@@ -446,7 +446,7 @@
             "section": "def-common.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          ") => void; updateSavedObjectId: (newSavedObjectId: string | undefined) => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { description?: string | undefined; title?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          ") => void; updateRefId: (newRefId: string | undefined) => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { description?: string | undefined; title?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -777,7 +777,7 @@
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
-          "[] | undefined; forceDSL?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes?: undefined; }"
+          "[] | undefined; forceDSL?: boolean | undefined; isNewPanel?: boolean | undefined; ref_id?: string | undefined; attributes?: undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
         "lineNumber": 58,
@@ -833,7 +833,7 @@
             "section": "def-common.LensApiState",
             "text": "LensApiState"
           },
-          " | undefined; savedObjectId?: string | undefined; }"
+          " | undefined; ref_id?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common-2/index.ts",
         "lineNumber": 52,
@@ -1208,7 +1208,7 @@
             "section": "def-common.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          ") => void; updateSavedObjectId: (newSavedObjectId: string | undefined) => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { description?: string | undefined; title?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          ") => void; updateRefId: (newRefId: string | undefined) => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { description?: string | undefined; title?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -1541,7 +1541,7 @@
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
-          "[] | undefined; forceDSL?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes?: undefined; } | ",
+          "[] | undefined; forceDSL?: boolean | undefined; isNewPanel?: boolean | undefined; ref_id?: string | undefined; attributes?: undefined; } | ",
           {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",

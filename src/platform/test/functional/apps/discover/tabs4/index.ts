@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const security = getService('security');
   const { common, timePicker, discover } = getPageObjects(['common', 'timePicker', 'discover']);
 
-  describe('discover/tabs', function () {
+  describe('discover/tabs4', function () {
     before(async function () {
       await browser.setWindowSize(1200, 1200);
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -44,7 +44,28 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await discover.waitUntilTabIsLoaded();
     });
 
-    loadTestFile(require.resolve('./_save_and_load'));
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
+      await kibanaServer.uiSettings.unset('defaultIndex');
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
+    loadTestFile(require.resolve('./_new_tab'));
+    loadTestFile(require.resolve('./_no_data'));
     loadTestFile(require.resolve('./_duplication'));
   });
 }
