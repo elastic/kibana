@@ -8,10 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import type { EvaluationWorkerFixtures } from '@kbn/evals/src/types';
 
-export interface StreamsSpecificEvaluationWorkerFixtures {
+export interface SignificantEventsSpecificEvaluationWorkerFixtures {
   logger: Logger;
 }
 
-export interface StreamsEvaluationWorkerFixtures
+export interface SignificantEventsEvaluationWorkerFixtures
   extends EvaluationWorkerFixtures,
-    StreamsSpecificEvaluationWorkerFixtures {}
+    SignificantEventsSpecificEvaluationWorkerFixtures {}
