@@ -741,7 +741,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       ),
       config.experimentalFeatures,
       logger
-    );
+    ).catch((error) => {
+      this.logger.error(
+        `Error initializing Endpoint Exceptions per-policy opt-in status: ${error}`
+      );
+    });
 
     this.ruleMonitoringService.start(core, plugins);
 
