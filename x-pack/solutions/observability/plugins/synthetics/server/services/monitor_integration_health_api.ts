@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
@@ -201,13 +201,10 @@ export class MonitorIntegrationHealthApi {
         foundMonitors.push({ id: monitorIds[i], so: result.value });
       } else {
         const reason = result.reason;
-        const statusCode: number | undefined = SavedObjectsErrorHelpers.isNotFoundError(reason)
-          ? 404
-          : (reason?.output?.statusCode ?? reason?.statusCode);
         errors.push({
           configId: monitorIds[i],
           message: reason?.message ?? 'Failed to fetch monitor',
-          ...(statusCode ? { statusCode } : {}),
+          statusCode: reason?.output?.statusCode ?? 500,
         });
       }
     }

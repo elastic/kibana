@@ -171,8 +171,8 @@ describe('MonitorIntegrationHealthApi', () => {
 
       expect(result.monitors).toHaveLength(0);
       expect(result.errors).toEqual([
-        { configId: 'mon-1', message: 'Saved object not found' },
-        { configId: 'mon-2', message: 'Saved object not found' },
+        { configId: 'mon-1', message: 'Saved object not found', statusCode: 500 },
+        { configId: 'mon-2', message: 'Saved object not found', statusCode: 500 },
       ]);
     });
 
@@ -189,7 +189,7 @@ describe('MonitorIntegrationHealthApi', () => {
 
       expect(result.monitors).toHaveLength(1);
       expect(result.monitors[0].configId).toBe('mon-1');
-      expect(result.errors).toEqual([{ configId: 'mon-2', message: 'Not found' }]);
+      expect(result.errors).toEqual([{ configId: 'mon-2', message: 'Not found', statusCode: 500 }]);
     });
 
     it('provides a default error message when rejection has no message', async () => {
@@ -201,7 +201,7 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.errors).toEqual([{ configId: 'mon-1', message: 'Failed to fetch monitor' }]);
+      expect(result.errors).toEqual([{ configId: 'mon-1', message: 'Failed to fetch monitor', statusCode: 500 }]);
     });
 
     it('includes statusCode 404 for SavedObjects not found errors', async () => {
@@ -239,7 +239,7 @@ describe('MonitorIntegrationHealthApi', () => {
       ]);
     });
 
-    it('omits statusCode for generic errors without output.statusCode', async () => {
+    it('defaults statusCode to 500 for generic errors without output.statusCode', async () => {
       const api = buildApi({
         monitorConfigRepository: {
           get: jest.fn().mockRejectedValue(new Error('Something went wrong')),
@@ -248,8 +248,9 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.errors).toEqual([{ configId: 'mon-1', message: 'Something went wrong' }]);
-      expect(result.errors[0]).not.toHaveProperty('statusCode');
+      expect(result.errors).toEqual([
+        { configId: 'mon-1', message: 'Something went wrong', statusCode: 500 },
+      ]);
     });
   });
 
