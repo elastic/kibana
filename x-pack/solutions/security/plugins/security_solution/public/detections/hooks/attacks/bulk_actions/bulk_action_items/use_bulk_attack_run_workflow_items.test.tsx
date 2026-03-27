@@ -159,7 +159,6 @@ describe('useBulkAttackRunWorkflowItems', () => {
       panelContent.props.onClose();
       expect(closePopoverMenu).toHaveBeenCalledTimes(1);
     });
-
   });
 
   describe('when canRunWorkflow is false', () => {
