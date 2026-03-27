@@ -53,9 +53,10 @@ describe('Tagcloud Schema', () => {
         metric: {
           operation: 'sum',
           field: 'price',
-          show_metric_label: true,
+          label: 'Sum of price',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
+        caption: { visible: true },
         tag_by: {
           operation: 'terms',
           fields: ['category'],
@@ -90,7 +91,7 @@ describe('Tagcloud Schema', () => {
                 color: { type: 'from_palette', palette: 'default', index: 0 },
               },
             ],
-            unassignedColor: { type: 'color_code', value: '#cccccc' },
+            unassigned: { type: 'color_code', value: '#cccccc' },
           },
         },
       };
@@ -110,9 +111,9 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'count',
             field: 'test_field',
-            show_metric_label: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
+          caption: { visible: false },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
@@ -134,9 +135,9 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'sum',
             field: 'sales',
-            show_metric_label: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
+          caption: { visible: false },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
@@ -158,9 +159,9 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'sum',
             field: 'sales',
-            show_metric_label: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
+          caption: { visible: false },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
@@ -184,9 +185,9 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'count',
             field: 'test_field',
-            show_metric_label: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
+          caption: { visible: false },
           font_size: {
             min: 10,
             max: 80,
@@ -211,9 +212,9 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'count',
             field: 'test_field',
-            show_metric_label: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
+          caption: { visible: false },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
@@ -265,8 +266,8 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'count',
             field: 'test_field',
-            show_metric_label: false,
           },
+          caption: { visible: false },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
@@ -283,8 +284,8 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'count',
             field: 'test_field',
-            show_metric_label: false,
           },
+          caption: { visible: false },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
@@ -304,7 +305,6 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'count',
             field: 'test_field',
-            show_metric_label: false,
           },
           tag_by: {
             operation: 'terms',
@@ -345,9 +345,9 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'sum',
             field: 'revenue',
-            show_metric_label: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
+          caption: { visible: false },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
@@ -376,9 +376,10 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'sum',
             field: 'sales',
-            show_metric_label: true,
+            label: 'Sum of sales',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
+          caption: { visible: true },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
@@ -411,8 +412,9 @@ describe('Tagcloud Schema', () => {
           metric: {
             operation: 'value',
             column: 'count',
-            show_metric_label: false,
+            label: 'Count',
           },
+          caption: { visible: false },
           tag_by: {
             operation: 'value',
             column: 'category',
