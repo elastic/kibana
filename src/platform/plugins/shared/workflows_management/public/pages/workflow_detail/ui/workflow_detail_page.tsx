@@ -19,6 +19,7 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
+import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
@@ -78,8 +79,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
       loadWorkflow({ id }); // sets loaded yaml string
     } else {
       dispatch(setYamlString(workflowDefaultYaml));
+      telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
     }
-  }, [loadWorkflow, id, dispatch]);
+  }, [loadWorkflow, id, dispatch, telemetry]);
 
   // Sync activeTab from URL state to store
   useEffect(() => {
@@ -159,6 +161,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           />
         )}
         <WorkflowDetailTestModal />
+        <WorkflowDetailTestStepModal />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

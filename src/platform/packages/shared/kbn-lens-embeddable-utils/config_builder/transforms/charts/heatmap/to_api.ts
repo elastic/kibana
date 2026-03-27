@@ -7,14 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import {
+  HEATMAP_NAME,
   type FormBasedLayer,
   type HeatmapVisualizationState,
   type TextBasedLayer,
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
+
 import { DEFAULT_LAYER_ID } from '../../../constants';
-import { getDatasourceLayers, getSharedChartLensStateToAPI, stripUndefined } from '../utils';
+import {
+  getDatasourceLayers,
+  getLegendTruncateAfterLines,
+  getSharedChartLensStateToAPI,
+  stripUndefined,
+} from '../utils';
 import type { HeatmapState } from '../../../schema';
 import { fromColorByValueLensStateToAPI } from '../../coloring';
 import { type LensAttributes } from '../../../types';
@@ -34,7 +41,7 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapSta
     visible: legend.isVisible,
     position: legend.position,
     ...stripUndefined<HeatmapState['legend']>({
-      truncate_after_lines: legend.maxLines,
+      truncate_after_lines: getLegendTruncateAfterLines(legend),
       size: legend.legendSize,
     }),
   };
@@ -46,7 +53,7 @@ function getOrientationFromRotation(rotation: number): 'angled' | 'vertical' | '
 
 function getGridConfigProps(
   gridConfig: HeatmapVisualizationState['gridConfig']
-): HeatmapState['axis'] {
+): HeatmapState['axes'] {
   return {
     x: {
       labels: {
@@ -56,7 +63,7 @@ function getGridConfigProps(
         }),
       },
       title: {
-        value: gridConfig.xTitle,
+        text: gridConfig.xTitle,
         visible: gridConfig.isXAxisTitleVisible,
       },
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
@@ -64,7 +71,7 @@ function getGridConfigProps(
     y: {
       labels: { visible: gridConfig.isYAxisLabelVisible },
       title: {
-        value: gridConfig.yTitle,
+        text: gridConfig.yTitle,
         visible: gridConfig.isYAxisTitleVisible,
       },
       ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
@@ -87,9 +94,9 @@ function reverseBuildVisualizationState(
 
   const sharedProps = {
     ...generateApiLayer(layer),
-    type: 'heat_map' as const,
+    type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
-    axis: getGridConfigProps(visualization.gridConfig),
+    axes: getGridConfigProps(visualization.gridConfig),
     cells: {
       labels: { visible: visualization.gridConfig.isCellLabelVisible },
     },

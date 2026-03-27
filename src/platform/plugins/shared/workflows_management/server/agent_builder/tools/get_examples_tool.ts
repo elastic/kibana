@@ -12,13 +12,12 @@ import { getWorkflowExamples, WORKFLOW_EXAMPLE_IDS } from '@kbn/workflows';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { loadWorkflowExampleContent } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
+import { workflowTools } from '../../../common/agent_builder/constants';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-
-export const GET_EXAMPLES_TOOL_ID = 'platform.workflows.get_examples';
 
 export function registerGetExamplesTool(agentBuilder: AgentBuilderPluginSetupContract): void {
   agentBuilder.tools.register({
-    id: GET_EXAMPLES_TOOL_ID,
+    id: workflowTools.getExamples,
     type: ToolType.builtin,
     description: `Search and retrieve example workflow YAML files from the bundled library.
 

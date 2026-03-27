@@ -57,6 +57,10 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
   columns: input.columns
     .map((col) => {
       if (col.id === columnId) {
+        // Skip formatting for non-number columns to avoid NaN values when rendering
+        if (col.meta?.type !== 'number') {
+          return col;
+        }
         if (!parentFormat) {
           if (supportedFormats[format]) {
             const serializedFormat: SerializedFieldFormat = {

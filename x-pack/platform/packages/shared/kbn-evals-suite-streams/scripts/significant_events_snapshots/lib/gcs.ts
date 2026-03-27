@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { GCS_BUCKET, OTEL_DEMO_NAMESPACE } from './constants';
-import { getSigeventsSnapshotFeaturesIndex } from '../../../src/data_generators/sigevents_features_index';
+import { getSigeventsSnapshotKIFeaturesIndex } from '../../../src/data_generators/sigevents_ki_features_index';
 
 export function generateGcsBasePath({
   runId,
@@ -28,10 +28,11 @@ export function generateGcsRepoName({ runId }: { runId: string }): string {
 export async function registerGcsRepository(
   esClient: Client,
   log: ToolingLog,
-  runId: string
+  runId: string,
+  appNamespace?: string
 ): Promise<void> {
   const repoName = generateGcsRepoName({ runId });
-  const basePath = generateGcsBasePath({ runId });
+  const basePath = generateGcsBasePath({ runId, appNamespace });
   log.info(`Registering GCS snapshot repository "${repoName}" → ${GCS_BUCKET}/${basePath}`);
 
   await esClient.snapshot.createRepository({
@@ -54,8 +55,8 @@ export async function createSnapshot({
   runId: string;
 }): Promise<void> {
   const repoName = generateGcsRepoName({ runId });
-  const featuresIndex = getSigeventsSnapshotFeaturesIndex(snapshotName);
-  const indices = `logs*,${featuresIndex}`;
+  const kiFeaturesIndex = getSigeventsSnapshotKIFeaturesIndex(snapshotName);
+  const indices = `logs*,${kiFeaturesIndex}`;
 
   try {
     await esClient.snapshot.get({ repository: repoName, snapshot: snapshotName });

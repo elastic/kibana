@@ -74,7 +74,7 @@ export const useGroupTakeActionsItems = ({
 }: UseGroupTakeActionsItemsParams): GroupTakeActionItems => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
-  const { hasIndexWrite } = useAlertsPrivileges();
+  const { hasIndexWrite, hasAlertsUpdate } = useAlertsPrivileges();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
   const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
   const {
@@ -203,14 +203,14 @@ export const useGroupTakeActionsItems = ({
   );
   const { item: alertClosingReasonItem, getPanels: getAlertClosingReasonPanels } =
     useBulkClosingReasonItems({
-      isEnabled: hasIndexWrite ?? false,
+      isEnabled: hasIndexWrite && hasAlertsUpdate ?? false,
     });
 
   return useCallback(
     ({ query, tableId, groupNumber, selectedGroup }) => {
       const actionItems: EuiContextMenuPanelItemDescriptor[] = [];
 
-      if (!showAlertStatusActions) {
+      if (!hasAlertsUpdate || !showAlertStatusActions) {
         return;
       }
 
@@ -339,6 +339,7 @@ export const useGroupTakeActionsItems = ({
       getAlertClosingReasonPanels,
       onClickUpdate,
       showAlertStatusActions,
+      hasAlertsUpdate,
     ]
   );
 };

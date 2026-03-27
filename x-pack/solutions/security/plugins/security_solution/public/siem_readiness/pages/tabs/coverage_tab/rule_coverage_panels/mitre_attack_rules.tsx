@@ -23,12 +23,7 @@ import {
   useDetectionRulesByIntegration,
 } from '@kbn/siem-readiness';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
-import {
-  INTEGRATIONS_INSTALLED_TOOLTIP,
-  INTEGRATIONS_UNINSTALLED_TOOLTIP,
-  INTEGRATIONS_DISABLED,
-  INTEGRATIONS_UNINSTALLED,
-} from '../../../../../detection_engine/common/components/related_integrations/translations';
+import { createIntegrationStatusMapFromSets } from '../create_integration_status_maps';
 
 interface DetectionRule {
   rule_id?: string;
@@ -296,10 +291,12 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
               closePopover={() => setActiveTacticPopover(null)}
               button={
                 <div
-                  onClick={() => setActiveTacticPopover(tactic.tacticId)}
+                  onClick={() =>
+                    tactic.missingPackages.length > 0 && setActiveTacticPopover(tactic.tacticId)
+                  }
                   // Keyboard accessibility: Opens the popover when user presses Enter or Space
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
+                    if ((e.key === 'Enter' || e.key === ' ') && tactic.missingPackages.length > 0) {
                       e.preventDefault();
                       setActiveTacticPopover(tactic.tacticId);
                     }
@@ -310,7 +307,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                   style={{
                     backgroundColor: tactic.statusColor,
                     padding: euiTheme.size.s,
-                    cursor: 'pointer',
+                    cursor: tactic.missingPackages.length > 0 ? 'pointer' : 'default',
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
@@ -376,23 +373,11 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                     if (a.isDisabled !== b.isDisabled) return a.isDisabled ? -1 : 1;
                     return a.label.localeCompare(b.label);
                   })}
-                statusMap={
-                  new Map(
-                    tactic.missingPackages.map((pkg) => {
-                      const isDisabled = disabledPackagesSet.has(pkg);
-                      return [
-                        pkg,
-                        {
-                          status: isDisabled ? INTEGRATIONS_DISABLED : INTEGRATIONS_UNINSTALLED,
-                          badgeColor: isDisabled ? 'primary' : 'default',
-                          tooltip: isDisabled
-                            ? INTEGRATIONS_INSTALLED_TOOLTIP
-                            : INTEGRATIONS_UNINSTALLED_TOOLTIP,
-                        },
-                      ];
-                    })
-                  )
-                }
+                statusMap={createIntegrationStatusMapFromSets(
+                  tactic.missingPackages,
+                  enabledPackagesSet,
+                  disabledPackagesSet
+                )}
                 showOnlySelectable
               />
             </EuiPopover>

@@ -8,6 +8,7 @@
  */
 
 import type { EnterWhileNode } from '@kbn/workflows/graph';
+import type { WhileStepState } from './types';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -38,14 +39,16 @@ export class EnterWhileNodeImpl implements NodeImplementation {
     this.workflowLogger.logDebug(`While step "${this.node.stepId}" starting first iteration.`, {
       workflow: { step_id: this.node.stepId },
     });
-
-    this.stepExecutionRuntime.setCurrentStepState({ iteration: 0 });
+    const whileState: WhileStepState = { iteration: 0 };
+    this.stepExecutionRuntime.setCurrentStepState(whileState);
     this.wfExecutionRuntimeManager.enterScope('0');
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
   private advanceIteration(): void {
-    const whileState = this.stepExecutionRuntime.getCurrentStepState();
+    const whileState = this.stepExecutionRuntime.getCurrentStepState() as
+      | WhileStepState
+      | undefined;
 
     if (!whileState) {
       throw new Error(`While state for step ${this.node.stepId} not found`);

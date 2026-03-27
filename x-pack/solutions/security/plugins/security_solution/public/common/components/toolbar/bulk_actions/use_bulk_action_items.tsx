@@ -52,7 +52,7 @@ export const useBulkActionItems = ({
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
   const { promptAlertCloseConfirmation } = useAlertCloseInfoModal();
-  const { hasIndexWrite } = useAlertsPrivileges();
+  const { hasIndexWrite, hasAlertsUpdate } = useAlertsPrivileges();
 
   const onAlertStatusUpdateSuccess = useCallback(
     (updated: number, conflicts: number, newStatus: AlertWorkflowStatus) => {
@@ -163,7 +163,7 @@ export const useBulkActionItems = ({
 
   const items = useMemo(() => {
     const actionItems: AlertTableContextMenuItem[] = [];
-    if (showAlertStatusActions) {
+    if (showAlertStatusActions && hasAlertsUpdate) {
       if (currentStatus !== FILTER_OPEN) {
         actionItems.push({
           key: 'open',
@@ -207,6 +207,7 @@ export const useBulkActionItems = ({
 
     return [...actionItems, ...additionalItems];
   }, [
+    hasAlertsUpdate,
     alertClosingReasonItem,
     currentStatus,
     customBulkActions,

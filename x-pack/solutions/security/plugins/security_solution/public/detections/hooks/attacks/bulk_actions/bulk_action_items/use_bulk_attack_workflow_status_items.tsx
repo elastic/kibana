@@ -82,6 +82,7 @@ export const useBulkAttackWorkflowStatusItems = ({
     useBulkClosingReasonItems({
       isEnabled: hasIndexWrite ?? false,
       onSubmitCloseReason,
+      buttonLabel: i18n.CLOSE_ATTACK_BUTTON_MESSAGE,
     });
 
   const workflowStatusItems: BulkActionsConfig[] = useMemo(() => {

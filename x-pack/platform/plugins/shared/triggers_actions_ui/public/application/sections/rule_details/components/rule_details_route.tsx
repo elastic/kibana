@@ -21,6 +21,8 @@ import type { ComponentOpts as ActionApis } from '../../common/components/with_a
 import { withActionOperations } from '../../common/components/with_actions_api_operations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { getRulesBreadcrumbWithHref } from '../../../lib/breadcrumb';
+import { useSetBreadcrumbs } from '../../../hooks/use_set_breadcrumbs';
 
 type RuleDetailsRouteProps = RouteComponentProps<{
   ruleId: string;
@@ -40,9 +42,16 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
     http,
     notifications: { toasts },
     spaces: spacesApi,
+    application: { getUrlForApp },
   } = useKibana().services;
 
   const { basePath } = http;
+
+  // sets a baseline breadcrumb regardless of the outcome of loading the rule
+  const setBreadcrumbs = useSetBreadcrumbs();
+  useEffect(() => {
+    setBreadcrumbs([getRulesBreadcrumbWithHref(getUrlForApp)]);
+  }, [getUrlForApp, setBreadcrumbs]);
 
   const [rule, setRule] = useState<ResolvedRule | null>(null);
   const [ruleType, setRuleType] = useState<RuleType | null>(null);

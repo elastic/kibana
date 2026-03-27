@@ -110,6 +110,9 @@ export interface BuilderParameters {
       };
     };
   };
+  extended_fields: {
+    parameters: { payload: { extended_fields: Record<string, string> } };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {
@@ -124,7 +127,7 @@ export interface CommonArguments {
   user: User;
   caseId: string;
   owner: string;
-  attachmentId?: string;
+  savedObjectId?: string;
   connectorId?: string;
   action?: UserActionAction;
 }
@@ -173,6 +176,7 @@ export interface ServiceContext {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
+  isCasesAttachmentsEnabled?: boolean;
 }
 
 export interface PushTimeFrameInfo {

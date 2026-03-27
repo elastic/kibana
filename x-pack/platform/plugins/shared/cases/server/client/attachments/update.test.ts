@@ -31,11 +31,11 @@ describe('update', () => {
   clientArgs.services.userActionService = userActionService;
   clientArgs.services.caseService = caseService;
   clientArgs.services.attachmentService = attachmentService;
+  clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
   describe('comments', () => {
     const updateComment = { ...comment, id: 'comment-id', version: 'WzAsMV0=' };
     it('should throw an error if the comment length is too long', async () => {
@@ -114,8 +114,7 @@ describe('update', () => {
     });
   });
 
-  it('accepts unified type (v2) update request without owner and uses case owner', async () => {
-    clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
+  it('accepts unified type (v2) update request', async () => {
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseID]: 0 });
 
     const theCase = { ...mockCases[0], id: caseID };
@@ -175,5 +174,29 @@ describe('update', () => {
         ]),
       })
     );
+  });
+
+  it('rejects unified comment updates over max length', async () => {
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseID]: 0 });
+
+    const longComment = Array(MAX_COMMENT_LENGTH + 1)
+      .fill('x')
+      .join('');
+
+    await expect(
+      update(
+        {
+          updateRequest: {
+            id: 'comment-id',
+            version: 'WzAsMV0=',
+            type: 'comment',
+            data: { content: longComment },
+            owner: SECURITY_SOLUTION_OWNER,
+          },
+          caseID,
+        },
+        clientArgs
+      )
+    ).rejects.toThrow(`Comment content exceeds maximum length of ${MAX_COMMENT_LENGTH} characters`);
   });
 });
