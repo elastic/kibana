@@ -598,8 +598,9 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           }
           data-test-subj={getTestId('description-row')}
         >
-          <EuiFieldText
+          <EuiTextArea
             defaultValue={draftScript.description}
+            rows={3}
             onChange={onChangeDescription}
             data-test-subj={getTestId('description-input')}
           />
