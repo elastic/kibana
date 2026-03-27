@@ -14,24 +14,8 @@
  * ## Architecture
  *
  * Dependency flow:
- * - ✅ kbn-evals-extensions → imports from → kbn-evals
- * - ❌ kbn-evals → MUST NOT import from → kbn-evals-extensions
- *
- * Evaluation suites can opt-in to extensions by importing directly:
- *
- * @example
- * ```typescript
- * import { evaluate } from '@kbn/evals';
- * import { createToxicityEvaluator, costTracker } from '@kbn/evals-extensions';
- *
- * evaluate('test', async ({ executorClient }) => {
- *   await executorClient.runExperiment(
- *     { dataset, task },
- *     [createToxicityEvaluator()]  // Extension evaluator
- *   );
- *   await costTracker.logRunCost(runId);  // Extension feature
- * });
- * ```
+ * - kbn-evals-extensions imports from kbn-evals
+ * - kbn-evals MUST NOT import from kbn-evals-extensions
  *
  * @packageDocumentation
  */
@@ -40,15 +24,6 @@
 export type { Evaluator, Example, EvaluationDataset, TaskOutput } from '@kbn/evals';
 
 export type { EvaluationScoreDocument } from '@kbn/evals';
-
-/**
- * Extension-specific types (to be populated in future PRs)
- */
-export interface ExtensionConfig {
-  placeholder?: string;
-}
-
-export const EVALS_EXTENSIONS_VERSION = '1.0.0';
 
 // --- Phase 4: Dashboard extensions ---
 export {

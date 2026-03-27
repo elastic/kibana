@@ -17,11 +17,11 @@ export { dashboardCmd } from './commands/dashboard';
  * (e.g. `node scripts/evals dashboard`). The delegation happens at the script
  * level so that @kbn/evals does NOT import from @kbn/evals-extensions.
  */
-export async function run() {
+export const run = async () => {
   await new RunWithCommands(
     {
       description: 'Evals Extensions CLI',
     },
     [dashboardCmd]
   ).execute();
-}
+};

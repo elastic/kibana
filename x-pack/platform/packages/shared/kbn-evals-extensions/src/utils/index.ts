@@ -8,12 +8,5 @@
 /**
  * Utility functions for @kbn/evals-extensions
  *
- * Will be populated in future PRs with:
- * - Common helpers
- * - Shared calculations
- * - Type guards
- * - Validation utilities
+ * Will be populated as features are added.
  */
-
-// Placeholder export
-export const UTILS_VERSION = '1.0.0';

@@ -61,6 +61,7 @@ describe('dashboardCmd', () => {
   afterEach(() => {
     global.fetch = originalFetch;
     process.env = { ...originalEnv };
+    process.exitCode = undefined;
   });
 
   describe('metadata', () => {
@@ -352,8 +353,6 @@ describe('dashboardCmd', () => {
       expect(process.exitCode).toBe(1);
       expect(log.error).toHaveBeenCalled();
       expect(global.fetch).not.toHaveBeenCalled();
-
-      process.exitCode = undefined;
     });
   });
 

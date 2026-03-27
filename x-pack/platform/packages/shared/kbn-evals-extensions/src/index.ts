@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export type * from './types';
-export * from './utils';
 export * from './dashboard';
 export * as cli from './cli';

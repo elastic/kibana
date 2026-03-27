@@ -343,13 +343,13 @@ const buildTokenUsagePanel = (): LensPanel => {
   );
 };
 
-const buildLatencyDistributionPanel = (): LensPanel => {
-  const layerId = 'latency-distribution-layer';
+const buildScoreDistributionPanel = (): LensPanel => {
+  const layerId = 'score-distribution-layer';
   const columns: Record<string, unknown> = {
-    latencyBucket: {
+    scoreBucket: {
       dataType: 'number',
       isBucketed: true,
-      label: 'Latency Score',
+      label: 'Score',
       operationType: 'range',
       sourceField: 'evaluator.score',
       params: { type: 'histogram', ranges: [{ from: 0, to: 1, label: '' }], maxBars: 20 },
@@ -364,25 +364,25 @@ const buildLatencyDistributionPanel = (): LensPanel => {
   };
 
   return makeLensPanel(
-    'panel-latency-distribution',
-    'Latency Distribution',
+    'panel-score-distribution',
+    'Score Distribution',
     { x: 24, y: 30, w: 24, h: 15 },
     'lnsXY',
     layerId,
     columns,
-    ['latencyBucket', 'count'],
+    ['scoreBucket', 'count'],
     {
       preferredSeriesType: 'bar',
       layers: [
         {
           layerId,
           seriesType: 'bar',
-          xAccessor: 'latencyBucket',
+          xAccessor: 'scoreBucket',
           accessors: ['count'],
           layerType: 'data',
         },
       ],
-      title: 'Latency Distribution',
+      title: 'Score Distribution',
       fittingFunction: 'None',
     }
   );
@@ -394,7 +394,7 @@ const buildRegressionHighlightPanel = (): LensPanel => {
     lastValue: {
       dataType: 'number',
       isBucketed: false,
-      label: 'Latest Mean Score',
+      label: 'Latest Score',
       operationType: 'last_value',
       sourceField: 'evaluator.score',
       params: { sortField: '@timestamp' },
@@ -414,7 +414,7 @@ const buildRegressionHighlightPanel = (): LensPanel => {
       layerType: 'data',
       metricAccessor: 'lastValue',
       color: '#6092C0',
-      subtitle: 'Latest mean evaluator score',
+      subtitle: 'Latest evaluator score',
       palette: {
         name: 'custom',
         type: 'palette',
@@ -534,7 +534,7 @@ export const generateDashboardBody = (): {
     buildEvaluatorHeatmapPanel(),
     buildPassRatePanel(),
     buildTokenUsagePanel(),
-    buildLatencyDistributionPanel(),
+    buildScoreDistributionPanel(),
     buildRegressionHighlightPanel(),
     buildPerSuiteBreakdownPanel(),
   ],

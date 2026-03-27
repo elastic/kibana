@@ -91,7 +91,7 @@ describe('panel visualization types', () => {
     ['panel-evaluator-heatmap', 'lnsHeatmap'],
     ['panel-pass-rate', 'lnsXY'],
     ['panel-token-usage', 'lnsXY'],
-    ['panel-latency-distribution', 'lnsXY'],
+    ['panel-score-distribution', 'lnsXY'],
     ['panel-regression-highlight', 'lnsMetric'],
     ['panel-per-suite-breakdown', 'lnsDatatable'],
   ])('panel %s has visualizationType %s', (uid, expectedType) => {

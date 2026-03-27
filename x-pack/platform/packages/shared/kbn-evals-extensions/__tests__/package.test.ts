@@ -9,17 +9,20 @@
  * Basic package health checks for @kbn/evals-extensions
  */
 
-import { EVALS_EXTENSIONS_VERSION } from '..';
-
 describe('@kbn/evals-extensions', () => {
   describe('package structure', () => {
-    it('should export EVALS_EXTENSIONS_VERSION', () => {
-      expect(EVALS_EXTENSIONS_VERSION).toBe('1.0.0');
-    });
-
     it('should be importable without errors', async () => {
       const mod = await import('..');
       expect(mod).toBeDefined();
+    });
+
+    it('should export dashboard generators', async () => {
+      const { generateDashboardBody, generateDataViewBody, DASHBOARD_ID, DATA_VIEW_ID } =
+        await import('..');
+      expect(generateDashboardBody).toBeInstanceOf(Function);
+      expect(generateDataViewBody).toBeInstanceOf(Function);
+      expect(DASHBOARD_ID).toBe('evals-dashboard');
+      expect(DATA_VIEW_ID).toBe('evals-data-view');
     });
   });
 
