@@ -47,7 +47,7 @@ export const Playground: Story = {
       { start: 'now-3M', end: 'now', label: 'Last 3 months' },
       { start: 'now-1y', end: 'now', label: 'Last 1 year' },
     ],
-    timeZone: 'Europe/Amsterdam',
+    timeZone: 'Browser',
   },
   render: (args) => <StatefulDateRangePicker {...args} />,
 };
