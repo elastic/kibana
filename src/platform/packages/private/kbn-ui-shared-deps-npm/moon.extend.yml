@@ -16,8 +16,6 @@ tasks:
       - --collect
       - '@elastic/charts'
       - --collect
-      - '@elastic/esql'
-      - --collect
       - '@elastic/eui'
       - --collect
       - '@elastic/eui-theme-borealis'
