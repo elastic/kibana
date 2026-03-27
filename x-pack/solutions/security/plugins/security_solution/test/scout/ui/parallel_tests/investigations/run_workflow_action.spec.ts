@@ -98,7 +98,7 @@ spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic
       ].join('\n');
 
       const createResponse = await page.request.post(
-        kbnUrl.get(`/s/${scoutSpace.id}/api/workflows`),
+        kbnUrl.get(`/s/${scoutSpace.id}/api/workflows/workflow`),
         {
           data: { yaml: workflowYaml },
           headers: { 'kbn-xsrf': 'true' },
@@ -141,9 +141,10 @@ spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic
         ]);
         await expect(newTab).toHaveURL(/\/app\/workflows/);
       } finally {
-        await page.request.delete(kbnUrl.get(`/s/${scoutSpace.id}/api/workflows/${workflowId}`), {
-          headers: { 'kbn-xsrf': 'true' },
-        });
+        await page.request.delete(
+          kbnUrl.get(`/s/${scoutSpace.id}/api/workflows/workflow/${workflowId}`),
+          { headers: { 'kbn-xsrf': 'true' } }
+        );
       }
     }
   );
