@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DATE_RANGE_INPUT_DELIMITER } from '../constants';
+import moment from 'moment';
+
+import { DATE_RANGE_INPUT_DELIMITER, DEFAULT_DATE_FORMAT } from '../constants';
 import type { TimeRangeBoundsOption } from '../types';
 import { PARSER_DELIMITERS, buildDelimiterPattern } from './parse_text';
 
@@ -41,6 +43,15 @@ const getDelimiterPatterns = (extraDelimiter?: string): RegExp[] => {
   if (extraDelimiter) delimiters.push(extraDelimiter);
 
   return delimiters.map(buildDelimiterPattern).filter((p): p is RegExp => p !== null);
+};
+
+/**
+ * Formats an ISO 8601 date string into a human-readable display format.
+ * Returns `null` if the string is not a valid ISO date.
+ */
+const prettifyAbsoluteDate = (bound: string): string | null => {
+  const parsed = moment(bound, moment.ISO_8601, true);
+  return parsed.isValid() ? parsed.format(DEFAULT_DATE_FORMAT) : null;
 };
 
 /**
@@ -119,8 +130,14 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
       const prettyStart = prettifyStartBound(start);
       const prettyEnd = prettifyEndBound(end);
 
-      // Both bounds are "now" (with or without rounding) — pass through
-      if (!prettyStart && !prettyEnd) return trimmed;
+      // Both bounds are "now" (with or without rounding) — format any absolute dates
+      if (!prettyStart && !prettyEnd) {
+        const absStart = prettifyAbsoluteDate(start);
+        const absEnd = prettifyAbsoluteDate(end);
+        if (!absStart && !absEnd) return trimmed;
+        const delim = DATE_RANGE_INPUT_DELIMITER;
+        return `${absStart ?? start} ${delim} ${absEnd ?? end}`;
+      }
 
       // One bound is "now" and the other is a relative offset → collapse
       if (end === 'now' && prettyStart) return prettyStart;
@@ -132,7 +149,9 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
       if (prettyStart && prettyEnd) return `${prettyStart} ${delim} ${prettyEnd}`;
 
       // One side is a relative offset, other is absolute/now-rounding → prettify what we can
-      return `${prettyStart ?? start} ${delim} ${prettyEnd ?? end}`;
+      return `${prettyStart ?? prettifyAbsoluteDate(start) ?? start} ${delim} ${
+        prettyEnd ?? prettifyAbsoluteDate(end) ?? end
+      }`;
     }
   }
 
@@ -140,6 +159,10 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
   if (trimmed === 'now') return trimmed;
   const prettySingle = prettifyStartBound(trimmed);
   if (prettySingle) return prettySingle;
+
+  // Try formatting as an absolute ISO date
+  const prettyAbsolute = prettifyAbsoluteDate(trimmed);
+  if (prettyAbsolute) return prettyAbsolute;
 
   // Natural language or anything else — pass through unchanged
   return trimmed;

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
+
+import { DEFAULT_DATE_FORMAT } from '../constants';
 import { prettifyValue } from './prettify_value';
 
 describe('prettifyValue', () => {
@@ -43,13 +46,15 @@ describe('prettifyValue', () => {
   });
 
   describe('mixed relative and absolute', () => {
-    it('prettifies the relative start, keeps absolute end', () => {
-      expect(prettifyValue('now-1d/d to 2025-06-15T00:00:00Z')).toBe('-1d to 2025-06-15T00:00:00Z');
+    it('prettifies the relative start, formats absolute end', () => {
+      expect(prettifyValue('now-1d/d to 2025-06-15T00:00:00Z')).toBe(
+        `-1d to ${moment('2025-06-15T00:00:00Z').format(DEFAULT_DATE_FORMAT)}`
+      );
     });
 
-    it('keeps rounding on end bound when start is absolute', () => {
+    it('formats absolute start, keeps rounding on end bound', () => {
       expect(prettifyValue('2025-01-01T00:00:00Z to now+7d/d')).toBe(
-        '2025-01-01T00:00:00Z to +7d/d'
+        `${moment('2025-01-01T00:00:00Z').format(DEFAULT_DATE_FORMAT)} to +7d/d`
       );
     });
   });
@@ -72,14 +77,26 @@ describe('prettifyValue', () => {
     });
   });
 
-  describe('absolute dates — pass through', () => {
-    it('leaves absolute-to-absolute unchanged', () => {
-      const input = '2025-01-01T00:00:00Z to 2025-06-15T00:00:00Z';
-      expect(prettifyValue(input)).toBe(input);
+  describe('absolute dates — formats ISO strings', () => {
+    it('formats absolute-to-absolute with DEFAULT_DATE_FORMAT', () => {
+      expect(prettifyValue('2025-01-01T00:00:00Z to 2025-06-15T00:00:00Z')).toBe(
+        `${moment.utc('2025-01-01T00:00:00Z').local().format(DEFAULT_DATE_FORMAT)} to ${moment
+          .utc('2025-06-15T00:00:00Z')
+          .local()
+          .format(DEFAULT_DATE_FORMAT)}`
+      );
     });
 
-    it('leaves absolute-to-now unchanged', () => {
-      expect(prettifyValue('2025-01-01T00:00:00Z to now')).toBe('2025-01-01T00:00:00Z to now');
+    it('formats absolute-to-now', () => {
+      expect(prettifyValue('2025-01-01T00:00:00Z to now')).toBe(
+        `${moment.utc('2025-01-01T00:00:00Z').local().format(DEFAULT_DATE_FORMAT)} to now`
+      );
+    });
+
+    it('formats a single absolute ISO date', () => {
+      expect(prettifyValue('2025-06-15T12:30:00Z')).toBe(
+        moment.utc('2025-06-15T12:30:00Z').local().format(DEFAULT_DATE_FORMAT)
+      );
     });
   });
 
