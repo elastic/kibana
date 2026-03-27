@@ -44,11 +44,9 @@ interface CreateTestConfigOptions<T> {
 }
 
 // ⚠️  DO NOT add args to esTestCluster.serverArgs or kbnTestServer.serverArgs in this file
-//     to make new tests pass. Args added here do NOT get set on ESS/Cloud — your tests will
-//     pass locally but may fail or behave differently on Cloud deployments.
-//     If your test needs an experimental feature flag, use
-//     createStatefulFeatureFlagTestConfig from feature_flag.stateful.config.base.ts
-//     and place your config under feature_flag_configs/ instead.
+//     to make tests pass — they won't be set on ESS/Cloud.
+//     If your test needs a feature flag, create a config under feature_flag_configs/ using
+//     createStatefulFeatureFlagTestConfig from feature_flag.stateful.config.base.ts.
 export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
   options: CreateTestConfigOptions<T>
 ) {
