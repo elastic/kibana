@@ -55,6 +55,12 @@ export const spaceTest = spaceBaseTest.extend<
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
+      discover: Object.assign(Object.create(pageObjects.discover), {
+        goto: async () => {
+          await page.gotoApp('discover');
+          await page.testSubj.locator('dscPage').waitFor({ state: 'visible', timeout: 30_000 });
+        },
+      }) as typeof pageObjects.discover,
       metricsExperience: createLazyPageObject(MetricsExperiencePage, page),
     };
 
