@@ -140,10 +140,9 @@ export const CaseViewActivity = ({
           key: 'status',
           value: status,
         });
-        return;
+      } else {
+        statusAction.handleUpdateCaseStatus([caseData], status, closeReason);
       }
-
-      statusAction.handleUpdateCaseStatus([caseData], status, closeReason);
     },
     [caseData, onUpdateField, statusAction]
   );

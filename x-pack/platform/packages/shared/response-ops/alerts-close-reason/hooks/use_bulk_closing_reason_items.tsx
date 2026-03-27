@@ -63,12 +63,10 @@ export const useBulkClosingReasonItems = ({
               ...renderProps,
               reason,
             });
-            return;
+          } else {
+            renderProps.closePopoverMenu();
           }
-
-          renderProps.closePopoverMenu();
         };
-
         return <ClosingReasonPanel onSubmit={handleSubmit} />;
       };
     },

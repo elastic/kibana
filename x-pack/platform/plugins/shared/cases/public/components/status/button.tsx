@@ -56,10 +56,9 @@ const StatusActionButtonComponent: React.FC<Props> = ({
   const onClick = useCallback(() => {
     if (nextStatus === CaseStatuses.closed) {
       openCloseCaseModal();
-      return;
+    } else {
+      onStatusChanged(nextStatus);
     }
-
-    onStatusChanged(nextStatus);
   }, [nextStatus, onStatusChanged, openCloseCaseModal]);
 
   return (

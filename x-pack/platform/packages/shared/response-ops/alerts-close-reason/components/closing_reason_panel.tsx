@@ -42,11 +42,9 @@ const ClosingReasonPanelComponent: React.FC<ClosingReasonPanelProps> = ({ onSubm
   const selectedOption = useMemo(() => options.find((option) => option.checked), [options]);
 
   const onSubmitHandler = useCallback(() => {
-    if (!selectedOption) {
-      return;
+    if (selectedOption) {
+      onSubmit(selectedOption.key);
     }
-
-    onSubmit(selectedOption.key);
   }, [onSubmit, selectedOption]);
 
   return (

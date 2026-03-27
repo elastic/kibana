@@ -81,14 +81,14 @@ export const useCloseCaseModal = ({
   }, [closeCloseCaseModal, onCloseCase, selectedCloseReason?.key]);
 
   const openCloseCaseModal = useCallback(() => {
-    // Should automatically close without reason when case sync to alerts is disabled
-    if (!canSyncCloseReasonToAlerts) {
+    if (canSyncCloseReasonToAlerts) {
+      const nextCloseReasonOptions = createCloseReasonOptions();
+      setCloseReasonOptions(nextCloseReasonOptions);
+      setIsCloseCaseModalVisible(true);
+    } else {
+      // Should automatically close without reason when case sync to alerts is disabled
       onCloseCase();
-      return;
     }
-    const nextCloseReasonOptions = createCloseReasonOptions();
-    setCloseReasonOptions(nextCloseReasonOptions);
-    setIsCloseCaseModalVisible(true);
   }, [canSyncCloseReasonToAlerts, createCloseReasonOptions, onCloseCase]);
 
   return {

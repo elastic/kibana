@@ -73,9 +73,9 @@ const StatusContextMenuComponent: React.FC<Props> = ({
       if (currentStatus !== status) {
         if (status === CaseStatuses.closed) {
           openCloseCaseModal();
-          return;
+        } else {
+          onStatusChanged(status);
         }
-        onStatusChanged(status);
       }
     },
     [closePopover, currentStatus, onStatusChanged, openCloseCaseModal]
