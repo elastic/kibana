@@ -25,7 +25,6 @@ export interface RunTestsOptions {
   esFrom: 'serverless' | 'source' | 'snapshot' | undefined;
   installDir: string | undefined;
   logsDir: string | undefined;
-  serverConfigSet: string;
 }
 
 export const TEST_FLAG_OPTIONS: FlagOptions = {
