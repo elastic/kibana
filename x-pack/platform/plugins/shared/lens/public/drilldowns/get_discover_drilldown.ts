@@ -14,7 +14,7 @@ import type { DrilldownDefinition } from '@kbn/embeddable-plugin/public';
 import { apiIsOfType, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS,
-  LENS_EMBEDDABLE_TYPE
+  LENS_EMBEDDABLE_TYPE,
 } from '../../common/constants';
 import { DiscoverDrilldownEditor } from './editor';
 import type { DiscoverDrilldownState } from '../../server';
