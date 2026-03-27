@@ -30,7 +30,7 @@
         "label": "AsCodeRuntimeField",
         "description": [],
         "signature": [
-          "Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; name: string; fields: Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }>[]; }>"
+          "Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; name: string; fields: Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }>[]; }>"
         ],
         "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
         "lineNumber": 12,
@@ -56,10 +56,10 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; name: string; fields: Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }>[]; }>>"
+          "<Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; name: string; fields: Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; name: string; }>[]; }>>"
         ],
         "path": "src/platform/packages/shared/as-code/data-views-schema/src/schema_runtime_field.ts",
-        "lineNumber": 137,
+        "lineNumber": 128,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

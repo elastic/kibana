@@ -368,7 +368,7 @@ describe('AttachmentService', () => {
       unsecuredSavedObjectsClient.update.mockResolvedValue(soClientRes);
 
       const res = await service.update({
-        attachmentId: '1',
+        savedObjectId: '1',
         updatedAttributes: persistableStateAttachment,
         options: { references: [] },
       });
@@ -383,7 +383,7 @@ describe('AttachmentService', () => {
       });
 
       const res = await service.update({
-        attachmentId: '1',
+        savedObjectId: '1',
         updatedAttributes: externalReferenceAttachmentSO,
         options: { references: [] },
       });
@@ -398,7 +398,7 @@ describe('AttachmentService', () => {
       });
 
       const res = await service.update({
-        attachmentId: '1',
+        savedObjectId: '1',
         updatedAttributes: externalReferenceAttachmentESAttributes,
         options: { references: [] },
       });
@@ -413,7 +413,7 @@ describe('AttachmentService', () => {
         await expect(
           service.update({
             updatedAttributes: createUserAttachment().attributes,
-            attachmentId: '1',
+            savedObjectId: '1',
           })
         ).resolves.not.toThrow();
       });
@@ -423,7 +423,7 @@ describe('AttachmentService', () => {
 
         const res = await service.update({
           updatedAttributes: createUserAttachment().attributes,
-          attachmentId: '1',
+          savedObjectId: '1',
         });
 
         expect(res).toStrictEqual(createUserAttachment());
@@ -438,7 +438,7 @@ describe('AttachmentService', () => {
         await expect(
           service.update({
             updatedAttributes: createAlertAttachment().attributes,
-            attachmentId: '1',
+            savedObjectId: '1',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid attributes: expected attributes.rule.name for alert attachments"`
@@ -454,7 +454,7 @@ describe('AttachmentService', () => {
         await expect(
           service.update({
             updatedAttributes: invalidAttachment.attributes,
-            attachmentId: '1',
+            savedObjectId: '1',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid attributes: expected attributes.rule.name for alert attachments"`
@@ -467,7 +467,7 @@ describe('AttachmentService', () => {
         await service.update({
           // @ts-expect-error: excess attributes
           updatedAttributes: { ...createUserAttachment().attributes, foo: 'bar' },
-          attachmentId: '1',
+          savedObjectId: '1',
         });
 
         const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
@@ -503,17 +503,17 @@ describe('AttachmentService', () => {
       const res = await service.bulkUpdate({
         comments: [
           {
-            attachmentId: '1',
+            savedObjectId: '1',
             updatedAttributes: persistableStateAttachment,
             options: { references: [] },
           },
           {
-            attachmentId: '2',
+            savedObjectId: '2',
             updatedAttributes: externalReferenceAttachmentSO,
             options: { references: [] },
           },
           {
-            attachmentId: '3',
+            savedObjectId: '3',
             updatedAttributes: externalReferenceAttachmentES,
             options: { references: [] },
           },
@@ -538,7 +538,7 @@ describe('AttachmentService', () => {
         const updatedAttributes = createUserAttachment().attributes;
 
         await expect(
-          service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }] })
+          service.bulkUpdate({ comments: [{ savedObjectId: '1', updatedAttributes }] })
         ).resolves.not.toThrow();
       });
 
@@ -554,8 +554,8 @@ describe('AttachmentService', () => {
 
         const res = await service.bulkUpdate({
           comments: [
-            { attachmentId: '1', updatedAttributes: userAttachment.attributes },
-            { attachmentId: '1', updatedAttributes: userAttachment.attributes },
+            { savedObjectId: '1', updatedAttributes: userAttachment.attributes },
+            { savedObjectId: '1', updatedAttributes: userAttachment.attributes },
           ],
         });
 
@@ -570,7 +570,7 @@ describe('AttachmentService', () => {
         });
 
         const res = await service.bulkUpdate({
-          comments: [{ attachmentId: '1', updatedAttributes }],
+          comments: [{ savedObjectId: '1', updatedAttributes }],
         });
 
         expect(res).toStrictEqual({ saved_objects: [createUserAttachment()] });
@@ -587,7 +587,7 @@ describe('AttachmentService', () => {
         const updatedAttributes = createAlertAttachment().attributes;
 
         await expect(
-          service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }] })
+          service.bulkUpdate({ comments: [{ savedObjectId: '1', updatedAttributes }] })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
@@ -606,7 +606,7 @@ describe('AttachmentService', () => {
             comments: [
               {
                 updatedAttributes: invalidAttachment.attributes,
-                attachmentId: '1',
+                savedObjectId: '1',
               },
             ],
           })
@@ -625,7 +625,7 @@ describe('AttachmentService', () => {
             {
               // @ts-expect-error: excess attributes
               updatedAttributes: { ...createUserAttachment().attributes, foo: 'bar' },
-              attachmentId: '1',
+              savedObjectId: '1',
             },
           ],
         });
@@ -642,7 +642,7 @@ describe('AttachmentService', () => {
     it('calls bulkDelete with both CASE_ATTACHMENT_SAVED_OBJECT and CASE_COMMENT_SAVED_OBJECT for each id', async () => {
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({ statuses: [] });
 
-      await service.bulkDelete({ attachmentIds: ['id-1', 'id-2'], refresh: false });
+      await service.bulkDelete({ savedObjectIds: ['id-1', 'id-2'], refresh: false });
 
       expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
       const [deleteRequests] = unsecuredSavedObjectsClient.bulkDelete.mock.calls[0];
