@@ -184,7 +184,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   // result of a callback. Because we're relying on a ref to handle this state (which
   // cannot trigger a re-render, calling a setState will force the component to render.
   // Without doing this, when the user exits the flyout using the back button, it won't
-  // end up rendering, and the traces flyout will never open.
+  // end up rendering, and the traces flyout will never re-open again.
   const [, forceRender] = useState(0);
 
   useEffect(() => {
