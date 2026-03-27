@@ -22,6 +22,9 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import downloadWorkflow from './workflows/download.yaml';
+import listWorkflow from './workflows/list.yaml';
+import searchWorkflow from './workflows/search.yaml';
 
 /**
  * Common output schema for Microsoft Graph API responses that return a collection.
@@ -37,7 +40,8 @@ export const SharepointOnline: ConnectorSpec = {
     id: '.sharepoint-online',
     displayName: 'SharePoint Online',
     description: i18n.translate('core.kibanaConnectorSpecs.sharepointOnline.metadata.description', {
-      defaultMessage: 'Kibana Stack Connector for SharePoint Online.',
+      defaultMessage:
+        'Search content, browse sites and document libraries, and download files from SharePoint Online',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -50,11 +54,24 @@ export const SharepointOnline: ConnectorSpec = {
         type: 'oauth_client_credentials',
         defaults: {
           scope: 'https://graph.microsoft.com/.default',
-          tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
         },
         overrides: {
           meta: {
             scope: { hidden: true },
+            tokenUrl: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.label',
+                { defaultMessage: 'Token URL' }
+              ),
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.helpText',
+                {
+                  defaultMessage:
+                    "Replace '{tenant-id}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                }
+              ),
+            },
           },
         },
       },
@@ -435,4 +452,6 @@ export const SharepointOnline: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [downloadWorkflow, listWorkflow, searchWorkflow],
 };

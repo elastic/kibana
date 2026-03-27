@@ -17,8 +17,8 @@ import type {
   AggregationsStringTermsBucket,
   AggregationsTopHitsAggregate,
 } from '@elastic/elasticsearch/lib/api/types';
+import { getLatestEntitiesIndexName } from '../../../common';
 import type { ResolutionClient } from '../../domain/resolution';
-import { getLatestEntitiesIndexName } from '../../domain/asset_manager/latest_index';
 import { getFieldValue } from '../../../common/domain/euid/commons';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import type { AutomatedResolutionState, MatchBucket, EntityHit } from './types';
@@ -118,7 +118,9 @@ async function collectNewEmailValues(
   ];
 
   if (state.lastProcessedTimestamp) {
-    filters.push({ range: { '@timestamp': { gt: state.lastProcessedTimestamp } } });
+    filters.push({
+      range: { 'entity.lifecycle.last_seen': { gt: state.lastProcessedTimestamp } },
+    });
   }
 
   do {
@@ -137,7 +139,7 @@ async function collectNewEmailValues(
             ...(afterKey ? { after: afterKey } : {}),
           },
         },
-        max_timestamp: { max: { field: '@timestamp' } },
+        max_timestamp: { max: { field: 'entity.lifecycle.last_seen' } },
       },
     });
 

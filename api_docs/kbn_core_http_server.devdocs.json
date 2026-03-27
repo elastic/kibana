@@ -282,7 +282,7 @@
           "<P, Q, B>"
         ],
         "path": "src/core/packages/http/server/src/versioning/types.ts",
-        "lineNumber": 330,
+        "lineNumber": 329,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -297,7 +297,7 @@
               "\nVersion to assign to this route"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 336,
+            "lineNumber": 335,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -321,7 +321,7 @@
               "<P, Q, B>)"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 341,
+            "lineNumber": 340,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -339,7 +339,7 @@
               ", \"authz\"> | undefined"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 349,
+            "lineNumber": 348,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -385,7 +385,7 @@
               ".ServerObject[] | undefined; }, \"requestBody\" | \"responses\">>) | undefined; } | undefined"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 351,
+            "lineNumber": 350,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -403,7 +403,7 @@
           "\nDescribes the state when authentication is disabled.\n\n- `enabled`: A boolean indicating that authentication is not enabled (`false`).\n- `reason`: A string explaining why authentication is disabled."
         ],
         "path": "src/core/packages/http/server/src/router/route.ts",
-        "lineNumber": 253,
+        "lineNumber": 269,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -419,7 +419,7 @@
               "false"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 260,
+            "lineNumber": 276,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -432,7 +432,7 @@
             "label": "reason",
             "description": [],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 261,
+            "lineNumber": 277,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -447,7 +447,7 @@
         "tags": [],
         "label": "AuthcEnabled",
         "description": [
-          "\nDescribes the authentication status when authentication is enabled.\n\n- `enabled`: A boolean or string indicating the authentication status. Can be `true` (authentication required) or `'optional'` (authentication is optional)."
+          "\nDescribes the authentication status when authentication is enabled (default)."
         ],
         "path": "src/core/packages/http/server/src/router/route.ts",
         "lineNumber": 244,
@@ -458,15 +458,109 @@
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-server.AuthcEnabled.enabled",
-            "type": "CompoundType",
+            "type": "boolean",
             "tags": [],
             "label": "enabled",
             "description": [],
             "signature": [
-              "true | \"optional\""
+              "true"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 250,
+            "lineNumber": 248,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.AuthcMinimal",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthcMinimal",
+        "description": [
+          "\nDescribes the authentication status when authentication is switched to a minimal mode (only existence of credentials\nis checked). Requires an explicit reason explaining why full authentication can be deferred to Elasticsearch."
+        ],
+        "path": "src/core/packages/http/server/src/router/route.ts",
+        "lineNumber": 251,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.AuthcMinimal.enabled",
+            "type": "string",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "signature": [
+              "\"minimal\""
+            ],
+            "path": "src/core/packages/http/server/src/router/route.ts",
+            "lineNumber": 256,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.AuthcMinimal.reason",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "path": "src/core/packages/http/server/src/router/route.ts",
+            "lineNumber": 257,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.AuthcOptional",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthcOptional",
+        "description": [
+          "\nDescribes the authentication status when authentication is optional. Requires an explicit reason explaining why\nauthentication is optional."
+        ],
+        "path": "src/core/packages/http/server/src/router/route.ts",
+        "lineNumber": 260,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.AuthcOptional.enabled",
+            "type": "string",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "signature": [
+              "\"optional\""
+            ],
+            "path": "src/core/packages/http/server/src/router/route.ts",
+            "lineNumber": 265,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.AuthcOptional.reason",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "path": "src/core/packages/http/server/src/router/route.ts",
+            "lineNumber": 266,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3889,20 +3983,8 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
-                "plugin": "globalSearch",
-                "path": "x-pack/platform/plugins/shared/global_search/server/routes/get_searchable_types.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/es_config/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/spec_definitions/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/autocomplete_entities/index.ts"
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes.ts"
               },
               {
                 "plugin": "esql",
@@ -3935,6 +4017,78 @@
               {
                 "plugin": "esql",
                 "path": "src/platform/plugins/shared/esql/server/routes/get_timefield.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/skills.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "globalSearch",
+                "path": "x-pack/platform/plugins/shared/global_search/server/routes/get_searchable_types.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/es_config/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/spec_definitions/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/autocomplete_entities/index.ts"
               },
               {
                 "plugin": "banners",
@@ -4277,102 +4431,6 @@
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_load_history_route.ts"
               },
               {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_child_workflow_executions.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_connectors.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_step_execution.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_aggs.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_by_id.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_execution_by_id.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_execution_logs.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_executions.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_json_schema.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_stats.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflows_config.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
-              },
-              {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.ts"
               },
@@ -4449,6 +4507,18 @@
                 "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
+                "plugin": "elasticConsole",
+                "path": "x-pack/platform/plugins/shared/elastic_console/server/routes/conversations.ts"
+              },
+              {
+                "plugin": "elasticConsole",
+                "path": "x-pack/platform/plugins/shared/elastic_console/server/routes/conversations.ts"
+              },
+              {
+                "plugin": "elasticConsole",
+                "path": "x-pack/platform/plugins/shared/elastic_console/server/routes/models.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/get.ts"
               },
@@ -4479,10 +4549,6 @@
               {
                 "plugin": "sampleDataIngest",
                 "path": "x-pack/platform/plugins/shared/sample_data_ingest/server/routes/installation.ts"
-              },
-              {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes.ts"
               },
               {
                 "plugin": "searchprofiler",
@@ -4611,6 +4677,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -5243,6 +5313,18 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/router-server-internal/src/router.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -6115,14 +6197,6 @@
               {
                 "plugin": "savedObjectsManagement",
                 "path": "src/platform/plugins/shared/saved_objects_management/server/routes/index.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflows_config.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflows_config.test.ts"
               },
               {
                 "plugin": "console",
@@ -7077,22 +7151,6 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
-                "plugin": "globalSearch",
-                "path": "x-pack/platform/plugins/shared/global_search/server/routes/find.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/proxy/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/convert_request_to_language/index.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes/server/routes.ts"
-              },
-              {
                 "plugin": "esql",
                 "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
@@ -7107,6 +7165,46 @@
               {
                 "plugin": "esql",
                 "path": "src/platform/plugins/shared/esql/server/routes/nl_to_esql_route.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/conversations.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
+              },
+              {
+                "plugin": "globalSearch",
+                "path": "x-pack/platform/plugins/shared/global_search/server/routes/find.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/proxy/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/convert_request_to_language/index.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes/server/routes.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -7385,70 +7483,6 @@
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_list_fields_route.ts"
               },
               {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_bulk_create_workflows.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_cancel_workflow_execution.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_clone_workflow.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_create_workflow.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_resume_workflow_execution.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_run_workflow.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_search_workflows.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_test_step.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_test_workflow.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_validate_workflow.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/conversations.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
-              },
-              {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.ts"
               },
@@ -7519,6 +7553,18 @@
               {
                 "plugin": "dataSources",
                 "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
+              },
+              {
+                "plugin": "elasticConsole",
+                "path": "x-pack/platform/plugins/shared/elastic_console/server/routes/chat_completions.ts"
+              },
+              {
+                "plugin": "elasticConsole",
+                "path": "x-pack/platform/plugins/shared/elastic_console/server/routes/conversations.ts"
+              },
+              {
+                "plugin": "elasticConsole",
+                "path": "x-pack/platform/plugins/shared/elastic_console/server/routes/setup.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -9553,6 +9599,10 @@
                 "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_update_route.ts"
               },
@@ -9673,14 +9723,6 @@
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/action/register_acknowledge_route.ts"
               },
               {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/put_update_workflow.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
-              },
-              {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.ts"
               },
@@ -9727,6 +9769,10 @@
               {
                 "plugin": "dataSources",
                 "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
+              },
+              {
+                "plugin": "elasticConsole",
+                "path": "x-pack/platform/plugins/shared/elastic_console/server/routes/conversations.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -10473,6 +10519,14 @@
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/public/jobs.ts"
               },
               {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_delete_route.ts"
               },
@@ -10525,18 +10579,6 @@
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/register_delete_route.ts"
               },
               {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/delete_workflow_by_id.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/delete_workflows_bulk.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
-              },
-              {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.ts"
               },
@@ -10559,10 +10601,6 @@
               {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/database/delete.ts"
-              },
-              {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -11663,7 +11701,7 @@
           "<Params, Query, Body, Method>"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 103,
+        "lineNumber": 122,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11678,7 +11716,7 @@
               "\nA identifier to identify this request.\n"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 113,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11693,7 +11731,7 @@
               "\nA UUID to identify this request.\n"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 123,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11711,7 +11749,7 @@
               "URL"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 132,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11747,7 +11785,7 @@
               "<Method>>; readonly routePath?: string | undefined; }"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 135,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11765,7 +11803,7 @@
               "{ range?: string | string[] | undefined; date?: string | string[] | undefined; origin?: string | string[] | undefined; allow?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; authorization?: string | string[] | undefined; from?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 138,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11780,7 +11818,7 @@
               "\nWhether or not the request is a \"system request\" rather than an application-level request.\nCan be set on the client using the `HttpFetchOptions#asSystemRequest` option."
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 145,
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11795,7 +11833,7 @@
               "\nAllows identifying requests that were created using a {@link FakeRawRequest}\nEven if the API facade is the same, fake requests have some stubbed functionalities."
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 151,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11813,7 +11851,7 @@
               "Record<string, boolean> | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 157,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11830,7 +11868,7 @@
               "\nAn internal request has access to internal routes."
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 163,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11845,7 +11883,7 @@
               "\nThe HTTP version sent by the client."
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 169,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11863,7 +11901,7 @@
               "\"http1\" | \"http2\""
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 174,
+            "lineNumber": 193,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11881,7 +11919,7 @@
               "IKibanaSocket"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 179,
+            "lineNumber": 198,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11899,7 +11937,7 @@
               "KibanaRequestEvents"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 185,
+            "lineNumber": 204,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11917,7 +11955,7 @@
               "KibanaRequestAuth"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 191,
+            "lineNumber": 210,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11936,7 +11974,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 197,
+            "lineNumber": 216,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11954,7 +11992,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 202,
+            "lineNumber": 221,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11972,7 +12010,7 @@
               "Params"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 207,
+            "lineNumber": 226,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11990,7 +12028,7 @@
               "Query"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 212,
+            "lineNumber": 231,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12008,7 +12046,25 @@
               "Body"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 217,
+            "lineNumber": 236,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.KibanaRequest.serverTiming",
+            "type": "Object",
+            "tags": [],
+            "label": "serverTiming",
+            "description": [
+              "\nAPI for recording custom timing events during request processing.\nThese events are automatically included in the Server-Timing response header.\n\nOnly available during development."
+            ],
+            "signature": [
+              "RequestTiming"
+            ],
+            "path": "src/core/packages/http/server/src/router/request.ts",
+            "lineNumber": 241,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12026,7 +12082,7 @@
           "\nAuth status for this request."
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 94,
+        "lineNumber": 113,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12041,7 +12097,7 @@
               "true if the request has been successfully authenticated, false otherwise."
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 99,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12059,7 +12115,7 @@
           "\nRequest events."
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 73,
+        "lineNumber": 92,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12078,7 +12134,7 @@
               "<void>"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 78,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12097,7 +12153,7 @@
               "<void>"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 83,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12119,7 +12175,7 @@
           "<Method>"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 62,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12132,7 +12188,7 @@
             "label": "path",
             "description": [],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 67,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12148,7 +12204,7 @@
               "Method"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 68,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12167,10 +12223,10 @@
               "RouteConfigOptions",
               "<Method>>) & { security?: ",
               "RouteSecurity",
-              " | undefined; }"
+              " | undefined; authRequired: boolean | \"optional\"; }"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 69,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12186,7 +12242,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 70,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12207,7 +12263,7 @@
           "RequestApplicationState"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 37,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12220,7 +12276,7 @@
             "label": "requestId",
             "description": [],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 41,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12233,7 +12289,7 @@
             "label": "requestUuid",
             "description": [],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 42,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12250,7 +12306,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 43,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12266,7 +12322,45 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 44,
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.KibanaRequestState.httpSpan",
+            "type": "Object",
+            "tags": [],
+            "label": "httpSpan",
+            "description": [
+              "The top HTTP Otel Span for this request."
+            ],
+            "signature": [
+              "Span",
+              " | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/router/request.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.KibanaRequestState.otelSubSpan",
+            "type": "Object",
+            "tags": [],
+            "label": "otelSubSpan",
+            "description": [
+              "The OTel sub-span: used to group the pre-route handlers, the route handler, and the post-route handlers."
+            ],
+            "signature": [
+              "Span",
+              " | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/router/request.ts",
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12277,13 +12371,15 @@
             "type": "CompoundType",
             "tags": [],
             "label": "span",
-            "description": [],
+            "description": [
+              "The Elastic APM span to group the pre-route handlers, the route handler, and the post-route handlers."
+            ],
             "signature": [
               "Span",
               " | null | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 45,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12299,7 +12395,7 @@
               "Record<string, boolean> | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 46,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12312,14 +12408,35 @@
             "label": "measureElu",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "((httpSpan?: ",
+              "Span",
+              " | undefined) => void) | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 47,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-server.KibanaRequestState.measureElu.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "httpSpan",
+                "description": [],
+                "signature": [
+                  "Span",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/http/server/src/router/request.ts",
+                "lineNumber": 62,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -12330,7 +12447,7 @@
             "label": "startTime",
             "description": [],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 48,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12346,7 +12463,24 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 49,
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.KibanaRequestState.timingState",
+            "type": "Object",
+            "tags": [],
+            "label": "timingState",
+            "description": [],
+            "signature": [
+              "RequestTimingState",
+              " | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/router/request.ts",
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12367,7 +12501,7 @@
           "RouteOptionsApp"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 26,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12384,7 +12518,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 30,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12397,7 +12531,7 @@
             "label": "xsrfRequired",
             "description": [],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 31,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12413,7 +12547,7 @@
               "\"public\" | \"internal\""
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 32,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12430,7 +12564,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 33,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12446,7 +12580,7 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 34,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13450,7 +13584,7 @@
           "\nPost Validation Route emitter metadata."
         ],
         "path": "src/core/packages/http/server/src/router/route.ts",
-        "lineNumber": 571,
+        "lineNumber": 575,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13467,7 +13601,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 575,
+            "lineNumber": 579,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13480,7 +13614,7 @@
             "label": "isInternalApiRequest",
             "description": [],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 576,
+            "lineNumber": 580,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13493,7 +13627,7 @@
             "label": "isPublicAccess",
             "description": [],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 577,
+            "lineNumber": 581,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13619,6 +13753,164 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.RequestTiming",
+        "type": "Interface",
+        "tags": [],
+        "label": "RequestTiming",
+        "description": [
+          "\nAPI for recording custom timing events during request processing.\nThese events are automatically included in the Server-Timing response header.\n"
+        ],
+        "path": "src/core/packages/http/server/src/router/timing.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RequestTiming.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [
+              "\nStart timing an operation. Returns a timer object with an end() method.\nThis prevents mismatched timings when operations overlap.\n"
+            ],
+            "signature": [
+              "(name: string, description?: string | undefined) => ",
+              "Timer"
+            ],
+            "path": "src/core/packages/http/server/src/router/timing.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-server.RequestTiming.start.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [
+                  "- Metric name (alphanumeric, underscore, dash only)"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/http/server/src/router/timing.ts",
+                "lineNumber": 32,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-server.RequestTiming.start.$2",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [
+                  "- Optional human-readable description"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/core/packages/http/server/src/router/timing.ts",
+                "lineNumber": 32,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "Timer object with end() method"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RequestTiming.measure",
+            "type": "Function",
+            "tags": [],
+            "label": "measure",
+            "description": [
+              "\nManually record a timing event with explicit duration.\nUse when you already have the duration calculated.\n"
+            ],
+            "signature": [
+              "(name: string, duration: number, description?: string | undefined) => void"
+            ],
+            "path": "src/core/packages/http/server/src/router/timing.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-server.RequestTiming.measure.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [
+                  "- Metric name (alphanumeric, underscore, dash only)"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/http/server/src/router/timing.ts",
+                "lineNumber": 49,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-server.RequestTiming.measure.$2",
+                "type": "number",
+                "tags": [],
+                "label": "duration",
+                "description": [
+                  "- Duration in milliseconds"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/core/packages/http/server/src/router/timing.ts",
+                "lineNumber": 49,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-server.RequestTiming.measure.$3",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [
+                  "- Optional human-readable description"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/core/packages/http/server/src/router/timing.ts",
+                "lineNumber": 49,
+                "columnNumber": 43,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
         "id": "def-server.RouteConfig",
         "type": "Interface",
         "tags": [],
@@ -13631,7 +13923,7 @@
           "<P, Q, B, Method>"
         ],
         "path": "src/core/packages/http/server/src/router/route.ts",
-        "lineNumber": 482,
+        "lineNumber": 486,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13646,7 +13938,7 @@
               "\nThe endpoint _within_ the router path to register the route.\n"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 487,
+            "lineNumber": 491,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13668,7 +13960,7 @@
               "<P, Q, B>)"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 502,
+            "lineNumber": 506,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13686,7 +13978,7 @@
               "RouteSecurity"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 560,
+            "lineNumber": 564,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13705,7 +13997,7 @@
               "<Method> | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 565,
+            "lineNumber": 569,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13727,553 +14019,11 @@
           "<Method>"
         ],
         "path": "src/core/packages/http/server/src/router/route.ts",
-        "lineNumber": 290,
+        "lineNumber": 307,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "@kbn/core-http-server",
-            "id": "def-server.RouteConfigOptions.authRequired",
-            "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "authRequired",
-            "description": [
-              "\nDefines authentication mode for a route:\n- true. A user has to have valid credentials to access a resource\n- false. A user can access a resource without any credentials.\n- 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid.\n              Can be useful when we grant access to a resource but want to identify a user if possible.\n\nDefaults to `true` if an auth mechanism is registered.\n"
-            ],
-            "signature": [
-              "boolean | \"optional\" | undefined"
-            ],
-            "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 295,
-            "columnNumber": 3,
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/security_route_config_validator.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/server-internal/src/http_server.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/server-internal/src/http_server.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/status/server-internal/src/routes/status.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/i18n/server-internal/src/routes/translations.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/rendering/server-internal/src/bootstrap/register_bootstrap_route.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts"
-              },
-              {
-                "plugin": "usageCollection",
-                "path": "src/platform/plugins/shared/usage_collection/server/routes/stats/stats.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/views/login.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/analytics/record_violations.ts"
-              },
-              {
-                "plugin": "monitoringCollection",
-                "path": "x-pack/platform/plugins/private/monitoring_collection/server/routes/api/v1/dynamic_route/get_metrics_by_type.ts"
-              },
-              {
-                "plugin": "monitoringCollection",
-                "path": "x-pack/platform/plugins/private/monitoring_collection/server/routes/api/v1/prometheus/get_metrics.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/pagerduty_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/servicenow_oauth_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/ms_exchage_server_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/ms_exchage_server_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xmatters_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/torq_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
-                "plugin": "banners",
-                "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
-              },
-              {
-                "plugin": "customBranding",
-                "path": "x-pack/platform/plugins/private/custom_branding/server/routes/info.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/cloud_integration/plugins/saml_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/cloud_integration/plugins/saml_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/cloud_integration/plugins/saml_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/functional_execution_context/plugins/alerts/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/plugin_api_integration/plugins/event_log/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_api_integration/plugins/saml_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_api_integration/plugins/saml_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_api_integration/plugins/saml_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_api_integration/plugins/saml_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_api_integration/plugins/saml_provider/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/workflow_insights/update_insight.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/workflow_insights/get_insights.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/policy/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/orphan_actions_space_handler.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/orphan_actions_space_handler.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/file_info_handler.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/file_download_handler.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/details.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/status.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/state.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/list.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/custom_scripts_handler.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/suggestions/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/route_config_helpers.test.ts"
-              },
-              {
-                "plugin": "interactiveSetup",
-                "path": "src/platform/plugins/private/interactive_setup/server/routes/configure.ts"
-              },
-              {
-                "plugin": "interactiveSetup",
-                "path": "src/platform/plugins/private/interactive_setup/server/routes/enroll.ts"
-              },
-              {
-                "plugin": "interactiveSetup",
-                "path": "src/platform/plugins/private/interactive_setup/server/routes/ping.ts"
-              },
-              {
-                "plugin": "interactiveSetup",
-                "path": "src/platform/plugins/private/interactive_setup/server/routes/status.ts"
-              },
-              {
-                "plugin": "interactiveSetup",
-                "path": "src/platform/plugins/private/interactive_setup/server/routes/verify.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-src",
-                "path": "src/platform/test/common/plugins/newsfeed/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-src",
-                "path": "src/platform/test/common/plugins/newsfeed/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-src",
-                "path": "src/platform/test/interactive_setup_api_integration/plugins/test_endpoints/server/index.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-src",
-                "path": "src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-src",
-                "path": "src/platform/test/plugin_functional/plugins/core_plugin_execution_context/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/security_route_config_validator.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "mockIdpPlugin",
-                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "mockIdpPlugin",
-                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "mockIdpPlugin",
-                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "mockIdpPlugin",
-                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "mockIdpPlugin",
-                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "mockIdpPlugin",
-                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/server-internal/src/lifecycle/auth.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/server-internal/src/lifecycle/auth.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/capabilities/capabilities_switcher.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/authentication/providers/anonymous.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/authentication/providers/basic.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/authentication/providers/kerberos.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/authentication/providers/saml.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/authentication/providers/token.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/authentication/providers/oidc.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/authentication/providers/pki.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/capabilities_switcher.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/request.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/request.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/request.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/request.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/request.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/request.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/request.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-internal/src/request.test.ts"
-              }
-            ]
-          },
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-server.RouteConfigOptions.xsrfRequired",
@@ -14287,7 +14037,7 @@
               "(Method extends \"get\" ? never : boolean) | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 308,
+            "lineNumber": 312,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14306,7 +14056,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 317,
+            "lineNumber": 321,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14324,7 +14074,7 @@
               "readonly string[] | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 327,
+            "lineNumber": 331,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14344,7 +14094,7 @@
               ") | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 332,
+            "lineNumber": 336,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14362,7 +14112,7 @@
               "{ payload?: (Method extends \"get\" | \"options\" ? undefined : number) | undefined; idleSocket?: number | undefined; } | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 337,
+            "lineNumber": 341,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14380,7 +14130,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 352,
+            "lineNumber": 356,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14398,7 +14148,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 366,
+            "lineNumber": 370,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14417,7 +14167,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 381,
+            "lineNumber": 385,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14465,7 +14215,7 @@
               ".ServerObject[] | undefined; }, \"requestBody\" | \"responses\">>) | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 395,
+            "lineNumber": 399,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -14487,7 +14237,7 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 426,
+            "lineNumber": 430,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14507,7 +14257,7 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 434,
+            "lineNumber": 438,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14525,7 +14275,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 441,
+            "lineNumber": 445,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14547,7 +14297,7 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 450,
+            "lineNumber": 454,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14565,7 +14315,7 @@
               "{ stability?: \"experimental\" | \"beta\" | \"stable\" | undefined; since?: string | undefined; } | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 464,
+            "lineNumber": 468,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15168,7 +14918,7 @@
           "\nDescribes the security requirements for a route, including authorization and authentication."
         ],
         "path": "src/core/packages/http/server/src/router/route.ts",
-        "lineNumber": 274,
+        "lineNumber": 291,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15186,7 +14936,7 @@
               "AuthzDisabled"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 278,
+            "lineNumber": 295,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15203,7 +14953,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
-            "lineNumber": 279,
+            "lineNumber": 296,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15964,6 +15714,110 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.Timer",
+        "type": "Interface",
+        "tags": [],
+        "label": "Timer",
+        "description": [
+          "\nTimer object returned by RequestTiming.start()\n"
+        ],
+        "path": "src/core/packages/http/server/src/router/timing.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.Timer.end",
+            "type": "Function",
+            "tags": [],
+            "label": "end",
+            "description": [
+              "\nEnd timing for this specific operation.\nCan be called multiple times (subsequent calls are no-ops)."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/http/server/src/router/timing.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.TimingEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimingEvent",
+        "description": [
+          "\nA recorded timing event\n"
+        ],
+        "path": "src/core/packages/http/server/src/router/timing.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.TimingEvent.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "Metric name"
+            ],
+            "path": "src/core/packages/http/server/src/router/timing.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.TimingEvent.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [
+              "Duration in milliseconds"
+            ],
+            "path": "src/core/packages/http/server/src/router/timing.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.TimingEvent.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "Optional human-readable description"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/router/timing.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
         "id": "def-server.VersionedRoute",
         "type": "Interface",
         "tags": [],
@@ -15976,7 +15830,7 @@
           "<Method, Ctx>"
         ],
         "path": "src/core/packages/http/server/src/versioning/types.ts",
-        "lineNumber": 361,
+        "lineNumber": 360,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -16012,7 +15866,7 @@
               "<Method, Ctx>"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 369,
+            "lineNumber": 368,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -16029,7 +15883,7 @@
                   "<P, Q, B>"
                 ],
                 "path": "src/core/packages/http/server/src/versioning/types.ts",
-                "lineNumber": 377,
+                "lineNumber": 376,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -16062,7 +15916,7 @@
                   "<any>>"
                 ],
                 "path": "src/core/packages/http/server/src/versioning/types.ts",
-                "lineNumber": 378,
+                "lineNumber": 377,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -16084,7 +15938,7 @@
         "label": "VersionedRouteCustomResponseBodyValidation",
         "description": [],
         "path": "src/core/packages/http/server/src/versioning/types.ts",
-        "lineNumber": 248,
+        "lineNumber": 247,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -16106,7 +15960,7 @@
               "; } | { value: unknown; error?: undefined; }"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 250,
+            "lineNumber": 249,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -16163,7 +16017,7 @@
           "<Ctx>"
         ],
         "path": "src/core/packages/http/server/src/versioning/types.ts",
-        "lineNumber": 121,
+        "lineNumber": 120,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -16185,7 +16039,7 @@
               "<\"get\", Ctx>"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 213,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": true,
@@ -16284,6 +16138,10 @@
               },
               {
                 "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/search/register_search_route.ts"
+              },
+              {
+                "plugin": "dashboard",
                 "path": "src/platform/plugins/shared/dashboard/server/api/read/register_read_route.ts"
               },
               {
@@ -16357,6 +16215,122 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
+              },
+              {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_features.ts"
+              },
+              {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_connectors.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/get_children_executions.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/get_execution.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/get_execution_logs.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/get_step_execution.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/get_workflow_executions.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/get_workflow_step_executions.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/internal/get_config.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/get_aggs.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/get_connectors.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/get_schema.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/get_stats.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/get_workflow.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/get_workflows.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/conversations.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/conversations.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/a2a.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -16433,54 +16407,6 @@
               {
                 "plugin": "logsShared",
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/conversations.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/conversations.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/a2a.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
               },
               {
                 "plugin": "automaticImportVTwo",
@@ -16743,6 +16669,10 @@
                 "path": "src/platform/plugins/shared/dashboard_markdown/server/api/read/register_read_route.ts"
               },
               {
+                "plugin": "dashboardMarkdown",
+                "path": "src/platform/plugins/shared/dashboard_markdown/server/api/search/register_search_route.ts"
+              },
+              {
                 "plugin": "evals",
                 "path": "x-pack/platform/plugins/shared/evals/server/routes/runs/get_runs.ts"
               },
@@ -16812,6 +16742,10 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/get_users_route.ts"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/status/create_status_route.ts"
               },
               {
@@ -16871,12 +16805,8 @@
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/scheduled_results/get_scheduled_query_results_route.ts"
               },
               {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
-              },
-              {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_features.ts"
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/schemas/get_schemas_route.ts"
               },
               {
                 "plugin": "dataUsage",
@@ -17067,6 +16997,22 @@
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/status.ts"
               },
               {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/crud/get.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/resolution/group.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/get_maintainers.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/check_privileges.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts"
               },
@@ -17105,14 +17051,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/list_scripts.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/resolution/group.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/get_maintainers.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17157,6 +17095,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/workflow_insights/get_insights.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/workflow_insights/get_pending.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17701,14 +17643,14 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
-                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
+                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
                   " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "src/core/packages/http/server/src/versioning/types.ts",
-                "lineNumber": 118,
+                "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -17732,7 +17674,7 @@
               "<\"put\", Ctx>"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 218,
+            "lineNumber": 217,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": true,
@@ -17798,6 +17740,34 @@
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/update_workflow.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts"
               },
@@ -17824,26 +17794,6 @@
               {
                 "plugin": "logsShared",
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
               },
               {
                 "plugin": "automaticImportVTwo",
@@ -17922,10 +17872,6 @@
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/update_pack_route.ts"
               },
               {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
-              },
-              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -17982,24 +17928,16 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/public/put/update.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/update_rule/route.ts"
-              },
-              {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/stop.ts"
               },
               {
                 "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/crud/upsert.ts"
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/crud/update.ts"
               },
               {
                 "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/crud/upsert_bulk.ts"
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/crud/bulk_update.ts"
               },
               {
                 "plugin": "entityStore",
@@ -18016,6 +17954,14 @@
               {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/stop.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/update_rule/route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -18120,14 +18066,14 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
-                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
+                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
                   " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "src/core/packages/http/server/src/versioning/types.ts",
-                "lineNumber": 118,
+                "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -18151,7 +18097,7 @@
               "<\"post\", Ctx>"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 223,
+            "lineNumber": 222,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": true,
@@ -18257,10 +18203,6 @@
                 "path": "src/platform/plugins/shared/dashboard/server/api/create/register_create_route.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/search/register_search_route.ts"
-              },
-              {
                 "plugin": "kql",
                 "path": "src/platform/plugins/shared/kql/server/autocomplete/value_suggestions_route.ts"
               },
@@ -18311,6 +18253,98 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/cancel_execution.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/resume_execution.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/run_workflow.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/test_step.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/executions/test_workflow.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/bulk_create_workflows.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/clone_workflow.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/create_workflow.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/export_workflows.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/mget_workflows.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/validate_workflow.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/consumption.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/chat.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/chat.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/mcp.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/a2a.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -18415,54 +18449,6 @@
               {
                 "plugin": "logsShared",
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/consumption.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/chat.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/chat.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/mcp.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/a2a.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
               },
               {
                 "plugin": "aiops",
@@ -18837,10 +18823,6 @@
                 "path": "src/platform/plugins/shared/dashboard_markdown/server/api/create/register_create_route.ts"
               },
               {
-                "plugin": "dashboardMarkdown",
-                "path": "src/platform/plugins/shared/dashboard_markdown/server/api/search/register_search_route.ts"
-              },
-              {
                 "plugin": "evals",
                 "path": "x-pack/platform/plugins/shared/evals/server/routes/datasets/create_dataset.ts"
               },
@@ -18977,6 +18959,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.ts"
+              },
+              {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/public/post/post_attack_discovery_generate.ts"
               },
@@ -19065,6 +19051,46 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/test_internal/create_attack_discovery_alerts_route.ts"
               },
               {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/install/index.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_history_snapshot.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/uninstall.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/crud/create.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/resolution/link.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/resolution/unlink.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/init.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/run.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
               },
@@ -19133,42 +19159,6 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/create_script.ts"
               },
               {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/install/index.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_history_snapshot.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/uninstall.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/resolution/link.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/resolution/unlink.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/init.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/run.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/routes/nba_routes.ts"
               },
@@ -19211,6 +19201,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/unified_alerts/set_alert_assignees_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/workflow_insights/create_insights.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -19343,6 +19337,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/watchlists/management/routes/entity_sources/create.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/watchlists/management/routes/sync.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -19627,14 +19625,14 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
-                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
+                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
                   " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "src/core/packages/http/server/src/versioning/types.ts",
-                "lineNumber": 118,
+                "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -19658,7 +19656,7 @@
               "<\"patch\", Ctx>"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 228,
+            "lineNumber": 227,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": true,
@@ -19668,16 +19666,16 @@
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts"
               },
               {
                 "plugin": "logsShared",
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
               },
               {
                 "plugin": "automaticImportVTwo",
@@ -19762,14 +19760,14 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
-                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
+                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
                   " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "src/core/packages/http/server/src/versioning/types.ts",
-                "lineNumber": 118,
+                "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -19793,7 +19791,7 @@
               "<\"delete\", Ctx>"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 233,
+            "lineNumber": 232,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": true,
@@ -19855,24 +19853,12 @@
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts"
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/bulk_delete_workflows.ts"
               },
               {
-                "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/delete.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/delete.ts"
-              },
-              {
-                "plugin": "fileUpload",
-                "path": "x-pack/platform/plugins/private/file_upload/server/routes.ts"
-              },
-              {
-                "plugin": "logsShared",
-                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/api/routes/workflows/delete_workflow.ts"
               },
               {
                 "plugin": "agentBuilder",
@@ -19897,6 +19883,26 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/delete.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/delete.ts"
+              },
+              {
+                "plugin": "fileUpload",
+                "path": "x-pack/platform/plugins/private/file_upload/server/routes.ts"
+              },
+              {
+                "plugin": "logsShared",
+                "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "automaticImportVTwo",
@@ -20019,16 +20025,16 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/delete_all_route.ts"
               },
               {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/crud/delete.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/delete_rule/route.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/delete_script.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/crud/delete.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -20141,14 +20147,14 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
-                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
+                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
                   " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "src/core/packages/http/server/src/versioning/types.ts",
-                "lineNumber": 118,
+                "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -20168,7 +20174,7 @@
               "<unknown, unknown, unknown>[]"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 239,
+            "lineNumber": 238,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -20191,7 +20197,7 @@
           "\nMap of response status codes to response schemas\n"
         ],
         "path": "src/core/packages/http/server/src/versioning/types.ts",
-        "lineNumber": 259,
+        "lineNumber": 258,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -20209,7 +20215,7 @@
               " | undefined; }"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 295,
+            "lineNumber": 294,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20225,7 +20231,7 @@
               "{ body?: boolean | undefined; } | undefined"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 306,
+            "lineNumber": 305,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20245,7 +20251,7 @@
           "<P, Q, B>"
         ],
         "path": "src/core/packages/http/server/src/versioning/types.ts",
-        "lineNumber": 382,
+        "lineNumber": 381,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -20258,7 +20264,7 @@
             "label": "method",
             "description": [],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 383,
+            "lineNumber": 382,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20271,7 +20277,7 @@
             "label": "path",
             "description": [],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 384,
+            "lineNumber": 383,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20288,14 +20294,14 @@
               "RouteConfigOptions",
               "<",
               "RouteMethod",
-              ">, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; security: ",
+              ">, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; security: ",
               "RouteSecurity",
               "; description?: string | undefined; summary?: string | undefined; access: ",
               "RouteAccess",
               "; discontinued?: string | undefined; enableQueryVersion?: boolean | undefined; }"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 385,
+            "lineNumber": 384,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20313,7 +20319,7 @@
               "<P, Q, B>; }[]"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 386,
+            "lineNumber": 385,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20329,7 +20335,7 @@
               "true"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 387,
+            "lineNumber": 386,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20351,7 +20357,7 @@
           "<P, Q, B>"
         ],
         "path": "src/core/packages/http/server/src/versioning/types.ts",
-        "lineNumber": 309,
+        "lineNumber": 308,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -20370,7 +20376,7 @@
               "<P, Q, B> | undefined"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 314,
+            "lineNumber": 313,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20391,7 +20397,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 319,
+            "lineNumber": 318,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20483,7 +20489,7 @@
           "\nA set of reserved privileges that can be used to check access to the route."
         ],
         "path": "src/core/packages/http/server/src/router/route.ts",
-        "lineNumber": 282,
+        "lineNumber": 299,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -20522,7 +20528,7 @@
           ">"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 223,
+        "lineNumber": 250,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -21048,7 +21054,7 @@
           "RouteSecurityGetter"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 24,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -21113,10 +21119,10 @@
           "RouteConfigOptions",
           "<Method>>) & { security?: ",
           "RouteSecurity",
-          " | undefined; }"
+          " | undefined; authRequired: boolean | \"optional\"; }"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 52,
+        "lineNumber": 68,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -22021,15 +22027,19 @@
         "tags": [],
         "label": "RouteAuthc",
         "description": [
-          "\nRepresents the authentication status for a route. It can either be enabled (`AuthcEnabled`) or disabled (`AuthcDisabled`)."
+          "\nRepresents the authentication status for a route. It can either be enabled (`AuthcEnabled`), minimal (`AuthcMinimal`),\noptional (`AuthcOptional`), or disabled (`AuthcDisabled`)."
         ],
         "signature": [
           "AuthcEnabled",
           " | ",
+          "AuthcMinimal",
+          " | ",
+          "AuthcOptional",
+          " | ",
           "AuthcDisabled"
         ],
         "path": "src/core/packages/http/server/src/router/route.ts",
-        "lineNumber": 264,
+        "lineNumber": 280,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -22050,7 +22060,7 @@
           "AuthzDisabled"
         ],
         "path": "src/core/packages/http/server/src/router/route.ts",
-        "lineNumber": 269,
+        "lineNumber": 286,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -22232,7 +22242,7 @@
           " | undefined"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 20,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -22251,7 +22261,7 @@
               "; query?: unknown; } | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 20,
+            "lineNumber": 22,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false
@@ -22487,7 +22497,7 @@
           "VersionedRouteCustomResponseBodyValidation"
         ],
         "path": "src/core/packages/http/server/src/versioning/types.ts",
-        "lineNumber": 254,
+        "lineNumber": 253,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -22507,7 +22517,7 @@
           "RouteConfig",
           "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
           "RouteConfigOptions",
-          "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
+          "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
           "RouteAccess",
           "; security?: ",
           "RouteSecurity",
@@ -22537,7 +22547,7 @@
           "<Method, Ctx>"
         ],
         "path": "src/core/packages/http/server/src/versioning/types.ts",
-        "lineNumber": 110,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -22559,14 +22569,14 @@
               "RouteConfig",
               "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
               "RouteConfigOptions",
-              "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
+              "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
               "RouteAccess",
               "; security?: ",
               "RouteSecurity",
               " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
             ],
             "path": "src/core/packages/http/server/src/versioning/types.ts",
-            "lineNumber": 118,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -22587,7 +22597,7 @@
           "RouteValidatorOptions"
         ],
         "path": "src/core/packages/http/server/src/versioning/types.ts",
-        "lineNumber": 245,
+        "lineNumber": 244,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

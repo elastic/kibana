@@ -204,4 +204,182 @@ describe('parseMetricsResponse', () => {
     expect(dimensionNames).toContain('pod.name');
     expect(dimensionNames).toContain('container.id');
   });
+
+  describe('internal dimension filtering', () => {
+    it('filters out internal dimension _metric_names_hash', () => {
+      const response: MetricsESQLResponse[] = [
+        {
+          metric_name: 'cpu.usage',
+          data_stream: 'my-index',
+          unit: ['percent'],
+          metric_type: 'gauge',
+          field_type: ES_FIELD_TYPES.DOUBLE,
+          dimension_fields: ['host.name', '_metric_names_hash'],
+        },
+      ];
+      const result = parseMetricsResponse(response);
+      expect(result.metricItems[0].dimensionFields).toEqual([{ name: 'host.name' }]);
+      expect(result.allDimensions).toEqual([{ name: 'host.name' }]);
+    });
+
+    it('filters out internal dimension unit', () => {
+      const response: MetricsESQLResponse[] = [
+        {
+          metric_name: 'cpu.usage',
+          data_stream: 'my-index',
+          unit: ['percent'],
+          metric_type: 'gauge',
+          field_type: ES_FIELD_TYPES.DOUBLE,
+          dimension_fields: ['host.name', 'unit'],
+        },
+      ];
+      const result = parseMetricsResponse(response);
+      expect(result.metricItems[0].dimensionFields).toEqual([{ name: 'host.name' }]);
+      expect(result.allDimensions).toEqual([{ name: 'host.name' }]);
+    });
+
+    it('filters out internal dimensions with labels._ prefix', () => {
+      const response: MetricsESQLResponse[] = [
+        {
+          metric_name: 'cpu.usage',
+          data_stream: 'my-index',
+          unit: ['percent'],
+          metric_type: 'gauge',
+          field_type: ES_FIELD_TYPES.DOUBLE,
+          dimension_fields: ['host.name', 'labels._foo_', 'labels._bar_baz_'],
+        },
+      ];
+      const result = parseMetricsResponse(response);
+      expect(result.metricItems[0].dimensionFields).toEqual([{ name: 'host.name' }]);
+      expect(result.allDimensions).toEqual([{ name: 'host.name' }]);
+    });
+
+    it('filters out all internal dimensions while keeping valid ones', () => {
+      const response: MetricsESQLResponse[] = [
+        {
+          metric_name: 'cpu.usage',
+          data_stream: 'my-index',
+          unit: ['percent'],
+          metric_type: 'gauge',
+          field_type: ES_FIELD_TYPES.DOUBLE,
+          dimension_fields: [
+            'host.name',
+            '_metric_names_hash',
+            'unit',
+            'labels._internal_',
+            'pod.name',
+          ],
+        },
+      ];
+      const result = parseMetricsResponse(response);
+      expect(result.metricItems[0].dimensionFields).toEqual([
+        { name: 'host.name' },
+        { name: 'pod.name' },
+      ]);
+      expect(result.allDimensions).toEqual([{ name: 'host.name' }, { name: 'pod.name' }]);
+    });
+
+    it('does not filter non-internal labels dimensions', () => {
+      const response: MetricsESQLResponse[] = [
+        {
+          metric_name: 'cpu.usage',
+          data_stream: 'my-index',
+          unit: ['percent'],
+          metric_type: 'gauge',
+          field_type: ES_FIELD_TYPES.DOUBLE,
+          dimension_fields: ['labels.environment', 'labels.team'],
+        },
+      ];
+      const result = parseMetricsResponse(response);
+      expect(result.metricItems[0].dimensionFields).toEqual([
+        { name: 'labels.environment' },
+        { name: 'labels.team' },
+      ]);
+      expect(result.allDimensions).toEqual([
+        { name: 'labels.environment' },
+        { name: 'labels.team' },
+      ]);
+    });
+  });
+
+  describe('with getFieldType', () => {
+    const getFieldType = (name: string): string | undefined => {
+      const types: Record<string, string> = {
+        'host.name': 'keyword',
+        'pod.name': 'keyword',
+        'container.id': 'keyword',
+      };
+      return types[name];
+    };
+
+    it('enriches dimensionFields and allDimensions with type from getFieldType', () => {
+      const response: MetricsESQLResponse[] = [
+        {
+          metric_name: 'cpu.usage',
+          data_stream: 'my-index',
+          unit: ['percent'],
+          metric_type: 'gauge',
+          field_type: ES_FIELD_TYPES.DOUBLE,
+          dimension_fields: ['host.name', 'pod.name'],
+        },
+      ];
+      const result = parseMetricsResponse(response, getFieldType);
+      expect(result.metricItems[0].dimensionFields).toEqual([
+        { name: 'host.name', type: 'keyword' },
+        { name: 'pod.name', type: 'keyword' },
+      ]);
+      expect(result.allDimensions).toEqual([
+        { name: 'host.name', type: 'keyword' },
+        { name: 'pod.name', type: 'keyword' },
+      ]);
+    });
+
+    it('omits type when getFieldType returns undefined for a dimension', () => {
+      const response: MetricsESQLResponse[] = [
+        {
+          metric_name: 'cpu.usage',
+          data_stream: 'my-index',
+          unit: ['percent'],
+          metric_type: 'gauge',
+          field_type: ES_FIELD_TYPES.DOUBLE,
+          dimension_fields: ['host.name', 'unknown.field'],
+        },
+      ];
+      const result = parseMetricsResponse(response, getFieldType);
+      expect(result.metricItems[0].dimensionFields).toEqual([
+        { name: 'host.name', type: 'keyword' },
+        { name: 'unknown.field' },
+      ]);
+      expect(result.allDimensions).toEqual([
+        { name: 'host.name', type: 'keyword' },
+        { name: 'unknown.field' },
+      ]);
+    });
+
+    it('enriches allDimensions across multiple metrics', () => {
+      const response: MetricsESQLResponse[] = [
+        {
+          metric_name: 'metric.a',
+          data_stream: 'ds-1',
+          unit: ['percent'],
+          metric_type: 'gauge',
+          field_type: ES_FIELD_TYPES.DOUBLE,
+          dimension_fields: ['host.name'],
+        },
+        {
+          metric_name: 'metric.b',
+          data_stream: 'ds-2',
+          unit: ['bytes'],
+          metric_type: 'counter',
+          field_type: ES_FIELD_TYPES.LONG,
+          dimension_fields: ['container.id'],
+        },
+      ];
+      const result = parseMetricsResponse(response, getFieldType);
+      expect(result.allDimensions).toEqual([
+        { name: 'host.name', type: 'keyword' },
+        { name: 'container.id', type: 'keyword' },
+      ]);
+    });
+  });
 });

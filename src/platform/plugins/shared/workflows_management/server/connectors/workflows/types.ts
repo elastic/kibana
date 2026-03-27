@@ -9,8 +9,8 @@
 
 import type { AlertHit } from '@kbn/alerting-plugin/server/types';
 import type { Logger } from '@kbn/core/server';
-import type { TriggerType } from '@kbn/workflows/spec/schema/triggers/trigger_schema';
-import type { z } from '@kbn/zod';
+import type { TriggerType } from '@kbn/workflows';
+import type { z } from '@kbn/zod/v4';
 import type { ExecutorParamsSchema } from './schema';
 
 export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;

@@ -10,11 +10,10 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   registerExtensionSteps,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { googleCalendarDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-google-calendar-connector';
 const CONNECTOR_ID = 'fake-gcal-connector-uuid';
@@ -23,9 +22,9 @@ describe('google calendar workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(googleCalendarDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.google_calendar', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 

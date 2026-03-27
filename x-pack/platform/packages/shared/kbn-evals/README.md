@@ -2,6 +2,16 @@
 
 `@kbn/evals` contains utilities for writing offline evaluation suites against LLM-based workflows in Kibana.
 
+## Vision Alignment
+
+This package follows the strategic direction outlined in the "Future of @kbn/evals" vision document. Contributors should be aware of these principles:
+
+- **Trace-first evaluators**: New evaluators should derive signals from OTel traces stored in Elasticsearch when possible. Use `createTraceBasedEvaluator` for non-functional metrics. For evaluators that currently operate on in-memory output, design interfaces that also accept `traceId` references for future API-based evaluation.
+- **Elastic-native path**: Build on ES/Kibana/OTel capabilities rather than introducing new external dependencies. Phoenix usage should remain behind `KBN_EVALS_EXECUTOR=phoenix` and not expand.
+- **Shared evaluation layer**: This package provides primitives (evaluator factories, data model, persistence, reporting). Solution-specific evaluators, datasets, and reporting belong in solution-owned evaluation suites, not here.
+- **Code-defined datasets**: Evaluation datasets should be defined in code, versioned, and reviewed alongside suites. Ad-hoc datasets must be explicitly decoupled from CI-contributing datasets.
+- **Ownership**: Framework is owned by the Observability AI team. General-purpose evaluators discovered in solution suites should be contributed upstream.
+
 This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages. It bundles three main entry-points:
 
 1. `createPlaywrightEvalsConfig` – helper that returns a ready-made Playwright config for evaluation suites. It automatically:
@@ -178,16 +188,32 @@ Eval suites can be triggered in PR CI by adding GitHub labels:
 
 Evals support optional PR labels for selecting which connector projects to run and (separately) which connector should be used for LLM-as-a-judge evaluators:
 
-- **Model selection**:
-  - `models:all` to opt into **all** available connector projects (LiteLLM + EIS)
+- **Model selection** (required — evals are skipped if no `models:*` label is present):
   - `models:<model-group>` to select one or more model groups
     - LiteLLM model groups typically look like `llm-gateway/<model>`
     - EIS model groups are expressed as `eis/<modelId>` (e.g. `models:eis/gpt-4.1`)
+  - `models:weekly-eis-models` — curated alias that expands to the same EIS model set used by the weekly evals pipeline
 - **Judge override**:
   - `models:judge:<connector-id>` to override the connector id used for LLM-as-a-judge evaluators in CI.
     This takes precedence over the Vault `evaluationConnectorId` fallback (env var overrides still apply in local runs).
 
-#### CI ops: create/update model + judge labels
+Model group aliases (like `models:weekly-eis-models`) are defined in `MODEL_GROUP_ALIASES` in `.buildkite/pipelines/evals/eval_pipeline.ts`.
+
+#### Automated label sync
+
+The `models:*` and `models:judge:*` labels are automatically synced from LiteLLM and EIS model discovery:
+
+- **Weekly**: The weekly LLM evals pipeline includes a label sync step that runs alongside the build.
+- **On demand**: Add the `ci:sync-model-labels` label to any PR to trigger label sync in PR CI.
+
+The sync step:
+1. Discovers available models from both **LiteLLM** (`GET /v1/models`) and **EIS** (via `discover_eis_models.js`)
+2. Creates/updates labels for all discovered models
+3. Marks stale labels as deprecated (renamed from `models:*` to `deprecated:models:*`)
+
+Deprecated labels are kept for historical record — they remain visible on past PRs. The `deprecated:` prefix moves them out of the `models:` autocomplete namespace so they don't clutter label suggestions.
+
+#### CI ops: create/update model + judge labels manually
 
 The helper script `scripts/create_models_labels.sh` is idempotent (safe to re-run) and supports targeting a specific repo.
 
@@ -195,6 +221,12 @@ Update **all** model + judge labels (LiteLLM + EIS) using default discovery sour
 
 ```bash
 ./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels
+```
+
+To also deprecate stale labels in one step:
+
+```bash
+./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels --prune
 ```
 
 If you need to run only a subset:
@@ -353,10 +385,17 @@ node scripts/evals run --suite <suite-id> --evaluation-connector-id <connector-i
 If you are _not_ using Scout to start Kibana (e.g. you are targeting your own dev Kibana), configure the HTTP exporter in `kibana.dev.yml`:
 
 ```yaml
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+telemetry.tracing.sample_rate: 1
 telemetry.tracing.exporters:
   - http:
       url: 'http://localhost:4318/v1/traces'
 ```
+
+> **Note:** `elastic.apm.active: false` and `elastic.apm.contextPropagationOnly: false` are required when enabling OpenTelemetry tracing — Elastic APM and OTel tracing cannot run simultaneously. The Scout `evals_tracing` config set handles this automatically, but when configuring `kibana.dev.yml` directly you must set both.
 
 If you want EDOT to store traces in a specific Elasticsearch cluster, override via env:
 
@@ -364,7 +403,7 @@ If you want EDOT to store traces in a specific Elasticsearch cluster, override v
 ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
 ```
 
-If you want to view traces in the Phoenix UI, configure a Phoenix exporter in `kibana.dev.yml`:
+If you want to view traces in the Phoenix UI, add a Phoenix exporter to the `telemetry.tracing.exporters` list in `kibana.dev.yml` (alongside the APM and telemetry flags shown above):
 
 ```yaml
 telemetry.tracing.exporters:
@@ -373,6 +412,8 @@ telemetry.tracing.exporters:
       public_url: 'https://<my-phoenix-host>'
       project_name: '<my-name>'
       api_key: '<my-api-key>'
+  - http:
+      url: 'http://localhost:4318/v1/traces'
 ```
 
 This is **optional** for the default (in-Kibana) executor. If you only care about trace-based evaluators stored in Elasticsearch, you can just run the EDOT collector to capture traces locally (see `src/platform/packages/shared/kbn-edot-collector/README.md`).
@@ -417,10 +458,14 @@ By default, these evaluators query traces from the same Elasticsearch cluster as
 
 #### Prerequisites
 
-To enable trace-based evaluators, configure the HTTP exporter in `kibana.dev.yml` to export traces via OpenTelemetry.
-You can also include the Phoenix exporter if you want traces visible in Phoenix (optional):
+To enable trace-based evaluators, configure tracing in `kibana.dev.yml`. You must also disable Elastic APM (it conflicts with OpenTelemetry tracing):
 
 ```yaml
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+telemetry.tracing.sample_rate: 1
 telemetry.tracing.exporters:
   - phoenix:
       base_url: 'https://<my-phoenix-host>'
@@ -430,6 +475,8 @@ telemetry.tracing.exporters:
   - http:
       url: 'http://localhost:4318/v1/traces'
 ```
+
+The Phoenix exporter is optional - include it if you want traces visible in Phoenix.
 
 #### Start EDOT Collector
 
