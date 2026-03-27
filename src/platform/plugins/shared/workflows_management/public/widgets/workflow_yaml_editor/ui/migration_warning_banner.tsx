@@ -92,16 +92,20 @@ export const MigrationWarningBanner: React.FC<MigrationWarningBannerProps> = ({
         <ul css={css({ listStyle: 'none', padding: 0, margin: 0 })}>
           {Array.from(matchedLines.entries()).map(([lineNumber, hints]) =>
             hints.map((hint) => (
-              <li key={`${lineNumber}-${hint.id}`} css={css({ marginBottom: '2px' })}>
+              <li key={`${lineNumber}-${hint.id}`} css={css({ marginBottom: euiTheme.size.xxs })}>
                 {hint.name}
                 <EuiButtonEmpty
                   size="xs"
                   flush="left"
                   onClick={handleLineClick(lineNumber)}
-                  css={css({ marginLeft: '4px', minInlineSize: 'auto', height: 'auto' })}
+                  css={css({
+                    marginLeft: euiTheme.size.xs,
+                    minInlineSize: 'auto',
+                    height: 'auto',
+                  })}
                   data-test-subj={`migrationWarningBannerLine-${lineNumber}`}
                 >
-                  L{lineNumber}
+                  {`L${lineNumber}`}
                 </EuiButtonEmpty>
               </li>
             ))
