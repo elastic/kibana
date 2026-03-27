@@ -416,9 +416,7 @@ export class AlertingPlugin {
       this.config
     );
 
-    uiamProvisioningEvents.forEach((eventConfig) =>
-      core.analytics.registerEventType(eventConfig)
-    );
+    uiamProvisioningEvents.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
     this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
       logger: this.logger,

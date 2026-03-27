@@ -1344,17 +1344,14 @@ describe('UiamApiKeyProvisioningTask', () => {
         });
         await runner.run();
 
-        expect(analytics.reportEvent).toHaveBeenCalledWith(
-          UIAM_PROVISIONING_RUN_EVENT.eventType,
-          {
-            total: 3,
-            completed: 2,
-            failed: 0,
-            skipped: 1,
-            has_more_to_provision: false,
-            run_number: 1,
-          }
-        );
+        expect(analytics.reportEvent).toHaveBeenCalledWith(UIAM_PROVISIONING_RUN_EVENT.eventType, {
+          total: 3,
+          completed: 2,
+          failed: 0,
+          skipped: 1,
+          has_more_to_provision: false,
+          run_number: 1,
+        });
       });
 
       it('reports has_more_to_provision: true when there are more batches', async () => {
@@ -1430,17 +1427,14 @@ describe('UiamApiKeyProvisioningTask', () => {
         });
         await runner.run();
 
-        expect(analytics.reportEvent).toHaveBeenCalledWith(
-          UIAM_PROVISIONING_RUN_EVENT.eventType,
-          {
-            total: 0,
-            completed: 0,
-            failed: 0,
-            skipped: 0,
-            has_more_to_provision: false,
-            run_number: 1,
-          }
-        );
+        expect(analytics.reportEvent).toHaveBeenCalledWith(UIAM_PROVISIONING_RUN_EVENT.eventType, {
+          total: 0,
+          completed: 0,
+          failed: 0,
+          skipped: 0,
+          has_more_to_provision: false,
+          run_number: 1,
+        });
       });
 
       it('does not throw when analytics.reportEvent fails', async () => {
