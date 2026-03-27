@@ -55,3 +55,17 @@ export const optInForPerPolicyEndpointExceptions = async (kbnClient: KbnClient):
     },
   });
 };
+
+export const disablePerPolicyEndpointExceptions = async (kbnClient: KbnClient): Promise<void> => {
+  await kbnClient.savedObjects.create({
+    type: REFERENCE_DATA_SAVED_OBJECT_TYPE,
+    id: REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus,
+    attributes: {
+      id: REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus,
+      owner: 'EDR',
+      type: 'OPT_IN_STATUS',
+      metadata: { status: false, reason: undefined },
+    } as ReferenceDataSavedObject<OptInStatusMetadata>,
+    overwrite: true,
+  });
+};

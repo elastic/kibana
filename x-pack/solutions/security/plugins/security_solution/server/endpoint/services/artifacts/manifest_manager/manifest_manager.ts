@@ -236,6 +236,7 @@ export class ManifestManager {
     if (
       await getIsEndpointExceptionsPerPolicyEnabled(
         this.savedObjectsClientFactory.createInternalScopedSoClient({ readonly: false }),
+        this.experimentalFeatures,
         this.logger
       )
     ) {
@@ -346,6 +347,7 @@ export class ManifestManager {
     if (
       await getIsEndpointExceptionsPerPolicyEnabled(
         this.savedObjectsClientFactory.createInternalScopedSoClient({ readonly: false }),
+        this.experimentalFeatures,
         this.logger
       )
     ) {

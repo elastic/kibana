@@ -20,7 +20,7 @@ import {
   waitForAlertsToBePresent,
 } from '@kbn/detections-response-ftr-services';
 import {
-  deleteEndpointExceptionsPerPolicyOptInSO,
+  disablePerPolicyEndpointExceptions,
   optInForPerPolicyEndpointExceptions,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/per_policy_opt_in';
 import { createRuleWithExceptionEntries } from '../../../../utils';
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/agent'
       );
 
-      await deleteEndpointExceptionsPerPolicyOptInSO(kibanaServer);
+      await disablePerPolicyEndpointExceptions(kibanaServer);
     });
 
     beforeEach(async () => {

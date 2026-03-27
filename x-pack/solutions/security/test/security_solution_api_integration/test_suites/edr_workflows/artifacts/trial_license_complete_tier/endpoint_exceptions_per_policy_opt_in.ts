@@ -10,8 +10,11 @@ import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import { ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   deleteEndpointExceptionsPerPolicyOptInSO,
+  disablePerPolicyEndpointExceptions,
   findEndpointExceptionsPerPolicyOptInSO,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/per_policy_opt_in';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/endpoint_exceptions/constants';
 import type { CustomRole } from '../../../../config/services/types';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
@@ -19,6 +22,7 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
   const utils = getService('securitySolutionUtils');
   const config = getService('config');
   const kibanaServer = getService('kibanaServer');
+  const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
   const isServerless = config.get('serverless');
   const superuserRole = isServerless ? 'admin' : 'elastic';
@@ -37,7 +41,7 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
 
   describe('@ess @serverless @skipInServerlessMKI Endpoint Exceptions Per Policy Opt-In API', function () {
     beforeEach(async () => {
-      await deleteEndpointExceptionsPerPolicyOptInSO(kibanaServer);
+      await disablePerPolicyEndpointExceptions(kibanaServer);
     });
 
     if (IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED) {
@@ -79,7 +83,7 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
               const initialOptInStatusSO = await findEndpointExceptionsPerPolicyOptInSO(
                 kibanaServer
               );
-              expect(initialOptInStatusSO).to.be(undefined);
+              expect(initialOptInStatusSO?.attributes.metadata.status).to.be(false);
 
               await superuser
                 .post(ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE)
@@ -94,7 +98,7 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
               const initialOptInStatusSO = await findEndpointExceptionsPerPolicyOptInSO(
                 kibanaServer
               );
-              expect(initialOptInStatusSO).to.be(undefined);
+              expect(initialOptInStatusSO?.attributes.metadata.status).to.be(false);
 
               await superuser
                 .post(ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE)
@@ -136,13 +140,35 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
           });
 
           describe('functionality', () => {
-            it('should return `false` opt-in status when it has not been set', async () => {
+            it('should return `false` opt-in status for upgraded deployments', async () => {
+              // Simulate upgraded deployment by ensuring the SO does not exist and creating
+              // the Endpoint exceptions list as this is the base for deciding the default opt-in status
+              await endpointArtifactTestResources.ensureListExists(
+                ENDPOINT_EXCEPTIONS_LIST_DEFINITION
+              );
+
               const response = await superuser
                 .get(ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE)
                 .set(HEADERS)
                 .expect(200);
 
-              expect(response.body.status).to.be(false);
+              expect(response.body).to.eql({ status: false });
+            });
+
+            it('should return `true` opt-in status when it is a new deployment', async () => {
+              // Simulate new deployment by ensuring the SO does not exist and deleting
+              await deleteEndpointExceptionsPerPolicyOptInSO(kibanaServer);
+              // the Endpoint exceptions list as this is the base for deciding the default opt-in status
+              await endpointArtifactTestResources.deleteList(
+                ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+              );
+
+              const response = await superuser
+                .get(ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE)
+                .set(HEADERS)
+                .expect(200);
+
+              expect(response.body).to.eql({ status: true, reason: 'newDeployment' });
             });
 
             it('should return `true` opt-in status when it has been set', async () => {
@@ -156,7 +182,7 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
                 .set(HEADERS)
                 .expect(200);
 
-              expect(response.body.status).to.be(true);
+              expect(response.body).to.eql({ status: true, reason: 'userOptedIn' });
             });
           });
         });

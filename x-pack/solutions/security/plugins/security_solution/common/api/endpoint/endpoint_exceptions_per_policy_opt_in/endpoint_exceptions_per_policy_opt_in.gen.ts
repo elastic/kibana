@@ -21,4 +21,5 @@ export type GetEndpointExceptionsPerPolicyOptInResponse = z.infer<
 >;
 export const GetEndpointExceptionsPerPolicyOptInResponse = z.object({
   status: z.boolean(),
+  reason: z.enum(['newDeployment', 'userOptedIn']).optional(),
 });

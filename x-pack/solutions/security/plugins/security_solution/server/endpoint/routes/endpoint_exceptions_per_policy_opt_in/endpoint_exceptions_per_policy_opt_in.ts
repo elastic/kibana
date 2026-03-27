@@ -32,7 +32,7 @@ export const getOptInToPerPolicyEndpointExceptionsPOSTHandler = (
         REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
       );
 
-      currentOptInStatus.metadata.status = true;
+      currentOptInStatus.metadata = { status: true, reason: 'userOptedIn' };
 
       await referenceDataClient.update<OptInStatusMetadata>(
         REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus,
@@ -61,9 +61,7 @@ export const getOptInToPerPolicyEndpointExceptionsGETHandler = (
         REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
       );
 
-      const body: GetEndpointExceptionsPerPolicyOptInResponse = {
-        status: currentOptInStatus.metadata.status,
-      };
+      const body: GetEndpointExceptionsPerPolicyOptInResponse = { ...currentOptInStatus.metadata };
 
       return res.ok({ body });
     } catch (err) {

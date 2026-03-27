@@ -498,6 +498,7 @@ export class EndpointAppContextService {
 
     return new ReferenceDataClient(
       this.savedObjects.createInternalScopedSoClient({ readonly: false }),
+      this.experimentalFeatures,
       this.createLogger('ReferenceDataClient')
     );
   }

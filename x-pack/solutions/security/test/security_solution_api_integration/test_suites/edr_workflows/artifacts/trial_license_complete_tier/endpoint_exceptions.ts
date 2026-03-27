@@ -23,7 +23,7 @@ import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
 import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 import {
-  deleteEndpointExceptionsPerPolicyOptInSO,
+  disablePerPolicyEndpointExceptions,
   optInForPerPolicyEndpointExceptions,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/per_policy_opt_in';
 import type { CustomRole } from '../../../../config/services/types';
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       if (IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED) {
-        await deleteEndpointExceptionsPerPolicyOptInSO(kibanaServer);
+        await disablePerPolicyEndpointExceptions(kibanaServer);
       }
     });
 

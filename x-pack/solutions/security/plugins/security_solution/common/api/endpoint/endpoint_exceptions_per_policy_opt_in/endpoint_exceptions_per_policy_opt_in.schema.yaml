@@ -22,6 +22,9 @@ paths:
                 properties:
                   status:
                     type: boolean
+                  reason:
+                    type: string
+                    enum: [newDeployment, userOptedIn]
 
     post:
       summary: Opt-in to endpoint exceptions per policy

@@ -37,7 +37,7 @@ import { ensureSpaceIdExists } from '@kbn/security-solution-plugin/scripts/endpo
 import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
-  deleteEndpointExceptionsPerPolicyOptInSO,
+  disablePerPolicyEndpointExceptions,
   optInForPerPolicyEndpointExceptions,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/per_policy_opt_in';
 import type { CustomRole } from '../../../../config/services/types';
@@ -196,7 +196,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
             });
 
             after(async () => {
-              await deleteEndpointExceptionsPerPolicyOptInSO(kbnServer);
+              await disablePerPolicyEndpointExceptions(kbnServer);
             });
 
             describe('when checking privileges', () => {
@@ -1426,7 +1426,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
           ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
         );
 
-        await deleteEndpointExceptionsPerPolicyOptInSO(kbnServer);
+        await disablePerPolicyEndpointExceptions(kbnServer);
       });
 
       beforeEach(async () => {
@@ -1476,7 +1476,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
         }
       });
 
-      it('should add global artifact tag if it is missing is missing', async () => {
+      it('should add global artifact tag if it is missing', async () => {
         await endpointOpsAnalystSupertest
           .post(`${EXCEPTION_LIST_URL}/_import`)
           .set('kbn-xsrf', 'true')

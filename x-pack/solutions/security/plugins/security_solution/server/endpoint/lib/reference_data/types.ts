@@ -55,4 +55,5 @@ export interface OrphanResponseActionsMetadata {
 
 export interface OptInStatusMetadata {
   status: boolean;
+  reason?: 'newDeployment' | 'userOptedIn';
 }

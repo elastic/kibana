@@ -162,6 +162,10 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
+import {
+  initializeEndpointExceptionsPerPolicyOptInStatus,
+  REFERENCE_DATA_SAVED_OBJECT_TYPE,
+} from './endpoint/lib/reference_data';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -730,6 +734,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
     const { config, logger, productFeaturesService } = this;
+
+    initializeEndpointExceptionsPerPolicyOptInStatus(
+      new SavedObjectsClient(
+        core.savedObjects.createInternalRepository([REFERENCE_DATA_SAVED_OBJECT_TYPE])
+      ),
+      config.experimentalFeatures,
+      logger
+    );
 
     this.ruleMonitoringService.start(core, plugins);
 

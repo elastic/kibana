@@ -8,6 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
+import type { ExperimentalFeatures } from '../../../../common';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type {
   ReferenceDataClientInterface,
@@ -24,6 +25,7 @@ import { catchAndWrapError, wrapErrorIfNeeded } from '../../utils';
 export class ReferenceDataClient implements ReferenceDataClientInterface {
   constructor(
     protected readonly soClient: SavedObjectsClientContract,
+    protected readonly experimentalFeatures: ExperimentalFeatures,
     protected readonly logger: Logger
   ) {}
 
@@ -71,7 +73,10 @@ export class ReferenceDataClient implements ReferenceDataClientInterface {
           if (REF_DATA_KEY_INITIAL_VALUE[refDataKey]) {
             return this.create<TMeta>(
               refDataKey,
-              REF_DATA_KEY_INITIAL_VALUE[refDataKey]() as ReferenceDataSavedObject<TMeta>
+              (await REF_DATA_KEY_INITIAL_VALUE[refDataKey](
+                soClient,
+                this.experimentalFeatures
+              )) as ReferenceDataSavedObject<TMeta>
             );
           }
 
