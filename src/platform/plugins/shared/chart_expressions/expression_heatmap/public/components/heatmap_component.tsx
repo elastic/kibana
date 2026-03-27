@@ -116,20 +116,23 @@ export function computeMinIntervalFromData(
   }
 
   // Extract numeric timestamps (already converted from date strings)
-  const timestamps = Array.from(
-    new Set(
-      data.map((row) => row[xAccessor]).filter((val): val is number => typeof val === 'number')
-    )
-  ).sort((a, b) => a - b);
+  const timestamps = data.reduce((acc, curr) => {
+    if (curr[xAccessor] !== null && typeof curr[xAccessor] === 'number') {
+      acc.add(curr[xAccessor]);
+    }
+    return acc;
+  }, new Set<number>());
 
-  if (timestamps.length < 2) {
+  const sortedTimestamps = Array.from(timestamps).sort((a, b) => a - b);
+
+  if (sortedTimestamps.length < 2) {
     return undefined;
   }
 
   // Compute minimum interval between adjacent values
   let minInterval = Number.MAX_SAFE_INTEGER;
-  for (let i = 1; i < timestamps.length; i++) {
-    const interval = Math.abs(timestamps[i] - timestamps[i - 1]);
+  for (let i = 1; i < sortedTimestamps.length; i++) {
+    const interval = Math.abs(sortedTimestamps[i] - sortedTimestamps[i - 1]);
     if (interval > 0) {
       minInterval = Math.min(minInterval, interval);
     }

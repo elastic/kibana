@@ -21,7 +21,11 @@ import {
   axisTitleSchemaProps,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import { legendSizeSchema, mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps } from './shared';
+import {
+  legendSizeSchema,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
+  xScaleSchema,
+} from './shared';
 import { positionSchema } from '../alignments';
 import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
@@ -50,16 +54,6 @@ const simpleLabelsSchema = schema.object(omit(labelsSchemaProps, 'orientation'))
 const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
   meta: { description: 'Axis sort order; omit or use undefined for no sorting' },
 });
-
-const xScaleSchema = schema.maybe(
-  schema.oneOf([schema.literal('ordinal'), schema.literal('temporal'), schema.literal('linear')], {
-    meta: {
-      // IMPORTANT: This description guides LLM agents - modify with caution and test agent behavior after changes
-      description:
-        "X-axis scale type for ES|QL charts. Use 'temporal' for timestamp/date fields (e.g., @timestamp, DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
-    },
-  })
-);
 
 const heatmapSharedStateSchema = {
   type: schema.literal('heatmap'),

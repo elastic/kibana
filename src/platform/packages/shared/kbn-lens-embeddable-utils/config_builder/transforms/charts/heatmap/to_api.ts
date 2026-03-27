@@ -15,6 +15,7 @@ import {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 
+import type { XScaleSchemaType } from '../../../schema/charts/shared';
 import { DEFAULT_LAYER_ID } from '../../../constants';
 import {
   getDatasourceLayers,
@@ -54,7 +55,7 @@ function getOrientationFromRotation(rotation: number): 'angled' | 'vertical' | '
 
 function getGridConfigProps(
   gridConfig: HeatmapVisualizationState['gridConfig'],
-  xAxisScale?: 'temporal' | 'linear' | 'ordinal'
+  xAxisScale?: XScaleSchemaType
 ): HeatmapState['axis'] {
   return {
     x: {
@@ -95,7 +96,7 @@ function reverseBuildVisualizationState(
     throw new Error('Value accessor is missing in the visualization state');
   }
 
-  let xAxisScale: 'temporal' | 'linear' | 'ordinal' | undefined;
+  let xAxisScale: XScaleSchemaType | undefined;
   if (isTextBasedLayer(layer) && visualization.xAccessor) {
     const xColumn = layer.columns.find((c) => c.columnId === visualization.xAccessor);
     xAxisScale = getScaleTypeFromColumnType(xColumn?.meta?.type);
