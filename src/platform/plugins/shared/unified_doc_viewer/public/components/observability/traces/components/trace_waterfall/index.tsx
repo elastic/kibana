@@ -180,7 +180,11 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   //
   // See: https://github.com/elastic/eui/blob/v113.3.0/packages/eui/src/components/flyout/manager/flyout_managed.tsx
   const pendingCloseRef = useRef<'exit' | 'child' | null>(null);
-  // Dummy state update to force a re-render so the effect below can fire.
+  // We have special conditions here where we want to force an effect to fire as
+  // result of a callback. Because we're relying on a ref to handle this state (which
+  // cannot trigger a re-render, calling a setState will force the component to render.
+  // Without doing this, when the user exits the flyout using the back button, it won't
+  // end up rendering, and the traces flyout will never open.
   const [, forceRender] = useState(0);
 
   useEffect(() => {
