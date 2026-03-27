@@ -9,7 +9,7 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExecutionStatus, isTriggerType } from '@kbn/workflows';
+import { ExecutionStatus, isEventDrivenWorkflowTriggerSource } from '@kbn/workflows';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { WorkflowsMeteringService } from '../metering';
@@ -52,6 +52,7 @@ export async function runWorkflow({
     workflowTaskManager,
     workflowExecutionRepository,
     esClient,
+    telemetryClient,
   } = await setupDependencies(
     workflowRunId,
     spaceId,
@@ -71,18 +72,29 @@ export async function runWorkflow({
     );
     if (execution) {
       const triggeredBy = execution.triggeredBy;
-      const isEventDriven = triggeredBy != null && !isTriggerType(triggeredBy);
+      const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
       if (isEventDriven && !isEventDrivenExecutionEnabled()) {
+        const cancelledAt = new Date().toISOString();
         await workflowExecutionRepository.updateWorkflowExecution({
           id: workflowRunId,
           status: ExecutionStatus.SKIPPED,
           cancellationReason: 'Event-driven execution disabled by operator',
-          cancelledAt: new Date().toISOString(),
+          cancelledAt,
           cancelledBy: 'system',
         });
         logger.debug(
           `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`
         );
+        telemetryClient.reportEventDrivenExecutionSuppressed({
+          workflowExecution: {
+            ...execution,
+            status: ExecutionStatus.SKIPPED,
+            cancellationReason: 'Event-driven execution disabled by operator',
+            cancelledAt,
+            cancelledBy: 'system',
+          },
+          logTriggerEventsEnabled: workflowsExecutionEngine?.isLogTriggerEventsEnabled() ?? false,
+        });
         return;
       }
     }
