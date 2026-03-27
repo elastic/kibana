@@ -116,22 +116,20 @@ export function SettingsPanel() {
         </PanelBodySection>
       </PanelBody>
       <PanelFooter>
-        <EuiFlexGroup alignItems="center">
-          <EuiBetaBadge label="Tech preview" color="hollow" iconType="flask" />
-          <EuiText size="xs" color="subdued" component="p">
-            <FormattedMessage
-              id="sharedUXPackages.dateRangePicker.settingsPanel.technicalPreviewNotice"
-              defaultMessage="This time picker is in a technical preview. You can revert to the legacy picker in {advancedSettingsLink}."
-              values={{
-                advancedSettingsLink: (
-                  <EuiLink href={prependBasePath(ADVANCED_SETTINGS_URL_LEGACY_PICKER)}>
-                    {settingsPanelTexts.advancedSettingsLink}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-        </EuiFlexGroup>
+        <EuiBetaBadge label="Tech preview" color="hollow" iconType="flask" size="s" />
+        <EuiText size="xs" color="subdued" component="p">
+          <FormattedMessage
+            id="sharedUXPackages.dateRangePicker.settingsPanel.technicalPreviewNotice"
+            defaultMessage="This time picker is in a technical preview. You can revert to the legacy picker in {advancedSettingsLink}."
+            values={{
+              advancedSettingsLink: (
+                <EuiLink href={prependBasePath(ADVANCED_SETTINGS_URL_LEGACY_PICKER)}>
+                  {settingsPanelTexts.advancedSettingsLink}!!
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
       </PanelFooter>
     </PanelContainer>
   );
