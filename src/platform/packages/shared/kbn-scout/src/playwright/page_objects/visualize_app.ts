@@ -117,6 +117,19 @@ export class VisualizeApp {
     await this.confirmSave();
   }
 
+  async selectNoDashboard() {
+    await this.page.locator('label[for="add-to-library-option"]').click();
+  }
+
+  async saveToLibrary(visName: string) {
+    await this.fillVisTitle(visName);
+    await this.selectNoDashboard();
+    const addToLibraryCheckbox = this.page.locator('input#add-to-library-checkbox');
+    await expect(addToLibraryCheckbox).toBeChecked();
+    await expect(addToLibraryCheckbox).toBeDisabled();
+    await this.confirmSave();
+  }
+
   async createAggBasedVisualization(subType: string, dataSource: string) {
     await this.goto();
     await this.openNewVisualizationWizard();
@@ -129,6 +142,13 @@ export class VisualizeApp {
     await this.openNewVisualizationWizard();
     await this.clickVisType('vega');
     await this.waitForVisualizationLoaded();
+  }
+
+  async createMapVisualization() {
+    await this.goto();
+    await this.openNewVisualizationWizard();
+    await this.clickVisType('maps');
+    await expect(this.page.testSubj.locator('breadcrumb first')).toHaveText('Maps');
   }
 
   async createTSVBVisualization() {
