@@ -48,18 +48,25 @@ StreamsAppPageTemplate.Body = ({
 }: EuiPageSectionProps & { noPadding?: boolean; grow?: boolean }) => (
   <EuiPageTemplate.Section
     grow={grow}
+    restrictWidth={false}
     className={css`
       overflow-y: auto;
       min-height: 0;
+      width: 100% !important;
+      max-width: 100% !important;
+      max-inline-size: 100% !important;
       ${noPadding ? 'padding: 0px;' : ''}
     `}
     contentProps={{
-      className: css`
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        ${noPadding ? 'padding: 0px;' : ''}
-      `,
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        width: '100%',
+        maxWidth: '100%',
+        maxInlineSize: '100%',
+        ...(noPadding ? { padding: 0 } : {}),
+      },
     }}
     {...props}
   />

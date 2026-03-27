@@ -290,6 +290,7 @@ export function DataSourcesView() {
       <StreamsAppPageTemplate.Body grow={false}>
         {!hasIngestedMockAwsData ? (
           <EuiEmptyPrompt
+            css={{ maxInlineSize: '100% !important' }}
             iconType="database"
             title={
               <h3>
