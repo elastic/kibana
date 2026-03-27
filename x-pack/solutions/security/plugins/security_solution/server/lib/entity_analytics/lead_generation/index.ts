@@ -7,8 +7,48 @@
 
 export { createLeadIndexService, type LeadIndexService } from './indices';
 export {
-  ObservationModuleRegistry,
-  type ObservationModule,
-  type ObservationModuleConfig,
-  type ObservationEntity,
+  createLeadDataClient,
+  type LeadDataClient,
+  type LeadDataClientDeps,
+  type CreateLeadsParams,
+} from './lead_data_client';
+export {
+  generateLeadContentHash,
+  generateLeadEntityHash,
+  deduplicateLeads,
+  type DeduplicationResult,
+} from './deduplication';
+export { ObservationModuleRegistry, type ObservationEntity } from './observation_modules';
+export { createLeadGenerationEngine } from './engine';
+export {
+  createRiskScoreModule,
+  createTemporalStateModule,
+  createBehavioralAnalysisModule,
+  createAlertAnalysisModule,
 } from './observation_modules';
+export {
+  createEntityRetriever,
+  entityRecordToLeadEntity,
+  type EntityRetriever,
+  type EntityRetrieverDeps,
+} from './entity_retriever';
+export {
+  createEntityEnricher,
+  type EntityEnricher,
+  type EntityEnricherDeps,
+  type EnrichedLeadEntity,
+  type EntityEnrichment,
+  type RiskEnrichment,
+  type AlertEnrichment,
+} from './entity_enricher';
+export type {
+  Lead,
+  LeadEntity,
+  LeadGenerationEngineConfig,
+  LeadStaleness,
+  Observation,
+  ObservationModule,
+  ObservationModuleConfig,
+  ObservationSeverity,
+} from './types';
+export { DEFAULT_ENGINE_CONFIG } from './types';

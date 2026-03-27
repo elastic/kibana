@@ -43,5 +43,8 @@ export const generateLeadIndexMappings = (): MappingTypeMapping => ({
     },
     execution_uuid: { type: 'keyword' },
     source_type: { type: 'keyword' },
+    content_hash: { type: 'keyword' },
+    entity_hash: { type: 'keyword' },
+    version: { type: 'integer' },
   },
 });
