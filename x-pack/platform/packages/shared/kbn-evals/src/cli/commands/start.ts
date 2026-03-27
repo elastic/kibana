@@ -421,6 +421,9 @@ export const startCmd: Command<void> = {
           {
             connectorsHash: connectorsHash(),
             serverConfigSet,
+            env: profileEnvOverrides.GCS_CREDENTIALS
+              ? { GCS_CREDENTIALS: profileEnvOverrides.GCS_CREDENTIALS }
+              : undefined,
           }
         );
 

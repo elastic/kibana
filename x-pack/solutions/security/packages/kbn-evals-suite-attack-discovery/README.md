@@ -97,7 +97,7 @@ restoring an Elasticsearch snapshot from GCS before running:
 
 ```bash
 ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BUCKET=security-ai-datasets \
-ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BASE_PATH=attack-discovery/alerts/2026-03-01 \
+ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BASE_PATH=attack-discovery/oh-my-malware/2026-03-26 \
 ATTACK_DISCOVERY_ALERTS_SNAPSHOT_NAME=alerts-snapshot \
   node scripts/evals run --suite attack-discovery --grep "searchAlerts"
 ```

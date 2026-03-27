@@ -15,12 +15,26 @@ interface VaultConfig {
   evaluationsEs?: { url?: string; apiKey?: string };
   tracingEs?: { url?: string; apiKey?: string };
   tracingExporters?: unknown;
+  gcsDatasetAccessCredentials?: unknown;
 }
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
 
 const isPlaceholder = (value: string): boolean => value.includes('REPLACE_ME');
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const maybeSetGcsCredentialsEnv = (cfg: VaultConfig | undefined, next: Record<string, string>) => {
+  const creds = cfg?.gcsDatasetAccessCredentials;
+  if (!isRecord(creds)) return;
+
+  const serialized = JSON.stringify(creds);
+  if (!isNonEmptyString(serialized) || isPlaceholder(serialized)) return;
+
+  next.GCS_CREDENTIALS = serialized;
+};
 
 export const resolveVaultConfigPath = (repoRoot: string, profile?: string): string => {
   const normalized = profile && profile.trim().length > 0 ? profile.trim() : undefined;
@@ -46,15 +60,18 @@ export const envFromDatasetsProfile = (
   profile?: string
 ): Record<string, string> => {
   const cfg = readVaultConfig(repoRoot, profile);
-  if (!cfg?.evaluationsKbn) return {};
-
   const next: Record<string, string> = {};
-  if (isNonEmptyString(cfg.evaluationsKbn.url) && !isPlaceholder(cfg.evaluationsKbn.url)) {
-    next.EVALUATIONS_KBN_URL = cfg.evaluationsKbn.url;
+
+  if (cfg?.evaluationsKbn) {
+    if (isNonEmptyString(cfg.evaluationsKbn.url) && !isPlaceholder(cfg.evaluationsKbn.url)) {
+      next.EVALUATIONS_KBN_URL = cfg.evaluationsKbn.url;
+    }
+    if (isNonEmptyString(cfg.evaluationsKbn.apiKey) && !isPlaceholder(cfg.evaluationsKbn.apiKey)) {
+      next.EVALUATIONS_KBN_API_KEY = cfg.evaluationsKbn.apiKey;
+    }
   }
-  if (isNonEmptyString(cfg.evaluationsKbn.apiKey) && !isPlaceholder(cfg.evaluationsKbn.apiKey)) {
-    next.EVALUATIONS_KBN_API_KEY = cfg.evaluationsKbn.apiKey;
-  }
+
+  maybeSetGcsCredentialsEnv(cfg, next);
   return next;
 };
 
@@ -92,5 +109,6 @@ export const envFromExportProfile = (
     next.TRACING_EXPORTERS = JSON.stringify([{ http: { url: 'http://localhost:4318/v1/traces' } }]);
   }
 
+  maybeSetGcsCredentialsEnv(cfg, next);
   return next;
 };

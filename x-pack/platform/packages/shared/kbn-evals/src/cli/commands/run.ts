@@ -40,7 +40,14 @@ const isExportProfileImplicitLocal = (flagsReader: any, exportProfile?: string):
 
 const formatEnvPrefix = (overrides: Record<string, string>) =>
   Object.entries(overrides)
-    .map(([key, value]) => `${key}=${key.includes('API_KEY') ? '[redacted]' : value}`)
+    .map(([key, value]) => {
+      const isSensitive =
+        key.includes('API_KEY') ||
+        key.includes('CREDENTIALS') ||
+        key.includes('TOKEN') ||
+        key === 'GCS_CREDENTIALS';
+      return `${key}=${isSensitive ? '[redacted]' : value}`;
+    })
     .join(' ');
 
 const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {

@@ -16,6 +16,53 @@ export interface AlertsSnapshotConfig {
 }
 
 const INDEX_REFRESH_WAIT_MS = 3_000;
+const ALERT_INDICES_TO_RESTORE_AND_OVERWRITE = [
+  '.internal.alerts-security.alerts-default-*',
+  'insights-alerts-*',
+] as const;
+
+const resolveIndicesByPattern = async (esClient: Client, pattern: string): Promise<string[]> => {
+  try {
+    const response = (await esClient.indices.get({
+      index: pattern,
+      expand_wildcards: 'all',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    })) as unknown as Record<string, unknown>;
+
+    // indices.get returns an object keyed by index name.
+    return Object.keys(response);
+  } catch {
+    return [];
+  }
+};
+
+const deleteExistingAlertIndices = async (esClient: Client, log: ToolingLog): Promise<void> => {
+  log.info('Resolving existing alert indices to delete before restore...');
+  const resolvedToDelete = (
+    await Promise.all(
+      ALERT_INDICES_TO_RESTORE_AND_OVERWRITE.map((pattern) =>
+        resolveIndicesByPattern(esClient, pattern)
+      )
+    )
+  ).flat();
+  const uniqueToDelete = [...new Set(resolvedToDelete)];
+
+  if (uniqueToDelete.length === 0) {
+    log.info('No existing alert indices matched for deletion');
+    return;
+  }
+
+  log.info(`Deleting ${uniqueToDelete.length} existing indices before restore`);
+  await esClient.indices.delete({
+    index: uniqueToDelete,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+  });
+};
+
+const isOpenIndexConflictError = (errors: string[]): boolean =>
+  errors.some((e) => e.includes('open index with same name already exists in the cluster'));
 
 /**
  * Reads snapshot config from environment variables.
@@ -58,12 +105,36 @@ export const restoreAlertsSnapshot = async ({
     }`
   );
 
-  const result = await restoreSnapshot({
+  // Scout's Kibana boot will eagerly create the Security Solution alert index, which causes
+  // snapshot restore conflicts. For repeatability, we delete any matching indices first.
+  // This runs in a disposable eval cluster, so this is safe and expected.
+  try {
+    await deleteExistingAlertIndices(esClient, log);
+  } catch (err) {
+    log.warning(
+      `Failed to delete existing alert indices (continuing with restore attempt): ${String(err)}`
+    );
+  }
+
+  let result = await restoreSnapshot({
     esClient,
     log,
     repository,
     snapshotName: config.snapshotName,
+    indices: [...ALERT_INDICES_TO_RESTORE_AND_OVERWRITE],
   });
+
+  if (!result.success && isOpenIndexConflictError(result.errors)) {
+    log.warning('Snapshot restore failed due to existing indices. Retrying once after deletion.');
+    await deleteExistingAlertIndices(esClient, log);
+    result = await restoreSnapshot({
+      esClient,
+      log,
+      repository,
+      snapshotName: config.snapshotName,
+      indices: [...ALERT_INDICES_TO_RESTORE_AND_OVERWRITE],
+    });
+  }
 
   if (!result.success) {
     throw new Error(`Snapshot restore failed: ${result.errors.join('; ')}`);
