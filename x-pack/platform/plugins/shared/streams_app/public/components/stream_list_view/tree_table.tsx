@@ -40,7 +40,10 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
+import {
+  STREAMS_HISTOGRAM_NUM_DATA_POINTS,
+  useStreamDocCountsFetch,
+} from '../../hooks/use_streams_doc_counts_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { RetentionColumn } from './retention_column';
@@ -95,12 +98,10 @@ export function StreamsTreeTable({
     pageSize: 25,
   });
 
-  const numDataPoints = 25;
-
   const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
     canReadFailureStore,
-    numDataPoints,
+    numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });
 
   const docCountsFetch = getStreamDocCounts();
@@ -366,7 +367,7 @@ export function StreamsTreeTable({
                 {treeMode && item.children && hasChildren && (
                   <EuiFlexItem grow={false}>
                     <EuiIcon
-                      type={isCollapsed ? 'arrowRight' : 'arrowDown'}
+                      type={isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown'}
                       color="text"
                       size="m"
                       data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
@@ -460,7 +461,7 @@ export function StreamsTreeTable({
                 indexPattern={item.stream.name}
                 histogramQueryFetch={getStreamHistogram(item.stream.name)}
                 timeState={timeState}
-                numDataPoints={numDataPoints}
+                numDataPoints={STREAMS_HISTOGRAM_NUM_DATA_POINTS}
               />
             ) : null,
         },

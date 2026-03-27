@@ -36,7 +36,19 @@ export const CreateWatchlistEntitySourceRequestBody = z
     type: EntitySourceType,
     name: z.string(),
     indexPattern: z.string().optional(),
+    /**
+     * Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+     */
+    integrationName: z.string().optional(),
     enabled: z.boolean().optional(),
+    /**
+     * Field used to query the entity store for index-type sources
+     */
+    identifierField: z.string().optional(),
+    /**
+     * KQL query used to filter data from the provided index patterns
+     */
+    queryRule: z.string().optional(),
     matchers: z.array(Matcher).optional(),
     filter: Filter.optional(),
   })

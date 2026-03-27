@@ -22,7 +22,7 @@
           "<TItem>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-        "lineNumber": 86,
+        "lineNumber": 83,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -45,7 +45,7 @@
               "<TItem>"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 86,
+            "lineNumber": 83,
             "columnNumber": 71,
             "deprecated": false,
             "trackAdoption": false,
@@ -63,10 +63,10 @@
         "label": "DataSourceBrowser",
         "description": [],
         "signature": [
-          "({ isOpen, isLoading, allSources, selectedSources, onClose, onSelect, position, }: DataSourceBrowserProps) => React.JSX.Element"
+          "({ isOpen, isTimeseries, preloadedSources, selectedSources, onClose, onSelect, position, }: DataSourceBrowserProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/data_source_browser/data_source_browser.tsx",
-        "lineNumber": 44,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -76,13 +76,13 @@
             "id": "def-public.DataSourceBrowser.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isOpen,\n  isLoading,\n  allSources,\n  selectedSources = [],\n  onClose,\n  onSelect,\n  position,\n}",
+            "label": "{\n  isOpen,\n  isTimeseries,\n  preloadedSources,\n  selectedSources = [],\n  onClose,\n  onSelect,\n  position,\n}",
             "description": [],
             "signature": [
               "DataSourceBrowserProps"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/data_source_browser/data_source_browser.tsx",
-            "lineNumber": 44,
+            "lineNumber": 58,
             "columnNumber": 69,
             "deprecated": false,
             "trackAdoption": false,
@@ -100,10 +100,10 @@
         "label": "FieldsBrowser",
         "description": [],
         "signature": [
-          "({ isOpen, isLoading, onClose, onSelect, allFields, recommendedFields, position, }: FieldsBrowserProps) => React.JSX.Element"
+          "({ isOpen, onClose, onSelect, preloadedFields, indexPattern, fullQuery, activeSolutionId, position, }: FieldsBrowserProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/fields_browser/fields_browser.tsx",
-        "lineNumber": 33,
+        "lineNumber": 49,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -113,13 +113,13 @@
             "id": "def-public.FieldsBrowser.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isOpen,\n  isLoading,\n  onClose,\n  onSelect,\n  allFields,\n  recommendedFields,\n  position,\n}",
+            "label": "{\n  isOpen,\n  onClose,\n  onSelect,\n  preloadedFields,\n  indexPattern,\n  fullQuery,\n  activeSolutionId,\n  position,\n}",
             "description": [],
             "signature": [
               "FieldsBrowserProps"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/fields_browser/fields_browser.tsx",
-            "lineNumber": 33,
+            "lineNumber": 49,
             "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
@@ -149,7 +149,7 @@
           "<TItem>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-        "lineNumber": 59,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -185,7 +185,7 @@
               ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; }))[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 60,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -198,7 +198,7 @@
             "label": "isOpen",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 61,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -214,7 +214,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 62,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -252,7 +252,7 @@
               ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; }) | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 63,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -288,7 +288,7 @@
                   ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; }) | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-                "lineNumber": 63,
+                "lineNumber": 60,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -305,7 +305,7 @@
             "label": "isFilterOpen",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 64,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -321,7 +321,7 @@
               "(isOpen: boolean) => void"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 65,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -337,7 +337,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-                "lineNumber": 65,
+                "lineNumber": 62,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -357,7 +357,7 @@
               "{ top?: number | undefined; left?: number | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 66,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -373,7 +373,7 @@
               "{ title: string; searchPlaceholder: string; filterTitle: string; closeLabel: string; loading: string; empty: string; noMatches: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 68,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -386,7 +386,7 @@
             "label": "numTypes",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 77,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -399,7 +399,7 @@
             "label": "numActiveFilters",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 78,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -415,7 +415,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 79,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -428,7 +428,7 @@
             "label": "isLoading",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 80,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -441,7 +441,7 @@
             "label": "searchValue",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 81,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -457,7 +457,7 @@
               "(value: string) => void"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 82,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -473,7 +473,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-                "lineNumber": 82,
+                "lineNumber": 79,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -493,7 +493,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-            "lineNumber": 83,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -532,7 +532,7 @@
           "500"
         ],
         "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-        "lineNumber": 30,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -549,7 +549,7 @@
           "400"
         ],
         "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
-        "lineNumber": 29,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
