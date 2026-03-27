@@ -278,7 +278,7 @@ export function getColumns({
                   defaultMessage: 'Edit',
                 })}
                 data-test-subj={`instanceActionsButton_${instanceItem.serviceNodeName}`}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={() => toggleRowActionMenu(instanceItem.serviceNodeName)}
               />
             }
@@ -315,7 +315,9 @@ export function getColumns({
               itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'Collapse' : 'Expand'
             }
             iconType={
-              itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'arrowUp' : 'arrowDown'
+              itemIdToExpandedRowMap[instanceItem.serviceNodeName]
+                ? 'chevronSingleUp'
+                : 'chevronSingleDown'
             }
           />
         );

@@ -27,8 +27,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { ReactNode } from 'react-markdown';
-import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { useKibana } from '../../../../common/lib/kibana';
 import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/constants';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -62,9 +62,19 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
   }) => {
     const { connectorId } = defaultSettings;
 
-    const { siemMigrations, settings } = useKibana().services;
+    const {
+      http,
+      notifications: { toasts },
+      siemMigrations,
+      settings,
+    } = useKibana().services;
 
-    const { aiConnectors, isLoading } = useAIConnectors();
+    const { data: aiConnectors = [], isLoading } = useLoadConnectors({
+      http,
+      toasts,
+      featureId: 'siem_migrations',
+      settings,
+    });
 
     const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>(
       // Both `siemMigrations.rules` and `siemMigrations.dashboards` store connector using the same key,
