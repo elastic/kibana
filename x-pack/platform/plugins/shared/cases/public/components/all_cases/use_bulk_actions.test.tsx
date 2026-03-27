@@ -135,7 +135,7 @@ describe('useBulkActions', () => {
                   "data-test-subj": "cases-bulk-action-status-closed",
                   "disabled": false,
                   "icon": "empty",
-                  "key": "cases-bulk-status-action",
+                  "key": "cases-bulk-action-status-closed",
                   "name": "Closed",
                   "onClick": [Function],
                 },

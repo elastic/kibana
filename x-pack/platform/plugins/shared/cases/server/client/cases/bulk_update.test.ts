@@ -2093,48 +2093,24 @@ describe('update', () => {
       });
 
       it('does not propagate unconfigured custom closeReason values to alerts', async () => {
-        const alertComment = {
-          ...mockCaseComments[3],
-          score: 0,
-          references: [
+        await expect(
+          bulkUpdate(
             {
-              ...mockCaseComments[3].references[0],
-              id: mockCases[0].id,
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  status: CaseStatuses.closed,
+                  closeReason: 'my custom reason',
+                },
+              ],
             },
-          ],
-        };
+            clientArgs,
+            casesClientMock
+          )
+        ).rejects.toThrow('Invalid close reason: "my custom reason"');
 
-        clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
-          saved_objects: [alertComment],
-          total: 1,
-          per_page: 10,
-          page: 1,
-        });
-        clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(1);
-
-        await bulkUpdate(
-          {
-            cases: [
-              {
-                id: mockCases[0].id,
-                version: mockCases[0].version ?? '',
-                status: CaseStatuses.closed,
-                closeReason: 'my custom reason',
-              },
-            ],
-          },
-          clientArgs,
-          casesClientMock
-        );
-
-        expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
-          {
-            id: 'test-id',
-            index: 'test-index',
-            status: CaseStatuses.closed,
-            closingReason: undefined,
-          },
-        ]);
+        expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
       });
 
       it('returns synced alert count when only one of two alerts is updated', async () => {
@@ -2240,54 +2216,25 @@ describe('update', () => {
 
       it('does not update alerts with an invalid close reason', async () => {
         const invalidCloseReason = 'invalid_reason';
-        const firstAlertComment = {
-          ...mockCaseComments[3],
-          score: 0,
-          references: [{ ...mockCaseComments[3].references[0], id: mockCases[0].id }],
-        };
-        const secondAlertComment = {
-          ...mockCaseComments[4],
-          score: 0,
-          references: [{ ...mockCaseComments[4].references[0], id: mockCases[0].id }],
-        };
 
-        clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
-          saved_objects: [firstAlertComment, secondAlertComment],
-          total: 2,
-          per_page: 10,
-          page: 1,
-        });
-        clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(2);
+        await expect(
+          bulkUpdate(
+            {
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  status: CaseStatuses.closed,
+                  closeReason: invalidCloseReason,
+                },
+              ],
+            },
+            clientArgs,
+            casesClientMock
+          )
+        ).rejects.toThrow(`Invalid close reason: "${invalidCloseReason}"`);
 
-        await bulkUpdate(
-          {
-            cases: [
-              {
-                id: mockCases[0].id,
-                version: mockCases[0].version ?? '',
-                status: CaseStatuses.closed,
-                closeReason: invalidCloseReason,
-              },
-            ],
-          },
-          clientArgs,
-          casesClientMock
-        );
-
-        expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
-          {
-            id: 'test-id',
-            index: 'test-index',
-            status: CaseStatuses.closed,
-            closingReason: undefined,
-          },
-          {
-            id: 'test-id-2',
-            index: 'test-index-2',
-            status: CaseStatuses.closed,
-            closingReason: undefined,
-          },
-        ]);
+        expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
       });
 
       it('does not propagate closeReason when status is not closed', async () => {
