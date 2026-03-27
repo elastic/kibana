@@ -548,54 +548,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 </EuiCallOut>
               </>
             )}
-
-          {isESOutput && (
-            <>
-              <EuiSpacer size="l" />
-              <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="m">
-                <EuiTitle size="s">
-                  <h3 id="FleetEditOutputFlyoutOtelExporterConfigTitle">
-                    <FormattedMessage
-                      id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigTitle"
-                      defaultMessage="OpenTelemetry Exporter"
-                    />
-                  </h3>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <EuiFormRow
-                  fullWidth
-                  label={
-                    <FormattedMessage
-                      id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigLabel"
-                      defaultMessage="Advanced YAML Configuration"
-                    />
-                  }
-                  helpText={
-                    <FormattedMessage
-                      id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigHelpText"
-                      defaultMessage="Settings added here are merged into the Elasticsearch exporter configuration of any OTel-based agent policy that uses this output."
-                    />
-                  }
-                  {...inputs.otelExporterConfigInput.formRowProps}
-                >
-                  <YamlCodeEditorWithPlaceholder
-                    value={inputs.otelExporterConfigInput.value}
-                    onChange={(value) => inputs.otelExporterConfigInput.setValue(value)}
-                    disabled={inputs.otelExporterConfigInput.props.disabled}
-                    placeholder={i18n.translate(
-                      'xpack.fleet.settings.editOutputFlyout.otelExporterConfigPlaceholder',
-                      {
-                        defaultMessage:
-                          '# YAML settings here will be added to the exporter section of OTel policies.',
-                      }
-                    )}
-                  />
-                </EuiFormRow>
-              </EuiPanel>
-            </>
-          )}
-
-          <EuiSpacer size="l" />
           <EuiFormRow
             label={
               <EuiLink href={docLinks.links.fleet.esSettings} external target="_blank">
@@ -627,6 +579,60 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             />
           </EuiFormRow>
           <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
+          {isESOutput && (
+            <>
+              <EuiSpacer size="l" />
+              <EuiAccordion
+                id="FleetEditOutputFlyoutOtelExporterConfigAccordion"
+                buttonContent={
+                  <EuiTitle size="xs">
+                    <h3>
+                      i
+                      <FormattedMessage
+                        id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigTitle"
+                        defaultMessage="OpenTelemetry Exporter"
+                      />
+                    </h3>
+                  </EuiTitle>
+                }
+                paddingSize="none"
+              >
+                <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="m">
+                  <EuiFormRow
+                    fullWidth
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigLabel"
+                        defaultMessage="Advanced YAML Configuration"
+                      />
+                    }
+                    helpText={
+                      <FormattedMessage
+                        id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigHelpText"
+                        defaultMessage="Settings added here are merged into the Elasticsearch exporter configuration of any OTel-based agent policy that uses this output."
+                      />
+                    }
+                    {...inputs.otelExporterConfigInput.formRowProps}
+                  >
+                    <YamlCodeEditorWithPlaceholder
+                      value={inputs.otelExporterConfigInput.value}
+                      onChange={(value) => inputs.otelExporterConfigInput.setValue(value)}
+                      disabled={inputs.otelExporterConfigInput.props.disabled}
+                      placeholder={i18n.translate(
+                        'xpack.fleet.settings.editOutputFlyout.otelExporterConfigPlaceholder',
+                        {
+                          defaultMessage:
+                            '# YAML settings here will be added to the exporter section of OTel policies.',
+                        }
+                      )}
+                    />
+                  </EuiFormRow>
+                </EuiPanel>
+              </EuiAccordion>
+            </>
+          )}
+
+          <EuiSpacer size="l" />
         </EuiForm>
         {output?.id && output.type === 'remote_elasticsearch' ? (
           <OutputHealth output={output} />
