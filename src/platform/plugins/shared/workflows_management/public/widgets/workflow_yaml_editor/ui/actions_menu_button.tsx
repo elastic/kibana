@@ -15,6 +15,7 @@ import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isMac } from '@kbn/shared-ux-utility';
+import { kbdStyles } from './kbd_styles';
 
 type ActionsMenuButtonProps = Omit<EuiButtonEmptyPropsForButton, 'children'>;
 
@@ -33,7 +34,8 @@ export function ActionsMenuButton(props: ActionsMenuButtonProps) {
           />
         </b>
         <EuiTextColor color="subdued" css={styles.withKbd}>
-          <kbd>{commandKey}</kbd> {'+'} <kbd>{'K'}</kbd>
+          <kbd>{commandKey}</kbd>
+          <kbd>{'K'}</kbd>
         </EuiTextColor>
       </EuiText>
     </EuiButtonEmpty>
@@ -41,14 +43,10 @@ export function ActionsMenuButton(props: ActionsMenuButtonProps) {
 }
 
 const componentStyles = {
-  withKbd: ({ euiTheme }: UseEuiTheme) =>
+  withKbd: (euiThemeContext: UseEuiTheme) =>
     css({
-      '& kbd': {
-        borderColor: euiTheme.colors.borderBaseSubdued,
-        borderRadius: euiTheme.border.radius.small,
-        borderWidth: euiTheme.border.width.thin,
-        borderStyle: 'solid',
-        padding: `${euiTheme.size.xxs} ${euiTheme.size.xs}`,
-      },
+      display: 'flex',
+      gap: 2,
+      '& kbd': kbdStyles(euiThemeContext),
     }),
 };
