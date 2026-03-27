@@ -17,7 +17,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AiButton } from '@kbn/shared-ux-ai-components';
 import { AssetImage } from '../asset_image';
 import type { Flow } from './add_significant_event_flyout/types';
 
@@ -72,7 +71,7 @@ export function SignificantEventsGenerationPanel({
           <EuiSpacer size="s" />
 
           <EuiFlexItem>
-            <AiButton
+            <EuiButton
               iconType="sparkles"
               isLoading={isGeneratingQueries}
               isDisabled={isGeneratingQueries || isSavingManualEntry}
@@ -85,7 +84,7 @@ export function SignificantEventsGenerationPanel({
                   defaultMessage: 'Generate suggestions',
                 }
               )}
-            </AiButton>
+            </EuiButton>
           </EuiFlexItem>
         </EuiPanel>
       </EuiFlexItem>

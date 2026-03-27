@@ -19,7 +19,6 @@ import { TaskStatus } from '@kbn/streams-schema';
 import React, { useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { Insight } from '@kbn/streams-schema';
-import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTaskPolling } from '../../../../hooks/use_task_polling';
@@ -190,10 +189,10 @@ export function Summary({ count }: { count: number }) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
-                <AiButton
-                  iconType="sparkles"
+                <EuiButton
+                  fill
                   size="m"
-                  variant="accent"
+                  iconType="sparkles"
                   onClick={onGenerateInsightsClick}
                   isDisabled={isGenerateButtonPending}
                   isLoading={isGenerateButtonPending}
@@ -206,7 +205,7 @@ export function Summary({ count }: { count: number }) {
                     : i18n.translate('xpack.streams.insights.generateButtonLabel', {
                         defaultMessage: 'Discover Significant Events',
                       })}
-                </AiButton>
+                </EuiButton>
 
                 {(task?.status === TaskStatus.InProgress || isCancellingTask) && (
                   <EuiButton
