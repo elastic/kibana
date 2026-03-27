@@ -411,7 +411,6 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     signal: runContext.abortController.signal,
                     systemPrompt: featurePromptOverride,
                     onIterationComplete: async (it, changedFeatures) => {
-                      hasTrackedIteration = true;
                       if (changedFeatures.length > 0) {
                         await featureClient.bulk(
                           stream.name,
@@ -439,6 +438,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                         filters_capped: it.filtersCapped,
                         has_filtered_documents: it.hasFilteredDocuments,
                       });
+                      hasTrackedIteration = true;
                     },
                   }),
                   generateAllComputedFeatures({
@@ -492,9 +492,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   taskContext.logger.debug(
                     () => `Task ${runContext.taskInstance.id} was canceled: ${errorMessage}`
                   );
-                  if (!hasTrackedIteration) {
-                    trackEmptyTelemetry('canceled');
-                  }
+                  trackEmptyTelemetry('canceled');
                   return getDeleteTaskRunResult();
                 }
 
