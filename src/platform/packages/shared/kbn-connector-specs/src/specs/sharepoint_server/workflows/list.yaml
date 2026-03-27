@@ -81,3 +81,8 @@ steps:
                     type: data.set
                     with:
                       result: "${{ steps.get-folder-contents.output }}"
+                else:
+                  - name: set-missing-param-error
+                    type: data.set
+                    with:
+                      error: "Missing required parameter: list_title is required for getListItems, path is required for getFolderContents"
