@@ -100,6 +100,7 @@ export const Content = ({
 }: ContentProps) => {
   // Use OTel fallback version that returns the actual field name used
   const { field, value } = getMessageFieldWithFallbacks(row.flattened);
+  const highlightSnippet = field ? row.raw.highlight?.[field]?.[0] : undefined;
 
   const { euiTheme } = useEuiTheme();
   const isDarkTheme = useKibanaIsDarkMode();
@@ -107,9 +108,14 @@ export const Content = ({
   const highlightedValue = useMemo(
     () =>
       value
-        ? getHighlightedMessage(escapeAndPreserveHighlightTags(value), row, euiTheme, isDarkTheme)
-        : value,
-    [value, row, euiTheme, isDarkTheme]
+        ? getHighlightedMessage(
+            escapeAndPreserveHighlightTags(highlightSnippet ?? value),
+            row,
+            euiTheme,
+            isDarkTheme
+          )
+        : undefined,
+    [value, highlightSnippet, row, euiTheme, isDarkTheme]
   );
 
   const shouldRenderContent = !!field && !!value && !!highlightedValue;

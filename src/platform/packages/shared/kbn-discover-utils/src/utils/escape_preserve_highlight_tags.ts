@@ -9,22 +9,46 @@
 
 import { escape } from 'lodash';
 
-// TODO: These constants are duplicated from @kbn/field-formats-plugin (html_tags.ts).
+// TODO: These constants are duplicated from @kbn/field-formats-plugin (html_tags.ts / highlight_tags.ts).
 // They are kept locally because packages cannot depend on plugins. This is a temporary
 // workaround until we reach an agreement on how to handle formatted/highlighted content
 // across packages and plugins.
-const HIGHLIGHT_PRE_TAG = '<mark class="ffSearch__highlight">';
-const HIGHLIGHT_POST_TAG = '</mark>';
-const HIGHLIGHT_TAGS_REGEX = new RegExp(`${HIGHLIGHT_PRE_TAG}|${HIGHLIGHT_POST_TAG}`, 'g');
+const HTML_HIGHLIGHT_PRE_TAG = '<mark class="ffSearch__highlight">';
+const HTML_HIGHLIGHT_POST_TAG = '</mark>';
+
+const ES_HIGHLIGHT_PRE_TAG = '@kibana-highlighted-field@';
+const ES_HIGHLIGHT_POST_TAG = '@/kibana-highlighted-field@';
+
+const escapeAndConvertHighlightTags = (value: string, preTag: string, postTag: string): string => {
+  return value
+    .split(preTag)
+    .map((segment, index) => {
+      // if first segment, escape it and return
+      if (index === 0) return escape(segment);
+
+      const postTagIndex = segment.indexOf(postTag);
+
+      // if post tag is not found, escape it and return
+      if (postTagIndex === -1) return escape(segment);
+
+      const highlightedSnippet = segment.substring(0, postTagIndex);
+      const rest = segment.substring(postTagIndex + postTag.length);
+
+      return (
+        HTML_HIGHLIGHT_PRE_TAG + escape(highlightedSnippet) + HTML_HIGHLIGHT_POST_TAG + escape(rest)
+      );
+    })
+    .join('');
+};
 
 export function escapeAndPreserveHighlightTags(value: string): string {
-  const markTags: string[] = [];
-  const cleanText = value.replace(HIGHLIGHT_TAGS_REGEX, (match) => {
-    markTags.push(match);
-    return '';
-  });
+  if (value.includes(ES_HIGHLIGHT_PRE_TAG)) {
+    return escapeAndConvertHighlightTags(value, ES_HIGHLIGHT_PRE_TAG, ES_HIGHLIGHT_POST_TAG);
+  }
 
-  const escapedText = escape(cleanText);
+  if (value.includes(HTML_HIGHLIGHT_PRE_TAG)) {
+    return escapeAndConvertHighlightTags(value, HTML_HIGHLIGHT_PRE_TAG, HTML_HIGHLIGHT_POST_TAG);
+  }
 
-  return markTags.length === 2 ? `${markTags[0]}${escapedText}${markTags[1]}` : escapedText;
+  return escape(value);
 }

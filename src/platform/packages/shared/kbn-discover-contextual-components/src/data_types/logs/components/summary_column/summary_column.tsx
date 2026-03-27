@@ -166,11 +166,14 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(row.flattened, {
     includeFormattedValue: true,
   });
+  const highlightSnippet = field ? row.raw.highlight?.[field]?.[0] : undefined;
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
     : {
         language: 'txt',
-        dangerouslySetInnerHTML: { __html: escapeAndPreserveHighlightTags(value ?? '') },
+        dangerouslySetInnerHTML: {
+          __html: escapeAndPreserveHighlightTags(highlightSnippet ?? value ?? ''),
+        },
       };
   const shouldRenderContent = Boolean(field && value);
 

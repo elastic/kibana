@@ -20,8 +20,8 @@ import {
   getMessageFieldWithFallbacks,
   type DataTableRecord,
   type LogDocumentOverview,
+  escapeAndPreserveHighlightTags,
 } from '@kbn/discover-utils';
-import { escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Badges } from '../badges/badges';
@@ -43,12 +43,15 @@ export const ContentBreakdown = ({
   });
 
   const rawFieldValue = hit && field ? hit.flattened[field] : undefined;
+  const highlightSnippet = field ? hit.raw.highlight?.[field]?.[0] : undefined;
 
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
     : {
         language: 'txt',
-        dangerouslySetInnerHTML: { __html: escapeAndPreserveHighlightTags(value ?? '') },
+        dangerouslySetInnerHTML: {
+          __html: escapeAndPreserveHighlightTags(highlightSnippet ?? value ?? ''),
+        },
       };
   const hasMessageField = field && value;
 

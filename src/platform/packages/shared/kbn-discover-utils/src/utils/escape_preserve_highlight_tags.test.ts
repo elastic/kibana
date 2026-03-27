@@ -13,6 +13,10 @@ import { escapeAndPreserveHighlightTags } from './escape_preserve_highlight_tags
 const PRE = '<mark class="ffSearch__highlight">';
 const POST = '</mark>';
 
+// Must match the tags defined in @kbn/field-formats-plugin (highlight_tags.ts)
+const ES_PRE = '@kibana-highlighted-field@';
+const ES_POST = '@/kibana-highlighted-field@';
+
 describe('escapeAndPreserveHighlightTags', () => {
   it('escapes HTML when there are no highlight tags', () => {
     expect(escapeAndPreserveHighlightTags('<hello>world</hello>')).toBe(
@@ -26,15 +30,39 @@ describe('escapeAndPreserveHighlightTags', () => {
     );
   });
 
-  it('returns only escaped text when there are multiple highlight regions', () => {
+  it('preserves multiple highlight regions', () => {
     expect(escapeAndPreserveHighlightTags(`${PRE}hello${POST} + ${PRE}world${POST}`)).toBe(
-      'hello + world'
+      `${PRE}hello${POST} + ${PRE}world${POST}`
     );
   });
 
   it('escapes plain <mark> tags that do not match the highlight format', () => {
     expect(escapeAndPreserveHighlightTags('<mark><hello></mark>')).toBe(
-      '&lt;mark&gt;&lt;hello&gt;'
+      '&lt;mark&gt;&lt;hello&gt;&lt;/mark&gt;'
+    );
+  });
+
+  it('converts ES highlight tags to HTML mark tags with a single match', () => {
+    expect(escapeAndPreserveHighlightTags(`This is a ${ES_PRE}test${ES_POST} message`)).toBe(
+      `This is a ${PRE}test${POST} message`
+    );
+  });
+
+  it('converts ES highlight tags to HTML mark tags with multiple matches', () => {
+    expect(
+      escapeAndPreserveHighlightTags(`${ES_PRE}hello${ES_POST} and ${ES_PRE}world${ES_POST}`)
+    ).toBe(`${PRE}hello${POST} and ${PRE}world${POST}`);
+  });
+
+  it('escapes HTML characters in non-highlighted text around ES tags', () => {
+    expect(escapeAndPreserveHighlightTags(`<b>${ES_PRE}test${ES_POST}</b>`)).toBe(
+      `&lt;b&gt;${PRE}test${POST}&lt;/b&gt;`
+    );
+  });
+
+  it('escapes HTML characters inside ES highlighted text', () => {
+    expect(escapeAndPreserveHighlightTags(`${ES_PRE}<script>${ES_POST}`)).toBe(
+      `${PRE}&lt;script&gt;${POST}`
     );
   });
 });
