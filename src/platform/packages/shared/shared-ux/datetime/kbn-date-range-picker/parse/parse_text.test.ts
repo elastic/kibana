@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { textToTimeRange, matchPreset } from './parse_text';
+import { textToTimeRange, matchPreset, getNamedRangeAlias } from './parse_text';
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
 import { getOptionInputText, toLocalPreciseString } from '../utils';
 
@@ -138,7 +138,7 @@ describe('textToTimeRange', () => {
       ['-7d/d', 'now-7d/d', 'now'],
       ['500ms', 'now-500ms', 'now'],
       ['7min', 'now-7m', 'now'],
-      ['3mos', 'now-3M', 'now'],
+      ['3mo', 'now-3M', 'now'],
       ['7hrs', 'now-7h', 'now'],
       ['2wks', 'now-2w', 'now'],
       ['1yr', 'now-1y', 'now'],
@@ -160,7 +160,10 @@ describe('textToTimeRange', () => {
   describe('named ranges', () => {
     it.each([
       ['yesterday', 'now-1d/d', 'now-1d/d'],
+      ['yd', 'now-1d/d', 'now-1d/d'],
       ['tomorrow', 'now+1d/d', 'now+1d/d'],
+      ['tmr', 'now+1d/d', 'now+1d/d'],
+      ['td', 'now/d', 'now/d'],
       ['this week', 'now/w', 'now/w'],
       ['this month', 'now/M', 'now/M'],
       ['this year', 'now/y', 'now/y'],
@@ -294,6 +297,123 @@ describe('textToTimeRange', () => {
       expect(textToTimeRange('hello world').isInvalid).toBe(true);
       expect(textToTimeRange('not a date').isInvalid).toBe(true);
     });
+
+    describe('canonical Kibana format (@ separator)', () => {
+      it.each([
+        ['Mar 9, 2025 @ 15:36:07.801', { year: 2025, month: 2, day: 9, hour: 15, minute: 36 }],
+        ['Mar 9, 2025 @ 15:36:07', { year: 2025, month: 2, day: 9, hour: 15, minute: 36 }],
+        ['Mar 9, 2025 @ 15:36', { year: 2025, month: 2, day: 9, hour: 15, minute: 36 }],
+        ['Mar 9, 2025 @ 15', { year: 2025, month: 2, day: 9, hour: 15, minute: 0 }],
+        ['Mar 9, 2025', { year: 2025, month: 2, day: 9, hour: 0, minute: 0 }],
+      ])('parses "%s"', (text, expected) => {
+        const range = textToTimeRange(text);
+
+        expect(range.isInvalid).toBe(false);
+        expect(range.type).toEqual([DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW]);
+
+        const d = range.startDate!;
+        expect(d.getFullYear()).toBe(expected.year);
+        expect(d.getMonth()).toBe(expected.month);
+        expect(d.getDate()).toBe(expected.day);
+        expect(d.getHours()).toBe(expected.hour);
+        expect(d.getMinutes()).toBe(expected.minute);
+      });
+    });
+
+    describe('ISO 8601 date with simple time', () => {
+      it.each([
+        ['2025-02-14 6:00', { year: 2025, month: 1, day: 14, hour: 6, minute: 0 }],
+        ['2025-02-14 14:30', { year: 2025, month: 1, day: 14, hour: 14, minute: 30 }],
+      ])('parses "%s"', (text, expected) => {
+        const range = textToTimeRange(text);
+
+        expect(range.isInvalid).toBe(false);
+
+        const d = range.startDate!;
+        expect(d.getFullYear()).toBe(expected.year);
+        expect(d.getMonth()).toBe(expected.month);
+        expect(d.getDate()).toBe(expected.day);
+        expect(d.getHours()).toBe(expected.hour);
+        expect(d.getMinutes()).toBe(expected.minute);
+      });
+    });
+
+    describe('US-style dates', () => {
+      it.each([
+        ['2/14/2025 6:00', { year: 2025, month: 1, day: 14, hour: 6, minute: 0 }],
+        ['2/14 6:00', { year: 2025, month: 1, day: 14, hour: 6, minute: 0 }],
+        ['2/14/2025', { year: 2025, month: 1, day: 14, hour: 0, minute: 0 }],
+        ['2/14', { year: 2025, month: 1, day: 14, hour: 0, minute: 0 }],
+        ['6/30/2025 23:59', { year: 2025, month: 5, day: 30, hour: 23, minute: 59 }],
+      ])('parses "%s"', (text, expected) => {
+        const range = textToTimeRange(text);
+
+        expect(range.isInvalid).toBe(false);
+        expect(range.type).toEqual([DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW]);
+
+        const d = range.startDate!;
+        expect(d.getFullYear()).toBe(expected.year);
+        expect(d.getMonth()).toBe(expected.month);
+        expect(d.getDate()).toBe(expected.day);
+        expect(d.getHours()).toBe(expected.hour);
+        expect(d.getMinutes()).toBe(expected.minute);
+      });
+    });
+
+    describe('RFC 2822 variants', () => {
+      it.each([
+        ['Sun, 23 Jan 2000 01:23:45 +0000', { year: 2000, month: 0, day: 23 }],
+        ['Sun, 23 Jan 2000 01:23 +0000', { year: 2000, month: 0, day: 23 }],
+        ['23 Jan 2000 01:23:45 +0000', { year: 2000, month: 0, day: 23 }],
+        ['23 Jan 2000 01:23 +0000', { year: 2000, month: 0, day: 23 }],
+        ['Sun, 23 Jan 2000 01:23:45', { year: 2000, month: 0, day: 23 }],
+        ['23 Jan 2000 01:23', { year: 2000, month: 0, day: 23 }],
+      ])('parses "%s"', (text, expected) => {
+        const range = textToTimeRange(text);
+
+        expect(range.isInvalid).toBe(false);
+
+        const d = range.startDate!;
+        expect(d.getFullYear()).toBe(expected.year);
+        expect(d.getMonth()).toBe(expected.month);
+        expect(d.getDate()).toBe(expected.day);
+      });
+
+      it('parses RFC 2822 with timezone abbreviation via forgiving mode', () => {
+        const range = textToTimeRange('Sun, 23 Jan 2000 01:23:45 JST');
+
+        expect(range.isInvalid).toBe(false);
+        expect(range.startDate!.getFullYear()).toBe(2000);
+        expect(range.startDate!.getMonth()).toBe(0);
+        expect(range.startDate!.getDate()).toBe(23);
+      });
+    });
+
+    describe('DateRangePicker default format variants', () => {
+      it.each([
+        ['Mar 17, 2025, 09:43', { year: 2025, month: 2, day: 17, hour: 9, minute: 43 }],
+        ['Mar 17 2025, 09:43', { year: 2025, month: 2, day: 17, hour: 9, minute: 43 }],
+        ['Mar 17, 2025, 09:43:34', { year: 2025, month: 2, day: 17, hour: 9, minute: 43 }],
+        ['Mar 17 2025, 09:43:34', { year: 2025, month: 2, day: 17, hour: 9, minute: 43 }],
+        ['Mar 17, 2025, 09:43:34.667', { year: 2025, month: 2, day: 17, hour: 9, minute: 43 }],
+        ['Mar 17 2025, 09:43:34.667', { year: 2025, month: 2, day: 17, hour: 9, minute: 43 }],
+        ['Mar 17, 2025', { year: 2025, month: 2, day: 17, hour: 0, minute: 0 }],
+        ['Mar 17 2025', { year: 2025, month: 2, day: 17, hour: 0, minute: 0 }],
+        ['Mar 17', { year: 2025, month: 2, day: 17, hour: 0, minute: 0 }],
+      ])('parses "%s"', (text, expected) => {
+        const range = textToTimeRange(text);
+
+        expect(range.isInvalid).toBe(false);
+        expect(range.type).toEqual([DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW]);
+
+        const d = range.startDate!;
+        expect(d.getFullYear()).toBe(expected.year);
+        expect(d.getMonth()).toBe(expected.month);
+        expect(d.getDate()).toBe(expected.day);
+        expect(d.getHours()).toBe(expected.hour);
+        expect(d.getMinutes()).toBe(expected.minute);
+      });
+    });
   });
 
   describe('date offset', () => {
@@ -376,12 +496,12 @@ describe('textToTimeRange', () => {
       expect(minuteRange.start).toBe('now-3m');
     });
 
-    it('resolves shorthand aliases: min -> m, mos -> M', () => {
+    it('resolves shorthand aliases: min -> m, mo -> M', () => {
       const minRange = textToTimeRange('5min');
       expect(minRange.start).toBe('now-5m');
 
-      const mosRange = textToTimeRange('5mos');
-      expect(mosRange.start).toBe('now-5M');
+      const moRange = textToTimeRange('5mo');
+      expect(moRange.start).toBe('now-5M');
     });
   });
 
@@ -481,11 +601,11 @@ describe('textToTimeRange', () => {
         expect(range.end).toBe('now/d');
       });
 
-      it('does not affect preset matches', () => {
+      it('applies rounding to preset matches', () => {
         const presets = [{ label: 'Last 15 Minutes', start: 'now-15m', end: 'now' }];
         const range = textToTimeRange('Last 15 Minutes', { presets, roundRelativeTime: true });
 
-        expect(range.start).toBe('now-15m');
+        expect(range.start).toBe('now-15m/m');
         expect(range.end).toBe('now');
       });
 
@@ -577,5 +697,23 @@ describe('matchPreset', () => {
 
   it('returns undefined for no match', () => {
     expect(matchPreset('no match', presets)).toBeUndefined();
+  });
+});
+
+describe('getNamedRangeAlias', () => {
+  it('returns the alias for named ranges that have one', () => {
+    expect(getNamedRangeAlias('now/d', 'now/d')).toBe('td');
+    expect(getNamedRangeAlias('now-1d/d', 'now-1d/d')).toBe('yd');
+    expect(getNamedRangeAlias('now+1d/d', 'now+1d/d')).toBe('tmr');
+  });
+
+  it('returns null for named ranges without an alias', () => {
+    expect(getNamedRangeAlias('now/w', 'now/w')).toBeNull();
+    expect(getNamedRangeAlias('now/M', 'now/M')).toBeNull();
+  });
+
+  it('returns null for non-named-range bounds', () => {
+    expect(getNamedRangeAlias('now-15m', 'now')).toBeNull();
+    expect(getNamedRangeAlias('2025-01-01', 'now')).toBeNull();
   });
 });

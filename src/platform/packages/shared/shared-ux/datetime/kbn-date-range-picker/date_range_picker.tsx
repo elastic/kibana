@@ -103,11 +103,18 @@ export interface DateRangePickerProps {
    */
   compressed?: boolean;
   /**
-   * When `true`, the idle-state control hides its text label and only shows
-   * the short-duration badge.
-   * @default false
+   * Controls the collapsed mode of the idle-state control.
+   *
+   * - `'auto'` — the text label collapses automatically via a CSS container
+   *   query when the nearest ancestor with `container-type: inline-size` is
+   *   narrow. The duration badge is always visible when collapsed, but hidden
+   *   in non-collapsed mode when the range is relative-to-now (e.g. "Last 15
+   *   minutes"), since the label already conveys the duration.
+   * - `'never'` — the text label is always shown, never collapses.
+   *
+   * @default 'never'
    */
-  collapsed?: boolean;
+  collapsed?: 'auto' | 'never';
   /**
    * Show time window buttons (previous, zoom out, zoom in, next) beside the control.
    * Pass `true` for defaults, or a config object for fine-grained control.
@@ -146,6 +153,12 @@ export interface DateRangePickerProps {
   timeZone?: string;
   /** Fires at the end of each auto-refresh interval while `settings.autoRefresh` exists, is enabled and timer is unpaused. */
   onRefresh?: () => void;
+  /**
+   * Prepends the Kibana server `basePath` to an internal URL path.
+   * Typically provided as `core.http.basePath.prepend`.
+   * When omitted, paths are used as-is.
+   */
+  prependBasePath?: (path: string) => string;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
