@@ -124,6 +124,7 @@ describe('getCustomPropertySuggestions', () => {
         stepType: 'custom-type',
         scope: 'config',
         propertyKey: 'key',
+        values: { config: {}, input: {} },
       });
     });
   });
@@ -473,14 +474,14 @@ describe('getCustomPropertySuggestions', () => {
       expect(suggestions[0].label).toBe('async-option');
     });
 
-    it('should handle rejected promises from search function', async () => {
+    it('should return empty array when search function rejects', async () => {
       const searchMock = jest.fn().mockRejectedValue(new Error('Search failed'));
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(searchMock);
 
-      await expect(getCustomPropertySuggestions(context, getPropertyHandler)).rejects.toThrow(
-        'Search failed'
-      );
+      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
+
+      expect(suggestions).toEqual([]);
     });
   });
 

@@ -36,7 +36,10 @@ import {
   getCacheKeyForValue,
   setCachedOption,
 } from '../../../shared/lib/custom_property_selection_cache';
+import type { StepSelectionValues } from '@kbn/workflows';
 import type { CustomPropertyItem } from '../model/types';
+
+const EMPTY_VALUES: StepSelectionValues = { config: {}, input: {} };
 
 const mockGetAllConnectorsMapCache = stepSchemas.getAllConnectorsMapCache as jest.MockedFunction<
   typeof stepSchemas.getAllConnectorsMapCache
@@ -94,6 +97,7 @@ describe('validateCustomProperties', () => {
           stepType: '1',
           scope: 'config',
           propertyKey: '1',
+          values: EMPTY_VALUES,
         },
         propertyValue: '1',
         propertyKey: '1',
@@ -109,6 +113,7 @@ describe('validateCustomProperties', () => {
       stepType: '1',
       scope: 'config',
       propertyKey: '1',
+      values: EMPTY_VALUES,
     });
     expect(selectionHandler.getDetails).toHaveBeenCalledWith(
       '1',
@@ -116,6 +121,7 @@ describe('validateCustomProperties', () => {
         stepType: '1',
         scope: 'config',
         propertyKey: '1',
+        values: EMPTY_VALUES,
       },
       null
     );
@@ -165,6 +171,7 @@ describe('validateCustomProperties', () => {
           stepType: '2',
           scope: 'input',
           propertyKey: '2',
+          values: EMPTY_VALUES,
         },
         propertyValue: '2',
         propertyKey: '2',
@@ -180,6 +187,7 @@ describe('validateCustomProperties', () => {
       stepType: '2',
       scope: 'input',
       propertyKey: '2',
+      values: EMPTY_VALUES,
     });
     expect(selectionHandler.getDetails).toHaveBeenCalledWith(
       '2',
@@ -187,6 +195,7 @@ describe('validateCustomProperties', () => {
         stepType: '2',
         scope: 'input',
         propertyKey: '2',
+        values: EMPTY_VALUES,
       },
       resolvedOption
     );
@@ -239,6 +248,7 @@ describe('validateCustomProperties', () => {
           stepType: '3',
           scope: 'config',
           propertyKey: '3',
+          values: EMPTY_VALUES,
         },
         propertyValue: '3',
         propertyKey: '3',
@@ -257,6 +267,7 @@ describe('validateCustomProperties', () => {
         stepType: '3',
         scope: 'config',
         propertyKey: '3',
+        values: EMPTY_VALUES,
       },
       cachedOption
     );
@@ -307,6 +318,7 @@ describe('validateCustomProperties', () => {
           stepType: '4',
           scope: 'input',
           propertyKey: '4',
+          values: EMPTY_VALUES,
         },
         propertyValue: '4',
         propertyKey: '4',
@@ -325,6 +337,7 @@ describe('validateCustomProperties', () => {
         stepType: '4',
         scope: 'input',
         propertyKey: '4',
+        values: EMPTY_VALUES,
       },
       cachedSearchOption
     );
@@ -366,6 +379,7 @@ describe('validateCustomProperties', () => {
           stepType: '5',
           scope: 'config',
           propertyKey: '5',
+          values: EMPTY_VALUES,
         },
         propertyValue: 'invalid', // String instead of number
         propertyKey: '5',
@@ -410,6 +424,7 @@ describe('validateCustomProperties', () => {
           stepType: '6a',
           scope: 'config',
           propertyKey: 'prop',
+          values: EMPTY_VALUES,
         },
         propertyValue: '{{ inputs.something }}',
         propertyKey: 'prop',
@@ -449,6 +464,7 @@ describe('validateCustomProperties', () => {
           stepType: '6',
           scope: 'config',
           propertyKey: '6',
+          values: EMPTY_VALUES,
         },
         propertyValue: '6',
         propertyKey: '6',
@@ -518,6 +534,7 @@ describe('validateCustomProperties', () => {
           stepType: '1',
           scope: 'config',
           propertyKey: '1',
+          values: EMPTY_VALUES,
         },
         propertyValue: '1',
         propertyKey: '1',
@@ -538,6 +555,7 @@ describe('validateCustomProperties', () => {
           stepType: '2',
           scope: 'input',
           propertyKey: '2',
+          values: EMPTY_VALUES,
         },
         propertyValue: '2',
         propertyKey: '2',
@@ -563,6 +581,106 @@ describe('validateCustomProperties', () => {
       beforeMessage: '✓ Option 2',
       afterMessage: null,
       hoverMessage: 'Valid',
+    });
+  });
+
+  it('should return warning when resolve throws', async () => {
+    const selectionHandler = {
+      search: jest.fn(),
+      resolve: jest.fn().mockRejectedValue(new Error('Required value missing')),
+      getDetails: jest.fn(),
+    };
+
+    const mockConnector = {
+      type: 'err',
+      configSchema: z.object({ prop: z.string() }),
+    };
+    mockGetAllConnectorsMapCache.mockReturnValue(new Map([['err', mockConnector as any]]));
+    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: 'prop' });
+
+    const customPropertyItems: CustomPropertyItem[] = [
+      {
+        id: 'err-1',
+        startLineNumber: 3,
+        startColumn: 5,
+        endLineNumber: 3,
+        endColumn: 20,
+        yamlPath: ['prop'],
+        key: 'prop',
+        selectionHandler,
+        context: {
+          stepType: 'err',
+          scope: 'config',
+          propertyKey: 'prop',
+          values: EMPTY_VALUES,
+        },
+        propertyValue: 'some-val',
+        propertyKey: 'prop',
+        stepType: 'err',
+        scope: 'config',
+        type: 'custom-property',
+      },
+    ];
+
+    const validationResults = await validateCustomProperties(customPropertyItems);
+
+    expect(validationResults).toHaveLength(1);
+    expect(validationResults[0]).toMatchObject({
+      id: 'err-1',
+      severity: 'warning',
+      message: 'Required value missing',
+      hoverMessage: 'Required value missing',
+      owner: 'custom-property-validation',
+    });
+    expect(selectionHandler.getDetails).not.toHaveBeenCalled();
+  });
+
+  it('should return warning when getDetails throws', async () => {
+    const selectionHandler = {
+      search: jest.fn(),
+      resolve: jest.fn().mockResolvedValue({ value: 'v', label: 'L' }),
+      getDetails: jest.fn().mockRejectedValue(new Error('Details failed')),
+    };
+
+    const mockConnector = {
+      type: 'err2',
+      configSchema: z.object({ prop: z.string() }),
+    };
+    mockGetAllConnectorsMapCache.mockReturnValue(new Map([['err2', mockConnector as any]]));
+    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: 'prop' });
+
+    const customPropertyItems: CustomPropertyItem[] = [
+      {
+        id: 'err-2',
+        startLineNumber: 1,
+        startColumn: 1,
+        endLineNumber: 1,
+        endColumn: 10,
+        yamlPath: ['prop'],
+        key: 'prop',
+        selectionHandler,
+        context: {
+          stepType: 'err2',
+          scope: 'config',
+          propertyKey: 'prop',
+          values: EMPTY_VALUES,
+        },
+        propertyValue: 'val',
+        propertyKey: 'prop',
+        stepType: 'err2',
+        scope: 'config',
+        type: 'custom-property',
+      },
+    ];
+
+    const validationResults = await validateCustomProperties(customPropertyItems);
+
+    expect(validationResults).toHaveLength(1);
+    expect(validationResults[0]).toMatchObject({
+      id: 'err-2',
+      severity: 'warning',
+      message: 'Details failed',
+      owner: 'custom-property-validation',
     });
   });
 });

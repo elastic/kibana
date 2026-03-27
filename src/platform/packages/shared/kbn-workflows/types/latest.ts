@@ -64,6 +64,7 @@ export type {
   SelectionOption,
   SelectionDetails,
   SelectionContext,
+  StepSelectionValues,
   RequestOptions,
   GetAvailableConnectorsResponse,
 } from './v1';

@@ -562,6 +562,20 @@ export interface SelectionDetails {
   }>;
 }
 
+/**
+ * Structured values of the current step, split by scope.
+ *
+ * Built from scalar leaf properties in the YAML step definition.
+ * Intermediate map nodes that have no scalar value are **not** represented;
+ * a missing key means "not yet defined in the YAML", not "empty object".
+ */
+export interface StepSelectionValues {
+  /** Root-level step properties (everything outside the `with` block). */
+  config: Record<string, unknown>;
+  /** Properties nested under the `with` block. */
+  input: Record<string, unknown>;
+}
+
 export interface SelectionContext {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;
@@ -569,6 +583,8 @@ export interface SelectionContext {
   scope: 'config' | 'input';
   /** The property key (e.g., "agent_id") */
   propertyKey: string;
+  /** Sibling values of the current step, keyed by scope. */
+  values: StepSelectionValues;
 }
 
 export interface ConnectorIdSelectionHandler {

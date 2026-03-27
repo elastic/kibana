@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SelectionOption } from '@kbn/workflows/types/latest';
+import type { PropertySelectionHandler, SelectionOption } from '@kbn/workflows/types/latest';
 import { SortFieldCase } from '../../common/ui';
 import { getCases, resolveCase } from '../containers/api';
 import { DEFAULT_FILTER_OPTIONS } from '../containers/constants';
@@ -23,18 +23,25 @@ const toCaseSelectionOption = (theCase: CaseSelectionShape): SelectionOption<str
   description: theCase.description,
 });
 
-export const caseIdSelection = {
-  search: async (input: string) => {
+export const caseIdSelection: PropertySelectionHandler<string> = {
+  search: async (input, context) => {
+    console.log('context', context);
     const query = input.trim();
-    if (query.length === 0) {
-      return [];
-    }
+    // if (query.length === 0) {
+    //   return [];
+    // }
+
+    // TODO: get the owner from the context values
+    // context.values.config.owner
+    // context.values.input.case_id
+    // context.values.input.comment
 
     const response = await getCases({
       filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         search: query,
-        searchFields: ['title'],
+        // searchFields: ['name'],
+        owner: ['securitySolution', 'observability', 'cases'],
       },
       queryParams: {
         page: 1,
@@ -46,7 +53,7 @@ export const caseIdSelection = {
 
     return response.cases.map((theCase) => toCaseSelectionOption(theCase));
   },
-  resolve: async (value: string) => {
+  resolve: async (value, context) => {
     const caseId = value.trim();
     if (caseId.length === 0) {
       return null;
