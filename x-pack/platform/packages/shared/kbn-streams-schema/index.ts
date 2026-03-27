@@ -210,6 +210,8 @@ export {
   isComputedFeature,
   isDuplicateFeature,
   hasSameFingerprint,
+  mergeFeature,
+  toBaseFeature,
   featureSchema,
   baseFeatureSchema,
   identifiedFeatureSchema,

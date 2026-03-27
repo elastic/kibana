@@ -34,7 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
             connector_id: 'connectorId',
             field_name: 'message',
             sample_messages: [],
-            review_fields: {},
           })
           .expect(403);
       });

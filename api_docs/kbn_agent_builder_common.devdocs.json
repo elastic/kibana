@@ -6914,7 +6914,7 @@
           "\nPublic API-facing representation of an installed plugin."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-        "lineNumber": 43,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6927,7 +6927,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 47,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6940,7 +6940,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 48,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6953,7 +6953,7 @@
             "label": "version",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 49,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6965,6 +6965,21 @@
             "tags": [],
             "label": "description",
             "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginDefinition.readonly",
+            "type": "boolean",
+            "tags": [],
+            "label": "readonly",
+            "description": [
+              "\nWhether the plugin is read-only (built-in) or user-managed (persisted).\nBuilt-in plugins are registered programmatically and cannot be modified or deleted."
+            ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
             "lineNumber": 50,
             "columnNumber": 3,
@@ -6988,7 +7003,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 51,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7004,7 +7019,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 52,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7020,7 +7035,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 53,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7042,7 +7057,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 54,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7055,7 +7070,7 @@
             "label": "created_at",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 55,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7068,7 +7083,7 @@
             "label": "updated_at",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 56,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7411,7 +7426,7 @@
           "\nManifest metadata stored alongside a persisted plugin.\nContains the optional manifest fields that are not promoted to\ntop-level plugin fields."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-        "lineNumber": 30,
+        "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7434,7 +7449,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 36,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7450,7 +7465,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 37,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7466,7 +7481,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 38,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7482,7 +7497,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 39,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7498,7 +7513,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 40,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9025,22 +9040,6 @@
         "children": [
           {
             "parentPluginId": "@kbn/agent-builder-common",
-            "id": "def-common.UnmanagedPluginAssets.commands",
-            "type": "Array",
-            "tags": [],
-            "label": "commands",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 22,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/agent-builder-common",
             "id": "def-common.UnmanagedPluginAssets.agents",
             "type": "Array",
             "tags": [],
@@ -9050,7 +9049,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 23,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9066,7 +9065,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 24,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9082,7 +9081,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 25,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9098,7 +9097,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 26,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9114,7 +9113,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
-            "lineNumber": 27,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9557,7 +9556,7 @@
         "tags": [],
         "label": "EsResourceType",
         "description": [
-          "\nRepresents the type of a \"searchable\" resource in the cluster.\nSearchable resources are indices, aliases and data streams"
+          "\nRepresents the type of a \"searchable\" resource in the cluster.\nConcrete resources are indices, aliases and data streams.\n`indexPattern` denotes a multi-target or wildcard target resolved via field caps."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/resources.ts",
         "lineNumber": 8,
