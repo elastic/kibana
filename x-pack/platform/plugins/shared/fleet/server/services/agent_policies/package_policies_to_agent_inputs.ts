@@ -34,7 +34,7 @@ import {
 import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '../package_policy';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
-import { FleetError } from '../../errors';
+import { FleetError, PackagePolicyValidationError } from '../../errors';
 import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
@@ -104,7 +104,7 @@ export const storedPackagePolicyToAgentInputs = (
             stream.data_stream = restDataStream as FullAgentPolicyInputStream['data_stream'];
           } else {
             // Should never reach here if preflightCheckPackagePolicy ran, but throw defensively
-            throw new FleetError(
+            throw new PackagePolicyValidationError(
               `[data_stream.type]: unexpected undefined stream type for non-dynamic package`
             );
           }

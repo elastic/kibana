@@ -8,6 +8,7 @@
 jest.mock('../epm/packages');
 
 import type { PackagePolicy } from '../../types';
+import { PackagePolicyValidationError } from '../../errors';
 
 import type { DataStreamMeta } from './package_policies_to_agent_permissions';
 import {
@@ -1275,9 +1276,10 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         },
       ];
 
-      expect(() =>
-        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'default', packagePolicies)
-      ).toThrowError(
+      const invoke = () =>
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'default', packagePolicies);
+      expect(invoke).toThrow(PackagePolicyValidationError);
+      expect(invoke).toThrow(
         '[data_stream.type]: unexpected undefined stream type for non-dynamic package "non_dynamic_pkg"'
       );
     });

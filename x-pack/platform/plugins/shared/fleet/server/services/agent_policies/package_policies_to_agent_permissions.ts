@@ -27,7 +27,7 @@ import type {
   RegistryDataStreamPrivileges,
 } from '../../../common/types';
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
-import { PackagePolicyRequestError } from '../../errors';
+import { PackagePolicyRequestError, PackagePolicyValidationError } from '../../errors';
 
 import type { FullAgentPolicyInput, PackagePolicy, TemplateAgentPolicyInput } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
@@ -211,7 +211,7 @@ export function storedPackagePoliciesToAgentPermissions(
                       return;
                     }
                     // Should never happen for non-dynamic inputs if preflightCheckPackagePolicy ran
-                    throw new PackagePolicyRequestError(
+                    throw new PackagePolicyValidationError(
                       `[data_stream.type]: unexpected undefined stream type for non-dynamic package "${pkg.name}"`
                     );
                   }
