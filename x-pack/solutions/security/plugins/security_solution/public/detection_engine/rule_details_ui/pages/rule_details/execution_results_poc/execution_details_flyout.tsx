@@ -39,6 +39,8 @@ import {
 } from '../../../../../common/translations';
 import * as i18n from './translations';
 
+const EXECUTION_DETAILS_FLYOUT_WIDTH = 600;
+
 const tooltipListCss = css`
   list-style: disc;
   padding-left: 16px;
@@ -109,7 +111,12 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
     item.metrics.index_duration_ms != null;
 
   return (
-    <EuiFlyout onClose={onClose} size="s" ownFocus aria-labelledby={flyoutTitleId}>
+    <EuiFlyout
+      onClose={onClose}
+      size={EXECUTION_DETAILS_FLYOUT_WIDTH}
+      ownFocus
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
