@@ -8,8 +8,8 @@
  */
 
 module.exports = {
-  preset: '@kbn/test_jest_integration',
-  rootDir: '../../../../../../..',
+  preset: '@kbn/test/jest_integration_node',
+  rootDir: '../../../../../../../..',
   roots: [
     '<rootDir>/src/platform/plugins/shared/workflows_management/test/connector_workflows/integration_tests',
   ],
