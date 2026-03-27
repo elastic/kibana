@@ -25,7 +25,7 @@ export function ActionsMenuButton(props: ActionsMenuButtonProps) {
   const commandKey = isMac ? '⌘' : 'Ctrl';
 
   return (
-    <EuiButtonEmpty size="s" {...props}>
+    <EuiButtonEmpty size="s" data-test-subj="workflowYamlEditorActionsMenuButton" {...props}>
       <EuiText css={{ display: 'flex', alignItems: 'center', gap: '6px' }} size="xs">
         <b>
           <FormattedMessage

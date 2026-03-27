@@ -21,6 +21,7 @@ export function DocumentationLink() {
       iconType="popout"
       iconSide="right"
       iconSize="s"
+      data-test-subj="workflowYamlEditorDocumentationLink"
     >
       <EuiText size="xs">
         <b>
