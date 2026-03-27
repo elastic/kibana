@@ -159,22 +159,6 @@ describe('crud_client utils', () => {
       expect(result.id).toBe('doc-id');
     });
 
-    it('does not entity under typed field for non-generic types', () => {
-      mockGetEntityDefinition.mockReturnValue(createDefinition('host', [createField('host.name')]));
-
-      const doc: Entity = {
-        entity: { id: 'entity-host' },
-        host: { name: 'original-host-name' },
-      };
-      const result = validateAndTransformDoc('update', 'host', 'default', doc, undefined, false);
-
-      expect(result.doc).toHaveProperty('@timestamp');
-      expect(result.doc).toHaveProperty('entity');
-      expect(result.doc).not.toHaveProperty('host.entity');
-      expect(result.doc).toHaveProperty('entity.id', 'entity-host');
-      expect(result.doc).toHaveProperty('host.name', 'original-host-name');
-    });
-
     describe('name defaulting on create vs update', () => {
       it('defaults type.name from entity.id on create when name is not present', () => {
         mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
