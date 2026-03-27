@@ -34,7 +34,7 @@ export const getMonitorHealthRoute: SyntheticsRestApiRouteFactory = () => ({
       }
 
       return routeContext.response.customError({
-        statusCode: 500,
+        statusCode: error.statusCode,
         body: { message: error.message },
       });
     }
