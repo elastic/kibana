@@ -48,15 +48,6 @@ describe('common/attachments/comment', () => {
         } as never)
       ).toBe(false);
     });
-
-    it('returns false when owner is missing', () => {
-      expect(
-        isLegacyPayloadCommentAttachment({
-          type: AttachmentType.user,
-          comment: 'hello',
-        } as never)
-      ).toBe(false);
-    });
   });
 
   describe('isUnifiedPayloadCommentAttachment', () => {
@@ -116,10 +107,11 @@ describe('common/attachments/comment', () => {
 
   describe('toLegacyPayloadCommentAttachment', () => {
     it('transforms unified comment to legacy format with provided owner', () => {
-      const result = toLegacyPayloadCommentAttachment(
-        { type: 'comment', data: { content: 'unified content' }, owner: 'securitySolution' },
-        'securitySolution'
-      );
+      const result = toLegacyPayloadCommentAttachment({
+        type: 'comment',
+        data: { content: 'unified content' },
+        owner: 'securitySolution',
+      });
       expect(result).toEqual({
         type: AttachmentType.user,
         comment: 'unified content',
@@ -129,10 +121,11 @@ describe('common/attachments/comment', () => {
 
     it('throws when content is empty', () => {
       expect(() =>
-        toLegacyPayloadCommentAttachment(
-          { type: 'comment', data: { content: '' }, owner: 'securitySolution' },
-          'owner'
-        )
+        toLegacyPayloadCommentAttachment({
+          type: 'comment',
+          data: { content: '' },
+          owner: 'securitySolution',
+        })
       ).toThrow('Comment content is required for comment attachments');
     });
   });
@@ -229,15 +222,6 @@ describe('common/attachments/comment', () => {
         expect(result.type).toBe('user');
         expect(result.comment).toBe('unified content');
         expect(result.owner).toBe('securitySolution');
-      });
-
-      it('uses owner argument when metadata.owner is missing', () => {
-        const unifiedNoOwner = { ...unifiedComment, metadata: {}, owner: '' };
-        const result = commentAttachmentTransformer.toLegacySchema(
-          unifiedNoOwner,
-          'fallback-owner'
-        ) as { owner: string };
-        expect(result.owner).toBe('fallback-owner');
       });
 
       it('returns legacy attributes unchanged when already old schema', () => {

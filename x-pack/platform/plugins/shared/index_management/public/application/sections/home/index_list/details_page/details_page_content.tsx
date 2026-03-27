@@ -144,7 +144,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
         <EuiButton
           data-test-subj="indexDetailsBackToIndicesButton"
           color="text"
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           onClick={navigateToIndicesList}
         >
           <FormattedMessage

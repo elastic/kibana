@@ -278,6 +278,9 @@ export const getNavigationTreeDefinition = ({
                     {
                       link: 'management:model_settings',
                     },
+                    {
+                      link: 'management:elastic_inference_service',
+                    },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },
                   ],

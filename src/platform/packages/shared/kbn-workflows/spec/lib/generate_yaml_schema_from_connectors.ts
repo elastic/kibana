@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { convertLegacyInputsToJsonSchema } from './input_conversion';
+import { convertLegacyFieldsToJsonSchema } from './field_conversion';
 import { type ConnectorContractUnion } from '../..';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
@@ -19,19 +19,23 @@ import {
   getMergeStepSchema,
   getOnFailureStepSchema,
   getParallelStepSchema,
-  getTriggerSchema,
+  getSwitchStepSchema,
   getWhileStepSchema,
   getWorkflowSettingsSchema,
   LoopBreakStepSchema,
   LoopContinueStepSchema,
+  WaitForInputStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
+  WorkflowOutputStepSchema,
   WorkflowSchemaBase,
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
 import type { JsonModelSchema } from '../schema/common/json_model_schema';
+import { getTriggerSchema } from '../schema/triggers';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -82,7 +86,7 @@ export function generateYamlSchemaFromConnectors(
         ) {
           normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
         } else if (Array.isArray(data.inputs)) {
-          normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+          normalizedInputs = convertLegacyFieldsToJsonSchema(data.inputs);
         }
       }
       const { inputs: _, ...rest } = data;
@@ -106,6 +110,7 @@ function createRecursiveStepSchema(
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
     const whileSchema = getWhileStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
+    const switchSchema = getSwitchStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
 
@@ -123,12 +128,16 @@ function createRecursiveStepSchema(
       forEachSchema,
       whileSchema,
       ifSchema,
+      switchSchema,
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
+      WaitForInputStepSchema,
       DataSetStepSchema,
       WorkflowExecuteStepSchema,
       WorkflowExecuteAsyncStepSchema,
+      WorkflowOutputStepSchema,
+      WorkflowFailStepSchema,
       LoopBreakStepSchema,
       LoopContinueStepSchema,
       ...connectorSchemas,

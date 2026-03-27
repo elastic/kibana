@@ -26,7 +26,7 @@ const defaultUseMockConnectors: { data: AIConnector[]; isLoading: boolean; refet
   refetch: jest.fn(),
 };
 const mockUseLoadConnectors = jest.fn(() => defaultUseMockConnectors);
-jest.mock('@kbn/elastic-assistant', () => ({
+jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: () => mockUseLoadConnectors(),
 }));
 

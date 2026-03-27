@@ -18,7 +18,7 @@ import {
 
 const STREAM_NAMES_CREATED_BY_SPEC = ['logs.ecs.host-1', 'test-query-stream'];
 
-// Failing: See https://github.com/elastic/kibana/issues/256974
+// Failing: See https://github.com/elastic/kibana/issues/258151
 test.describe.skip('Query streams - Create query stream', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
     await browserAuth.loginAsAdmin();
@@ -90,8 +90,12 @@ test.describe.skip('Query streams - Create query stream', { tag: tags.stateful.c
     await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
     await pageObjects.streams.clickQueryStreamFormCreateButton();
 
-    // child query stream created in the UI
+    // child query stream created appears in the UI
     await expect(pageObjects.streams.childQueryStreamCreatedSuccessToast).toBeVisible();
+    // Wait for query mode to be unselected before we click it
+    await expect(
+      pageObjects.streams.childStreamTypeSelector.getByTestId('queryMode')
+    ).toHaveAttribute('aria-pressed', 'false');
     await pageObjects.streams.selectChildStreamType('Query');
     await expect(
       page.getByTestId(`queryStream-${parentStreamName}.${childStreamName}`)

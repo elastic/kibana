@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { BuiltInStepType, ConnectorTypeInfo } from '@kbn/workflows';
+import type { BuiltInStepType, ConnectorTypeInfo, WorkflowOutput } from '@kbn/workflows';
 import {
   DataSetStepSchema,
   ForEachStepSchema,
@@ -18,10 +18,14 @@ import {
   LoopContinueStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
+  SwitchStepSchema,
+  WaitForInputStepSchema,
   WaitStepSchema,
   WhileStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
+  WorkflowOutputStepSchema,
 } from '@kbn/workflows';
 import { getCachedAllConnectors } from '../../../connectors_cache';
 import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';
@@ -37,7 +41,8 @@ export function getConnectorTypeSuggestions(
   typePrefix: string,
   range: monaco.IRange,
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
-  isInsideLoopBody = false
+  isInsideLoopBody = false,
+  workflowOutputs?: WorkflowOutput[]
 ): monaco.languages.CompletionItem[] {
   // Create a cache key based on the type prefix, context, and loop state
   const cacheKey = `${typePrefix}|${JSON.stringify(range)}|${isInsideLoopBody}`;
@@ -121,7 +126,11 @@ export function getConnectorTypeSuggestions(
     );
 
     matchingBuiltInTypes.forEach((stepType) => {
-      const snippetText = generateBuiltInStepSnippet(stepType.type as BuiltInStepType, {});
+      const snippetText = generateBuiltInStepSnippet(
+        stepType.type as BuiltInStepType,
+        {},
+        workflowOutputs
+      );
       const extendedRange = {
         startLineNumber: range.startLineNumber,
         endLineNumber: range.endLineNumber,
@@ -237,6 +246,12 @@ function getBuiltInStepTypesFromSchema(): Array<{
       icon: monaco.languages.CompletionItemKind.Keyword,
     },
     {
+      schema: SwitchStepSchema,
+      description:
+        'Multi-way branching. Evaluates expression and runs the steps of the first matching case value',
+      icon: monaco.languages.CompletionItemKind.Keyword,
+    },
+    {
       schema: LoopBreakStepSchema,
       description: 'Exit the enclosing loop immediately',
       icon: monaco.languages.CompletionItemKind.Keyword,
@@ -269,6 +284,11 @@ function getBuiltInStepTypesFromSchema(): Array<{
       icon: monaco.languages.CompletionItemKind.Constant,
     },
     {
+      schema: WaitForInputStepSchema,
+      description: 'Pause execution until external input is provided (human-in-the-loop)',
+      icon: monaco.languages.CompletionItemKind.Event,
+    },
+    {
       schema: WorkflowExecuteStepSchema,
       description: 'Execute another workflow (synchronous)',
       icon: monaco.languages.CompletionItemKind.Function,
@@ -277,6 +297,16 @@ function getBuiltInStepTypesFromSchema(): Array<{
       schema: WorkflowExecuteAsyncStepSchema,
       description: 'Execute another workflow (asynchronous)',
       icon: monaco.languages.CompletionItemKind.Function,
+    },
+    {
+      schema: WorkflowOutputStepSchema,
+      description: 'Output values from the workflow',
+      icon: monaco.languages.CompletionItemKind.Property,
+    },
+    {
+      schema: WorkflowFailStepSchema,
+      description: 'Fail the workflow with a message',
+      icon: monaco.languages.CompletionItemKind.Constant,
     },
   ];
 

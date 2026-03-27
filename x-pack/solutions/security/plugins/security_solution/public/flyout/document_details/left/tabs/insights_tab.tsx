@@ -30,7 +30,7 @@ import {
 import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_details';
 import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
 import { getField } from '../../shared/utils';
-import { EventKind } from '../../shared/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const ENTITIES_TAB_ID = 'entity';

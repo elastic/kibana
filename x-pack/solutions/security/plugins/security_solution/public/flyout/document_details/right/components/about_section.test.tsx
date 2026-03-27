@@ -8,7 +8,10 @@
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { REASON_TITLE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
+import {
+  REASON_TITLE_TEST_ID,
+  MITRE_ATTACK_TITLE_TEST_ID,
+} from '../../../../flyout_v2/document/components/test_ids';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
@@ -19,11 +22,10 @@ import {
   EVENT_CATEGORY_DESCRIPTION_TEST_ID,
   EVENT_KIND_DESCRIPTION_TEST_ID,
   EVENT_RENDERER_TEST_ID,
-  MITRE_ATTACK_TITLE_TEST_ID,
   WORKFLOW_STATUS_TITLE_TEST_ID,
 } from './test_ids';
 import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
-import { EventKind } from '../../shared/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
 
 jest.mock('../../../../common/components/link_to');
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({

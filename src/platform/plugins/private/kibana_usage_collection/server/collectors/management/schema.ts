@@ -159,14 +159,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Allows users to enable/disable querying cold and frozen data tiers in alert prevalence.',
     },
   },
-  'securitySolution:enableVisualizationsInFlyout': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enableGraphVisualization': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:enableAssetInventory': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -536,6 +528,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:connectorsEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'dataSources:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -755,6 +751,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable ES|QL views for wired streams',
     },
   },
+  'observability:streamsEnableOverviewPage': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable the Streams management Overview tab',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {
@@ -786,6 +788,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Switches the Entity Store Engine to v2',
+    },
+  },
+  'elasticConsole:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of setting.',
     },
   },
 };
