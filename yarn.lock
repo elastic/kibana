@@ -6827,6 +6827,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-extensions@link:x-pack/platform/packages/shared/kbn-evals-extensions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-phoenix-executor@link:x-pack/platform/packages/shared/kbn-evals-phoenix-executor":
   version "0.0.0"
   uid ""
