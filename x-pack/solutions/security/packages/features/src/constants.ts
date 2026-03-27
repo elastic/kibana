@@ -82,13 +82,13 @@ export const USERS_API_READ = 'users-read' as const;
 export const RULES_UI_READ = 'read_rules' as const;
 export const RULES_UI_DETECTIONS = 'detections' as const;
 export const RULES_UI_EXTERNAL_DETECTIONS = 'external_detections' as const;
-export const RULES_UI_READ_PRIVILEGE = `${RULES_FEATURE_ID_V4}.${RULES_UI_READ}` as const;
+export const RULES_UI_READ_PRIVILEGE = `${RULES_FEATURE_LATEST}.${RULES_UI_READ}` as const;
 export const RULES_UI_EDIT = 'edit_rules' as const;
-export const RULES_UI_EDIT_PRIVILEGE = `${RULES_FEATURE_ID_V4}.${RULES_UI_EDIT}` as const;
+export const RULES_UI_EDIT_PRIVILEGE = `${RULES_FEATURE_LATEST}.${RULES_UI_EDIT}` as const;
 export const RULES_UI_DETECTIONS_PRIVILEGE =
-  `${RULES_FEATURE_ID_V4}.${RULES_UI_DETECTIONS}` as const;
+  `${RULES_FEATURE_LATEST}.${RULES_UI_DETECTIONS}` as const;
 export const RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
-  `${RULES_FEATURE_ID_V4}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
+  `${RULES_FEATURE_LATEST}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
 
 /**
  * Rules API subfeatures privileges
@@ -100,9 +100,9 @@ export const EXCEPTIONS_API_ALL = 'exceptions-all' as const;
 export const EXCEPTIONS_UI_READ = 'readExceptions' as const;
 export const EXCEPTIONS_UI_EDIT = 'editExceptions' as const;
 export const EXCEPTIONS_UI_READ_PRIVILEGES =
-  `${RULES_FEATURE_ID_V3}.${EXCEPTIONS_UI_READ}` as const;
+  `${RULES_FEATURE_LATEST}.${EXCEPTIONS_UI_READ}` as const;
 export const EXCEPTIONS_UI_EDIT_PRIVILEGES =
-  `${RULES_FEATURE_ID_V3}.${EXCEPTIONS_UI_EDIT}` as const;
+  `${RULES_FEATURE_LATEST}.${EXCEPTIONS_UI_EDIT}` as const;
 
 // Investigation guide
 export const INVESTIGATION_GUIDE_API_EDIT = 'investigation-guide-edit' as const;
@@ -127,27 +127,27 @@ export const RULES_MANAGEMENT_SETTINGS_API_PRIVILEGE =
 // Investigation guide
 export const INVESTIGATION_GUIDE_UI_EDIT = 'editInvestigationGuide' as const;
 export const INVESTIGATION_GUIDE_UI_EDIT_PRIVILEGES =
-  `${RULES_FEATURE_ID_V4}.${INVESTIGATION_GUIDE_UI_EDIT}` as const;
+  `${RULES_FEATURE_LATEST}.${INVESTIGATION_GUIDE_UI_EDIT}` as const;
 
 // Custom highlighted fields
 export const CUSTOM_HIGHLIGHTED_FIELDS_UI_EDIT = 'editCustomHighlightedFields' as const;
 export const CUSTOM_HIGHLIGHTED_FIELDS_UI_EDIT_PRIVILEGES =
-  `${RULES_FEATURE_ID_V4}.${CUSTOM_HIGHLIGHTED_FIELDS_UI_EDIT}` as const;
+  `${RULES_FEATURE_LATEST}.${CUSTOM_HIGHLIGHTED_FIELDS_UI_EDIT}` as const;
 
 // Enable/Disable rules
 export const ENABLE_DISABLE_RULES_UI = 'enableDisableRulesPrivilege' as const;
 export const ENABLE_DISABLE_RULES_UI_PRIVILEGES =
-  `${RULES_FEATURE_ID_V4}.${ENABLE_DISABLE_RULES_UI}` as const;
+  `${RULES_FEATURE_LATEST}.${ENABLE_DISABLE_RULES_UI}` as const;
 
 // Manual run rules
 export const MANUAL_RUN_RULES_UI = 'manualRunRulesPrivilege' as const;
 export const MANUAL_RUN_RULES_UI_PRIVILEGES =
-  `${RULES_FEATURE_ID_V4}.${MANUAL_RUN_RULES_UI}` as const;
+  `${RULES_FEATURE_LATEST}.${MANUAL_RUN_RULES_UI}` as const;
 
 // Rules management settings
 export const RULES_MANAGEMENT_SETTINGS_UI = 'rulesManagementSettingsPrivilege' as const;
 export const RULES_MANAGEMENT_SETTINGS_UI_PRIVILEGES =
-  `${RULES_FEATURE_ID_V4}.${RULES_MANAGEMENT_SETTINGS_UI}` as const;
+  `${RULES_FEATURE_LATEST}.${RULES_MANAGEMENT_SETTINGS_UI}` as const;
 
 /**
  * Alerts feature constants

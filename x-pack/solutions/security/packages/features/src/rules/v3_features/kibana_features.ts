@@ -33,7 +33,6 @@ import {
   SECURITY_SOLUTION_RULES_APP_ID,
   SERVER_APP_ID,
   USERS_API_READ,
-  EXCEPTIONS_SUBFEATURE_ALL_ID,
   RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
@@ -85,7 +84,6 @@ export const getRulesV3BaseKibanaFeature = (
             feature: RULES_FEATURE_ID_V4,
             privileges: [
               'minimal_all',
-              EXCEPTIONS_SUBFEATURE_ALL_ID,
               INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
               CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
               ENABLE_DISABLE_RULES_SUBFEATURE_ID,
