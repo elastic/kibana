@@ -296,20 +296,20 @@ describe('UnifiedWaterfallContainer', () => {
 
   describe('service badge navigation', () => {
     it('service name badge has href pointing to service overview', async () => {
-      const { getByTestId } = renderUnifiedWaterfallContainer();
+      const { getAllByTestId } = renderUnifiedWaterfallContainer();
 
-      await waitFor(() => getByTestId('apmBarDetailsServiceNameBadge'));
+      await waitFor(() => getAllByTestId('apmBarDetailsServiceNameBadge'));
 
-      expect(getByTestId('apmBarDetailsServiceNameBadge')).toHaveAttribute(
-        'href',
-        '/mock-service-overview-url'
-      );
+      const badges = getAllByTestId('apmBarDetailsServiceNameBadge');
+      badges.forEach((badge) => {
+        expect(badge).toHaveAttribute('href', '/mock-service-overview-url');
+      });
     });
 
     it('builds the href using the service name from the trace item', async () => {
-      const { getByTestId } = renderUnifiedWaterfallContainer();
+      const { getAllByTestId } = renderUnifiedWaterfallContainer();
 
-      await waitFor(() => getByTestId('apmBarDetailsServiceNameBadge'));
+      await waitFor(() => getAllByTestId('apmBarDetailsServiceNameBadge'));
 
       expect(mockRouterLink).toHaveBeenCalledWith(
         '/services/{serviceName}/overview',
