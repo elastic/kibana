@@ -16,6 +16,9 @@ import { useReportTopBarHeight } from './hooks';
 import { ProjectNextTitle } from './title';
 import { ProjectNextTrailingActions } from './trailing_actions';
 
+/** Application top bar height; aligns with project layout `applicationTopBarHeight`. */
+const APPLICATION_TOP_BAR_HEIGHT_PX = 48;
+
 const useHeaderStyles = () => {
   const { euiTheme } = useEuiTheme();
 
@@ -24,7 +27,10 @@ const useHeaderStyles = () => {
       display: flex;
       flex-direction: column;
       min-width: 0;
-      padding: ${euiTheme.size.s};
+      height: 100%;
+      min-height: ${APPLICATION_TOP_BAR_HEIGHT_PX}px;
+      box-sizing: border-box;
+      padding: 0 ${euiTheme.size.s};
       background: ${euiTheme.colors.backgroundBasePlain};
       border-bottom: ${euiTheme.border.thin};
       margin-bottom: -${euiTheme.border.width.thin};
@@ -35,6 +41,8 @@ const useHeaderStyles = () => {
       align-items: center;
       gap: ${euiTheme.size.xs};
       min-width: 0;
+      flex: 1;
+      min-height: 0;
     `;
 
     const titleCluster = css`

@@ -25,7 +25,7 @@ const useGlobalActionsStyles = () => {
       display: flex;
       flex-shrink: 0;
       align-items: center;
-      gap: ${euiTheme.size.xxs};
+      gap: ${euiTheme.size.xs};
     `;
 
     const favoriteSlot = css`
@@ -65,6 +65,7 @@ export const ProjectNextGlobalActions = React.memo(() => {
       {share ? (
         <EuiButtonIcon
           iconType="share"
+          color="text"
           display="empty"
           size="s"
           aria-label={SHARE_ARIA_LABEL}

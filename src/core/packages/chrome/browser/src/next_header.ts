@@ -25,24 +25,14 @@ export interface ChromeNextHeaderConfig {
   title: string;
 
   /**
-   * Optional badges displayed inline next to the title.
-   * Overflow rules (enforced by Chrome rendering):
-   * - 1–2 badges: show all.
-   * - 3+: show the first badge plus a "+N" overflow control that opens a popover with the rest.
-   * Guidance: prefer 1–2 badges; 3+ is for uncontrolled cases (e.g. user-applied tags).
-   * Badge max width: 200px (truncated text).
-   * The `filled` color variant is not exposed to avoid competing primary CTAs.
-   *
-   * TODO: Wire rendering in `ProjectNextHeader`.
+   * Badges inline next to the title. Chrome shows 1–2 as-is; for 3+, first badge plus "+N" popover
+   * for the rest. Max 200px per badge; `filled` is not exposed. TODO: render in `ProjectNextHeader`.
    */
   badges?: ChromeNextHeaderBadge[];
 
   /**
-   * Optional metadata row below the title (second row).
-   * At most 3 items; no overflow — all are visible.
-   * Items are plain text (`EuiText`) or interactive (`EuiButtonEmpty`).
-   *
-   * TODO: Wire rendering in `ProjectNextHeader`.
+   * Second row below the title (max 3 items, all visible). Text (`EuiText`) or button (`EuiButtonEmpty`).
+   * TODO: render in `ProjectNextHeader`.
    */
   metadata?: ChromeNextHeaderMetadataSlotItem[];
 
@@ -106,24 +96,16 @@ export type ChromeNextHeaderMetadataSlotItem =
  */
 export interface ChromeNextHeaderGlobalActions {
   /**
-   * Edit title: Chrome will own the pencil control and inline editor; apps handle persistence.
-   * TODO: Wire UI — `onSave` is reserved for when inline editing is implemented.
+   * Inline title edit (Chrome UI TBD). `onSave` runs when the user commits a new title.
    */
   editTitle?: {
-    /** Called when Chrome's inline editor commits a new title. */
     onSave: (newTitle: string) => void;
-    // TODO: onCancel, validation, maxLength when inline editing ships.
   };
-  /** Share action. Chrome renders a share icon. */
+  /** Share; Chrome renders the icon. */
   share?: {
     onClick: () => void;
-    // TODO: disabled, tooltipContent when polish pass.
   };
-  /**
-   * Favorite control supplied by the app (e.g. `FavoriteButton` with providers).
-   * Chrome reserves layout only; fixed order after share. A handler-only API is insufficient
-   * because favorites need app-owned clients, context, and React Query wiring.
-   */
+  /** Favorite control as `ReactNode` (e.g. FavoriteButton) so apps supply providers and clients. */
   favorite?: ReactNode;
 }
 
