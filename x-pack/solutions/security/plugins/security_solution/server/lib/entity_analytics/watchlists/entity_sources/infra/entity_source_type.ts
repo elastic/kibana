@@ -22,7 +22,7 @@ const watchlistEntitySourceMappings: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     name: {
-      type: 'keyword',
+      type: 'text',
     },
     managed: {
       type: 'boolean',
