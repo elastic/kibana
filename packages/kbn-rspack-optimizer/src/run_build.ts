@@ -196,6 +196,21 @@ async function runWatchBuild(
     let hasResolvedFirstBuild = false;
     let isShuttingDown = false;
     const previousAssetSizes = new Map<string, number>();
+    let previousBuildHash: string | undefined;
+
+    const cleanupStaleHotUpdates = (newHash: string) => {
+      const keepHash = previousBuildHash;
+      previousBuildHash = newHash;
+      if (!keepHash) return;
+      Fs.readdir(compiler.outputPath, (err, files) => {
+        if (err) return;
+        for (const file of files) {
+          if (/\.hot-update\.(js|json)(\.map)?$/.test(file) && !file.includes(keepHash)) {
+            Fs.unlink(Path.join(compiler.outputPath, file), () => {});
+          }
+        }
+      });
+    };
 
     const closeWatcher = (): Promise<void> => {
       if (isShuttingDown) {
@@ -279,6 +294,7 @@ async function runWatchBuild(
             copyBundlesToPluginDirs(repoRoot, log);
             if (stats.hash && hmrServer) {
               hmrServer.broadcast(stats.hash);
+              cleanupStaleHotUpdates(stats.hash);
             }
             log?.info('Watching for changes... (Ctrl+C to stop)');
           } else if (hmrServer && result.errors?.length) {
@@ -316,6 +332,10 @@ async function runWatchBuild(
                   .map((f) => f.replace(repoRoot + '/', ''))
               : [];
             hmrServer.broadcast(stats.hash, rebuildTime, changedFiles);
+          }
+
+          if (stats.hash) {
+            cleanupStaleHotUpdates(stats.hash);
           }
 
           const isVerbose = typeof log?.getWriters === 'function' && log.getWriters().some(
