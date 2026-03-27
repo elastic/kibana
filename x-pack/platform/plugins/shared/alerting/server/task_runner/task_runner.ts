@@ -46,6 +46,7 @@ import type {
   RuleTypeState,
 } from '../../common';
 import { RuleLastRunOutcomeOrderMap } from '../../common';
+import type { RuleMonitoringLastRunMetrics, GapReason } from '../../common';
 import type { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { InMemoryMetrics } from '../monitoring';
 import { IN_MEMORY_METRICS } from '../monitoring';
@@ -584,9 +585,9 @@ export class TaskRunner<
       // Set rule monitoring data
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
 
-      // Clear gap range that was persisted in the rule SO
+      // Clear gap data that was persisted in the rule SO from previous run
       if (this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range) {
-        this.ruleMonitoring.getSetters().clearGapRange();
+        this.ruleMonitoring.getSetters().clearGap();
       }
       (async () => {
         try {
@@ -671,10 +672,13 @@ export class TaskRunner<
         });
       }
 
-      const gap = this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range;
-      if (gap) {
+      const { gap_range: gapRange, gap_reason: gapReasonValue } =
+        (this.ruleMonitoring.getMonitoring()?.run?.last_run
+          ?.metrics as RuleMonitoringLastRunMetrics) ?? {};
+      if (gapRange) {
         this.alertingEventLogger.reportGap({
-          gap,
+          gap: gapRange,
+          reason: (gapReasonValue as GapReason) ?? undefined,
         });
       }
 

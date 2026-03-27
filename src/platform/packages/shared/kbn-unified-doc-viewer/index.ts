@@ -15,4 +15,11 @@ export {
   DocViewsRegistry,
   ElasticRequestState,
   FieldName,
+  registerDocViewerAnalyticsEvents,
+  type UseDocViewerSpanLogViewedEventParams,
+  type UseDocViewerTabViewedEventParams,
+  type UseDocViewerViewedEventParams,
+  useDocViewerSpanLogViewedEvent,
+  useDocViewerTabViewedEvent,
+  useDocViewerViewedEvent,
 } from './src';

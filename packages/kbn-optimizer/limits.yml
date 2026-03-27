@@ -173,10 +173,10 @@ pageLoadAssetSize:
   share: 58677
   slo: 40437
   snapshotRestore: 22068
-  spaces: 30016
+  spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 10000
+  streams: 11422
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
@@ -185,7 +185,7 @@ pageLoadAssetSize:
   transform: 16515
   triggersActionsUi: 114000
   uiActions: 35278
-  unifiedDocViewer: 14513
+  unifiedDocViewer: 15000
   unifiedSearch: 19500
   upgradeAssistant: 6898
   uptime: 48171
@@ -210,5 +210,5 @@ pageLoadAssetSize:
   visualizations: 52210
   watcher: 10485
   workflowsExtensions: 89850
-  workflowsManagement: 25000
-  workplaceAIApp: 65547
+  workflowsManagement: 30804
+  workplaceAIApp: 73317
