@@ -14,11 +14,15 @@ import type {
   ResolutionCsvUploadRowResponse,
   ResolutionCsvUploadResponse,
 } from '../../../../common/entity_analytics/entity_store/resolution_csv_upload';
+import {
+  RESOLUTION_CSV_VALID_ENTITY_TYPES,
+  RESOLUTION_CSV_REQUIRED_COLUMNS,
+} from '../../../../common/entity_analytics/entity_store/resolution_csv_upload';
 
 export type { ResolutionCsvUploadRowResponse, ResolutionCsvUploadResponse };
 
-const VALID_ENTITY_TYPES = new Set(['user', 'host', 'service', 'generic']);
-const RESERVED_COLUMNS = new Set(['type', 'resolved_to']);
+const VALID_ENTITY_TYPES = new Set(RESOLUTION_CSV_VALID_ENTITY_TYPES);
+const RESERVED_COLUMNS = new Set(RESOLUTION_CSV_REQUIRED_COLUMNS);
 const ENTITY_SEARCH_PAGE_SIZE = 100;
 const ENTITY_ID_FIELD = 'entity.id';
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';

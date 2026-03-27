@@ -6,6 +6,10 @@
  */
 
 import { RESOLUTION_CSV_MAX_SIZE_BYTES } from '../../../../common/entity_analytics/entity_store/constants';
+import {
+  RESOLUTION_CSV_VALID_ENTITY_TYPES,
+  RESOLUTION_CSV_REQUIRED_COLUMNS,
+} from '../../../../common/entity_analytics/entity_store/resolution_csv_upload';
 
 export const SUPPORTED_FILE_TYPES = [
   'text/csv',
@@ -17,5 +21,5 @@ export const SUPPORTED_FILE_TYPES = [
 export const SUPPORTED_FILE_EXTENSIONS = ['CSV', 'TXT', 'TSV'];
 export const MAX_FILE_SIZE_BYTES = RESOLUTION_CSV_MAX_SIZE_BYTES;
 
-export const VALID_ENTITY_TYPES = ['user', 'host', 'service', 'generic'];
-export const REQUIRED_COLUMNS = ['type', 'resolved_to'];
+export const VALID_ENTITY_TYPES = [...RESOLUTION_CSV_VALID_ENTITY_TYPES];
+export const REQUIRED_COLUMNS = [...RESOLUTION_CSV_REQUIRED_COLUMNS];
