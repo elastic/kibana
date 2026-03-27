@@ -16,7 +16,7 @@ import { ConfigKey, LocationHealthStatusValue } from '../../../../../../common/r
 import { fetchMonitorHealthAction, selectMonitorHealth } from '../../../state/monitor_health';
 import { resetMonitorAPI, resetMonitorBulkAPI } from '../../../state/monitor_management/api';
 import { useSyntheticsRefreshContext } from '../../../contexts';
-import { isResetFixableStatus } from './status_labels';
+import { isFixableByResetStatus } from './status_labels';
 
 export interface MonitorIntegrationStatus {
   configId: string;
@@ -39,7 +39,7 @@ interface UseMonitorIntegrationHealthReturn {
   resetMonitor: (configId: string) => Promise<{ error?: Error }>;
   resetMonitors: (configIds: string[]) => Promise<{ error?: Error }>;
   isUnhealthy: (configId: string) => boolean;
-  isResetFixable: (configId: string) => boolean;
+  isFixableByReset: (configId: string) => boolean;
   getUnhealthyLocationStatuses: (configId: string) => MonitorIntegrationStatus[];
   getUnhealthyLocationCount: () => number;
   getUnhealthyMonitorCountForLocation: (locationId: string) => number;
@@ -113,10 +113,10 @@ export const useMonitorIntegrationHealth = (
     [statuses]
   );
 
-  const isResetFixable = useCallback(
+  const isFixableByReset = useCallback(
     (configId: string): boolean => {
       const locationStatuses = statuses.get(configId);
-      return locationStatuses?.some((s) => isResetFixableStatus(s.status)) ?? false;
+      return locationStatuses?.some((s) => isFixableByResetStatus(s.status)) ?? false;
     },
     [statuses]
   );
@@ -214,7 +214,7 @@ export const useMonitorIntegrationHealth = (
     resetMonitor,
     resetMonitors,
     isUnhealthy,
-    isResetFixable,
+    isFixableByReset,
     getUnhealthyLocationStatuses,
     getUnhealthyLocationCount,
     getUnhealthyMonitorCountForLocation,

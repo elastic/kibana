@@ -48,7 +48,7 @@ export function useMonitorListColumns({
   overviewStatus,
   setMonitorPendingDeletion,
   setMonitorPendingReset,
-  isResetFixable,
+  isFixableByReset,
 }: {
   loading: boolean;
   overviewStatus: OverviewStatusState | null;
@@ -57,7 +57,7 @@ export function useMonitorListColumns({
     resetIds: string[];
     skippedMonitors: Array<{ id: string; name: string }>;
   }) => void;
-  isResetFixable: (configId: string) => boolean;
+  isFixableByReset: (configId: string) => boolean;
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
   const { http, spaces } = useKibana<ClientPluginsStart>().services;
@@ -339,7 +339,7 @@ export function useMonitorListColumns({
           icon: 'refresh' as const,
           type: 'icon' as const,
           color: 'warning' as const,
-          available: (fields) => isResetFixable(fields[ConfigKey.CONFIG_ID]),
+          available: (fields) => isFixableByReset(fields[ConfigKey.CONFIG_ID]),
           enabled: (fields) =>
             canEditSynthetics &&
             !isActionLoading(fields) &&

@@ -15,7 +15,7 @@ import { kibanaService } from '../../../../../utils/kibana_service';
 export const MissingIntegrationCallout = ({ configId }: { configId: string }) => {
   const {
     isUnhealthy: hasMissingIntegrations,
-    isResetFixable,
+    isFixableByReset,
     getUnhealthyLocationStatuses: getMissingStatuses,
     resetMonitor,
     isResetting,
@@ -24,7 +24,7 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
   });
 
   const isMissing = hasMissingIntegrations(configId);
-  const canReset = isResetFixable(configId);
+  const canReset = isFixableByReset(configId);
   const missingStatuses = getMissingStatuses(configId);
 
   const handleReset = useCallback(async () => {

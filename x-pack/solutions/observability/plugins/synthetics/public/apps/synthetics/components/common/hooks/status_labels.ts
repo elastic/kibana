@@ -56,5 +56,5 @@ export const RESET_FIXABLE_STATUSES = new Set([
   LocationHealthStatusValue.AgentPolicyMismatch,
 ]);
 
-export const isResetFixableStatus = (status: LocationHealthStatusValue): boolean =>
+export const isFixableByResetStatus = (status: LocationHealthStatusValue): boolean =>
   RESET_FIXABLE_STATUSES.has(status);

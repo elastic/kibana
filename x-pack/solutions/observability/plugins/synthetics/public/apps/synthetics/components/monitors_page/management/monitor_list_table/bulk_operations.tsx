@@ -24,7 +24,7 @@ export const BulkOperations = ({
     skippedMonitors: Array<{ id: string; name: string }>;
   }) => void;
 }) => {
-  const { isUnhealthy, isResetFixable } = useMonitorIntegrationHealth();
+  const { isUnhealthy, isFixableByReset } = useMonitorIntegrationHealth();
 
   const onDeleted = () => {
     setMonitorPendingDeletion(selectedItems.map((item) => item[ConfigKey.CONFIG_ID]));
@@ -32,11 +32,11 @@ export const BulkOperations = ({
 
   const selectedConfigIds = selectedItems.map((item) => item[ConfigKey.CONFIG_ID]);
   const unhealthyConfigIds = selectedConfigIds.filter((id) => isUnhealthy(id));
-  const resetIds = unhealthyConfigIds.filter((id) => isResetFixable(id));
+  const resetIds = unhealthyConfigIds.filter((id) => isFixableByReset(id));
   const skippedMonitors = selectedItems
     .filter((item) => {
       const id = item[ConfigKey.CONFIG_ID];
-      return isUnhealthy(id) && !isResetFixable(id);
+      return isUnhealthy(id) && !isFixableByReset(id);
     })
     .map((item) => ({ id: item[ConfigKey.CONFIG_ID], name: item[ConfigKey.NAME] }));
 

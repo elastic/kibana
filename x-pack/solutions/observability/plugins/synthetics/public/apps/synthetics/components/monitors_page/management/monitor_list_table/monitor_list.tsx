@@ -57,7 +57,7 @@ export const MonitorList = ({
     resetIds: string[];
     skippedMonitors: Array<{ id: string; name: string }>;
   } | null>(null);
-  const { resetMonitors, isResetFixable } = useMonitorIntegrationHealth();
+  const { resetMonitors, isFixableByReset } = useMonitorIntegrationHealth();
 
   const handleOnChange = useCallback(
     ({
@@ -102,7 +102,7 @@ export const MonitorList = ({
     overviewStatus,
     setMonitorPendingDeletion,
     setMonitorPendingReset,
-    isResetFixable,
+    isFixableByReset,
   });
 
   const [selectedItems, setSelectedItems] = useState<EncryptedSyntheticsSavedMonitor[]>([]);
