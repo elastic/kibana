@@ -9,14 +9,14 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import { getRouteConfig } from '../get_route_config';
-import { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
+import { searchRequestParamsSchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
 import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
 
 export function registerSearchRoute(router: VersionedRouter<DashboardApiRequestHandlerContext>) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
-  const searchRoute = router.post({
-    path: `${basePath}/search`,
+  const searchRoute = router.get({
+    path: `${basePath}`,
     summary: `Search dashboards`,
     ...routeConfig,
   });
@@ -26,11 +26,15 @@ export function registerSearchRoute(router: VersionedRouter<DashboardApiRequestH
       version: routeVersion,
       validate: {
         request: {
-          body: searchRequestBodySchema,
+          query: searchRequestParamsSchema,
         },
         response: {
           200: {
             body: () => searchResponseBodySchema,
+            description: 'Indicates the search is successful and the dashboards are retrieved',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
           },
         },
       },
@@ -39,15 +43,15 @@ export function registerSearchRoute(router: VersionedRouter<DashboardApiRequestH
       let result;
       const { dashboardApi } = await ctx.resolve(['dashboardApi']);
       try {
-        result = await search(ctx, req.body);
+        result = await search(ctx, req.query);
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
-          const response = res.forbidden();
+          const response = res.forbidden({ body: { message: e.message } });
           dashboardApi.telemetry.incrementCounter(response);
           return response;
         }
 
-        const response = res.badRequest();
+        const response = res.badRequest({ body: { message: e.message } });
         dashboardApi.telemetry.incrementCounter(response);
         return response;
       }

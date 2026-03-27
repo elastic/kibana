@@ -7,6 +7,10 @@
 
 import { useMemo } from 'react';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS as ENTITY_STORE_API_VERSIONS,
+  ENTITY_STORE_ROUTES,
+} from '@kbn/entity-store/common';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
@@ -133,6 +137,30 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     /**
+     * Fetches entities from the Entity Store v2 unified latest index (internal entity_store plugin route).
+     */
+    const fetchEntitiesListV2 = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params: FetchEntitiesListParams;
+    }) =>
+      http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.CRUD_GET, {
+        version: ENTITY_STORE_API_VERSIONS.internal.v2,
+        method: 'GET',
+        query: {
+          entity_types: params.entityTypes,
+          sort_field: params.sortField,
+          sort_order: params.sortOrder,
+          page: params.page,
+          per_page: params.perPage,
+          filterQuery: params.filterQuery,
+        },
+        signal,
+      });
+
+    /**
      * Fetches risks engine status
      */
     const fetchRiskEngineStatus = ({ signal }: { signal?: AbortSignal }) =>
@@ -213,6 +241,15 @@ export const useEntityAnalyticsRoutes = () => {
     const fetchEntityStorePrivileges = () =>
       http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_INTERNAL_PRIVILEGES_URL, {
         version: '1',
+        method: 'GET',
+      });
+
+    /**
+     * Get Entity Store v2 privileges
+     */
+    const fetchEntityStoreV2Privileges = () =>
+      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
+        version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
       });
 
@@ -530,6 +567,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       fetchEntityStorePrivileges,
+      fetchEntityStoreV2Privileges,
       searchPrivMonIndices,
       createPrivMonImportIndex,
       createAssetCriticality,
@@ -552,6 +590,7 @@ export const useEntityAnalyticsRoutes = () => {
       calculateEntityRiskScore,
       cleanUpRiskEngine,
       fetchEntitiesList,
+      fetchEntitiesListV2,
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,

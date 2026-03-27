@@ -34,6 +34,17 @@ export function registerDeleteRoute(router: VersionedRouter<DashboardApiRequestH
             }),
           }),
         },
+        response: {
+          200: {
+            description: 'Indicates the dashboard is deleted successfully',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates that the dashboard with the given ID is not found.',
+          },
+        },
       },
     },
     async (ctx, req, res) => {
@@ -51,11 +62,11 @@ export function registerDeleteRoute(router: VersionedRouter<DashboardApiRequestH
           return response;
         }
         if (e.isBoom && e.output.statusCode === 403) {
-          const response = res.forbidden();
+          const response = res.forbidden({ body: { message: e.message } });
           dashboardApi.telemetry.incrementCounter(response);
           return response;
         }
-        const response = res.badRequest();
+        const response = res.badRequest({ body: { message: e.message } });
         dashboardApi.telemetry.incrementCounter(response);
         return response;
       }

@@ -107,7 +107,7 @@ export const RedactProcessorForm = () => {
             />
           ))}
           <EuiButtonEmpty
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={() => append({ value: '' })}
             size="xs"
             data-test-subj="streamsAppRedactAddPatternButton"

@@ -54,6 +54,13 @@ export function registerUpdateRoute(
         response: {
           200: {
             body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
+            description: 'Indicates the dashboard is updated successfully',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates that the dashboard with the given ID is not found.',
           },
         },
       }),
@@ -82,11 +89,11 @@ export function registerUpdateRoute(
           return response;
         }
         if (e.isBoom && e.output.statusCode === 403) {
-          const response = res.forbidden();
+          const response = res.forbidden({ body: { message: e.message } });
           dashboardApi.telemetry.incrementCounter(response);
           return response;
         }
-        const response = res.badRequest({ body: e.output.payload });
+        const response = res.badRequest({ body: { message: e.message } });
         dashboardApi.telemetry.incrementCounter(response);
         return response;
       }

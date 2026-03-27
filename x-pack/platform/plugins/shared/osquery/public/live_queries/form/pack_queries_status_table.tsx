@@ -15,13 +15,13 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiNotificationBadge,
   RIGHT_ALIGNMENT,
   EuiBadge,
   EuiText,
+  formatDate,
 } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryDetailsFlyout } from './query_details_flyout';
 import { PackResultsHeader } from './pack_results_header';
@@ -48,13 +48,18 @@ const truncateTooltipTextCss = {
   },
 };
 
-const euiFlexItemCss = {
+const queryClampCss = {
   cursor: 'pointer',
+  '.euiCodeBlock__code': {
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical' as const,
+    overflow: 'hidden',
+  },
 };
 
-const euiFlexItemWithMinWidthCss = {
+const queryClampFlexItemCss = {
   minWidth: 0,
-  ...euiFlexItemCss,
 };
 
 // TODO fix types
@@ -66,6 +71,8 @@ const euiBasicTableCss = {
   '.euiTableRow.euiTableRow-isExpandedRow .euiTableCellContent': {
     paddingLeft: 0,
     paddingRight: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
   },
 
   'div.euiDataGrid__virtualized::-webkit-scrollbar': {
@@ -97,7 +104,7 @@ interface DocsColumnResultsProps {
 const DocsColumnResults: React.FC<DocsColumnResultsProps> = ({ count, isLive }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
-      {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
+      {count ? <EuiBadge color="hollow">{count}</EuiBadge> : '\u2014'}
     </EuiFlexItem>
     {!isLive ? (
       <EuiFlexItem grow={false} data-test-subj={'live-query-loading'}>
@@ -113,20 +120,28 @@ interface AgentsColumnResultsProps {
   failed?: number;
 }
 
+const agentsSeparatorCss = ({ euiTheme }: UseEuiTheme) => ({ color: euiTheme.colors.subduedText });
+
 const AgentsColumnResults: React.FC<AgentsColumnResultsProps> = ({
   successful,
   pending,
   failed,
 }) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center">
+  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
     <EuiFlexItem grow={false}>
-      <EuiText color="subdued">
-        <EuiBadge color="success">{successful}</EuiBadge>
-        {' / '}
-        <EuiBadge color="default">{pending}</EuiBadge>
-        {' / '}
-        <EuiBadge color={failed ? 'danger' : 'default'}>{failed}</EuiBadge>
-      </EuiText>
+      <EuiBadge color="success">{successful}</EuiBadge>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <span css={agentsSeparatorCss}>/</span>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color="default">{pending}</EuiBadge>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <span css={agentsSeparatorCss}>/</span>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color={failed ? 'danger' : 'default'}>{failed}</EuiBadge>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -186,6 +201,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     },
     []
   );
+  const handleQueryFlyoutKeyDown = useCallback(
+    (item: any) => (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setQueryDetailsFlyoutOpen(item);
+      }
+    },
+    []
+  );
   const handleQueryFlyoutClose = useCallback(() => setQueryDetailsFlyoutOpen(null), []);
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
@@ -205,27 +229,26 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderQueryColumn = useCallback(
     (query: string, item: any) => {
       const singleLine = removeMultilines(query);
-      const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
+      const content = singleLine.length > 120 ? `${singleLine.substring(0, 120)}...` : singleLine;
 
       const queryContent = (
-        <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-          {content}
-        </EuiCodeBlock>
+        <div
+          css={queryClampCss}
+          role="button"
+          tabIndex={0}
+          onClick={handleQueryFlyoutOpen(item)}
+          onKeyDown={handleQueryFlyoutKeyDown(item)}
+        >
+          <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+            {content}
+          </EuiCodeBlock>
+        </div>
       );
 
       if (scheduleId && packName) {
         return (
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            wrap={false}
-            justifyContent="spaceBetween"
-          >
-            <EuiFlexItem
-              grow={true}
-              css={euiFlexItemWithMinWidthCss}
-              onClick={handleQueryFlyoutOpen(item)}
-            >
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false}>
+            <EuiFlexItem grow={false} css={queryClampFlexItemCss}>
               {queryContent}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -237,13 +260,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         );
       }
 
-      return (
-        <EuiFlexItem css={euiFlexItemCss} onClick={handleQueryFlyoutOpen(item)}>
-          {queryContent}
-        </EuiFlexItem>
-      );
+      return queryContent;
     },
-    [handleQueryFlyoutOpen, scheduleId, packName]
+    [handleQueryFlyoutOpen, handleQueryFlyoutKeyDown, scheduleId, packName]
   );
 
   const renderDocsColumn = useCallback((item: PackQueryStatusItem) => {
@@ -268,7 +287,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   // These renderers intentionally ignore the row item — the value is the same
   // for all rows since it comes from the parent execution context, not per-query data.
   const renderRunAtColumn = useCallback(
-    () => (startDate ? <EuiText size="s">{moment(startDate).format('lll')}</EuiText> : null),
+    () => (startDate ? <EuiText size="s">{formatDate(startDate)}</EuiText> : null),
     [startDate]
   );
 
@@ -315,7 +334,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           delete itemIdToExpandedRowMapValues[item.id];
         } else {
           itemIdToExpandedRowMapValues[item.id] = (
-            <EuiFlexGroup gutterSize="xl">
+            <EuiFlexGroup gutterSize="none">
               <EuiFlexItem>
                 <ResultTabs
                   liveQueryActionId={actionId}
@@ -347,7 +366,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         <EuiButtonIcon
           data-test-subj={`toggleIcon-${item.id}`}
           onClick={getHandleErrorsToggle(item)}
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleUp' : 'chevronSingleDown'}
           aria-label={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
             defaultMessage: 'Toggle results',
           })}
@@ -375,7 +394,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                 addToTimeline={addToTimeline}
                 scheduleId={scheduleId}
                 executionCount={executionCount}
-                onViewQuery={handleQueryFlyoutOpen(row)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -451,8 +469,31 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     [data, renderResultActions, renderToggleResultsAction]
   );
 
+  const renderViewQueryColumn = useCallback(
+    (row: PackQueryStatusItem) => (
+      <EuiButtonIcon
+        iconType="expand"
+        onClick={handleQueryFlyoutOpen(row)}
+        aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
+          defaultMessage: 'View query',
+        })}
+      />
+    ),
+    [handleQueryFlyoutOpen]
+  );
+
   const columns = useMemo(
     () => [
+      ...(isHistoryEnabled
+        ? [
+            {
+              field: '',
+              name: '',
+              width: '40px',
+              render: renderViewQueryColumn,
+            },
+          ]
+        : []),
       {
         field: 'id',
         name: i18n.translate('xpack.osquery.pack.queriesTable.idColumnTitle', {
@@ -467,7 +508,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           defaultMessage: 'Query',
         }),
         render: renderQueryColumn,
-        width: '40%',
+        width: '42%',
       },
       ...(isHistoryEnabled && !scheduleId && tags
         ? [
@@ -486,7 +527,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         name: i18n.translate('xpack.osquery.pack.queriesTable.docsResultsColumnTitle', {
           defaultMessage: 'Docs',
         }),
-        width: '80px',
+        width: '60px',
         render: renderDocsColumn,
       },
       {
@@ -504,7 +545,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
               name: i18n.translate('xpack.osquery.pack.queriesTable.runAtColumnTitle', {
                 defaultMessage: 'Run at',
               }),
-              width: '180px',
+              width: '160px',
               render: renderRunAtColumn,
             },
           ]
@@ -528,7 +569,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
               name: i18n.translate('xpack.osquery.pack.queriesTable.actionsColumnTitle', {
                 defaultMessage: 'Actions',
               }),
-              width: '120px',
+              width: '80px',
               render: renderActionsColumn,
             },
           ]
@@ -557,6 +598,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     ],
     [
       isHistoryEnabled,
+      renderViewQueryColumn,
       renderIDColumn,
       renderQueryColumn,
       renderDocsColumn,

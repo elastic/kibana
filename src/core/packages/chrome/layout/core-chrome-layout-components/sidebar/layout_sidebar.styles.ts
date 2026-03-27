@@ -14,7 +14,9 @@ const root = css`
   grid-area: sidebar;
   display: flex;
   flex-direction: column;
-  height: calc(100% - ${layoutVar('application.marginBottom')});
+  height: calc(
+    100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
+  );
   width: calc(100% - ${layoutVar('application.marginRight')});
   z-index: ${layoutLevels.sidebar};
   min-height: 0; // to allow flex children to shrink properly

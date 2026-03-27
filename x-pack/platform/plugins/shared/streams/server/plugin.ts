@@ -45,6 +45,7 @@ import type {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
+import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
@@ -55,7 +56,7 @@ import { TaskService } from './lib/tasks/task_service';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
-import { registerStreamsAgentBuilder } from './agent_builder/register';
+import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -83,6 +84,7 @@ export class StreamsPlugin
   private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
+  private patternExtractionService?: PatternExtractionService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -99,6 +101,11 @@ export class StreamsPlugin
       config: this.config,
       logger: this.logger,
     } as StreamsServer;
+
+    this.patternExtractionService = new PatternExtractionService(
+      this.config.workers.patternExtraction,
+      this.logger.get('patternExtraction')
+    );
 
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(
@@ -271,6 +278,7 @@ export class StreamsPlugin
         server: this.server,
         telemetry: telemetryClient,
         processorSuggestions: this.processorSuggestionsService,
+        patternExtractionService: this.patternExtractionService,
         getScopedClients,
       },
       core,
@@ -363,6 +371,7 @@ export class StreamsPlugin
       this.server.security = plugins.security;
       this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+      this.server.inference = plugins.inference;
       this.server.taskManager = plugins.taskManager;
     }
 
@@ -389,5 +398,7 @@ export class StreamsPlugin
     return {};
   }
 
-  public stop() {}
+  public async stop() {
+    await this.patternExtractionService?.stop();
+  }
 }

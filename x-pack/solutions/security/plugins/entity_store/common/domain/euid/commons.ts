@@ -6,7 +6,15 @@
  */
 
 import { get } from 'lodash';
-import type { EuidAttribute, FieldEvaluationSource } from '../definitions/entity_schema';
+import type { Condition } from '@kbn/streamlang';
+import type {
+  CalculatedEntityIdentity,
+  EntityDefinitionWithoutId,
+  EuidAttribute,
+  FieldEvaluationSource,
+  FieldValueSchema,
+} from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 
 interface FieldValue {
   [key: string]: string;
@@ -39,11 +47,11 @@ export function getFieldValue(doc: any, field: string): string | undefined {
   // However, it can still happen that elasticsearch
   // client returns an array of values.
   if (Array.isArray(fieldInObject)) {
-    if (fieldInObject.length > 0) {
-      return String(fieldInObject[0]);
-    } else {
-      throw new Error(`Field ${field} is an array but has no values`);
+    if (fieldInObject.length === 0) {
+      return undefined;
     }
+    const first = fieldInObject[0];
+    return first !== undefined && first !== null ? String(first) : undefined;
   }
 
   if (typeof fieldInObject === 'object') {
@@ -59,6 +67,133 @@ export function getFieldValue(doc: any, field: string): string | undefined {
 
 export function getCompositionFields(composition: EuidAttribute[]): string[] {
   return composition.filter(isEuidField).map((attr) => attr.field);
+}
+
+/**
+ * Builds `documentsFilter` ∧ `postAggFilter` for DSL, ESQL, and single-doc gate evaluation.
+ * Missing `documentsFilter` is treated as always true so a definition with only `postAggFilter` still applies.
+ */
+export function mergeDocumentsFilterAndPostAgg(
+  documentsFilter?: Condition,
+  postAggFilter?: Condition
+): Condition {
+  let condition: Condition = documentsFilter ?? { always: true };
+  if (postAggFilter) {
+    condition = { and: [condition, postAggFilter] };
+  }
+  return condition;
+}
+
+/**
+ * Evaluates a streamlang condition against a document. Supports and, or, not, and field predicates.
+ */
+export function evaluateStreamlangCondition(doc: any, condition: unknown): boolean {
+  if (!condition || typeof condition !== 'object') return false;
+  const c = condition as Record<string, unknown>;
+  if ('and' in c && Array.isArray(c.and)) {
+    return (c.and as unknown[]).every((sub) => evaluateStreamlangCondition(doc, sub));
+  }
+  if ('or' in c && Array.isArray(c.or)) {
+    return (c.or as unknown[]).some((sub) => evaluateStreamlangCondition(doc, sub));
+  }
+  if ('not' in c) {
+    return !evaluateStreamlangCondition(doc, c.not);
+  }
+  if ('always' in c) return true;
+  if ('never' in c) return false;
+  if ('field' in c && typeof c.field === 'string') {
+    const value = getFieldValue(doc, c.field);
+    if ('eq' in c && c.eq !== undefined) return value === String(c.eq);
+    if ('neq' in c && c.neq !== undefined) return value !== String(c.neq);
+    if ('exists' in c) {
+      const exists = value !== undefined && value !== null && value !== '';
+      return c.exists === exists;
+    }
+    if ('includes' in c) {
+      const fieldVal = getFieldValue(doc, c.field);
+      if (fieldVal === undefined) return false;
+      return String(fieldVal).includes(String(c.includes));
+    }
+  }
+  return false;
+}
+
+/**
+ * True when the document matches `documentsFilter` ∧ `postAggFilter` (same predicate as
+ * `getEuidDslDocumentsContainsIdFilter` / logs extraction WHERE). `postAggFilter` uses
+ * logical field names; main extraction ESQL applies `recent.` only when building the post-join WHERE.
+ *
+ * For single-field identity definitions, returns true (callers only use this on the
+ * calculated-identity path after field evaluations).
+ */
+export function documentPassesCalculatedIdentityPipelineGate(
+  doc: any,
+  entityDefinition: EntityDefinitionWithoutId
+): boolean {
+  const { identityField, postAggFilter } = entityDefinition;
+  if (isSingleFieldIdentity(identityField)) {
+    return true;
+  }
+  return evaluateStreamlangCondition(
+    doc,
+    mergeDocumentsFilterAndPostAgg(identityField.documentsFilter, postAggFilter)
+  );
+}
+
+/**
+ * Resolves a FieldValue (literal, source, or composition) to a string for in-memory doc.
+ */
+export function resolveFieldValueSchema(doc: any, value: FieldValueSchema): string | undefined {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if ('source' in value) {
+    return getFieldValue(doc, value.source);
+  }
+  const { fields, sep } = value.composition;
+  const values = fields.map((f) => getFieldValue(doc, f));
+  if (values.some((v) => v === undefined)) {
+    return undefined;
+  }
+  return values.join(sep);
+}
+
+/**
+ * Applies when-condition field overrides to doc (source/composition resolved per entry).
+ * Used for `whenConditionTrueSetFieldsPreAgg` and `whenConditionTrueSetFieldsAfterStats` on a single-document simulation.
+ */
+export function applyWhenConditionTrueSetFields(
+  doc: any,
+  entries: Array<{ condition: unknown; fields: Record<string, FieldValueSchema> }>
+): void {
+  for (const entry of entries) {
+    if (evaluateStreamlangCondition(doc, entry.condition)) {
+      for (const [field, value] of Object.entries(entry.fields)) {
+        const resolved = resolveFieldValueSchema(doc, value);
+        if (resolved !== undefined) {
+          doc[field] = resolved;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Returns the effective euid ranking for a document. Iterates branches in order;
+ * returns the first matching branch's ranking. Doc must have fieldEvaluations and
+ * whenConditionTrueSetFieldsPreAgg already applied.
+ */
+export function getEffectiveEuidRanking(
+  doc: any,
+  identityField: CalculatedEntityIdentity
+): EuidAttribute[][] {
+  const { euidRanking } = identityField;
+  for (const branch of euidRanking.branches) {
+    if (!branch.when || evaluateStreamlangCondition(doc, branch.when)) {
+      return branch.ranking;
+    }
+  }
+  return euidRanking.branches[euidRanking.branches.length - 1]?.ranking ?? [];
 }
 
 export function getFieldsToBeFilteredOn(
