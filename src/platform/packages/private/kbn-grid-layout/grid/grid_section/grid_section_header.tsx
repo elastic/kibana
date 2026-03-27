@@ -248,7 +248,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         onTouchEnd={(e) => {
           // prevents both `onMouseDown` and `onTouchStart` from firing during touch events
           if (!shouldIgnoreHeaderClick(e.target)) {
-            e.preventDefault();
+            if (e.cancelable) e.preventDefault();
             e.stopPropagation();
           }
         }}
@@ -392,7 +392,6 @@ const styles = {
 
       // these styles ensure that dragged sections are rendered **above** everything else + the move icon stays visible
       '&.kbnGridSectionHeader--active': {
-        touchAction: 'none', // prevents default drag behaviour on mobile
         zIndex: euiTheme.levels.modal,
         '.kbnGridSection--dragHandle': {
           cursor: 'move',
