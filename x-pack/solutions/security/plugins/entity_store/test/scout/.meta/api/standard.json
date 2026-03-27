@@ -1,5 +1,5 @@
 {
-  "sha1": "3cb14fd971b50768a976ac0f26e4c463bd152319",
+  "sha1": "535a62655ffc78f13730519d3adda95a498c4450",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -1620,7 +1620,7 @@
     {
       "id": "eea391c0059ed1b-89487fe761ee169",
       "title": "Entity Store Main logs extraction Should apply user postAggFilter: IDP asset/iam paths and entity.id-after-LOOKUP; omit when no keep branch",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1630,13 +1630,13 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
         "line": 416,
-        "column": 11
+        "column": 10
       }
     },
     {
       "id": "eea391c0059ed1b-ec90f47880eb3c8",
       "title": "Entity Store Main logs extraction Should only enrich (update) existing entities when entity already exists for both IDP and non-IDP, no new entity creation",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1646,7 +1646,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
         "line": 548,
-        "column": 11
+        "column": 10
       }
     },
     {

@@ -91,7 +91,7 @@ apiTest.describe(
         });
 
         expect(entities.hits.hits).toHaveLength(expectedResultCount);
-        // it's deterministic because of the MD5 id
+        // it's deterministic because of the SHA-256 id
         // manually checking object until we have a snapshot matcher
         expect(entities.hits.hits).toMatchObject(expectedHostEntities);
       }
