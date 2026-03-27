@@ -156,6 +156,7 @@ import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { CpsMlRuleCallout } from '../../../rule_management_ui/components/cps_ml_rule_callout/callout';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const RULE_EXCEPTION_LIST_TYPES = [
@@ -339,9 +340,6 @@ export const RuleDetailsPage = connector(
     const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
     const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-    const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled(
-      'storeGapsInEventLogEnabled'
-    );
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
     const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
@@ -640,6 +638,7 @@ export const RuleDetailsPage = connector(
       <>
         <NeedAdminForUpdateRulesCallOut />
         <MissingDetectionsPrivilegesCallOut />
+        {isMlRule(rule?.type) && <CpsMlRuleCallout />}
         {upgradeCallout}
         {isBulkDuplicateConfirmationVisible && (
           <BulkActionDuplicateExceptionsConfirmation
@@ -929,12 +928,8 @@ export const RuleDetailsPage = connector(
                           theme={theme}
                         />
                         <EuiSpacer size="xl" />
-                        {storeGapsInEventLogEnabled && (
-                          <>
-                            <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
-                            <EuiSpacer size="xl" />
-                          </>
-                        )}
+                        <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
+                        <EuiSpacer size="xl" />
                         <RuleBackfillsInfo ruleId={ruleId} />
                       </>
                     </Route>
