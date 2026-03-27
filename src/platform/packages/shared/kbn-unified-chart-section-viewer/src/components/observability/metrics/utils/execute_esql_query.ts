@@ -33,6 +33,24 @@ export interface ExecuteEsqlParams {
   uiSettings: IUiSettingsClient;
 }
 
+function getErrorMessageFromEsqlResponse(response: object): string | undefined {
+  if (!('error' in response) || response.error == null || typeof response.error !== 'object') {
+    return undefined;
+  }
+  const e = response.error as {
+    type?: string;
+    reason?: string;
+    root_cause?: Array<{ type?: string; reason?: string }>;
+  };
+  const head = [e.type, e.reason].filter((x): x is string => Boolean(x?.trim())).join(': ');
+  if (head) {
+    return head;
+  }
+  const rc = e.root_cause?.[0];
+  const fromRoot = [rc?.type, rc?.reason].filter((x): x is string => Boolean(x?.trim())).join(': ');
+  return fromRoot || 'Elasticsearch returned an error';
+}
+
 /**
  * Executes an ES|QL query using the data plugin's search service.
  */
@@ -70,7 +88,10 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
     ),
   });
 
-  const plainObjects = esqlResultToPlainObjects<TDocument>(response);
+  const errorMessage = getErrorMessageFromEsqlResponse(response as object);
+  if (errorMessage) {
+    throw new Error(errorMessage);
+  }
 
-  return plainObjects;
+  return esqlResultToPlainObjects<TDocument>(response);
 }
