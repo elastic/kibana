@@ -57,7 +57,7 @@ export const initializeSwimLaneDataFetcher = (
     fromPage: swimLaneApi.fromPage,
   });
 
-  const fetchContext$ = fetch$(swimLaneApi);
+  const fetchContext$ = fetch$(swimLaneApi).pipe(shareReplay(1));
 
   const bucketInterval$ = combineLatest([
     selectedJobs$,
