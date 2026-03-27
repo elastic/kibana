@@ -11,7 +11,7 @@ import { spawn } from 'child_process';
 import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
 import { parseConnectorsFromEnv, isTTY } from '../prompts';
-import { isServiceRunning, readState } from '../services';
+import { isServiceRunning, readState, startService, tailLog } from '../services';
 import { safeExec } from '../utils';
 import { defaultExportProfile, readVaultConfig, resolveVaultConfigPath } from '../profiles';
 
@@ -123,8 +123,27 @@ export const doctorCmd: Command<void> = {
         status: 'fail',
         detail: 'not running',
         fix: async () => {
-          log.info('EDOT will start automatically with: node scripts/evals start');
-          log.info('Or start it manually: node scripts/edot_collector.js');
+          log.info('Starting EDOT collector (backgrounded)...');
+          startService(repoRoot, 'edot', 'node', ['scripts/edot_collector.js'], log);
+
+          const stopTail = tailLog(repoRoot, 'edot', log, { fromStart: true });
+          await new Promise((r) => setTimeout(r, 5000));
+          stopTail();
+
+          const edotUpAfterFix = safeExec('docker', [
+            'ps',
+            '--filter',
+            'name=kibana-edot-collector',
+            '--format',
+            '{{.Names}}',
+          ]);
+          if (edotUpAfterFix && edotUpAfterFix.length > 0) {
+            log.info('EDOT collector started successfully');
+          } else {
+            log.warning(
+              'EDOT collector may not have started. Check logs: node scripts/evals logs --service edot'
+            );
+          }
         },
       });
     }
