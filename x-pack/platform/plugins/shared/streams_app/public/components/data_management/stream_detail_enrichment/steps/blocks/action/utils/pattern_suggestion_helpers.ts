@@ -9,7 +9,6 @@ import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { get } from 'lodash';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 import type {
   PreviewDocsFilterOption,
@@ -64,19 +63,7 @@ export async function prepareSamplesForPatternExtraction(
   return samples;
 }
 
-/**
- * Extracts string messages from a specific field in the samples.
- * Filters out non-string values.
- */
-export function extractMessagesFromField(samples: FlattenRecord[], fieldName: string): string[] {
-  return samples.reduce<string[]>((acc, sample) => {
-    const value = get(sample, fieldName);
-    if (typeof value === 'string') {
-      acc.push(value);
-    }
-    return acc;
-  }, []);
-}
+export { extractMessagesFromField } from '@kbn/streams-plugin/common';
 
 /**
  * Custom hook that provides common dependencies needed for pattern suggestions.
