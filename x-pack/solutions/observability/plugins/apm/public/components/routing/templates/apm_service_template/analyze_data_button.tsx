@@ -82,7 +82,7 @@ export function AnalyzeDataButton() {
         <EuiButtonEmpty
           data-test-subj="apmAnalyzeDataButtonExploreDataButton"
           href={href}
-          iconType="visBarVerticalStacked"
+          iconType="chartBarVerticalStack"
         >
           {i18n.translate('xpack.apm.analyzeDataButton.label', {
             defaultMessage: 'Explore data',

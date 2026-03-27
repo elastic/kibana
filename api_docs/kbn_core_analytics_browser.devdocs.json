@@ -718,12 +718,48 @@
                 "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts"
               },
               {
+                "plugin": "@kbn/unified-doc-viewer",
+                "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/analytics/doc_viewer_viewed_event.ts"
+              },
+              {
+                "plugin": "@kbn/unified-doc-viewer",
+                "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx"
+              },
+              {
+                "plugin": "@kbn/unified-doc-viewer",
+                "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx"
+              },
+              {
                 "plugin": "@kbn/index-editor",
                 "path": "src/platform/packages/private/kbn-index-editor/src/telemetry/telemetry_service.ts"
               },
               {
                 "plugin": "@kbn/esql-editor",
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts"
+              },
+              {
+                "plugin": "unifiedDocViewer",
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer/doc_viewer.tsx"
+              },
+              {
+                "plugin": "unifiedDocViewer",
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer/doc_viewer.tsx"
+              },
+              {
+                "plugin": "unifiedDocViewer",
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/full_screen_waterfall/waterfall_flyout/index.tsx"
+              },
+              {
+                "plugin": "unifiedDocViewer",
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/full_screen_waterfall/waterfall_flyout/index.tsx"
+              },
+              {
+                "plugin": "unifiedDocViewer",
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/full_screen_waterfall/index.tsx"
+              },
+              {
+                "plugin": "unifiedDocViewer",
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/full_screen_waterfall/index.tsx"
               },
               {
                 "plugin": "cases",
@@ -818,6 +854,10 @@
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
                 "plugin": "dashboard",
                 "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/track_contentful_render.ts"
               },
@@ -840,6 +880,14 @@
               {
                 "plugin": "workflowsExecutionEngine",
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/telemetry/workflows_ai_telemetry_client.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/telemetry/workflows_management_telemetry_client.ts"
               },
               {
                 "plugin": "agentBuilder",
@@ -1442,12 +1490,12 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
-              },
-              {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/telemetry/events.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -2240,6 +2288,42 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_gap_detected_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "workflowsExecutionEngine",
+                "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "workflowsExecutionEngine",
+                "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "workflowsExecutionEngine",
+                "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "workflowsExecutionEngine",
+                "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "workflowsExecutionEngine",
+                "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "workflowsExecutionEngine",
+                "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "workflowsExecutionEngine",
+                "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "workflowsExecutionEngine",
+                "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "workflowsExecutionEngine",
+                "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.test.ts"
               },
               {
                 "plugin": "workflowsExecutionEngine",

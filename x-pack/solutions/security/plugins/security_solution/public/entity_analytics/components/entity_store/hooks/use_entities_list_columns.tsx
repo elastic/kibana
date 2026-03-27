@@ -67,6 +67,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
                 [EntityPanelParamByType[entityType] ?? '']: value,
                 contextID: ENTITIES_LIST_TABLE_ID,
                 scopeId: ENTITIES_LIST_TABLE_ID,
+                entityId: record.entity.id,
               },
             });
           }

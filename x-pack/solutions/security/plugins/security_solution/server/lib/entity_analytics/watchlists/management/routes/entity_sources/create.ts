@@ -18,13 +18,14 @@ import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
 import { getRequestSavedObjectClient } from '../../../shared/utils';
-import type { IntegrationType } from '../../../../privilege_monitoring/data_sources';
 import {
+  WatchlistEntitySourceClient,
   getStreamPatternFor,
   INTEGRATION_TYPES,
   integrationsSourceIndex,
   oktaLastFullSyncMarkersIndex,
-} from '../../../../privilege_monitoring/data_sources';
+} from '../../../entity_sources/infra';
+import type { IntegrationType } from '../../../entity_sources/infra';
 
 const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType): string => {
   if (integration === 'entityanalytics_ad') {
@@ -80,7 +81,10 @@ export const createEntitySourceRoute = (
             const secSol = await context.securitySolution;
             const core = await context.core;
             const namespace = secSol.getSpaceId();
-            const client = secSol.getMonitoringEntitySourceDataClient();
+            const client = new WatchlistEntitySourceClient({
+              soClient: getRequestSavedObjectClient(core),
+              namespace,
+            });
 
             let body: WatchlistDataSources.CreateWatchlistEntitySourceResponse;
 
@@ -136,7 +140,7 @@ export const createEntitySourceRoute = (
             return response.ok({ body });
           } catch (e) {
             const error = transformError(e);
-            logger.error(`Error creating monitoring entity source sync config: ${error.message}`);
+            logger.error(`Error creating watchlist entity source sync config: ${error.message}`);
             return siemResponse.error({
               statusCode: error.statusCode,
               body: error.message,
