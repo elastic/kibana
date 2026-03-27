@@ -378,7 +378,7 @@ bundle:
       output_products: "kibana {version}"
       output: "kibana/{version}.yaml"
     observability-release:
-      output_products: "observability"
+      output_products: "observability {version}"
       output: "observability/{version}.yaml"
     security-release:
       output_products: "security {version}"
