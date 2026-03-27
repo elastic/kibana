@@ -73,7 +73,7 @@ export const EntityResolutionFileUploader: React.FC = () => {
           {
             version: API_VERSIONS.internal.v1,
             method: 'POST',
-            headers: { 'Content-Type': undefined as unknown as string },
+            headers: { 'Content-Type': undefined }, // Let the browser set multipart/form-data boundary
             body,
           }
         );
