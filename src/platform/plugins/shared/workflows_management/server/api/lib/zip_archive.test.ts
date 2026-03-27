@@ -36,4 +36,47 @@ describe('generateWorkflowsArchive', () => {
     expect(manifest.version).toBe('1');
     expect(manifest.exportedAt).toBeDefined();
   });
+
+  it('should handle empty workflows array (manifest only)', async () => {
+    const buffer = await generateWorkflowsArchive([]);
+    const zip = new AdmZip(buffer);
+    const entries = zip.getEntries().map((e) => e.entryName);
+
+    expect(entries).toEqual(['manifest.yml']);
+
+    const manifestRaw = zip.getEntry('manifest.yml')!.getData().toString('utf-8');
+    const manifest = YAML.parse(manifestRaw);
+    expect(manifest.exportedCount).toBe(0);
+  });
+
+  it('should preserve UTF-8 content including CJK characters and emoji', async () => {
+    const workflows: WorkflowExportEntry[] = [
+      {
+        id: 'w-unicode',
+        yaml: 'name: \u30EF\u30FC\u30AF\u30D5\u30ED\u30FC\ndescription: \u2728 sparkle workflow',
+      },
+    ];
+
+    const buffer = await generateWorkflowsArchive(workflows);
+    const zip = new AdmZip(buffer);
+    const content = zip.getEntry('w-unicode.yml')!.getData().toString('utf-8');
+
+    expect(content).toContain('\u30EF\u30FC\u30AF\u30D5\u30ED\u30FC');
+    expect(content).toContain('\u2728');
+  });
+
+  it('should handle a single workflow', async () => {
+    const workflows: WorkflowExportEntry[] = [{ id: 'w-single', yaml: 'name: Solo\nsteps: []' }];
+
+    const buffer = await generateWorkflowsArchive(workflows);
+    const zip = new AdmZip(buffer);
+    const entries = zip.getEntries().map((e) => e.entryName);
+
+    expect(entries).toContain('w-single.yml');
+    expect(entries).toContain('manifest.yml');
+
+    const manifestRaw = zip.getEntry('manifest.yml')!.getData().toString('utf-8');
+    const manifest = YAML.parse(manifestRaw);
+    expect(manifest.exportedCount).toBe(1);
+  });
 });

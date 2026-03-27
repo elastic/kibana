@@ -29,7 +29,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           } as GrokProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [{ message: '55.3.244.1 GET /index.html 15824 0.043' }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -59,7 +59,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           } as GrokProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [{ message: '8.8.8.8 4.4.4.4' }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -81,7 +81,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           } as GrokProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [{ message: 'not_an_ip' }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -103,7 +103,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           } as GrokProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [
         {
           message:
@@ -146,7 +146,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           } as GrokProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [
         { expect: null, log: { level: 'info' }, client: { ip: '192.168.1.1' } }, // Should not grok, but nullifies the field
         { expect: '127.0.0.1', client: { ip: '192.168.1.1' }, message: 'User IP: 127.0.0.1' }, // Should grok
@@ -186,7 +186,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           } as GrokProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [{ log: { level: 'info' } }];
       await testBed.ingest(indexName, docs);
       await expect(esql.queryOnIndex(indexName, query)).rejects.toThrow('Unknown column [message]');
@@ -211,7 +211,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           } as GrokProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [
         {
           expect: '55.3.244.1',
@@ -262,7 +262,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           } as GrokProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [
         // Mapping doc to ensure fields exist
         {
@@ -322,7 +322,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           } as GrokProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [
         // Mapping doc for pre-cast stability
         {
@@ -395,7 +395,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           } as GrokProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [
         // Mapping / schema stabilization doc
         {
@@ -513,7 +513,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           } as GrokProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const mappingDoc = { size: 0, message: '' }; // Ingest size as long type
       const docs = [
         mappingDoc,
@@ -552,7 +552,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       };
 
       // Should throw validation error for Mustache templates
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed'
       );
     }
@@ -574,7 +574,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
           } as GrokProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [
         {
           message:

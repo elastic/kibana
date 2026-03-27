@@ -30,7 +30,8 @@ export {
   type SamlSessionManagerOptions,
   type HostOptions,
   type GetCookieOptions,
-} from './src/auth';
+  type Role,
+} from '@kbn/test-saml-auth';
 
 export type {
   CreateTestEsClusterOptions,

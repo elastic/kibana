@@ -95,7 +95,7 @@ export const ServicesContent = ({
             defaultMessage: 'Error',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           {i18n.translate('xpack.infra.assetDetails.services.getServicesRequestError', {
             defaultMessage: 'An error occurred while fetching services.',
