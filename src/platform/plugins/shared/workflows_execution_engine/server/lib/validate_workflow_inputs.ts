@@ -32,7 +32,8 @@ export const validateWorkflowInputs = async (
   workflowExecutionRepository: WorkflowExecutionRepository,
   logger: Logger
 ): Promise<boolean> => {
-  if (context.trigger !== 'manual') {
+  // TODO: This is a workaround to skip validation for alert triggers.
+  if (context.event && typeof context.event === 'object' && 'alerts' in context.event) {
     return true;
   }
 
