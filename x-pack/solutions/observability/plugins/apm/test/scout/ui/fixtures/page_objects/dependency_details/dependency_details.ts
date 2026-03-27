@@ -39,7 +39,8 @@ export class DependencyDetailsPage {
       this.page,
       this.kbnUrl,
       this.DEPENDENCY_NAME,
-      this.SPAN_NAME
+      this.SPAN_NAME,
+      this.SERVICE_NAME
     );
   }
 

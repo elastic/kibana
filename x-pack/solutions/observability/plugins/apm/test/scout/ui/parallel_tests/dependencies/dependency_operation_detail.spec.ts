@@ -85,20 +85,14 @@ test.describe(
     });
 
     test('Service badge in waterfall links to service overview', async ({
+      page,
       pageObjects: { dependencyDetailsPage },
     }) => {
-      const serviceBadge = dependencyDetailsPage.operationDetailSubpage.getWaterfallServiceBadge(
-        dependencyDetailsPage.SERVICE_NAME
-      );
-
-      await test.step('verify service badge is visible in the waterfall', async () => {
-        await expect(serviceBadge).toBeVisible();
-      });
-
-      await test.step('click the service badge and verify navigation to service overview', async () => {
-        const href = await serviceBadge.getAttribute('href');
-        expect(href).toContain('/services/');
-        expect(href).toContain('/overview');
+      await test.step('click service badge and verify navigation to service overview', async () => {
+        await dependencyDetailsPage.operationDetailSubpage.clickWaterfallServiceBadge();
+        await expect(page).toHaveURL(
+          new RegExp(`/services/${dependencyDetailsPage.SERVICE_NAME}/overview`)
+        );
       });
     });
 

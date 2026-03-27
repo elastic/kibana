@@ -24,7 +24,8 @@ export class OperationDetailSubpage {
     private readonly page: ScoutPage,
     private readonly kbnUrl: KibanaUrl,
     private readonly defaultDependencyName: string,
-    private readonly defaultSpanName: string
+    private readonly defaultSpanName: string,
+    private readonly defaultServiceName: string
   ) {
     this.breadcrumb = this.page.getByTestId('apmDetailViewHeaderLink');
     this.latencyChart = this.page.getByTestId('latencyChart');
@@ -37,10 +38,12 @@ export class OperationDetailSubpage {
     this.waterfallSpanLinksBadge = this.page.testSubj.locator('^spanLinksBadge_');
   }
 
-  public getWaterfallServiceBadge(serviceName: string): Locator {
-    return this.page.testSubj
-      .locator('apmBarDetailsServiceNameBadge')
-      .filter({ hasText: serviceName });
+  public async clickWaterfallServiceBadge(): Promise<void> {
+    const badge = this.page
+      .getByRole('row', { name: `View details for ${this.defaultSpanName}` })
+      .getByTestId('apmBarDetailsServiceNameBadge')
+      .filter({ hasText: this.defaultServiceName });
+    await badge.click();
   }
 
   private async waitForWaterfallToLoad() {
