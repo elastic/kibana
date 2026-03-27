@@ -286,11 +286,11 @@ describe('csvUploadV2', () => {
       });
 
       it('paginates through entity pages using searchAfter until exhausted', async () => {
-        const firstPage = [{ id: 'e1' }, { id: 'e2' }];
-        const secondPage = [{ id: 'e3' }];
+        const firstPage = Array.from({ length: 100 }, (_, i) => ({ id: `e${i}` }));
+        const secondPage = [{ id: 'e100' }];
 
         (entityStoreClient.listEntities as jest.Mock)
-          .mockResolvedValueOnce({ entities: firstPage, nextSearchAfter: ['e2'] })
+          .mockResolvedValueOnce({ entities: firstPage, nextSearchAfter: ['e99'] })
           .mockResolvedValueOnce({ entities: secondPage, nextSearchAfter: undefined });
 
         const csv = 'type,host.name,criticality_level\nhost,my-host,high_impact\n';
@@ -303,7 +303,7 @@ describe('csvUploadV2', () => {
         );
         expect(entityStoreClient.listEntities).toHaveBeenNthCalledWith(
           2,
-          expect.objectContaining({ searchAfter: ['e2'] })
+          expect.objectContaining({ searchAfter: ['e99'] })
         );
       });
 
