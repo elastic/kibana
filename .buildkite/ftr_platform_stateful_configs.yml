@@ -47,6 +47,15 @@ disabled:
   # Default http2 config to use for performance journeys
   - x-pack/performance/configs/http2_config.ts
 
+  # Streams performance journeys — run exclusively in the scheduled performance pipeline
+  - x-pack/performance/journeys_e2e/streams_data_quality.ts
+  - x-pack/performance/journeys_e2e/streams_field_mapping.ts
+  - x-pack/performance/journeys_e2e/streams_listing_page.ts
+  - x-pack/performance/journeys_e2e/streams_processing_step.ts
+  - x-pack/performance/journeys_e2e/streams_retention.ts
+  - x-pack/performance/journeys_e2e/streams_wired_hierarchy.ts
+  - x-pack/performance/configs/streams_heavy_config.ts
+
   # Gen AI suites, running with their own pipeline
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
   - x-pack/platform/test/agent_builder/smoke_tests/config.stateful.ts

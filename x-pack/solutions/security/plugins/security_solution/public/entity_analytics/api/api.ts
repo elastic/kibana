@@ -137,6 +137,30 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     /**
+     * Fetches entities from the Entity Store v2 unified latest index (internal entity_store plugin route).
+     */
+    const fetchEntitiesListV2 = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params: FetchEntitiesListParams;
+    }) =>
+      http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.CRUD_GET, {
+        version: ENTITY_STORE_API_VERSIONS.internal.v2,
+        method: 'GET',
+        query: {
+          entity_types: params.entityTypes,
+          sort_field: params.sortField,
+          sort_order: params.sortOrder,
+          page: params.page,
+          per_page: params.perPage,
+          filterQuery: params.filterQuery,
+        },
+        signal,
+      });
+
+    /**
      * Fetches risks engine status
      */
     const fetchRiskEngineStatus = ({ signal }: { signal?: AbortSignal }) =>
@@ -566,6 +590,7 @@ export const useEntityAnalyticsRoutes = () => {
       calculateEntityRiskScore,
       cleanUpRiskEngine,
       fetchEntitiesList,
+      fetchEntitiesListV2,
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
