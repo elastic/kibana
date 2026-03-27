@@ -34,6 +34,7 @@ import {
   type Group,
   getFormattedGroups,
 } from '@kbn/alerting-rule-utils';
+import type { DataViewBase } from '@kbn/es-query';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { Aggregators, AlertStates } from '../../../../common/alerting/metrics';
@@ -266,11 +267,18 @@ export const createMetricThresholdExecutor =
           )
         : [];
 
-    let dataView;
+    let dataView: DataViewBase | undefined;
     if (shouldCreateDataView(criteria)) {
       const dataViewsService = await services.getDataViews();
       try {
-        dataView = await dataViewsService.create({ title: config.metricAlias });
+        const fields = await dataViewsService.getFieldsForWildcard({
+          pattern: config.metricAlias,
+          allowNoIndex: true,
+        });
+        dataView = {
+          title: config.metricAlias,
+          fields,
+        };
       } catch (e) {
         // ignore — dataView stays undefined and toElasticsearchQuery degrades gracefully
       }

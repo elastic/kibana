@@ -75,7 +75,7 @@ const mockDataView = {
 };
 
 const mockDataViewsService = {
-  create: jest.fn().mockResolvedValue(mockDataView),
+  getFieldsForWildcard: jest.fn().mockResolvedValue(mockDataView.fields),
 };
 
 const mockOptions = {
@@ -347,8 +347,9 @@ describe('The metric threshold rule type', () => {
       });
 
       expect(services.getDataViews).toHaveBeenCalledTimes(1);
-      expect(mockDataViewsService.create).toHaveBeenCalledWith({
-        title: 'metrics-*,metricbeat-*',
+      expect(mockDataViewsService.getFieldsForWildcard).toHaveBeenCalledWith({
+        pattern: 'metrics-*,metricbeat-*',
+        allowNoIndex: true,
       });
       expect(jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6]).toEqual(
         mockDataView
