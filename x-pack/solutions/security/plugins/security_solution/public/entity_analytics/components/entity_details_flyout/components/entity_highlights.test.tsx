@@ -14,7 +14,7 @@ import { TestProviders } from '../../../../common/mock';
 // Mock the hooks
 const mockUseFetchAnonymizationFields = jest.fn();
 const mockUseAssistantContext = jest.fn();
-const mockUseLoadInferenceConnectors = jest.fn();
+const mockUseLoadConnectors = jest.fn();
 const mockUseSpaceId = jest.fn();
 const mockUseStoredAssistantConnectorId = jest.fn();
 const mockUseAssistantAvailability = jest.fn();
@@ -79,7 +79,7 @@ jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => 
 }));
 
 jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: () => mockUseLoadInferenceConnectors(),
+  useLoadConnectors: () => mockUseLoadConnectors(),
 }));
 
 describe('EntityHighlights', () => {
@@ -139,7 +139,7 @@ describe('EntityHighlights', () => {
     // Set up default mock implementations
     mockUseFetchAnonymizationFields.mockReturnValue(defaultAnonymizationFields);
     mockUseAssistantContext.mockReturnValue(defaultAssistantContext);
-    mockUseLoadInferenceConnectors.mockReturnValue(defaultLoadConnectors);
+    mockUseLoadConnectors.mockReturnValue(defaultLoadConnectors);
     mockUseSpaceId.mockReturnValue(defaultSpaceId);
     mockUseStoredAssistantConnectorId.mockReturnValue(defaultStoredAssistantConnectorId);
     mockUseAssistantAvailability.mockReturnValue(defaultAssistantAvailability);
@@ -236,9 +236,7 @@ describe('EntityHighlights', () => {
   });
 
   it(`shows "Add Connector" button when no assistant result, not loading and no connectors`, () => {
-    mockUseLoadInferenceConnectors.mockReturnValueOnce({
-      data: { hasConnectors: false, connectors: [] },
-    });
+    mockUseLoadConnectors.mockReturnValueOnce({ data: [] });
     render(<EntityHighlightsAccordion {...defaultProps} />, {
       wrapper: TestProviders,
     });
