@@ -17,5 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/evals",
+    "@kbn/dev-cli-runner",
+    "@kbn/tooling-log",
   ]
 }

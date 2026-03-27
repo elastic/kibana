@@ -45,8 +45,7 @@ const jsonResponse = (body: unknown, status = 200) =>
     headers: { 'content-type': 'application/json' },
   });
 
-const textResponse = (body: string, status: number) =>
-  new Response(body, { status });
+const textResponse = (body: string, status: number) => new Response(body, { status });
 
 describe('dashboardCmd', () => {
   const originalFetch = global.fetch;
@@ -219,7 +218,7 @@ describe('dashboardCmd', () => {
       expect(global.fetch).toHaveBeenCalledTimes(2);
 
       const [dashUrl, dashOpts] = (global.fetch as jest.Mock).mock.calls[0];
-      expect(dashUrl).toContain(`/internal/dashboards/app/${DASHBOARD_ID}`);
+      expect(dashUrl).toContain(`/api/dashboards/${DASHBOARD_ID}`);
       expect(dashOpts.method).toBe('DELETE');
 
       const [dvUrl, dvOpts] = (global.fetch as jest.Mock).mock.calls[1];

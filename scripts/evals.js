@@ -352,6 +352,9 @@ function runFastHelp() {
   logInfo('  doctor                        Check local prerequisites');
   logInfo('  env                           List environment variables');
   logInfo('  ci-map [--json]               Output CI label mapping');
+  logInfo(
+    '  dashboard [--delete] [--dry-run]  Create/update Lens dashboard (via @kbn/evals-extensions)'
+  );
   logInfo('');
   logInfo('Examples:');
   logInfo('  node scripts/evals init');
@@ -411,6 +414,13 @@ function main() {
     if (runFastEnv()) {
       return;
     }
+  }
+
+  if (command === 'dashboard') {
+    process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
+    require('@kbn/setup-node-env');
+    void require('@kbn/evals-extensions').extensionsCli.run();
+    return;
   }
 
   if (!command || command === 'help' || hasHelpFlag) {

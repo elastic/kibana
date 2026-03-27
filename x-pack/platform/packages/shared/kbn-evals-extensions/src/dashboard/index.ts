@@ -8,15 +8,13 @@
 /**
  * Kibana-specific dashboard module for evaluation trend visualizations.
  *
- * This module depends on Kibana Lens and Saved Objects APIs and is intentionally
- * coupled to the Kibana runtime. When the evaluation layer is extracted for
- * non-Kibana use (see vision Section 5), this module should be excluded.
+ * This module depends on Kibana Lens and Dashboard APIs and is intentionally
+ * coupled to the Kibana runtime. It lives in @kbn/evals-extensions because
+ * it represents a Phase 4 extension feature (Lens dashboards) that should not
+ * be part of the core @kbn/evals package.
  *
  * All Lens visualization field references use the canonical `kibana-evaluations`
- * data stream schema defined in {@link EvaluationScoreDocument} and the index
- * template in {@link EvaluationScoreRepository.ensureIndexTemplate}. The
- * `evaluator.metadata.*` sub-fields (e.g. `input_tokens`) are accessible via
- * the `flattened` mapping type.
+ * data stream schema defined in {@link EvaluationScoreDocument} from @kbn/evals.
  *
  * @module dashboard
  */
