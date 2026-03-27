@@ -836,6 +836,7 @@ const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
 );
 
 export const WorkflowContextSchema = z.object({
+  inputs: z.record(z.string(), z.unknown()).optional(),
   event: z.unknown().optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,

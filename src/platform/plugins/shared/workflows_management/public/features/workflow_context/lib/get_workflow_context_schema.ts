@@ -22,13 +22,7 @@ import { inferZodType } from '../../../../common/lib/zod';
 import { triggerSchemas } from '../../../trigger_schemas';
 
 // Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
-export type WorkflowDefinitionForContext =
-  | WorkflowYaml
-  | (Omit<WorkflowYaml, 'inputs'> & {
-      inputs?:
-        | WorkflowYaml['inputs']
-        | Array<{ name: string; type: string; [key: string]: unknown }>;
-    });
+export type WorkflowDefinitionForContext = WorkflowYaml;
 
 function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
   return schema instanceof z.ZodObject;

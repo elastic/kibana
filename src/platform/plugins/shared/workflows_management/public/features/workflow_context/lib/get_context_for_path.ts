@@ -23,13 +23,7 @@ import { getVariablesSchema } from './get_variables_schema';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
 
 // Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
-type WorkflowDefinitionForContext =
-  | WorkflowYaml
-  | (Omit<WorkflowYaml, 'inputs'> & {
-      inputs?:
-        | WorkflowYaml['inputs']
-        | Array<{ name: string; type: string; [key: string]: unknown }>;
-    });
+type WorkflowDefinitionForContext = WorkflowYaml;
 
 // Implementation should be the same as in the 'WorkflowContextManager.getContext' function
 // src/platform/plugins/shared/workflows_execution_engine/server/workflow_context_manager/workflow_context_manager.ts

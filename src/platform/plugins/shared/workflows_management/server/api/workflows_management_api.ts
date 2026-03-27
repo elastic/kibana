@@ -238,6 +238,7 @@ export class WorkflowsManagementApi {
       spaceId,
       inputs: manualInputs,
       triggeredBy,
+      trigger: 'manual', // TODO: TEMP
     };
     if (metadata) {
       context.metadata = metadata;
@@ -322,6 +323,7 @@ export class WorkflowsManagementApi {
 
     const context = {
       event: resolvedEvent,
+      trigger: 'manual', // TODO: TEMP
       spaceId,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();

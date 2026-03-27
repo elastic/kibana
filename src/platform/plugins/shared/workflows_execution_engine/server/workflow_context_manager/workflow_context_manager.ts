@@ -278,15 +278,20 @@ export class WorkflowContextManager {
         ...(contextOverride.consts || {}),
       };
 
-      stepContext.inputs = {
-        ...stepContext.inputs,
-        ...(contextOverride.inputs || {}),
-      };
-
       stepContext.event = {
-        ...stepContext.event,
+        ...(typeof stepContext.event === 'object' ? stepContext.event : {}),
         ...(contextOverride.event || {}),
       } as StepContext['event'];
+
+      if (
+        stepContext.event &&
+        typeof stepContext.event === 'object' &&
+        'inputs' in stepContext.event
+      ) {
+        // TEMP: We're removing "inputs" from the context level. During execution it will still work
+        // for backwards compatibility with previous workfows, but editor will show the error for inputs workflow-level.
+        stepContext.inputs = stepContext.event.inputs as Record<string, unknown>;
+      }
 
       stepContext.execution = {
         ...stepContext.execution,

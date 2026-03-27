@@ -9,10 +9,6 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowContext } from '@kbn/workflows';
-import {
-  applyInputDefaults,
-  normalizeFieldsToJsonSchema,
-} from '@kbn/workflows/spec/lib/field_conversion';
 import type { ContextDependencies } from './types';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
 
@@ -28,9 +24,6 @@ export function buildWorkflowContext(
     workflowExecution.workflowId,
     workflowExecution.id
   );
-  const normalizedInputsSchema = normalizeFieldsToJsonSchema(
-    workflowExecution.workflowDefinition.inputs
-  );
 
   // Extract parent workflow information from context if available
   const parentWorkflowId = workflowExecution.context?.parentWorkflowId as string | undefined;
@@ -39,15 +32,22 @@ export function buildWorkflowContext(
     | undefined;
   const parentDepth = workflowExecution.context?.parentDepth as number | undefined;
 
-  const inputsWithDefaults = applyInputDefaults(
-    workflowExecution.context?.inputs as Record<string, unknown> | undefined,
-    normalizedInputsSchema
-  );
-
   const metadata = (workflowExecution.metadata ??
     (workflowExecution.context?.metadata as Record<string, unknown> | undefined)) as
     | Record<string, unknown>
     | undefined;
+
+  let inputs: Record<string, unknown> | undefined;
+
+  if (
+    workflowExecution.context?.event &&
+    typeof workflowExecution.context.event === 'object' &&
+    'inputs' in workflowExecution.context?.event
+  ) {
+    // TEMP: We're removing "inputs" from the context level. During execution it will still work
+    // for backwards compatibility with previous workfows, but editor will show the error for inputs workflow-level.
+    inputs = workflowExecution.context.event.inputs as Record<string, unknown>;
+  }
 
   return {
     execution: {
@@ -67,7 +67,7 @@ export function buildWorkflowContext(
     kibanaUrl,
     consts: workflowExecution.workflowDefinition?.consts ?? {},
     event: workflowExecution.context?.event,
-    inputs: inputsWithDefaults,
+    inputs,
     output: workflowExecution.context?.output,
     now: new Date(),
     parent:

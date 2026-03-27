@@ -81,7 +81,6 @@ export const WorkflowDetailTestStepModal = React.memo(() => {
           enabled: workflowDefinition.enabled ?? true,
           spaceId,
         },
-        inputsDefinition: workflowDefinition.inputs,
       });
     }
     return getContextOverrideData(testStepModalOpenStepId);
