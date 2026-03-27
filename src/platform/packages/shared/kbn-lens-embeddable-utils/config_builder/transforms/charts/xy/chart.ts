@@ -118,14 +118,14 @@ function convertAxisSettingsToStateFormat(
           yRight: axis?.right?.grid?.visible ?? true,
         };
   const labelsOrientation =
-    axis?.x?.label_orientation == null &&
-    axis?.left?.label_orientation == null &&
-    axis?.right?.label_orientation == null
+    axis?.x?.labels?.orientation == null &&
+    axis?.left?.labels?.orientation == null &&
+    axis?.right?.labels?.orientation == null
       ? undefined
       : {
-          x: orientationDictionary[axis?.x?.label_orientation ?? 'horizontal'],
-          yLeft: orientationDictionary[axis?.left?.label_orientation ?? 'horizontal'],
-          yRight: orientationDictionary[axis?.right?.label_orientation ?? 'horizontal'],
+          x: orientationDictionary[axis?.x?.labels?.orientation ?? 'horizontal'],
+          yLeft: orientationDictionary[axis?.left?.labels?.orientation ?? 'horizontal'],
+          yRight: orientationDictionary[axis?.right?.labels?.orientation ?? 'horizontal'],
         };
   const xTitle = axis?.x?.title?.value;
   const yTitle = axis?.left?.title?.value;
@@ -300,12 +300,15 @@ function convertAxisSettingsToAPIFormat(
         ? { visible: config.gridlinesVisibilitySettings.x }
         : undefined,
     ...convertXExtent(config.xExtent),
-    label_orientation:
-      config.labelsOrientation?.x != null
-        ? (Object.entries(orientationDictionary).find(
-            ([_, value]) => value === config.labelsOrientation?.x
-          )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined)
-        : undefined,
+    ...(config.labelsOrientation?.x != null
+      ? {
+          labels: {
+            orientation: Object.entries(orientationDictionary).find(
+              ([_, value]) => value === config.labelsOrientation?.x
+            )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
+          },
+        }
+      : {}),
     scale: xAxisScale,
   });
   if (Object.keys(xAxis).length) {
@@ -333,12 +336,15 @@ function convertAxisSettingsToAPIFormat(
         ? { visible: config.gridlinesVisibilitySettings.yLeft }
         : undefined,
     ...convertExtendsToAPIFormat(config.yLeftExtent),
-    label_orientation:
-      config.labelsOrientation?.yLeft != null
-        ? (Object.entries(orientationDictionary).find(
-            ([_, value]) => value === config.labelsOrientation?.yLeft
-          )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined)
-        : undefined,
+    ...(config.labelsOrientation?.yLeft != null
+      ? {
+          labels: {
+            orientation: Object.entries(orientationDictionary).find(
+              ([_, value]) => value === config.labelsOrientation?.yLeft
+            )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
+          },
+        }
+      : {}),
   });
   if (Object.keys(leftAxis).length) {
     axis.left = leftAxis;
@@ -364,14 +370,16 @@ function convertAxisSettingsToAPIFormat(
       config.gridlinesVisibilitySettings?.yRight != null
         ? { visible: config.gridlinesVisibilitySettings.yRight }
         : undefined,
-
     ...convertExtendsToAPIFormat(config.yRightExtent),
-    label_orientation:
-      config.labelsOrientation?.yRight != null
-        ? (Object.entries(orientationDictionary).find(
-            ([_, value]) => value === config.labelsOrientation?.yRight
-          )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined)
-        : undefined,
+    ...(config.labelsOrientation?.yRight != null
+      ? {
+          labels: {
+            orientation: Object.entries(orientationDictionary).find(
+              ([_, value]) => value === config.labelsOrientation?.yRight
+            )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
+          },
+        }
+      : {}),
   });
 
   if (Object.keys(rightAxis).length) {
