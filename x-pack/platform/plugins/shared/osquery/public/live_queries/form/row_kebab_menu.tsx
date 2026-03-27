@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
@@ -20,11 +20,10 @@ interface RowKebabMenuProps {
   addToTimeline?: AddToTimelineHandler;
   scheduleId?: string;
   executionCount?: number;
-  onViewQuery: () => void;
 }
 
 export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
-  ({ row, actionId, agentIds, addToTimeline, scheduleId, executionCount, onViewQuery }) => {
+  ({ row, actionId, agentIds, addToTimeline, scheduleId, executionCount }) => {
     const [isOpen, setIsOpen] = useState(false);
     const close = useCallback(() => setIsOpen(false), []);
     const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
@@ -33,15 +32,6 @@ export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
       'xpack.osquery.pack.queriesTable.viewResultsMoreActionsAriaLabel',
       { defaultMessage: 'More actions' }
     );
-
-    const handleViewQueryClick = useCallback(() => {
-      close();
-      onViewQuery();
-    }, [close, onViewQuery]);
-
-    const viewQueryLabel = i18n.translate('xpack.osquery.pack.queriesTable.viewQueryMenuLabel', {
-      defaultMessage: 'View query',
-    });
 
     const menuItems = useMemo(
       () => [
@@ -73,22 +63,11 @@ export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
               />,
             ]
           : []),
-        <EuiContextMenuItem key="viewQuery" icon="expand" onClick={handleViewQueryClick}>
-          {viewQueryLabel}
-        </EuiContextMenuItem>,
       ],
-      [
-        row.action_id,
-        actionId,
-        agentIds,
-        addToTimeline,
-        scheduleId,
-        executionCount,
-        close,
-        handleViewQueryClick,
-        viewQueryLabel,
-      ]
+      [row.action_id, actionId, agentIds, addToTimeline, scheduleId, executionCount, close]
     );
+
+    if (menuItems.length === 0) return null;
 
     return (
       <EuiPopover
