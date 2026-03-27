@@ -144,19 +144,15 @@ function transformDoc(
     return doc;
   }
 
-  const typeKey = type as keyof typeof doc;
-  if (!doc[typeKey] || typeof doc[typeKey] !== 'object') {
-    doc[typeKey] = {};
+  // Set <entityType>.name if not set
+  const key = type as string;
+  if (!doc[key]) {
+    doc[key] = {};
   }
-  const typeDoc = doc[typeKey] as Record<string, unknown>;
-
-  if (operation === 'create' && !typeDoc.name) {
-    typeDoc.name = data.entity?.id;
+  const typeSection = doc[key] as Record<string, unknown>;
+  if (operation === 'create' && !typeSection.name) {
+    typeSection.name = data.entity?.id;
   }
-  typeDoc.entity = data.entity;
-
-  // Remove entity from root
-  delete doc.entity;
 
   return doc;
 }
