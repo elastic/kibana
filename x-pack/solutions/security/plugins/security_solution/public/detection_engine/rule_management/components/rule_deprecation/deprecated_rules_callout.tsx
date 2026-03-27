@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import * as i18n from './translations';
 
 interface DeprecatedRulesCalloutProps {
   title: string;
   description: string;
+  reason?: string;
   buttons: React.ReactNode[];
   onDismiss?: () => void;
   dataTestSubj?: string;
@@ -19,6 +21,7 @@ interface DeprecatedRulesCalloutProps {
 export const DeprecatedRulesCallout: React.FC<DeprecatedRulesCalloutProps> = ({
   title,
   description,
+  reason,
   buttons,
   onDismiss,
   dataTestSubj,
@@ -32,7 +35,20 @@ export const DeprecatedRulesCallout: React.FC<DeprecatedRulesCalloutProps> = ({
         onDismiss={onDismiss}
         data-test-subj={dataTestSubj}
       >
-        <p>{description}</p>
+        <EuiText size="s" data-test-subj="deprecated-rule-callout-description">
+          <p>{description}</p>
+        </EuiText>
+        {reason && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="s" data-test-subj="deprecated-rule-reason">
+              <p>
+                <strong>{i18n.DEPRECATION_REASON_LABEL}</strong> {reason}
+              </p>
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <EuiFlexGroup gutterSize="s">
           {buttons.map((button, index) => (
             <EuiFlexItem grow={false} key={index}>

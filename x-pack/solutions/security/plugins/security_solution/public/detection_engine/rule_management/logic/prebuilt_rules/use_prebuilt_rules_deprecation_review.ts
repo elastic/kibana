@@ -11,15 +11,9 @@ import type {
 } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-import * as i18n from '../translations';
+import * as i18n from './translations';
 import { useFetchPrebuiltRulesDeprecationReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_deprecation_review_query';
 
-/**
- * A wrapper around useQuery that provides default values to the underlying query,
- * like query key, abort signal, and error handler.
- *
- * @returns useQuery result
- */
 export const usePrebuiltRulesDeprecationReview = (
   request: ReviewRuleDeprecationRequestBody,
   options?: UseQueryOptions<ReviewRuleDeprecationResponseBody>
@@ -27,7 +21,7 @@ export const usePrebuiltRulesDeprecationReview = (
   const { addError } = useAppToasts();
 
   return useFetchPrebuiltRulesDeprecationReviewQuery(request, {
-    onError: (error) => addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE }),
+    onError: (error) => addError(error, { title: i18n.DEPRECATION_REVIEW_FETCH_FAILURE }),
     ...options,
   });
 };

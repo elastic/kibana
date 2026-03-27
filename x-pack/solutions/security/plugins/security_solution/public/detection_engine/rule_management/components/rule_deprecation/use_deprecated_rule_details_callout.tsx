@@ -126,9 +126,9 @@ export const useDeprecatedRuleDetailsCallout = ({
     navigateToApp,
   ]);
 
-  const isDeprecated = (data?.rules?.length ?? 0) > 0;
+  const deprecatedRule = data?.rules?.[0];
 
-  if (!isDeprecated || isLoading) {
+  if (!deprecatedRule || isLoading) {
     return null;
   }
 
@@ -136,6 +136,7 @@ export const useDeprecatedRuleDetailsCallout = ({
     <DeprecatedRulesCallout
       title={i18n.DEPRECATION_DETAILS_CALLOUT_TITLE}
       description={i18n.DEPRECATION_DETAILS_CALLOUT_DESCRIPTION}
+      reason={deprecatedRule.deprecated_reason}
       buttons={[
         <EuiButton
           color="warning"
@@ -155,7 +156,7 @@ export const useDeprecatedRuleDetailsCallout = ({
           {i18n.DUPLICATE_AND_DELETE_RULE}
         </EuiButton>,
       ]}
-      data-test-subj="deprecated-rule-details-callout"
+      dataTestSubj="deprecated-rule-details-callout"
     />
   );
 };

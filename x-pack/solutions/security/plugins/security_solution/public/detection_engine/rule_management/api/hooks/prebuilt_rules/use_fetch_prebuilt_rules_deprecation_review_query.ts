@@ -34,10 +34,6 @@ export const useFetchPrebuiltRulesDeprecationReviewQuery = (
   );
 };
 
-/**
- * Invalidates the deprecated rules review cache. Should be called after
- * deleting a deprecated rule so the callout/modal reflect current state.
- */
 export const useInvalidateFetchPrebuiltRulesDeprecationReviewQuery = () => {
   const queryClient = useQueryClient();
 

@@ -29,7 +29,7 @@ export interface DeprecatedRuleForReview {
   id: string;
   /** Rule signature ID */
   rule_id: string;
-  /** Installed rule name (may differ from the package name if customized) */
+  /** Installed rule name */
   name: string;
   deprecated_reason?: string;
 }

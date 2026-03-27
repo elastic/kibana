@@ -74,7 +74,7 @@ export const useDeprecatedRulesTableCallout = () => {
           </EuiButton>,
         ]}
         onDismiss={dismiss}
-        data-test-subj="deprecated-rules-table-callout"
+        dataTestSubj="deprecated-rules-table-callout"
       />
       {isModalVisible && (
         <DeprecatedRulesModal rules={data.rules} isLoading={isLoading} onClose={hideModal} />

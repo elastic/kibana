@@ -113,3 +113,10 @@ export const DUPLICATE_AND_DELETE_RULE = i18n.translate(
     defaultMessage: 'Duplicate and delete',
   }
 );
+
+export const DEPRECATION_REASON_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.deprecation.reasonLabel',
+  {
+    defaultMessage: 'Reason for deprecation:',
+  }
+);
