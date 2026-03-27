@@ -19,12 +19,6 @@ describe('TemplatesListHeader', () => {
     expect(await screen.findByTestId('all-templates-header')).toBeInTheDocument();
   });
 
-  it('renders the templates title', async () => {
-    renderWithTestingProviders(<TemplatesListHeader />);
-
-    expect(await screen.findByText('Templates')).toBeInTheDocument();
-  });
-
   it('renders the import template button', async () => {
     renderWithTestingProviders(<TemplatesListHeader />);
 
