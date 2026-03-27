@@ -83,6 +83,12 @@ describe('timeRangeToDisplayText', () => {
     expect(timeRangeToDisplayText(textToTimeRange('last 7 minutes'))).toBe('Last 7 minutes');
   });
 
+  it('resolves named range aliases to their canonical name', () => {
+    expect(timeRangeToDisplayText(textToTimeRange('td'))).toBe('Today');
+    expect(timeRangeToDisplayText(textToTimeRange('yd'))).toBe('Yesterday');
+    expect(timeRangeToDisplayText(textToTimeRange('tmr'))).toBe('Tomorrow');
+  });
+
   it.todo('uses abbreviations for absolute dates, with default format');
 
   it('supports a custom delimiter', () => {

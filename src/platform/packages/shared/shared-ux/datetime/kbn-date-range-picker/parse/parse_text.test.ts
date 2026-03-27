@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { textToTimeRange, matchPreset } from './parse_text';
+import { textToTimeRange, matchPreset, getNamedRangeAlias } from './parse_text';
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
 import { getOptionInputText, toLocalPreciseString } from '../utils';
 
@@ -160,7 +160,10 @@ describe('textToTimeRange', () => {
   describe('named ranges', () => {
     it.each([
       ['yesterday', 'now-1d/d', 'now-1d/d'],
+      ['yd', 'now-1d/d', 'now-1d/d'],
       ['tomorrow', 'now+1d/d', 'now+1d/d'],
+      ['tmr', 'now+1d/d', 'now+1d/d'],
+      ['td', 'now/d', 'now/d'],
       ['this week', 'now/w', 'now/w'],
       ['this month', 'now/M', 'now/M'],
       ['this year', 'now/y', 'now/y'],
@@ -694,5 +697,23 @@ describe('matchPreset', () => {
 
   it('returns undefined for no match', () => {
     expect(matchPreset('no match', presets)).toBeUndefined();
+  });
+});
+
+describe('getNamedRangeAlias', () => {
+  it('returns the alias for named ranges that have one', () => {
+    expect(getNamedRangeAlias('now/d', 'now/d')).toBe('td');
+    expect(getNamedRangeAlias('now-1d/d', 'now-1d/d')).toBe('yd');
+    expect(getNamedRangeAlias('now+1d/d', 'now+1d/d')).toBe('tmr');
+  });
+
+  it('returns null for named ranges without an alias', () => {
+    expect(getNamedRangeAlias('now/w', 'now/w')).toBeNull();
+    expect(getNamedRangeAlias('now/M', 'now/M')).toBeNull();
+  });
+
+  it('returns null for non-named-range bounds', () => {
+    expect(getNamedRangeAlias('now-15m', 'now')).toBeNull();
+    expect(getNamedRangeAlias('2025-01-01', 'now')).toBeNull();
   });
 });

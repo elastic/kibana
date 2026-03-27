@@ -9,6 +9,7 @@
 
 import moment from 'moment';
 
+import { resolveNamedRangeAlias } from '../parse';
 import {
   DATE_RANGE_DISPLAY_DELIMITER,
   DEFAULT_DATE_FORMAT,
@@ -51,9 +52,9 @@ export function timeRangeToDisplayText(
     return timeRange.value;
   }
   if (timeRange.isNaturalLanguage) {
-    // capitalize
-    const { value } = timeRange;
-    return value.charAt(0).toUpperCase() + value.slice(1);
+    // Resolve aliases (e.g. "yd" → "yesterday") before capitalizing
+    const resolved = resolveNamedRangeAlias(timeRange.value);
+    return resolved.charAt(0).toUpperCase() + resolved.slice(1);
   }
 
   // For [RELATIVE, NOW] show "Last {count} {unit}" and for [NOW, RELATIVE] show "Next {count} {unit}"

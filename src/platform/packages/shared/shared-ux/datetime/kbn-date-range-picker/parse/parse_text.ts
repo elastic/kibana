@@ -35,6 +35,8 @@ interface ParserConfig {
   nowKeyword: string;
   delimiters: string[];
   namedRanges: Record<string, { start: string; end: string }>;
+  /** Maps shorthand aliases to canonical named range keys (e.g. `td` → `today`). */
+  namedRangeAliases: Record<string, string>;
   unitAliases: Record<string, TimeUnit>;
   durationTemplates: { past: string[]; future: string[] };
   instantTemplates: { past: string[]; future: string[] };
@@ -54,6 +56,11 @@ const DEFAULT_CONFIG: ParserConfig = {
     'last week': { start: 'now-1w/w', end: 'now-1w/w' },
     'last month': { start: 'now-1M/M', end: 'now-1M/M' },
     'last year': { start: 'now-1y/y', end: 'now-1y/y' },
+  },
+  namedRangeAliases: {
+    td: 'today',
+    yd: 'yesterday',
+    tmr: 'tomorrow',
   },
   unitAliases: {
     ms: 'ms',
@@ -168,6 +175,53 @@ const escapeRegExp = (input: string) => input.replace(/[.*+?^${}()|[\]\\]/g, '\\
 /** The word delimiters recognised by the parser (excluding the universal dash). */
 export const PARSER_DELIMITERS: readonly string[] = DEFAULT_CONFIG.delimiters;
 
+/**
+ * Builds a reverse map from `"start|end"` bounds keys to the shortest alias
+ * that resolves to those bounds. When multiple aliases point to the same
+ * canonical named range, the shortest one wins.
+ */
+function buildBoundsToAliasMap(config: ParserConfig): ReadonlyMap<string, string> {
+  const map = new Map<string, string>();
+  for (const [alias, canonical] of Object.entries(config.namedRangeAliases)) {
+    const range = config.namedRanges[canonical];
+    if (!range) continue;
+    const key = `${range.start}|${range.end}`;
+    const existing = map.get(key);
+    if (!existing || alias.length < existing.length) {
+      map.set(key, alias);
+    }
+  }
+  return map;
+}
+
+const boundsToAlias = buildBoundsToAliasMap(DEFAULT_CONFIG);
+
+/**
+ * Returns the shorthand alias for a named range identified by its bounds,
+ * or `null` if no alias exists.
+ *
+ * @example
+ * getNamedRangeAlias('now/d', 'now/d')       // "td"
+ * getNamedRangeAlias('now-1d/d', 'now-1d/d') // "yd"
+ * getNamedRangeAlias('now-15m', 'now')        // null
+ */
+export function getNamedRangeAlias(start: string, end: string): string | null {
+  return boundsToAlias.get(`${start}|${end}`) ?? null;
+}
+
+/**
+ * Resolves a named range alias to its canonical name, or returns the
+ * input unchanged if it is not an alias.
+ *
+ * @example
+ * resolveNamedRangeAlias('td')    // "today"
+ * resolveNamedRangeAlias('yd')    // "yesterday"
+ * resolveNamedRangeAlias('today') // "today"
+ */
+export function resolveNamedRangeAlias(text: string): string {
+  return DEFAULT_CONFIG.namedRangeAliases[text.toLowerCase()] ?? text;
+}
+
 /** Builds a regex that splits text on a word delimiter surrounded by whitespace. */
 export function buildDelimiterPattern(delimiter: string): RegExp | null {
   const trimmed = delimiter.trim();
@@ -265,8 +319,10 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
     return buildRange(text, roundedStart, preset.end, formats, true);
   }
 
-  // (2) Named range ("today", "yesterday", "this week", ...)
-  const named = config.namedRanges[trimmed.toLowerCase()];
+  // (2) Named range ("today", "yesterday", "this week", ...) or alias ("td", "yd", "tmr")
+  const lower = trimmed.toLowerCase();
+  const canonicalKey = config.namedRangeAliases[lower] ?? lower;
+  const named = config.namedRanges[canonicalKey];
   if (named) {
     return buildRange(text, named.start, named.end, formats, true);
   }

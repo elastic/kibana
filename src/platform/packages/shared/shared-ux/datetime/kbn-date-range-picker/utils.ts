@@ -20,7 +20,7 @@ import type {
   AutoRefreshIntervalUnit,
 } from './types';
 import { DATE_RANGE_INPUT_DELIMITER, DEFAULT_DATE_FORMAT, UNIT_DISPLAY_ABBREV } from './constants';
-import { textToTimeRange } from './parse';
+import { textToTimeRange, getNamedRangeAlias } from './parse';
 import { dateMathToRelativeParts, timeRangeToDisplayText, applyTimePrecision } from './format';
 import { MS_PER } from './format/format_duration';
 
@@ -233,6 +233,10 @@ export function getOptionDisplayLabel(
  * getOptionShorthand({ start: '2025-01-01', end: 'now' }) // null
  */
 export function getOptionShorthand(option: TimeRangeBoundsOption): string | null {
+  // Named range alias (e.g. "today" → "td", "yesterday" → "yd")
+  const alias = getNamedRangeAlias(option.start, option.end);
+  if (alias) return alias;
+
   const startOffset = boundToRelativeShorthand(option.start);
   const endOffset = boundToRelativeShorthand(option.end);
 

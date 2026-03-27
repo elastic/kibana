@@ -124,8 +124,13 @@ describe('getOptionShorthand', () => {
     expect(getOptionShorthand({ start: 'now-7d', end: 'now-1d' })).toBe('-7d to -1d');
   });
 
-  it('returns null when a bound has rounding', () => {
-    expect(getOptionShorthand({ start: 'now/d', end: 'now/d' })).toBeNull();
+  it('returns named range alias when bounds match a known named range', () => {
+    expect(getOptionShorthand({ start: 'now/d', end: 'now/d' })).toBe('td');
+    expect(getOptionShorthand({ start: 'now-1d/d', end: 'now-1d/d' })).toBe('yd');
+    expect(getOptionShorthand({ start: 'now+1d/d', end: 'now+1d/d' })).toBe('tmr');
+  });
+
+  it('returns null when a bound has rounding but no named range alias', () => {
     expect(getOptionShorthand({ start: 'now-1d/d', end: 'now' })).toBeNull();
     expect(getOptionShorthand({ start: 'now', end: 'now+1d/d' })).toBeNull();
   });
