@@ -255,8 +255,8 @@ EOF
 if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
   MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
   export MOON_REMOTE_CACHE_TOKEN
-  export MOON_CACHE=read
 fi
+export MOON_CACHE=off
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then

@@ -147,11 +147,7 @@ export const getAlertsAppMenuItem = ({
       }),
       iconType: 'tableOfContents',
       testId: 'discoverManageAlertsButton',
-      href: services.application.getUrlForApp(
-        services.application.isAppRegistered('rules')
-          ? 'rules'
-          : 'management/insightsAndAlerting/triggersActions/rules'
-      ),
+      href: services.application.getUrlForApp('rules'),
     });
 
     if (discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)) {
