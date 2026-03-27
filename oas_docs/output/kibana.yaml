@@ -63843,7 +63843,7 @@ paths:
                 description:
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_3___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_ContentPackIncludedObjects'
                 name:
                   type: string
                 version:
@@ -78093,58 +78093,6 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_3___schema0:
-      anyOf:
-        - additionalProperties: false
-          type: object
-          properties:
-            objects:
-              additionalProperties: false
-              type: object
-              properties:
-                all:
-                  additionalProperties: false
-                  type: object
-                  properties: {}
-              required:
-                - all
-          required:
-            - objects
-        - additionalProperties: false
-          type: object
-          properties:
-            objects:
-              additionalProperties: false
-              type: object
-              properties:
-                mappings:
-                  type: boolean
-                queries:
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                    required:
-                      - id
-                  type: array
-                routing:
-                  items:
-                    allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_3___schema0'
-                      - type: object
-                        properties:
-                          destination:
-                            type: string
-                        required:
-                          - destination
-                  type: array
-              required:
-                - mappings
-                - queries
-                - routing
-          required:
-            - objects
     Kibana_HTTP_APIs_ClassicFieldDefinition:
       additionalProperties:
         $ref: '#/components/schemas/Kibana_HTTP_APIs_ClassicFieldDefinitionConfig'
@@ -78401,6 +78349,58 @@ components:
               type: array
           required:
             - steps
+    Kibana_HTTP_APIs_ContentPackIncludedObjects:
+      anyOf:
+        - additionalProperties: false
+          type: object
+          properties:
+            objects:
+              additionalProperties: false
+              type: object
+              properties:
+                all:
+                  additionalProperties: false
+                  type: object
+                  properties: {}
+              required:
+                - all
+          required:
+            - objects
+        - additionalProperties: false
+          type: object
+          properties:
+            objects:
+              additionalProperties: false
+              type: object
+              properties:
+                mappings:
+                  type: boolean
+                queries:
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required:
+                      - id
+                  type: array
+                routing:
+                  items:
+                    allOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_ContentPackIncludedObjects'
+                      - type: object
+                        properties:
+                          destination:
+                            type: string
+                        required:
+                          - destination
+                  type: array
+              required:
+                - mappings
+                - queries
+                - routing
+          required:
+            - objects
     Kibana_HTTP_APIs_core_status_redactedResponse:
       additionalProperties: false
       description: A minimal representation of Kibana's operational status.
