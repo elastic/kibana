@@ -2398,6 +2398,8 @@
       "@kbn/test-feature-usage-plugin/*": ["x-pack/platform/test/licensing_plugin/plugins/test_feature_usage/*"],
       "@kbn/test-jest-helpers": ["src/platform/packages/shared/kbn-test-jest-helpers"],
       "@kbn/test-jest-helpers/*": ["src/platform/packages/shared/kbn-test-jest-helpers/*"],
+      "@kbn/test-saml-auth": ["src/platform/packages/shared/kbn-test-saml-auth"],
+      "@kbn/test-saml-auth/*": ["src/platform/packages/shared/kbn-test-saml-auth/*"],
       "@kbn/test-subj-selector": ["src/platform/packages/shared/kbn-test-subj-selector"],
       "@kbn/test-subj-selector/*": ["src/platform/packages/shared/kbn-test-subj-selector/*"],
       "@kbn/test-suites-security-solution-apis": ["x-pack/solutions/security/test/security_solution_api_integration"],
