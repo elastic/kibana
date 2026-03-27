@@ -130,7 +130,7 @@ buffer@5.7.1
 builtin-status-codes@3.0.0
 call-bind-apply-helpers@1.0.2
 call-bind@1.0.8
-call-bound@1.0.3
+call-bound@1.0.4
 callsites@3.1.0
 camelize@1.0.0
 caniuse-lite@1.0.30001754
