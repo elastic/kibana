@@ -17,7 +17,6 @@ export {
   createRiskScoreModule,
   createTemporalStateModule,
   createBehavioralAnalysisModule,
-  createAlertAnalysisModule,
 } from './observation_modules';
 export {
   createEntityRetriever,

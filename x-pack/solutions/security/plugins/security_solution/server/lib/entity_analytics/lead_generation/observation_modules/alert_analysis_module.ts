@@ -302,6 +302,3 @@ const parseEntityBuckets = (
     });
   }
 };
-
-/** @deprecated Use createBehavioralAnalysisModule. */
-export const createAlertAnalysisModule = createBehavioralAnalysisModule;

@@ -100,7 +100,7 @@ export const createLeadGenerationEngine = ({
 
       // 4. Group related entities into leads
       const groupStart = Date.now();
-      const leads = await groupIntoLeads(qualifyingEntities, config, logger, options?.chatModel);
+      const leads = await groupIntoLeads(qualifyingEntities, logger, options?.chatModel);
       const groupMs = Date.now() - groupStart;
       logger.info(
         `[LeadGenerationEngine][Telemetry] Lead grouping & synthesis: ${groupMs}ms (${leads.length} leads)`
@@ -243,7 +243,6 @@ const calculateWeightedPriority = (
 
 const groupIntoLeads = async (
   scoredEntities: ScoredEntity[],
-  _config: LeadGenerationEngineConfig,
   logger: Logger,
   chatModel?: InferenceChatModel
 ): Promise<Lead[]> => {
@@ -346,8 +345,7 @@ const synthesizeLeadContent = async (
   if (chatModel) {
     try {
       const llmResult = await llmSynthesizeLeadContent(chatModel, group, observations, logger);
-      const dominantPattern = selectDominantPattern(observations);
-      const byline = buildByline(group, observations, dominantPattern);
+      const byline = buildByline(group, observations);
 
       return {
         title: llmResult.title,
@@ -376,14 +374,12 @@ const ruleSynthesizeLeadContent = (
   tags: string[];
   recommendations: string[];
 } => {
-  const observationTypes = [...new Set(observations.map((o) => o.type))];
-
   const dominantPattern = selectDominantPattern(observations);
 
-  const title = buildRuleBasedTitle(group, dominantPattern);
-  const byline = buildByline(group, observations, dominantPattern);
+  const title = buildRuleBasedTitle(dominantPattern);
+  const byline = buildByline(group, observations);
   const description = buildDescription(group, observations);
-  const tags = buildTags(observationTypes, observations);
+  const tags = buildTags(observations);
   const recommendations = buildRecommendations(group, observations);
 
   return { title, byline, description, tags, recommendations };
@@ -406,7 +402,7 @@ interface DominantPattern {
  * where `best_observation_score` is the highest raw score among observations
  * of that type. The pattern with the highest pattern_score wins.
  *
- * This means a very high-scoring `risk_escalation` can outrank a mediocre
+ * This means a very high-scoring `risk_escalation_24h` can outrank a mediocre
  * `multi_tactic_attack`, producing titles that reflect what actually stands
  * out about the entity rather than defaulting to a fixed priority list.
  */
@@ -429,14 +425,6 @@ const PATTERN_CATALOG: Record<string, { labels: string[]; distinctiveness: numbe
     ],
     distinctiveness: 1.2,
   },
-  investigation_status: {
-    labels: ['Under Investigation', 'Active Investigation', 'Entity Under Review'],
-    distinctiveness: 1.0,
-  },
-  watchlist_inclusion: {
-    labels: ['Watchlist Addition', 'Added to Watchlist', 'New Watchlist Member'],
-    distinctiveness: 0.9,
-  },
   multi_tactic_attack: {
     labels: [
       'Multi-Tactic Attack',
@@ -446,15 +434,6 @@ const PATTERN_CATALOG: Record<string, { labels: string[]; distinctiveness: numbe
       'Compound Threat Activity',
     ],
     distinctiveness: 1.15,
-  },
-  risk_escalation: {
-    labels: [
-      'Risk Score Escalation',
-      'Rapid Risk Increase',
-      'Anomalous Risk Spike',
-      'Sudden Risk Surge',
-    ],
-    distinctiveness: 1.1,
   },
   risk_escalation_24h: {
     labels: [
@@ -581,14 +560,9 @@ const selectDominantPattern = (observations: Observation[]): DominantPattern => 
   return { label: 'Suspicious Activity', key: 'unknown' };
 };
 
-const buildRuleBasedTitle = (_group: ScoredEntity[], pattern: DominantPattern): string =>
-  pattern.label;
+const buildRuleBasedTitle = (pattern: DominantPattern): string => pattern.label;
 
-const buildByline = (
-  group: ScoredEntity[],
-  observations: Observation[],
-  _pattern: DominantPattern
-): string => {
+const buildByline = (group: ScoredEntity[], observations: Observation[]): string => {
   if (group.length === 1) {
     const { entity } = group[0];
     const entityObs = observations.filter((o) => o.entityId === entityToKey(entity));
@@ -662,7 +636,7 @@ const buildDescription = (group: ScoredEntity[], observations: Observation[]): s
  * found in alert metadata (the closest proxy we have for MITRE techniques)
  * rather than generic tactic labels.
  */
-const buildTags = (_observationTypes: string[], observations: Observation[]): string[] => {
+const buildTags = (observations: Observation[]): string[] => {
   const ruleNames = new Set<string>();
 
   for (const obs of observations) {
@@ -682,9 +656,8 @@ const buildTags = (_observationTypes: string[], observations: Observation[]): st
 
   if (ruleNames.size === 0) {
     const fallback: string[] = [];
-    const types = new Set(_observationTypes);
+    const types = new Set(observations.map((o) => o.type));
     if (
-      types.has('risk_escalation') ||
       types.has('risk_escalation_24h') ||
       types.has('risk_escalation_7d') ||
       types.has('risk_escalation_90d')
