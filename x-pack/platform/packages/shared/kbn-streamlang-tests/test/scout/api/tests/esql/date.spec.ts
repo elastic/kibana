@@ -26,7 +26,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
           } as DateProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -50,7 +50,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
           } as DateProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [
         { event: { created: '01/01/2025:12:34:56' } },
         { event: { created: '2025-01-02T12:34:56.789Z' } },
@@ -78,7 +78,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
           } as DateProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -101,7 +101,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
           } as DateProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -127,7 +127,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
           } as DateProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const mappingDoc = { '@timestamp': '2025-01-01T12:32:54.123Z' }; // Needed to satisfy ES|QL which needs all operand columns pre-mapped
       const docs = [
@@ -156,7 +156,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
           } as DateProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [{ log: { time: '01-01-2025' } }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -181,7 +181,7 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       };
 
       // Should throw validation error for Mustache templates
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed'
       );
     }

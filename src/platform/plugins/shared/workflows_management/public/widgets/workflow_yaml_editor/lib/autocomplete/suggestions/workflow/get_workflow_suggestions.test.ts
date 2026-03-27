@@ -10,6 +10,7 @@
 import type { monaco } from '@kbn/monaco';
 import { getWorkflowSuggestions } from './get_workflow_suggestions';
 import type { WorkflowsResponse } from '../../../../../../entities/workflows/model/types';
+import { createStepInfo } from '../../../../../../shared/test_utils';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 
 type WorkflowSuggestionsContext = ExtendedAutocompleteContext & {
@@ -53,14 +54,11 @@ function makeContext(
     },
     range,
     workflows,
-    focusedStepInfo: {
+    focusedStepInfo: createStepInfo({
       stepId: 'step1',
       stepType: 'workflow.execute',
-      stepYamlNode: {} as any,
-      lineStart: 1,
       lineEnd: 5,
-      propInfos: {},
-    },
+    }),
     model: {
       getLineContent: () => '  workflow-id: ',
     } as unknown as monaco.editor.ITextModel,
@@ -81,14 +79,7 @@ describe('getWorkflowSuggestions', () => {
   it('returns empty array when step type is not workflow.execute or workflow.executeAsync', async () => {
     const result = await getWorkflowSuggestions(
       makeContext({
-        focusedStepInfo: {
-          stepId: 's',
-          stepType: 'slack',
-          stepYamlNode: {} as any,
-          lineStart: 1,
-          lineEnd: 1,
-          propInfos: {},
-        },
+        focusedStepInfo: createStepInfo({ stepId: 's', stepType: 'slack', lineEnd: 1 }),
       })
     );
     expect(result).toEqual([]);
@@ -106,14 +97,11 @@ describe('getWorkflowSuggestions', () => {
   it('returns suggestions for workflow.executeAsync step type', async () => {
     const result = await getWorkflowSuggestions(
       makeContext({
-        focusedStepInfo: {
+        focusedStepInfo: createStepInfo({
           stepId: 's',
           stepType: 'workflow.executeAsync',
-          stepYamlNode: {} as any,
-          lineStart: 1,
           lineEnd: 1,
-          propInfos: {},
-        },
+        }),
       })
     );
     expect(result).toHaveLength(2);
