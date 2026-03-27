@@ -8,14 +8,12 @@
  */
 
 import { waitFor } from '@testing-library/react';
-import { filter, firstValueFrom, timeout } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { DataDocuments$ } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -90,33 +88,6 @@ const msgComplete = {
   query,
 };
 
-const waitForCompleteForQuery = async ({
-  documents$,
-  esql,
-}: {
-  documents$: DataDocuments$;
-  esql: string;
-}) => {
-  try {
-    await firstValueFrom(
-      documents$.pipe(
-        filter(
-          (msg) =>
-            msg.fetchStatus === FetchStatus.COMPLETE &&
-            msg.query !== undefined &&
-            'esql' in msg.query &&
-            msg.query.esql === esql
-        ),
-        timeout({ first: 2000 })
-      )
-    );
-  } catch (error) {
-    throw new Error(`Timed out waiting for COMPLETE documents$ event for query: ${esql}`, {
-      cause: error,
-    });
-  }
-};
-
 const setupTest = async ({
   appState,
   defaultFetchStatus,
@@ -142,6 +113,8 @@ const setupTest = async ({
   return { ...props, tabId };
 };
 
+// Testing buildEsqlFetchSubscribe through the state container
+// since the logic is pretty intertwined with the state management
 describe('buildEsqlFetchSubscribe', () => {
   test('an ES|QL query should change state when loading and finished', async () => {
     const { replaceUrlState, dataState, tabId } = await setupTest();
@@ -238,13 +211,10 @@ describe('buildEsqlFetchSubscribe', () => {
   test('changing a ES|QL query with no transformational commands should not change state when loading and finished if index pattern and columns are the same', async () => {
     const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
-    const sameIndexQuery = 'from the-data-view-title | where field1 > 0';
-    const differentIndexQuery = 'from the-data-view-title2 | where field1 > 0';
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockClear();
 
-    const sameIndexQueryCompleted = waitForCompleteForQuery({ documents$, esql: sameIndexQuery });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [
@@ -255,16 +225,11 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       // non transformational command, same columns as msgComplete
-      query: { esql: sameIndexQuery },
+      query: { esql: 'from the-data-view-title | where field1 > 0' },
     });
-    await sameIndexQueryCompleted;
-    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
     replaceUrlState.mockClear();
 
-    const differentIndexQueryCompleted = waitForCompleteForQuery({
-      documents$,
-      esql: differentIndexQuery,
-    });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [
@@ -275,13 +240,17 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       // non transformational command, different index
-      query: { esql: differentIndexQuery },
+      query: { esql: 'from the-data-view-title2 | where field1 > 0' },
     });
-    await differentIndexQueryCompleted;
-    expect(replaceUrlState).toHaveBeenCalledWith({
-      tabId,
-      appState: { columns: ['field1', 'field2'] },
-    });
+    await waitFor(
+      () => {
+        expect(replaceUrlState).toHaveBeenCalledWith({
+          tabId,
+          appState: { columns: ['field1', 'field2'] },
+        });
+      },
+      { timeout: 2000 }
+    );
   });
 
   test('only changing an ES|QL query with same result columns should not change columns', async () => {
