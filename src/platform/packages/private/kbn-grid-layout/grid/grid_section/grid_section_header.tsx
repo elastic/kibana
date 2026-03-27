@@ -136,7 +136,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
       const handleFirstDrag = () => {
         collapseSectionOnDrag();
-        setIsActive(true);
+
         hasBeenDragged.current = true;
         const width = headerRef.getBoundingClientRect().width;
         headerRef.style.width = `${width}px`;
@@ -368,7 +368,7 @@ const styles = {
       },
       '.kbnGridSection--dragHandle': {
         cursor: 'move',
-        pointerEvents: 'none',
+        pointerEvents: 'none', // prevents hover effects, since the drag handle is only included for keyboard a11y
         '&:active, &:hover, &:focus': {
           transform: 'none !important', // prevent "bump up" that EUI adds on hover
           backgroundColor: 'transparent',
