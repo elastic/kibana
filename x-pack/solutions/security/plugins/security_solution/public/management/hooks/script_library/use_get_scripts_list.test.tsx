@@ -77,6 +77,39 @@ describe('useGetEndpointScriptsList hook', () => {
     });
   });
 
+  it('should construct the correct KQL for matching search filter (without quotes)', async () => {
+    await renderReactQueryHook(() =>
+      useGetEndpointScriptsList({
+        searchTerms: ['test search'],
+      })
+    );
+
+    expect(apiMocks.responseProvider.getScriptsList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          kuery: '(name:*test*search* OR updatedBy:*test*search* OR fileHash:*test*search*)',
+        }),
+      })
+    );
+  });
+
+  it('should construct the correct KQL for matching search filter for multiple search terms (without quotes)', async () => {
+    await renderReactQueryHook(() =>
+      useGetEndpointScriptsList({
+        searchTerms: ['test search', 'another search term'],
+      })
+    );
+
+    expect(apiMocks.responseProvider.getScriptsList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          kuery:
+            '((name:*test*search* OR updatedBy:*test*search* OR fileHash:*test*search*) OR (name:*another*search*term* OR updatedBy:*another*search*term* OR fileHash:*another*search*term*))',
+        }),
+      })
+    );
+  });
+
   it('should construct the correct KQL query when single element array', async () => {
     await renderReactQueryHook(() =>
       useGetEndpointScriptsList({
@@ -91,7 +124,7 @@ describe('useGetEndpointScriptsList hook', () => {
       expect.objectContaining({
         query: expect.objectContaining({
           kuery:
-            'platform:"windows" AND fileType:"script" AND tags:"dataCollection" AND (name:"*test*search*" OR updatedBy:"*test*search*" OR fileHash:"*test*search*")',
+            'platform:"windows" AND fileType:"script" AND tags:"dataCollection" AND (name:*test*search* OR updatedBy:*test*search* OR fileHash:*test*search*)',
         }),
       })
     );
@@ -111,7 +144,7 @@ describe('useGetEndpointScriptsList hook', () => {
       expect.objectContaining({
         query: expect.objectContaining({
           kuery:
-            '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement") AND ((name:"*test*search*" OR updatedBy:"*test*search*" OR fileHash:"*test*search*") OR (name:"*another*search*term*" OR updatedBy:"*another*search*term*" OR fileHash:"*another*search*term*"))',
+            '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement") AND ((name:*test*search* OR updatedBy:*test*search* OR fileHash:*test*search*) OR (name:*another*search*term* OR updatedBy:*another*search*term* OR fileHash:*another*search*term*))',
         }),
       })
     );
@@ -129,7 +162,7 @@ describe('useGetEndpointScriptsList hook', () => {
     expect.objectContaining({
       query: expect.objectContaining({
         kuery:
-          '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement") AND ((name:"*test*search*" OR updatedBy:"*test*search*" OR fileHash:"*test*search*") OR (name:"*another*search*term*" OR updatedBy:"*another*search*term*" OR fileHash:"*another*search*term*"))',
+          '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement") AND ((name:*test*search* OR updatedBy:*test*search* OR fileHash:*test*search*) OR (name:*another*search*term* OR updatedBy:*another*search*term* OR fileHash:*another*search*term*))',
       }),
     });
   });
