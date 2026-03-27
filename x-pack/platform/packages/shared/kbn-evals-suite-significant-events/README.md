@@ -1,6 +1,6 @@
 # Significant Events Evaluations
 
-Evaluations for Significant Events, which assess the quality of LLM-based Knowledge Indicator (KI) feature extraction, KI query generation, and KI feature duplication across failure scenarios.
+Evaluations for Significant Events, which assess the quality of LLM-based Knowledge Indicator (KI) feature extraction, KI query generation, KI feature exclusion, and KI feature duplication across failure scenarios.
 These evaluations support both qualitative (LLM-as-a-judge + deterministic CODE evaluators) and quantitative (trace-based) metrics.
 
 For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../kbn-evals/README.md).
@@ -11,6 +11,7 @@ For general information about writing evaluation tests, configuration, and usage
 | --- | --- | --- |
 | **KI feature extraction** | `ki_feature_extraction/ki_feature_extraction.spec.ts` | Can the LLM identify entities, dependencies, and infrastructure from raw log samples? |
 | **KI query generation** | `ki_query_generation/ki_query_generation.spec.ts` | Can the LLM produce valid, hit-producing ES\|QL rules for significant event detection? |
+| **KI feature exclusion** | `ki_feature_exclusion/ki_feature_exclusion.spec.ts` | Does the LLM respect excluded features and avoid regenerating them in follow-up runs? |
 | **KI feature duplication** | `ki_feature_duplication/ki_feature_duplication.spec.ts` | Are KIs stable and semantically unique across repeated extraction runs? |
 
 ## Prerequisites
@@ -44,13 +45,20 @@ To capture trace-based metrics (input/output/cached tokens, and latency), config
 
 #### Step 1: Configure tracing exporters
 
-Add the HTTP exporter to `kibana.dev.yml`:
+Add the following to `kibana.dev.yml`:
 
 ```yaml
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+telemetry.tracing.sample_rate: 1
 telemetry.tracing.exporters:
   - http:
       url: 'http://localhost:4318/v1/traces'
 ```
+
+> **Note:** `elastic.apm.active: false` and `elastic.apm.contextPropagationOnly: false` are required — Elastic APM and OpenTelemetry tracing cannot run simultaneously. The Scout `evals_tracing` config set handles this automatically, but when configuring `kibana.dev.yml` directly you must set both.
 
 Optionally include the Phoenix exporter for a trace UI:
 
@@ -66,6 +74,8 @@ telemetry.tracing.exporters:
 ```
 
 #### Step 2: Start EDOT Collector
+
+Ensure Docker is running, then start the EDOT Gateway Collector:
 
 ```bash
 node scripts/edot_collector.js
@@ -158,6 +168,7 @@ node scripts/evals run \
 | Evaluator | Suite | Description |
 | --- | --- | --- |
 | **scenario_criteria** | KI feature extraction, KI query generation | Scenario-specific criteria (e.g. "must identify payment service") |
+| **llm_exclude_compliance** | KI feature exclusion | Excluded features are not regenerated in follow-up identification runs |
 | **llm_semantic_uniqueness** | KI feature duplication | Semantic deduplication across KIs |
 | **llm_id_consistency** | KI feature duplication | Same KI ID refers to the same concept across runs |
 
