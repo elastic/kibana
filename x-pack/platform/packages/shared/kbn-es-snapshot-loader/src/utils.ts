@@ -6,7 +6,6 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { errors } from '@elastic/elasticsearch';
 
 /**
  * Extracts the data stream name from a backing index name.
@@ -31,11 +30,11 @@ export async function getMissingDataStreams({
     try {
       await esClient.indices.getDataStream({ name });
     } catch (error) {
-      if (error instanceof errors.ResponseError && error.statusCode === 404) {
+      const statusCode = (error as { meta?: { statusCode?: number } })?.meta?.statusCode;
+      if (statusCode === 404) {
         missing.push(name);
         continue;
       }
-      throw error;
     }
   }
 
