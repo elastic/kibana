@@ -67987,7 +67987,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Export one or more workflows YAML files as a ZIP archive.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Export one or more workflows as JSON with YAML content and metadata.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
       operationId: post-workflows-export
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -68002,7 +68002,7 @@ paths:
           application/json:
             examples:
               exportWorkflowsRequestExample:
-                description: Example request to export workflows as a ZIP archive
+                description: Example request to export workflows
                 value:
                   ids:
                     - workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
@@ -68025,12 +68025,31 @@ paths:
       responses:
         '200':
           content:
-            application/zip:
+            application/json:
               examples:
                 exportWorkflowsResponseExample:
-                  description: A ZIP archive containing the exported workflow YAML files
-                  value: '{binary ZIP content}'
-          description: A ZIP archive containing the exported workflow YAML files
+                  description: Workflow entries with YAML content and export manifest
+                  value:
+                    entries:
+                      - id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        yaml: |-
+                          name: My Workflow
+                          steps:
+                            - type: http.request
+                              with:
+                                url: https://example.com
+                      - id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                        yaml: |-
+                          name: Another Workflow
+                          steps:
+                            - type: http.request
+                              with:
+                                url: https://example.com
+                    manifest:
+                      exportedAt: '2026-03-26T12:00:00.000Z'
+                      exportedCount: 2
+                      version: '1'
+          description: JSON containing exported workflow YAML entries and manifest metadata
       summary: Export workflows
       tags:
         - workflows
@@ -68042,7 +68061,6 @@ paths:
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
-              -o workflows_export.zip \
               -d '{
                 "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"]
               }'
@@ -81483,6 +81501,41 @@ components:
                 - action
                 - field
                 - extractions
+            - additionalProperties: false
+              type: object
+              properties:
+                action:
+                  enum:
+                    - enrich
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  type: boolean
+                override:
+                  type: boolean
+                policy_name:
+                  description: A non-empty string.
+                  minLength: 1
+                  type: string
+                to:
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_Condition'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - policy_name
+                - to
             - additionalProperties: false
               description: Manual ingest pipeline wrapper around native Elasticsearch processors
               type: object
