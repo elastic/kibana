@@ -114,6 +114,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
     const queries = await this.getRunnableHealthQueries(lastExecutionByQuery, new Date());
     const resolved = await this.integrationResolver.resolve(queries);
+    this.logger.trace('About to run queries', { numQueries: queries.length } as LogMeta);
     const statistics: HealthDiagnosticQueryStats[] = [];
 
     for (const resolvedQuery of resolved) {
@@ -362,6 +363,9 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   ): Promise<HealthDiagnosticQuery[]> {
     const healthQueries = await this.healthQueries();
     return healthQueries.filter((query) => {
+      this.logger.trace('Evaluating health diagnostic query for execution', {
+        query: query.name,
+      } as LogMeta);
       try {
         if (!('scheduleCron' in query) || !('enabled' in query)) {
           return true;
