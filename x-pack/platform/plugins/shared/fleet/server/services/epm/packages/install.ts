@@ -28,6 +28,7 @@ import type {
   PackageDataStreamTypes,
   PackageDependencies,
   PackageInstallContext,
+  RegistryDataStream,
 } from '../../../../common/types';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
@@ -1293,9 +1294,10 @@ export async function createInstallation(options: {
     installedAsDependencyOf,
   } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
-  const toSaveESIndexPatterns = generateESIndexPatterns(
-    getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
+  const typedStreams = getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME).filter(
+    (ds): ds is RegistryDataStream => !!ds.type
   );
+  const toSaveESIndexPatterns = generateESIndexPatterns(typedStreams);
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
   // packages, default it to undefined. Use undefined rather than false to allow us to differentiate

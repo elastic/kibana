@@ -19,7 +19,8 @@
       "user.email",
       "event.module",
       "source.ip",
-      "source.geo.city_name"
+      "source.geo.city_name",
+      "event.action"
     ]
   },
   "allow_lazy_open": true,

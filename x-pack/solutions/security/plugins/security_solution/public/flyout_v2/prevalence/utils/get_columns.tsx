@@ -10,6 +10,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IS_OPERATOR } from '@kbn/timelines-plugin/common';
+import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 import {
   getDataProvider,
   getDataProviderAnd,
@@ -65,6 +66,14 @@ export interface PrevalenceDetailsRow extends PrevalenceData {
    * True if user have the correct timeline read privilege
    */
   canUseTimeline: boolean;
+  /**
+   * Host entity identifiers from the current document (for EUID / entity store).
+   */
+  documentHostEntityIdentifiers?: IdentityFields | null;
+  /**
+   * User entity identifiers from the current document (for EUID / entity store).
+   */
+  documentUserEntityIdentifiers?: IdentityFields | null;
 }
 
 export const fieldColumn: EuiBasicTableColumn<PrevalenceDetailsRow> = {
