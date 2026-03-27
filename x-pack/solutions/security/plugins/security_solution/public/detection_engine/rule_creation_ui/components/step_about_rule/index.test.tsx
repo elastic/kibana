@@ -135,7 +135,9 @@ describe.skip('StepAboutRuleComponent', () => {
     }));
     useSecurityJobsMock = (useSecurityJobs as jest.Mock).mockImplementation(() => ({ jobs: [] }));
 
-    mockedUseGetEndpointExceptionsPerPolicyOptIn.mockImplementation(() => ({ data: false }));
+    mockedUseGetEndpointExceptionsPerPolicyOptIn.mockImplementation(() => ({
+      data: { status: false },
+    }));
   });
 
   it('it renders StepRuleDescription if isReadOnlyView is true and "name" property exists', () => {
@@ -151,7 +153,9 @@ describe.skip('StepAboutRuleComponent', () => {
   });
 
   it('shows endpoint exceptions for rule definition if they are not per-policy', async () => {
-    mockedUseGetEndpointExceptionsPerPolicyOptIn.mockImplementation(() => ({ data: undefined }));
+    mockedUseGetEndpointExceptionsPerPolicyOptIn.mockImplementation(() => ({
+      data: { status: false },
+    }));
 
     const wrapper = mount(<TestComp setFormRef={() => {}} />, {
       wrappingComponent: TestProviders as EnzymeComponentType<{}>,
@@ -166,7 +170,9 @@ describe.skip('StepAboutRuleComponent', () => {
   });
 
   it('does not show endpoint exceptions for rule definition if they are per-policy', async () => {
-    mockedUseGetEndpointExceptionsPerPolicyOptIn.mockImplementation(() => ({ data: true }));
+    mockedUseGetEndpointExceptionsPerPolicyOptIn.mockImplementation(() => ({
+      data: { status: true },
+    }));
 
     const wrapper = mount(<TestComp setFormRef={() => {}} />, {
       wrappingComponent: TestProviders as EnzymeComponentType<{}>,

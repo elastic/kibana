@@ -103,7 +103,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPattern);
 
-  const { data: isEndpointExceptionsPerPolicyEnabled } = useGetEndpointExceptionsPerPolicyOptIn();
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
 
   useEffect(() => {
     if (index != null && (dataViewId === '' || dataViewId == null)) {
@@ -336,7 +336,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiToolTip>
             <EuiSpacer size="l" />
-            {!isEndpointExceptionsPerPolicyEnabled ? (
+            {endpointPerPolicyOptIn?.status === false ? (
               <EuiFormRow label={I18n.GLOBAL_ENDPOINT_EXCEPTION_LIST} fullWidth>
                 <CommonUseField
                   path="isAssociatedToEndpointList"

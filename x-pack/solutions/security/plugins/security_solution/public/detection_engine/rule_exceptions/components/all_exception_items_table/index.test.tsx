@@ -21,6 +21,8 @@ import { useFindExceptionListReferences } from '../../logic/use_find_references'
 import * as i18n from './translations';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
+import type { OptInStatusMetadata } from '../../../../../server/endpoint/lib/reference_data';
 
 jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
 jest.mock('../../../../common/lib/kibana');
@@ -28,12 +30,15 @@ jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/securitysolution-list-api');
 jest.mock('../../logic/use_find_references');
 jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
 jest.mock('react', () => {
   const r = jest.requireActual('react');
   return { ...r, useReducer: jest.fn() };
 });
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const mockUseGetEndpointExceptionsPerPolicyOptIn =
+  useGetEndpointExceptionsPerPolicyOptIn as jest.Mock;
 const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
 
 const sampleExceptionItem = {
@@ -91,6 +96,7 @@ describe('ExceptionsViewer', () => {
 
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({ data: { status: false } });
 
     (fetchExceptionListsItemsByListIds as jest.Mock).mockReturnValue({ total: 0 });
 
@@ -416,6 +422,26 @@ describe('ExceptionsViewer', () => {
   });
 
   describe('when Endpoint exception is moved under management FF is enabled', () => {
+    let render: () => ReturnType<typeof mount>;
+
+    const expectCalloutToBeRendered = ({
+      wrapper,
+      shouldBeDismissible,
+    }: {
+      wrapper: ReturnType<typeof mount>;
+      shouldBeDismissible: boolean;
+    }) => {
+      const callout = wrapper.find('[data-test-subj="EndpointExceptionsMovedCallout"]');
+
+      expect(callout.exists()).toBeTruthy();
+
+      if (shouldBeDismissible) {
+        expect(callout.first().prop('onDismiss')).toBeTruthy();
+      } else {
+        expect(callout.first().prop('onDismiss')).toBeFalsy();
+      }
+    };
+
     beforeEach(() => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
 
@@ -434,6 +460,10 @@ describe('ExceptionsViewer', () => {
     });
 
     it('should not render EndpointExceptionsMovedCallout when rule is not an endpoint security rule and does not have endpoint exceptions', () => {
+      mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+        data: { status: true, reason: 'userOptedIn' } as OptInStatusMetadata,
+      });
+
       const wrapper = mount(
         <TestProviders>
           <ExceptionsViewer
@@ -452,58 +482,114 @@ describe('ExceptionsViewer', () => {
       ).toBeFalsy();
     });
 
-    it('should render non-dismissible EndpointExceptionsMovedCallout when rule is an endpoint security rule', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ExceptionsViewer
-            rule={{
-              ...getMockRule(),
-              immutable: true,
-              rule_source: { type: 'external' } as Rule['rule_source'],
-              related_integrations: [{ package: 'endpoint', version: '9.0.0' }],
-              exceptions_list: [], // even if endpoint exceptions are unassigned from the rule somehow
-            }}
-            listTypes={[ExceptionListTypeEnum.DETECTION]}
-            isViewReadOnly={false}
-          />
-        </TestProviders>
-      );
+    describe('when the rule is an Endpoint security rule', () => {
+      beforeEach(() => {
+        render = () =>
+          mount(
+            <TestProviders>
+              <ExceptionsViewer
+                rule={{
+                  ...getMockRule(),
+                  immutable: true,
+                  rule_source: { type: 'external' } as Rule['rule_source'],
+                  related_integrations: [{ package: 'endpoint', version: '9.0.0' }],
+                  exceptions_list: [], // even if endpoint exceptions are unassigned from the rule somehow
+                }}
+                listTypes={[ExceptionListTypeEnum.DETECTION]}
+                isViewReadOnly={false}
+              />
+            </TestProviders>
+          );
+      });
 
-      expect(
-        wrapper.find('[data-test-subj="EndpointExceptionsMovedCallout"]').exists()
-      ).toBeTruthy();
-      expect(
-        wrapper.find('[data-test-subj="EndpointExceptionsMovedCallout"]').first().prop('onDismiss')
-      ).toBeFalsy();
+      it('should render non-dismissible EndpointExceptionsMovedCallout when user has NOT opted in to per-policy Endpoint exceptions', () => {
+        mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+          data: { status: false } as OptInStatusMetadata,
+        });
+
+        const wrapper = render();
+
+        expectCalloutToBeRendered({ wrapper, shouldBeDismissible: false });
+      });
+
+      it('should render non-dismissible EndpointExceptionsMovedCallout when user has opted in to per-policy Endpoint exceptions', () => {
+        mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+          data: { status: true, reason: 'userOptedIn' } as OptInStatusMetadata,
+        });
+
+        const wrapper = render();
+
+        expectCalloutToBeRendered({ wrapper, shouldBeDismissible: false });
+      });
+
+      it('should NOT render EndpointExceptionsMovedCallout on a new deployment', () => {
+        mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+          data: { status: true, reason: 'newDeployment' } as OptInStatusMetadata,
+        });
+
+        const wrapper = render();
+
+        expect(
+          wrapper.find('[data-test-subj="EndpointExceptionsMovedCallout"]').exists()
+        ).toBeFalsy();
+      });
     });
 
-    it('should render dismissible EndpointExceptionsMovedCallout when rule has endpoint_list linked', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ExceptionsViewer
-            rule={{
-              ...getMockRule(),
-              exceptions_list: [
-                {
-                  id: '12345',
-                  list_id: 'endpoint_list',
-                  type: 'endpoint',
-                  namespace_type: 'agnostic',
-                },
-              ],
-            }}
-            listTypes={[ExceptionListTypeEnum.DETECTION]}
-            isViewReadOnly={false}
-          />
-        </TestProviders>
-      );
+    describe('when a detection rule has endpoint_list linked', () => {
+      beforeEach(() => {
+        render = () =>
+          mount(
+            <TestProviders>
+              <ExceptionsViewer
+                rule={{
+                  ...getMockRule(),
+                  exceptions_list: [
+                    {
+                      id: '12345',
+                      list_id: 'endpoint_list',
+                      type: 'endpoint',
+                      namespace_type: 'agnostic',
+                    },
+                  ],
+                }}
+                listTypes={[ExceptionListTypeEnum.DETECTION]}
+                isViewReadOnly={false}
+              />
+            </TestProviders>
+          );
+      });
 
-      expect(
-        wrapper.find('[data-test-subj="EndpointExceptionsMovedCallout"]').exists()
-      ).toBeTruthy();
-      expect(
-        wrapper.find('[data-test-subj="EndpointExceptionsMovedCallout"]').first().prop('onDismiss')
-      ).toBeTruthy();
+      it('should render non-dismissible EndpointExceptionsMovedCallout when user has NOT opted in to per-policy Endpoint exceptions', () => {
+        mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+          data: { status: false } as OptInStatusMetadata,
+        });
+
+        const wrapper = render();
+
+        expectCalloutToBeRendered({ wrapper, shouldBeDismissible: false });
+      });
+
+      it('should render dismissible EndpointExceptionsMovedCallout when user has opted in to per-policy Endpoint exceptions', () => {
+        mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+          data: { status: true, reason: 'userOptedIn' } as OptInStatusMetadata,
+        });
+
+        const wrapper = render();
+
+        expectCalloutToBeRendered({ wrapper, shouldBeDismissible: true });
+      });
+
+      it('should NOT render EndpointExceptionsMovedCallout on a new deployment', () => {
+        mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+          data: { status: true, reason: 'newDeployment' } as OptInStatusMetadata,
+        });
+
+        const wrapper = render();
+
+        expect(
+          wrapper.find('[data-test-subj="EndpointExceptionsMovedCallout"]').exists()
+        ).toBeFalsy();
+      });
     });
   });
 });

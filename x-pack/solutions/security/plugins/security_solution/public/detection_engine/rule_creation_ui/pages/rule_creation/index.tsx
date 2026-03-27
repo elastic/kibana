@@ -20,7 +20,7 @@ import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from '
 import styled from 'styled-components';
 
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
@@ -848,10 +848,9 @@ const CreateRulePageComponent: React.FC<{
     []
   );
 
-  // TODO: switch to per-policy use opt-in state in follow-up (https://github.com/elastic/security-team/issues/14870)
-  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
-    'endpointExceptionsMovedUnderManagement'
-  );
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
+  const shouldShowEndpointExceptionsCannotBeAddedToRuleCallout =
+    endpointPerPolicyOptIn?.status === true && endpointPerPolicyOptIn.reason === 'userOptedIn';
 
   if (
     redirectToDetections(
@@ -886,7 +885,7 @@ const CreateRulePageComponent: React.FC<{
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
-                      {isEndpointExceptionsMovedFFEnabled && (
+                      {shouldShowEndpointExceptionsCannotBeAddedToRuleCallout && (
                         <EndpointExceptionsMovedCallout
                           id="ruleCreation"
                           dismissable

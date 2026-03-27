@@ -247,7 +247,7 @@ export const PolicyTabs = React.memo(() => {
     [http]
   );
 
-  const { data: isEndpointExceptionsPerPolicyOptedIn } = useGetEndpointExceptionsPerPolicyOptIn();
+  const { data: isPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
 
   const tabs: Record<PolicyTabKeys, PolicyTab | undefined> = useMemo(() => {
     const trustedAppsLabels = {
@@ -484,7 +484,7 @@ export const PolicyTabs = React.memo(() => {
                     getArtifactPath={getEndpointExceptionsListPath}
                     getPolicyArtifactsPath={getPolicyEndpointExceptionsPath}
                     canWriteArtifact={canWriteEndpointExceptions}
-                    disableArtifactsByPolicy={!isEndpointExceptionsPerPolicyOptedIn}
+                    disableArtifactsByPolicy={!isPerPolicyOptIn?.status}
                   />
                 </>
               ),
@@ -536,7 +536,7 @@ export const PolicyTabs = React.memo(() => {
     canReadEndpointExceptions,
     getEndpointExceptionsApiClientInstance,
     canWriteEndpointExceptions,
-    isEndpointExceptionsPerPolicyOptedIn,
+    isPerPolicyOptIn?.status,
     isEnterprise,
   ]);
 

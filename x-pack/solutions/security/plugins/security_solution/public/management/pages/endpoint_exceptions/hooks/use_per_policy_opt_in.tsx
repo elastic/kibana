@@ -34,8 +34,9 @@ export const usePerPolicyOptIn = (): {
   const [isCalloutDismissed, setIsCalloutDismissed] = useState(
     sessionStorage.get(STORAGE_KEY) === true
   );
-  const shouldShowCallout = isPerPolicyOptIn !== true && !isCalloutDismissed;
-  const shouldShowAction = isPerPolicyOptIn !== true && canOptInPerPolicyEndpointExceptions;
+  const shouldShowCallout = isPerPolicyOptIn?.status === false && !isCalloutDismissed;
+  const shouldShowAction =
+    isPerPolicyOptIn?.status === false && canOptInPerPolicyEndpointExceptions;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 

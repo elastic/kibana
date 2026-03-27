@@ -141,15 +141,14 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
       hasPartialCodeSignatureEntry([exception])
     );
 
-    const { data: isEndpointExceptionsPerPolicyOptedIn } = useGetEndpointExceptionsPerPolicyOptIn();
+    const { data: isPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
 
     const canAssignArtifactPerPolicy = useCanAssignArtifactPerPolicy(
       exception,
       mode,
       hasFormChanged
     );
-    const showAssignmentSection =
-      isEndpointExceptionsPerPolicyOptedIn === true && canAssignArtifactPerPolicy;
+    const showAssignmentSection = isPerPolicyOptIn?.status === true && canAssignArtifactPerPolicy;
 
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
       ENDPOINT_ALERTS_INDEX_NAMES,

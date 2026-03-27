@@ -518,12 +518,11 @@ export class EndpointAppContextService {
 
     const referenceDataClient = this.getReferenceDataClient();
 
-    const endpointExceptionsMovedUnderManagement =
-      await referenceDataClient.get<OptInStatusMetadata>(
-        REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
-      );
+    const optInStatusMetadata = await referenceDataClient.get<OptInStatusMetadata>(
+      REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
+    );
 
-    return endpointExceptionsMovedUnderManagement.metadata.status;
+    return optInStatusMetadata.metadata.status;
   }
 
   public getServerConfigValue<TKey extends keyof ConfigType = keyof ConfigType>(

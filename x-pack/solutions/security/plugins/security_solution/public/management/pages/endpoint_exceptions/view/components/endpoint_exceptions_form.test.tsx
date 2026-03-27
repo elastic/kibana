@@ -24,6 +24,7 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { buildPerPolicyTag } from '../../../../../../common/endpoint/service/artifacts/utils';
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../hooks/artifacts/use_endpoint_per_policy_opt_in';
 import type { UseQueryResult } from '@kbn/react-query';
+import type { GetEndpointExceptionsPerPolicyOptInResponse } from '../../../../../../common/api/endpoint/endpoint_exceptions_per_policy_opt_in/endpoint_exceptions_per_policy_opt_in.gen';
 
 jest.setTimeout(15_000);
 
@@ -160,8 +161,8 @@ describe('Endpoint exceptions form', () => {
       },
     });
     mockedUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
-      data: true,
-    } as UseQueryResult<boolean, Error>);
+      data: { status: false },
+    } as UseQueryResult<GetEndpointExceptionsPerPolicyOptInResponse, Error>);
 
     formProps = {
       item: latestUpdatedItem,
@@ -520,8 +521,8 @@ describe('Endpoint exceptions form', () => {
 
     it('should not display policy assignment when user has not opted in', async () => {
       mockedUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
-        data: false,
-      } as UseQueryResult<boolean, Error>);
+        data: { status: false },
+      } as UseQueryResult<GetEndpointExceptionsPerPolicyOptInResponse, Error>);
       await act(() => render());
 
       expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).not.toBeInTheDocument();
