@@ -88,6 +88,8 @@ describe('useTopNavLinks', () => {
           adHocDataViews: [],
           hasShareIntegration: false,
           persistedDiscoverSession: undefined,
+          onOpenSaveModal: jest.fn(),
+          onOpenSaveAsModal: jest.fn(),
           ...hookAttrs,
         }),
       {
