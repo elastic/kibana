@@ -91,7 +91,7 @@ describe('Tagcloud Schema', () => {
                 color: { type: 'from_palette', palette: 'default', index: 0 },
               },
             ],
-            unassignedColor: { type: 'color_code', value: '#cccccc' },
+            unassigned: { type: 'color_code', value: '#cccccc' },
           },
         },
       };

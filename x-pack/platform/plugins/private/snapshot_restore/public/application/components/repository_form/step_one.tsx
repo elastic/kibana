@@ -24,15 +24,17 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import type { Error } from '@kbn/es-ui-shared-plugin/public';
+import { SectionError } from '@kbn/es-ui-shared-plugin/public';
+
 import type { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common';
-import type { Error } from '../../../shared_imports';
-import { SectionError } from '../../../shared_imports';
 
 import { useLoadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
 import type { RepositoryValidation } from '../../services/validation';
-import { SectionLoading, RepositoryTypeLogo } from '..';
+import { SectionLoading } from '../loading';
+import { RepositoryTypeLogo } from '../repository_type_logo';
 import { useCore } from '../../app_context';
 import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';
 
