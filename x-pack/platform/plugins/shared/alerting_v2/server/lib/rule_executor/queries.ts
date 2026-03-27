@@ -27,7 +27,7 @@ export const getActiveAlertGroupHashesQuery = ({
 
   query = query.where`rule.id == ${{ ruleId }} AND episode.status IS NOT NULL`;
 
-  query = query.pipe`STATS 
+  query = query.pipe`STATS
       last_episode_status = LAST(episode.status, @timestamp)
     BY group_hash`;
 
