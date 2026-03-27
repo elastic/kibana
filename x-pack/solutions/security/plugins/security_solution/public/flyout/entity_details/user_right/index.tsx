@@ -236,16 +236,17 @@ export const UserPanel = ({
     [http, queryClient, calculateEntityRiskScore]
   );
 
+  const defaultTab = useMemo(() => {
+    if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;
+    if (hasMisconfigurationFindings || hasNonClosedAlerts)
+      return EntityDetailsLeftPanelTab.CSP_INSIGHTS;
+    if (entityStoreEntityId) return EntityDetailsLeftPanelTab.RESOLUTION_GROUP;
+    return EntityDetailsLeftPanelTab.RISK_INPUTS;
+  }, [isRiskScoreExist, hasMisconfigurationFindings, hasNonClosedAlerts, entityStoreEntityId]);
+
   const openDefaultPanel = useCallback(
-    () =>
-      openDetailsPanel({
-        tab: isRiskScoreExist
-          ? EntityDetailsLeftPanelTab.RISK_INPUTS
-          : hasMisconfigurationFindings || hasNonClosedAlerts
-          ? EntityDetailsLeftPanelTab.CSP_INSIGHTS
-          : EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
-      }),
-    [isRiskScoreExist, hasMisconfigurationFindings, hasNonClosedAlerts, openDetailsPanel]
+    () => openDetailsPanel({ tab: defaultTab }),
+    [openDetailsPanel, defaultTab]
   );
 
   const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled

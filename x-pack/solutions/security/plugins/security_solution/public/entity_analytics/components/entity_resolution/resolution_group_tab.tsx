@@ -10,7 +10,7 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { EntityType } from '@kbn/entity-store/public';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useResolutionGroup } from './hooks/use_resolution_group';
+import { useResolutionGroup, RESOLUTION_GROUP_ROUTE } from './hooks/use_resolution_group';
 import type { ResolutionGroup } from './hooks/use_resolution_group';
 import { useLinkEntities } from './hooks/use_link_entities';
 import { useUnlinkEntities } from './hooks/use_unlink_entities';
@@ -30,8 +30,6 @@ interface ResolutionGroupTabProps {
   entityType: EntityType;
   scopeId: string;
 }
-
-const RESOLUTION_GROUP_ROUTE = '/internal/security/entity_store/resolution/group';
 
 export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId, entityType }) => {
   const { http } = useKibana().services;

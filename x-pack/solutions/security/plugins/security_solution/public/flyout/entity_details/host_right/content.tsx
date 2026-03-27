@@ -99,7 +99,6 @@ export const HostPanelContent = ({
           <ResolutionSection
             entityId={entityStoreEntityId}
             openDetailsPanel={openDetailsPanel}
-            isPreviewMode={isPreviewMode}
           />
           <EuiHorizontalRule />
         </>

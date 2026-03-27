@@ -9,7 +9,7 @@ import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
-const RESOLUTION_GROUP_ROUTE = '/internal/security/entity_store/resolution/group';
+export const RESOLUTION_GROUP_ROUTE = '/internal/security/entity_store/resolution/group';
 export const RESOLUTION_GROUP_QUERY_KEY = 'resolution-group';
 
 export interface ResolutionGroup {

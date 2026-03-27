@@ -8,11 +8,11 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-
-const RESOLUTION_UNLINK_ROUTE = '/internal/security/entity_store/resolution/unlink';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { ENTITY_REMOVED_TOAST, RESOLUTION_ERROR_TITLE } from '../translations';
 import { RESOLUTION_GROUP_QUERY_KEY } from './use_resolution_group';
+
+const RESOLUTION_UNLINK_ROUTE = '/internal/security/entity_store/resolution/unlink';
 
 interface UnlinkEntitiesParams {
   entity_ids: string[];

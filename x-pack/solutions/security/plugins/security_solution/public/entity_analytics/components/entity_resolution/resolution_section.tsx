@@ -23,13 +23,11 @@ import { getEntityId } from './helpers';
 interface ResolutionSectionProps {
   entityId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  isPreviewMode: boolean;
 }
 
 export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
   entityId,
   openDetailsPanel,
-  isPreviewMode,
 }) => {
   const { data: group, isLoading } = useResolutionGroup(entityId, {
     enabled: !!entityId,
@@ -56,13 +54,11 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
       <ExpandablePanel
         header={{
           title: RESOLUTION_GROUP_LINK_TITLE,
-          link: isPreviewMode
-            ? undefined
-            : {
-                callback: handleOpenResolutionTab,
-                tooltip: RESOLUTION_GROUP_LINK_TOOLTIP,
-              },
-          iconType: !isPreviewMode ? 'arrowStart' : undefined,
+          link: {
+            callback: handleOpenResolutionTab,
+            tooltip: RESOLUTION_GROUP_LINK_TOOLTIP,
+          },
+          iconType: 'arrowStart',
         }}
         expand={{ expandable: false }}
       >
