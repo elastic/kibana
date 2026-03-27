@@ -19,13 +19,19 @@ import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import {
+  buildEuidCspPreviewOptions,
+  inferEntityTypeFromIdentityFields,
+} from '../../utils/build_euid_csp_preview_options';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
+import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
+import { useUiSetting } from '../../../common/lib/kibana';
 
 interface MisconfigurationPreviewDistributionBarProps {
   key: string;
@@ -105,19 +111,23 @@ const MisconfigurationPreviewScore = ({
 };
 
 export const MisconfigurationsPreview = ({
-  value,
-  field,
+  identityFields,
   isPreviewMode,
   openDetailsPanel,
 }: {
-  value: string;
-  field: CloudPostureEntityIdentifier;
+  identityFields: IdentityFields;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
+  const euidApi = useEntityStoreEuidApi();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
-    field,
-    value
+    buildEuidCspPreviewOptions(
+      inferEntityTypeFromIdentityFields(identityFields),
+      identityFields,
+      euidApi,
+      { entityStoreV2Enabled }
+    )
   );
   const findingsStats = useGetFindingsStats(passedFindings, failedFindings);
 

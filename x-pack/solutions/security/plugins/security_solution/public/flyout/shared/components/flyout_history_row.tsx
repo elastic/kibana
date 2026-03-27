@@ -80,7 +80,14 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
         <GenericHistoryRow
           item={item}
           index={index}
-          title={String(item.panel.params?.hostName)}
+          title={String(
+            item.panel.params?.hostName ??
+              (item.panel.params?.identityFields as Record<string, string>)?.['host.name'] ??
+              Object.values(
+                (item.panel.params?.identityFields as Record<string, string>) || {}
+              )[0] ??
+              ''
+          )}
           icon={'storage'}
           name={'Host'}
           dataTestSubj={HOST_HISTORY_ROW_TEST_ID}
@@ -91,7 +98,14 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
         <GenericHistoryRow
           item={item}
           index={index}
-          title={String(item.panel.params?.userName)}
+          title={String(
+            item.panel.params?.userName ??
+              (item.panel.params?.identityFields as Record<string, string>)?.['user.name'] ??
+              Object.values(
+                (item.panel.params?.identityFields as Record<string, string>) || {}
+              )[0] ??
+              ''
+          )}
           icon={'user'}
           name={'User'}
           dataTestSubj={USER_HISTORY_ROW_TEST_ID}

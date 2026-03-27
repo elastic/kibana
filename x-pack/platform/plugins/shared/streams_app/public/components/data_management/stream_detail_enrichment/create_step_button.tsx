@@ -95,7 +95,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor"
       data-stream-type={streamType}
       key="addProcessor"
-      icon="compute"
+      icon="processor"
       onClick={() => {
         togglePopover(false);
         addProcessor(undefined, { parentId: parentId ?? null });
@@ -113,7 +113,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       data-stream-type={streamType}
     >
       {mode === 'prominent' ? createTextProminent : createText}
-      {mode === 'prominent' || mode === 'subdued' ? <EuiIcon type="arrowDown" /> : null}
+      {mode === 'prominent' || mode === 'subdued' ? <EuiIcon type="chevronSingleDown" /> : null}
     </EuiButton>
   );
 
@@ -122,7 +122,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButtonInline"
       data-stream-type={streamType}
       size="xs"
-      iconType="plusInCircle"
+      iconType="plusCircle"
       onClick={togglePopover}
       disabled={!canAddStep}
       aria-label={i18n.translate(

@@ -7,15 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut, EuiInMemoryTable, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ReactNode } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash/fp';
 import type { CriticalityLevel } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { AlertPreviewButton } from '../../../../../flyout/shared/components/alert_preview_button';
+import { ALERT_PREVIEW_BANNER } from '../../../../../flyout/document_details/preview/constants';
+import { DocumentDetailsPreviewPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { formatRiskScore } from '../../../../common';
@@ -55,6 +57,22 @@ export const RiskInputsTab = <T extends EntityType>({
 }: RiskInputsTabProps<T>) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const openAlertPreview = useCallback(
+    (id: string, indexName: string) =>
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id,
+          indexName,
+          scopeId,
+          isPreviewMode: true,
+          banner: ALERT_PREVIEW_BANNER,
+        },
+      }),
+    [openPreviewPanel, scopeId]
+  );
 
   const nameFilterQuery = useMemo(() => {
     return buildEntityNameFilter(entityType, [entityName]);
@@ -100,11 +118,17 @@ export const RiskInputsTab = <T extends EntityType>({
     () => [
       {
         render: (data: InputAlert) => (
-          <AlertPreviewButton
-            id={data._id}
-            indexName={data.input.index}
-            scopeId={scopeId}
+          <EuiButtonIcon
+            iconType="expand"
             data-test-subj={EXPAND_ALERT_TEST_ID}
+            onClick={() => openAlertPreview(data._id, data.input.index)}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.right.alertPreview.ariaLabel',
+              {
+                defaultMessage: 'Preview alert with id {id}',
+                values: { id: data._id },
+              }
+            )}
           />
         ),
         width: '5%',
@@ -163,7 +187,7 @@ export const RiskInputsTab = <T extends EntityType>({
         render: formatContribution,
       },
     ],
-    [scopeId]
+    [openAlertPreview]
   );
 
   if (riskScoreError) {

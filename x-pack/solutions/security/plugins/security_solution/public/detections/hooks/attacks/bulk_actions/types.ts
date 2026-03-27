@@ -55,6 +55,8 @@ export interface BaseAttackContextMenuItemsProps {
 export interface BaseAttackProps {
   /** ID of the attack */
   attackId: string;
+  /** Concrete Elasticsearch index where the attack alert is stored */
+  attackIndex?: string;
   /** IDs of related alerts */
   relatedAlertIds: string[];
 }

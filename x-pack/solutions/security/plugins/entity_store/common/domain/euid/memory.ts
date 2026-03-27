@@ -13,6 +13,7 @@ import {
   documentPassesCalculatedIdentityPipelineGate,
   getDocument,
   getEffectiveEuidRanking,
+  getFieldsToBeFilteredOn,
   getFieldValue,
   isEuidField,
 } from './commons';
@@ -83,6 +84,58 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     return rawId;
   }
   return `${entityType}:${rawId}`;
+}
+
+/**
+ * Extracts identity field name → value pairs from a document (flattened, nested, or ES hit with `_source`)
+ * using the same rules as {@link getEuidFromObject}. Use for entity store resolution / flyout identity seeds.
+ */
+export function getEntityIdentifiersFromDocument(
+  entityType: EntityType,
+  doc: unknown
+): Record<string, string> | undefined {
+  if (!doc) {
+    return undefined;
+  }
+
+  let workingDoc = getDocument(doc);
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+
+  if (isSingleFieldIdentity(identityField)) {
+    const value = getFieldValue(workingDoc, identityField.singleField);
+    if (value === undefined) {
+      return undefined;
+    }
+    return { [identityField.singleField]: value };
+  }
+
+  if (identityField.fieldEvaluations?.length) {
+    const evaluated = applyFieldEvaluations(workingDoc, identityField.fieldEvaluations);
+    workingDoc = { ...workingDoc, ...evaluated };
+  }
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    applyWhenConditionTrueSetFields(workingDoc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  }
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    applyWhenConditionTrueSetFields(
+      workingDoc,
+      entityDefinition.whenConditionTrueSetFieldsAfterStats
+    );
+  }
+
+  if (!documentPassesCalculatedIdentityPipelineGate(workingDoc, entityDefinition)) {
+    return undefined;
+  }
+
+  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(
+    workingDoc,
+    getEffectiveEuidRanking(workingDoc, identityField)
+  );
+  if (fieldsToBeFilteredOn.rankingPosition === -1) {
+    return undefined;
+  }
+  return fieldsToBeFilteredOn.values;
 }
 
 function getComposedFieldValues(doc: any, euidFields: EuidAttribute[][]): string[] {
