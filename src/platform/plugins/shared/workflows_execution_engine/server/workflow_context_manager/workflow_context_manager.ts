@@ -288,8 +288,8 @@ export class WorkflowContextManager {
         typeof stepContext.event === 'object' &&
         'inputs' in stepContext.event
       ) {
-        // TEMP: We're removing "inputs" from the context level. During execution it will still work
-        // for backwards compatibility with previous workflows, but editor will show the error for inputs workflow-level.
+        // TODO(https://github.com/elastic/security-team/issues/16526): Remove this compatibility bridge.
+        // We copy event.inputs into context.inputs for backwards compatibility with previous workflows.
         stepContext.inputs = stepContext.event.inputs as Record<string, unknown>;
       }
 

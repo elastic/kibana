@@ -32,7 +32,7 @@ export const validateWorkflowInputs = async (
   workflowExecutionRepository: WorkflowExecutionRepository,
   logger: Logger
 ): Promise<boolean> => {
-  // TODO: This is a workaround to skip validation for alert triggers.
+  // TODO(https://github.com/elastic/security-team/issues/16526): This is a workaround to skip validation for alert triggers.
   if (context.event && typeof context.event === 'object' && 'alerts' in context.event) {
     return true;
   }

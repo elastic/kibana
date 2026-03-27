@@ -60,6 +60,7 @@ export type FlatInput = z.infer<typeof FlatInputSchema>;
 export const WorkflowInputSchema = z.union([
   // New JSON Schema format
   JsonModelSchema,
+  // TODO(https://github.com/elastic/security-team/issues/16526): Remove legacy array format once all workflows are migrated to JSON Schema inputs.
   // Legacy array format (for backward compatibility)
   z.array(FlatInputSchema),
 ]);

@@ -327,7 +327,7 @@ export class WorkflowsManagementApi {
 
     const context = {
       event: resolvedEvent,
-      trigger: 'manual', // TODO: TEMP
+      trigger: 'manual', // TODO(https://github.com/elastic/security-team/issues/16526): Remove once trigger context is properly resolved.
       spaceId,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();

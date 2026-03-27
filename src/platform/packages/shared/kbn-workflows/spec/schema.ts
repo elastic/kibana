@@ -841,7 +841,7 @@ export const WorkflowContextSchema = z.object({
    * not at the workflow root. This field remains on the runtime context for backward compatibility
    * and is populated from the trigger's input values at execution time.
    */
-  // TODO: Remove this "inputs" field once the inputs migration to manual trigger is fully complete.
+  // TODO(https://github.com/elastic/security-team/issues/16526): Remove this "inputs" field once the inputs migration to manual trigger is fully complete.
   inputs: z.record(z.string(), z.unknown()).optional(),
   event: z.unknown().optional(),
   execution: WorkflowExecutionContextSchema,
@@ -874,7 +874,7 @@ export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 export const DynamicWorkflowContextSchema = WorkflowContextSchema
   // Omit base `inputs` so autocomplete only shows typed inputs when the workflow defines them.
   // getWorkflowContextSchema() adds a properly typed `inputs` field back when applicable.
-  // TODO: Remove this .omit() once the inputs migration to manual trigger is fully complete.
+  // TODO(https://github.com/elastic/security-team/issues/16526): Remove this .omit() once the inputs migration to manual trigger is fully complete.
   .omit({ inputs: true })
   .extend({
     // overriding record with object to avoid type mismatch when
