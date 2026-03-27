@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-// TODO(vision-alignment): Refactor to use executorClient.runExperiment() for consistency
-// with the shared evaluation layer. The current implementation builds its own evaluation loop,
-// which means it won't automatically benefit from future improvements to the shared executor
-// (e.g. trace storage, Elastic-native result persistence, centralized concurrency control).
-// See: "Future of @kbn/evals" vision document, Section 5 — evaluation entry points.
-
-import type { Evaluator, EvaluationResult } from '../types';
+import type { Evaluator, EvaluationResult } from '@kbn/evals';
 import type {
   AttackModule,
   AttackModuleConfig,

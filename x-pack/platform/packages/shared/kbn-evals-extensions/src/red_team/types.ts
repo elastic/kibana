@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Example, EvaluationResult } from '../types';
+import type { Example, EvaluationResult } from '@kbn/evals';
 
 export type AttackCategory =
   | 'prompt-injection'

@@ -6,7 +6,7 @@
  */
 
 import { createRedTeamRunner, ALL_MODULES, MODULES_BY_NAME } from './runner';
-import type { Evaluator, EvaluationResult } from '../types';
+import type { Evaluator, EvaluationResult } from '@kbn/evals';
 
 const createMockEvaluator = (name: string, score: number): Evaluator => ({
   name,

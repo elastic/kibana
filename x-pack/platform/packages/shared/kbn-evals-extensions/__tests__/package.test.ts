@@ -5,49 +5,58 @@
  * 2.0.
  */
 
-/**
- * Basic package health checks for @kbn/evals-extensions
- */
-
-import { EVALS_EXTENSIONS_VERSION } from '..';
+import {
+  createRedTeamRunner,
+  createGuardrailsEngine,
+  DEFAULT_GUARDRAIL_RULES,
+  promptInjectionModule,
+  privilegeEscalationModule,
+  infoExtractionModule,
+  jailbreakingModule,
+  ALL_MODULES,
+} from '..';
 
 describe('@kbn/evals-extensions', () => {
   describe('package structure', () => {
-    it('should export EVALS_EXTENSIONS_VERSION', () => {
-      expect(EVALS_EXTENSIONS_VERSION).toBe('1.0.0');
-    });
-
     it('should be importable without errors', async () => {
       const mod = await import('..');
       expect(mod).toBeDefined();
     });
   });
 
+  describe('red-team exports', () => {
+    it('exports createRedTeamRunner', () => {
+      expect(typeof createRedTeamRunner).toBe('function');
+    });
+
+    it('exports createGuardrailsEngine', () => {
+      expect(typeof createGuardrailsEngine).toBe('function');
+    });
+
+    it('exports DEFAULT_GUARDRAIL_RULES', () => {
+      expect(Array.isArray(DEFAULT_GUARDRAIL_RULES)).toBe(true);
+      expect(DEFAULT_GUARDRAIL_RULES.length).toBeGreaterThan(0);
+    });
+
+    it('exports all attack modules', () => {
+      expect(promptInjectionModule.name).toBe('prompt-injection');
+      expect(privilegeEscalationModule.name).toBe('privilege-escalation');
+      expect(infoExtractionModule.name).toBe('info-extraction');
+      expect(jailbreakingModule.name).toBe('jailbreaking');
+    });
+
+    it('exports ALL_MODULES with 4 modules', () => {
+      expect(ALL_MODULES).toHaveLength(4);
+    });
+  });
+
   describe('dependency isolation', () => {
     it('should not create circular dependencies with @kbn/evals', async () => {
-      // This test ensures we maintain one-way dependency:
-      // kbn-evals-extensions → depends on → kbn-evals
-      // kbn-evals → MUST NOT depend on → kbn-evals-extensions
-
-      // Both packages should be importable
       const evalsExtensions = await import('..');
       const kbnEvals = await import('@kbn/evals');
 
       expect(evalsExtensions).toBeDefined();
       expect(kbnEvals).toBeDefined();
-
-      // kbn-evals-extensions can use kbn-evals types (verified by compilation)
-      // kbn-evals should have no knowledge of kbn-evals-extensions
-      // This is enforced by TypeScript references in tsconfig.json
-    });
-  });
-
-  describe('exports', () => {
-    it('should re-export core types from @kbn/evals', async () => {
-      // Type exports are verified at compile time
-      // Runtime check just ensures module loads
-      const exports = await import('..');
-      expect(exports).toBeDefined();
     });
   });
 });

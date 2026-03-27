@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-/**
- * Internal exports for @kbn/evals-extensions
- * External API surface is defined in the root index.ts
- */
-
-export type * from './types';
-export * from './utils';
+export * from './red_team';
