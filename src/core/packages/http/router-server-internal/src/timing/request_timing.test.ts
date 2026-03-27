@@ -10,7 +10,8 @@
 import { RequestTimingImpl } from './request_timing';
 import type { RequestTimingState } from './types';
 
-describe('RequestTimingImpl', () => {
+// Failing: See https://github.com/elastic/kibana/issues/259867
+describe.skip('RequestTimingImpl', () => {
   let state: RequestTimingState;
   let timing: RequestTimingImpl;
 

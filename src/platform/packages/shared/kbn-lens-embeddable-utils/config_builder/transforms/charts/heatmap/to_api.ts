@@ -53,7 +53,7 @@ function getOrientationFromRotation(rotation: number): 'angled' | 'vertical' | '
 
 function getGridConfigProps(
   gridConfig: HeatmapVisualizationState['gridConfig']
-): HeatmapState['axis'] {
+): HeatmapState['axes'] {
   return {
     x: {
       labels: {
@@ -63,7 +63,7 @@ function getGridConfigProps(
         }),
       },
       title: {
-        value: gridConfig.xTitle,
+        text: gridConfig.xTitle,
         visible: gridConfig.isXAxisTitleVisible,
       },
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
@@ -71,7 +71,7 @@ function getGridConfigProps(
     y: {
       labels: { visible: gridConfig.isYAxisLabelVisible },
       title: {
-        value: gridConfig.yTitle,
+        text: gridConfig.yTitle,
         visible: gridConfig.isYAxisTitleVisible,
       },
       ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
@@ -96,7 +96,7 @@ function reverseBuildVisualizationState(
     ...generateApiLayer(layer),
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
-    axis: getGridConfigProps(visualization.gridConfig),
+    axes: getGridConfigProps(visualization.gridConfig),
     cells: {
       labels: { visible: visualization.gridConfig.isCellLabelVisible },
     },
