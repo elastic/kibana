@@ -393,10 +393,6 @@
   "alerting_rule": {
     "dynamic": false,
     "properties": {
-      "artifacts": {
-        "enabled": false,
-        "type": "object"
-      },
       "createdAt": {
         "type": "date"
       },
@@ -482,10 +478,6 @@
             "type": "keyword"
           }
         }
-      },
-      "state_transition": {
-        "enabled": false,
-        "type": "object"
       },
       "time_field": {
         "type": "keyword"
