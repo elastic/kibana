@@ -14249,6 +14249,14 @@
               },
               {
                 "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template_tags.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template_creators.ts"
+              },
+              {
+                "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_case.tsx"
               },
               {
@@ -14290,14 +14298,6 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_case_metrics.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template_tags.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template_creators.ts"
               },
               {
                 "plugin": "@kbn/elastic-assistant",
