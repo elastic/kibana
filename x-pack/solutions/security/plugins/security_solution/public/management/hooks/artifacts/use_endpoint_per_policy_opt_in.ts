@@ -6,9 +6,10 @@
  */
 import type { UseQueryResult } from '@kbn/react-query';
 import { useMutation, useQuery } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import type { GetEndpointExceptionsPerPolicyOptInResponse } from '../../../../common/api/endpoint/endpoint_exceptions_per_policy_opt_in/endpoint_exceptions_per_policy_opt_in.gen';
 import { ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE } from '../../../../common/endpoint/constants';
-import { useHttp } from '../../../common/lib/kibana';
+import { useHttp, useToasts } from '../../../common/lib/kibana';
 
 export const useSendEndpointExceptionsPerPolicyOptIn = () => {
   const http = useHttp();
@@ -25,18 +26,24 @@ export const useGetEndpointExceptionsPerPolicyOptIn = (): UseQueryResult<
   Error
 > => {
   const http = useHttp();
+  const toasts = useToasts();
 
   return useQuery<GetEndpointExceptionsPerPolicyOptInResponse, Error>({
     queryKey: ['endpointExceptionsPerPolicyOptIn'],
-    queryFn: async () => {
-      try {
-        return await http.get<GetEndpointExceptionsPerPolicyOptInResponse>(
-          ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
-          { version: '1' }
-        );
-      } catch (error) {
-        return error;
-      }
+    queryFn: async () =>
+      http.get<GetEndpointExceptionsPerPolicyOptInResponse>(
+        ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
+        { version: '1' }
+      ),
+    onError: (error) => {
+      toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.securitySolution.endpointExceptionsPerPolicyOptIn.errorToastTitle',
+          {
+            defaultMessage: 'Error fetching endpoint exceptions per policy opt-in status',
+          }
+        ),
+      });
     },
   });
 };
