@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiToolTip, EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import { getStatusLabel } from '../../../common/hooks/status_labels';
@@ -20,19 +20,25 @@ export const UnhealthyTooltip = ({ configId }: { configId: string }) => {
 
   const tooltipContent =
     unhealthyStatuses.length > 0 ? (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
         {unhealthyStatuses.map((s) => (
-          <div key={s.locationId} style={{ display: 'flex', gap: '6px' }}>
-            <span style={{ minWidth: '6px' }}>•</span>
-            <div>
-              <div style={{ fontWeight: 600 }}>{s.locationLabel}</div>
-              <div style={{ fontSize: '12px', color: '#666' }}>
-                {getStatusLabel(s.status) ?? UNHEALTHY_TOOLTIP_BADGE}
-              </div>
-            </div>
-          </div>
+          <EuiFlexItem key={s.locationId} grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <span>•</span>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong>{s.locationLabel}</strong>
+                </EuiText>
+                <EuiText size="xs" color="subdued">
+                  {getStatusLabel(s.status) ?? UNHEALTHY_TOOLTIP_BADGE}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         ))}
-      </div>
+      </EuiFlexGroup>
     ) : (
       UNHEALTHY_TOOLTIP_BADGE
     );
