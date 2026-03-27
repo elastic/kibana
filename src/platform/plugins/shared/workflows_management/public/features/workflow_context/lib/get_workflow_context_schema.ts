@@ -34,11 +34,11 @@ function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
  * Uses shape spread instead of deprecated Zod v4 .merge().
  */
 function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.ZodType {
-  const triggerEventSchemas = [];
+  const triggerEventSchemas: z.ZodType[] = [];
 
-  for (const trigger of triggers.filter(
-    (t) => typeof t.type === 'string' && isTriggerType(t.type)
-  ) as Array<{ type: string }>) {
+  for (const trigger of triggers.filter((t) => typeof t.type === 'string') as Array<{
+    type: string;
+  }>) {
     if (isAlertTrigger(trigger)) {
       triggerEventSchemas.push(AlertEventSchema);
     } else if (isManualTrigger(trigger)) {
@@ -50,20 +50,27 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
       }
 
       triggerEventSchemas.push(z.object(eventShape));
-    }
-
-    const def = triggerSchemas.getTriggerDefinition(trigger.type);
-    if (def?.eventSchema && isZodObject(def.eventSchema)) {
-      triggerEventSchemas.push(
-        z.object({
-          ...def.eventSchema.shape,
-          ...(EventTimestampSchema as z.ZodObject<z.ZodRawShape>).shape,
-        })
-      );
+    } else if (!isTriggerType(trigger.type)) {
+      const def = triggerSchemas.getTriggerDefinition(trigger.type);
+      if (def?.eventSchema && isZodObject(def.eventSchema)) {
+        triggerEventSchemas.push(
+          z.object({
+            ...def.eventSchema.shape,
+            ...(EventTimestampSchema as z.ZodObject<z.ZodRawShape>).shape,
+          })
+        );
+      }
     }
   }
 
-  return triggerEventSchemas.length === 1 ? triggerEventSchemas[0] : z.union(triggerEventSchemas);
+  if (triggerEventSchemas.length === 0) {
+    return z.unknown().optional();
+  }
+
+  const schema =
+    triggerEventSchemas.length === 1 ? triggerEventSchemas[0] : z.union(triggerEventSchemas);
+
+  return schema.optional();
 }
 
 /**

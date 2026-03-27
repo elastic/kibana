@@ -289,7 +289,7 @@ export class WorkflowContextManager {
         'inputs' in stepContext.event
       ) {
         // TEMP: We're removing "inputs" from the context level. During execution it will still work
-        // for backwards compatibility with previous workfows, but editor will show the error for inputs workflow-level.
+        // for backwards compatibility with previous workflows, but editor will show the error for inputs workflow-level.
         stepContext.inputs = stepContext.event.inputs as Record<string, unknown>;
       }
 
