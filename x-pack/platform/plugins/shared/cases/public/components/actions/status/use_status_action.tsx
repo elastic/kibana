@@ -51,6 +51,7 @@ const getUpdateSuccessToast = ({
 }: GetUpdateSuccessToastParams): { title: string; text?: ToastInputFields['text'] } => {
   const totalCases = cases.length;
   const caseTitle = totalCases === 1 ? cases[0].title : '';
+  const theCase = cases[0];
 
   if (status === CaseStatuses.open) {
     return { title: i18n.REOPENED_CASES({ totalCases, caseTitle }) };
@@ -65,7 +66,9 @@ const getUpdateSuccessToast = ({
     patchCaseStats?.reduce((total, stats) => {
       return total + (stats?.syncedAlertCount ?? 0);
     }, 0) ?? 0;
-  const totalAlertsCount = cases.reduce((total, currentCase) => total + currentCase.totalAlerts, 0);
+  const totalAlertsCount = theCase.settings.syncAlerts
+    ? cases.reduce((total, currentCase) => total + currentCase.totalAlerts, 0)
+    : 0;
   const summary =
     totalAlertsCount === 0
       ? undefined
@@ -75,7 +78,6 @@ const getUpdateSuccessToast = ({
     text: summary,
   };
 
-  const theCase = cases[0];
   if (cases.length !== 1 || !theCase.settings.syncAlerts || summary == null) {
     return toast;
   }
