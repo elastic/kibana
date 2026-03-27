@@ -62299,6 +62299,10 @@ paths:
                   additionalProperties: {}
                   description: Context overrides for the step execution.
                   type: object
+                executionContext:
+                  additionalProperties: {}
+                  description: Execution context for the step execution.
+                  type: object
                 stepId:
                   description: ID of the step to test.
                   type: string
@@ -72174,6 +72178,9 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseEntryDetailsInError:
       type: object
@@ -72213,18 +72220,27 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntry'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntry'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntry'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntry'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps:
       anyOf:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryUpdateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryUpdateFields'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps:
       anyOf:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseReadResponse200:
       type: object
@@ -77478,6 +77494,18 @@ components:
           required:
             - gte
             - lte
+        gap_reason:
+          description: Detected reason for the execution gap
+          type: object
+          properties:
+            type:
+              description: The type of reason for the gap (rule_disabled or rule_did_not_run)
+              enum:
+                - rule_disabled
+                - rule_did_not_run
+              type: string
+          required:
+            - type
         total_enrichment_duration_ms:
           description: Total time spent enriching documents during current rule execution cycle
           minimum: 0

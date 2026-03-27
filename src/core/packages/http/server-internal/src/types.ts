@@ -26,6 +26,7 @@ import type { HttpServerSetup } from './http_server';
 import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';
 import type { RateLimiterConfig } from './rate_limiter';
+import type { HttpConfig } from './http_config';
 
 /** @internal */
 export interface InternalHttpServicePreboot
@@ -58,6 +59,7 @@ export interface InternalHttpServiceSetup
   staticAssets: InternalStaticAssets;
   externalUrl: ExternalUrlConfig;
   prototypeHardening: boolean;
+  config: HttpConfig;
   createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
     path: string,
     plugin?: PluginOpaqueId

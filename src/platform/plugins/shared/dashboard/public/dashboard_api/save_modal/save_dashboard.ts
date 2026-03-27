@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import { coreServices } from '../../services/kibana_services';
 import { dashboardClient } from '../../dashboard_client';
 import type { SaveDashboardProps, SaveDashboardReturn } from './types';
