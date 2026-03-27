@@ -24,6 +24,7 @@ export function getDashboardMeta(
   return {
     error: savedObject.error,
     managed: savedObject.managed,
+    owner: savedObject.accessControl?.owner,
     updated_at: savedObject.updated_at,
     updated_by: savedObject.updated_by,
     version: savedObject.version ?? '',
@@ -73,7 +74,6 @@ export function getDashboardCRUResponseBody(
       ...(savedObject?.accessControl && {
         access_control: {
           access_mode: savedObject.accessControl.accessMode,
-          owner: savedObject.accessControl.owner,
         },
       }),
     },

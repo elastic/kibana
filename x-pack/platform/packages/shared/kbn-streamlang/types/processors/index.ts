@@ -575,6 +575,58 @@ export const sortProcessorSchema = processorBaseWithWhereSchema.extend({
 }) satisfies z.Schema<SortProcessor>;
 
 /**
+ * JsonExtract processor
+ *
+ * Extracts values from JSON strings using JSONPath-like selectors.
+ */
+
+export const jsonExtractTypes = ['keyword', 'integer', 'long', 'double', 'boolean'] as const;
+export type JsonExtractType = (typeof jsonExtractTypes)[number];
+
+export interface JsonExtraction {
+  selector: string;
+  target_field: string;
+  type?: JsonExtractType;
+}
+
+const jsonExtractionSchema = z
+  .object({
+    selector: NonEmptyString.describe(
+      'JSONPath-like selector to extract value (e.g., "user.id", "$.metadata.client.ip", "items[0].name")'
+    ),
+    target_field: StreamlangTargetField.describe('Target field to store the extracted value'),
+    type: z
+      .optional(z.enum(jsonExtractTypes))
+      .describe(
+        'Data type for the extracted value. Defaults to "keyword". Ensures consistent types across transpilers.'
+      ),
+  })
+  .describe('A single extraction specification') satisfies z.Schema<JsonExtraction>;
+
+export interface JsonExtractProcessor extends ProcessorBaseWithWhere {
+  action: 'json_extract';
+  field: string;
+  extractions: JsonExtraction[];
+  ignore_missing?: boolean;
+}
+
+export const jsonExtractProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('json_extract'),
+    field: StreamlangSourceField.describe('Source field containing the JSON string to parse'),
+    extractions: z
+      .array(jsonExtractionSchema)
+      .nonempty()
+      .describe('List of extraction specifications'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .describe(
+    'JsonExtract processor - Extract values from JSON strings using JSONPath-like selectors'
+  ) satisfies z.Schema<JsonExtractProcessor>;
+
+/**
  * Concat processor
  */
 
@@ -688,6 +740,7 @@ export type StreamlangProcessorDefinition =
   | SortProcessor
   | ConcatProcessor
   | NetworkDirectionProcessor
+  | JsonExtractProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -712,6 +765,7 @@ export const streamlangProcessorSchema = z.union([
   convertProcessorSchema,
   concatProcessorSchema,
   networkDirectionProcessorSchema,
+  jsonExtractProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
@@ -731,6 +785,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     redactProcessorSchema,
     mathProcessorSchema,
     splitProcessorSchema,
+    jsonExtractProcessorSchema,
   ])
 );
 

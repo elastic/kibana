@@ -148,6 +148,7 @@ export async function deleteDuplicatePackagePolicies(
     await fleet.packagePolicyService.delete(soClient, esClient, batch, {
       force: true,
       spaceIds: ['*'],
+      ignoreMissing: true,
     });
   }
 }
