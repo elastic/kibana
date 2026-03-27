@@ -7,8 +7,7 @@
 
 import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../fixtures';
-import { openInlineEditorAndWaitVisible } from '../fixtures/helpers';
+import { openInlineEditorAndWaitVisible, testData } from '../fixtures';
 
 test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {

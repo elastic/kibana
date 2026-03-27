@@ -7,14 +7,14 @@
 
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../fixtures';
 import {
   applyLensInlineEditorAndWaitClosed,
   cancelLensInlineEditorAndWaitClosed,
   convertToEsqlViaModal,
   openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
-} from '../fixtures/helpers';
+  testData,
+} from '../fixtures';
 
 spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
@@ -60,7 +60,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
       // Open editor again and check the "Apply and close" button is disabled
       await openInlineEditorAndWaitVisible(pageObjects, testData.INLINE_METRIC_PANEL_ID);
-      await expect(lens.getInlineEditor()).toBeVisible();
+      await expect(page.getByText('ES|QL Query Results')).toBeVisible();
       await expect(lens.getApplyFlyoutButton()).toBeDisabled();
 
       // TODO: Add conversion assertions: https://github.com/elastic/kibana/issues/250385
@@ -93,6 +93,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
       // The "Apply and close" button is disabled when there are no unsaved changes
       await openInlineEditorAndWaitVisible(pageObjects, testData.INLINE_METRIC_PANEL_ID);
+      await expect(page.getByText('ES|QL Query Results')).toBeVisible();
       await expect(lens.getApplyFlyoutButton()).toBeDisabled();
     }
   );
