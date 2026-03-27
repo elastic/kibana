@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiTitle, EuiText, EuiFlexItem, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { AssetImage } from '../../../../asset_image';
@@ -19,33 +19,31 @@ interface PartitioningPanelProps {
 export function PartitioningPanel({ message, children }: PartitioningPanelProps) {
   return (
     <EuiPanel
-      hasBorder
+      hasShadow={false}
       grow={false}
       css={css`
         text-align: left;
       `}
-      paddingSize="l"
+      paddingSize="none"
     >
       <EuiFlexGroup gutterSize="l">
         <EuiFlexItem>
           <EuiTitle size="m">
-            <h4>
+            <h5>
               {i18n.translate(
                 'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.panelTitle',
                 {
-                  defaultMessage: 'Partition your data',
+                  defaultMessage: 'Route your data into meaningful child streams',
                 }
               )}
-            </h4>
+            </h5>
           </EuiTitle>
-          <EuiText size="s">{message}</EuiText>
+          <EuiText size="xs">{message}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <AssetImage type="routingSuggestionEmptyState" size={100} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      {children}
     </EuiPanel>
   );
 }
