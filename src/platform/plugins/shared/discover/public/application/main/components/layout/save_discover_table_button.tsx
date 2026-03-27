@@ -67,7 +67,6 @@ export function SaveDiscoverTableButton() {
       <EuiButtonIcon
         data-test-subj="saveDiscoverTableToDashboardButton"
         aria-label={BUTTON_LABEL}
-        display="base"
         color="text"
         size="s"
         iconSize="m"

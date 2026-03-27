@@ -463,9 +463,19 @@ function DiscoverDocumentsComponent({
     [isDataLoading, styles.progress]
   );
 
+  const canSaveDiscoverTable =
+    !services.embeddableEditor.isEmbeddedEditor() && services.embeddableEditor.canSaveToDashboard();
+
+  const saveModalButton = useMemo(
+    () =>
+      canSaveDiscoverTable ? <SaveDiscoverTableButton key="SaveDiscoverTableButton" /> : undefined,
+    [canSaveDiscoverTable]
+  );
+
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
+        saveButton: saveModalButton,
         leftSide: isDataGridFullScreen ? undefined : viewModeToggle,
         bottomSection: (
           <>
@@ -474,7 +484,7 @@ function DiscoverDocumentsComponent({
           </>
         ),
       }),
-    [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen]
+    [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen, saveModalButton]
   );
 
   const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
@@ -521,15 +531,6 @@ function DiscoverDocumentsComponent({
     setSelectedCascadeGroups,
     viewModeToggle,
   ]);
-
-  const canSaveDiscoverTable =
-    !services.embeddableEditor.isEmbeddedEditor() && services.embeddableEditor.canSaveToDashboard();
-
-  const saveModalButton = useMemo(
-    () =>
-      canSaveDiscoverTable ? <SaveDiscoverTableButton key="SaveDiscoverTableButton" /> : undefined,
-    [canSaveDiscoverTable]
-  );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -605,7 +606,6 @@ function DiscoverDocumentsComponent({
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
             externalCustomRenderers={cellRenderers}
-            externalAdditionalControls={saveModalButton}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
             onUpdateESQLQuery={onUpdateESQLQuery}
