@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/streams-schema';
-import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
+import { getDiverseSampleDocuments, getSampleDocuments } from '@kbn/ai-tools';
 import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
 import type { Condition } from '@kbn/streamlang';
-import { compact } from 'lodash';
 import { getEntityFilters, MAX_FILTERS } from './get_entity_filters';
+import { parseError } from '../../../streams/errors/parse_error';
+
+const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits: [] };
 
 const DEFAULT_SAMPLE_SIZE = 20;
-// Defines the proportion of the sample size (e.g., 60%) that should be fetched
-// from a pool that excludes known features (via must_not filters). The remaining
-// portion is backfilled with unfiltered, random documents to ensure a diverse sample.
-const ENTITY_FILTERED_RATIO = 0.6;
+// The sample is split into three buckets to balance novelty and coverage:
+//  - Entity-filtered (ENTITY_FILTERED_RATIO): diverse docs that exclude known features
+//    via must_not filters, biasing toward undiscovered patterns.
+//  - Diverse (DIVERSE_RATIO): unfiltered diverse docs for broad field-value coverage.
+//  - Random (remainder): unfiltered random docs to avoid systematic sampling blind spots.
+const ENTITY_FILTERED_RATIO = 0.4;
+const DIVERSE_RATIO = 0.4;
 
 export async function fetchSampleDocuments({
   esClient,
@@ -38,9 +44,23 @@ export async function fetchSampleDocuments({
   size?: number;
 }) {
   const entityFilters = getEntityFilters(features, MAX_FILTERS);
+
   if (entityFilters.length === 0) {
-    const { hits } = await getSampleDocuments({ esClient, index, start, end, size });
-    return { documents: hits, totalFilters: 0, filtersCapped: false, hasFilteredDocuments: false };
+    const diverseSize = Math.round(size * DIVERSE_RATIO);
+
+    const [{ hits: diverseHits }, { hits: randomHits }] = await Promise.all([
+      getDiverseSampleDocuments({ esClient, index, start, end, size: diverseSize }),
+      getSampleDocuments({ esClient, index, start, end, size }),
+    ]);
+
+    const documents = mergeDocuments(
+      [
+        { hits: diverseHits, cap: diverseSize },
+        { hits: randomHits, cap: size },
+      ],
+      size
+    );
+    return { documents, totalFilters: 0, filtersCapped: false, hasFilteredDocuments: false };
   }
 
   logger.debug(
@@ -52,35 +72,77 @@ export async function fetchSampleDocuments({
 
   const runtimeMappings = await getRuntimeMappings(esClient, index, entityFilters);
   const entityFilteredSize = Math.round(size * ENTITY_FILTERED_RATIO);
-  const [{ hits: entityFilteredDocs }, { hits: unfilteredDocs }] = await Promise.all([
-    getSampleDocuments({
-      esClient,
-      index,
-      start,
-      end,
-      timeout: '10s',
-      size: entityFilteredSize,
-      filter: { bool: { must_not: entityFilters.map(conditionToQueryDsl) } },
-      runtime_mappings: runtimeMappings,
-    }),
-    getSampleDocuments({
-      esClient,
-      index,
-      start,
-      end,
-      size,
-    }),
-  ]);
+  const diverseSize = Math.round(size * DIVERSE_RATIO);
 
-  const seenIds = new Set<string>(compact(entityFilteredDocs.map(({ _id }) => _id)));
-  const backfill = unfilteredDocs.filter(({ _id }) => _id && !seenIds.has(_id));
+  const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
+    await Promise.all([
+      getSampleDocuments({
+        esClient,
+        index,
+        start,
+        end,
+        size: entityFilteredSize,
+        filter: { bool: { must_not: entityFilters.map(conditionToQueryDsl) } },
+        runtime_mappings: runtimeMappings,
+      }).catch((err) => {
+        logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
+        return EMPTY_SAMPLE;
+      }),
+      getDiverseSampleDocuments({
+        esClient,
+        index,
+        start,
+        end,
+        size: diverseSize + entityFilteredSize,
+      }),
+      getSampleDocuments({
+        esClient,
+        index,
+        start,
+        end,
+        size,
+      }),
+    ]);
+
+  const documents = mergeDocuments(
+    [
+      { hits: entityFilteredHits, cap: entityFilteredSize },
+      { hits: diverseHits, cap: diverseSize },
+      { hits: randomHits, cap: size },
+    ],
+    size
+  );
 
   return {
-    documents: [...entityFilteredDocs, ...backfill.slice(0, size - entityFilteredDocs.length)],
+    documents,
     totalFilters: features.length,
     filtersCapped: features.length > MAX_FILTERS,
-    hasFilteredDocuments: entityFilteredDocs.length > 0,
+    hasFilteredDocuments: entityFilteredHits.length > 0,
   };
+}
+
+function mergeDocuments(
+  prioritizedHits: Array<{
+    hits: Array<SearchHit<Record<string, unknown>>>;
+    cap: number;
+  }>,
+  totalSize: number
+): Array<SearchHit<Record<string, unknown>>> {
+  const seen = new Set<string>();
+  const result: Array<SearchHit<Record<string, unknown>>> = [];
+
+  for (const { hits, cap } of prioritizedHits) {
+    let added = 0;
+    for (const hit of hits) {
+      if (added >= cap || result.length >= totalSize) break;
+      if (hit._id && seen.has(hit._id)) continue;
+      if (hit._id) seen.add(hit._id);
+      result.push(hit);
+      added++;
+    }
+  }
+
+  return result;
 }
 
 async function getRuntimeMappings(
