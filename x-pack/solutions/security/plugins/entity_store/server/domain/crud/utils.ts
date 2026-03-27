@@ -20,7 +20,6 @@ import { HASH_ALG } from '../constants';
 import { BadCRUDRequestError } from '../errors';
 
 type CrudOperation = 'create' | 'update';
-const GENERIC_TYPE = 'generic' as EntityType;
 
 export function hashEuid(id: string): string {
   return createHash(HASH_ALG).update(id).digest('hex');
@@ -69,7 +68,16 @@ export function validateAndTransformDoc(
     assertOnlyNonForcedAttributesInReq(fieldDescriptions);
   }
 
-  return { id, doc: transformDoc(operation, entityType, doc) };
+  if (operation === 'create' && !doc.entity.name) {
+    doc.entity.name = id;
+  }
+
+  const transformedDoc: Record<string, unknown> = {
+    ...doc,
+    '@timestamp': new Date().toISOString(),
+  };
+
+  return { id, doc: transformedDoc };
 }
 
 function getFieldDescriptions(
@@ -128,31 +136,4 @@ function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>)
         `updated without forcing it (?force=true): ${notAllowedPropsString}`
     );
   }
-}
-
-function transformDoc(
-  operation: CrudOperation,
-  type: EntityType,
-  data: Entity
-): Record<string, unknown> {
-  const doc: Record<string, unknown> = {
-    ...data,
-    '@timestamp': new Date().toISOString(),
-  };
-
-  if (type === GENERIC_TYPE) {
-    return doc;
-  }
-
-  // Set <entityType>.name if not set
-  const key = type as string;
-  if (!doc[key]) {
-    doc[key] = {};
-  }
-  const typeSection = doc[key] as Record<string, unknown>;
-  if (operation === 'create' && !typeSection.name) {
-    typeSection.name = data.entity?.id;
-  }
-
-  return doc;
 }
