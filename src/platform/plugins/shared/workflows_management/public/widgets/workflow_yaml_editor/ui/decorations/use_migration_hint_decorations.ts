@@ -8,9 +8,12 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
+import { getPathAtOffset } from '../../../../../common/lib/yaml';
 import {
   type MigrationHint,
+  type MigrationHintMatchContext,
   migrationHints,
 } from '../../../../features/validate_workflow_yaml/lib/migration_hints';
 import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
@@ -21,6 +24,7 @@ interface UseMigrationHintDecorationsProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;
   isEditorMounted: boolean;
   validationErrors: YamlValidationResult[];
+  yamlDocument: YAML.Document | null;
 }
 
 interface ActiveMigrationHint {
@@ -39,6 +43,7 @@ export const useMigrationHintDecorations = ({
   editor,
   isEditorMounted,
   validationErrors,
+  yamlDocument,
 }: UseMigrationHintDecorationsProps): MigrationHintPanelState => {
   const decorationCollectionRef = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const [activeHint, setActiveHint] = useState<ActiveMigrationHint | null>(null);
@@ -128,10 +133,37 @@ export const useMigrationHintDecorations = ({
 
     const decorations: monaco.editor.IModelDeltaDecoration[] = validationErrors
       .filter((error): error is YamlValidationResult & { message: string } => !!error.message)
-      .map((error) => ({
-        error,
-        hint: migrationHints.find((h: MigrationHint) => h.match({ message: error.message })),
-      }))
+      .map((error) => {
+        let yamlPath: (string | number)[] = [];
+        let value: unknown;
+        const offset = model.getOffsetAt({
+          lineNumber: error.startLineNumber,
+          column: error.startColumn,
+        });
+        if (yamlDocument) {
+          try {
+            yamlPath = getPathAtOffset(yamlDocument, offset);
+            value = yamlDocument.getIn(yamlPath);
+          } catch {
+            // path resolution can fail for malformed YAML; fall back to empty
+          }
+        }
+        const lineContent = model.getLineContent(error.startLineNumber);
+        const keyMatch = lineContent.match(/^\s*([a-zA-Z_][\w]*)\s*:/);
+        const propertyName = keyMatch?.[1] ?? null;
+        const context: MigrationHintMatchContext = {
+          error,
+          yamlPath,
+          value,
+          propertyName,
+          yamlDocument,
+          offset,
+        };
+        return {
+          error,
+          hint: migrationHints.find((h: MigrationHint) => h.match(context)),
+        };
+      })
       .filter((entry): entry is { error: typeof entry.error; hint: MigrationHint } => !!entry.hint)
       .map(({ error, hint }) => {
         newMatchedLines.set(error.startLineNumber, hint);
@@ -170,7 +202,7 @@ export const useMigrationHintDecorations = ({
       }
       return current;
     });
-  }, [editor, isEditorMounted, validationErrors]);
+  }, [editor, isEditorMounted, validationErrors, yamlDocument]);
 
   // Cleanup dismiss timer on unmount
   useEffect(() => {

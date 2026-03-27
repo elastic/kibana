@@ -503,6 +503,7 @@ export const WorkflowYAMLEditor = ({
     editor: editorRef.current,
     isEditorMounted,
     validationErrors: interceptorValidationErrors,
+    yamlDocument: yamlDocument || null,
   });
 
   useWorkflowIdDecorations({
