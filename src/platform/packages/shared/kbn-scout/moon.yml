@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/kbn-client'
   - '@kbn/test-es-server'
   - '@kbn/test'
+  - '@kbn/test-saml-auth'
   - '@kbn/es-archiver'
   - '@kbn/dev-utils'
   - '@kbn/mock-idp-utils'
