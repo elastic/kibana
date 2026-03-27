@@ -18,6 +18,7 @@ project:
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-test
 dependsOn:
+  - '@kbn/kbn-client'
   - '@kbn/dev-utils'
   - '@kbn/std'
   - '@kbn/tooling-log'
@@ -33,7 +34,6 @@ dependsOn:
   - '@kbn/stdio-dev-helpers'
   - '@kbn/babel-register'
   - '@kbn/repo-packages'
-  - '@kbn/core-saved-objects-api-server'
   - '@kbn/mock-idp-utils'
   - '@kbn/code-owners'
   - '@kbn/scout-reporting'

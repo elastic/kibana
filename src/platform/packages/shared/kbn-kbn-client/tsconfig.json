@@ -8,13 +8,16 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/scout",
-    "@kbn/data-forge",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/dev-cli-errors",
+    "@kbn/dev-utils",
+    "@kbn/repo-info",
+    "@kbn/tooling-log"
   ]
 }
