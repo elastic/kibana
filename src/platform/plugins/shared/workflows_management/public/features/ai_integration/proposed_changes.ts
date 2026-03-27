@@ -42,8 +42,10 @@ export interface DiffHunk {
 }
 
 export interface ProposalManagerOptions {
-  onAccept?: (proposalId: string) => void;
-  onReject?: (proposalId: string) => void;
+  onAccept?: (context: { proposalId: string; isBulkAction: boolean }) => void;
+  onReject?: (context: { proposalId: string; isBulkAction: boolean }) => void;
+  onHunkAccepted?: (hunkIndex: number) => void;
+  onHunkRejected?: (hunkIndex: number) => void;
 }
 
 interface HunkUIState {
@@ -99,6 +101,7 @@ export class ProposalManager {
   private contentChangeDisposable: monaco.IDisposable | null = null;
   private mouseMoveRafId: ReturnType<typeof requestAnimationFrame> | null = null;
   private isInternalEdit = false;
+  private isBulkOperation = false;
   private undoRedoService: UndoRedoService | undefined;
   private isDisposing = false;
 
@@ -233,11 +236,15 @@ export class ProposalManager {
     const newOrigValue = newOrigLines.join('\n');
     this.originalModel.setValue(newOrigValue);
 
+    if (!this.isBulkOperation) {
+      this.options.onHunkAccepted?.(hunkIndex);
+    }
+
     this.recomputeDiff();
     this.renderDiffUI();
 
-    if (!this.hasPendingProposals()) {
-      this.options.onAccept?.('all');
+    if (!this.hasPendingProposals() && !this.isBulkOperation) {
+      this.options.onAccept?.({ proposalId: 'all', isBulkAction: false });
     }
 
     if (this.undoRedoService && !this.isDisposing) {
@@ -285,11 +292,15 @@ export class ProposalManager {
     );
     this.isInternalEdit = false;
 
+    if (!this.isBulkOperation) {
+      this.options.onHunkRejected?.(hunkIndex);
+    }
+
     this.recomputeDiff();
     this.renderDiffUI();
 
-    if (!this.hasPendingProposals()) {
-      this.options.onReject?.('all');
+    if (!this.hasPendingProposals() && !this.isBulkOperation) {
+      this.options.onReject?.({ proposalId: 'all', isBulkAction: false });
     }
 
     if (this.undoRedoService && !this.isDisposing && inverseOps) {
@@ -319,17 +330,23 @@ export class ProposalManager {
   acceptAll(): void {
     if (!this.originalModel || !this.editor) return;
 
+    this.isBulkOperation = true;
     while (this.diffHunks.length > 0) {
       this.acceptHunk(0);
     }
+    this.isBulkOperation = false;
+    this.options.onAccept?.({ proposalId: 'all', isBulkAction: true });
   }
 
   rejectAll(): void {
     if (!this.originalModel || !this.editor) return;
 
+    this.isBulkOperation = true;
     while (this.diffHunks.length > 0) {
       this.rejectHunk(0);
     }
+    this.isBulkOperation = false;
+    this.options.onReject?.({ proposalId: 'all', isBulkAction: true });
   }
 
   getDiffHunks(): DiffHunk[] {
