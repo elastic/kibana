@@ -10061,6 +10061,40 @@
               }
             }
           }
+        },
+        "filterLists": {
+          "properties": {
+            "total_filter_list_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of ML filter lists"
+              }
+            },
+            "total_filter_item_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of items across all filter lists"
+              }
+            },
+            "avg_items_per_filter_list": {
+              "type": "float",
+              "_meta": {
+                "description": "Average number of items per filter list, rounded to 2 decimal places"
+              }
+            },
+            "empty_filter_list_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of filter lists that contain no items"
+              }
+            },
+            "filter_lists_used_in_rules_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of filter lists referenced by at least one custom rule scope across all jobs"
+              }
+            }
+          }
         }
       }
     },

@@ -23,8 +23,19 @@ import {
   type MlCalendarsUsage,
   type MlGetCalendarsCalendarItem,
 } from './calendars_usage_aggregation';
+import {
+  aggregateFilterListsUsage,
+  emptyFilterListsUsage,
+  type MlFilterListsUsage,
+} from './filter_lists_usage_aggregation';
+import type { MlJob } from '..';
 
-export type { MlCustomRulesUsage, MlCalendarsUsage, MlGetCalendarsCalendarItem };
+export type {
+  MlCustomRulesUsage,
+  MlCalendarsUsage,
+  MlGetCalendarsCalendarItem,
+  MlFilterListsUsage,
+};
 
 export interface MlUsageData {
   alertRules: {
@@ -50,6 +61,7 @@ export interface MlUsageData {
   };
   customRules: MlCustomRulesUsage;
   calendars: MlCalendarsUsage;
+  filterLists: MlFilterListsUsage;
 }
 
 export function registerCollector(
@@ -197,6 +209,33 @@ export function registerCollector(
           },
         },
       },
+      filterLists: {
+        total_filter_list_count: {
+          type: 'long',
+          _meta: { description: 'Total number of ML filter lists' },
+        },
+        total_filter_item_count: {
+          type: 'long',
+          _meta: { description: 'Total number of items across all filter lists' },
+        },
+        avg_items_per_filter_list: {
+          type: 'float',
+          _meta: {
+            description: 'Average number of items per filter list, rounded to 2 decimal places',
+          },
+        },
+        empty_filter_list_count: {
+          type: 'long',
+          _meta: { description: 'Number of filter lists that contain no items' },
+        },
+        filter_lists_used_in_rules_count: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of filter lists referenced by at least one custom rule scope across all jobs',
+          },
+        },
+      },
     },
     isReady: () => true,
     fetch: async ({ esClient }) => {
@@ -315,10 +354,13 @@ export function registerCollector(
         }
       );
 
+      let jobs: MlJob[] = [];
       let customRulesData = emptyCustomRulesUsage();
       let calendarsData = emptyCalendarsUsage();
+      let filterListsData = emptyFilterListsUsage();
+
       try {
-        const { jobs = [] } = await esClient.ml.getJobs();
+        ({ jobs = [] } = await esClient.ml.getJobs());
         customRulesData = aggregateCustomRulesUsageFromJobs(jobs);
       } catch {
         // ML API may be unavailable; keep zeroes so alertRules data is still returned
@@ -338,6 +380,13 @@ export function registerCollector(
         // ML API may be unavailable; keep zeroes so other data is still returned
       }
 
+      try {
+        const { filters = [] } = await esClient.ml.getFilters({ size: 10000 });
+        filterListsData = aggregateFilterListsUsage(filters, jobs);
+      } catch {
+        // ML API may be unavailable; keep zeroes so other data is still returned
+      }
+
       return {
         alertRules: {
           [ML_ALERT_TYPES.ANOMALY_DETECTION]: {
@@ -350,6 +399,7 @@ export function registerCollector(
         },
         customRules: customRulesData,
         calendars: calendarsData,
+        filterLists: filterListsData,
       };
     },
   });
