@@ -176,6 +176,18 @@ export const ReviewApproveModal: React.FC<{
     [categoriesData]
   );
 
+  const hasAtLeastOneCategory = useMemo(
+    () =>
+      selectedCategories.some((opt) => {
+        const value = opt.value;
+        if (typeof value === 'string') {
+          return value.length > 0;
+        }
+        return Boolean(value);
+      }),
+    [selectedCategories]
+  );
+
   const loadReviewDetails = useCallback(async () => {
     setIsLoadingReviewDetails(true);
     setReviewError(null);
@@ -250,6 +262,19 @@ export const ReviewApproveModal: React.FC<{
       return;
     }
 
+    const categoryIds = selectedCategories.map((opt) => opt.value as string).filter(Boolean);
+    if (categoryIds.length === 0) {
+      setReviewError(
+        i18n.translate(
+          'xpack.fleet.epmList.manageIntegrations.actions.reviewCategoryRequiredError',
+          {
+            defaultMessage: 'Select at least one category before approving.',
+          }
+        )
+      );
+      return;
+    }
+
     (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
       'aiv2_approve_modal_approve_clicked',
       {}
@@ -257,7 +282,6 @@ export const ReviewApproveModal: React.FC<{
     setIsApproving(true);
     setReviewError(null);
     try {
-      const categoryIds = selectedCategories.map((opt) => opt.value as string).filter(Boolean);
       await onApproveAndDeploy(integrationId, version, categoryIds);
       onClose();
     } catch (error) {
@@ -424,6 +448,12 @@ export const ReviewApproveModal: React.FC<{
                   defaultMessage="Category"
                 />
               }
+              helpText={
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryHelp"
+                  defaultMessage="Select at least one category."
+                />
+              }
             >
               <EuiComboBox
                 data-test-subj="manageIntegrationReviewModalCategories"
@@ -465,7 +495,7 @@ export const ReviewApproveModal: React.FC<{
           onClick={handleApproveAndDeploy}
           fill
           isLoading={isApproving}
-          isDisabled={isLoadingReviewDetails || !isVersionValid}
+          isDisabled={isLoadingReviewDetails || !isVersionValid || !hasAtLeastOneCategory}
           data-test-subj="manageIntegrationReviewApproveDeployButton"
         >
           <FormattedMessage
