@@ -239,7 +239,6 @@ export class WorkflowsManagementApi {
       spaceId,
       inputs: manualInputs,
       triggeredBy,
-      trigger: 'manual', // TODO: TEMP
     };
     if (metadata) {
       context.metadata = metadata;
