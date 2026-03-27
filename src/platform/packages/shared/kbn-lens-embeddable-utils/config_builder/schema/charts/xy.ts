@@ -20,6 +20,7 @@ import {
 } from '../shared';
 import { datasetEsqlTableSchema, datasetSchema } from '../dataset';
 import {
+  legendSizeSchema,
   legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
@@ -285,14 +286,7 @@ const xySharedSettings = {
             placement: schema.maybe(schema.literal('outside')),
             layout: schema.maybe(schema.literal('list')),
             position: schema.maybe(positionSchema()),
-            size: schema.maybe(
-              schema.oneOf([
-                schema.literal('small'),
-                schema.literal('medium'),
-                schema.literal('large'),
-                schema.literal('xlarge'),
-              ])
-            ),
+            size: legendSizeSchema,
           },
           {
             meta: {
