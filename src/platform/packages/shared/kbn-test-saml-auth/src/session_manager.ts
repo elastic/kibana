@@ -11,7 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import Url from 'url';
 import type { ServerlessProjectType } from '@kbn/es';
 import { createHash } from 'crypto';
-import { KbnClient } from '@kbn/kbn-client';
+import { fetchKibanaVersionHeaderString } from './fetch_kibana_version';
 import { isValidHostname, readCloudUsersFromFile } from './helper';
 import type { Session } from './saml_auth';
 import { createCloudSAMLSession, createLocalSAMLSession, getSecurityProfile } from './saml_auth';
@@ -57,7 +57,9 @@ export interface GetCookieOptions {
 export class SamlSessionManager {
   private readonly isCloud: boolean;
   private readonly kbnHost: string;
-  private readonly kbnClient: KbnClient;
+  private readonly kbnUsername: string;
+  private readonly kbnPassword: string;
+  private kbnVersionResolved?: string;
   private readonly log: ToolingLog;
   private readonly roleToUserMap: Map<Role, User>;
   private readonly sessionCache: Map<Role, Session>;
@@ -74,24 +76,33 @@ export class SamlSessionManager {
       port: options.hostOptions.port,
     };
     this.kbnHost = Url.format(hostOptionsWithoutAuth);
+    this.kbnUsername = options.hostOptions.username;
+    this.kbnPassword = options.hostOptions.password;
     this.isCloud = options.isCloud;
     this.cloudHostName = options.cloudHostName || process.env.TEST_CLOUD_HOST_NAME;
     if (this.isCloud) {
       this.validateCloudHostName();
     }
-    this.kbnClient = new KbnClient({
-      log: this.log,
-      url: Url.format({
-        ...hostOptionsWithoutAuth,
-        auth: `${options.hostOptions.username}:${options.hostOptions.password}`,
-      }),
-    });
     this.cloudUsersFilePath = options.cloudUsersFilePath;
     this.sessionCache = new Map<Role, Session>();
     this.roleToUserMap = new Map<Role, User>();
     this.supportedRoles = options.supportedRoles;
     this.serverless = options.serverless;
     this.validateCloudSetting();
+  }
+
+  private async getKibanaVersionForCloudSaml(): Promise<string> {
+    if (this.kbnVersionResolved !== undefined) {
+      return this.kbnVersionResolved;
+    }
+    const version = await fetchKibanaVersionHeaderString(
+      this.kbnHost,
+      this.kbnUsername,
+      this.kbnPassword,
+      this.log
+    );
+    this.kbnVersionResolved = version;
+    return version;
   }
 
   private validateCloudHostName() {
@@ -171,7 +182,7 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
   private createSessionForRole = async (role: string): Promise<Session> => {
     if (this.isCloud) {
       this.log.debug(`Creating new cloud SAML session for role '${role}'`);
-      const kbnVersion = await this.kbnClient.version.get();
+      const kbnVersion = await this.getKibanaVersionForCloudSaml();
       const { email, password } = this.getCloudUserByRole(role);
       return await createCloudSAMLSession({
         hostname: this.cloudHostName!,

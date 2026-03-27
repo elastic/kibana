@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  SamlSessionManager,
-  type GetCookieOptions,
-  type HostOptions,
-  type SamlSessionManagerOptions,
-} from './session_manager';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-test-saml-auth'],
+};

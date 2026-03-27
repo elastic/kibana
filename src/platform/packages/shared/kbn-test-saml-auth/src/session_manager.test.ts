@@ -10,9 +10,18 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import crypto from 'crypto';
 import { Cookie } from 'tough-cookie';
+import { fetchKibanaVersionHeaderString } from './fetch_kibana_version';
 import { Session } from './saml_auth';
 import type { SupportedRoles } from './session_manager';
 import { SamlSessionManager } from './session_manager';
+
+jest.mock('./fetch_kibana_version', () => ({
+  fetchKibanaVersionHeaderString: jest.fn(),
+}));
+
+const mockedFetchKibanaVersionHeaderString = fetchKibanaVersionHeaderString as jest.MockedFunction<
+  typeof fetchKibanaVersionHeaderString
+>;
 import * as samlAuth from './saml_auth';
 import * as helper from './helper';
 import type { Role, User, UserProfile } from './types';
@@ -36,13 +45,6 @@ const readCloudUsersFromFileMock = jest.spyOn(helper, 'readCloudUsersFromFile');
 
 const getTestToken = () => 'kbn_cookie_' + crypto.randomBytes(16).toString('hex');
 
-jest.mock('@kbn/kbn-client', () => {
-  return {
-    KbnClient: jest.fn(),
-  };
-});
-const get = jest.fn();
-
 describe('SamlSessionManager', () => {
   let createCloudSAMLSessionMock: jest.SpyInstance;
   beforeEach(() => {
@@ -52,10 +54,6 @@ describe('SamlSessionManager', () => {
   describe('for local session', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      jest
-        .requireMock('@kbn/kbn-client')
-        .KbnClient.mockImplementation(() => ({ version: { get } }));
-      get.mockImplementation(() => Promise.resolve('8.12.0'));
 
       createLocalSAMLSessionMock.mockResolvedValue(new Session(cookieInstance, testEmail));
     });
@@ -266,10 +264,6 @@ describe('SamlSessionManager', () => {
     describe('handles errors', () => {
       beforeEach(() => {
         jest.resetAllMocks();
-        jest
-          .requireMock('@kbn/kbn-client')
-          .KbnClient.mockImplementation(() => ({ version: { get } }));
-        get.mockImplementationOnce(() => Promise.resolve('8.12.0'));
 
         readCloudUsersFromFileMock.mockReturnValue(cloudUsers);
         delete process.env.TEST_CLOUD_HOST_NAME; // Ensure variable is unset
@@ -292,11 +286,8 @@ describe('SamlSessionManager', () => {
 
     beforeEach(() => {
       jest.resetAllMocks();
-      jest
-        .requireMock('@kbn/kbn-client')
-        .KbnClient.mockImplementation(() => ({ version: { get } }));
-      get.mockImplementationOnce(() => Promise.resolve('8.12.0'));
 
+      mockedFetchKibanaVersionHeaderString.mockResolvedValue('8.12.0');
       createCloudSAMLSessionMock.mockResolvedValue(new Session(cloudCookieInstance, cloudEmail));
       readCloudUsersFromFileMock.mockReturnValue(cloudUsers);
       delete process.env.TEST_CLOUD_HOST_NAME;

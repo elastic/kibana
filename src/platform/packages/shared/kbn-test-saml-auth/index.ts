@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Role } from '@kbn/test-saml-auth';
+export {
+  SamlSessionManager,
+  type GetCookieOptions,
+  type HostOptions,
+  type SamlSessionManagerOptions,
+} from './src/session_manager';
 
-export const PROJECT_DEFAULT_ROLES = new Map<string, Role>([
-  ['es', 'developer'],
-  ['security', 'editor'],
-  ['oblt', 'editor'],
-]);
+export type { Role } from './src/types';
