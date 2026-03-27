@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
@@ -11,9 +13,9 @@ import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_
 import {
   getWorkflowYaml,
   loadWorkflowsFromConnectorSpec,
-  registerExtensionSteps,
   type ProcessedWorkflow,
-} from '../workflow.test_helpers';
+  registerExtensionSteps,
+} from './workflow.test_helpers';
 
 const CONNECTOR_NAME = 'fake-pagerduty-connector';
 const CONNECTOR_ID = 'fake-pagerduty-connector-uuid';
