@@ -12,7 +12,7 @@ import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-pub
 import { flow } from 'lodash';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
-import { embeddableService, logger } from '../../../kibana_services';
+import { embeddableService } from '../../../kibana_services';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
 import type { DroppedPanelWarning } from '../../read/types';
@@ -104,21 +104,13 @@ function transformPanel(
   const transformType = type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : type;
   const transforms = embeddableService?.getTransforms(transformType);
 
-  let transformedPanelConfig;
-  try {
-    transformedPanelConfig =
+  const transformedPanelConfig =
       transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
       defaultTransform(embeddableConfig);
-  } catch (transformOutError) {
-    // do not prevent read on transformOutError
-    logger.warn(
-      `Unable to transform "${type}" embeddable state on read. Error: ${transformOutError.message}`
-    );
-  }
 
   return {
     grid: restOfGrid,
-    config: transformedPanelConfig ? transformedPanelConfig : embeddableConfig,
+    config: transformedPanelConfig,
     uid: panelIndex,
     type,
   };

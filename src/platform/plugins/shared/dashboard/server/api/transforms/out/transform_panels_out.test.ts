@@ -86,7 +86,7 @@ describe('transformPanelsOut', () => {
         "panels": Array [],
         "warnings": Array [
           Object {
-            "message": "Unable to transform panel config. Error: Cannot read properties of undefined (reading 'warn')",
+            "message": "Unable to transform panel config. Error: Simulated panel transform error",
             "panel_config": Object {
               "foo": "1",
             },
