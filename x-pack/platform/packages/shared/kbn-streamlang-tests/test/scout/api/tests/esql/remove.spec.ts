@@ -27,7 +27,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ temp_field: 'to-be-removed', message: 'keep-this' }];
       await testBed.ingest(indexName, docs);
@@ -54,7 +54,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docWithField = { temp_field: 'to-be-removed', message: 'doc1' };
         const docWithoutField = { message: 'doc2' }; // Should be filtered out
@@ -82,7 +82,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docWithField = { temp_field: 'to-be-removed', message: 'doc1' };
       const docWithoutField = { message: 'doc2' }; // Should pass through
@@ -92,8 +92,8 @@ apiTest.describe(
 
       // Both documents should be present
       expect(esqlResult.documents).toHaveLength(2);
-      const doc1 = esqlResult.documents.find((d: any) => d.message === 'doc1');
-      const doc2 = esqlResult.documents.find((d: any) => d.message === 'doc2');
+      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.message === 'doc1');
+      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.message === 'doc2');
       expect(doc1?.temp_field).toBeUndefined();
       expect(doc2?.temp_field).toBeUndefined();
     });
@@ -114,7 +114,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { temp_data: 'remove-me', event: { kind: 'test' }, message: 'doc1' },
@@ -126,13 +126,13 @@ apiTest.describe(
       expect(esqlResult.documents).toHaveLength(2);
 
       // First doc should have temp_data nulled (where condition matched)
-      const doc1 = esqlResult.documents.find((d: any) => d.message === 'doc1');
+      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.message === 'doc1');
       // Note: ESQL CASE sets to null, which is removed from the result
       expect(doc1?.temp_data).toBeNull();
       expect(doc1?.['event.kind']).toBe('test');
 
       // Second doc should keep temp_data (where condition not matched)
-      const doc2 = esqlResult.documents.find((d: any) => d.message === 'doc2');
+      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.message === 'doc2');
       expect(doc2?.temp_data).toBe('keep-me');
       expect(doc2?.['event.kind']).toBe('production');
     });
@@ -146,7 +146,7 @@ apiTest.describe(
           } as RemoveProcessor,
         ],
       };
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
       );
     });

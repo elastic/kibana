@@ -27,12 +27,12 @@ import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../streams_tour';
-import { FeaturesColumn } from './features_column';
+import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
 import {
   ACTIONS_COLUMN_HEADER,
-  FEATURES_COLUMN_HEADER,
+  KNOWLEDGE_INDICATORS_COLUMN_HEADER,
   NAME_COLUMN_HEADER,
   NO_STREAMS_MESSAGE,
   ONBOARDING_STATUS_COLUMN_HEADER,
@@ -276,7 +276,7 @@ export function StreamsTreeTable({
                     {treeMode && item.children && hasChildren && (
                       <EuiFlexItem grow={false}>
                         <EuiIcon
-                          type={isCollapsed ? 'arrowRight' : 'arrowDown'}
+                          type={isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown'}
                           color="text"
                           size="m"
                           data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
@@ -350,27 +350,17 @@ export function StreamsTreeTable({
                   case TaskStatus.Completed:
                   case TaskStatus.Acknowledged:
                     return (
-                      <EuiIcon
-                        type="checkInCircleFilled"
-                        color="success"
-                        size="m"
-                        aria-hidden={true}
-                      />
+                      <EuiIcon type="checkCircleFill" color="success" size="m" aria-hidden={true} />
                     );
                   case TaskStatus.Stale:
                     return (
-                      <EuiIcon
-                        type="checkInCircleFilled"
-                        color="subdued"
-                        size="m"
-                        aria-hidden={true}
-                      />
+                      <EuiIcon type="checkCircleFill" color="subdued" size="m" aria-hidden={true} />
                     );
                   case TaskStatus.Failed:
                     return (
                       <EuiIconTip
                         size="m"
-                        type="crossInCircle"
+                        type="crossCircle"
                         color="danger"
                         content={onboardingResult.error}
                       />
@@ -379,11 +369,11 @@ export function StreamsTreeTable({
               },
             },
             {
-              name: FEATURES_COLUMN_HEADER,
+              name: KNOWLEDGE_INDICATORS_COLUMN_HEADER,
               width: '120px',
               align: 'left',
               render: (item: TableRow) => (
-                <FeaturesColumn
+                <KnowledgeIndicatorsColumn
                   stream={item.stream}
                   streamOnboardingResult={streamOnboardingResultMap[item.stream.name]}
                 />
@@ -446,7 +436,7 @@ export function StreamsTreeTable({
                     disableScreenReaderOutput
                   >
                     <EuiButtonIcon
-                      iconType="securitySignal"
+                      iconType="radar"
                       aria-label={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
                       onClick={() => onOnboardStreamActionClick(item.stream.name)}
                     />

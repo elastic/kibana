@@ -33,15 +33,16 @@ import { useQuery } from '@kbn/react-query';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
-  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../../../../../../../common/constants';
 
 import { sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
-  isInputOnlyPolicyTemplate,
   mapPackageReleaseToIntegrationCardRelease,
+  getPolicyTemplateInputDefinition,
+  registryInputAllowsDynamicSignalTypes,
+  isInputOnlyPolicyTemplate,
 } from '../../../../../../../../../common/services';
 
 import type {
@@ -59,7 +60,6 @@ import { useAgentless } from '../../../single_page_layout/hooks/setup_technology
 
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
-import type { RegistryPolicyInputOnlyTemplate } from '../../../../../../../../../common/types/models/epm';
 import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
@@ -67,6 +67,7 @@ import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
 import { VarGroupSelector } from './var_group_selector';
+import { MigrationTooltip } from './package_policy_input_panel';
 
 const ScrollAnchor = styled.div`
   display: none;
@@ -81,9 +82,12 @@ interface Props {
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  isUpgrade?: boolean;
   totalStreams?: number;
   showDescriptionColumn?: boolean;
   varGroupSelections?: Record<string, string>;
+  /** Parent input's `policy_template`; required for correct composable multi-template matching. */
+  inputPolicyTemplate?: string;
 }
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
@@ -95,9 +99,11 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     inputStreamValidationResults,
     forceShowErrors,
     isEditPage,
+    isUpgrade,
     totalStreams,
     showDescriptionColumn = true,
     varGroupSelections = {},
+    inputPolicyTemplate,
   }) => {
     const { docLinks } = useStartServices();
     const { isAgentlessEnabled } = useAgentless();
@@ -125,15 +131,26 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     const customDataStreamTypeVar = packagePolicyInputStream.vars?.[DATA_STREAM_TYPE_VAR_NAME];
 
-    // Check if package uses dynamic_signal_types
+    // Check if this specific stream's input allows dynamic signal types.
+    // Works for both input-only packages and composable integration packages
+    // (integration templates with nested OTel inputs).
     const dynamicSignalTypes = useMemo(() => {
-      const inputOnlyTemplate = packageInfo?.policy_templates?.find(
-        (template) =>
-          isInputOnlyPolicyTemplate(template) && template.input === OTEL_COLLECTOR_INPUT_TYPE
-      ) as RegistryPolicyInputOnlyTemplate | undefined;
-
-      return inputOnlyTemplate?.dynamic_signal_types === true;
-    }, [packageInfo?.policy_templates]);
+      const inputType = packageInputStream.input;
+      return (packageInfo?.policy_templates ?? []).some((template) => {
+        if (isInputOnlyPolicyTemplate(template) && template.input !== inputType) {
+          return false;
+        }
+        if (
+          !isInputOnlyPolicyTemplate(template) &&
+          inputPolicyTemplate &&
+          template.name !== inputPolicyTemplate
+        ) {
+          return false;
+        }
+        const inputDef = getPolicyTemplateInputDefinition(template, inputType);
+        return inputDef ? registryInputAllowsDynamicSignalTypes(inputDef) : false;
+      });
+    }, [packageInfo?.policy_templates, packageInputStream.input, inputPolicyTemplate]);
 
     const customDataStreamTypeVarValue =
       customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';
@@ -308,6 +325,14 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             </span>
                           </EuiFlexItem>
                         )}
+                        {isUpgrade &&
+                          packagePolicyInputStream.migrate_from &&
+                          !showStreamDeprecationIcon && (
+                            <MigrationTooltip
+                              migrateFrom={packagePolicyInputStream.migrate_from}
+                              isStream
+                            />
+                          )}
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   )}
@@ -433,7 +458,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         <EuiButtonEmpty
                           aria-label="Advanced options"
                           size="xs"
-                          iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                          iconType={isShowingAdvanced ? 'chevronSingleDown' : 'chevronSingleRight'}
                           onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                           flush="left"
                           data-test-subj={`advancedStreamOptionsToggle-${packagePolicyInputStream.id}`}
@@ -553,24 +578,36 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                           </EuiFlexItem>
                         );
                       })}
-                      {isPackagePolicyEdit && showPipelinesAndMappings && (
-                        <>
-                          <EuiFlexItem>
-                            <PackagePolicyEditorDatastreamPipelines
-                              packageInputStream={packagePolicyInputStream}
-                              packageInfo={packageInfo}
-                              customDataset={customDatasetVarValue}
-                            />
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <PackagePolicyEditorDatastreamMappings
-                              packageInputStream={packagePolicyInputStream}
-                              packageInfo={packageInfo}
-                              customDataset={customDatasetVarValue}
-                            />
-                          </EuiFlexItem>
-                        </>
-                      )}
+                      {isPackagePolicyEdit &&
+                        showPipelinesAndMappings &&
+                        packagePolicyInputStream.data_stream.type && (
+                          <>
+                            <EuiFlexItem>
+                              <PackagePolicyEditorDatastreamPipelines
+                                packageInputStream={
+                                  packagePolicyInputStream as {
+                                    id?: string;
+                                    data_stream: { dataset: string; type: string };
+                                  }
+                                }
+                                packageInfo={packageInfo}
+                                customDataset={customDatasetVarValue}
+                              />
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <PackagePolicyEditorDatastreamMappings
+                                packageInputStream={
+                                  packagePolicyInputStream as {
+                                    id?: string;
+                                    data_stream: { dataset: string; type: string };
+                                  }
+                                }
+                                packageInfo={packageInfo}
+                                customDataset={customDatasetVarValue}
+                              />
+                            </EuiFlexItem>
+                          </>
+                        )}
                     </>
                   ) : null}
                 </Fragment>

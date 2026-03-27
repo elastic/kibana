@@ -61,7 +61,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
     shape: 'heatmap',
     valueAccessor,
     xAccessor: getAccessorName('x'),
-    ...(layer.yAxis ? { yAccessor: getAccessorName('y') } : {}),
+    ...(layer.y ? { yAccessor: getAccessorName('y') } : {}),
     gridConfig: {
       type: HEATMAP_GRID_NAME,
       isCellLabelVisible: layer.cells?.labels?.visible ?? false,
@@ -70,8 +70,8 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
       isYAxisLabelVisible: layer.axes?.y?.labels?.visible ?? true,
       isYAxisTitleVisible: layer.axes?.y?.title?.visible ?? false,
       ...stripUndefined<HeatmapGridConfigResult>({
-        xTitle: layer.axes?.x?.title?.value,
-        yTitle: layer.axes?.y?.title?.value,
+        xTitle: layer.axes?.x?.title?.text,
+        yTitle: layer.axes?.y?.title?.text,
         xAxisLabelRotation,
         xSortPredicate: layer.axes?.x?.sort,
         ySortPredicate: layer.axes?.y?.sort,
@@ -105,22 +105,22 @@ function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState
 
   addLayerColumn(defaultLayer, getAccessorName('value'), metricColumns);
 
-  if (layer.xAxis) {
+  if (layer.x) {
     const columnName = getAccessorName('x');
-    const xAxisColumn = fromBucketLensApiToLensState(
-      layer.xAxis as LensApiBucketOperations,
+    const xColumn = fromBucketLensApiToLensState(
+      layer.x as LensApiBucketOperations,
       metricColumns.map((col) => ({ column: col, id: getAccessorName('value') }))
     );
-    addLayerColumn(defaultLayer, columnName, xAxisColumn, true);
+    addLayerColumn(defaultLayer, columnName, xColumn, true);
   }
 
-  if (layer.yAxis) {
+  if (layer.y) {
     const columnName = getAccessorName('y');
-    const yAxisColumn = fromBucketLensApiToLensState(
-      layer.yAxis as LensApiBucketOperations,
+    const yColumn = fromBucketLensApiToLensState(
+      layer.y as LensApiBucketOperations,
       metricColumns.map((col) => ({ column: col, id: getAccessorName('value') }))
     );
-    addLayerColumn(defaultLayer, columnName, yAxisColumn, true);
+    addLayerColumn(defaultLayer, columnName, yColumn, true);
   }
 
   return layers;
@@ -128,9 +128,9 @@ function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState
 
 function getValueColumns(layer: HeatmapStateESQL) {
   return [
-    getValueColumn(getAccessorName('value'), layer.metric.column, 'number'),
-    ...(layer.xAxis ? [getValueColumn(getAccessorName('x'), layer.xAxis.column)] : []),
-    ...(layer.yAxis ? [getValueColumn(getAccessorName('y'), layer.yAxis.column)] : []),
+    getValueColumn(getAccessorName('value'), layer.metric, 'number'),
+    ...(layer.x ? [getValueColumn(getAccessorName('x'), layer.x)] : []),
+    ...(layer.y ? [getValueColumn(getAccessorName('y'), layer.y)] : []),
   ];
 }
 

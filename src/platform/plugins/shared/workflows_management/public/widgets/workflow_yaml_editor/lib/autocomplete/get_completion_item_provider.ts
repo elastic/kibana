@@ -11,6 +11,8 @@ import { monaco } from '@kbn/monaco';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions, isInsideLoopBody } from './suggestions/get_suggestions';
+import { isInWorkflowOutputWithBlock } from './suggestions/workflow/get_workflow_outputs_suggestions';
+import type { WorkflowKqlCompletionServices } from './suggestions/workflow_kql_completion_services';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
@@ -82,7 +84,8 @@ function mapSuggestions(
 }
 
 export function getCompletionItemProvider(
-  getState: () => WorkflowDetailState
+  getState: () => WorkflowDetailState,
+  getKqlServices?: () => WorkflowKqlCompletionServices
 ): monaco.languages.CompletionItemProvider {
   const provider: monaco.languages.CompletionItemProvider & { __providerId?: string } = {
     // Unique identifier to distinguish our provider from others
@@ -90,10 +93,11 @@ export function getCompletionItemProvider(
     // Trigger characters for completion:
     // '@' - variable references
     // '.' - property access within variables
-    // ' ' - space, used for separating tokens in Liquid syntax
+    // ' ' - space, Liquid / KQL tokens
     // '|' - Liquid filters (e.g., {{ variable | filter }})
     // '{' - start of Liquid blocks (e.g., {{ ... }})
-    triggerCharacters: ['@', '.', ' ', '|', '{'],
+    // ':' '(' '"' "'" — also trigger automatic quick suggest for KQL inside quoted `on.condition`.
+    triggerCharacters: ['@', '.', ' ', '"', "'", '(', ':', '|', '{'],
     provideCompletionItems: async (model, position, completionContext) => {
       const editorState = getState();
       const autocompleteContext = buildAutocompleteContext({
@@ -112,13 +116,17 @@ export function getCompletionItemProvider(
       // Incremental deduplication accumulator
       const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
 
+      // Inside workflow.output's with: block, show only declared output field names so the user
+      // doesn't get generic YAML/JSON Schema keys; skip the YAML provider in that case.
+      const shouldUseExclusiveSuggestions = isInWorkflowOutputWithBlock(
+        autocompleteContext.focusedStepInfo
+      );
+
       let isIncomplete = false;
 
-      {
-        // Get suggestions from all stored YAML providers (excluding workflow provider)
+      if (!shouldUseExclusiveSuggestions) {
         const allYamlProviders = getAllYamlProviders();
 
-        // Call all stored providers and add their suggestions incrementally
         for (const yamlProvider of allYamlProviders) {
           if (yamlProvider.provideCompletionItems) {
             try {
@@ -129,6 +137,7 @@ export function getCompletionItemProvider(
                 {} as monaco.CancellationToken
               );
               if (result) {
+                // Deduplicate across YAML providers only (snippet beats plain)
                 mapSuggestions(deduplicatedMap, result.suggestions || []);
                 if (result.incomplete) {
                   isIncomplete = true;
@@ -141,14 +150,21 @@ export function getCompletionItemProvider(
         }
       }
 
-      // Then, get workflow-specific suggestions (variables, connectors, etc.)
-      // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
-      const workflowSuggestions = await getSuggestions({
-        ...autocompleteContext,
-        model,
-        position,
-      });
-      mapSuggestions(deduplicatedMap, workflowSuggestions);
+      const workflowSuggestions = await getSuggestions(
+        {
+          ...autocompleteContext,
+          model,
+          position,
+        },
+        getKqlServices?.()
+      );
+      // Workflow suggestions always win over YAML duplicates.
+      for (const suggestion of workflowSuggestions) {
+        const key = getDeduplicationKey(suggestion);
+        if (!DEPRECATED_TYPE_ALIASES.has(key)) {
+          deduplicatedMap.set(key, suggestion);
+        }
+      }
 
       let suggestions = Array.from(deduplicatedMap.values());
 

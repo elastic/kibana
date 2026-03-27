@@ -30,7 +30,7 @@ describe('SecurityUserAvatar', () => {
       data: { user: mockUser, avatar: 'avatarUrl' },
     });
     render(<SecurityUserAvatar user={mockUser} />);
-    expect(screen.getByTestId('userAvatar')).toBeInTheDocument();
+    expect(screen.getByTestId('user')).toBeInTheDocument();
   });
 
   it('renders EuiAvatar when userProfile does not exist', () => {

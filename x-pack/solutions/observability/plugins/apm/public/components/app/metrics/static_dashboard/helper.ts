@@ -9,11 +9,14 @@ import Mustache from 'mustache';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
-import { existingDashboardFileNames, loadDashboardFile } from './dashboards/dashboard_catalog';
+import type { DashboardFileName } from './dashboards/dashboard_catalog';
+import { loadDashboardFile } from './dashboards/dashboard_catalog';
 import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
+
 interface DashboardFileProps {
   agentName?: string;
   runtimeName?: string;
+  runtimeVersion?: string;
   serverlessType?: string;
   telemetrySdkName?: string;
   telemetrySdkLanguage?: string;
@@ -28,15 +31,22 @@ function getDashboardFileNameFromProps({
   agentName,
   telemetrySdkName,
   telemetrySdkLanguage,
-}: DashboardFileProps) {
-  const dashboardFile =
-    agentName && getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage });
-  return dashboardFile;
+  runtimeVersion,
+}: DashboardFileProps): DashboardFileName | undefined {
+  if (!agentName) {
+    return undefined;
+  }
+
+  return getDashboardFileName({
+    agentName,
+    telemetrySdkName,
+    telemetrySdkLanguage,
+    runtimeVersion,
+  });
 }
 
 export function hasDashboard(props: DashboardFileProps) {
-  const dashboardFilename = getDashboardFileNameFromProps(props);
-  return !!dashboardFilename && existingDashboardFileNames.has(dashboardFilename);
+  return !!getDashboardFileNameFromProps(props);
 }
 
 const getAdhocDataView = (dataView: DataView) => {
@@ -53,7 +63,7 @@ export async function convertSavedDashboardToPanels(
 ): Promise<DashboardState['panels'] | undefined> {
   const { dataView } = props;
   const dashboardFilename = getDashboardFileNameFromProps(props);
-  const unreplacedDashboardJSON = !!dashboardFilename
+  const unreplacedDashboardJSON = dashboardFilename
     ? await loadDashboardFile(dashboardFilename)
     : false;
 

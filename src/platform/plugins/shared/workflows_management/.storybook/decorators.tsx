@@ -67,6 +67,10 @@ export const kibanaReactDecorator: Decorator = (story: Function) => {
                   executeWorkflow: true,
                 },
               },
+              getUrlForApp: (
+                appId: string,
+                options?: { path?: string; deepLinkId?: string; absolute?: boolean }
+              ) => (options?.absolute ? `${window.location.origin}/app/${appId}` : `/app/${appId}`),
             },
             settings: {
               client: mockUiSettingsService(),

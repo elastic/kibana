@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   createToolNotFoundError,
@@ -25,8 +26,9 @@ import type {
   ToolCreateParams,
   ToolUpdateParams,
 } from '@kbn/agent-builder-server';
-import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { UiSettingsServiceStart, IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ToolProvider, WritableToolProvider, ReadonlyToolProvider } from './tool_provider';
 import { isReadonlyToolProvider } from './tool_provider';
 import { toExecutableTool } from './utils';
@@ -38,6 +40,7 @@ interface CreateToolRegistryParams {
   builtinProvider: ReadonlyToolProvider;
   request: KibanaRequest;
   space: string;
+  logger: Logger;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   healthClient: ToolHealthClient;
@@ -48,7 +51,13 @@ export const createToolRegistry = (params: CreateToolRegistryParams): ToolRegist
   return new ToolRegistryImpl(params);
 };
 
+interface ToolRegistryScopedClients {
+  soClient: SavedObjectsClientContract;
+  uiSettingsClient: IUiSettingsClient;
+}
+
 class ToolRegistryImpl implements ToolRegistry {
+  private readonly logger: Logger;
   private readonly persistedProvider: WritableToolProvider;
   private readonly builtinProvider: ReadonlyToolProvider;
   private readonly spaceId: string;
@@ -58,8 +67,10 @@ class ToolRegistryImpl implements ToolRegistry {
   private readonly getRunner: () => Runner;
   private readonly healthClient: ToolHealthClient;
   private readonly healthTrackedToolTypes: Set<ToolType>;
+  private _scopedClients?: ToolRegistryScopedClients;
 
   constructor({
+    logger,
     persistedProvider,
     builtinProvider,
     request,
@@ -70,6 +81,7 @@ class ToolRegistryImpl implements ToolRegistry {
     healthClient,
     healthTrackedToolTypes,
   }: CreateToolRegistryParams) {
+    this.logger = logger;
     this.persistedProvider = persistedProvider;
     this.builtinProvider = builtinProvider;
     this.request = request;
@@ -129,14 +141,22 @@ class ToolRegistryImpl implements ToolRegistry {
   }
 
   async list(opts?: ToolListParams | undefined) {
+    const providerFilters = {
+      types: opts?.types && opts.types.length > 0 ? opts.types : undefined,
+      tags: opts?.tags && opts.tags.length > 0 ? opts.tags : undefined,
+    };
+
     const allTools: InternalToolDefinition[] = [];
     for (const provider of this.orderedProviders) {
-      const toolsFromType = await provider.list();
-      for (const tool of toolsFromType) {
-        if (await this.isAvailable(tool)) {
+      const toolsFromType = await provider.list(providerFilters);
+      const availabilityResults = await Promise.all(
+        toolsFromType.map((tool) => this.isAvailable(tool))
+      );
+      toolsFromType.forEach((tool, index) => {
+        if (availabilityResults[index]) {
           allTools.push(tool);
         }
-      }
+      });
     }
     return allTools;
   }
@@ -184,17 +204,34 @@ class ToolRegistryImpl implements ToolRegistry {
     throw createToolNotFoundError({ toolId });
   }
 
-  private async isAvailable(tool: InternalToolDefinition): Promise<boolean> {
-    const soClient = this.savedObjects.getScopedClient(this.request);
-    const uiSettingsClient = this.uiSettings.asScopedToClient(soClient);
+  private getScopedClients() {
+    if (!this._scopedClients) {
+      const soClient = this.savedObjects.getScopedClient(this.request);
+      const uiSettingsClient = this.uiSettings.asScopedToClient(soClient);
+      this._scopedClients = { soClient, uiSettingsClient };
+    }
+    return this._scopedClients;
+  }
 
+  private async isAvailable(tool: InternalToolDefinition, timeoutMs = 2000): Promise<boolean> {
+    const { uiSettingsClient } = this.getScopedClients();
     const context: ToolAvailabilityContext = {
       spaceId: this.spaceId,
       request: this.request,
       uiSettings: uiSettingsClient,
     };
-    const toolStatus = await tool.isAvailable(context);
-    return toolStatus.status === 'available';
+    let timeoutHandle: ReturnType<typeof setTimeout>;
+    const checkPromise = Promise.resolve(tool.isAvailable(context)).then((s) => {
+      clearTimeout(timeoutHandle);
+      return s.status === 'available';
+    });
+    const timeoutPromise = new Promise<boolean>((resolve) => {
+      timeoutHandle = setTimeout(() => {
+        this.logger.warn(`Tool availability check for "${tool.id}" timed out after ${timeoutMs}ms`);
+        resolve(false);
+      }, timeoutMs);
+    });
+    return Promise.race([checkPromise, timeoutPromise]);
   }
 
   /**

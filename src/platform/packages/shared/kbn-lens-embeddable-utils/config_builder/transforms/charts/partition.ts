@@ -36,6 +36,7 @@ import {
 import {
   getDatasourceLayers,
   getDataViewsMetadata,
+  getLegendTruncateAfterLines,
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
   stripUndefined,
@@ -100,6 +101,13 @@ function isAPIMosaicChartLayer(layer: PartitionState): layer is MosaicState {
   return layer.type === 'mosaic';
 }
 
+function getPartitionMetricsAsArray(config: PartitionState) {
+  if (isAPIMosaicChartLayer(config)) {
+    return [config.metric];
+  }
+  return config.metrics;
+}
+
 function isAPITreemapChartLayer(layer: PartitionState): layer is TreemapState {
   return layer.type === 'treemap';
 }
@@ -111,7 +119,8 @@ function buildFormBasedPartitionLayer(layer: unknown) {
   const datasource = generateLayer(DEFAULT_LAYER_ID, layer);
   const newLayer = datasource[DEFAULT_LAYER_ID];
 
-  const metricColumns = layer.metrics?.flatMap((col) => fromMetricAPItoLensState(col)) ?? [];
+  const dslMetricsArray = isAPIMosaicChartLayer(layer) ? [layer.metric] : layer.metrics;
+  const metricColumns = dslMetricsArray.flatMap((col) => fromMetricAPItoLensState(col));
   const metricColumnsWithIds = metricColumns.map((col, index) => ({
     column: col,
     id: getAccessorName('metric', index),
@@ -148,46 +157,49 @@ export function getValueColumns(layer: unknown) {
     return [];
   }
 
-  const esqlMetricColumns =
-    layer.metrics?.map((metric, index) =>
-      getValueColumn(getAccessorName('metric', index), metric.column, 'number')
-    ) ?? [];
+  const esqlMetricsArray = isAPIMosaicChartLayer(layer) ? [layer.metric] : layer.metrics;
+  const esqlMetricColumns = esqlMetricsArray.map((metric, index) =>
+    getValueColumn(getAccessorName('metric', index), metric, 'number')
+  );
 
   const esqlBucketColumns =
     layer.group_by?.map((bucket, index) =>
-      getValueColumn(getAccessorName('group_by', index), bucket.column)
+      getValueColumn(getAccessorName('group_by', index), bucket)
     ) ?? [];
   return esqlMetricColumns.concat(esqlBucketColumns);
 }
 
-function convertAPINumberDisplayOption(option: PartitionState['value_display']): {
+function convertAPINumberDisplayOption(option: PartitionState['values']): {
   numberDisplay: NumberDisplayType;
   percentDecimals?: number;
 } {
   const decimals =
     option?.percent_decimals != null ? { percentDecimals: option.percent_decimals } : {};
+  if (option?.visible === false) {
+    return { numberDisplay: 'hidden', ...decimals };
+  }
   if (option?.mode === 'percentage') {
     return { numberDisplay: 'percent', ...decimals };
   }
   if (option?.mode === 'absolute') {
     return { numberDisplay: 'value', ...decimals };
   }
-  if (option) {
-    return { numberDisplay: option.mode, ...decimals };
+  if (option != null) {
+    return { numberDisplay: 'percent', ...decimals };
   }
   return { numberDisplay: 'percent', ...decimals };
 }
 
 function convertAPICategoryDisplayOption(
-  option: PieState['label_position']
+  option: PieState['labels']
 ): PartitionLens['state']['visualization']['layers'][0]['categoryDisplay'] {
-  if (option === 'outside') {
-    return 'default';
-  }
-  if (option === 'hidden') {
+  if (option?.visible === false) {
     return 'hide';
   }
-  return option ?? 'default';
+  if (option?.position === 'inside') {
+    return 'inside';
+  }
+  return 'default';
 }
 
 function convertAPILegendDisplayOption(
@@ -202,13 +214,13 @@ function convertAPILegendDisplayOption(
         nestedLegend: 'nested' in legend ? legend?.nested : undefined,
         legendSize: legend?.size,
         legendMaxLines: legend?.truncate_after_lines,
-        truncateLegend: legend?.truncate_after_lines != null,
+        truncateLegend: Boolean(legend?.truncate_after_lines),
       })
     : {};
-  if (legend?.visible === 'auto' || legend?.visible == null) {
+  if (legend?.visibility === 'auto' || legend?.visibility == null) {
     return { legendDisplay: 'default', ...legendOptions };
   }
-  return { legendDisplay: legend?.visible, ...legendOptions };
+  return { legendDisplay: legend?.visibility === 'visible' ? 'show' : 'hide', ...legendOptions };
 }
 
 function convertAPIStaticColorToLensState(config: PartitionState) {
@@ -248,7 +260,7 @@ function computeSharedPartitionLayerState(config: PartitionState) {
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: LENS_LAYER_TYPES.DATA,
-    ...convertAPINumberDisplayOption(config.value_display),
+    ...convertAPINumberDisplayOption(config.values),
     ...convertAPILegendDisplayOption(config),
     ...convertAPIStaticColorToLensState(config),
     collapseFns: Object.fromEntries(
@@ -273,16 +285,21 @@ function getEmptySizeRatioFromDonutHoleOption(
   return { emptySizeRatio: PARTITION_EMPTY_SIZE_RADIUS[partitionEmptySizeRadiusName] };
 }
 
-function hasStaticColorAssignment<T extends PartitionState['metrics'][number]>(
+type PartitionMetricItem =
+  | Exclude<PartitionState, MosaicState>['metrics'][number]
+  | MosaicState['metric'];
+
+function hasStaticColorAssignment<T extends PartitionMetricItem>(
   metric: T
 ): metric is Extract<T, { color: StaticColorType }> {
   return 'color' in metric && metric.color != null && metric.color.type === 'static';
 }
 
 function shouldAllowMultipleMetrics(config: PartitionState): boolean {
+  const metricsArray = getPartitionMetricsAsArray(config);
   return (
-    config.metrics.length > 1 ||
-    (config.metrics.some(hasStaticColorAssignment) &&
+    metricsArray.length > 1 ||
+    (metricsArray.some(hasStaticColorAssignment) &&
       (config.group_by?.filter(groupIsNotCollapsed).length ?? 0) > 1)
   );
 }
@@ -290,7 +307,9 @@ function shouldAllowMultipleMetrics(config: PartitionState): boolean {
 function buildVisualizationState(
   config: PartitionState
 ): PartitionLensWithoutQueryAndFilters['state']['visualization'] {
-  const metrics = config.metrics.map((_, index) => getAccessorName('metric', index));
+  const metrics = getPartitionMetricsAsArray(config).map((_, index) =>
+    getAccessorName('metric', index)
+  );
   const primaryGroups = (config.group_by ?? []).map((_, index) =>
     getAccessorName('group_by', index)
   );
@@ -308,7 +327,7 @@ function buildVisualizationState(
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
           ...sharedState,
           ...(!isLegacyColor && { ...colorMapping }), // modern colors are included at the layer level
-          categoryDisplay: convertAPICategoryDisplayOption(config.label_position),
+          categoryDisplay: convertAPICategoryDisplayOption(config.labels),
           ...getEmptySizeRatioFromDonutHoleOption(config.donut_hole),
         },
       ],
@@ -326,7 +345,7 @@ function buildVisualizationState(
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
           ...sharedState,
           ...(!isLegacyColor && { ...colorMapping }),
-          categoryDisplay: 'default',
+          categoryDisplay: config.labels?.visible === false ? 'hide' : 'default',
         },
       ],
     };
@@ -415,36 +434,37 @@ export function fromLensStateToAPI(config: LensAttributes): PartitionState {
   };
 }
 
-function convertStateValueDisplayToAPI(
-  option: LensPartitionVisualizationState['layers'][0]['numberDisplay']
-): NonNullable<PartitionState['value_display']>['mode'] | undefined {
-  if (option === 'percent') {
-    return 'percentage';
-  }
-  if (option === 'value') {
-    return 'absolute';
-  }
-  return option;
-}
-
 function fromLensStateToSharedPartitionAPI(
   visualization: PartitionLens['state']['visualization']
-): Pick<PartitionState, 'legend' | 'value_display'> | undefined {
+): Pick<PartitionState, 'legend' | 'values'> | undefined {
   const layerState = visualization.layers[0];
   const legend = stripUndefined({
-    visible: layerState.legendDisplay === 'default' ? 'auto' : layerState.legendDisplay,
-    truncate_after_lines: layerState.legendMaxLines,
+    visibility:
+      layerState.legendDisplay === 'default'
+        ? 'auto'
+        : layerState.legendDisplay === 'show'
+        ? 'visible'
+        : layerState.legendDisplay === 'hide'
+        ? 'hidden'
+        : undefined,
+    truncate_after_lines: getLegendTruncateAfterLines(layerState),
     nested: isStateWaffleChart(visualization) ? undefined : layerState.nestedLegend,
     size: layerState.legendSize,
   });
   const valueDisplay = stripUndefined({
-    mode: convertStateValueDisplayToAPI(layerState.numberDisplay),
+    visible: layerState.numberDisplay !== 'hidden',
+    mode:
+      layerState.numberDisplay === 'percent'
+        ? ('percentage' as const)
+        : layerState.numberDisplay === 'value'
+        ? ('absolute' as const)
+        : undefined,
     percent_decimals: layerState.percentDecimals,
   });
 
   return stripUndefined({
     legend: Object.keys(legend).length > 0 ? legend : undefined,
-    value_display: Object.keys(valueDisplay).length > 0 ? valueDisplay : undefined,
+    values: Object.keys(valueDisplay).length > 0 ? valueDisplay : undefined,
   });
 }
 
@@ -480,7 +500,7 @@ function fromLensStateToAPIDataset(
 function fromLensStateToAPIMetrics(
   visualization: LensPartitionVisualizationState,
   layer: DataSourceStateLayer
-): PartitionState['metrics'] {
+): PartitionMetricItem[] {
   const vizLayer = visualization.layers[0];
   const staticColouring = vizLayer.colorsByDimension;
 
@@ -490,7 +510,7 @@ function fromLensStateToAPIMetrics(
         stripUndefined({
           ...getValueApiColumn(id, layer),
           color: staticColouring ? fromStaticColorLensStateToAPI(staticColouring[id]) : undefined,
-        }) as PartitionStateESQL['metrics'][0]
+        }) as PartitionMetricItem
     );
   }
 
@@ -502,7 +522,7 @@ function fromLensStateToAPIMetrics(
       stripUndefined({
         ...operationFromColumn(id, layer),
         color: staticColouring ? fromStaticColorLensStateToAPI(staticColouring[id]) : undefined,
-      }) as PartitionStateNoESQL['metrics'][0]
+      }) as PartitionMetricItem
   );
 }
 
@@ -631,14 +651,17 @@ function isStateWaffleChart(
 
 function convertStateCategoryDisplayOption(
   categoryDisplay: LensPartitionVisualizationState['layers'][0]['categoryDisplay']
-): PieState['label_position'] {
+): PieState['labels'] {
   if (categoryDisplay === 'default') {
-    return 'outside';
+    return { visible: true, position: 'outside' };
   }
   if (categoryDisplay === 'hide') {
-    return 'hidden';
+    return { visible: false };
   }
-  return categoryDisplay;
+  if (categoryDisplay === 'inside') {
+    return { visible: true, position: 'inside' };
+  }
+  return undefined;
 }
 
 function fromLensStateToPerChartSpecificAPI(visualization: LensPartitionVisualizationState) {
@@ -649,14 +672,14 @@ function fromLensStateToPerChartSpecificAPI(visualization: LensPartitionVisualiz
       donut_hole: Object.entries(PARTITION_EMPTY_SIZE_RADIUS)
         .find(([key, value]) => value === vizLayer.emptySizeRatio)?.[0]
         .toLowerCase(),
-      label_position: convertStateCategoryDisplayOption(vizLayer.categoryDisplay),
+      labels: convertStateCategoryDisplayOption(vizLayer.categoryDisplay),
     });
   }
 
   if (isStateTreemapChart(visualization)) {
-    const labelPosition = convertStateCategoryDisplayOption(vizLayer.categoryDisplay);
+    const labels = convertStateCategoryDisplayOption(vizLayer.categoryDisplay);
     return stripUndefined({
-      label_position: labelPosition === 'outside' ? undefined : labelPosition,
+      labels: labels?.position === 'outside' ? undefined : labels,
     });
   }
 }
@@ -668,9 +691,13 @@ function buildVisualizationAPI(
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[]
 ): PartitionState {
+  const metricsArray = fromLensStateToAPIMetrics(visualization, layer);
+  const metricsField = isStateMosaicChart(visualization)
+    ? { metric: metricsArray[0] }
+    : { metrics: metricsArray };
   return stripUndefined({
     type: visualization.shape,
-    metrics: fromLensStateToAPIMetrics(visualization, layer),
+    ...metricsField,
     group_by: fromLensStateToAPIGroups(visualization, layer),
     ...fromLensStateToAPISecondaryGroups(visualization, layer),
     ...fromLensStateToAPIDataset(visualization, layer, adHocDataViews, references, adhocReferences),

@@ -16,6 +16,7 @@ jest.mock('../../../common/schema', () => ({
     return getEs();
   },
   addDynamicConnectorsToCache: jest.fn(),
+  getCachedAllConnectorsMap: () => null,
 }));
 
 const MAX_CHARS_PER_STEP = 5000;
@@ -34,7 +35,7 @@ describe('get_step_definitions output size', () => {
     registerGetStepDefinitionsTool(agentBuilder, {
       getAvailableConnectors: jest
         .fn()
-        .mockResolvedValue({ connectorsByType: {}, totalConnectors: 0 }),
+        .mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
     } as any);
   });
 

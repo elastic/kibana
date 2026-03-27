@@ -79,6 +79,12 @@ dependsOn:
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/logging-mocks'
+  - '@kbn/core-ui-settings-server'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
+  - '@kbn/datemath'
+  - '@kbn/setup-node-env'
 tags:
   - plugin
   - prod

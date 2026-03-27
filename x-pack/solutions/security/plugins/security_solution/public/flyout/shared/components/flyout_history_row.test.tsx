@@ -40,7 +40,10 @@ import {
 } from './test_ids';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 import { IOCRightPanelKey } from '../../ioc_details/constants/panel_keys';
-import { AttackDetailsRightPanelKey } from '../../attack_details/constants/panel_keys';
+import {
+  AttackDetailsPreviewPanelKey,
+  AttackDetailsRightPanelKey,
+} from '../../attack_details/constants/panel_keys';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -84,14 +87,24 @@ const rowItems: { [id: string]: FlyoutPanelHistory } = {
     lastOpen: Date.now(),
     panel: {
       id: HostPanelKey,
-      params: { hostName: 'host name' },
+      params: {
+        contextID: 'history-test',
+        scopeId: 'history-test',
+        isPreviewMode: false,
+        hostName: 'host name',
+      },
     },
   },
   user: {
     lastOpen: Date.now(),
     panel: {
       id: UserPanelKey,
-      params: { userName: 'user name' },
+      params: {
+        contextID: 'history-test',
+        scopeId: 'history-test',
+        isPreviewMode: false,
+        userName: 'user name',
+      },
     },
   },
   network: {
@@ -113,6 +126,13 @@ const rowItems: { [id: string]: FlyoutPanelHistory } = {
     panel: {
       id: AttackDetailsRightPanelKey,
       params: { attackId: 'attack-1', indexName: '.alerts-security.alerts-default' },
+    },
+  },
+  attackPreview: {
+    lastOpen: Date.now(),
+    panel: {
+      id: AttackDetailsPreviewPanelKey,
+      params: { attackId: 'attack-2', indexName: '.alerts-security.alerts-default' },
     },
   },
   unsupported: {
@@ -222,6 +242,18 @@ describe('FlyoutHistoryRow', () => {
     );
     expect(getByTestId(`${6}-${ATTACK_DETAILS_HISTORY_ROW_TEST_ID}`)).toBeInTheDocument();
     expect(getByTestId(`${6}-${ATTACK_DETAILS_HISTORY_ROW_TEST_ID}`)).toHaveTextContent(
+      'Attack: Attack title'
+    );
+  });
+
+  it('should render attack details history row when key is attack preview', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <FlyoutHistoryRow item={rowItems.attackPreview} index={7} />
+      </TestProviders>
+    );
+    expect(getByTestId(`${7}-${ATTACK_DETAILS_HISTORY_ROW_TEST_ID}`)).toBeInTheDocument();
+    expect(getByTestId(`${7}-${ATTACK_DETAILS_HISTORY_ROW_TEST_ID}`)).toHaveTextContent(
       'Attack: Attack title'
     );
   });

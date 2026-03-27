@@ -17,6 +17,10 @@ jest.mock('@kbn/agent-builder-server/skills', () => {
   };
 });
 
+jest.mock('@kbn/agent-builder-server/allow_lists', () => ({
+  isAllowedBuiltinSkill: jest.fn().mockReturnValue(true),
+}));
+
 jest.mock('../runner/store/volumes/skills/utils', () => ({
   getSkillEntryPath: jest.fn(({ skill }) => `${skill.basePath}/${skill.name}/SKILL.md`),
 }));
@@ -65,6 +69,18 @@ describe('createSkillService', () => {
 
       const skill = createMockSkillDefinition();
       expect(() => registerSkill(skill)).not.toThrow();
+    });
+
+    it('throws when registering a skill id not in the allow-list', () => {
+      const { isAllowedBuiltinSkill } = jest.requireMock('@kbn/agent-builder-server/allow_lists');
+      isAllowedBuiltinSkill.mockReturnValueOnce(false);
+
+      const service = createSkillService();
+      const { registerSkill } = service.setup();
+
+      expect(() => registerSkill(createMockSkillDefinition({ id: 'unlisted-skill' }))).toThrow(
+        'Built-in skill with id "unlisted-skill" is not in the list of allowed built-in skills.'
+      );
     });
 
     it('throws when registering duplicate skill id', () => {
@@ -135,10 +151,18 @@ describe('createSkillService', () => {
       const skill = createMockSkillDefinition({ id: 'builtin-1' });
       registerSkill(skill);
 
+      const mockSoClient = { get: jest.fn() } as any;
+      const mockUiSettings = {
+        asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(false) }),
+      } as any;
+      const mockSavedObjects = { getScopedClient: jest.fn().mockReturnValue(mockSoClient) } as any;
+
       const { getRegistry } = service.start({
         elasticsearch: { client: { asInternalUser: {} } } as any,
         logger: { warn: jest.fn() } as any,
         getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+        uiSettings: mockUiSettings,
+        savedObjects: mockSavedObjects,
       });
 
       const registry = await getRegistry({ request: {} as any });

@@ -35,6 +35,7 @@ export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const SECURITY_FEATURE_ID = SECURITY_FEATURE_ID_V5;
 export const RULES_FEATURE_ID = RULES_FEATURE_LATEST;
+export { ALERTS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 export const APP_NAME = 'Security' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
@@ -143,7 +144,7 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
-export const SCRIPTS_LIBRARY_PATH = `${MANAGEMENT_PATH}/scripts_library` as const;
+export const SCRIPT_LIBRARY_PATH = `${MANAGEMENT_PATH}/script_library` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
 export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
@@ -154,7 +155,7 @@ export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as cons
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
 export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
-export const ENTITY_ANALYTICS_THREAT_HUNTING_PATH = '/entity_analytics_threat_hunting' as const;
+export const ENTITY_ANALYTICS_HOME_PAGE_PATH = '/entity_analytics_home_page' as const;
 export const ENTITY_ANALYTICS_WATCHLISTS_PATH = '/entity_analytics_watchlists' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
@@ -170,7 +171,7 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
-export const APP_SCRIPTS_LIBRARY_PATH = `${APP_PATH}${SCRIPTS_LIBRARY_PATH}` as const;
+export const APP_SCRIPT_LIBRARY_PATH = `${APP_PATH}${SCRIPT_LIBRARY_PATH}` as const;
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
 export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as const;
@@ -266,18 +267,11 @@ export const INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
 /** The default value for the included data stream namespaces setting (empty = no filter) */
 export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
 
-/** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
-export const ENABLE_GRAPH_VISUALIZATION_SETTING =
-  'securitySolution:enableGraphVisualization' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
 export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
-
-/** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness Feature */
-export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
 
 /**
  * Id for the notifications alerting type

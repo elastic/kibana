@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/evals'
   - '@kbn/evals-phoenix-executor'
   - '@kbn/object-utils'
-  - '@kbn/grok-heuristics'
   - '@kbn/tooling-log'
   - '@kbn/repo-info'
   - '@kbn/streams-ai'
@@ -32,10 +31,12 @@ dependsOn:
   - '@kbn/kibana-api-cli'
   - '@kbn/dev-cli-runner'
   - '@kbn/core'
-  - '@kbn/dissect-heuristics'
   - '@kbn/inference-common'
+  - '@kbn/inference-prompt-utils'
+  - '@kbn/zod'
   - '@kbn/es-snapshot-loader'
   - '@kbn/es-errors'
+  - '@kbn/otel-demo'
 tags:
   - functional-tests
   - package

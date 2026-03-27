@@ -114,7 +114,7 @@ describe('findPackRoute', () => {
 
     const findArgs = mockSavedObjectsClient.find.mock.calls[0][0];
     expect(findArgs.search).toBe('monitoring');
-    expect(findArgs.searchFields).toEqual(['name']);
+    expect(findArgs.searchFields).toEqual(['name', 'description']);
   });
 
   it('does not pass search or searchFields when search param is absent', async () => {

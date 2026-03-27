@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { performance } from 'perf_hooks';
 import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
@@ -56,7 +57,7 @@ export const configureClient = (
   const { apisToRedactInLogs = [] } = config;
   instrumentEsQueryAndDeprecationLogger({ logger, client, type, apisToRedactInLogs });
 
-  instrumentCpsMetrics({ client, logger });
+  instrumentCpsMetrics({ client, logger: logger.get('cps') });
 
   return client;
 };
@@ -83,13 +84,22 @@ function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logg
     const routingContext = (event.meta.request.options?.context as any)?.cpsRoutingContext;
     if (!routingContext) return; // Not a CPS-instrumented request
 
-    const { routingType, cpsEnabled, apiName, bypassReason, requestId, routePath, requestPath } =
-      routingContext;
+    const {
+      routingType,
+      routingAccepted,
+      cpsEnabled,
+      apiName,
+      bypassReason,
+      requestId,
+      routePath,
+      requestPath,
+    } = routingContext;
     const httpStatus = error ? getErrorStatus(error) : event.statusCode ?? 200;
 
     const metricAttributes: Record<string, string | number | boolean> = {
       'kibana.cps.enabled': cpsEnabled,
       'kibana.cps.routing.type': routingType,
+      'kibana.cps.routing.accepted': routingAccepted,
       'db.operation.name': apiName,
       'http.response.status_code': httpStatus,
     };
@@ -99,6 +109,16 @@ function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logg
     }
 
     cpsRequestCounter.add(1, metricAttributes);
+
+    // Report ES request timing to Server-Timing header
+    const timingContext = (event.meta.request.options?.context as any)?.timingContext;
+    if (timingContext?.kibanaRequest?.serverTiming && timingContext.startTime) {
+      const duration = performance.now() - timingContext.startTime;
+      const method = event.meta.request.params.method || 'unknown';
+      const path = event.meta.request.params.path || 'unknown';
+
+      timingContext.kibanaRequest.serverTiming.measure('es-request', duration, `${method} ${path}`);
+    }
 
     logger.debug('CPS request completed', {
       event: {

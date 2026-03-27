@@ -20,6 +20,16 @@ export const customTriggerEventSchema = z.object({
   message: z.string().describe('The message text for the event.'),
   source: z.string().optional().describe('The source that emitted the event.'),
   category: z.string().optional().describe('Category of the event.'),
+  labels: z.array(z.string()).optional().describe('Optional labels for multi-value filtering.'),
+  foo: z
+    .object({
+      bar: z.object({
+        baz: z.string(),
+      }),
+    })
+    .optional()
+    .describe('Example nested property (foo.bar.baz).'),
+  another: z.string().optional().describe('Another string property.'),
 });
 
 export type CustomTriggerEvent = z.infer<typeof customTriggerEventSchema>;

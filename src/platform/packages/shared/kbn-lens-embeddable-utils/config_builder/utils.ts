@@ -379,3 +379,9 @@ export function groupIsNotCollapsed(def: {
 }): def is { collapse_by: undefined } {
   return def.collapse_by == null;
 }
+
+export function isLensESQLConfig(config: LensApiState): boolean {
+  if (config.type === 'xy')
+    return config.layers.some((layer) => 'dataset' in layer && layer.dataset?.type === 'esql');
+  return config.dataset?.type === 'esql';
+}

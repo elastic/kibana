@@ -118,7 +118,7 @@ test('create and edit entity', async () => {
 - Put shared helpers in `test/scout*/ui/fixtures/helpers.ts` (or API helpers in API fixtures).
 - Add test-subject constants in `fixtures/constants.ts` for reuse across tests and page objects.
 - For `parallel_tests/` ingestion, use `parallel_tests/global.setup.ts` + `globalSetupHook` (no `esArchiver` in spec files).
-- If using synthtrace generators, add `@kbn/synthtrace-client` to the test tsconfig references.
+- If using synthtrace generators, add `@kbn/synthtrace-client` (and `@kbn/scout-synthtrace` when merging `synthtraceFixture` / `getSynthtraceClient`) to the test tsconfig `kbn_references`.
 
 ### 7) Extract component/unit tests where possible
 

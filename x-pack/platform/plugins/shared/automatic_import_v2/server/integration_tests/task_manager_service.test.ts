@@ -61,11 +61,17 @@ describe('TaskManagerService Integration Tests', () => {
       expect(taskManagerSetupSpy).toHaveBeenCalled();
       taskManagerSetup = taskManagerSetupSpy.mock.results[0].value;
 
+      const mockAnalytics = {
+        reportEvent: jest.fn(),
+        registerEventType: jest.fn(),
+      } as any;
+
       automaticImportService = new AutomaticImportService(
         kbnRoot.logger,
         coreSetup.savedObjects,
         taskManagerSetup,
-        coreSetup as unknown as CoreSetup<AutomaticImportV2PluginStartDependencies>
+        coreSetup as unknown as CoreSetup<AutomaticImportV2PluginStartDependencies>,
+        mockAnalytics
       );
 
       // Start Kibana to boot taskManager
@@ -88,7 +94,11 @@ describe('TaskManagerService Integration Tests', () => {
 
       const savedObjectsClient =
         coreStart.savedObjects.createInternalRepository() as unknown as SavedObjectsClient;
-      await automaticImportService.initialize(savedObjectsClient, taskManagerStart);
+      await automaticImportService.initialize(
+        savedObjectsClient,
+        taskManagerStart,
+        coreStart.elasticsearch.client.asInternalUser
+      );
       savedObjectService = (automaticImportService as any).savedObjectService;
 
       // Get the TaskManagerService instance that was already created by AutomaticImportService
@@ -169,7 +179,9 @@ describe('TaskManagerService Integration Tests', () => {
 
       const taskParams = {
         integrationId: integrationSavedObject.id,
+        integrationName: integrationParams.title,
         dataStreamId: 'test-ds-456', // Use the ID we plan to create
+        dataStreamName: 'Test Data Stream',
         connectorId: 'test-connector-id',
       };
 
@@ -268,7 +280,9 @@ describe('TaskManagerService Integration Tests', () => {
           // Schedule AI workflow task
           const taskParams = {
             integrationId: integration.id,
+            integrationName: integrationParams.title,
             dataStreamId,
+            dataStreamName: `Concurrent Data Stream ${i}`,
             connectorId: 'test-connector-id',
           };
 
@@ -318,7 +332,9 @@ describe('TaskManagerService Integration Tests', () => {
         const firstObject = createdObjects[0];
         const duplicateTaskParams = {
           integrationId: firstObject.integration.id,
+          integrationName: firstObject.integration.attributes.title,
           dataStreamId: firstObject.dataStream.attributes.data_stream_id,
+          dataStreamName: firstObject.dataStream.attributes.title,
           connectorId: 'test-connector-id',
         };
 

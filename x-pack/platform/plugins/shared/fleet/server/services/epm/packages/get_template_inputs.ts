@@ -46,7 +46,7 @@ type PackageWithInputAndStreamIndexed = Record<
     streams: Record<
       string,
       RegistryStream & {
-        data_stream: { type: string; dataset: string };
+        data_stream: { type?: string; dataset: string };
       }
     >;
   }
@@ -279,7 +279,7 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
             Record<
               string,
               RegistryStream & {
-                data_stream: { type: string; dataset: string };
+                data_stream: { type?: string; dataset: string };
               }
             >
           >((acc, stream) => {

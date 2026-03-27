@@ -120,6 +120,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const streamConfigBody: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'Web app stream with processing and custom fields',
             ingest: {
               lifecycle: { inherit: {} },
@@ -438,6 +439,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const updatedStreamBody: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'Updated description after restore',
             ingest: {
               lifecycle: { inherit: {} },
