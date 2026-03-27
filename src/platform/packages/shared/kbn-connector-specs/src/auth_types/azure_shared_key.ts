@@ -48,7 +48,7 @@ export function buildCanonicalizedHeaders(headers: Record<string, string>): stri
 
 /**
  * Build CanonicalizedResource: /accountName + path + \n + sorted query params as key:value.
- * Path is the URL pathname; query params are URL-decoded and sorted by name.
+ * Path is the URL pathname; query params are used as-is and sorted by name.
  */
 export function buildCanonicalizedResource(
   accountName: string,
@@ -58,7 +58,7 @@ export function buildCanonicalizedResource(
   const path = pathname.startsWith('/') ? pathname : `/${pathname}`;
   let resource = `/${accountName}${path}`;
   const paramEntries = Object.entries(searchParams)
-    .map(([k, v]) => [k.toLowerCase(), decodeURIComponent(v ?? '')] as [string, string])
+    .map(([k, v]) => [k.toLowerCase(), v ?? ''] as [string, string])
     .sort(([a], [b]) => a.localeCompare(b));
   if (paramEntries.length > 0) {
     resource += '\n' + paramEntries.map(([k, v]) => `${k}:${v}`).join('\n');
