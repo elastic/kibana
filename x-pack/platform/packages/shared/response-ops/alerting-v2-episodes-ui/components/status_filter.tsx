@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiPopover, EuiFilterButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InlineFilterPopover } from './inline_filter_popover';
@@ -48,7 +48,7 @@ export function StatusFilter({
   onStatusChange,
   'data-test-subj': dataTestSubj = 'statusFilter',
 }: StatusFilterProps) {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSelectionChange = useCallback(
     (values: string[]) => {

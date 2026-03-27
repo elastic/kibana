@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, type ChangeEvent } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +19,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { StatusFilter } from '@kbn/alerting-v2-episodes-ui/components/status_filter';
 import { RuleFilter } from '@kbn/alerting-v2-episodes-ui/components/rule_filter';
 import type { HttpStart } from '@kbn/core-http-browser';
+import useDebounce from 'react-use/lib/useDebounce';
 
 export interface EpisodesFilterBarProps {
   filterState: EpisodesFilterState;
@@ -41,6 +42,20 @@ export function EpisodesFilterBar({
   isLoading = false,
   services,
 }: EpisodesFilterBarProps) {
+  const [kueryInput, setKueryInput] = useState(filterState.kuery ?? '');
+
+  // Debounced update to filters
+  useDebounce(
+    () => {
+      const trimmedValue = kueryInput.trim() || undefined;
+      if (trimmedValue !== filterState.kuery) {
+        onFilterChange({ ...filterState, kuery: trimmedValue });
+      }
+    },
+    300,
+    [kueryInput]
+  );
+
   const onStatusChange = useCallback(
     (status: string | undefined) => {
       onFilterChange({
@@ -61,13 +76,9 @@ export function EpisodesFilterBar({
     [filterState, onFilterChange]
   );
 
-  const onKueryChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const v = e.target.value.trim() || null;
-      onFilterChange({ ...filterState, kuery: v ?? undefined });
-    },
-    [filterState, onFilterChange]
-  );
+  const onKueryChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setKueryInput(e.target.value);
+  }, []);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
@@ -79,7 +90,7 @@ export function EpisodesFilterBar({
           placeholder={i18n.translate('xpack.observability.alertsV2.filterBar.searchPlaceholder', {
             defaultMessage: 'Search episodes…',
           })}
-          value={filterState.kuery ?? ''}
+          value={kueryInput}
           onChange={onKueryChange}
           data-test-subj="episodesFilterBar-search"
         />

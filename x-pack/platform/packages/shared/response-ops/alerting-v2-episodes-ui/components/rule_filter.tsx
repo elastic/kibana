@@ -31,7 +31,7 @@ export function RuleFilter({
   services: { http },
   'data-test-subj': dataTestSubj = 'ruleFilter',
 }: RuleFilterProps) {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, RULE_SEARCH_DEBOUNCE_MS);
 
