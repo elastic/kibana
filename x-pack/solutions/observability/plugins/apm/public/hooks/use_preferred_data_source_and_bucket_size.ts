@@ -11,12 +11,16 @@ import type { ApmDataSourceWithSummary } from '../../common/data_source';
 import { ApmDocumentType } from '../../common/document_type';
 import { getBucketSize } from '../../common/utils/get_bucket_size';
 import { useTimeRangeMetadata } from '../context/time_range_metadata/use_time_range_metadata_context';
+import {
+  useQueryQuality,
+  getAdjustedNumBuckets,
+} from '../context/query_quality/query_quality_context';
 
 /**
  * Hook to get the source and interval based on Time Range Metadata API
  *
- * @param {number} numBuckets - The number of buckets. Should be 20 for SparkPlots or 100 for Other charts.
-
+ * @param {number} numBuckets - The base number of buckets. Typically 20 for SparkPlots or 100 for charts.
+ * Adjusted at runtime by the query quality slider.
  */
 
 export function usePreferredDataSourceAndBucketSize<
@@ -50,6 +54,9 @@ export function usePreferredDataSourceAndBucketSize<
     kuery,
   });
 
+  const { numBucketsMultiplier } = useQueryQuality();
+  const adjustedNumBuckets = getAdjustedNumBuckets(numBuckets, numBucketsMultiplier);
+
   const sources = timeRangeMetadataFetch.data?.sources;
 
   return useMemo(() => {
@@ -71,7 +78,7 @@ export function usePreferredDataSourceAndBucketSize<
 
     const { bucketSizeInSeconds, source } = getPreferredBucketSizeAndDataSource({
       bucketSizeInSeconds: getBucketSize({
-        numBuckets,
+        numBuckets: adjustedNumBuckets,
         start: new Date(start).getTime(),
         end: new Date(end).getTime(),
       }).bucketSize,
@@ -82,5 +89,5 @@ export function usePreferredDataSourceAndBucketSize<
       bucketSizeInSeconds,
       source: source as ApmDataSourceWithSummary<any>,
     };
-  }, [type, start, end, sources, numBuckets]);
+  }, [type, start, end, sources, adjustedNumBuckets]);
 }
