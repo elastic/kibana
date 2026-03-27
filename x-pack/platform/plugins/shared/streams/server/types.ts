@@ -46,6 +46,7 @@ export interface StreamsServer {
   taskManager: TaskManagerStartContract;
   memoryTriggerRegistry?: MemoryTriggerRegistry;
   ensureMemorySkillRegistered?: () => void;
+  ensureMemoryTasksScheduled?: () => Promise<void>;
 }
 
 export interface ElasticsearchAccessorOptions {

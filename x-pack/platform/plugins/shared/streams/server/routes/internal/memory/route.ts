@@ -412,7 +412,11 @@ const scrapeConversationsRoute = createServerRoute({
     request,
     getScopedClients,
   }): Promise<TaskResult<ConversationScraperTaskResult>> => {
-    const { taskClient } = await getScopedClients({ request });
+    const { taskClient, modelSettingsClient } = await getScopedClients({ request });
+    const settings = await modelSettingsClient.getSettings();
+    if (!settings.useMemory) {
+      throw new Error('Memory is disabled. Enable useMemory in settings to use this feature.');
+    }
 
     const { body } = params;
 
@@ -456,7 +460,11 @@ const consolidateMemoryRoute = createServerRoute({
     request,
     getScopedClients,
   }): Promise<TaskResult<MemoryConsolidationTaskResult>> => {
-    const { taskClient } = await getScopedClients({ request });
+    const { taskClient, modelSettingsClient } = await getScopedClients({ request });
+    const settings = await modelSettingsClient.getSettings();
+    if (!settings.useMemory) {
+      throw new Error('Memory is disabled. Enable useMemory in settings to use this feature.');
+    }
 
     const { body } = params;
 

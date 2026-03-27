@@ -51,6 +51,18 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
               const taskLogger = taskContext.logger.get('conversation_scraper');
 
               const settings = await modelSettingsClient.getSettings();
+
+              if (!settings.useMemory) {
+                taskLogger.info('Memory is disabled, skipping conversation scraping');
+                if (_task) {
+                  await taskClient.complete<
+                    ConversationScraperTaskParams,
+                    ConversationScraperTaskResult
+                  >(_task, {}, { conversationsProcessed: 0 });
+                }
+                return;
+              }
+
               const connectorId = await resolveConnectorId({
                 connectorId: settings.connectorIdDiscovery,
                 uiSettingsClient,
@@ -90,10 +102,12 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
 
                 if (conversations.length === 0) {
                   taskLogger.info('No new conversations to scrape');
-                  await taskClient.complete<
-                    ConversationScraperTaskParams,
-                    ConversationScraperTaskResult
-                  >(_task, {}, { conversationsProcessed: 0 });
+                  if (_task) {
+                    await taskClient.complete<
+                      ConversationScraperTaskParams,
+                      ConversationScraperTaskResult
+                    >(_task, {}, { conversationsProcessed: 0 });
+                  }
                   return;
                 }
 
@@ -255,10 +269,12 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                   `Conversation scraping completed: ${conversations.length} conversation(s) processed, ${pagesWritten} page(s) written`
                 );
 
-                await taskClient.complete<
-                  ConversationScraperTaskParams,
-                  ConversationScraperTaskResult
-                >(_task, {}, { conversationsProcessed: conversations.length });
+                if (_task) {
+                  await taskClient.complete<
+                    ConversationScraperTaskParams,
+                    ConversationScraperTaskResult
+                  >(_task, {}, { conversationsProcessed: conversations.length });
+                }
               } catch (error) {
                 const errorMessage = getErrorMessage(error);
 
@@ -271,7 +287,9 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
 
                 taskLogger.error(`Conversation scraper failed: ${errorMessage}`);
 
-                await taskClient.fail<ConversationScraperTaskParams>(_task, {}, errorMessage);
+                if (_task) {
+                  await taskClient.fail<ConversationScraperTaskParams>(_task, {}, errorMessage);
+                }
 
                 return getDeleteTaskRunResult();
               }

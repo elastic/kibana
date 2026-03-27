@@ -77,6 +77,7 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
 
     if (params.body.useMemory) {
       server.ensureMemorySkillRegistered?.();
+      await server.ensureMemoryTasksScheduled?.();
     }
 
     return { success: true };

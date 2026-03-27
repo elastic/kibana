@@ -52,7 +52,7 @@ export const createMemoryRecentChangesTool = ({
                 version: c.version,
                 change_type: c.change_type,
                 change_summary: c.change_summary,
-                updated_by: c.updated_by,
+                created_by: c.created_by,
                 created_at: c.created_at,
               })),
             },

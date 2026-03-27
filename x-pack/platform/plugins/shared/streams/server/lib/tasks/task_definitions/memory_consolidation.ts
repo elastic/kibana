@@ -47,6 +47,18 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
               const taskLogger = taskContext.logger.get('memory_consolidation');
 
               const settings = await modelSettingsClient.getSettings();
+
+              if (!settings.useMemory) {
+                taskLogger.info('Memory is disabled, skipping memory consolidation');
+                if (_task) {
+                  await taskClient.complete<
+                    MemoryConsolidationTaskParams,
+                    MemoryConsolidationTaskResult
+                  >(_task, {}, { entriesProcessed: 0 });
+                }
+                return;
+              }
+
               const connectorId = await resolveConnectorId({
                 connectorId: settings.connectorIdDiscovery,
                 uiSettingsClient,
@@ -68,10 +80,12 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
 
                 if (entries.length === 0) {
                   taskLogger.info('No memory entries to consolidate');
-                  await taskClient.complete<
-                    MemoryConsolidationTaskParams,
-                    MemoryConsolidationTaskResult
-                  >(_task, {}, { entriesProcessed: 0 });
+                  if (_task) {
+                    await taskClient.complete<
+                      MemoryConsolidationTaskParams,
+                      MemoryConsolidationTaskResult
+                    >(_task, {}, { entriesProcessed: 0 });
+                  }
                   return;
                 }
 
@@ -165,7 +179,7 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
                             version: c.version,
                             change_type: c.change_type,
                             change_summary: c.change_summary,
-                            updated_by: c.updated_by,
+                            created_by: c.created_by,
                             created_at: c.created_at,
                           })),
                         },
@@ -195,10 +209,12 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
                   `Memory consolidation completed: reviewed ${entries.length} entries`
                 );
 
-                await taskClient.complete<
-                  MemoryConsolidationTaskParams,
-                  MemoryConsolidationTaskResult
-                >(_task, {}, { entriesProcessed: entries.length });
+                if (_task) {
+                  await taskClient.complete<
+                    MemoryConsolidationTaskParams,
+                    MemoryConsolidationTaskResult
+                  >(_task, {}, { entriesProcessed: entries.length });
+                }
               } catch (error) {
                 const errorMessage = getErrorMessage(error);
 
@@ -211,7 +227,9 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
 
                 taskLogger.error(`Memory consolidation failed: ${errorMessage}`);
 
-                await taskClient.fail<MemoryConsolidationTaskParams>(_task, {}, errorMessage);
+                if (_task) {
+                  await taskClient.fail<MemoryConsolidationTaskParams>(_task, {}, errorMessage);
+                }
 
                 return getDeleteTaskRunResult();
               }

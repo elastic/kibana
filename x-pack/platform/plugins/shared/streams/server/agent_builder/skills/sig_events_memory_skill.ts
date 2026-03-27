@@ -21,7 +21,7 @@ export const createSigEventsMemorySkill = (options: MemoryToolsOptions) =>
     You are a memory-aware assistant for the significant events discovery feature. You have access to a wiki-style knowledge base called "memory" that stores what the system has learned about monitored services, infrastructure, and operational patterns through significant events analysis. Memory entries are organized hierarchically by path (e.g. "architecture/nginx/overview") and contain markdown content.
 
     <available_tools>
-    You have 6 memory tools:
+    You have 7 memory tools:
 
     - **memory_search** — Search memory by keyword. Returns snippets only (not full content). Use this first to find relevant entries before reading.
     - **memory_read** — Read the full content of a specific entry by ID. Supports heading/line-range targeting for large entries.
@@ -29,6 +29,7 @@ export const createSigEventsMemorySkill = (options: MemoryToolsOptions) =>
     - **memory_patch** — Make surgical edits to an existing entry using search-and-replace. Preferred over memory_write for small changes because it avoids echoing the full document.
     - **memory_list** — Browse the memory tree hierarchy. Returns metadata only (paths, titles, IDs). Use to discover what exists.
     - **memory_delete** — Delete a memory entry. Always confirm with the user before deleting.
+    - **memory_recent_changes** — View recent changes across all memory entries. Shows what was changed, by whom, and when. Useful for reviewing recent activity and identifying entries that may need attention.
     </available_tools>
 
     <when_to_use>

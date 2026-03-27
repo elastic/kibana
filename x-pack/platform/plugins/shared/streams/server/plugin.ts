@@ -59,6 +59,8 @@ import {
   chatLearningTrigger,
 } from './lib/memory/triggers';
 import { TaskService } from './lib/tasks/task_service';
+import { CONVERSATION_SCRAPER_TASK_TYPE } from './lib/tasks/task_definitions/conversation_scraper';
+import { MEMORY_CONSOLIDATION_TASK_TYPE } from './lib/tasks/task_definitions/memory_consolidation';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
@@ -385,6 +387,7 @@ export class StreamsPlugin
           });
           if (this.config.significantEvents.useMemory) {
             this.server?.ensureMemorySkillRegistered?.();
+            await this.server?.ensureMemoryTasksScheduled?.();
           }
           this.logger.info(
             `Preconfigured significantEvents.useMemory: ${this.config.significantEvents.useMemory}`
@@ -413,6 +416,34 @@ export class StreamsPlugin
       memoryTriggerRegistry.register(discoveryCompletedTrigger);
       memoryTriggerRegistry.register(chatLearningTrigger);
       this.server.memoryTriggerRegistry = memoryTriggerRegistry;
+
+      // Set up recurring memory tasks (conversation scraper + consolidation).
+      // These are scheduled only when useMemory is enabled.
+      const taskManager = plugins.taskManager;
+      const logger = this.logger;
+      this.server.ensureMemoryTasksScheduled = async () => {
+        try {
+          await taskManager.ensureScheduled({
+            id: 'streams_conversation_scraper_recurring',
+            taskType: CONVERSATION_SCRAPER_TASK_TYPE,
+            params: {},
+            state: {},
+            scope: ['streams'],
+            schedule: { interval: '4h' },
+          });
+          await taskManager.ensureScheduled({
+            id: 'streams_memory_consolidation_recurring',
+            taskType: MEMORY_CONSOLIDATION_TASK_TYPE,
+            params: {},
+            state: {},
+            scope: ['streams'],
+            schedule: { interval: '24h' },
+          });
+          logger.info('Recurring memory tasks scheduled');
+        } catch (err) {
+          logger.error(`Failed to schedule recurring memory tasks: ${(err as Error).message}`);
+        }
+      };
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
