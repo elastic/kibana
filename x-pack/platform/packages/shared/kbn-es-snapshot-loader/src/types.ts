@@ -49,7 +49,12 @@ export interface RestoreConfig extends BaseConfig {
 export interface ReplayConfig extends BaseConfig {
   patterns: string[];
   concurrency?: number;
+
+  /** Index patterns that use an inline Painless script instead of an ingest pipeline for
+   * timestamp transformation. Required for data streams whose index templates are managed
+   * by Elasticsearch and reject explicit pipelines in bulk/reindex requests. */
   pipelineExcludePatterns?: string[];
+  /** Called after temp indices are restored, before reindexing to final destinations. */
   beforeReindex?: (params: {
     esClient: Client;
     log: ToolingLog;

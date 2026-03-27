@@ -11,7 +11,7 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { getConnectionConfig } from '../lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
-import { GCS_BUCKET, STREAMS_REGISTRY_PATTERN } from '../lib/constants';
+import { GCS_BUCKET } from '../lib/constants';
 import {
   resolvePatterns,
   parseCommonSnapshotFlags,
@@ -34,12 +34,10 @@ async function captureSystemIndex({
   esClient,
   log,
   sourceIndex,
-  query,
 }: {
   esClient: Client;
   log: ToolingLog;
   sourceIndex: string;
-  query?: Record<string, unknown>;
 }): Promise<string> {
   const snapshotIndex = toSnapshotName(sourceIndex);
 
@@ -58,7 +56,7 @@ async function captureSystemIndex({
   const result = await esClient.reindex(
     {
       wait_for_completion: true,
-      source: { index: sourceIndex, ...(query && { query }) },
+      source: { index: sourceIndex },
       dest: { index: snapshotIndex },
     },
     { requestTimeout: 30 * 60 * 1000 }
@@ -117,12 +115,9 @@ export async function captureEnvSnapshot({
 
   const capturedSystemIndices: string[] = [];
   for (const idx of resolvedSystemIndices) {
-    const isStreamsRegistry = idx.startsWith(STREAMS_REGISTRY_PATTERN.replace('*', ''));
-    const query = isStreamsRegistry ? { ids: { values: [logsIndex] } } : undefined;
-
     let snapshotIndex: string;
     try {
-      snapshotIndex = await captureSystemIndex({ esClient, log, sourceIndex: idx, query });
+      snapshotIndex = await captureSystemIndex({ esClient, log, sourceIndex: idx });
     } catch (err) {
       if (err?.meta?.body?.error?.type === 'security_exception') {
         throw new Error(

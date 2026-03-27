@@ -6,10 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type {
-  BulkIndexByScrollFailure,
-  ReindexResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { extractDataStreamName, getErrorMessage } from '../utils';
 import { TIMESTAMP_REINDEX_SCRIPT } from './pipeline';
@@ -34,24 +31,6 @@ export function getDestinationInfo(originalIndex: string): DestinationInfo {
     destIndex: dataStreamName ?? originalIndex,
     isDataStream: dataStreamName != null,
   };
-}
-
-function throwOnReindexFailures(
-  failures: Array<BulkIndexByScrollFailure>,
-  destIndex: string,
-  log: ToolingLog
-): void {
-  log.warning(`Reindex had ${failures.length} failures`);
-  const sampleFailures = failures.slice(0, 3);
-  for (const failure of sampleFailures) {
-    const cause = failure.cause;
-    const reason = cause?.reason?.split('\n')[0]?.slice(0, 120) ?? 'unknown';
-    log.debug(`  - ${cause?.type ?? 'error'}: ${reason}`);
-  }
-  if (failures.length > 3) {
-    log.debug(`  ... and ${failures.length - 3} more`);
-  }
-  throw new Error(`Reindex had failures for ${destIndex}`);
 }
 
 export async function reindexThroughPipeline({
@@ -108,7 +87,17 @@ export async function reindexThroughPipeline({
     }
 
     if (failures.length > 0) {
-      throwOnReindexFailures(failures, destIndex, log);
+      log.warning(`Reindex had ${failures.length} failures`);
+      const sampleFailures = failures.slice(0, 3);
+      for (const failure of sampleFailures) {
+        const cause = failure.cause;
+        const reason = cause?.reason?.split('\n')[0]?.slice(0, 120) ?? 'unknown';
+        log.debug(`  - ${cause?.type ?? 'error'}: ${reason}`);
+      }
+      if (failures.length > 3) {
+        log.debug(`  ... and ${failures.length - 3} more`);
+      }
+      throw new Error(`Reindex had failures for ${destIndex}`);
     }
 
     log.debug(`Reindexed ${created} documents to ${destIndex}`);

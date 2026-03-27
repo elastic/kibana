@@ -22,14 +22,12 @@ export const KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS = 10_000;
 export const KI_FEATURE_EXTRACTION_TIMEOUT_MS = 5 * 60 * 1000;
 
 export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };
-export const STREAMS_REGISTRY_PATTERN = '.kibana_streams-*';
 
 export const VALID_SYSTEM_INDICES = [
   '.kibana_streams_features-*',
   '.kibana_streams_assets-*',
   '.kibana_streams_insights-*',
   '.kibana_streams_tasks-*',
-  // STREAMS_REGISTRY_PATTERN,
 ] as const;
 
 export const VALID_ALERT_INDICES = ['.internal.alerts-streams.alerts-default-*'] as const;
@@ -58,10 +56,6 @@ export const INDEX_ALIAS_CONFIG: Record<
     alias: '.kibana_streams_tasks',
     is_hidden: true,
   },
-  // [STREAMS_REGISTRY_PATTERN]: {
-  //   alias: '.kibana_streams',
-  //   is_hidden: true,
-  // },
   '.internal.alerts-streams.alerts-default-*': {
     alias: '.alerts-streams.alerts-default',
   },
