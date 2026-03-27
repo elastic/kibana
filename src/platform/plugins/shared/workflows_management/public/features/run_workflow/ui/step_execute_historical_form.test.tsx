@@ -68,6 +68,7 @@ const renderWithProviders = (component: React.ReactElement) => {
 describe('StepExecuteHistoricalForm', () => {
   const defaultProps = {
     value: '{}',
+    setExecutionContext: jest.fn(),
     setValue: jest.fn(),
     errors: null as string | null,
     warnings: null as string | null,
