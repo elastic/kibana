@@ -36,7 +36,6 @@
     "@kbn/cloud",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-plugin",
-    "@kbn/agent-builder-server",
     "@kbn/deeplinks-search",
     "@kbn/scout-search",
     "@kbn/search-agent"
