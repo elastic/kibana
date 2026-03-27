@@ -7,7 +7,11 @@
 
 import type { ISavedObjectsRepository, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { type InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
+import {
+  type InferenceConnector,
+  InferenceConnectorType,
+  defaultInferenceEndpoints,
+} from '@kbn/inference-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceFeatureConfig } from './types';
 import type { InferenceSettingsAttributes } from '../common/types';
@@ -97,17 +101,18 @@ describe('getForFeature', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('not registered'));
   });
 
-  it('returns empty endpoints for features with no SO and no recommendations', async () => {
+  it('falls back to Kibana default endpoint when no SO and no recommendations', async () => {
+    const defaultEp = defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION;
     registry.register(createValidFeature({ featureId: 'f1', taskType: 'chat_completion' }));
     const result = await getForFeature(
       registry,
       createSoClient(),
-      createGetConnectorById([]),
+      createGetConnectorById([defaultEp]),
       'f1',
       logger
     );
     expect(result).toEqual({
-      endpoints: [],
+      endpoints: [createConnector(defaultEp)],
       warnings: [],
       soEntryFound: false,
     });
@@ -389,6 +394,28 @@ describe('getForFeature', () => {
       getForFeature(registry, createSoClient(), createGetConnectorById(['gp_ep']), 'child', logger)
     ).resolves.toEqual({
       endpoints: [createConnector('gp_ep')],
+      warnings: [],
+      soEntryFound: false,
+    });
+  });
+
+  it('prefers recommendedEndpoints over Kibana default endpoint', async () => {
+    registry.register(
+      createValidFeature({
+        featureId: 'f1',
+        recommendedEndpoints: ['rec1'],
+      })
+    );
+    await expect(
+      getForFeature(
+        registry,
+        createSoClient(),
+        createGetConnectorById(['rec1', defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION]),
+        'f1',
+        logger
+      )
+    ).resolves.toEqual({
+      endpoints: [createConnector('rec1')],
       warnings: [],
       soEntryFound: false,
     });
