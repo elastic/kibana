@@ -40,13 +40,18 @@ const ORDER = ['Low', 'Medium', 'High', 'Critical'];
 
 interface AlertCountInsightProps {
   /**
-   * The name of the entity to filter the alerts by.
+   * Entity identifiers used to filter the alerts by.
    */
-  name: string;
+  identityFields: Record<string, string>;
   /**
-   * The field name to filter the alerts by.
+   * When Entity Store v2 is on and `identityFields` includes `entity.id`, resolves ECS terms
+   * from the store for the alerts query (same as `useAlertsByStatus` / `useNonClosedAlerts`).
    */
-  fieldName: 'host.name' | 'user.name';
+  entityType?: string;
+  /**
+   * Global query inspector id; use a unique suffix when multiple instances mount (e.g. left + right flyout).
+   */
+  queryId?: string;
   /**
    * The direction of the flex group.
    */
@@ -100,21 +105,22 @@ export const getFormattedAlertStats = (
  * Displays a distribution bar with the total alert count for a given entity
  */
 export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
-  name,
-  fieldName,
+  identityFields,
+  entityType,
+  queryId = DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
   direction,
   openDetailsPanel,
   'data-test-subj': dataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
   const { to, from } = useGlobalTime();
   const { signalIndexName } = useSignalIndex();
 
   const { items, isLoading } = useAlertsByStatus({
-    entityFilter,
+    identityFields,
+    entityType,
     signalIndexName,
-    queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
+    queryId,
     to,
     from,
   });

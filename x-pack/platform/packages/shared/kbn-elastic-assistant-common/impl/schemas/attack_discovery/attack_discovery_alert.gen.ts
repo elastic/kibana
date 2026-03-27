@@ -124,4 +124,8 @@ export const AttackDiscoveryAlert = z.object({
    * The optional array of tags assigned the attack
    */
   tags: z.array(z.string()).optional(),
+  /**
+   * The concrete Elasticsearch index where this attack discovery is stored
+   */
+  index: z.string().optional(),
 });

@@ -21,7 +21,11 @@ import {
   axisTitleSchemaProps,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import { legendSizeSchema, mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps } from './shared';
+import {
+  legendSizeSchema,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
+  xScaleSchema,
+} from './shared';
 import { positionSchema } from '../alignments';
 import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
@@ -73,6 +77,7 @@ const heatmapSharedStateSchema = {
               title: schema.maybe(schema.object(axisTitleSchemaProps)),
               labels: schema.maybe(schema.object(labelsSchemaProps)),
               sort: schema.maybe(heatmapSortPredicateSchema),
+              scale: xScaleSchema,
             },
             {
               meta: {

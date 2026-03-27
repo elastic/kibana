@@ -462,6 +462,25 @@ describe('test helper methods', () => {
         getExpectedAlertsQuery(size, 'low', sortField, sortDirection)
       );
     });
+
+    it('should use entityFilter instead of a term on field when entityFilter is provided', () => {
+      const entityFilter = {
+        bool: {
+          filter: [{ term: { 'host.entity.id': 'entity-store-id' } }],
+        },
+      };
+      const size = 50;
+      const result = buildEntityAlertsQuery({
+        field,
+        to,
+        from,
+        queryValue: query,
+        size,
+        entityFilter,
+      });
+
+      expect(result.query.bool.filter[0]).toEqual(entityFilter);
+    });
   });
 
   describe('getEntitiesLatestIndexName', () => {
