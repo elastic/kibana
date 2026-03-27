@@ -291,7 +291,7 @@ describe('parseMetricsWithTelemetry', () => {
           dimension_fields: ['host.name', '_metric_names_hash'],
         },
       ];
-      const result = parseMetricsResponse(response);
+      const result = parseMetricsWithTelemetry(response);
       expect(result.metricItems[0].dimensionFields).toEqual([{ name: 'host.name' }]);
       expect(result.allDimensions).toEqual([{ name: 'host.name' }]);
     });
@@ -307,7 +307,7 @@ describe('parseMetricsWithTelemetry', () => {
           dimension_fields: ['host.name', 'unit'],
         },
       ];
-      const result = parseMetricsResponse(response);
+      const result = parseMetricsWithTelemetry(response);
       expect(result.metricItems[0].dimensionFields).toEqual([{ name: 'host.name' }]);
       expect(result.allDimensions).toEqual([{ name: 'host.name' }]);
     });
@@ -323,7 +323,7 @@ describe('parseMetricsWithTelemetry', () => {
           dimension_fields: ['host.name', 'labels._foo_', 'labels._bar_baz_'],
         },
       ];
-      const result = parseMetricsResponse(response);
+      const result = parseMetricsWithTelemetry(response);
       expect(result.metricItems[0].dimensionFields).toEqual([{ name: 'host.name' }]);
       expect(result.allDimensions).toEqual([{ name: 'host.name' }]);
     });
@@ -345,7 +345,7 @@ describe('parseMetricsWithTelemetry', () => {
           ],
         },
       ];
-      const result = parseMetricsResponse(response);
+      const result = parseMetricsWithTelemetry(response);
       expect(result.metricItems[0].dimensionFields).toEqual([
         { name: 'host.name' },
         { name: 'pod.name' },
@@ -364,7 +364,7 @@ describe('parseMetricsWithTelemetry', () => {
           dimension_fields: ['labels.environment', 'labels.team'],
         },
       ];
-      const result = parseMetricsResponse(response);
+      const result = parseMetricsWithTelemetry(response);
       expect(result.metricItems[0].dimensionFields).toEqual([
         { name: 'labels.environment' },
         { name: 'labels.team' },

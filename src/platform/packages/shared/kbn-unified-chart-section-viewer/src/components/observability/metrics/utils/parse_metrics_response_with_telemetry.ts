@@ -48,7 +48,7 @@ const isInternalDimension = (name: string): boolean => {
   return INTERNAL_DIMENSION_PREFIXES.some((prefix) => name.startsWith(prefix));
 };
 
-export const parseMetricsResponse = (
+export const parseMetricsWithTelemetry = (
   response: MetricsESQLResponse[],
   getFieldType?: (name: string) => string | undefined
 ): ParsedMetricsWithTelemetry => {
