@@ -7,6 +7,7 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
+import { setGrouping } from '../../../tasks/entity_analytics/entity_analytics_home';
 import { ENTITY_ANALYTICS_HOME_PAGE_URL } from '../../../urls/navigation';
 import {
   PAGE_TITLE,
@@ -27,21 +28,6 @@ import {
 import { TIMELINE_FLYOUT_WRAPPER } from '../../../screens/timeline';
 
 const ARCHIVE_NAME = 'entity_store_v2_home';
-
-/**
- * Sets localStorage to disable grouping (flat table view) before navigating.
- * @kbn/grouping reads from `localStorage.groups` keyed by groupingId.
- * Setting activeGroups to ['none'] makes EntitiesTableSection render the
- * flat EntitiesDataTable instead of the GroupWrapper.
- */
-const setFlatTableGrouping = () => {
-  cy.window().then((win) =>
-    win.localStorage.setItem(
-      'groups',
-      JSON.stringify({ 'entityAnalytics:grouping': { activeGroups: ['none'] } })
-    )
-  );
-};
 
 const waitForTableToLoad = () => {
   cy.get(PAGE_TITLE).should('exist');
@@ -70,7 +56,7 @@ describe(
 
     beforeEach(() => {
       login();
-      setFlatTableGrouping();
+      setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
       waitForTableToLoad();
     });
@@ -203,7 +189,7 @@ describe(
   () => {
     beforeEach(() => {
       login();
-      setFlatTableGrouping();
+      setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
       cy.get(PAGE_TITLE).should('exist');
     });

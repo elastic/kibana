@@ -46,6 +46,9 @@ export const GROUP_PANEL_TOGGLE = '[data-test-subj="group-panel-toggle"]';
 export const GROUP_STATS = '[data-test-subj="group-stats"]';
 export const GROUP_COUNT = '[data-test-subj="group-count"]';
 export const IS_LOADING_GROUPING_TABLE = '[data-test-subj="is-loading-grouping-table"]';
+export const GLOBAL_LOADING_INDICATOR_HIDDEN =
+  '[data-test-subj="globalLoadingIndicator-hidden"]';
+export const GLOBAL_LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
 
 // Group selector menu options
 export const PANEL_NONE = '[data-test-subj="panel-none"]';
