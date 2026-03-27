@@ -152,23 +152,23 @@ export const EXECUTION_TABLE = `[data-test-subj="executionsTable"]`;
 
 export const EXECUTION_LOG_CONTAINER = `[data-test-subj="executionLogContainer"]`;
 
-export const EXECUTION_RESULTS_POC_CONTAINER = `[data-test-subj="executionResultsPocContainer"]`;
+export const EXECUTION_RESULTS_CONTAINER = `[data-test-subj="executionResultsContainer"]`;
 
-export const EXECUTION_RESULTS_POC_TABLE = `[data-test-subj="executionResultsPocTable"]`;
+export const EXECUTION_RESULTS_TABLE = `[data-test-subj="executionResultsTable"]`;
 
 export const EXECUTION_DETAILS_FLYOUT = `[data-test-subj="executionDetailsFlyout"]`;
 
 export const EXECUTION_DETAILS_FLYOUT_MESSAGE_SECTION = `[data-test-subj="executionDetailsFlyoutMessageSection"]`;
 
-export const EXECUTION_RESULTS_POC_TABLE_ACTION_VIEW_DETAILS = `[data-test-subj="executionResultsPocTableActionViewDetails"]`;
+export const EXECUTION_RESULTS_TABLE_ACTION_VIEW_DETAILS = `[data-test-subj="executionResultsTableActionViewDetails"]`;
 
-// Execution results POC table cell selectors
-export const EXECUTION_RESULTS_POC_TABLE_CELL_STATUS = `[data-test-subj="executionResultsPocTableCellStatus"]`;
-export const EXECUTION_RESULTS_POC_TABLE_CELL_RUN_TYPE = `[data-test-subj="executionResultsPocTableCellRunType"]`;
-export const EXECUTION_RESULTS_POC_TABLE_CELL_TIMESTAMP = `[data-test-subj="executionResultsPocTableCellTimestamp"]`;
-export const EXECUTION_RESULTS_POC_TABLE_CELL_DURATION = `[data-test-subj="executionResultsPocTableCellDuration"]`;
-export const EXECUTION_RESULTS_POC_TABLE_CELL_ALERTS = `[data-test-subj="executionResultsPocTableCellAlerts"]`;
-export const EXECUTION_RESULTS_POC_TABLE_CELL_MESSAGE = `[data-test-subj="executionResultsPocTableCellMessage"]`;
+// Execution results table cell selectors
+export const EXECUTION_RESULTS_TABLE_CELL_STATUS = `[data-test-subj="executionResultsTableCellStatus"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_RUN_TYPE = `[data-test-subj="executionResultsTableCellRunType"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_TIMESTAMP = `[data-test-subj="executionResultsTableCellTimestamp"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_DURATION = `[data-test-subj="executionResultsTableCellDuration"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_ALERTS = `[data-test-subj="executionResultsTableCellAlerts"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_MESSAGE = `[data-test-subj="executionResultsTableCellMessage"]`;
 
 // Execution details flyout header selectors
 export const EXECUTION_DETAILS_FLYOUT_HEADER_STATUS = `[data-test-subj="executionDetailsFlyoutHeaderStatus"]`;

@@ -118,7 +118,7 @@ import {
 } from '../../../common/components/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
-import { ExecutionResultsPocTable } from './execution_results_poc/execution_results_poc_table';
+import { ExecutionResultsTable } from './execution_results/execution_results_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
 
@@ -936,7 +936,7 @@ export const RuleDetailsPage = connector(
                     >
                       <>
                         {newExecutionResultsTableEnabled ? (
-                          <ExecutionResultsPocTable
+                          <ExecutionResultsTable
                             ruleId={ruleId}
                             selectAlertsTab={navigateToAlertsTab}
                           />
