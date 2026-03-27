@@ -6,7 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import type { Logger, CoreSetup, CoreStart } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger, CoreSetup, CoreStart } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -49,16 +49,27 @@ import {
   RESCHEDULE_DELAY_MS,
   TAGS,
 } from './constants';
+import { UIAM_PROVISIONING_RUN_EVENT } from './event_based_telemetry';
 
 export class UiamApiKeyProvisioningTask {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
+  private readonly analytics: AnalyticsServiceSetup;
   private isTaskScheduled: boolean | undefined = undefined;
   private featureFlagSubscription: Subscription | undefined;
 
-  constructor({ logger, isServerless }: { logger: Logger; isServerless: boolean }) {
+  constructor({
+    logger,
+    isServerless,
+    analytics,
+  }: {
+    logger: Logger;
+    isServerless: boolean;
+    analytics: AnalyticsServiceSetup;
+  }) {
     this.logger = logger;
     this.isServerless = isServerless;
+    this.analytics = analytics;
   }
 
   register({
@@ -203,6 +214,16 @@ export class UiamApiKeyProvisioningTask {
     );
 
     const nextState = { runs: state.runs + 1 };
+
+    this.reportProvisioningRunEvent({
+      completed: provisioningStatusForCompletedRules.length,
+      failed:
+        provisioningStatusForFailedConversions.length + provisioningStatusForFailedRules.length,
+      skipped: provisioningStatusForSkippedRules.length,
+      hasMoreToProvision,
+      runNumber: nextState.runs,
+    });
+
     if (hasMoreToProvision) {
       return {
         state: nextState,
@@ -342,6 +363,33 @@ export class UiamApiKeyProvisioningTask {
       this.logger.error(`Error writing provisioning status: ${getErrorMessage(e)}`, {
         error: { stack_trace: e instanceof Error ? e.stack : undefined, tags: TAGS },
       });
+    }
+  };
+
+  private reportProvisioningRunEvent = ({
+    completed,
+    failed,
+    skipped,
+    hasMoreToProvision,
+    runNumber,
+  }: {
+    completed: number;
+    failed: number;
+    skipped: number;
+    hasMoreToProvision: boolean;
+    runNumber: number;
+  }): void => {
+    try {
+      this.analytics.reportEvent(UIAM_PROVISIONING_RUN_EVENT.eventType, {
+        total: completed + failed + skipped,
+        completed,
+        failed,
+        skipped,
+        has_more_to_provision: hasMoreToProvision,
+        run_number: runNumber,
+      });
+    } catch (error) {
+      this.logger.debug(`Failed to report UIAM provisioning run telemetry event: ${error}`);
     }
   };
 }
