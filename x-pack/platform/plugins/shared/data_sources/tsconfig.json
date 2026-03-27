@@ -47,6 +47,7 @@
     "@kbn/workflows-execution-engine",
     "@kbn/tooling-log",
     "@kbn/test",
-    "@kbn/workflows-extensions"
+    "@kbn/workflows-extensions",
+    "@kbn/connector-specs-test-helpers"
   ]
 }

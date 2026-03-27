@@ -5083,6 +5083,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/connector-specs-test-helpers@link:src/platform/packages/shared/kbn-connector-specs-test-helpers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/connector-specs@link:src/platform/packages/shared/kbn-connector-specs":
   version "0.0.0"
   uid ""

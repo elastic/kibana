@@ -1,0 +1,26 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/connector-specs",
+    "@kbn/workflows-management-plugin",
+    "@kbn/workflows-execution-engine",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows",
+    "@kbn/actions-plugin",
+    "@kbn/test",
+    "@kbn/tooling-log",
+  ]
+}
