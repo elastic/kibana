@@ -265,7 +265,6 @@ export const EntityStoreUtils = (
 
   const installEntityStoreV2 = async (body: any = { entityTypes: ['user', 'host'] }) => {
     const supertest = getService('supertest');
-    const retry = getService('retry');
 
     const res = enableEntityStoreV2(body);
 
