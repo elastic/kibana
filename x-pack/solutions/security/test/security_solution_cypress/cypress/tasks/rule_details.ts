@@ -30,9 +30,9 @@ import {
   EXCEPTIONS_TAB_ACTIVE_FILTER,
   EXCEPTIONS_TAB_EXPIRED_FILTER,
   EXECUTION_LOG_CONTAINER,
-  EXECUTION_RESULTS_POC_CONTAINER,
-  EXECUTION_RESULTS_POC_TABLE,
-  EXECUTION_RESULTS_POC_TABLE_ACTION_VIEW_DETAILS,
+  EXECUTION_RESULTS_CONTAINER,
+  EXECUTION_RESULTS_TABLE,
+  EXECUTION_RESULTS_TABLE_ACTION_VIEW_DETAILS,
   EXECUTION_DETAILS_FLYOUT,
   EXECUTION_RUN_TYPE_FILTER,
   EXECUTION_RUN_TYPE_FILTER_ITEM,
@@ -227,29 +227,28 @@ export const getExecutionLogTableRow = () => cy.get(EXECUTION_TABLE).find('tbody
 export const refreshRuleExecutionTable = () =>
   cy.get(`${EXECUTION_LOG_CONTAINER} ${LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE}`).click();
 
-export const getExecutionResultsPocTableRows = () =>
-  cy.get(EXECUTION_RESULTS_POC_TABLE).find('tbody tr');
+export const getExecutionResultsTableRows = () => cy.get(EXECUTION_RESULTS_TABLE).find('tbody tr');
 
-export const refreshExecutionResultsPocTable = () =>
-  cy.get(`${EXECUTION_RESULTS_POC_CONTAINER} ${LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE}`).click();
+export const refreshExecutionResultsTable = () =>
+  cy.get(`${EXECUTION_RESULTS_CONTAINER} ${LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE}`).click();
 
-export const waitForExecutionResultsPocTableToBePopulated = (minRowCount = 1) => {
+export const waitForExecutionResultsTableToBePopulated = (minRowCount = 1) => {
   cy.waitUntil(
     () => {
-      cy.log('Waiting for execution results to appear in POC table');
-      refreshExecutionResultsPocTable();
-      return getExecutionResultsPocTableRows().then((rows) => rows.length >= minRowCount);
+      cy.log('Waiting for execution results to appear in table');
+      refreshExecutionResultsTable();
+      return getExecutionResultsTableRows().then((rows) => rows.length >= minRowCount);
     },
     { interval: 5000, timeout: 30000 }
   );
 };
 
 export const openExecutionDetailsFlyout = (rowIndex: number) => {
-  getExecutionResultsPocTableRows()
+  getExecutionResultsTableRows()
     .eq(rowIndex)
     .within(($row) => {
       cy.wrap($row).trigger('mouseover');
-      cy.get(EXECUTION_RESULTS_POC_TABLE_ACTION_VIEW_DETAILS).click();
+      cy.get(EXECUTION_RESULTS_TABLE_ACTION_VIEW_DETAILS).click();
     });
   cy.get(EXECUTION_DETAILS_FLYOUT).should('be.visible');
 };

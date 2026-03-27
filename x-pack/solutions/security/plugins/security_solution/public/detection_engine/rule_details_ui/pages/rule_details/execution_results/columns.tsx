@@ -47,7 +47,7 @@ export const getColumns = ({
       />
     ),
     render: (_: unknown, record: UnifiedExecutionResult) => (
-      <span data-test-subj="executionResultsPocTableCellStatus">
+      <span data-test-subj="executionResultsTableCellStatus">
         <ExecutionStatusIndicator
           status={UNIFIED_TO_RULE_STATUS[record.outcome.status]}
           showTooltip={true}
@@ -68,7 +68,7 @@ export const getColumns = ({
     render: (_: unknown, record: UnifiedExecutionResult) => {
       const typeStr = record.backfill ? RULE_EXECUTION_TYPE_BACKFILL : RULE_EXECUTION_TYPE_STANDARD;
       return (
-        <EuiText size="s" data-test-subj="executionResultsPocTableCellRunType">
+        <EuiText size="s" data-test-subj="executionResultsTableCellRunType">
           {typeStr}
         </EuiText>
       );
@@ -84,7 +84,7 @@ export const getColumns = ({
       />
     ),
     render: (value: string) => (
-      <span data-test-subj="executionResultsPocTableCellTimestamp">
+      <span data-test-subj="executionResultsTableCellTimestamp">
         <FormattedDate value={value} fieldName="execution_start" />
       </span>
     ),
@@ -100,7 +100,7 @@ export const getColumns = ({
       />
     ),
     render: (value: number | null) => (
-      <span data-test-subj="executionResultsPocTableCellDuration">
+      <span data-test-subj="executionResultsTableCellDuration">
         {value != null ? <RuleDurationFormat duration={value} /> : '—'}
       </span>
     ),
@@ -116,7 +116,7 @@ export const getColumns = ({
       />
     ),
     render: (_: unknown, record: UnifiedExecutionResult) => (
-      <span data-test-subj="executionResultsPocTableCellAlerts">
+      <span data-test-subj="executionResultsTableCellAlerts">
         {record.metrics.alert_counts?.new ?? 0}
       </span>
     ),
@@ -131,7 +131,7 @@ export const getColumns = ({
       />
     ),
     render: (_: unknown, record: UnifiedExecutionResult) => (
-      <span data-test-subj="executionResultsPocTableCellMessage">
+      <span data-test-subj="executionResultsTableCellMessage">
         <EuiTextBlockTruncate lines={2}>{record.outcome.message ?? '—'}</EuiTextBlockTruncate>
       </span>
     ),
@@ -160,7 +160,7 @@ export const getColumns = ({
         icon: 'maximize',
         type: 'icon',
         onClick: onViewDetails,
-        'data-test-subj': 'executionResultsPocTableActionViewDetails',
+        'data-test-subj': 'executionResultsTableActionViewDetails',
       },
     ],
     width: '80px',

@@ -50,12 +50,12 @@ const RULE_STATUS_TO_UNIFIED: Partial<Record<RuleExecutionStatus, UnifiedExecuti
   failed: 'failure',
 };
 
-interface ExecutionResultsPocTableProps {
+interface ExecutionResultsTableProps {
   ruleId: string;
   selectAlertsTab: () => void;
 }
 
-export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> = ({
+export const ExecutionResultsTable: React.FC<ExecutionResultsTableProps> = ({
   ruleId,
   selectAlertsTab,
 }) => {
@@ -143,7 +143,7 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
   );
 
   return (
-    <EuiPanel hasBorder data-test-subj="executionResultsPocContainer">
+    <EuiPanel hasBorder data-test-subj="executionResultsContainer">
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={true}>
           <HeaderSection title={logTableI18n.TABLE_TITLE} subtitle={logTableI18n.TABLE_SUBTITLE} />
@@ -174,7 +174,7 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
             onRefresh={onRefreshCallback}
             isLoading={isFetching}
             width="full"
-            data-test-subj="executionResultsPocDatePicker"
+            data-test-subj="executionResultsDatePicker"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -182,7 +182,7 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
       <EuiSpacer size="s" />
 
       <EuiBasicTable
-        data-test-subj="executionResultsPocTable"
+        data-test-subj="executionResultsTable"
         tableCaption={i18n.TABLE_CAPTION}
         items={tableItems}
         columns={columns}

@@ -18,19 +18,19 @@ import { ruleDetailsUrl } from '../../../../urls/rule_details';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import {
   goToExecutionLogTab,
-  getExecutionResultsPocTableRows,
-  waitForExecutionResultsPocTableToBePopulated,
+  getExecutionResultsTableRows,
+  waitForExecutionResultsTableToBePopulated,
   openExecutionDetailsFlyout,
 } from '../../../../tasks/rule_details';
 import { getCustomQueryRuleParams } from '../../../../objects/rule';
 import {
   EXECUTION_DETAILS_FLYOUT,
-  EXECUTION_RESULTS_POC_TABLE_CELL_STATUS,
-  EXECUTION_RESULTS_POC_TABLE_CELL_RUN_TYPE,
-  EXECUTION_RESULTS_POC_TABLE_CELL_TIMESTAMP,
-  EXECUTION_RESULTS_POC_TABLE_CELL_DURATION,
-  EXECUTION_RESULTS_POC_TABLE_CELL_ALERTS,
-  EXECUTION_RESULTS_POC_TABLE_CELL_MESSAGE,
+  EXECUTION_RESULTS_TABLE_CELL_STATUS,
+  EXECUTION_RESULTS_TABLE_CELL_RUN_TYPE,
+  EXECUTION_RESULTS_TABLE_CELL_TIMESTAMP,
+  EXECUTION_RESULTS_TABLE_CELL_DURATION,
+  EXECUTION_RESULTS_TABLE_CELL_ALERTS,
+  EXECUTION_RESULTS_TABLE_CELL_MESSAGE,
   EXECUTION_DETAILS_FLYOUT_HEADER_STATUS,
   EXECUTION_DETAILS_FLYOUT_HEADER_RUN_TYPE,
   EXECUTION_DETAILS_FLYOUT_ALERT_COUNT,
@@ -44,16 +44,13 @@ import {
   EXECUTION_DETAILS_FLYOUT_INDEX_DURATION,
 } from '../../../../screens/rule_details';
 
-// Note: ExecutionStatusIndicator renders 'Succeeded', 'Warning' (not 'Partial failure'), 'Failed'
-// because getCapitalizedStatusText maps 'partial failure' -> 'warning' -> 'Warning'.
-
-// Matches hh:mm:ss:SSS (normal) or ddd:hh:mm:ss:SSS (days overflow)
+// Matches hh:mm:ss:SSS (normal) or ddd:hh:mm:ss:SSS
 const DURATION_FORMAT_REGEXP = /^\d{2}:\d{2}:\d{2}:\d{3}$|^\d{3}:\d{2}:\d{2}:\d{2}:\d{3}$/;
 
-const TEST_INDEX = 'test-execution-results-poc';
+const TEST_INDEX = 'test-execution-results';
 
 describe(
-  'Execution results POC table',
+  'Execution results table',
   {
     tags: ['@ess'],
     env: {
@@ -106,20 +103,20 @@ describe(
       visit(ruleDetailsUrl(this.ruleId));
       goToExecutionLogTab();
 
-      waitForExecutionResultsPocTableToBePopulated(1);
+      waitForExecutionResultsTableToBePopulated(1);
 
       // Table row: verify key columns have expected values
-      getExecutionResultsPocTableRows()
+      getExecutionResultsTableRows()
         .first()
         .within(() => {
-          cy.get(EXECUTION_RESULTS_POC_TABLE_CELL_STATUS).should('contain.text', 'Succeeded');
-          cy.get(EXECUTION_RESULTS_POC_TABLE_CELL_RUN_TYPE).should('have.text', 'Scheduled');
-          cy.get(EXECUTION_RESULTS_POC_TABLE_CELL_TIMESTAMP).should('exist');
-          cy.get(EXECUTION_RESULTS_POC_TABLE_CELL_DURATION)
+          cy.get(EXECUTION_RESULTS_TABLE_CELL_STATUS).should('contain.text', 'Succeeded');
+          cy.get(EXECUTION_RESULTS_TABLE_CELL_RUN_TYPE).should('have.text', 'Scheduled');
+          cy.get(EXECUTION_RESULTS_TABLE_CELL_TIMESTAMP).should('exist');
+          cy.get(EXECUTION_RESULTS_TABLE_CELL_DURATION)
             .invoke('text')
             .should('match', DURATION_FORMAT_REGEXP);
-          cy.get(EXECUTION_RESULTS_POC_TABLE_CELL_ALERTS).invoke('text').should('eq', '1');
-          cy.get(EXECUTION_RESULTS_POC_TABLE_CELL_MESSAGE).should('exist');
+          cy.get(EXECUTION_RESULTS_TABLE_CELL_ALERTS).invoke('text').should('eq', '1');
+          cy.get(EXECUTION_RESULTS_TABLE_CELL_MESSAGE).should('exist');
         });
 
       // Open the flyout for the first row
