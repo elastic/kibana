@@ -10,17 +10,20 @@
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
+    "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-server",
     "@kbn/dashboard-plugin",
     "@kbn/dashboard-agent-common",
     "@kbn/zod",
     "@kbn/lens-embeddable-utils",
     "@kbn/dashboard-markdown",
-    "@kbn/lens-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/share-plugin",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/logging",
+    "@kbn/core-elasticsearch-server"
   ],
   "exclude": ["target/**/*"]
 }

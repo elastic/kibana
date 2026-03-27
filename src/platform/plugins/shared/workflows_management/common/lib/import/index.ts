@@ -70,3 +70,8 @@ export const WorkflowExportManifestSchema = z
 
 export type WorkflowExportEntry = z.infer<typeof WorkflowExportEntrySchema>;
 export type WorkflowExportManifest = z.infer<typeof WorkflowExportManifestSchema>;
+
+export interface ExportWorkflowsResponse {
+  entries: WorkflowExportEntry[];
+  manifest: WorkflowExportManifest;
+}
