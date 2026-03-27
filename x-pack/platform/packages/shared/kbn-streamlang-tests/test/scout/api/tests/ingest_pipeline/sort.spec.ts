@@ -28,7 +28,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
       await testBed.ingest(indexName, docs, processors);
@@ -53,7 +53,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
       await testBed.ingest(indexName, docs, processors);
@@ -79,7 +79,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
       await testBed.ingest(indexName, docs, processors);
@@ -107,7 +107,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ numbers: [3, 1, 4, 1, 5, 9, 2, 6] }];
       await testBed.ingest(indexName, docs, processors);
@@ -132,7 +132,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -155,7 +155,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
         await testBed.ingest(indexName, docs, processors);
@@ -183,7 +183,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
         await testBed.ingest(indexName, docs, processors);
@@ -209,7 +209,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
       await testBed.ingest(indexName, docs, processors);
@@ -238,7 +238,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         { tags: ['charlie', 'alpha', 'bravo'], event: { kind: 'test' } },
@@ -291,7 +291,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { tags: ['charlie', 'alpha', 'bravo'], event: { kind: 'test' } },
@@ -348,7 +348,7 @@ apiTest.describe(
           ],
         };
 
-        expect(() => transpile(streamlangDSL)).toThrow(
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
         );
       });
