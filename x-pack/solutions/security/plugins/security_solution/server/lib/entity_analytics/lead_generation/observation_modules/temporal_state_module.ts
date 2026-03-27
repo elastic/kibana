@@ -11,24 +11,16 @@ import { makeObservation, extractIsPrivileged } from './utils';
 import { getEntitiesSnapshotIndexPattern } from '../../entity_store/utils/entity_utils';
 import type { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 const MODULE_ID = 'temporal_state_analysis';
 const MODULE_NAME = 'Temporal State Analysis';
 const MODULE_PRIORITY = 9;
-const MODULE_WEIGHT = 0.25;
 
 const SUPPORTED_ENTITY_TYPES: EntityTypeOpenAPI[] = ['user', 'host'];
 
-// ---------------------------------------------------------------------------
-// Temporal State Analysis Module
-//
-// Detects shifts in entity state over time using Entity Store snapshots.
-// Currently: privilege_escalation (entity was non-privileged, is now privileged).
-// ---------------------------------------------------------------------------
-
+/**
+ * Detects shifts in entity state over time using Entity Store snapshots.
+ * Currently: privilege_escalation (entity was non-privileged, is now privileged).
+ */
 interface TemporalStateModuleDeps {
   readonly esClient: ElasticsearchClient;
   readonly logger: Logger;
@@ -40,12 +32,7 @@ export const createTemporalStateModule = ({
   logger,
   spaceId,
 }: TemporalStateModuleDeps): ObservationModule => ({
-  config: {
-    id: MODULE_ID,
-    name: MODULE_NAME,
-    priority: MODULE_PRIORITY,
-    weight: MODULE_WEIGHT,
-  },
+  config: { id: MODULE_ID, name: MODULE_NAME, priority: MODULE_PRIORITY },
 
   isEnabled: () => true,
 
@@ -66,15 +53,11 @@ export const createTemporalStateModule = ({
   },
 });
 
-// ---------------------------------------------------------------------------
-// Privilege escalation detection
-//
-// Strategy: for each currently-privileged entity, retrieve the earliest
-// snapshot via a top_hits aggregation (size:0 outer query, no raw docs fetched
-// beyond 1 per entity). If the oldest snapshot had privileged=false, it was
-// escalated.
-// ---------------------------------------------------------------------------
-
+/**
+ * For each currently-privileged entity, retrieves the earliest snapshot via a
+ * top_hits aggregation. If the oldest snapshot had privileged=false, the entity
+ * was escalated.
+ */
 const fetchPrivilegeEscalations = async (
   esClient: ElasticsearchClient,
   spaceId: string,
@@ -128,9 +111,6 @@ const fetchPrivilegeEscalations = async (
             const entityField = hit._source?.entity as Record<string, unknown> | undefined;
             const attrs = entityField?.attributes as { privileged?: boolean } | undefined;
 
-            // Only flag escalation when the oldest snapshot explicitly had privileged === false.
-            // A missing attributes field (undefined) means privilege tracking didn't exist yet
-            // for this entity — not that the entity was non-privileged.
             if (attrs !== undefined && attrs.privileged === false) {
               escalated.add(`${entityType}:${bucket.key}`);
             }
@@ -144,10 +124,6 @@ const fetchPrivilegeEscalations = async (
 
   return escalated;
 };
-
-// ---------------------------------------------------------------------------
-// Observation builders
-// ---------------------------------------------------------------------------
 
 const buildPrivilegeEscalationObservation = (entity: LeadEntity): Observation =>
   makeObservation(entity, MODULE_ID, {

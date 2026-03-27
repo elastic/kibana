@@ -15,12 +15,8 @@ import { bulkUpdateLeadsRoute } from './bulk_update_leads';
 import { enableLeadGenerationRoute } from './enable_lead_generation';
 import { disableLeadGenerationRoute } from './disable_lead_generation';
 
-export const registerLeadGenerationRoutes = ({
-  router,
-  logger,
-  getStartServices,
-}: EntityAnalyticsRoutesDeps) => {
-  generateLeadsRoute(router, logger, getStartServices);
+export const registerLeadGenerationRoutes = ({ router, logger }: EntityAnalyticsRoutesDeps) => {
+  generateLeadsRoute(router, logger);
   getLeadsRoute(router, logger);
   getLeadByIdRoute(router, logger);
   getLeadGenerationStatusRoute(router, logger);

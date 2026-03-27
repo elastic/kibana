@@ -18,21 +18,8 @@ export {
   createTemporalStateModule,
   createBehavioralAnalysisModule,
 } from './observation_modules';
-export {
-  createEntityRetriever,
-  entityRecordToLeadEntity,
-  type EntityRetriever,
-  type EntityRetrieverDeps,
-} from './entity_retriever';
-export {
-  createEntityEnricher,
-  type EntityEnricher,
-  type EntityEnricherDeps,
-  type EnrichedLeadEntity,
-  type EntityEnrichment,
-  type RiskEnrichment,
-  type AlertEnrichment,
-} from './entity_enricher';
+export { entityRecordToLeadEntity } from './entity_conversion';
+export { createLeadGenerationService } from './services/lead_generation_service';
 export type {
   Lead,
   LeadEntity,
@@ -43,4 +30,4 @@ export type {
   ObservationModuleConfig,
   ObservationSeverity,
 } from './types';
-export { DEFAULT_ENGINE_CONFIG } from './types';
+export { DEFAULT_ENGINE_CONFIG, STALENESS_THRESHOLDS_MS, computeStaleness } from './types';

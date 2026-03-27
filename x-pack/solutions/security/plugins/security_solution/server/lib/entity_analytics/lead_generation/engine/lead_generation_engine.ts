@@ -12,17 +12,12 @@ import type {
   Lead,
   LeadEntity,
   LeadGenerationEngineConfig,
-  LeadStaleness,
   Observation,
   ObservationModule,
 } from '../types';
-import { DEFAULT_ENGINE_CONFIG } from '../types';
+import { DEFAULT_ENGINE_CONFIG, computeStaleness } from '../types';
 import { entityToKey } from '../observation_modules/utils';
 import { llmSynthesizeLeadContent } from './llm_synthesize';
-
-// ---------------------------------------------------------------------------
-// Engine
-// ---------------------------------------------------------------------------
 
 interface LeadGenerationEngineDeps {
   readonly logger: Logger;
@@ -68,24 +63,21 @@ export const createLeadGenerationEngine = ({
       const collectStart = Date.now();
       const observations = await collectAllObservations(modules, entities, logger);
       const collectMs = Date.now() - collectStart;
-      logger.info(
-        `[LeadGenerationEngine][Telemetry] Observation collection: ${collectMs}ms (${observations.length} observations from ${modules.length} modules)`
+      logger.debug(
+        `[LeadGenerationEngine] Observation collection: ${collectMs}ms (${observations.length} observations from ${modules.length} modules)`
       );
 
       if (observations.length === 0) {
-        logger.info('[LeadGenerationEngine] No observations collected - no leads to generate');
+        logger.debug('[LeadGenerationEngine] No observations collected - no leads to generate');
         return [];
       }
 
       // 2. Score entities based on their observations
       const scoreStart = Date.now();
-      const moduleWeights = new Map<string, number>(
-        modules.map((m) => [m.config.id, m.config.weight])
-      );
-      const scoredEntities = scoreEntities(observations, entities, config, moduleWeights);
+      const scoredEntities = scoreEntities(observations, entities, config);
       const scoreMs = Date.now() - scoreStart;
-      logger.info(
-        `[LeadGenerationEngine][Telemetry] Entity scoring: ${scoreMs}ms (${scoredEntities.length} entities scored)`
+      logger.debug(
+        `[LeadGenerationEngine] Entity scoring: ${scoreMs}ms (${scoredEntities.length} entities scored)`
       );
 
       // 3. Filter entities below threshold
@@ -94,31 +86,27 @@ export const createLeadGenerationEngine = ({
       );
 
       if (qualifyingEntities.length === 0) {
-        logger.info('[LeadGenerationEngine] No entities met the threshold - no leads to generate');
+        logger.debug('[LeadGenerationEngine] No entities met the threshold - no leads to generate');
         return [];
       }
 
       // 4. Group related entities into leads
       const groupStart = Date.now();
-      const leads = await groupIntoLeads(qualifyingEntities, logger, options?.chatModel);
+      const leads = await groupIntoLeads(qualifyingEntities, config, logger, options?.chatModel);
       const groupMs = Date.now() - groupStart;
-      logger.info(
-        `[LeadGenerationEngine][Telemetry] Lead grouping & synthesis: ${groupMs}ms (${leads.length} leads)`
+      logger.debug(
+        `[LeadGenerationEngine] Lead grouping & synthesis: ${groupMs}ms (${leads.length} leads)`
       );
 
       const totalMs = Date.now() - pipelineStart;
-      logger.info(
-        `[LeadGenerationEngine][Telemetry] Total pipeline: ${totalMs}ms | Collection: ${collectMs}ms | Scoring: ${scoreMs}ms | Synthesis: ${groupMs}ms | Entities: ${entities.length} | Observations: ${observations.length} | Leads: ${leads.length}`
+      logger.debug(
+        `[LeadGenerationEngine] Total pipeline: ${totalMs}ms | Collection: ${collectMs}ms | Scoring: ${scoreMs}ms | Synthesis: ${groupMs}ms | Entities: ${entities.length} | Observations: ${observations.length} | Leads: ${leads.length}`
       );
 
       return leads.slice(0, config.maxLeads);
     },
   };
 };
-
-// ---------------------------------------------------------------------------
-// Step 1: Observation collection
-// ---------------------------------------------------------------------------
 
 const collectAllObservations = async (
   modules: ObservationModule[],
@@ -133,8 +121,8 @@ const collectAllObservations = async (
         const moduleStart = Date.now();
         const moduleObservations = await module.collect(entities);
         const moduleMs = Date.now() - moduleStart;
-        logger.info(
-          `[LeadGenerationEngine][Telemetry] Module "${module.config.name}": ${moduleMs}ms (${moduleObservations.length} observations from ${entities.length} entities)`
+        logger.debug(
+          `[LeadGenerationEngine] Module "${module.config.name}": ${moduleMs}ms (${moduleObservations.length} observations from ${entities.length} entities)`
         );
         allObservations.push(...moduleObservations);
       } catch (error) {
@@ -148,19 +136,16 @@ const collectAllObservations = async (
   return allObservations;
 };
 
-// ---------------------------------------------------------------------------
-// Step 2: Entity scoring — weighted formula
-//
-// Contribution per observation:
-//   module_weight × observation.score × observation.confidence
-//
-// Bonuses (multiplicative):
-//   Corroboration: +corroborationBonus% when multiple observations share a module
-//   Diversity:     +diversityBonus% when observations span multiple modules
-//
-// Normalization:
-//   priority = round(rawScore / normalizationCeiling × 9 + 1), clamped to [1, 10]
-// ---------------------------------------------------------------------------
+/**
+ * Scoring formula: priority = max(severity_rank) + clamp(observation_count - 1, 0, 4)
+ * severity_rank: critical=7, high=5, medium=3, low=1 → natural 1–10 scale
+ */
+const SEVERITY_RANK: Record<string, number> = {
+  critical: 7,
+  high: 5,
+  medium: 3,
+  low: 1,
+};
 
 interface ScoredEntity {
   readonly entity: LeadEntity;
@@ -171,8 +156,7 @@ interface ScoredEntity {
 const scoreEntities = (
   observations: Observation[],
   allEntities: LeadEntity[],
-  config: LeadGenerationEngineConfig,
-  moduleWeights: ReadonlyMap<string, number>
+  _config: LeadGenerationEngineConfig
 ): ScoredEntity[] => {
   const entityByKey = new Map<string, LeadEntity>();
   for (const entity of allEntities) {
@@ -190,7 +174,7 @@ const scoreEntities = (
   for (const [entityId, entityObservations] of observationsByEntity.entries()) {
     const entity = entityByKey.get(entityId);
     if (entity) {
-      const priority = calculateWeightedPriority(entityObservations, moduleWeights, config);
+      const priority = calculatePriority(entityObservations);
       scored.push({ entity, priority, observations: entityObservations });
     }
   }
@@ -200,53 +184,23 @@ const scoreEntities = (
 };
 
 /**
- * Weighted scoring with corroboration and diversity bonuses.
+ * priority = max(severity_rank) + clamp(observation_count - 1, 0, 4)
  *
- * Falls back to weight=1.0 for observations from unregistered modules so the
- * pipeline degrades gracefully when a module is added without engine wiring.
+ * Capped at 10.
  */
-const calculateWeightedPriority = (
-  observations: Observation[],
-  moduleWeights: ReadonlyMap<string, number>,
-  config: LeadGenerationEngineConfig
-): number => {
-  if (observations.length === 0) {
-    return 1;
-  }
-
-  let rawScore = 0;
-  const countByModule = new Map<string, number>();
-
-  for (const obs of observations) {
-    const weight = moduleWeights.get(obs.moduleId) ?? 1.0;
-    rawScore += weight * obs.score * obs.confidence;
-    countByModule.set(obs.moduleId, (countByModule.get(obs.moduleId) ?? 0) + 1);
-  }
-
-  const hasCorroboration = [...countByModule.values()].some((count) => count > 1);
-  if (hasCorroboration) {
-    rawScore *= 1 + config.corroborationBonus;
-  }
-
-  const hasDiversity = countByModule.size > 1;
-  if (hasDiversity) {
-    rawScore *= 1 + config.diversityBonus;
-  }
-
-  const normalized = (rawScore / config.normalizationCeiling) * 9 + 1;
-  return Math.max(1, Math.min(10, Math.round(normalized)));
+const calculatePriority = (observations: Observation[]): number => {
+  const maxSeverityRank = Math.max(...observations.map((o) => SEVERITY_RANK[o.severity] ?? 1));
+  const countBonus = Math.min(observations.length - 1, 4);
+  return Math.min(10, maxSeverityRank + countBonus);
 };
-
-// ---------------------------------------------------------------------------
-// Step 3: Grouping into leads
-// ---------------------------------------------------------------------------
 
 const groupIntoLeads = async (
   scoredEntities: ScoredEntity[],
+  _config: LeadGenerationEngineConfig,
   logger: Logger,
   chatModel?: InferenceChatModel
 ): Promise<Lead[]> => {
-  resetUsedTitles();
+  const usedTitleTracker = new Map<string, number>();
   const groups = groupByObservationPattern(scoredEntities);
   const leads: Lead[] = [];
   const now = new Date();
@@ -262,11 +216,12 @@ const groupIntoLeads = async (
       group,
       allObservations,
       logger,
+      usedTitleTracker,
       chatModel
     );
     const synthMs = Date.now() - synthStart;
-    logger.info(
-      `[LeadGenerationEngine][Telemetry] Lead ${i + 1}/${
+    logger.debug(
+      `[LeadGenerationEngine] Lead ${i + 1}/${
         groups.length
       } synthesis for [${entityLabel}]: ${synthMs}ms (${chatModel ? 'LLM' : 'rule-based'})`
     );
@@ -281,7 +236,7 @@ const groupIntoLeads = async (
       priority: maxPriority,
       chatRecommendations: recommendations,
       timestamp: now.toISOString(),
-      staleness: calculateStaleness(now, now),
+      staleness: computeStaleness(now, now),
       observations: allObservations,
     });
   }
@@ -301,39 +256,11 @@ const groupByObservationPattern = (scoredEntities: ScoredEntity[]): ScoredEntity
   return scoredEntities.map((entity) => [entity]);
 };
 
-// ---------------------------------------------------------------------------
-// Staleness model
-//
-// Fresh:   0-24 hours
-// Stale:   24-72 hours
-// Expired: >72 hours
-// ---------------------------------------------------------------------------
-
-const STALENESS_THRESHOLDS = {
-  fresh: 24 * 60 * 60 * 1000,
-  stale: 72 * 60 * 60 * 1000,
-};
-
-const calculateStaleness = (generatedAt: Date, now: Date): LeadStaleness => {
-  const ageMs = now.getTime() - generatedAt.getTime();
-
-  if (ageMs <= STALENESS_THRESHOLDS.fresh) {
-    return 'fresh';
-  }
-  if (ageMs <= STALENESS_THRESHOLDS.stale) {
-    return 'stale';
-  }
-  return 'expired';
-};
-
-// ---------------------------------------------------------------------------
-// Lead content synthesis (LLM-powered with rule-based fallback)
-// ---------------------------------------------------------------------------
-
 const synthesizeLeadContent = async (
   group: ScoredEntity[],
   observations: Observation[],
   logger: Logger,
+  usedTitleTracker: Map<string, number>,
   chatModel?: InferenceChatModel
 ): Promise<{
   title: string;
@@ -345,7 +272,8 @@ const synthesizeLeadContent = async (
   if (chatModel) {
     try {
       const llmResult = await llmSynthesizeLeadContent(chatModel, group, observations, logger);
-      const byline = buildByline(group, observations);
+      const dominantPattern = selectDominantPattern(observations, usedTitleTracker);
+      const byline = buildByline(group, observations, dominantPattern);
 
       return {
         title: llmResult.title,
@@ -361,12 +289,13 @@ const synthesizeLeadContent = async (
     }
   }
 
-  return ruleSynthesizeLeadContent(group, observations);
+  return ruleSynthesizeLeadContent(group, observations, usedTitleTracker);
 };
 
 const ruleSynthesizeLeadContent = (
   group: ScoredEntity[],
-  observations: Observation[]
+  observations: Observation[],
+  usedTitleTracker: Map<string, number>
 ): {
   title: string;
   byline: string;
@@ -374,12 +303,14 @@ const ruleSynthesizeLeadContent = (
   tags: string[];
   recommendations: string[];
 } => {
-  const dominantPattern = selectDominantPattern(observations);
+  const observationTypes = [...new Set(observations.map((o) => o.type))];
 
-  const title = buildRuleBasedTitle(dominantPattern);
-  const byline = buildByline(group, observations);
+  const dominantPattern = selectDominantPattern(observations, usedTitleTracker);
+
+  const title = buildRuleBasedTitle(group, dominantPattern);
+  const byline = buildByline(group, observations, dominantPattern);
   const description = buildDescription(group, observations);
-  const tags = buildTags(observations);
+  const tags = buildTags(observationTypes, observations);
   const recommendations = buildRecommendations(group, observations);
 
   return { title, byline, description, tags, recommendations };
@@ -402,7 +333,7 @@ interface DominantPattern {
  * where `best_observation_score` is the highest raw score among observations
  * of that type. The pattern with the highest pattern_score wins.
  *
- * This means a very high-scoring `risk_escalation_24h` can outrank a mediocre
+ * This means a very high-scoring `risk_escalation` can outrank a mediocre
  * `multi_tactic_attack`, producing titles that reflect what actually stands
  * out about the entity rather than defaulting to a fixed priority list.
  */
@@ -425,6 +356,14 @@ const PATTERN_CATALOG: Record<string, { labels: string[]; distinctiveness: numbe
     ],
     distinctiveness: 1.2,
   },
+  investigation_status: {
+    labels: ['Under Investigation', 'Active Investigation', 'Entity Under Review'],
+    distinctiveness: 1.0,
+  },
+  watchlist_inclusion: {
+    labels: ['Watchlist Addition', 'Added to Watchlist', 'New Watchlist Member'],
+    distinctiveness: 0.9,
+  },
   multi_tactic_attack: {
     labels: [
       'Multi-Tactic Attack',
@@ -434,6 +373,15 @@ const PATTERN_CATALOG: Record<string, { labels: string[]; distinctiveness: numbe
       'Compound Threat Activity',
     ],
     distinctiveness: 1.15,
+  },
+  risk_escalation: {
+    labels: [
+      'Risk Score Escalation',
+      'Rapid Risk Increase',
+      'Anomalous Risk Spike',
+      'Sudden Risk Surge',
+    ],
+    distinctiveness: 1.1,
   },
   risk_escalation_24h: {
     labels: [
@@ -507,13 +455,10 @@ const PATTERN_CATALOG: Record<string, { labels: string[]; distinctiveness: numbe
   },
 };
 
-const usedTitleTracker = new Map<string, number>();
-
-const resetUsedTitles = (): void => {
-  usedTitleTracker.clear();
-};
-
-const selectDominantPattern = (observations: Observation[]): DominantPattern => {
+const selectDominantPattern = (
+  observations: Observation[],
+  usedTitleTracker: Map<string, number>
+): DominantPattern => {
   const bestByType = new Map<string, { score: number; confidence: number }>();
 
   for (const obs of observations) {
@@ -560,9 +505,14 @@ const selectDominantPattern = (observations: Observation[]): DominantPattern => 
   return { label: 'Suspicious Activity', key: 'unknown' };
 };
 
-const buildRuleBasedTitle = (pattern: DominantPattern): string => pattern.label;
+const buildRuleBasedTitle = (_group: ScoredEntity[], pattern: DominantPattern): string =>
+  pattern.label;
 
-const buildByline = (group: ScoredEntity[], observations: Observation[]): string => {
+const buildByline = (
+  group: ScoredEntity[],
+  observations: Observation[],
+  _pattern: DominantPattern
+): string => {
   if (group.length === 1) {
     const { entity } = group[0];
     const entityObs = observations.filter((o) => o.entityId === entityToKey(entity));
@@ -636,7 +586,7 @@ const buildDescription = (group: ScoredEntity[], observations: Observation[]): s
  * found in alert metadata (the closest proxy we have for MITRE techniques)
  * rather than generic tactic labels.
  */
-const buildTags = (observations: Observation[]): string[] => {
+const buildTags = (_observationTypes: string[], observations: Observation[]): string[] => {
   const ruleNames = new Set<string>();
 
   for (const obs of observations) {
@@ -656,8 +606,9 @@ const buildTags = (observations: Observation[]): string[] => {
 
   if (ruleNames.size === 0) {
     const fallback: string[] = [];
-    const types = new Set(observations.map((o) => o.type));
+    const types = new Set(_observationTypes);
     if (
+      types.has('risk_escalation') ||
       types.has('risk_escalation_24h') ||
       types.has('risk_escalation_7d') ||
       types.has('risk_escalation_90d')
