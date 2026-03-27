@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Kibana predefined role name used in Scout session / API helpers.
- * Duplicated from @kbn/test auth types (`Role` is a string alias there).
- */
-export type Role = string;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-test-saml-auth'],
+};

@@ -12,4 +12,6 @@ export {
   type GetCookieOptions,
   type HostOptions,
   type SamlSessionManagerOptions,
-} from './session_manager';
+} from './src/session_manager';
+
+export type { Role } from './src/types';

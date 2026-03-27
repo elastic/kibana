@@ -320,7 +320,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/dashboard/public/dashboard_listing/index.tsx",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -338,7 +338,7 @@
               "DashboardListingProps"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_listing/index.tsx",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
