@@ -7,7 +7,7 @@
 
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { EventKind } from '../constants/event_kinds';
+import { EventKind } from '../../document/constants/event_kinds';
 import { APP_ID } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 

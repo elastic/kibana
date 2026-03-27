@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { ENTRY_LEADER_ENTITY_ID } from '../constants/field_names';
+import { ENTRY_LEADER_ENTITY_ID } from '../../document/constants/field_names';
 
 export interface UseShowRelatedAlertsBySessionParams {
   /**

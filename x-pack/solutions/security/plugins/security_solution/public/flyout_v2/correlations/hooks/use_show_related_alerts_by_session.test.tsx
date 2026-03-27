@@ -14,7 +14,7 @@ import type {
 } from './use_show_related_alerts_by_session';
 import { useShowRelatedAlertsBySession } from './use_show_related_alerts_by_session';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { ENTRY_LEADER_ENTITY_ID } from '../constants/field_names';
+import { ENTRY_LEADER_ENTITY_ID } from '../../document/constants/field_names';
 
 describe('useShowRelatedAlertsBySession', () => {
   let hookResult: RenderHookResult<

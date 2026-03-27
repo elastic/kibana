@@ -8,18 +8,17 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiIcon, EuiInMemoryTable } from '@elastic/eui';
+import { EuiIcon, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
-import { CaseDetailsLink } from '../../../../common/components/links';
+import { CaseDetailsLink } from '../../../common/components/links';
 import {
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
 } from './test_ids';
-import { useFetchRelatedCases } from '../../../../flyout_v2/document/hooks/use_fetch_related_cases';
-import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
+import { useFetchRelatedCases } from '../../document/hooks/use_fetch_related_cases';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
 
 const ICON = 'warning';
 const EXPAND_PROPERTIES = {
@@ -32,12 +31,12 @@ const getColumns: (data: RelatedCase[]) => Array<EuiBasicTableColumn<RelatedCase
     field: 'title',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.correlations.nameColumnLabel"
+        id="xpack.securitySolution.flyout.correlations.nameColumnLabel"
         defaultMessage="Name"
       />
     ),
     render: (_: string, caseData: RelatedCase) => (
-      <CellTooltipWrapper tooltip={caseData.title}>
+      <EuiToolTip content={caseData.title}>
         <CaseDetailsLink detailName={caseData.id} title={caseData.title} openInNewTab={true}>
           {caseData.title}
           <EuiIcon
@@ -47,16 +46,17 @@ const getColumns: (data: RelatedCase[]) => Array<EuiBasicTableColumn<RelatedCase
             css={css`
               margin-left: 4px;
             `}
+            aria-hidden={true}
           />
         </CaseDetailsLink>
-      </CellTooltipWrapper>
+      </EuiToolTip>
     ),
   },
   {
     field: 'status',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.correlations.statusColumnLabel"
+        id="xpack.securitySolution.flyout.correlations.statusColumnLabel"
         defaultMessage="Status"
       />
     ),
@@ -82,7 +82,7 @@ export const RelatedCases: React.FC<RelatedCasesProps> = ({ eventId }) => {
   const title = useMemo(
     () => (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.correlations.relatedCasesTitle"
+        id="xpack.securitySolution.flyout.correlations.relatedCasesTitle"
         defaultMessage="{count} related {count, plural, one {case} other {cases}}"
         values={{ count: dataCount }}
       />
@@ -113,14 +113,14 @@ export const RelatedCases: React.FC<RelatedCasesProps> = ({ eventId }) => {
         columns={columns}
         pagination={true}
         tableCaption={i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.correlations.relatedCasesCaption',
+          'xpack.securitySolution.flyout.correlations.relatedCasesCaption',
           {
             defaultMessage: 'Related cases',
           }
         )}
         noItemsMessage={
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.correlations.relatedCasesNoDataDescription"
+            id="xpack.securitySolution.flyout.correlations.relatedCasesNoDataDescription"
             defaultMessage="No related cases."
           />
         }

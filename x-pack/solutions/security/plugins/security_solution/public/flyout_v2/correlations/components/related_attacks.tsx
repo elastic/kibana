@@ -10,15 +10,15 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PageScope } from '../../../../data_view_manager/constants';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import {
-  CorrelationsDetailsAlertsTable,
   type CorrelationsCustomTableColumn,
+  CorrelationsDetailsAlertsTable,
 } from './correlations_details_alerts_table';
 import { CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID } from './test_ids';
-import { AttackDetailsPreviewPanelKey } from '../../../attack_details/constants/panel_keys';
-import { ATTACK_PREVIEW_BANNER } from '../../../attack_details/context';
+import { AttackDetailsPreviewPanelKey } from '../../../flyout/attack_details/constants/panel_keys';
+import { ATTACK_PREVIEW_BANNER } from '../../../flyout/attack_details/context';
 
 export interface RelatedAttacksProps {
   /**
@@ -64,7 +64,7 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scope
             data-test-subj={`${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`}
             onClick={() => openAttackPreview(row.id as string, row.index as string)}
             aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.left.insights.correlations.relatedAttacksPreviewButtonLabel',
+              'xpack.securitySolution.flyout.correlations.relatedAttacksPreviewButtonLabel',
               {
                 defaultMessage: 'Preview attack with id {id}',
                 values: { id: row.id as string },
@@ -78,7 +78,7 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scope
         field: 'kibana.alert.attack_discovery.title',
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.correlations.relatedAttacksTitleColumnLabel"
+            id="xpack.securitySolution.flyout.correlations.relatedAttacksTitleColumnLabel"
             defaultMessage="Title"
           />
         ),
@@ -89,7 +89,7 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scope
         field: 'kibana.alert.workflow_status',
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.correlations.relatedAttacksStatusColumnLabel"
+            id="xpack.securitySolution.flyout.correlations.relatedAttacksStatusColumnLabel"
             defaultMessage="Status"
           />
         ),
@@ -101,7 +101,7 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scope
         field: 'kibana.alert.attack_discovery.alert_ids',
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.correlations.relatedAttacksAlertCountColumnLabel"
+            id="xpack.securitySolution.flyout.correlations.relatedAttacksAlertCountColumnLabel"
             defaultMessage="Alert count"
           />
         ),
@@ -118,7 +118,7 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scope
     <CorrelationsDetailsAlertsTable
       title={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.relatedAttacksTitle"
+          id="xpack.securitySolution.flyout.correlations.relatedAttacksTitle"
           defaultMessage="Related attacks ({count})"
           values={{ count: attackIds.length }}
         />
@@ -132,7 +132,7 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scope
       timelineDataViewId={dataView.id}
       noItemsMessage={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.relatedAttacksNoDataDescription"
+          id="xpack.securitySolution.flyout.correlations.relatedAttacksNoDataDescription"
           defaultMessage="No related attacks."
         />
       }

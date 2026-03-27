@@ -8,30 +8,32 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { TestProviders } from '../../../../common/mock';
-import { DocumentDetailsContext } from '../../shared/context';
-import { mockContextValue } from '../../shared/mocks/mock_context';
-import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
+import { TestProviders } from '../../../common/mock';
+import { DocumentDetailsContext } from '../../../flyout/document_details/shared/context';
+import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
+import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import {
-  CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID,
 } from './test_ids';
 import { RelatedAttacks } from './related_attacks';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../../flyout_v2/shared/components/test_ids';
-import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
-import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks/mock_data_view';
-import { AttackDetailsPreviewPanelKey } from '../../../attack_details/constants/panel_keys';
+} from '../../shared/components/test_ids';
+import { usePaginatedAlerts } from '../../../flyout/document_details/left/hooks/use_paginated_alerts';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
+import { AttackDetailsPreviewPanelKey } from '../../../flyout/attack_details/constants/panel_keys';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../hooks/use_paginated_alerts');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../../data_view_manager/hooks/use_data_view');
+jest.mock('../../../flyout/document_details/left/hooks/use_paginated_alerts');
+jest.mock('../../../data_view_manager/hooks/use_data_view');
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../common/hooks/is_in_security_app');
+jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
 
@@ -65,6 +67,7 @@ describe('<RelatedAttacks />', () => {
     });
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     jest.mocked(mockFlyoutApi.openPreviewPanel).mockReset();
+    jest.mocked(useIsInSecurityApp).mockReturnValue(true);
     jest.mocked(useDataView).mockReturnValue({
       dataView: getMockDataViewWithMatchedIndices([
         '.alerts-security.attack.discovery.alerts-default',

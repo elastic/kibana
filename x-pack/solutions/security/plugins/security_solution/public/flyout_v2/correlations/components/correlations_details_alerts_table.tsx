@@ -5,28 +5,20 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo, useCallback, type ReactElement, type ReactNode } from 'react';
-import { type Criteria, type EuiBasicTableColumn, EuiBasicTable, formatDate } from '@elastic/eui';
-import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import React, { type FC, type ReactElement, type ReactNode, useCallback, useMemo } from 'react';
+import { type Criteria, EuiBasicTable, type EuiBasicTableColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { isRight } from 'fp-ts/Either';
-import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
-import type { DataProvider } from '../../../../../common/types';
-import { SeverityBadge } from '../../../../common/components/severity_badge';
-import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
-import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
-import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
-import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { getDataProvider } from '../../../../common/components/event_details/use_action_cell_data_provider';
-import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
-import { PreviewLink } from '../../../shared/components/preview_link';
-import { FlyoutMissingAlertsPrivilege } from '../../../../flyout_v2/document/components/flyout_missing_alerts_privilege';
+import type { DataProvider } from '../../../../common/types';
+import { usePaginatedAlerts } from '../../../flyout/document_details/left/hooks/use_paginated_alerts';
+import { InvestigateInTimelineButton } from '../../../common/components/event_details/investigate_in_timeline_button';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
+import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../detections/components/alerts_table/translations';
+import { getDataProvider } from '../../../common/components/event_details/use_action_cell_data_provider';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { FlyoutMissingAlertsPrivilege } from '../../document/components/flyout_missing_alerts_privilege';
 
-export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
 type CorrelationsTableRow = Record<string, unknown>;
 export type CorrelationsCustomTableColumn = EuiBasicTableColumn<CorrelationsTableRow> & {
@@ -81,9 +73,9 @@ export interface CorrelationsDetailsAlertsTableProps {
    */
   indexName?: string;
   /**
-   * Optional table columns override
+   * Table columns to render
    */
-  columns?: Array<CorrelationsCustomTableColumn>;
+  columns: Array<CorrelationsCustomTableColumn>;
   /**
    * Optional data view id to use when opening timeline.
    */
@@ -155,6 +147,10 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
       });
   }, [data, mappedValueFields]);
 
+  const isInSecurityApp = useIsInSecurityApp();
+  const showTimelineButton =
+    isInSecurityApp && hasAlertsRead && alertIds != null && alertIds.length > 0;
+
   const shouldUseFilters = Boolean(
     alertIds && alertIds.length && alertIds.length >= dataProviderLimit
   );
@@ -167,102 +163,6 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     [alertIds, shouldUseFilters]
   );
 
-  const defaultColumns = useMemo<Array<EuiBasicTableColumn<CorrelationsTableRow>>>(
-    () => [
-      {
-        render: (row: CorrelationsTableRow) => (
-          <AlertPreviewButton
-            id={row.id as string}
-            indexName={row.index as string}
-            data-test-subj={`${dataTestSubj}AlertPreviewButton`}
-            scopeId={scopeId}
-          />
-        ),
-        width: '5%',
-      },
-      {
-        field: '@timestamp',
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.correlations.timestampColumnLabel"
-            defaultMessage="Timestamp"
-          />
-        ),
-        truncateText: true,
-        dataType: 'date' as const,
-        render: (value: string) => {
-          const date = formatDate(value, TIMESTAMP_DATE_FORMAT);
-          return (
-            <CellTooltipWrapper tooltip={date}>
-              <span>{date}</span>
-            </CellTooltipWrapper>
-          );
-        },
-      },
-      {
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.correlations.ruleColumnLabel"
-            defaultMessage="Rule"
-          />
-        ),
-        truncateText: true,
-        render: (row: CorrelationsTableRow) => {
-          const ruleName = row[ALERT_RULE_NAME] as string;
-          const ruleId = row['kibana.alert.rule.uuid'] as string;
-          return (
-            <CellTooltipWrapper tooltip={ruleName}>
-              <PreviewLink
-                field={ALERT_RULE_NAME}
-                value={ruleName}
-                scopeId={scopeId}
-                ruleId={ruleId}
-                data-test-subj={`${dataTestSubj}RulePreview`}
-              >
-                <span>{ruleName}</span>
-              </PreviewLink>
-            </CellTooltipWrapper>
-          );
-        },
-      },
-      {
-        field: ALERT_REASON,
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.correlations.reasonColumnLabel"
-            defaultMessage="Reason"
-          />
-        ),
-        truncateText: true,
-        render: (value: string) => (
-          <CellTooltipWrapper tooltip={value} anchorPosition="left">
-            <span>{value}</span>
-          </CellTooltipWrapper>
-        ),
-      },
-      {
-        field: 'kibana.alert.severity',
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.correlations.severityColumnLabel"
-            defaultMessage="Severity"
-          />
-        ),
-        truncateText: true,
-        render: (value: string) => {
-          const decodedSeverity = Severity.decode(value);
-          const renderValue = isRight(decodedSeverity) ? (
-            <SeverityBadge value={decodedSeverity.right} />
-          ) : (
-            <p>{value}</p>
-          );
-          return <CellTooltipWrapper tooltip={value}>{renderValue}</CellTooltipWrapper>;
-        },
-      },
-    ],
-    [scopeId, dataTestSubj]
-  );
-
   const panelContent = !hasAlertsRead ? (
     <FlyoutMissingAlertsPrivilege data-test-subj={`${dataTestSubj}MissingAlertsPrivilege`} />
   ) : (
@@ -270,13 +170,13 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
       data-test-subj={`${dataTestSubj}Table`}
       loading={loading || alertsLoading}
       tableCaption={i18n.translate(
-        'xpack.securitySolution.flyout.left.insights.correlations.correlatedAlertsCaption',
+        'xpack.securitySolution.flyout.insights.correlations.correlatedAlertsCaption',
         {
           defaultMessage: 'Correlated alerts',
         }
       )}
       items={mappedData}
-      columns={columns ?? defaultColumns}
+      columns={columns}
       pagination={paginationConfig}
       sorting={sorting}
       onChange={onTableChange}
@@ -289,20 +189,19 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
       header={{
         title,
         iconType: 'warning',
-        headerContent:
-          hasAlertsRead && alertIds && alertIds.length && alertIds.length > 0 ? (
-            <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
-              <InvestigateInTimelineButton
-                dataProviders={dataProviders}
-                filters={filters}
-                asEmptyButton
-                iconType="timeline"
-                dataViewId={timelineDataViewId}
-              >
-                {ACTION_INVESTIGATE_IN_TIMELINE}
-              </InvestigateInTimelineButton>
-            </div>
-          ) : null,
+        headerContent: showTimelineButton ? (
+          <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
+            <InvestigateInTimelineButton
+              dataProviders={dataProviders}
+              filters={filters}
+              asEmptyButton
+              iconType="timeline"
+              dataViewId={timelineDataViewId}
+            >
+              {ACTION_INVESTIGATE_IN_TIMELINE}
+            </InvestigateInTimelineButton>
+          </div>
+        ) : null,
       }}
       content={{ error: hasAlertsRead ? error : undefined }}
       expand={{
@@ -322,7 +221,7 @@ const getFilters = (alertIds?: string[]) => {
       {
         meta: {
           alias: i18n.translate(
-            'xpack.securitySolution.flyout.left.insights.correlations.tableFilterLabel',
+            'xpack.securitySolution.flyout.insights.correlations.tableFilterLabel',
             {
               defaultMessage: 'Correlations Details Table Alert IDs.',
             }

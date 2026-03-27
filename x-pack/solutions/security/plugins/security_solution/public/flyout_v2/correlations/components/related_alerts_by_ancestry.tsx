@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
-import { useFetchRelatedAlertsByAncestry } from '../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_ancestry';
+import { useFetchRelatedAlertsByAncestry } from '../../document/hooks/use_fetch_related_alerts_by_ancestry';
 import { CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID } from './test_ids';
+import { getColumns } from '../utils/get_columns';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
+import { sourcererSelectors } from '../../../sourcerer/store';
 
 export interface RelatedAlertsByAncestryProps {
   /**
@@ -17,13 +22,17 @@ export interface RelatedAlertsByAncestryProps {
    */
   documentId: string;
   /**
-   * Values of the kibana.alert.rule.parameters.index field
-   */
-  indices: string[];
-  /**
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * Callback to open the alert preview
+   */
+  onShowAlert: (id: string, indexName: string) => void;
+  /**
+   * Whether to hide the rule preview link
+   */
+  hidePreviewLink: boolean;
 }
 
 /**
@@ -31,13 +40,33 @@ export interface RelatedAlertsByAncestryProps {
  */
 export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = ({
   documentId,
-  indices,
   scopeId,
+  onShowAlert,
+  hidePreviewLink,
 }) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const oldSecurityDefaultPatterns =
+    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
+  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
+  const indices = newDataViewPickerEnabled
+    ? experimentalSecurityDefaultIndexPatterns
+    : oldSecurityDefaultPatterns;
+
   const { loading, error, data, dataCount } = useFetchRelatedAlertsByAncestry({
     documentId,
     indices,
   });
+
+  const columns = useMemo(
+    () =>
+      getColumns({
+        scopeId,
+        dataTestSubj: CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
+        onShowAlert,
+        hidePreviewLink,
+      }),
+    [scopeId, onShowAlert, hidePreviewLink]
+  );
 
   if (error) {
     return null;
@@ -47,7 +76,7 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
     <CorrelationsDetailsAlertsTable
       title={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.ancestryAlertsTitle"
+          id="xpack.securitySolution.flyout.correlations.ancestryAlertsTitle"
           defaultMessage="{count} {count, plural, one {alert} other {alerts}} related by ancestry"
           values={{ count: dataCount }}
         />
@@ -58,10 +87,11 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
       eventId={documentId}
       noItemsMessage={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.ancestryAlertsNoDataDescription"
+          id="xpack.securitySolution.flyout.correlations.ancestryAlertsNoDataDescription"
           defaultMessage="No alerts related by ancestry."
         />
       }
+      columns={columns}
       data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}
     />
   );

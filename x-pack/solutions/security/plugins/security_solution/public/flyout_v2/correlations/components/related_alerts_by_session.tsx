@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
-import { useFetchRelatedAlertsBySession } from '../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_session';
+import { useFetchRelatedAlertsBySession } from '../../document/hooks/use_fetch_related_alerts_by_session';
 import { CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID } from './test_ids';
+import { getColumns } from '../utils/get_columns';
 
 export interface RelatedAlertsBySessionProps {
   /**
@@ -24,6 +25,14 @@ export interface RelatedAlertsBySessionProps {
    * Id of the document
    */
   eventId: string;
+  /**
+   * Callback to open the alert preview
+   */
+  onShowAlert: (id: string, indexName: string) => void;
+  /**
+   * Whether to hide the rule preview link
+   */
+  hidePreviewLink: boolean;
 }
 
 /**
@@ -33,11 +42,24 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
   entityId,
   scopeId,
   eventId,
+  onShowAlert,
+  hidePreviewLink,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsBySession({
     entityId,
     scopeId,
   });
+
+  const columns = useMemo(
+    () =>
+      getColumns({
+        scopeId,
+        dataTestSubj: CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
+        onShowAlert,
+        hidePreviewLink,
+      }),
+    [scopeId, onShowAlert, hidePreviewLink]
+  );
 
   if (error) {
     return null;
@@ -47,7 +69,7 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
     <CorrelationsDetailsAlertsTable
       title={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.sessionAlertsTitle"
+          id="xpack.securitySolution.flyout.correlations.sessionAlertsTitle"
           defaultMessage="{count} {count, plural, one {alert} other {alerts}} related by session"
           values={{ count: dataCount }}
         />
@@ -58,10 +80,11 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
       eventId={eventId}
       noItemsMessage={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.sessionAlertsNoDataDescription"
+          id="xpack.securitySolution.flyout.correlations.sessionAlertsNoDataDescription"
           defaultMessage="No alerts related by session."
         />
       }
+      columns={columns}
       data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}
     />
   );

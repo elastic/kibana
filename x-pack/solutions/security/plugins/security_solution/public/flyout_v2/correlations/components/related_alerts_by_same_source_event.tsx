@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useFetchRelatedAlertsBySameSourceEvent } from '../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_same_source_event';
+import { useFetchRelatedAlertsBySameSourceEvent } from '../../document/hooks/use_fetch_related_alerts_by_same_source_event';
 import { CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID } from './test_ids';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
+import { getColumns } from '../utils/get_columns';
 
 export interface RelatedAlertsBySameSourceEventProps {
   /**
@@ -24,6 +25,14 @@ export interface RelatedAlertsBySameSourceEventProps {
    * Id of the document
    */
   eventId: string;
+  /**
+   * Callback to open the alert preview
+   */
+  onShowAlert: (id: string, indexName: string) => void;
+  /**
+   * Whether to hide the rule preview link
+   */
+  hidePreviewLink: boolean;
 }
 
 /**
@@ -33,17 +42,30 @@ export const RelatedAlertsBySameSourceEvent: React.FC<RelatedAlertsBySameSourceE
   originalEventId,
   scopeId,
   eventId,
+  onShowAlert,
+  hidePreviewLink,
 }) => {
   const { loading, data, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
     originalEventId,
     scopeId,
   });
 
+  const columns = useMemo(
+    () =>
+      getColumns({
+        scopeId,
+        dataTestSubj: CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
+        onShowAlert,
+        hidePreviewLink,
+      }),
+    [scopeId, onShowAlert, hidePreviewLink]
+  );
+
   return (
     <CorrelationsDetailsAlertsTable
       title={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.sourceAlertsTitle"
+          id="xpack.securitySolution.flyout.correlations.sourceAlertsTitle"
           defaultMessage="{count} {count, plural, one {alert} other {alerts}} related by source event"
           values={{ count: dataCount }}
         />
@@ -54,10 +76,11 @@ export const RelatedAlertsBySameSourceEvent: React.FC<RelatedAlertsBySameSourceE
       eventId={eventId}
       noItemsMessage={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.sourceAlertsNoDataDescription"
+          id="xpack.securitySolution.flyout.correlations.sourceAlertsNoDataDescription"
           defaultMessage="No related source events."
         />
       }
+      columns={columns}
       data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}
     />
   );

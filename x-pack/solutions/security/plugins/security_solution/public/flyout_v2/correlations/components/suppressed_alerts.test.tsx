@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import {
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
   SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID,
@@ -17,18 +17,18 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../../flyout_v2/shared/components/test_ids';
-import { DocumentDetailsContext } from '../../shared/context';
-import { mockContextValue } from '../../shared/mocks/mock_context';
-import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
+} from '../../shared/components/test_ids';
+import { DocumentDetailsContext } from '../../../flyout/document_details/shared/context';
+import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
+import { isSuppressionRuleInGA } from '../../../../common/detection_engine/utils';
 
-jest.mock('../../../../../common/detection_engine/utils', () => ({
+jest.mock('../../../../common/detection_engine/utils', () => ({
   isSuppressionRuleInGA: jest.fn().mockReturnValue(false),
 }));
 
 const isSuppressionRuleInGAMock = isSuppressionRuleInGA as jest.Mock;
 
-const mockDataAsNestedObject = {
+const mockEcsData = {
   _id: 'testId',
 };
 
@@ -52,7 +52,7 @@ const renderSuppressedAlerts = (
       <DocumentDetailsContext.Provider value={mockContextValue}>
         <SuppressedAlerts
           alertSuppressionCount={alertSuppressionCount}
-          dataAsNestedObject={mockDataAsNestedObject}
+          ecsData={mockEcsData}
           showInvestigateInTimeline={showInvestigateInTimeline}
         />
       </DocumentDetailsContext.Provider>
