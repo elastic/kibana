@@ -36,6 +36,7 @@ export const GmailConnector: ConnectorSpec = {
     displayName: 'Gmail',
     description: 'Search and read emails from Gmail',
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {

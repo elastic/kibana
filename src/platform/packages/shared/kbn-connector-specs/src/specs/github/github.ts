@@ -114,6 +114,7 @@ export const GithubConnector: ConnectorSpec = {
         'Search repositories, issues, and pull requests, browse file contents, and list branches in GitHub',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 

@@ -37,6 +37,7 @@ export const OnePasswordConnector: ConnectorSpec = {
         'Manage users in 1Password Enterprise Password Manager — list, get, suspend, and reactivate users',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows'],
   },
   auth: {
