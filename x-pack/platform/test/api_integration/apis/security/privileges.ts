@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
 import { diff } from 'jest-diff';
 import { isEqual, isEqualWith } from 'lodash';
@@ -343,13 +343,29 @@ export default function ({ getService }: FtrProviderContext) {
       securitySolutionTimeline: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionNotes: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionSiemMigrations: ['all', 'read', 'minimal_all', 'minimal_read'],
-      securitySolutionRulesV1: ['all', 'read', 'minimal_all', 'minimal_read'],
+      securitySolutionRulesV1: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'security_solution_exceptions_all',
+        'security_solution_investigation_guide_edit',
+        'security_solution_custom_highlighted_fields_edit',
+        'security_solution_enable_disable_rules',
+        'security_solution_manual_run_rules',
+        'security_solution_rules_management_settings',
+      ],
       securitySolutionRulesV2: [
         'all',
         'read',
         'minimal_all',
         'minimal_read',
         'security_solution_exceptions_all',
+        'security_solution_investigation_guide_edit',
+        'security_solution_custom_highlighted_fields_edit',
+        'security_solution_enable_disable_rules',
+        'security_solution_manual_run_rules',
+        'security_solution_rules_management_settings',
       ],
       securitySolutionRulesV3: [
         'all',
@@ -357,6 +373,11 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_all',
         'minimal_read',
         'security_solution_exceptions_all',
+        'security_solution_investigation_guide_edit',
+        'security_solution_custom_highlighted_fields_edit',
+        'security_solution_enable_disable_rules',
+        'security_solution_manual_run_rules',
+        'security_solution_rules_management_settings',
       ],
       securitySolutionRulesV4: [
         'all',
