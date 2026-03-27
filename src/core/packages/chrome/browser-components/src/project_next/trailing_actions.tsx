@@ -54,3 +54,5 @@ export const ProjectNextTrailingActions = React.memo(() => {
     </div>
   );
 });
+
+ProjectNextTrailingActions.displayName = 'ProjectNextTrailingActions';

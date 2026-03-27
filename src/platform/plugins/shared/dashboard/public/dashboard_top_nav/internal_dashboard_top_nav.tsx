@@ -304,23 +304,16 @@ export function InternalDashboardTopNav({
     [redirectTo]
   );
 
-  const {
-    viewModeTopNavConfig,
-    editModeTopNavConfig,
-    chromeNextHeaderEditTitleGlobalAction,
-    chromeNextHeaderShareGlobalAction,
-  } = useDashboardMenuItems({
-    isLabsShown,
-    setIsLabsShown,
-    maybeRedirect,
-    showResetChange,
-  });
+  const { viewModeTopNavConfig, editModeTopNavConfig, chromeNextHeaderShareGlobalAction } =
+    useDashboardMenuItems({
+      isLabsShown,
+      setIsLabsShown,
+      maybeRedirect,
+      showResetChange,
+    });
 
   useEffect(() => {
     const globalActions: ChromeNextHeaderGlobalActions = {};
-    if (chromeNextHeaderEditTitleGlobalAction) {
-      globalActions.editTitle = chromeNextHeaderEditTitleGlobalAction;
-    }
     if (chromeNextHeaderShareGlobalAction) {
       globalActions.share = chromeNextHeaderShareGlobalAction;
     }
@@ -335,12 +328,7 @@ export function InternalDashboardTopNav({
     return () => {
       coreServices.chrome.next.header.set(undefined);
     };
-  }, [
-    title,
-    chromeNextHeaderEditTitleGlobalAction,
-    chromeNextHeaderShareGlobalAction,
-    chromeNextHeaderFavoriteGlobalAction,
-  ]);
+  }, [title, chromeNextHeaderShareGlobalAction, chromeNextHeaderFavoriteGlobalAction]);
 
   UseUnmount(() => {
     dashboardApi.clearOverlays();

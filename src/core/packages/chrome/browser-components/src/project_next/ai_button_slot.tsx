@@ -23,3 +23,5 @@ export const AiButtonSlot = React.memo(() => {
 
   return <>{node}</>;
 });
+
+AiButtonSlot.displayName = 'AiButtonSlot';

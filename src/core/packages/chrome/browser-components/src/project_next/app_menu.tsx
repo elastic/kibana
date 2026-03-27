@@ -39,3 +39,5 @@ export const ProjectNextAppMenu = React.memo(() => {
 
   return null;
 });
+
+ProjectNextAppMenu.displayName = 'ProjectNextAppMenu';

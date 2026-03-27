@@ -86,3 +86,5 @@ export const ProjectNextHeader = React.memo(() => {
     </div>
   );
 });
+
+ProjectNextHeader.displayName = 'ProjectNextHeader';

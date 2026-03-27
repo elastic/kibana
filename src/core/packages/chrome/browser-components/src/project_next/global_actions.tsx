@@ -7,18 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useNextHeader } from '../shared/chrome_hooks';
-
-const EDIT_TITLE_ARIA_LABEL = i18n.translate(
-  'core.ui.chrome.projectNextHeader.globalEditTitleAriaLabel',
-  {
-    defaultMessage: 'Edit title',
-  }
-);
 
 const SHARE_ARIA_LABEL = i18n.translate('core.ui.chrome.projectNextHeader.globalShareAriaLabel', {
   defaultMessage: 'Share',
@@ -35,17 +28,13 @@ const useGlobalActionsStyles = () => {
       gap: ${euiTheme.size.xxs};
     `;
 
-    const disabledTooltipAnchor = css`
-      display: inline-block;
-    `;
-
     const favoriteSlot = css`
       display: flex;
       flex-shrink: 0;
       align-items: center;
     `;
 
-    return { root, disabledTooltipAnchor, favoriteSlot };
+    return { root, favoriteSlot };
   }, [euiTheme]);
 };
 
@@ -53,12 +42,7 @@ const useGlobalActionsStyles = () => {
  * Fixed-order global object actions (editTitle, share, favorite) next to the Chrome-Next title.
  * Only renders actions the page opts into via `chrome.next.header.set({ globalActions })`.
  *
- * Favorite is a `ReactNode` slot (not a star icon in core) so plugins own full behavior
- * (clients, context, React Query). That is separate from `chrome.setBreadcrumbsAppendExtension`,
- * which apps may use for the breadcrumb row in other layouts; see `ChromeNextHeaderConfig`.
- *
- * **editTitle** should eventually drive inline title editing; until then apps may use stub
- * callbacks (e.g. open settings).
+ * Favorite is a `ReactNode` slot so plugins own full behavior (clients, context, React Query).
  */
 export const ProjectNextGlobalActions = React.memo(() => {
   const config = useNextHeader();
@@ -69,34 +53,23 @@ export const ProjectNextGlobalActions = React.memo(() => {
     return null;
   }
 
-  const { editTitle, share, favorite } = globalActions;
+  const { share, favorite } = globalActions;
 
-  if (!editTitle && !share && !favorite) {
+  if (!share && !favorite) {
     return null;
   }
 
   return (
     <div css={styles.root} data-test-subj="chromeProjectNextHeaderGlobalActions">
-      {editTitle ? (
-        <GlobalActionButton
-          iconType="pencil"
-          testSubj="chromeProjectNextHeaderGlobalEditTitle"
-          ariaLabel={editTitle.ariaLabel ?? EDIT_TITLE_ARIA_LABEL}
-          disabled={Boolean(editTitle.disabled)}
-          onClick={editTitle.onClick}
-          tooltipContent={editTitle.tooltipContent}
-          disabledTooltipAnchorCss={styles.disabledTooltipAnchor}
-        />
-      ) : null}
+      {/* TODO: editTitle — Chrome-controlled inline title editor; wire onSave from config */}
       {share ? (
-        <GlobalActionButton
+        <EuiButtonIcon
           iconType="share"
-          testSubj="chromeProjectNextHeaderGlobalShare"
-          ariaLabel={share.ariaLabel ?? SHARE_ARIA_LABEL}
-          disabled={Boolean(share.disabled)}
+          display="empty"
+          size="s"
+          aria-label={SHARE_ARIA_LABEL}
+          data-test-subj="chromeProjectNextHeaderGlobalShare"
           onClick={share.onClick}
-          tooltipContent={share.tooltipContent}
-          disabledTooltipAnchorCss={styles.disabledTooltipAnchor}
         />
       ) : null}
       {favorite ? (
@@ -108,52 +81,4 @@ export const ProjectNextGlobalActions = React.memo(() => {
   );
 });
 
-const GlobalActionButton = React.memo(
-  ({
-    iconType,
-    testSubj,
-    ariaLabel,
-    disabled,
-    onClick,
-    tooltipContent,
-    disabledTooltipAnchorCss,
-  }: {
-    iconType: 'pencil' | 'share';
-    testSubj: string;
-    ariaLabel: string;
-    disabled: boolean;
-    onClick: () => void;
-    tooltipContent?: string;
-    disabledTooltipAnchorCss: ReturnType<typeof css>;
-  }) => {
-    const button = (
-      <EuiButtonIcon
-        iconType={iconType}
-        display="empty"
-        size="s"
-        aria-label={ariaLabel}
-        data-test-subj={testSubj}
-        disabled={disabled}
-        onClick={onClick}
-      />
-    );
-
-    if (!tooltipContent) {
-      return button;
-    }
-
-    if (disabled) {
-      return (
-        <EuiToolTip content={tooltipContent}>
-          <span css={disabledTooltipAnchorCss} tabIndex={0}>
-            {button}
-          </span>
-        </EuiToolTip>
-      );
-    }
-
-    return <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>;
-  }
-);
-
-GlobalActionButton.displayName = 'GlobalActionButton';
+ProjectNextGlobalActions.displayName = 'ProjectNextGlobalActions';

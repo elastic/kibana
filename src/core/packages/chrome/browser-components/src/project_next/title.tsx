@@ -46,3 +46,5 @@ export const ProjectNextTitle = React.memo(() => {
 
   return <h1 css={styles.title}>{title}</h1>;
 });
+
+ProjectNextTitle.displayName = 'ProjectNextTitle';

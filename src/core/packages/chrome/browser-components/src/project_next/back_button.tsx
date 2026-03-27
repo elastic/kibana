@@ -50,3 +50,5 @@ export const ProjectNextBackButton = React.memo(() => {
     />
   );
 });
+
+ProjectNextBackButton.displayName = 'ProjectNextBackButton';

@@ -25,9 +25,9 @@ export interface ChromeNextHeaderConfig {
   title: string;
 
   /**
-   * Optional metadata badges/text rendered below the title.
+   * Optional metadata badges/text for a second row below the title.
    * E.g. "Managed", "Read-only", creation date, severity.
-   * Limited to a single row; Chrome controls layout.
+   * TODO: Wire rendering in `ProjectNextHeader` when the metadata row is implemented.
    */
   metadata?: ChromeNextHeaderMetadataItem[];
 
@@ -36,9 +36,6 @@ export interface ChromeNextHeaderConfig {
    * favorite is an optional app-supplied `ReactNode` (e.g. content-management FavoriteButton).
    *
    * Rendering order (fixed by Chrome): editTitle, share, favorite.
-   *
-   * See {@link ChromeNextHeaderGlobalActions} and the `ChromeNextHeaderConfig` overview for how
-   * this relates to breadcrumb append extensions.
    */
   globalActions?: ChromeNextHeaderGlobalActions;
 
@@ -87,28 +84,18 @@ export interface ChromeNextHeaderMetadataItem {
  */
 export interface ChromeNextHeaderGlobalActions {
   /**
-   * Edit title action. Chrome renders a pencil icon next to the title.
-   * TODO: Intended for inline title editing; shape may evolve beyond a simple click handler.
-   * Interim behavior is app-defined (e.g. open settings).
+   * Edit title: Chrome will own the pencil control and inline editor; apps handle persistence.
+   * TODO: Wire UI — `onSave` is reserved for when inline editing is implemented.
    */
   editTitle?: {
-    onClick: () => void;
-    /** When true, the control is non-interactive. */
-    disabled?: boolean;
-    /** Optional tooltip (e.g. explain why the control is disabled). */
-    tooltipContent?: string;
-    /** Overrides the default "Edit title" accessible name. */
-    ariaLabel?: string;
+    /** Called when Chrome's inline editor commits a new title. */
+    onSave: (newTitle: string) => void;
+    // TODO: onCancel, validation, maxLength when inline editing ships.
   };
   /** Share action. Chrome renders a share icon. */
   share?: {
     onClick: () => void;
-    /** When true, the control is non-interactive. */
-    disabled?: boolean;
-    /** Optional tooltip (e.g. access mode hints). */
-    tooltipContent?: string;
-    /** Overrides the default "Share" accessible name. */
-    ariaLabel?: string;
+    // TODO: disabled, tooltipContent when polish pass.
   };
   /**
    * Favorite control supplied by the app (e.g. `FavoriteButton` with providers).
