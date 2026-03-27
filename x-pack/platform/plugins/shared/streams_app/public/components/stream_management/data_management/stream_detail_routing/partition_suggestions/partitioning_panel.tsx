@@ -13,10 +13,9 @@ import { AssetImage } from '../../../../asset_image';
 
 interface PartitioningPanelProps {
   message: string;
-  children?: React.ReactNode;
 }
 
-export function PartitioningPanel({ message, children }: PartitioningPanelProps) {
+export function PartitioningPanel({ message }: PartitioningPanelProps) {
   return (
     <EuiPanel
       hasShadow={false}

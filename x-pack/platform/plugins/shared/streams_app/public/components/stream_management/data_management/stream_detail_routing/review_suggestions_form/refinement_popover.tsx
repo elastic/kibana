@@ -69,10 +69,9 @@ export const RefinementPopover = ({
 
   const connectorsResult = aiFeatures.genAiConnectors;
 
-  const selectedConnectorName = useMemo(() => {
-    const { connectors, selectedConnector } = connectorsResult;
-    return connectors?.find((c) => c.connectorId === selectedConnector)?.name;
-  }, [connectorsResult]);
+  const selectedConnectorName = connectorsResult.connectors?.find(
+    (c) => c.connectorId === connectorsResult.selectedConnector
+  )?.name;
 
   const fontSize = useEuiFontSize('s');
 
