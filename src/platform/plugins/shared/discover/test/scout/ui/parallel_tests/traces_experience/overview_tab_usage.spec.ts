@@ -205,9 +205,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click service badge in the focused waterfall', async () => {
-          const serviceBadge = flyout.traceSummary.section.locator(
-            '[data-test-subj="apmBarDetailsServiceNameBadge"]'
-          );
+          const serviceBadge = flyout.traceSummary.getServiceBadge(RICH_TRACE.TRANSACTION_NAME);
           await expect(serviceBadge).toBeVisible();
           await serviceBadge.click();
         });

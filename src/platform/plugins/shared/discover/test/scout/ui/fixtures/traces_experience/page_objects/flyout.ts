@@ -31,6 +31,7 @@ export interface TracesFlyout {
     readonly fullScreenButton: Locator;
     readonly openInDiscoverButton: Locator;
     readonly tourOkButton: Locator;
+    getServiceBadge(name: string): Locator;
   };
 
   readonly errors: {
@@ -111,6 +112,12 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
         'unifiedDocViewerObservabilityTracesOpenInDiscoverButton'
       ),
       tourOkButton: page.testSubj.locator('traceWaterfallFullScreenActionTourOkButton'),
+      getServiceBadge(name: string) {
+        return page.testSubj
+          .locator('traceItemRowWrapper')
+          .filter({ hasText: name })
+          .locator('[data-test-subj="apmBarDetailsServiceNameBadge"]');
+      },
     },
 
     errors: {
