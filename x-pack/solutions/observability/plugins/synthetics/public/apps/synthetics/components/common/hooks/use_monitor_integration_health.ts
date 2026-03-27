@@ -49,7 +49,7 @@ interface UseMonitorIntegrationHealthReturn {
 export const useMonitorIntegrationHealth = (
   options?: UseMonitorIntegrationHealthOptions
 ): UseMonitorIntegrationHealthReturn => {
-  const { configIds: explicitConfigIds } = options ?? {};
+  const { configIds } = options ?? {};
   const dispatch = useDispatch();
   const [isResetting, setIsResetting] = useState(false);
   const { lastRefresh } = useSyntheticsRefreshContext();
@@ -63,14 +63,14 @@ export const useMonitorIntegrationHealth = (
   const { data: healthData, loading: healthLoading } = useSelector(selectMonitorHealth);
 
   useEffect(() => {
-    if (!explicitConfigIds && !listLoaded && !listLoading) {
+    if (!configIds && !listLoaded && !listLoading) {
       dispatch(fetchMonitorListAction.get(getMonitorListPageStateWithDefaults()));
     }
-  }, [dispatch, explicitConfigIds, listLoaded, listLoading]);
+  }, [dispatch, configIds, listLoaded, listLoading]);
 
   const monitorIdsToFetch = useMemo(() => {
-    if (explicitConfigIds) {
-      return explicitConfigIds;
+    if (configIds) {
+      return configIds;
     }
     if (!listLoaded) {
       return [];
@@ -78,7 +78,7 @@ export const useMonitorIntegrationHealth = (
     return listMonitors
       .filter((m) => (m[ConfigKey.LOCATIONS] ?? []).some((loc) => !loc.isServiceManaged))
       .map((m) => m[ConfigKey.CONFIG_ID]);
-  }, [explicitConfigIds, listLoaded, listMonitors]);
+  }, [configIds, listLoaded, listMonitors]);
 
   useEffect(() => {
     if (monitorIdsToFetch.length === 0) return;
@@ -219,7 +219,7 @@ export const useMonitorIntegrationHealth = (
     [refetchHealth]
   );
 
-  const loading = explicitConfigIds ? healthLoading : !listLoaded || healthLoading;
+  const loading = configIds ? healthLoading : !listLoaded || healthLoading;
 
   return {
     statuses,
