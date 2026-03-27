@@ -16,7 +16,8 @@ import type {
   BulkObjectResponse,
   EntityStoreCRUDClient,
 } from '@kbn/entity-store/server';
-import { ENGINE_METADATA_TYPE_FIELD, hashEuid } from '@kbn/entity-store/server';
+import { ENGINE_METADATA_TYPE_FIELD } from '@kbn/entity-store/server';
+import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality/common.gen';
 import type { HapiReadableStream } from '../../../types';
 

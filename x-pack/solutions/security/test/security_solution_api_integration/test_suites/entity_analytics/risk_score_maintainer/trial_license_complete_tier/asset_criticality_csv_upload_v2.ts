@@ -6,8 +6,9 @@
  */
 
 import expect from 'expect';
-import { getLatestEntitiesIndexName, hashEuid } from '@kbn/entity-store/server';
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common';
+import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { assetCriticalityRouteHelpersFactory, EntityStoreUtils } from '../../utils';
 

@@ -10,7 +10,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { HapiReadableStream } from '../../../types';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { csvUploadV2 } from './csv_upload_v2';
-import { hashEuid } from '@kbn/entity-store/server/domain/crud/utils';
+import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 
 const createMockStream = (data: string): HapiReadableStream => {
   const stream = new Readable() as HapiReadableStream;
