@@ -114,18 +114,32 @@ export const useEsqlCallbacks = ({
   const getColumnsFor = useCallback(
     async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
       if (queryToExecute) {
-        // Abort any previous in-flight autocomplete column fetch and
-        // remove its potentially stale cache entry
-        if (columnsAbortControllerRef.current) {
+        // Only abort if the query changed — re-requests for the same query
+        // (e.g. from concurrent validation passes) should share the same fetch
+        // rather than aborting each other, which causes "Unknown column" errors.
+        if (
+          columnsAbortControllerRef.current &&
+          previousColumnsQueryRef.current !== queryToExecute
+        ) {
           columnsAbortControllerRef.current.abort();
           if (previousColumnsQueryRef.current) {
             esqlFieldsCache.delete(previousColumnsQueryRef.current);
           }
         }
 
-        const controller = new AbortController();
-        columnsAbortControllerRef.current = controller;
-        previousColumnsQueryRef.current = queryToExecute;
+        if (
+          !columnsAbortControllerRef.current ||
+          previousColumnsQueryRef.current !== queryToExecute
+        ) {
+          const controller = new AbortController();
+          columnsAbortControllerRef.current = controller;
+          previousColumnsQueryRef.current = queryToExecute;
+        }
+
+        // Capture the controller before the await so the aborted check
+        // refers to this request's signal, not a newer one that may have
+        // replaced it on the ref during the async gap.
+        const currentController = columnsAbortControllerRef.current;
 
         clearCacheWhenOld(esqlFieldsCache, queryToExecute);
         const timeRange = data.query.timefilter.timefilter.getTime();
@@ -133,12 +147,12 @@ export const useEsqlCallbacks = ({
           esqlQuery: queryToExecute,
           search: data.search.search,
           timeRange,
-          signal: controller.signal,
+          signal: currentController.signal,
           variables: esqlService?.variablesService?.esqlVariables,
           dropNullColumns: true,
         }).result;
 
-        if (controller.signal.aborted) {
+        if (currentController.signal.aborted) {
           esqlFieldsCache.delete(queryToExecute);
           return [];
         }

@@ -729,6 +729,7 @@ export class WorkflowsExecutionEnginePlugin
     const executeWorkflowStep: ExecuteWorkflowStep = async (
       workflow,
       stepId,
+      executionContext,
       contextOverride,
       request
     ) => {
@@ -737,6 +738,7 @@ export class WorkflowsExecutionEnginePlugin
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
       const context: Record<string, unknown> = {
+        ...(executionContext ?? {}),
         contextOverride,
       };
 

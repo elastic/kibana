@@ -195,7 +195,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       pageTitle="Diagnostics"
       showServiceGroupSaveButton={false}
       pageHeader={{
-        iconType: 'magnifyWithExclamation',
+        iconType: 'magnifyExclamation',
         rightSideItems: [<RefreshButton />],
         description: <TemplateDescription />,
         tabs,
@@ -216,7 +216,7 @@ function TemplateDescription() {
           'xpack.apm.templateDescription.euiCallOut.displayingResultsFromTheLabel',
           { defaultMessage: 'Displaying results from the uploaded diagnostics report' }
         )}
-        iconType="exportAction"
+        iconType="upload"
       >
         <EuiButton
           data-test-subj="apmTemplateDescriptionClearBundleButton"
