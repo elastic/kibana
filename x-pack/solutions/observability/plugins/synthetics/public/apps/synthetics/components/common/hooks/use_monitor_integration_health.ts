@@ -43,6 +43,7 @@ interface UseMonitorIntegrationHealthReturn {
   getUnhealthyLocationStatuses: (configId: string) => MonitorIntegrationStatus[];
   getUnhealthyMonitorCountForLocation: (locationId: string) => number;
   getUnhealthyConfigIdsForLocation: (locationId: string) => string[];
+  getUnhealthyMonitorsForLocation: (locationId: string) => Array<{ configId: string; name: string }>;
 }
 
 export const useMonitorIntegrationHealth = (
@@ -152,6 +153,30 @@ export const useMonitorIntegrationHealth = (
     [statuses]
   );
 
+  const getUnhealthyMonitorsForLocation = useCallback(
+    (locationId: string): Array<{ configId: string; name: string }> => {
+      const monitorNameMap = new Map(
+        listMonitors.map((m) => [m[ConfigKey.CONFIG_ID], m[ConfigKey.NAME]])
+      );
+      const monitors: Array<{ configId: string; name: string }> = [];
+      const seenConfigIds = new Set<string>();
+
+      for (const entries of statuses.values()) {
+        const entry = entries.find((s) => s.locationId === locationId && s.isUnhealthy);
+        if (entry && !seenConfigIds.has(entry.configId)) {
+          seenConfigIds.add(entry.configId);
+          monitors.push({
+            configId: entry.configId,
+            name: monitorNameMap.get(entry.configId) || entry.configId,
+          });
+        }
+      }
+
+      return monitors;
+    },
+    [statuses, listMonitors]
+  );
+
   const refetchHealth = useCallback(() => {
     if (monitorIdsToFetch.length > 0) {
       dispatch(fetchMonitorHealthAction.get(monitorIdsToFetch));
@@ -209,5 +234,6 @@ export const useMonitorIntegrationHealth = (
     getUnhealthyLocationStatuses,
     getUnhealthyMonitorCountForLocation,
     getUnhealthyConfigIdsForLocation,
+    getUnhealthyMonitorsForLocation,
   };
 };

@@ -37,6 +37,7 @@ import type { ClientPluginsStart } from '../../../../../plugin';
 import { UnhealthyCountBadge } from './unhealthy_count_badge';
 import { ResetMonitorModal } from '../../monitors_page/management/monitor_list_table/reset_monitor_modal';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
+import { isFixableByResetStatus } from '../../common/hooks/status_labels';
 
 interface ListItem extends PrivateLocation {
   monitors: number;
@@ -57,9 +58,16 @@ export const PrivateLocationsTable = ({
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [monitorPendingReset, setMonitorPendingReset] = useState<string[]>([]);
-  const { resetMonitors, getUnhealthyMonitorCountForLocation, getUnhealthyConfigIdsForLocation } =
-    useMonitorIntegrationHealth();
+  const [monitorPendingReset, setMonitorPendingReset] = useState<{
+    resetIds: string[];
+    skippedMonitors: Array<{ id: string; name: string }>;
+  } | null>(null);
+  const {
+    resetMonitors,
+    getUnhealthyMonitorCountForLocation,
+    getUnhealthyLocationStatuses,
+    getUnhealthyMonitorsForLocation,
+  } = useMonitorIntegrationHealth();
 
   const { locationMonitors, loading } = useLocationMonitors();
 
@@ -149,9 +157,27 @@ export const PrivateLocationsTable = ({
           'data-test-subj': 'action-reset',
           available: (item: ListItem) => getUnhealthyMonitorCountForLocation(item.id) > 0,
           onClick: (item: ListItem) => {
-            const ids = getUnhealthyConfigIdsForLocation(item.id);
-            if (ids.length > 0) {
-              setMonitorPendingReset(ids);
+            const unhealthyMonitors = getUnhealthyMonitorsForLocation(item.id);
+            const unhealthyStatuses = getUnhealthyLocationStatuses(item.id);
+            const statusMap = new Map(unhealthyStatuses.map((s) => [s.configId, s.status]));
+
+            const resetIds: string[] = [];
+            const skippedMonitors: Array<{ id: string; name: string }> = [];
+
+            for (const monitor of unhealthyMonitors) {
+              const status = statusMap.get(monitor.configId);
+              if (status && isFixableByResetStatus(status)) {
+                resetIds.push(monitor.configId);
+              } else {
+                skippedMonitors.push({
+                  id: monitor.configId,
+                  name: monitor.name,
+                });
+              }
+            }
+
+            if (resetIds.length > 0) {
+              setMonitorPendingReset({ resetIds, skippedMonitors });
             }
           },
         },
@@ -250,11 +276,12 @@ export const PrivateLocationsTable = ({
           ],
         }}
       />
-      {monitorPendingReset.length > 0 && (
+      {monitorPendingReset && (
         <ResetMonitorModal
-          configIds={monitorPendingReset}
-          onClose={() => setMonitorPendingReset([])}
+          configIds={monitorPendingReset.resetIds}
+          onClose={() => setMonitorPendingReset(null)}
           resetMonitors={resetMonitors}
+          skippedMonitors={monitorPendingReset.skippedMonitors}
         />
       )}
     </div>
