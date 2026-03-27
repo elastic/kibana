@@ -38,17 +38,18 @@ const scenario: Scenario<Fields | ApmOtelFields> = async ({ logger, scenarioOpts
         .generator((timestamp) =>
           hosts.flatMap((hostName) => {
             const base = {
+              _index: 'metrics-generic.otel-default',
               'agent.id': `agent-${hostName}`,
               'host.hostname': hostName,
               '@timestamp': timestamp,
               'host.name': hostName,
-              'host.os.name': 'linux',
-              'cloud.provider': 'gcp',
+              'host.os.name': 'ubuntu',
+              'cloud.provider': 'aws',
               'cloud.region': 'us-central1',
               'host.ip': '122.122.122.122',
               'resource.attributes.host.name': hostName,
-              'resource.attributes.os.type': 'linux',
-              'os.type': 'linux',
+              'resource.attributes.os.type': 'ubuntu',
+              'os.type': 'ubuntu',
               'data_stream.dataset': 'hostmetricsreceiver.otel',
               'data_stream.type': 'metrics',
               'data_stream.namespace': 'default',

@@ -36,6 +36,7 @@ const scenario: Scenario<import('@kbn/synthtrace-client').Fields> = async ({
         .generator((timestamp) =>
           hosts.flatMap((hostName) => {
             const base = {
+              _index: 'metrics-generic.otel-default',
               'agent.id': `agent-${hostName}`,
               'host.hostname': hostName,
               '@timestamp': timestamp,
@@ -46,6 +47,7 @@ const scenario: Scenario<import('@kbn/synthtrace-client').Fields> = async ({
               'host.ip': '122.122.122.122',
               'resource.attributes.host.name': hostName,
               'resource.attributes.os.type': 'linux',
+              'os.type': 'linux',
               // This is the key: dataset that matches inventory model expectation
               'data_stream.dataset': 'hostmetricsreceiver.otel',
               'data_stream.type': 'metrics',
