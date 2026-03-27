@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// write a custom hook to generate filter options for fileType, platform and types filters in the script library view page. The hook should return an object with three properties: fileTypeOptions, platformOptions and typeOptions. Each property should be an array of strings representing the options for that filter. The hook should also return a function to clear all filters.
 
 import React, { useMemo, useState } from 'react';
 import { EuiBadge } from '@elastic/eui';

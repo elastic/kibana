@@ -202,12 +202,15 @@ describe('useGetEndpointScriptsList hook', () => {
           searchTerms: [`\\test \\search\\`, `"another" "search" "term" \\backspace`],
         })
       );
-      expect.objectContaining({
-        query: expect.objectContaining({
-          kuery:
-            '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement") AND ((name:*test*search* OR updatedBy:*test*search* OR fileHash:*test*search*) OR (name:*another*search*term* OR updatedBy:*another*search*term* OR fileHash:*another*search*term*))',
-        }),
-      });
+
+      expect(apiMocks.responseProvider.getScriptsList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            kuery:
+              '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement") AND ((name:*\\\\test*\\\\search\\\\* OR updatedBy:*\\\\test*\\\\search\\\\* OR fileHash:*\\\\test*\\\\search\\\\*) OR (name:*\\"another\\"*\\"search\\"*\\"term\\"*\\\\backspace* OR updatedBy:*\\"another\\"*\\"search\\"*\\"term\\"*\\\\backspace* OR fileHash:*\\"another\\"*\\"search\\"*\\"term\\"*\\\\backspace*))',
+          }),
+        })
+      );
     });
 
     it('should construct the correct KQL query when with mixed length arrays', async () => {

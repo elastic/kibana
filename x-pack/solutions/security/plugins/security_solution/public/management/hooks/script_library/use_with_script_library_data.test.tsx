@@ -164,7 +164,7 @@ describe('useWithScriptLibraryData', () => {
   });
 
   describe('unfiltered query behavior', () => {
-    it('should call unfiltered query with {page: 1, pageSize: 10}', () => {
+    it('should call unfiltered query with {page: 1, pageSize: 1}', () => {
       mockUseGetEndpointScriptsList.mockReturnValue(defaultGetEndpointScriptsListResponse);
 
       renderHook(() =>
@@ -181,7 +181,7 @@ describe('useWithScriptLibraryData', () => {
       expect(unfilteredCall).toBeDefined();
       expect(unfilteredCall![0]).toEqual({
         page: 1,
-        pageSize: 10,
+        pageSize: 1,
       });
     });
 

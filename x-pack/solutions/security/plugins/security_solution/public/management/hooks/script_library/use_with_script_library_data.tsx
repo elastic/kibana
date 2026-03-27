@@ -43,7 +43,7 @@ export const useWithScriptLibraryData = (
     isFetching: isLoadingHasData,
     refetch: verifyDataExists,
   } = useGetEndpointScriptsList(
-    { page: 1, pageSize: 10 },
+    { page: 1, pageSize: 1 },
     {
       enabled: options.enabled ?? false,
       refetchOnWindowFocus: false,

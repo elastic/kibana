@@ -46,8 +46,7 @@ export const ScriptLibraryFilter = memo<ScriptLibraryFilterProps>(
 
     const onOptionsChange = useCallback(
       (newOptions: FilterItems) => {
-        // update filter UI options state
-        setItems(newOptions.map((option) => option));
+        setItems(newOptions);
 
         // compute a selected list of options
         const selectedItems = newOptions.reduce<string[]>((acc, curr) => {
