@@ -43,7 +43,7 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
       disableScreenReaderOutput
     >
       <EuiButtonIcon
-        iconType="plusInCircle"
+        iconType="plusCircle"
         aria-label={PROMOTE_QUERY_ACTION_TITLE}
         isLoading={promoteMutation.isLoading}
         isDisabled={item.rule_backed || promoteMutation.isLoading}

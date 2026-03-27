@@ -280,7 +280,7 @@ export function useStreamFeaturesTable({
         render: (_: unknown, feature: Feature) => (
           <EuiButtonIcon
             data-test-subj="streamsAppFeatureDetailsButton"
-            iconType="expand"
+            iconType="maximize"
             isDisabled={isIdentifyingFeatures}
             aria-label={VIEW_DETAILS_ARIA_LABEL}
             onClick={() => onSelectFeature(feature)}

@@ -233,7 +233,7 @@ function CompletedState({
             announceOnMount
             title={NO_FEATURES_IDENTIFIED_TITLE}
             color="primary"
-            iconType="search"
+            iconType="magnify"
             onDismiss={onDismissNoResults}
           >
             {NO_FEATURES_IDENTIFIED_DESCRIPTION}

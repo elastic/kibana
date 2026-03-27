@@ -42,7 +42,7 @@ export function ObservabilityOnboardingHeaderActionMenu({ setHeaderActionMenu, t
           aria-label={feedbackButtonLabel}
           href={LOGS_ONBOARDING_FEEDBACK_LINK}
           size="s"
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           target="_blank"
           color="primary"
