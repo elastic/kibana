@@ -85,6 +85,8 @@ export const createNavigationTree = ({
         : {
             link: 'observability-overview:alerts',
             icon: 'warning',
+            getIsActive: ({ pathNameSerialized, prepend }) =>
+              pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
           },
       ...filterForFeatureAvailability(
         {

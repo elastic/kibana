@@ -441,7 +441,7 @@ export class NotificationPolicyClient {
     }
 
     const sortFieldMap: Record<string, string> = {
-      name: 'name.keyword',
+      name: 'name',
       createdAt: 'createdAt',
       createdByUsername: 'createdByUsername',
       updatedAt: 'updatedAt',

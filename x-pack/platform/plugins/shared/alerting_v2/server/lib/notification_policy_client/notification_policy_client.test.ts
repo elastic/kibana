@@ -686,14 +686,14 @@ describe('NotificationPolicyClient', () => {
       );
     });
 
-    it('maps sort field name to name.keyword', async () => {
+    it('maps sort field name to name', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
 
       await client.findNotificationPolicies({ sortField: 'name', sortOrder: 'asc' });
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          sortField: 'name.keyword',
+          sortField: 'name',
           sortOrder: 'asc',
         })
       );
