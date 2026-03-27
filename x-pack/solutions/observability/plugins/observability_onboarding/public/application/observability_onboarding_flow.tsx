@@ -7,7 +7,7 @@
 
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Route, Routes, Redirect } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -75,6 +75,9 @@ export function ObservabilityOnboardingFlow() {
         )}
         <Route path="/ingest-hub/:section?">
           <IngestHubPage />
+        </Route>
+        <Route exact path="/">
+          <Redirect to="/ingest-hub" />
         </Route>
         <Route>
           <LandingPage />

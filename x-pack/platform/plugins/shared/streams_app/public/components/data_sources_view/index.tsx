@@ -258,23 +258,29 @@ export function DataSourcesView() {
     <>
       <StreamsAppPageTemplate.Header
         bottomBorder="extended"
+        css={css`
+          background: ${euiTheme.colors.backgroundBasePlain};
+        `}
         pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            gutterSize="s"
+            responsive={false}
+            alignItems="center"
+          >
             <EuiFlexItem>
-              {i18n.translate('xpack.streams.dataSourcesView.pageTitle', {
-                defaultMessage: 'Data sources',
-              })}
+              <EuiFlexGroup alignItems="center" gutterSize="m">
+                {i18n.translate('xpack.streams.dataSourcesView.pageTitle', {
+                  defaultMessage: 'Data sources',
+                })}
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        description={
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.streams.dataSourcesView.pageDescription', {
-              defaultMessage:
-                'Active data sources feeding into your streams. Discovered and connected via the AWS CloudShell setup.',
-            })}
-          </EuiText>
-        }
+        description={i18n.translate('xpack.streams.dataSourcesView.pageDescription', {
+          defaultMessage:
+            'Browse and manage all data sources sending data to your streams.',
+        })}
         rightSideItems={
           hasIngestedMockAwsData
             ? [
