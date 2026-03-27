@@ -16,7 +16,7 @@ export const LIST_ENTITIES_URL = `${ENTITIES_URL}/list` as const;
 
 export const ENTITY_RESOLUTION_CSV_UPLOAD_URL =
   `${ENTITY_STORE_URL}/resolution/upload_csv` as const;
-export const RESOLUTION_CSV_MAX_SIZE_BYTES = 50 * 1024 * 1024; // 50MB
+export const RESOLUTION_CSV_MAX_SIZE_BYTES = 1024 * 1024; // 1MB
 
 export const ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',
