@@ -37,7 +37,9 @@ describe('PagerdutyConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCallTool.mockResolvedValue({ content: mockContent });
-    mockListTools.mockResolvedValue({ tools: [{ name: 'get_user_data' }, { name: 'list_incidents' }] });
+    mockListTools.mockResolvedValue({
+      tools: [{ name: 'get_user_data' }, { name: 'list_incidents' }],
+    });
   });
 
   describe('getUserData action', () => {

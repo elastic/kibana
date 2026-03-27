@@ -251,9 +251,7 @@ describe('TavilyConnector', () => {
         throw new Error('test handler not defined');
       }
 
-      await expect(TavilyConnector.test.handler(mockContext)).rejects.toThrow(
-        'connection refused'
-      );
+      await expect(TavilyConnector.test.handler(mockContext)).rejects.toThrow('connection refused');
     });
   });
 });
