@@ -997,6 +997,7 @@ x-pack/platform/packages/shared/kbn-entities-schema @elastic/core-analysis
 x-pack/platform/packages/shared/kbn-es-snapshot-loader @elastic/obs-ai-team
 x-pack/platform/packages/shared/kbn-evals @elastic/obs-ai-team @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-evals-common @elastic/obs-ai-team @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-evals-extensions @elastic/obs-ai-team @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-evals-phoenix-executor @elastic/obs-ai-team
 x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-presentation-team @elastic/obs-exploration-team
