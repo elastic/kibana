@@ -381,8 +381,8 @@ export const createTimelineTemplateFromBottomBar = () => {
 };
 
 export const executeTimelineKQL = (query: string) => {
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).clear();
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
+  typeAndVerifyValue(`${SEARCH_OR_FILTER_CONTAINER} textarea`, query);
+  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type('{enter}');
 };
 
 export const executeTimelineSearch = (query: string) => {
