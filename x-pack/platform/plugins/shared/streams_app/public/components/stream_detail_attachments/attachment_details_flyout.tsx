@@ -208,7 +208,7 @@ export function AttachmentDetailsFlyout({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="streamsAppAttachmentDetailsFlyoutUnlinkButton"
-                iconType="unlink"
+                iconType="linkSlash"
                 color="danger"
                 onClick={handleUnlink}
               >

@@ -21,7 +21,8 @@
       "user.name",
       "user.id",
       "destination.ip",
-      "event.module"
+      "event.module",
+      "destination.port"
     ]
   },
   "allow_lazy_open": true,

@@ -16,7 +16,6 @@ import {
 } from '../../common/endpoint/service/authz';
 import {
   ENDPOINTS_PATH,
-  ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   MANAGE_PATH,
   POLICIES_PATH,
@@ -29,8 +28,9 @@ import {
 import {
   ARTIFACTS,
   ENDPOINTS,
-  ENTITY_ANALYTICS_RISK_SCORE,
-  ENTITY_STORE,
+  ENTITY_ANALYTICS,
+  EVENT_FILTERS,
+  HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
@@ -57,7 +57,6 @@ import { IconEndpoints } from '../common/icons/endpoints';
 import { IconPolicies } from '../common/icons/policies';
 import { IconArtifacts } from '../common/icons/artifacts';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
-import { IconAssetCriticality } from '../common/icons/asset_criticality';
 import { IconScriptLibrary } from '../common/icons/script_library';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
@@ -66,10 +65,7 @@ const categories = [
     label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
       defaultMessage: 'Entity analytics',
     }),
-    linkIds: [
-      SecurityPageName.entityAnalyticsManagement,
-      SecurityPageName.entityAnalyticsEntityStoreManagement,
-    ],
+    linkIds: [SecurityPageName.entityAnalyticsManagement],
   },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
@@ -149,28 +145,20 @@ export const links: LinkItem = {
     },
     {
       id: SecurityPageName.entityAnalyticsManagement,
-      title: ENTITY_ANALYTICS_RISK_SCORE,
-      description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
-        defaultMessage: "Monitor entities' risk scores, and track anomalies.",
-      }),
+      title: ENTITY_ANALYTICS,
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.entityAnalyticsManagementDescription',
+        {
+          defaultMessage:
+            'Manage entity risk scores, entity store, and asset criticality settings.',
+        }
+      ),
       landingIcon: IconEntityAnalytics,
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
       licenseType: 'platinum',
-    },
-    {
-      id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-      title: ENTITY_STORE,
-      description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
-        defaultMessage: 'Store data for entities observed in events.',
-      }),
-      landingIcon: IconAssetCriticality,
-      path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-      capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
     },
     {
       id: SecurityPageName.responseActionsHistory,
@@ -290,8 +278,8 @@ export const getManagementFilteredLinks = async (
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
       : getEndpointAuthzInitialState();
-      
-    const showHostIsolationExceptions =
+
+  const showHostIsolationExceptions =
     canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
     // read host isolation exceptions is not a paid feature, to allow deleting exceptions after a downgrade scenario.
     // however, in this situation we allow to access only when there is data, otherwise the link won't be accessible.

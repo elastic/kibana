@@ -73,7 +73,7 @@ export const ProcessingButtonsManual = ({
             color: ${euiTheme.colors.textPrimary};
           `}
           data-test-subj="streamsAppStreamDetailEnrichmentCreateProcessorButton"
-          iconType="compute"
+          iconType="processor"
           onClick={() => addProcessor(undefined, { parentId: null })}
         >
           {createProcessorText}

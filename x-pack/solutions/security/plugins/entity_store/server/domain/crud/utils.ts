@@ -16,15 +16,13 @@ import type {
   EntityField,
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
+import { HASH_ALG } from '../constants';
 import { BadCRUDRequestError } from '../errors';
 
 type CrudOperation = 'create' | 'update';
-const GENERIC_TYPE = 'generic' as EntityType;
 
 export function hashEuid(id: string): string {
-  // EUID generation uses MD5. It is not a security-related feature.
-  // eslint-disable-next-line @kbn/eslint/no_unsafe_hash
-  return createHash('md5').update(id).digest('hex');
+  return createHash(HASH_ALG).update(id).digest('hex');
 }
 
 // validateDocIdentification checks provided and generated EUIDs. It
@@ -70,7 +68,16 @@ export function validateAndTransformDoc(
     assertOnlyNonForcedAttributesInReq(fieldDescriptions);
   }
 
-  return { id, doc: transformDoc(operation, entityType, doc) };
+  if (operation === 'create' && !doc.entity.name) {
+    doc.entity.name = id;
+  }
+
+  const transformedDoc: Record<string, unknown> = {
+    ...doc,
+    '@timestamp': new Date().toISOString(),
+  };
+
+  return { id, doc: transformedDoc };
 }
 
 function getFieldDescriptions(
@@ -129,35 +136,4 @@ function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>)
         `updated without forcing it (?force=true): ${notAllowedPropsString}`
     );
   }
-}
-
-function transformDoc(
-  operation: CrudOperation,
-  type: EntityType,
-  data: Entity
-): Record<string, unknown> {
-  const doc: Record<string, unknown> = {
-    ...data,
-    '@timestamp': new Date().toISOString(),
-  };
-
-  if (type === GENERIC_TYPE) {
-    return doc;
-  }
-
-  const typeKey = type as keyof typeof doc;
-  if (!doc[typeKey] || typeof doc[typeKey] !== 'object') {
-    doc[typeKey] = {};
-  }
-  const typeDoc = doc[typeKey] as Record<string, unknown>;
-
-  if (operation === 'create' && !typeDoc.name) {
-    typeDoc.name = data.entity?.id;
-  }
-  typeDoc.entity = data.entity;
-
-  // Remove entity from root
-  delete doc.entity;
-
-  return doc;
 }
