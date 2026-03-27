@@ -122,8 +122,6 @@
     "@kbn/react-query",
     "@kbn/lens-common",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/scout-synthtrace",
-    "@kbn/synthtrace-client"
   ],
   "exclude": ["target/**/*"]
 }
