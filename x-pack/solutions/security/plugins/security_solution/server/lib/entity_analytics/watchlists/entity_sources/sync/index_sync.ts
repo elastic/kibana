@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { MonitoringEntitySourceDescriptorClient } from '../../../privilege_monitoring/saved_objects';
+import type { WatchlistEntitySourceClient } from '../infra';
 import type { EntityStoreEntityIdsByType } from '../../entities/service';
 import { createSourcesSyncService } from './sources_sync';
 import { createUpdateDetectionService } from './update_detection/update_detection';
@@ -22,7 +22,7 @@ export const createIndexSyncService = ({
   esClient: ElasticsearchClient;
   logger: Logger;
   targetIndex: string;
-  descriptorClient: MonitoringEntitySourceDescriptorClient;
+  descriptorClient: WatchlistEntitySourceClient;
 }) => {
   const updateDetectionService = createUpdateDetectionService({
     esClient,

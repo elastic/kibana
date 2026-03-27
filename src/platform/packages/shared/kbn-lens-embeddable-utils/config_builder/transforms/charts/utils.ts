@@ -173,3 +173,19 @@ export function getLegendTruncateAfterLines(
 
   return shouldTruncate && maxLines > 0 ? maxLines : undefined;
 }
+
+/**
+ * Determines the x-axis scale type based on column metadata type.
+ * Returns 'temporal' for date columns, 'linear' for numeric columns, and 'ordinal' for others.
+ */
+export function getScaleTypeFromColumnType(
+  columnType: string | undefined
+): 'temporal' | 'linear' | 'ordinal' {
+  if (columnType === 'date') {
+    return 'temporal';
+  } else if (columnType === 'number') {
+    return 'linear';
+  } else {
+    return 'ordinal';
+  }
+}

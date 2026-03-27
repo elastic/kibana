@@ -208,6 +208,7 @@
     "@kbn/cloud-security-posture-graph",
     "@kbn/siem-readiness",
     "@kbn/presentation-publishing",
+    "@kbn/entity-store",
     "@kbn/entityManager-plugin",
     "@kbn/entities-schema",
     "@kbn/inference-plugin",
@@ -285,7 +286,10 @@
     "@kbn/workflows",
     "@kbn/deeplinks-workflows",
     "@kbn/core-rendering-browser",
+    "@kbn/controls-constants",
     "@kbn/anonymization-plugin",
-    "@kbn/anonymization-common"
+    "@kbn/anonymization-common",
+    "@kbn/controls-schemas",
+    "@kbn/search-inference-endpoints",
   ]
 }
