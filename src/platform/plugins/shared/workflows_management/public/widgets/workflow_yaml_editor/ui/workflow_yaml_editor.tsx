@@ -679,29 +679,6 @@ export const WorkflowYAMLEditor = ({
         panelProps={{ css: styles.actionsMenuPopoverPanel }}
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
-      {/* Floating Elasticsearch step actions */}
-      <div
-        css={styles.stepActionsContainer}
-        style={positionStyles ? positionStyles : {}}
-        data-test-subj={`workflowStepActionsContainer-${focusedStepInfo?.stepId}`}
-      >
-        <StepActions onStepRun={onStepRun} />
-      </div>
-      {activeMigrationHints && migrationHintTop != null && (
-        <div
-          css={styles.migrationHintPanelContainer}
-          style={{ top: `${migrationHintTop}px` }}
-          data-test-subj="migrationHintPanelContainer"
-        >
-          <MigrationHintPanel
-            hints={activeMigrationHints.hints}
-            isAiMigrationEnabled={isAgentBuilderAvailable}
-            onMigrateWithAi={openAgentChat}
-            onMouseEnter={onMigrationPanelMouseEnter}
-            onMouseLeave={onMigrationPanelMouseLeave}
-          />
-        </div>
-      )}
       {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml && (
         <div
           css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
@@ -759,9 +736,32 @@ export const WorkflowYAMLEditor = ({
         </div>
       )}
       <div
-        css={styles.editorContainer}
+        css={css([styles.editorContainer, { position: 'relative' }])}
         className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
       >
+        {/* Floating Elasticsearch step actions */}
+        <div
+          css={styles.stepActionsContainer}
+          style={positionStyles ? positionStyles : {}}
+          data-test-subj={`workflowStepActionsContainer-${focusedStepInfo?.stepId}`}
+        >
+          <StepActions onStepRun={onStepRun} />
+        </div>
+        {activeMigrationHints && migrationHintTop != null && (
+          <div
+            css={styles.migrationHintPanelContainer}
+            style={{ top: `${migrationHintTop}px` }}
+            data-test-subj="migrationHintPanelContainer"
+          >
+            <MigrationHintPanel
+              hints={activeMigrationHints.hints}
+              isAiMigrationEnabled={isAgentBuilderAvailable}
+              onMigrateWithAi={openAgentChat}
+              onMouseEnter={onMigrationPanelMouseEnter}
+              onMouseLeave={onMigrationPanelMouseLeave}
+            />
+          </div>
+        )}
         <YamlEditor
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}

@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +39,8 @@ export const MigrationWarningBanner: React.FC<MigrationWarningBannerProps> = ({
   onMigrateWithAi,
   onLineClick,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const handleLineClick = useCallback(
     (lineNumber: number) => () => onLineClick(lineNumber),
     [onLineClick]
@@ -70,7 +79,7 @@ export const MigrationWarningBanner: React.FC<MigrationWarningBannerProps> = ({
       color="warning"
       iconType="warning"
       size="s"
-      css={css({ flexShrink: 0 })}
+      css={css({ flexShrink: 0, margin: `${euiTheme.size.m} ${euiTheme.size.m} 0` })}
       title={
         <FormattedMessage
           id="workflows.migrationWarningBanner.title"
