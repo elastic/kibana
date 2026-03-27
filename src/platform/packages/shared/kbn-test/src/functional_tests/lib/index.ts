@@ -8,7 +8,8 @@
  */
 
 export { runKibanaServer } from './run_kibana_server';
-export { runElasticsearch, cleanupElasticsearch } from './run_elasticsearch';
+export { runElasticsearch } from './run_elasticsearch';
+export { cleanupElasticsearch } from '@kbn/test-es-server';
 export * from './run_ftr';
 export {
   parseRawFlags,
