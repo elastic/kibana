@@ -76,7 +76,7 @@ export const addSectionOperationSchema = z.object({
 
 export const removeSectionOperationSchema = z.object({
   operation: z.literal('remove_section'),
-  uid: z.string().describe('Section uid to remove.'),
+  id: z.string().describe('Section id to remove.'),
   panelAction: z
     .enum(['promote', 'delete'])
     .describe('How to handle section panels: promote to top-level or delete them.'),
@@ -135,7 +135,7 @@ const getWidgetsBottomY = (widgets: DashboardWidget[]): number => {
 };
 
 const findSectionIndex = (panels: DashboardWidget[], sectionId: string): number => {
-  return panels.findIndex((widget) => isSection(widget) && widget.uid === sectionId);
+  return panels.findIndex((widget) => isSection(widget) && widget.id === sectionId);
 };
 
 const updateSectionPanels = (
@@ -144,7 +144,7 @@ const updateSectionPanels = (
   updateFn: (sectionPanels: AttachmentPanel[]) => AttachmentPanel[]
 ): DashboardWidget[] => {
   return panels.map((widget) => {
-    if (isSection(widget) && widget.uid === sectionId) {
+    if (isSection(widget) && widget.id === sectionId) {
       return { ...widget, panels: updateFn(widget.panels) };
     }
     return widget;
@@ -169,7 +169,7 @@ const removePanelsFromDashboard = ({
     if (isSection(widget)) {
       const sectionPanelsToKeep: AttachmentPanel[] = [];
       for (const panel of widget.panels) {
-        if (panelIdSet.has(panel.uid)) {
+        if (panelIdSet.has(panel.id)) {
           removedPanels.push(panel);
         } else {
           sectionPanelsToKeep.push(panel);
@@ -177,7 +177,7 @@ const removePanelsFromDashboard = ({
       }
       nextPanels.push({ ...widget, panels: sectionPanelsToKeep });
     } else {
-      if (panelIdSet.has(widget.uid)) {
+      if (panelIdSet.has(widget.id)) {
         removedPanels.push(widget);
       } else {
         nextPanels.push(widget);
@@ -228,7 +228,7 @@ export const executeDashboardOperations = ({
       case 'add_markdown': {
         const markdownPanel: AttachmentPanel = {
           type: MARKDOWN_EMBEDDABLE_TYPE,
-          uid: uuidv4(),
+          id: uuidv4(),
           config: { content: operation.markdownContent },
           grid: operation.grid,
         };
@@ -308,7 +308,7 @@ export const executeDashboardOperations = ({
         }
 
         const nextSection: DashboardSection = {
-          uid: uuidv4(),
+          id: uuidv4(),
           title: operation.title,
           collapsed: false,
           grid: operation.grid,
@@ -323,9 +323,9 @@ export const executeDashboardOperations = ({
       }
 
       case 'remove_section': {
-        const sectionIndex = findSectionIndex(nextDashboardData.panels, operation.uid);
+        const sectionIndex = findSectionIndex(nextDashboardData.panels, operation.id);
         if (sectionIndex === -1) {
-          throw new Error(`Section "${operation.uid}" not found.`);
+          throw new Error(`Section "${operation.id}" not found.`);
         }
 
         const sectionToRemove = nextDashboardData.panels[sectionIndex] as DashboardSection;
@@ -387,14 +387,14 @@ export const executeDashboardOperations = ({
 
             const updatedPanel = {
               ...result.panels[0],
-              uid: panel.uid,
+              id: panel.id,
               grid: panel.grid,
             };
 
             return updatedPanel;
           } catch (error) {
             logger.error(
-              `Failed to update panel "${panel.uid}" from attachment "${
+              `Failed to update panel "${panel.id}" from attachment "${
                 panel.sourceAttachmentId
               }": ${error instanceof Error ? error.message : String(error)}`
             );

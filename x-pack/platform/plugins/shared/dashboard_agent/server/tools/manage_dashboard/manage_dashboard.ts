@@ -133,13 +133,13 @@ Use operations[] to:
                     panels: updatedDashboardData.panels.map((widget) => {
                       if (isSection(widget)) {
                         return {
-                          uid: widget.uid,
+                          id: widget.id,
                           title: widget.title,
                           collapsed: widget.collapsed,
                           grid: widget.grid,
                           panels: widget.panels.map((panel) => ({
                             type: panel.type,
-                            uid: panel.uid,
+                            id: panel.id,
                             grid: panel.grid,
                             sourceAttachmentId: panel.sourceAttachmentId,
                           })),
@@ -147,7 +147,7 @@ Use operations[] to:
                       }
                       return {
                         type: widget.type,
-                        uid: widget.uid,
+                        id: widget.id,
                         grid: widget.grid,
                         sourceAttachmentId: widget.sourceAttachmentId,
                       };
