@@ -652,7 +652,9 @@ src/platform/packages/shared/kbn-synthtrace-client @elastic/obs-presentation-tea
 src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-team
 src/platform/packages/shared/kbn-telemetry-config @elastic/kibana-core
 src/platform/packages/shared/kbn-test @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-es-server @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-saml-auth @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-timerange @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-tooling-log @elastic/kibana-operations
@@ -2283,6 +2285,7 @@ x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 
 /src/platform/test/server_integration/config.base.js @elastic/kibana-security @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/199795#discussion_r1846510782
 /src/platform/test/server_integration/__fixtures__ @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
+.cycodeignore @elastic/kibana-security
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-pr.yml @elastic/kibana-security
@@ -2400,7 +2403,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jina
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/response-ops
+src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** @elastic/workchat-eng
@@ -3249,6 +3252,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # No owner - generated files covered by CI checks
 **/moon.yml
+**/version_dependencies.txt
 
 # Operations (last-match override)
 /src/platform/test/package @elastic/kibana-operations
