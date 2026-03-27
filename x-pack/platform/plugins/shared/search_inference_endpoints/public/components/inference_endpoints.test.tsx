@@ -161,7 +161,7 @@ describe('InferenceEndpoints', () => {
 
       renderComponent();
 
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.getByTestId('inferenceEndpointsLoading')).toBeInTheDocument();
       expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
       expect(screen.queryByTestId('allInferenceEndpointsPage')).not.toBeInTheDocument();
     });
@@ -194,7 +194,7 @@ describe('InferenceEndpoints', () => {
 
       renderComponent();
 
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.getByTestId('inferenceEndpointsLoading')).toBeInTheDocument();
       expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
       expect(screen.queryByTestId('allInferenceEndpointsPage')).not.toBeInTheDocument();
     });
@@ -224,7 +224,7 @@ describe('InferenceEndpoints', () => {
 
       renderComponent();
 
-      expect(screen.getByTestId('allInferenceEndpointsPage')).toBeInTheDocument();
+      expect(screen.getByTestId('externalInferenceHeader')).toBeInTheDocument();
       expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
     });
 

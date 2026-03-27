@@ -16,19 +16,22 @@ import { useKibana } from '../hooks/use_kibana';
 import { isElasticInferenceServiceEnabled } from '../feature_flag';
 import { isEndpointPreconfigured } from '../utils/preconfigured_endpoint_helper';
 import { TabularPage } from './all_inference_endpoints/tabular_page';
+import { EisCallouts } from './all_inference_endpoints/eis_callouts';
 import { InferenceEndpointsHeader } from './inference_endpoints_header';
+import { ExternalInferenceHeader } from './external_inference_header';
 import { AddInferenceFlyoutWrapper } from './add_inference_endpoints/add_inference_flyout_wrapper';
 import { ExternalInferenceEmptyPrompt } from './external_inference_empty_prompt';
 
 const PageContent: React.FC<{
   isLoading: boolean;
+  isEisEnabled: boolean;
   showEmptyState: boolean;
   inferenceEndpoints: InferenceAPIConfigResponse[];
   onFlyoutOpen: () => void;
-}> = ({ isLoading, showEmptyState, inferenceEndpoints, onFlyoutOpen }) => {
+}> = ({ isLoading, isEisEnabled, showEmptyState, inferenceEndpoints, onFlyoutOpen }) => {
   if (isLoading) {
     return (
-      <EuiPageTemplate.Section alignment="center">
+      <EuiPageTemplate.Section alignment="center" data-test-subj="inferenceEndpointsLoading">
         <EuiLoadingSpinner size="l" />
       </EuiPageTemplate.Section>
     );
@@ -38,10 +41,13 @@ const PageContent: React.FC<{
     return <ExternalInferenceEmptyPrompt onFlyoutOpen={onFlyoutOpen} />;
   }
 
+  const Header = isEisEnabled ? ExternalInferenceHeader : InferenceEndpointsHeader;
+
   return (
     <>
-      <InferenceEndpointsHeader onFlyoutOpen={onFlyoutOpen} />
+      <Header onFlyoutOpen={onFlyoutOpen} />
       <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
+        {!isEisEnabled && <EisCallouts />}
         <TabularPage inferenceEndpoints={inferenceEndpoints} />
       </EuiPageTemplate.Section>
     </>
@@ -86,6 +92,7 @@ export const InferenceEndpoints: React.FC = () => {
     <>
       <PageContent
         isLoading={isLoading}
+        isEisEnabled={isEisEnabled}
         showEmptyState={showEmptyState}
         inferenceEndpoints={inferenceEndpoints}
         onFlyoutOpen={onFlyoutOpen}
