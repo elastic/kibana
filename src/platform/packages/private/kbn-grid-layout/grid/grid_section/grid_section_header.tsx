@@ -228,6 +228,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         gutterSize="xs"
         responsive={false}
         alignItems="center"
+        id={`kbnGridSectionHeader-${sectionId}`}
         css={(theme) => styles.headerStyles(theme, sectionId, readOnly)}
         className={classNames('kbnGridSectionHeader', {
           'kbnGridSectionHeader--active': isActive,
