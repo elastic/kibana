@@ -63,7 +63,7 @@ export function registerCreateRoute(
           isDashboardAppRequest
         );
         const response = res.created({ body: result });
-        dashboardApi.telemetry.incrementExternal(response);
+        dashboardApi.telemetry.incrementCounter(response);
         return response;
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {
@@ -72,18 +72,18 @@ export function registerCreateRoute(
               message: `A dashboard with ID ${req?.params?.id} already exists.`,
             },
           });
-          dashboardApi.telemetry.incrementExternal(response);
+          dashboardApi.telemetry.incrementCounter(response);
           return response;
         }
 
         if (e.isBoom && e.output.statusCode === 403) {
           const response = res.forbidden();
-          dashboardApi.telemetry.incrementExternal(response);
+          dashboardApi.telemetry.incrementCounter(response);
           return response;
         }
 
         const response = res.badRequest({ body: e });
-        dashboardApi.telemetry.incrementExternal(response);
+        dashboardApi.telemetry.incrementCounter(response);
         return response;
       }
     }

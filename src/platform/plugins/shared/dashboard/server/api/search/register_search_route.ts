@@ -43,17 +43,17 @@ export function registerSearchRoute(router: VersionedRouter<DashboardApiRequestH
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
           const response = res.forbidden();
-          dashboardApi.telemetry.incrementExternal(response);
+          dashboardApi.telemetry.incrementCounter(response);
           return response;
         }
 
         const response = res.badRequest();
-        dashboardApi.telemetry.incrementExternal(response);
+        dashboardApi.telemetry.incrementCounter(response);
         return response;
       }
 
       const response = res.ok({ body: result });
-      dashboardApi.telemetry.incrementExternal(response);
+      dashboardApi.telemetry.incrementCounter(response);
       return response;
     }
   );

@@ -8,34 +8,42 @@
  */
 
 import type { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 export interface DashboardApiTelemetry {
-  incrementExternal: (response: IKibanaResponse, incrementBy?: number) => void;
+  incrementCounter: (response: IKibanaResponse, incrementBy?: number) => void;
+}
+
+function isKibanaOrigin(request: KibanaRequest) {
+  const origin = request.headers[X_ELASTIC_INTERNAL_ORIGIN_REQUEST];
+  return typeof origin === 'string' && origin.toLocaleLowerCase() === 'kibana';
 }
 
 export const registerDashboardApiTelemetry = (params: {
   usageCounter?: UsageCounter;
-  isDashboardUiRequest: boolean;
   request: KibanaRequest;
 }): DashboardApiTelemetry => {
-  const { usageCounter, isDashboardUiRequest: isUi, request } = params;
+  const { usageCounter, request } = params;
+  const routePath = request.route.routePath;
 
-  if (!usageCounter)
+  /**
+   * Only count external API calls, ignoring calls originating from within Kibana itself.
+   */
+  if (!usageCounter || !routePath || isKibanaOrigin(request)) {
     return {
-      incrementExternal: () => {},
+      incrementCounter: () => {},
     };
+  }
 
-  const routePath = request.route.routePath ?? request.route.path;
   const counterPrefix = `${request.route.method} ${routePath}`;
 
-  const incrementExternal: DashboardApiTelemetry['incrementExternal'] = (response, incrementBy) => {
-    if (isUi) return;
+  const incrementCounter: DashboardApiTelemetry['incrementCounter'] = (response, incrementBy) => {
     usageCounter.incrementCounter({
       counterName: `${counterPrefix} ${response.status}`,
       incrementBy,
     });
   };
 
-  return { incrementExternal };
+  return { incrementCounter };
 };

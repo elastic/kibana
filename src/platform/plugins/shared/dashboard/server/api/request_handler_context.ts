@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
+import type { CustomRequestHandlerContext, IContextProvider } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { DashboardApiTelemetry } from './usage/register_api_telemetry';
 import { registerDashboardApiTelemetry } from './usage/register_api_telemetry';
-import { isDashboardUiRequest } from './usage/is_dashboard_ui_request';
 
 export interface DashboardApiRouteHandlerContext {
-  isDashboardUiRequest: boolean;
   telemetry: DashboardApiTelemetry;
 }
 
@@ -22,22 +20,15 @@ export type DashboardApiRequestHandlerContext = CustomRequestHandlerContext<{
   dashboardApi: DashboardApiRouteHandlerContext;
 }>;
 
-export const registerDashboardApiRouteHandlerContext = (
-  core: CoreSetup,
+export function createRouteHandlerContext(
   usageCounter?: UsageCounter
-) => {
-  core.http.registerRouteHandlerContext<DashboardApiRequestHandlerContext, 'dashboardApi'>(
-    'dashboardApi',
-    async (_context, request) => {
-      const isUi = isDashboardUiRequest(request.headers);
-      return {
-        isDashboardUiRequest: isUi,
-        telemetry: registerDashboardApiTelemetry({
-          usageCounter,
-          isDashboardUiRequest: isUi,
-          request,
-        }),
-      };
-    }
-  );
-};
+): IContextProvider<DashboardApiRequestHandlerContext, 'dashboardApi'> {
+  return (context, request) => {
+    return {
+      telemetry: registerDashboardApiTelemetry({
+        usageCounter,
+        request,
+      }),
+    };
+  };
+}

@@ -47,21 +47,21 @@ export function registerDeleteRoute(router: VersionedRouter<DashboardApiRequestH
               message: `A dashboard with ID [${req.params.id}] was not found.`,
             },
           });
-          dashboardApi.telemetry.incrementExternal(response);
+          dashboardApi.telemetry.incrementCounter(response);
           return response;
         }
         if (e.isBoom && e.output.statusCode === 403) {
           const response = res.forbidden();
-          dashboardApi.telemetry.incrementExternal(response);
+          dashboardApi.telemetry.incrementCounter(response);
           return response;
         }
         const response = res.badRequest();
-        dashboardApi.telemetry.incrementExternal(response);
+        dashboardApi.telemetry.incrementCounter(response);
         return response;
       }
 
       const response = res.noContent();
-      dashboardApi.telemetry.incrementExternal(response);
+      dashboardApi.telemetry.incrementCounter(response);
       return response;
     }
   );

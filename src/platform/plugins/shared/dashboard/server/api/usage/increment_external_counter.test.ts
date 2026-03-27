@@ -31,9 +31,7 @@ describe('dashboard api telemetry - ctx.dashboardApi.telemetry facade', () => {
         routePath,
       }),
     });
-    expect(() =>
-      telemetry.incrementExternal({ status: 200 } as IKibanaResponse<any>)
-    ).not.toThrow();
+    expect(() => telemetry.incrementCounter({ status: 200 } as IKibanaResponse<any>)).not.toThrow();
   });
 
   it('does not increment for Dashboard UI request', () => {
@@ -46,7 +44,7 @@ describe('dashboard api telemetry - ctx.dashboardApi.telemetry facade', () => {
         routePath,
       }),
     });
-    telemetry.incrementExternal({ status: 200 } as IKibanaResponse<any>);
+    telemetry.incrementCounter({ status: 200 } as IKibanaResponse<any>);
     expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
@@ -60,7 +58,7 @@ describe('dashboard api telemetry - ctx.dashboardApi.telemetry facade', () => {
         routePath,
       }),
     });
-    telemetry.incrementExternal({ status: 200 } as IKibanaResponse<any>);
+    telemetry.incrementCounter({ status: 200 } as IKibanaResponse<any>);
 
     expect(usageCounter.incrementCounter).toHaveBeenNthCalledWith(1, {
       counterName: 'get /api/dashboards/{id} 200',
@@ -77,7 +75,7 @@ describe('dashboard api telemetry - ctx.dashboardApi.telemetry facade', () => {
         path: actualPath,
       }),
     });
-    telemetry.incrementExternal({ status: 204 } as IKibanaResponse<any>);
+    telemetry.incrementCounter({ status: 204 } as IKibanaResponse<any>);
     expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
       counterName: 'get /api/dashboards/123 204',
       incrementBy: undefined,
