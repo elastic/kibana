@@ -33,6 +33,7 @@ import {
   useConnectorTypeDecorations,
   useFocusedStepDecoration,
   useLineDifferencesDecorations,
+  useMigrationHintDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
   useWorkflowIdDecorations,
@@ -490,6 +491,12 @@ export const WorkflowYAMLEditor = ({
     yamlDocument: yamlDocument || null,
     isEditorMounted,
     readOnly: isExecutionYaml,
+  });
+
+  useMigrationHintDecorations({
+    editor: editorRef.current,
+    isEditorMounted,
+    validationErrors: interceptorValidationErrors,
   });
 
   useWorkflowIdDecorations({
