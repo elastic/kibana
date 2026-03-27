@@ -10,16 +10,12 @@
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
-import type {
-  Dimension,
-  MetricsESQLResponse,
-  ParsedMetricsResult,
-  MetricsInfoResponse,
-} from '../../../../types';
-import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
+import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { getFieldIconType } from '@kbn/field-utils';
+import type { Dimension, MetricsESQLResponse, MetricsInfo, ParsedMetrics } from '../../../../types';
+import { useTelemetry } from '../../../../context/ebt_telemetry_context';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { parseMetricsResponse } from '../utils/parse_metrics_response';
+import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
 
 /**
@@ -38,7 +34,8 @@ export function useFetchMetricsData({
   services: ChartSectionProps['services'];
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
-}): MetricsInfoResponse {
+}): MetricsInfo {
+  const { trackMetricsInfo } = useTelemetry();
   const esql = getEsqlQuery(fetchParams.query);
 
   const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
@@ -54,7 +51,7 @@ export function useFetchMetricsData({
   );
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
-    async (signal: AbortSignal): Promise<ParsedMetricsResult | null> => {
+    async (signal: AbortSignal): Promise<ParsedMetrics | null> => {
       const result = await executeEsqlQuery<MetricsESQLResponse>({
         esqlQuery: metricsInfoQuery,
         search: services.data.search.search,
@@ -66,16 +63,25 @@ export function useFetchMetricsData({
         uiSettings: services.uiSettings,
       });
 
-      const parsed = parseMetricsResponse(result);
+      const getFieldType = (name: string) => {
+        const field = fetchParams.dataView?.getFieldByName(name);
+        return field ? getFieldIconType(field) : undefined;
+      };
 
-      return {
-        metricItems: [...(parsed?.metricItems ?? [])].sort((a, b) =>
+      const parsed = parseMetricsWithTelemetry(result, getFieldType);
+
+      const sortedMetrics: ParsedMetrics = {
+        metricItems: [...parsed.metricItems].sort((a, b) =>
           a.metricName.localeCompare(b.metricName)
         ),
-        allDimensions: [...(parsed?.allDimensions ?? [])].sort((a, b) =>
-          a.name.localeCompare(b.name)
-        ),
+        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
       };
+
+      if (!signal.aborted) {
+        trackMetricsInfo(parsed.telemetry);
+      }
+
+      return sortedMetrics;
     },
     [
       metricsInfoQuery,
@@ -85,6 +91,7 @@ export function useFetchMetricsData({
       fetchParams.esqlVariables,
       services.data.search.search,
       services.uiSettings,
+      trackMetricsInfo,
     ]
   );
 

@@ -11,6 +11,7 @@ import type {
   ConvertProcessor,
   GrokProcessor,
   JoinProcessor,
+  JsonExtractProcessor,
   LowercaseProcessor,
   MathProcessor,
   NetworkDirectionProcessor,
@@ -25,6 +26,7 @@ import type {
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
   TrimProcessor,
+  EnrichProcessor,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
@@ -42,7 +44,8 @@ import {
   type ClassicFieldDefinition,
 } from '@kbn/streams-schema';
 import type { IngestUpsertRequest } from '@kbn/streams-schema';
-import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
+import { isEmpty, mapValues, omit } from 'lodash';
+import { PRIORITIZED_CONTENT_FIELDS, getDefaultTextField } from '@kbn/streams-plugin/common';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
 import { configDrivenProcessors } from './steps/blocks/action/config_driven';
@@ -60,6 +63,7 @@ import type {
   EnrichmentDataSourceWithUIAttributes,
   GrokFormState,
   JoinFormState,
+  JsonExtractFormState,
   LowercaseFormState,
   ManualIngestPipelineFormState,
   MathFormState,
@@ -72,6 +76,7 @@ import type {
   SortFormState,
   TrimFormState,
   UppercaseFormState,
+  EnrichFormState,
 } from './types';
 
 /**
@@ -94,7 +99,9 @@ export const SPECIALISED_TYPES = [
   'split',
   'sort',
   'concat',
+  'json_extract',
   'network_direction',
+  'enrich',
 ];
 
 interface FormStateDependencies {
@@ -107,13 +114,7 @@ interface RecalcColumnWidthsParams {
   visibleColumns: string[];
 }
 
-export const PRIORITIZED_CONTENT_FIELDS = [
-  'message',
-  'body.text',
-  'error.message',
-  'event.original',
-  'attributes.exception.message',
-];
+export { PRIORITIZED_CONTENT_FIELDS, getDefaultTextField };
 
 const PRIORITIZED_DATE_FIELDS = [
   'timestamp',
@@ -125,27 +126,6 @@ const PRIORITIZED_DATE_FIELDS = [
   'custom.timestamp',
   'attributes.custom.timestamp',
 ];
-
-export const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
-  // Count occurrences of well-known text fields in the sample documents
-  const acceptableDefaultFields = sampleDocs.flatMap((doc) =>
-    Object.keys(doc).filter((key) => prioritizedFields.includes(key))
-  );
-  const acceptableFieldsOccurrences = countBy(acceptableDefaultFields);
-
-  // Sort by count descending first, then by order of field in prioritizedFields
-  const sortedFields = orderBy(
-    Object.entries(acceptableFieldsOccurrences),
-    [
-      ([_field, occurrencies]) => occurrencies, // Sort entries by occurrencies descending
-      ([field]) => prioritizedFields.indexOf(field), // Sort entries by priority order in well-known fields
-    ],
-    ['desc', 'asc']
-  );
-
-  const mostCommonField = sortedFields[0];
-  return mostCommonField ? mostCommonField[0] : '';
-};
 
 /**
  * Checks if the sample documents have valid message fields with actual content
@@ -323,6 +303,17 @@ const defaultConcatProcessorFormState = (): ConcatFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultJsonExtractProcessorFormState = (
+  sampleDocs: FlattenRecord[]
+): JsonExtractFormState => ({
+  action: 'json_extract' as const,
+  field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+  extractions: [{ selector: '', target_field: '', type: 'keyword' }],
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultNetworkDirectionProcessorFormState = (): NetworkDirectionFormState => ({
   action: 'network_direction' as const,
   source_ip: '',
@@ -331,6 +322,16 @@ const defaultNetworkDirectionProcessorFormState = (): NetworkDirectionFormState 
   target_field: 'attributes.network.direction',
   ignore_failure: true,
   ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultEnrichProcessorFormState = (): EnrichFormState => ({
+  action: 'enrich' as const,
+  policy_name: '',
+  to: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  override: true,
   where: ALWAYS_CONDITION,
 });
 
@@ -362,7 +363,9 @@ const defaultProcessorFormStateByType: Record<
   split: defaultSplitProcessorFormState,
   sort: defaultSortProcessorFormState,
   concat: defaultConcatProcessorFormState,
+  json_extract: defaultJsonExtractProcessorFormState,
   network_direction: defaultNetworkDirectionProcessorFormState,
+  enrich: defaultEnrichProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -430,7 +433,9 @@ export const getFormStateFromActionStep = (
     step.action === 'join' ||
     step.action === 'split' ||
     step.action === 'sort' ||
-    step.action === 'concat'
+    step.action === 'concat' ||
+    step.action === 'json_extract' ||
+    step.action === 'enrich'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -776,6 +781,26 @@ export const convertFormStateToProcessor = (
       };
     }
 
+    if (formState.action === 'json_extract') {
+      const { field, extractions, ignore_failure, ignore_missing } = formState;
+
+      const filteredExtractions = extractions.filter(
+        (e) => !isEmpty(e.selector) && !isEmpty(e.target_field)
+      );
+
+      return {
+        processorDefinition: {
+          action: 'json_extract',
+          field,
+          extractions: filteredExtractions,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as JsonExtractProcessor,
+      };
+    }
+
     if (formState.action === 'network_direction') {
       const { source_ip, destination_ip, target_field, ignore_failure, ignore_missing } = formState;
 
@@ -796,6 +821,22 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as NetworkDirectionProcessor,
+      };
+    }
+
+    if (formState.action === 'enrich') {
+      const { policy_name, to, ignore_failure, ignore_missing, override } = formState;
+      return {
+        processorDefinition: {
+          action: 'enrich',
+          policy_name,
+          to,
+          ignore_failure,
+          ignore_missing,
+          override,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as EnrichProcessor,
       };
     }
 

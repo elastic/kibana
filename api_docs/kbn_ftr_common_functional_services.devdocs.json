@@ -1337,9 +1337,9 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           }
@@ -1894,9 +1894,9 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           },
@@ -2146,9 +2146,9 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           },
@@ -2413,9 +2413,9 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           }
@@ -2631,9 +2631,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -2883,9 +2883,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -3143,9 +3143,9 @@
               },
               ") => ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/kbn-client",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnKbnClientPluginApi",
                 "section": "def-common.KbnClient",
                 "text": "KbnClient"
               }
@@ -3192,9 +3192,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -3444,9 +3444,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -3753,9 +3753,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -4005,9 +4005,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -4353,9 +4353,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -4605,9 +4605,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -4930,9 +4930,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -5182,9 +5182,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -5643,9 +5643,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -5895,9 +5895,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -6198,9 +6198,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -6450,9 +6450,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -6753,9 +6753,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -7005,9 +7005,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -7311,9 +7311,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -7563,9 +7563,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -7873,9 +7873,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
@@ -8125,9 +8125,9 @@
                   },
                   ") => ",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
