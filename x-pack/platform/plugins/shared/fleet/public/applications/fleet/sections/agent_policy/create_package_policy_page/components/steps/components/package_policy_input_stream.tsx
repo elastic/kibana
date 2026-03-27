@@ -41,12 +41,10 @@ import { sendGetDataStreams, useStartServices } from '../../../../../../../../ho
 import {
   getRegistryDataStreamAssetBaseName,
   mapPackageReleaseToIntegrationCardRelease,
-  getPolicyTemplateInputDefinition,
-  registryInputAllowsDynamicSignalTypes,
-  isInputOnlyPolicyTemplate,
   DATA_STREAM_USE_APM_VAR,
   shouldIncludeUseAPMVar,
 } from '../../../../../../../../../common/services';
+import { hasDynamicSignalTypes } from '../../../../../../../../../common/services/otelcol_helpers';
 
 import type {
   NewPackagePolicyInputStream,
@@ -137,23 +135,10 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     // Check if this specific stream's input allows dynamic signal types.
     // Works for both input-only packages and composable integration packages
     // (integration templates with nested OTel inputs).
-    const dynamicSignalTypes = useMemo(() => {
-      const inputType = packageInputStream.input;
-      return (packageInfo?.policy_templates ?? []).some((template) => {
-        if (isInputOnlyPolicyTemplate(template) && template.input !== inputType) {
-          return false;
-        }
-        if (
-          !isInputOnlyPolicyTemplate(template) &&
-          inputPolicyTemplate &&
-          template.name !== inputPolicyTemplate
-        ) {
-          return false;
-        }
-        const inputDef = getPolicyTemplateInputDefinition(template, inputType);
-        return inputDef ? registryInputAllowsDynamicSignalTypes(inputDef) : false;
-      });
-    }, [packageInfo?.policy_templates, packageInputStream.input, inputPolicyTemplate]);
+    const dynamicSignalTypes = useMemo(
+      () => hasDynamicSignalTypes(packageInfo, packageInputStream.input, inputPolicyTemplate),
+      [packageInfo, packageInputStream.input, inputPolicyTemplate]
+    );
 
     const customDataStreamTypeVarValue =
       customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';

@@ -84,7 +84,7 @@ describe('hasDynamicSignalTypes', () => {
         },
       ],
     } as any as PackageInfo;
-    expect(hasDynamicSignalTypes(pkg)).toBe(true);
+    expect(hasDynamicSignalTypes(pkg, 'otelcol')).toBe(true);
   });
 
   it('should return false when OTel input has dynamic_signal_types: false', () => {
@@ -100,7 +100,7 @@ describe('hasDynamicSignalTypes', () => {
         },
       ],
     } as any as PackageInfo;
-    expect(hasDynamicSignalTypes(pkg)).toBe(false);
+    expect(hasDynamicSignalTypes(pkg, 'otelcol')).toBe(false);
   });
 
   it('should return false when OTel input has no dynamic_signal_types property', () => {
@@ -109,10 +109,10 @@ describe('hasDynamicSignalTypes', () => {
         { name: 't', title: 't', input: 'otelcol', type: 'logs', template_path: 'input.yml.hbs' },
       ],
     } as any as PackageInfo;
-    expect(hasDynamicSignalTypes(pkg)).toBe(false);
+    expect(hasDynamicSignalTypes(pkg, 'otelcol')).toBe(false);
   });
 
-  it('should return false for non-OTel input package', () => {
+  it('should return false when inputType does not match the template input type', () => {
     const pkg = {
       policy_templates: [
         {
@@ -125,11 +125,11 @@ describe('hasDynamicSignalTypes', () => {
         },
       ],
     } as any as PackageInfo;
-    expect(hasDynamicSignalTypes(pkg)).toBe(false);
+    expect(hasDynamicSignalTypes(pkg, 'otelcol')).toBe(false);
   });
 
   it('should return false when packageInfo is undefined', () => {
-    expect(hasDynamicSignalTypes(undefined)).toBe(false);
+    expect(hasDynamicSignalTypes(undefined, 'otelcol')).toBe(false);
   });
 });
 

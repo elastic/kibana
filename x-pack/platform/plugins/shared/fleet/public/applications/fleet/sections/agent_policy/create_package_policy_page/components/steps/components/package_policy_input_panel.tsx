@@ -251,7 +251,15 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     );
     const showTopLevelDescription = inputStreams.length === 1;
 
-    const dynamicSignalTypes = useMemo(() => hasDynamicSignalTypes(packageInfo), [packageInfo]);
+    const dynamicSignalTypes = useMemo(
+      () =>
+        hasDynamicSignalTypes(
+          packageInfo,
+          packagePolicyInput.type,
+          packagePolicyInput.policy_template
+        ),
+      [packageInfo, packagePolicyInput.type, packagePolicyInput.policy_template]
+    );
 
     // When isSingleInputAndStreams, check if all stream vars are advanced so we can
     // consolidate them into the input-level advanced section.

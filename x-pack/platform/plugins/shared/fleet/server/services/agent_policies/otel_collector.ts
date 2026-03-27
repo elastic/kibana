@@ -103,7 +103,12 @@ export function generateOtelcolConfig(
                       'pipelines',
                       suffix,
                       addSuffixToOtelcolPipelinesComponents(
-                        adjustPipelineSignalType(stream, packageInfo),
+                        adjustPipelineSignalType(
+                          stream,
+                          packageInfo,
+                          input.type,
+                          policyTemplateName
+                        ),
                         suffix
                       )
                     ).pipelines ?? {},
@@ -315,13 +320,15 @@ function conditionallyAddApmToPipelines(
 
 function adjustPipelineSignalType(
   stream: FullAgentPolicyInputStream,
-  packageInfo: PackageInfo | undefined
+  packageInfo: PackageInfo | undefined,
+  inputType: string,
+  inputPolicyTemplate?: string
 ): Record<OTelCollectorPipelineID, any> {
   const pipelines = stream.service?.pipelines ?? {};
   const dataStreamType = stream.data_stream.type;
   if (
     !dataStreamType ||
-    hasDynamicSignalTypes(packageInfo) ||
+    hasDynamicSignalTypes(packageInfo, inputType, inputPolicyTemplate) ||
     Object.keys(pipelines).length !== 1
   ) {
     return pipelines;

@@ -7,7 +7,12 @@
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 import type { PackageInfo, PackagePolicyInput } from '../types';
 
-import { getNormalizedInputs, isInputOnlyPolicyTemplate } from './policy_template';
+import {
+  getNormalizedInputs,
+  isInputOnlyPolicyTemplate,
+  getPolicyTemplateInputDefinition,
+  registryInputAllowsDynamicSignalTypes,
+} from './policy_template';
 
 export const OTEL_INPUTS_MINIMUM_VERSION = '9.2.0';
 
@@ -20,12 +25,24 @@ export const packageInfoHasOtelInputs = (packageInfo: PackageInfo | undefined) =
     getNormalizedInputs(template).some((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
   );
 
-export const hasDynamicSignalTypes = (packageInfo: PackageInfo | undefined): boolean =>
-  (packageInfo?.policy_templates || []).some((template) => {
-    if (!isInputOnlyPolicyTemplate(template)) {
+export const hasDynamicSignalTypes = (
+  packageInfo: PackageInfo | undefined,
+  inputType: string,
+  inputPolicyTemplate?: string
+): boolean =>
+  (packageInfo?.policy_templates ?? []).some((template) => {
+    if (isInputOnlyPolicyTemplate(template) && template.input !== inputType) {
       return false;
     }
-    return template.input === OTEL_COLLECTOR_INPUT_TYPE && template.dynamic_signal_types === true;
+    if (
+      !isInputOnlyPolicyTemplate(template) &&
+      inputPolicyTemplate &&
+      template.name !== inputPolicyTemplate
+    ) {
+      return false;
+    }
+    const inputDef = getPolicyTemplateInputDefinition(template, inputType);
+    return inputDef ? registryInputAllowsDynamicSignalTypes(inputDef) : false;
   });
 
 export const packagePolicyHasOtelInputs = (packagePolicyInputs: PackagePolicyInput[] | undefined) =>
