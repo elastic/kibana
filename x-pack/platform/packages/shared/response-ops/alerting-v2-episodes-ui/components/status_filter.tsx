@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiPopover, EuiFilterButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InlineFilterPopover } from './inline_filter_popover';
@@ -19,7 +19,7 @@ const EPISODE_STATUS_OPTIONS: Array<{ label: string; value: string }> = [
   },
   {
     label: i18n.translate('xpack.alertingV2EpisodesUi.statusFilter.recoveringLabel', {
-      defaultMessage: 'Recovered',
+      defaultMessage: 'Recovering',
     }),
     value: 'recovering',
   },
@@ -43,11 +43,11 @@ interface StatusFilterProps {
   'data-test-subj'?: string;
 }
 
-export const StatusFilter: React.FC<StatusFilterProps> = ({
+export function StatusFilter({
   selectedStatus,
   onStatusChange,
   'data-test-subj': dataTestSubj = 'statusFilter',
-}) => {
+}: StatusFilterProps) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleSelectionChange = useCallback(
@@ -56,8 +56,6 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
     },
     [onStatusChange]
   );
-
-  const filteredOptions = useMemo(() => EPISODE_STATUS_OPTIONS, []);
 
   return (
     <EuiPopover
@@ -86,7 +84,7 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
       panelPaddingSize="none"
     >
       <InlineFilterPopover
-        options={filteredOptions}
+        options={EPISODE_STATUS_OPTIONS}
         selectedValues={selectedStatus ? [selectedStatus] : []}
         singleSelect
         onSelectionChange={handleSelectionChange}
@@ -97,4 +95,4 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
       />
     </EuiPopover>
   );
-};
+}
