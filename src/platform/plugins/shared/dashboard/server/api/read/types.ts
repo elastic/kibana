@@ -8,8 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { droppedPanelWarningSchema, getReadResponseBodySchema } from './schemas';
+import type { getReadResponseBodySchema } from './schemas';
 
-export type DroppedPanelWarning = TypeOf<typeof droppedPanelWarningSchema>;
 /** The response body type for reading a dashboard. */
 export type DashboardReadResponseBody = TypeOf<ReturnType<typeof getReadResponseBodySchema>>;

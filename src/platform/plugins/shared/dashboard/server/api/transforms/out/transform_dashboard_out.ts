@@ -15,7 +15,7 @@ import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
 import { transformSearchSourceOut } from './transform_search_source_out';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
-import type { DroppedPanelWarning } from '../../read/types';
+import type { Warnings } from '../../types';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
@@ -25,7 +25,7 @@ export function transformDashboardOut(
   dashboardState: Partial<
     Omit<DashboardState, 'options'> & { options: Partial<DashboardState['options']> }
   >;
-  warnings: DroppedPanelWarning[];
+  warnings: Warnings;
 } {
   const {
     pinned_panels,

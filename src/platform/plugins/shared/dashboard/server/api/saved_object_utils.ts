@@ -14,7 +14,7 @@ import type { DashboardState } from './types';
 import { transformDashboardOut } from './transforms';
 import type { getDashboardStateSchema } from './dashboard_state_schemas';
 import { stripUnmappedKeys } from './scope_tooling';
-import type { DroppedPanelWarning } from './read/types';
+import type { Warnings } from './types';
 
 export function getDashboardMeta(
   savedObject:
@@ -46,7 +46,7 @@ export function getDashboardCRUResponseBody(
   isDashboardAppRequest: boolean = false
 ) {
   let sanatizedDashboardState: DashboardState;
-  const warnings: DroppedPanelWarning[] = [];
+  const warnings: Warnings = [];
   try {
     // eslint-disable-next-line prefer-const
     let { dashboardState, warnings: dashboardStateWarnings } = transformDashboardOut(

@@ -15,16 +15,16 @@ import type { DashboardState, DashboardPanel, DashboardSection } from '../../typ
 import { embeddableService } from '../../../kibana_services';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
-import type { DroppedPanelWarning } from '../../read/types';
+import type { Warnings } from '../../types';
 
 export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
   containerReferences?: SavedObjectReference[],
   isDashboardAppRequest: boolean = false
-): { panels: DashboardState['panels']; warnings: DroppedPanelWarning[] } {
+): { panels: DashboardState['panels']; warnings: Warnings } {
   const topLevelPanels: DashboardPanel[] = [];
-  const warnings: DroppedPanelWarning[] = [];
+  const warnings: Warnings = [];
   const sectionsMap: { [uuid: string]: DashboardSection } = {};
   sections.forEach((section) => {
     const { gridData: grid, ...restOfSection } = section;
@@ -105,8 +105,8 @@ function transformPanel(
   const transforms = embeddableService?.getTransforms(transformType);
 
   const transformedPanelConfig =
-      transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
-      defaultTransform(embeddableConfig);
+    transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
+    defaultTransform(embeddableConfig);
 
   return {
     grid: restOfGrid,

@@ -9,11 +9,11 @@
 
 import { isDashboardSection } from '../../common';
 import { embeddableService } from '../kibana_services';
-import type { DroppedPanelWarning } from './read/types';
+import type { Warnings } from './types';
 import type { DashboardPanel, DashboardState, DashboardPinnedPanel } from './types';
 
 export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
-  const warnings: DroppedPanelWarning[] = [];
+  const warnings: Warnings = [];
   const { pinned_panels, panels, ...rest } = dashboardState;
 
   function isMappedPanelType(panel: DashboardPanel | DashboardPinnedPanel) {

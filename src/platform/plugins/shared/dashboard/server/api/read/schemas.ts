@@ -8,7 +8,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { referenceSchema } from '@kbn/content-management-utils';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import {
   baseMetaSchema,
@@ -16,25 +15,13 @@ import {
   resolveMetaSchema,
   updatedMetaSchema,
 } from '../meta_schemas';
-
-export const droppedPanelWarningSchema = schema.object({
-  type: schema.literal('dropped_panel'),
-  message: schema.string(),
-  panel_type: schema.string(),
-  panel_config: schema.object(
-    {},
-    {
-      unknowns: 'allow',
-    }
-  ),
-  panel_references: schema.maybe(schema.arrayOf(referenceSchema)),
-});
+import { warningsSchema } from '../warnings_schema';
 
 export function getReadResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
     data: getDashboardStateSchema(isDashboardAppRequest),
     meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, resolveMetaSchema]),
-    warnings: schema.maybe(schema.arrayOf(droppedPanelWarningSchema)),
+    warnings: schema.maybe(warningsSchema),
   });
 }
