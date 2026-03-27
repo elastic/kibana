@@ -11,58 +11,34 @@ import { LegendLayout, type XYLegendValue } from '@kbn/chart-expressions-common'
 import type { XYVisualizationState } from '@kbn/lens-common';
 
 import type { XYState } from '../../../schema';
-import { fromAPILegendSizeToState, fromLensStateLegendSizeToAPI } from '../legend_sizes';
-import { getLegendTruncateAfterLines, stripUndefined } from '../utils';
+import { legendSizeCompat } from '../legend_sizes';
+import { getLegendTruncateAfterLines, getReversibleMappings, stripUndefined } from '../utils';
 
 type OutsideLegendType = Extract<Required<XYState['legend']>, { placement: 'outside' }>;
 
 type StatisticsType = OutsideLegendType['statistics'][number];
 
-const StatsAPIToOldState = {
-  avg: 'average',
-  last_value: 'lastValue',
-  first_value: 'firstValue',
-  last_non_null_value: 'lastNonNullValue',
-  first_non_null_value: 'firstNonNullValue',
-  current_and_last_value: 'currentAndLastValue',
-  difference_percentage: 'differencePercent',
-  standard_deviation: 'stdDeviation',
-  distinct_count: 'distinctCount',
-} as const;
-
-function isAPIMappedStatistic(stat: StatisticsType): stat is keyof typeof StatsAPIToOldState {
-  return stat in StatsAPIToOldState;
-}
-
-function mapStatToCamelCase(stat: StatisticsType): XYLegendValue {
-  if (isAPIMappedStatistic(stat)) {
-    return StatsAPIToOldState[stat];
-  }
-  return stat;
-}
-
-const StatsStateToAPI = {
-  average: 'avg',
-  lastValue: 'last_value',
-  firstValue: 'first_value',
-  lastNonNullValue: 'last_non_null_value',
-  firstNonNullValue: 'first_non_null_value',
-  currentAndLastValue: 'current_and_last_value',
-  differencePercent: 'difference_percentage',
-  stdDeviation: 'standard_deviation',
-  distinctCount: 'distinct_count',
-} as const;
-
-function isStateMappedStatistic(stat: XYLegendValue): stat is keyof typeof StatsStateToAPI {
-  return stat in StatsStateToAPI;
-}
-
-function mapStatToSnakeCase(stat: XYLegendValue): StatisticsType {
-  if (isStateMappedStatistic(stat)) {
-    return StatsStateToAPI[stat];
-  }
-  return stat;
-}
+const legendStatisticCompat = getReversibleMappings<StatisticsType, XYLegendValue>([
+  // Unchanged
+  ['total', 'total'],
+  ['count', 'count'],
+  ['min', 'min'],
+  ['max', 'max'],
+  ['median', 'median'],
+  ['range', 'range'],
+  ['variance', 'variance'],
+  ['difference', 'difference'],
+  // Changed
+  ['avg', 'average'],
+  ['last_value', 'lastValue'],
+  ['first_value', 'firstValue'],
+  ['last_non_null_value', 'lastNonNullValue'],
+  ['first_non_null_value', 'firstNonNullValue'],
+  ['current_and_last_value', 'currentAndLastValue'],
+  ['difference_percentage', 'differencePercent'],
+  ['standard_deviation', 'stdDeviation'],
+  ['distinct_count', 'distinctCount'],
+]);
 
 const DEFAULT_LEGEND_POSITON = 'right';
 
@@ -90,7 +66,11 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
     shouldTruncate: Boolean(legend?.truncate_after_lines), // 0 will be interpreted as false
     ...(legend?.truncate_after_lines ? { maxLines: legend?.truncate_after_lines } : {}),
     ...(legend?.statistics
-      ? { legendStats: (legend?.statistics ?? []).map(mapStatToCamelCase) }
+      ? {
+          legendStats: (legend?.statistics ?? []).map((stat) =>
+            legendStatisticCompat.toState(stat)
+          ),
+        }
       : {}),
     ...extractAlignment(legend),
     ...(legend?.visibility === 'auto' ? { showSingleSeries: true } : {}),
@@ -102,7 +82,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
         }
       : {
           position: legend?.position ?? DEFAULT_LEGEND_POSITON,
-          legendSize: fromAPILegendSizeToState(legend?.size),
+          legendSize: legendSizeCompat.toState(legend?.size),
           ...(legend?.layout === 'list' ? { layout: LegendLayout.List } : {}),
         }),
   };
@@ -142,7 +122,7 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
   }
   return {
     placement: 'outside' as const,
-    size: fromLensStateLegendSizeToAPI(legend.legendSize),
+    size: legendSizeCompat.toAPI(legend.legendSize),
     position: legend.position,
   };
 }
@@ -154,7 +134,7 @@ export function convertLegendToAPIFormat(
     visibility: !legend.isVisible ? 'hidden' : legend.showSingleSeries ? 'auto' : 'visible',
     truncate_after_lines: getLegendTruncateAfterLines(legend),
     statistics: legend?.legendStats?.length
-      ? legend.legendStats.map(mapStatToSnakeCase)
+      ? legend.legendStats.map((stat) => legendStatisticCompat.toAPI(stat))
       : undefined,
     ...getLegendLayout(legend),
   });

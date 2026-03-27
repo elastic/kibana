@@ -12,19 +12,7 @@ import type { XYCurveType } from '@kbn/expression-xy-plugin/common';
 import type { $Values } from 'utility-types';
 import type { XYDecorations } from '../../../schema/charts/xy';
 import type { XYApiLineInterpolation } from '../../../schema/charts/xy';
-import { stripUndefined } from '../utils';
-
-const curveTypeAPItoState: Record<$Values<XYApiLineInterpolation>, XYCurveType> = {
-  linear: 'LINEAR',
-  smooth: 'CURVE_MONOTONE_X',
-  stepped: 'CURVE_STEP_AFTER',
-};
-
-const curveTypeStateToAPI: Record<XYCurveType, $Values<XYApiLineInterpolation>> = {
-  LINEAR: 'linear',
-  CURVE_MONOTONE_X: 'smooth',
-  CURVE_STEP_AFTER: 'stepped',
-};
+import { getReversibleMappings, stripUndefined } from '../utils';
 
 type XYLensAppearanceState = Pick<
   XYVisualizationState,
@@ -37,55 +25,39 @@ type XYLensAppearanceState = Pick<
   | 'pointVisibility'
 >;
 
-const pointVisibilityAPItoState: Record<
-  'auto' | 'visible' | 'hidden',
-  'auto' | 'always' | 'never'
-> = {
-  auto: 'auto',
-  visible: 'always',
-  hidden: 'never',
-};
+const curveTypeCompat = getReversibleMappings<$Values<XYApiLineInterpolation>, XYCurveType>([
+  ['linear', 'LINEAR'],
+  ['smooth', 'CURVE_MONOTONE_X'],
+  ['stepped', 'CURVE_STEP_AFTER'],
+]);
 
-const pointVisibilityStateToAPI: Record<
-  'auto' | 'always' | 'never',
-  'auto' | 'visible' | 'hidden'
-> = {
-  auto: 'auto',
-  always: 'visible',
-  never: 'hidden',
-};
+const pointVisibilityCompat = getReversibleMappings([
+  ['auto', 'auto'],
+  ['visible', 'always'],
+  ['hidden', 'never'],
+]);
 
 export function convertAppearanceToAPIFormat(config: XYLensAppearanceState): XYDecorations {
   return stripUndefined<XYDecorations>({
     values: config.valueLabels != null ? { visible: config.valueLabels === 'show' } : undefined,
-    line_interpolation:
-      config.curveType != null ? curveTypeStateToAPI[config.curveType] : undefined,
+    line_interpolation: curveTypeCompat.toAPI(config.curveType),
     fill_opacity: config.fillOpacity,
     minimum_bar_height: config.minBarHeight,
     end_zones: config.hideEndzones != null ? { visible: config.hideEndzones } : undefined,
     current_time_marker:
       config.showCurrentTimeMarker != null ? { visible: config.showCurrentTimeMarker } : undefined,
-    point_visibility:
-      config.pointVisibility != null
-        ? pointVisibilityStateToAPI[config.pointVisibility]
-        : undefined,
+    point_visibility: pointVisibilityCompat.toAPI(config.pointVisibility),
   });
 }
 
 export function convertAppearanceToStateFormat(config: XYDecorations): XYLensAppearanceState {
   return stripUndefined<XYLensAppearanceState>({
     valueLabels: config.values != null ? (config.values.visible ? 'show' : 'hide') : undefined,
-    curveType:
-      config.line_interpolation != null
-        ? curveTypeAPItoState[config.line_interpolation]
-        : undefined,
+    curveType: curveTypeCompat.toState(config.line_interpolation),
     fillOpacity: config.fill_opacity,
     minBarHeight: config.minimum_bar_height,
     hideEndzones: config.end_zones?.visible,
     showCurrentTimeMarker: config.current_time_marker?.visible,
-    pointVisibility:
-      config.point_visibility != null
-        ? pointVisibilityAPItoState[config.point_visibility]
-        : undefined,
+    pointVisibility: pointVisibilityCompat.toState(config.point_visibility),
   });
 }

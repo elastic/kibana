@@ -24,6 +24,7 @@ import {
   buildAPIReferenceLinesLayer,
 } from './api_layers';
 import { stripUndefined } from '../utils';
+import { axisLabelOrientationCompat } from '../common';
 import { convertAppearanceToAPIFormat, convertAppearanceToStateFormat } from './appearances';
 
 function convertFittingToStateFormat(fitting: XYState['fitting']) {
@@ -60,12 +61,6 @@ function convertAPIExtentToStateFormat(extent: ExtentsType): AxisExtentConfig | 
       return;
   }
 }
-
-const orientationDictionary = {
-  horizontal: 0,
-  vertical: -90,
-  angled: -45,
-} as const;
 
 function convertAxisSettingsToStateFormat(
   axis: XYState['axis']
@@ -123,9 +118,13 @@ function convertAxisSettingsToStateFormat(
     axis?.right?.labels?.orientation == null
       ? undefined
       : {
-          x: orientationDictionary[axis?.x?.labels?.orientation ?? 'horizontal'],
-          yLeft: orientationDictionary[axis?.left?.labels?.orientation ?? 'horizontal'],
-          yRight: orientationDictionary[axis?.right?.labels?.orientation ?? 'horizontal'],
+          x: axisLabelOrientationCompat.toState(axis?.x?.labels?.orientation ?? 'horizontal'),
+          yLeft: axisLabelOrientationCompat.toState(
+            axis?.left?.labels?.orientation ?? 'horizontal'
+          ),
+          yRight: axisLabelOrientationCompat.toState(
+            axis?.right?.labels?.orientation ?? 'horizontal'
+          ),
         };
   const xTitle = axis?.x?.title?.value;
   const yTitle = axis?.left?.title?.value;
@@ -303,9 +302,7 @@ function convertAxisSettingsToAPIFormat(
     ...(config.labelsOrientation?.x != null
       ? {
           labels: {
-            orientation: Object.entries(orientationDictionary).find(
-              ([_, value]) => value === config.labelsOrientation?.x
-            )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
+            orientation: axisLabelOrientationCompat.toAPI(config.labelsOrientation.x),
           },
         }
       : {}),
@@ -339,9 +336,7 @@ function convertAxisSettingsToAPIFormat(
     ...(config.labelsOrientation?.yLeft != null
       ? {
           labels: {
-            orientation: Object.entries(orientationDictionary).find(
-              ([_, value]) => value === config.labelsOrientation?.yLeft
-            )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
+            orientation: axisLabelOrientationCompat.toAPI(config.labelsOrientation.yLeft),
           },
         }
       : {}),
@@ -374,9 +369,7 @@ function convertAxisSettingsToAPIFormat(
     ...(config.labelsOrientation?.yRight != null
       ? {
           labels: {
-            orientation: Object.entries(orientationDictionary).find(
-              ([_, value]) => value === config.labelsOrientation?.yRight
-            )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
+            orientation: axisLabelOrientationCompat.toAPI(config.labelsOrientation.yRight),
           },
         }
       : {}),

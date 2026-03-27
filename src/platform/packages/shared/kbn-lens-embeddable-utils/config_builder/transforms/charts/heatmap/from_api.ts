@@ -21,7 +21,7 @@ import type {
 } from '@kbn/lens-common/visualizations/heatmap/types';
 
 import { DEFAULT_LAYER_ID } from '../../../constants';
-import { fromAPILegendSizeToState } from '../legend_sizes';
+import { legendSizeCompat } from '../legend_sizes';
 import { getSharedChartAPIToLensState, stripUndefined } from '../utils';
 import type { HeatmapState } from '../../../schema';
 import { fromColorByValueAPIToLensState } from '../../coloring';
@@ -37,6 +37,7 @@ import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
 import { getValueColumn } from '../../columns/esql_column';
+import { axisLabelOrientationCompat } from '../common';
 
 const ACCESSOR = 'heatmap_value_accessor';
 
@@ -44,16 +45,11 @@ function getAccessorName(type: 'x' | 'y' | 'value') {
   return `${ACCESSOR}_${type}`;
 }
 
-function getRotationFromOrientation(orientation?: 'angled' | 'vertical' | 'horizontal') {
-  if (!orientation) return;
-  return orientation === 'angled' ? -45 : orientation === 'vertical' ? -90 : 0;
-}
-
 function buildVisualizationState(config: HeatmapState): HeatmapVisualizationState {
   const layer = config;
   const valueAccessor = getAccessorName('value');
   const basePalette = layer.metric.color && fromColorByValueAPIToLensState(layer.metric.color);
-  const xAxisLabelRotation = getRotationFromOrientation(layer.axis?.x?.labels?.orientation);
+  const xAxisLabelRotation = axisLabelOrientationCompat.toState(layer.axis?.x?.labels?.orientation);
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -83,7 +79,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
       type: 'heatmap_legend',
       ...stripUndefined<HeatmapLegendConfigResult>({
         maxLines: layer.legend?.truncate_after_lines,
-        legendSize: fromAPILegendSizeToState(layer.legend?.size),
+        legendSize: legendSizeCompat.toState(layer.legend?.size),
         shouldTruncate: Boolean(layer.legend?.truncate_after_lines),
       }),
     },
