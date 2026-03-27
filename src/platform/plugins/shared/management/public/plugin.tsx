@@ -76,12 +76,13 @@ export class ManagementPlugin
         title: section.title,
         deepLinks: section
           .getAppsEnabled()
-          .filter((mgmtApp) => !mgmtApp.hideFromGlobalSearch)
+          .filter((mgmtApp) => mgmtApp.visibleIn || !mgmtApp.hideFromGlobalSearch)
           .map((mgmtApp) => ({
             id: mgmtApp.id,
             title: mgmtApp.title,
             path: mgmtApp.basePath,
             keywords: mgmtApp.keywords,
+            ...(mgmtApp.visibleIn ? { visibleIn: mgmtApp.visibleIn } : {}),
           })),
       })
     );
