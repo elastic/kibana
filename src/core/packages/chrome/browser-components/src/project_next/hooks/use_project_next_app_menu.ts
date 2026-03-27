@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppMenuConfigNext } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useAppMenu, useNextHeader } from '../../shared/chrome_hooks';
 
 /**
  * Returns the app menu config for the Chrome-Next project header.
  * Fallback: `config.appMenu` from `chrome.next.header.set()` -> global `chrome.getAppMenu$()`.
  */
-export function useProjectNextAppMenu(): AppMenuConfigNext | undefined {
+export function useProjectNextAppMenu(): AppMenuConfig | undefined {
   const config = useNextHeader();
   const globalAppMenu = useAppMenu();
   return config?.appMenu ?? globalAppMenu;

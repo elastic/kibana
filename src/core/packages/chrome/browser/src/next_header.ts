@@ -6,10 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { ReactNode } from 'react';
-
-import type { AppMenuConfigNext } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
 /**
  * Unified configuration for the Chrome-controlled Chrome-Next header.
@@ -58,9 +56,8 @@ export interface ChromeNextHeaderConfig {
 
   /**
    * App menu (toolbar actions). Items, primary action, secondary action.
-   * TODO: Consider strict type independent from `@kbn/core-chrome-app-menu-components`
    */
-  appMenu?: AppMenuConfigNext;
+  appMenu?: AppMenuConfig;
 
   /**
    * Optional explicit back navigation for the Chrome-Next header back control.

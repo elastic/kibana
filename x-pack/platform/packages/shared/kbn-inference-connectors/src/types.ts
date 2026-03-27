@@ -11,4 +11,5 @@ import type { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 export type AIConnector = ActionConnector & {
   // related to OpenAI connectors, ex: Azure OpenAI, OpenAI
   apiProvider?: OpenAiProviderType;
+  isRecommended?: boolean;
 };
