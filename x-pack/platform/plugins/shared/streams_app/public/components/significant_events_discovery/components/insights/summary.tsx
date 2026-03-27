@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { TaskStatus } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -32,32 +31,8 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useTaskPolling } from '../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../util/errors';
 import { FeedbackButtons } from './feedback_buttons';
-import { impactBadgeColors, impactLabels } from './insight_constants';
+import { formatGeneratedAt, impactBadgeColors, impactLabels } from './insight_constants';
 import { InsightFlyout } from './insight_flyout';
-
-const formatGeneratedAt = (dateStr: string): string => {
-  const diffMins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
-  if (diffMins < 1) {
-    return i18n.translate('xpack.streams.insights.justNow', { defaultMessage: 'just now' });
-  }
-  if (diffMins < 60) {
-    return i18n.translate('xpack.streams.insights.minutesAgo', {
-      defaultMessage: '{count} {count, plural, one {minute} other {minutes}} ago',
-      values: { count: diffMins },
-    });
-  }
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) {
-    return i18n.translate('xpack.streams.insights.hoursAgo', {
-      defaultMessage: '{count} {count, plural, one {hour} other {hours}} ago',
-      values: { count: diffHours },
-    });
-  }
-  return i18n.translate('xpack.streams.insights.daysAgo', {
-    defaultMessage: '{count} {count, plural, one {day} other {days}} ago',
-    values: { count: Math.floor(diffHours / 24) },
-  });
-};
 
 export function Summary({ count }: { count: number }) {
   const {
@@ -238,7 +213,7 @@ export function Summary({ count }: { count: number }) {
         width: '150px',
         render: (generatedAt: string) => (
           <EuiText size="s" color="subdued">
-            {moment(generatedAt).fromNow()}
+            {formatGeneratedAt(generatedAt)}
           </EuiText>
         ),
       },
