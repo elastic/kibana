@@ -23,7 +23,6 @@ export interface WatchlistEntitySourceClientDependencies {
 }
 
 type PartialEntitySource = Partial<MonitoringEntitySource> & { id: string };
-type UpsertInput = MonitoringEntitySource | MonitoringEntitySourceAttributes;
 
 interface UpsertResult {
   action: 'created' | 'updated';
@@ -46,7 +45,7 @@ export class WatchlistEntitySourceClient {
     return { ...created, id };
   }
 
-  async upsert(source: UpsertInput): Promise<UpsertResult> {
+  async upsert(source: Partial<MonitoringEntitySource>): Promise<UpsertResult> {
     const { sources } = await this.list({ name: source.name, per_page: 1 });
     const found = sources[0];
 
@@ -63,14 +62,15 @@ export class WatchlistEntitySourceClient {
 
   async update(entitySource: PartialEntitySource): Promise<MonitoringEntitySource> {
     await this.assertNameUniqueness(entitySource);
-    const { attributes } = await this.dependencies.soClient.update<MonitoringEntitySource>(
-      watchlistEntitySourceTypeName,
-      entitySource.id,
-      entitySource,
-      { refresh: 'wait_for' }
-    );
+    const { attributes } =
+      await this.dependencies.soClient.update<MonitoringEntitySourceAttributes>(
+        watchlistEntitySourceTypeName,
+        entitySource.id,
+        _.omit(entitySource, 'id'),
+        { refresh: 'wait_for' }
+      );
 
-    return { ...(attributes as MonitoringEntitySource), id: entitySource.id };
+    return { ...attributes, id: entitySource.id };
   }
 
   async get(id: string): Promise<MonitoringEntitySource> {
