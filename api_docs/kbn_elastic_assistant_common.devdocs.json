@@ -2032,9 +2032,17 @@
         "signature": [
           "(messages: ",
           "BaseMessage",
-          "[]) => ",
+          "<",
+          "MessageStructure",
+          "<",
+          "MessageToolSet",
+          ">, string>[]) => ",
           "BaseMessage",
-          "[]"
+          "<",
+          "MessageStructure",
+          "<",
+          "MessageToolSet",
+          ">, string>[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/references/utils.ts",
         "lineNumber": 86,
@@ -2051,7 +2059,11 @@
             "description": [],
             "signature": [
               "BaseMessage",
-              "[]"
+              "<",
+              "MessageStructure",
+              "<",
+              "MessageToolSet",
+              ">, string>[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/references/utils.ts",
             "lineNumber": 86,

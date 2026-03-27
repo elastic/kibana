@@ -1303,6 +1303,24 @@
             "StreamsRouteHandlerResources",
             ", ",
             "SuggestAttachmentsResponse",
+            ", undefined>; \"GET /internal/streams/connectors/{connectorId}\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /internal/streams/connectors/{connectorId}\", any, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            {
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
+            },
             ", undefined>; \"GET /internal/streams/connectors\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
@@ -1315,11 +1333,11 @@
             "StreamsRouteHandlerResources",
             ", { connectors: ",
             {
-              "pluginId": "actions",
-              "scope": "server",
-              "docId": "kibActionsPluginApi",
-              "section": "def-server.ConnectorWithExtraFindData",
-              "text": "ConnectorWithExtraFindData"
+              "pluginId": "@kbn/inference-common",
+              "scope": "common",
+              "docId": "kibKbnInferenceCommonPluginApi",
+              "section": "def-common.InferenceConnector",
+              "text": "InferenceConnector"
             },
             "[]; }, undefined>; \"GET /internal/streams/ingest/processor_suggestions\": ",
             {
@@ -1918,10 +1936,10 @@
         "label": "StreamsConfig",
         "description": [],
         "signature": [
-          "{ readonly preconfigured: Readonly<{} & { enabled: boolean; stream_definitions: any[]; }>; }"
+          "{ readonly preconfigured: Readonly<{} & { enabled: boolean; stream_definitions: any[]; }>; readonly workers: Readonly<{} & { patternExtraction: Readonly<{} & { enabled: boolean; minThreads: number; maxThreads: number; maxQueue: number; idleTimeout: moment.Duration; taskTimeout: moment.Duration; }>; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/config.ts",
-        "lineNumber": 18,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2671,6 +2689,24 @@
           "StreamsRouteHandlerResources",
           ", ",
           "SuggestAttachmentsResponse",
+          ", undefined>; \"GET /internal/streams/connectors/{connectorId}\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/streams/connectors/{connectorId}\", any, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          },
           ", undefined>; \"GET /internal/streams/connectors\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -2683,11 +2719,11 @@
           "StreamsRouteHandlerResources",
           ", { connectors: ",
           {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ConnectorWithExtraFindData",
-            "text": "ConnectorWithExtraFindData"
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
           },
           "[]; }, undefined>; \"GET /internal/streams/ingest/processor_suggestions\": ",
           {
@@ -3116,7 +3152,7 @@
       "label": "StreamsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
-      "lineNumber": 61,
+      "lineNumber": 62,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3132,7 +3168,7 @@
       "label": "StreamsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/server/plugin.ts",
-      "lineNumber": 63,
+      "lineNumber": 64,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3394,6 +3430,144 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.extractMessagesFromField",
+        "type": "Function",
+        "tags": [],
+        "label": "extractMessagesFromField",
+        "description": [],
+        "signature": [
+          "(samples: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.FlattenRecord",
+            "text": "FlattenRecord"
+          },
+          "[], fieldName: string) => string[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/pattern_extraction_helpers.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.extractMessagesFromField.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "samples",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FlattenRecord",
+                "text": "FlattenRecord"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/pattern_extraction_helpers.ts",
+            "lineNumber": 38,
+            "columnNumber": 42,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.extractMessagesFromField.$2",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/pattern_extraction_helpers.ts",
+            "lineNumber": 38,
+            "columnNumber": 68,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.getDefaultTextField",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultTextField",
+        "description": [],
+        "signature": [
+          "(sampleDocs: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.FlattenRecord",
+            "text": "FlattenRecord"
+          },
+          "[], prioritizedFields: string[]) => string"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/pattern_extraction_helpers.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.getDefaultTextField.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "sampleDocs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FlattenRecord",
+                "text": "FlattenRecord"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/pattern_extraction_helpers.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.getDefaultTextField.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "prioritizedFields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/pattern_extraction_helpers.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -3772,6 +3946,23 @@
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
         "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.PRIORITIZED_CONTENT_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "PRIORITIZED_CONTENT_FIELDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/pattern_extraction_helpers.ts",
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
