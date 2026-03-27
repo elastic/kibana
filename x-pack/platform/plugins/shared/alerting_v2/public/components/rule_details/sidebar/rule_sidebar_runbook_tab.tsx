@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiMarkdownFormat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleApiResponse } from '../../../services/rules_api';
 
@@ -15,24 +15,32 @@ export interface RuleSidebarRunbookTabProps {
 }
 
 export const RuleSidebarRunbookTab: React.FC<RuleSidebarRunbookTabProps> = ({ rule }) => {
+  const runbook = rule.artifacts?.find((artifact) => artifact.type === 'runbook');
+
+  if (!runbook) {
+    return (
+      <EuiEmptyPrompt
+        iconType="documentation"
+        title={
+          <h3>
+            {i18n.translate('xpack.alertingV2.sidebar.runbook.emptyTitle', {
+              defaultMessage: 'No runbook',
+            })}
+          </h3>
+        }
+        body={
+          <p>
+            {i18n.translate('xpack.alertingV2.sidebar.runbook.emptyBody', {
+              defaultMessage: 'No runbook has been added to this rule yet.',
+            })}
+          </p>
+        }
+        data-test-subj="sidebarRunbookEmpty"
+      />
+    );
+  }
+
   return (
-    <EuiEmptyPrompt
-      iconType="documentation"
-      title={
-        <h3>
-          {i18n.translate('xpack.alertingV2.sidebar.runbook.emptyTitle', {
-            defaultMessage: 'No runbook',
-          })}
-        </h3>
-      }
-      body={
-        <p>
-          {i18n.translate('xpack.alertingV2.sidebar.runbook.emptyBody', {
-            defaultMessage: 'No runbook has been added to this rule yet.',
-          })}
-        </p>
-      }
-      data-test-subj="sidebarRunbookEmpty"
-    />
+    <EuiMarkdownFormat data-test-subj="sidebarRunbookContent">{runbook.value}</EuiMarkdownFormat>
   );
 };

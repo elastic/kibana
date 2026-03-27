@@ -6,7 +6,13 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleSidebarConditionsTab } from './rule_sidebar_conditions_tab';
@@ -29,11 +35,11 @@ const SIDEBAR_TAB_OPTIONS = [
   },
 ];
 
-export interface SidebarProps {
+export interface RuleSidebarProps {
   rule: RuleApiResponse;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ rule }) => {
+export const RuleSidebar: React.FC<RuleSidebarProps> = ({ rule }) => {
   const [selectedTab, setSelectedTab] = useState('conditions');
 
   return (
@@ -62,7 +68,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ rule }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="m" />
 
       {selectedTab === 'conditions' ? (
         <RuleSidebarConditionsTab rule={rule} />

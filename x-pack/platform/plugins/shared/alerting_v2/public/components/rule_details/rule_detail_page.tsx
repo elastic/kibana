@@ -17,7 +17,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
 import { RuleHeaderDescription, RuleTitleWithBadges } from './rule_header_description';
-import { Sidebar } from './sidebar';
+import { RuleSidebar } from './sidebar/rule_sidebar';
 import { paths } from '../../constants';
 
 export interface RuleDetailPageProps {
@@ -49,7 +49,6 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
     <>
       <EuiPageHeader
         data-test-subj="ruleDetailsTitle"
-        bottomBorder
         pageTitle={<RuleTitleWithBadges rule={rule} />}
         description={<RuleHeaderDescription rule={rule} />}
         rightSideItems={[
@@ -78,7 +77,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
 
       <EuiSpacer size="l" />
 
-      <Sidebar rule={rule} />
+      <RuleSidebar rule={rule} />
 
       <EuiSpacer size="l" />
       {showDeleteConfirmation && (
