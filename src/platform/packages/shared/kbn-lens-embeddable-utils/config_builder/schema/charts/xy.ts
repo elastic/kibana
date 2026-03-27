@@ -341,7 +341,7 @@ const xySharedSettings = {
             },
           }
         ),
-        // Legend positioned inside
+        // Inside legend
         schema.object(
           {
             ...sharedLegendSchema,
@@ -360,7 +360,7 @@ const xySharedSettings = {
             meta: {
               id: 'xyLegendInside',
               title: 'Inside',
-              description: 'Internal legend positioned inside the chart',
+              description: 'Inside legend',
             },
           }
         ),
