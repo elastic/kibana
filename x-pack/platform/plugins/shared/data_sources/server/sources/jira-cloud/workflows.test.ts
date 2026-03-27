@@ -10,10 +10,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { jiraDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-jira-connector';
 const CONNECTOR_ID = 'fake-jira-connector-uuid';
@@ -22,9 +21,9 @@ describe('jira cloud workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(jiraDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.jira-cloud', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 

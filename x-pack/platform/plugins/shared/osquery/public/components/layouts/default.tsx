@@ -21,7 +21,7 @@ export const wrapperCss = {
 };
 
 export const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
-  padding: `0 ${euiTheme.size.l}`,
+  padding: `${euiTheme.size.l}`,
   flex: 1,
   minWidth: 0,
 });
@@ -36,7 +36,7 @@ export const fullWidthFormContentCss = (theme: UseEuiTheme) => ({
 export const navCss = ({ euiTheme }: UseEuiTheme) => ({
   background: euiTheme.colors.emptyShade,
   borderBottom: euiTheme.border.thin,
-  padding: `${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l}`,
+  padding: `${euiTheme.size.l} ${euiTheme.size.l} 0 ${euiTheme.size.l}`,
   '.euiTabs': {
     paddingLeft: '3px',
     marginLeft: '-3px',
