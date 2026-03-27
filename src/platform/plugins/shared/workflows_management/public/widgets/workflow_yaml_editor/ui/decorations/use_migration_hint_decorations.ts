@@ -13,8 +13,8 @@ import { monaco } from '@kbn/monaco';
 import { getPathAtOffset } from '../../../../../common/lib/yaml';
 import {
   type MigrationHint,
-  type MigrationHintMatchContext,
   migrationHints,
+  type MigrationMatchContext,
 } from '../../../../features/validate_workflow_yaml/lib/migration_hints';
 import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
 
@@ -35,6 +35,7 @@ interface ActiveMigrationHints {
 export interface MigrationHintPanelState {
   activeHints: ActiveMigrationHints | null;
   activeHintTop: number | null;
+  matchedLines: Map<number, MigrationHint[]>;
   onPanelMouseEnter: () => void;
   onPanelMouseLeave: () => void;
 }
@@ -51,6 +52,7 @@ export const useMigrationHintDecorations = ({
   const isPanelHoveredRef = useRef(false);
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const matchedHintLinesRef = useRef<Map<number, MigrationHint[]>>(new Map());
+  const [matchedLines, setMatchedLines] = useState<Map<number, MigrationHint[]>>(new Map());
 
   const clearDismissTimer = useCallback(() => {
     if (dismissTimerRef.current) {
@@ -142,12 +144,14 @@ export const useMigrationHintDecorations = ({
 
     if (!editor || !isEditorMounted) {
       matchedHintLinesRef.current = newMatchedLines;
+      setMatchedLines(newMatchedLines);
       return;
     }
 
     const model = editor.getModel();
     if (!model) {
       matchedHintLinesRef.current = newMatchedLines;
+      setMatchedLines(newMatchedLines);
       return;
     }
 
@@ -171,7 +175,7 @@ export const useMigrationHintDecorations = ({
         const lineContent = model.getLineContent(error.startLineNumber);
         const keyMatch = lineContent.match(/^\s*([a-zA-Z_][\w]*)\s*:/);
         const propertyName = keyMatch?.[1] ?? null;
-        const context: MigrationHintMatchContext = {
+        const context: MigrationMatchContext = {
           error,
           yamlPath,
           value,
@@ -195,6 +199,7 @@ export const useMigrationHintDecorations = ({
       });
 
     matchedHintLinesRef.current = newMatchedLines;
+    setMatchedLines(newMatchedLines);
 
     const decorations: monaco.editor.IModelDeltaDecoration[] = Array.from(
       newMatchedLines.keys()
@@ -231,5 +236,5 @@ export const useMigrationHintDecorations = ({
     return () => clearDismissTimer();
   }, [clearDismissTimer]);
 
-  return { activeHints, activeHintTop, onPanelMouseEnter, onPanelMouseLeave };
+  return { activeHints, activeHintTop, matchedLines, onPanelMouseEnter, onPanelMouseLeave };
 };

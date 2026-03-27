@@ -41,6 +41,7 @@ import {
 import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { MigrationHintPanel } from './migration_hint_panel';
+import { MigrationWarningBanner } from './migration_warning_banner';
 import { StepActions } from './step_actions';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
@@ -497,6 +498,7 @@ export const WorkflowYAMLEditor = ({
   const {
     activeHints: activeMigrationHints,
     activeHintTop: migrationHintTop,
+    matchedLines: migrationMatchedLines,
     onPanelMouseEnter: onMigrationPanelMouseEnter,
     onPanelMouseLeave: onMigrationPanelMouseLeave,
   } = useMigrationHintDecorations({
@@ -648,9 +650,24 @@ export const WorkflowYAMLEditor = ({
     }
   }, [workflowJsonSchemaStrict, notifications]);
 
+  const handleBannerLineClick = useCallback(
+    (lineNumber: number) => {
+      editorRef.current?.revealLineInCenter(lineNumber);
+    },
+    []
+  );
+
   return (
     <div css={css([styles.container, stepExecutionStyles])} ref={containerRef}>
       <GlobalWorkflowEditorStyles />
+      {migrationMatchedLines.size > 0 && (
+        <MigrationWarningBanner
+          matchedLines={migrationMatchedLines}
+          isAiMigrationEnabled={isAgentBuilderAvailable}
+          onMigrateWithAi={openAgentChat}
+          onLineClick={handleBannerLineClick}
+        />
+      )}
       <ActionsMenuPopover
         anchorPosition="upCenter"
         offset={32}
