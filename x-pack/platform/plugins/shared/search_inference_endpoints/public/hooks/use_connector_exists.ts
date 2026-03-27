@@ -6,9 +6,11 @@
  */
 
 import { useEffect, useState } from 'react';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { NO_DEFAULT_MODEL } from '../../common/constants';
-import { APIRoutes } from '../../common/types';
 import { useKibana } from './use_kibana';
+
+const INFERENCE_CONNECTORS_API = '/internal/inference/connectors';
 
 export const useConnectorExists = (connectorId: string): { exists: boolean; loading: boolean } => {
   const { services } = useKibana();
@@ -28,10 +30,13 @@ export const useConnectorExists = (connectorId: string): { exists: boolean; load
     setLoading(true);
 
     http
-      .get(APIRoutes.GET_CONNECTOR_BY_ID.replace('{connectorId}', connectorId), {
+      .get<{ connectors: InferenceConnector[] }>(INFERENCE_CONNECTORS_API, {
         signal: controller.signal,
       })
-      .then(() => setExists(true))
+      .then((res) => {
+        const found = res.connectors.some((c) => c.connectorId === connectorId);
+        setExists(found);
+      })
       .catch((e) => {
         if ((e as any)?.name !== 'AbortError') {
           setExists(false);

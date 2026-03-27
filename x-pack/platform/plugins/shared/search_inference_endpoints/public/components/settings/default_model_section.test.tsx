@@ -86,7 +86,7 @@ describe('DefaultModelSection', () => {
     );
 
     expect(
-      screen.getByText(/When disallowing all other connectors, a default model must be selected/)
+      screen.getByText(/When disallowing all other models, a default model must be selected/)
     ).toBeInTheDocument();
   });
 
@@ -103,9 +103,7 @@ describe('DefaultModelSection', () => {
       </Wrapper>
     );
 
-    expect(
-      screen.getByText(/The connector previously selected does not exist anymore/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/The model previously selected is not available/)).toBeInTheDocument();
   });
 
   it('calls setDisallowOtherModels when checkbox is toggled', () => {

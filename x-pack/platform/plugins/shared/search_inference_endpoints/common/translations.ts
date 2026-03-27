@@ -223,7 +223,7 @@ export const DEFAULT_MODEL_DESCRIPTION = i18n.translate(
   'xpack.searchInferenceEndpoints.settings.defaultModel.description',
   {
     defaultMessage:
-      'Choose a default inference connector for all AI features. Individual features can override this with their own connector.',
+      'Choose a default model for all AI features. Individual features can override this with their own model.',
   }
 );
 
@@ -265,14 +265,14 @@ export const DEFAULT_MODEL_CUSTOM_GROUP = i18n.translate(
 export const DISALLOW_OTHER_MODELS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels',
   {
-    defaultMessage: 'Disallow all other connectors',
+    defaultMessage: 'Disallow all other models',
   }
 );
 
 export const DISALLOW_OTHER_MODELS_TOOLTIP = i18n.translate(
   'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels.tooltip',
   {
-    defaultMessage: 'Only the chosen default connector will be shown to users of this space.',
+    defaultMessage: 'Only the chosen default model will be shown to users of this space.',
   }
 );
 
@@ -280,14 +280,14 @@ export const DEFAULT_MODEL_CONNECTOR_NOT_EXIST_ERROR = i18n.translate(
   'xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist',
   {
     defaultMessage:
-      'The connector previously selected does not exist anymore. Please select a different option.',
+      'The model previously selected is not available. Please select a different option.',
   }
 );
 
 export const DEFAULT_MODEL_DISALLOW_NO_DEFAULT_ERROR = i18n.translate(
   'xpack.searchInferenceEndpoints.settings.defaultModel.error.disallowNoDefault',
   {
-    defaultMessage: 'When disallowing all other connectors, a default model must be selected.',
+    defaultMessage: 'When disallowing all other models, a default model must be selected.',
   }
 );
 

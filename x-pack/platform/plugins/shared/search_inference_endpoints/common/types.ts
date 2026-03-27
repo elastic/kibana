@@ -17,8 +17,6 @@ export const APIRoutes = {
   PUT_INFERENCE_SETTINGS: '/internal/search_inference_endpoints/settings',
   GET_INFERENCE_FEATURES: '/internal/search_inference_endpoints/features',
   GET_INFERENCE_CONNECTORS: INFERENCE_CONNECTORS_INTERNAL_API_PATH,
-  GET_CONNECTORS: '/internal/search_inference_endpoints/connectors',
-  GET_CONNECTOR_BY_ID: '/internal/search_inference_endpoints/connectors/{connectorId}',
 } as const;
 
 export interface SearchInferenceEndpointsConfigType {
