@@ -48,6 +48,7 @@
 import type { ApmOtelFields } from '@kbn/synthtrace-client';
 import { apm, ApmSynthtracePipelineSchema } from '@kbn/synthtrace-client';
 import type { Client } from '@elastic/elasticsearch';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
