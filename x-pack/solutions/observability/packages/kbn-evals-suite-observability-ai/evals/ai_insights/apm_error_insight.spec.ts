@@ -7,8 +7,8 @@
 
 import { tags } from '@kbn/scout';
 import moment from 'moment';
-import type { ErrorInsightParams } from '../../src/clients/ai_insight_client';
 import type { LoadResult } from '@kbn/es-snapshot-loader';
+import type { ErrorInsightParams } from '../../src/clients/ai_insight_client';
 import {
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,

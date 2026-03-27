@@ -7,8 +7,8 @@
 
 import { tags } from '@kbn/scout';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
-import type { AlertInsightParams } from '../../src/clients/ai_insight_client';
 import type { LoadResult } from '@kbn/es-snapshot-loader';
+import type { AlertInsightParams } from '../../src/clients/ai_insight_client';
 import {
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
