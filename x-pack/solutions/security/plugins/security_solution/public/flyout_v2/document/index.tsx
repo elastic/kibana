@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { ResolverCellActionRenderer } from '../../resolver/types';
+import { getFieldValue } from '@kbn/discover-utils';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
+import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
+import { EventKind } from './constants/event_kinds';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 
@@ -21,13 +26,29 @@ export interface DocumentFlyoutProps {
   /**
    * Cell action renderer for the analyzer
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
-export const DocumentFlyout: FC<DocumentFlyoutProps> = memo(({ hit, renderCellActions }) => {
+export const DocumentFlyout = memo(({ hit, renderCellActions }: DocumentFlyoutProps) => {
+  const isAlert = useMemo(
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    [hit]
+  );
+
+  const { hasAlertsRead, loading } = useAlertsPrivileges();
+  const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
+
+  if (isAlert && loading) {
+    return <FlyoutLoading data-test-subj="document-overview-loading" />;
+  }
+
+  if (missingAlertsPrivilege) {
+    return <FlyoutMissingAlertsPrivilege />;
+  }
+
   return (
     <>
       <EuiFlyoutHeader>

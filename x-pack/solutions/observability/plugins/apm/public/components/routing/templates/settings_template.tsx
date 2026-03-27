@@ -59,7 +59,6 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
 
   return (
     <ApmMainTemplate
-      environmentFilter={false}
       pageHeader={{
         tabs,
         pageTitle: i18n.translate('xpack.apm.settings.title', {
