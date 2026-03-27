@@ -7750,6 +7750,11 @@ components:
         - name
         - type
     ResponseAction:
+      discriminator:
+        mapping:
+          .endpoint: '#/components/schemas/EndpointResponseAction'
+          .osquery: '#/components/schemas/OsqueryResponseAction'
+        propertyName: action_type_id
       oneOf:
         - $ref: '#/components/schemas/OsqueryResponseAction'
         - $ref: '#/components/schemas/EndpointResponseAction'
@@ -7979,6 +7984,15 @@ components:
         - $ref: '#/components/schemas/NewTermsRuleCreateProps'
         - $ref: '#/components/schemas/EsqlRuleCreateProps'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/EqlRuleCreateProps'
+          esql: '#/components/schemas/EsqlRuleCreateProps'
+          machine_learning: '#/components/schemas/MachineLearningRuleCreateProps'
+          new_terms: '#/components/schemas/NewTermsRuleCreateProps'
+          query: '#/components/schemas/QueryRuleCreateProps'
+          saved_query: '#/components/schemas/SavedQueryRuleCreateProps'
+          threat_match: '#/components/schemas/ThreatMatchRuleCreateProps'
+          threshold: '#/components/schemas/ThresholdRuleCreateProps'
         propertyName: type
     RuleDescription:
       description: The rule’s description.
@@ -8303,6 +8317,15 @@ components:
         - $ref: '#/components/schemas/NewTermsRule'
         - $ref: '#/components/schemas/EsqlRule'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/EqlRule'
+          esql: '#/components/schemas/EsqlRule'
+          machine_learning: '#/components/schemas/MachineLearningRule'
+          new_terms: '#/components/schemas/NewTermsRule'
+          query: '#/components/schemas/QueryRule'
+          saved_query: '#/components/schemas/SavedQueryRule'
+          threat_match: '#/components/schemas/ThreatMatchRule'
+          threshold: '#/components/schemas/ThresholdRule'
         propertyName: type
     RuleRevision:
       description: >
@@ -8360,6 +8383,15 @@ components:
         - $ref: '#/components/schemas/NewTermsRuleUpdateProps'
         - $ref: '#/components/schemas/EsqlRuleUpdateProps'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/EqlRuleUpdateProps'
+          esql: '#/components/schemas/EsqlRuleUpdateProps'
+          machine_learning: '#/components/schemas/MachineLearningRuleUpdateProps'
+          new_terms: '#/components/schemas/NewTermsRuleUpdateProps'
+          query: '#/components/schemas/QueryRuleUpdateProps'
+          saved_query: '#/components/schemas/SavedQueryRuleUpdateProps'
+          threat_match: '#/components/schemas/ThreatMatchRuleUpdateProps'
+          threshold: '#/components/schemas/ThresholdRuleUpdateProps'
         propertyName: type
     RuleVersion:
       description: >
