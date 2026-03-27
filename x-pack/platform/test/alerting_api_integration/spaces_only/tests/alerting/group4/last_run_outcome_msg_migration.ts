@@ -11,7 +11,13 @@ import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getUrlPrefix, getTestRuleData, ObjectRemover, checkAAD } from '../../../../common/lib';
+import {
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  checkAAD,
+  getEventLog,
+} from '../../../../common/lib';
 
 /** Simulates 7.x documents where lastRun.outcomeMsg was stored as a string. */
 const LEGACY_OUTCOME_MSG = 'legacy outcome message string';
@@ -19,6 +25,7 @@ const LEGACY_OUTCOME_MSG = 'legacy outcome message string';
 export default function lastRunOutcomeMsgMigrationTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('lastRun outcomeMsg migration', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -66,6 +73,8 @@ export default function lastRunOutcomeMsgMigrationTests({ getService }: FtrProvi
           })
         )
         .expect(200);
+      // Wait for rule execution to complete to avoid race conditions with injectLegacyStringOutcomeMsg()
+      await waitForEventLogDocs(createdRule.id, new Map());
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
       await injectLegacyStringOutcomeMsg(createdRule.id);
@@ -148,5 +157,21 @@ export default function lastRunOutcomeMsgMigrationTests({ getService }: FtrProvi
         id: createdRule.id,
       });
     });
+
+    async function waitForEventLogDocs(
+      id: string,
+      actions: Map<string, { gte: number } | { equal: number }>
+    ) {
+      return await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id,
+          provider: 'alerting',
+          actions,
+        });
+      });
+    }
   });
 }
