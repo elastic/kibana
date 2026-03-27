@@ -17,9 +17,14 @@ import { createAppContextStartContractMock } from '../../mocks';
 
 import type { Agent } from '../../types';
 
+import { SO_SEARCH_LIMIT } from '../../constants';
+
+import * as agentNamespaces from '../spaces/agent_namespaces';
+
 import { unenrollAgent, unenrollAgents } from './unenroll';
 import { invalidateAPIKeysForAgents, isAgentUnenrolled } from './unenroll_action_runner';
 import { createClientMock } from './action.mock';
+import * as crud from './crud';
 
 jest.mock('../api_keys');
 
@@ -411,5 +416,49 @@ describe('unenroll', () => {
         false
       );
     });
+  });
+});
+
+describe('unenrollAgents kuery construction', () => {
+  let mockGetAgentsByKuery: jest.SpyInstance;
+  let mockAgentsKueryNamespaceFilter: jest.SpyInstance;
+
+  beforeEach(async () => {
+    const { soClient } = createClientMock();
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        withoutSpaceExtensions: soClient,
+      })
+    );
+    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery').mockResolvedValue({
+      agents: [],
+      total: 0,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+    });
+    mockAgentsKueryNamespaceFilter = jest
+      .spyOn(agentNamespaces, 'agentsKueryNamespaceFilter')
+      .mockResolvedValue('namespaces:custom_space');
+  });
+
+  afterEach(() => {
+    mockGetAgentsByKuery.mockRestore();
+    mockAgentsKueryNamespaceFilter.mockRestore();
+    appContextService.stop();
+  });
+
+  it('wraps namespace filter and kuery containing OR in parentheses', async () => {
+    const { soClient, esClient } = createClientMock();
+    const kuery = 'status:online or status:error or status:offline';
+
+    await unenrollAgents(soClient, esClient, { kuery });
+
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({
+        kuery: `(namespaces:custom_space) AND (${kuery})`,
+      })
+    );
   });
 });
