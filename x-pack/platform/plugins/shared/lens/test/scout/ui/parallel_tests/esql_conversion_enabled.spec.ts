@@ -50,7 +50,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
   spaceTest(
     'should display ES|QL conversion modal for inline visualizations',
     async ({ pageObjects, page }) => {
-      const { dashboard, lens } = pageObjects;
+      const { lens } = pageObjects;
 
       await openInlineEditorAndWaitVisible(pageObjects, testData.INLINE_METRIC_PANEL_ID);
 
@@ -59,7 +59,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
       await applyLensInlineEditorAndWaitClosed({ lens });
 
       // Open editor again and check the "Apply and close" button is disabled
-      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      await openInlineEditorAndWaitVisible(pageObjects, testData.INLINE_METRIC_PANEL_ID);
       await expect(lens.getInlineEditor()).toBeVisible();
       await expect(lens.getApplyFlyoutButton()).toBeDisabled();
 
