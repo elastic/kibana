@@ -41,6 +41,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
 
         // add feature flags here
+        '--xpack.automatic_import_v2.enabled=true',
         `--xpack.fleet.experimentalFeatures=${JSON.stringify({
           enableAgentStatusAlerting: false,
           enableSloTemplates: false,

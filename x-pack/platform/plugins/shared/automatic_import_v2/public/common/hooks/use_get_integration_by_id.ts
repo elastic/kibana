@@ -28,11 +28,11 @@ export function useGetIntegrationById(
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['integration', integrationId],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!integrationId) {
         return undefined;
       }
-      const response = await getIntegrationById({ http, integrationId });
+      const response = await getIntegrationById({ http, integrationId, abortSignal: signal });
 
       return response.integrationResponse;
     },
@@ -42,7 +42,6 @@ export function useGetIntegrationById(
       }
       return 30 * 1000;
     },
-    refetchOnWindowFocus: (query) => query.state.status !== 'error',
     retry: (failureCount, err) => {
       const fetchError = err as { response?: { status?: number } };
       if (fetchError?.response?.status === 404) {

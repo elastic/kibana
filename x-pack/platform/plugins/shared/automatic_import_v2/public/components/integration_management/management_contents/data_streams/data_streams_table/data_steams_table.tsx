@@ -169,6 +169,10 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         ),
         css: css`
           max-width: 200px;
+          overflow: visible;
+          .euiTableCellContent {
+            overflow: visible;
+          }
         `,
       },
       {

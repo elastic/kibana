@@ -6,6 +6,8 @@
  */
 
 export const CREATE_INTEGRATION_V2_PAGE = '/app/automaticImportVTwo';
+export const MANAGE_INTEGRATIONS_V2_PAGE = '/app/integrations/browse?view=manage';
+export const MANAGE_INTEGRATIONS_TABLE = 'manageIntegrationsTable';
 
 export const CONNECTOR_BEDROCK = 'actionType-.bedrock';
 export const CONNECTOR_OPENAI = 'actionType-.gen-ai';
@@ -44,7 +46,6 @@ export const ANALYZE_LOGS_BUTTON = 'analyzeLogsButton';
 
 export const EDIT_PIPELINE_FLYOUT_SAVE_BUTTON = 'editPipelineFlyoutSaveButton';
 
-export const MANAGE_INTEGRATIONS_TABLE = 'manageIntegrationsTable';
 export const CREATE_INTEGRATION_CARD_BUTTON = 'createIntegrationCardButton';
 export const CREATE_NEW_INTEGRATION_LINK = 'createNewIntegrationLink';
 export const UPLOAD_INTEGRATION_PACKAGE_LINK = 'uploadIntegrationPackageLink';
@@ -55,5 +56,13 @@ export const CREATE_NEW_INTEGRATION_DROPDOWN_BTN = 'createNewIntegrationDropdown
 export const UPLOAD_INTEGRATION_PACKAGE_BTN = 'uploadIntegrationPackageBtn';
 
 export const MANAGE_INTEGRATION_ACTIONS_BTN = 'manageIntegrationActionsBtn';
-
-export const INPUT_TYPES_TABLE_COLUMN_TAGS = 'input-types-table-column-tags';
+export const MANAGE_INTEGRATION_REVIEW_APPROVE_MENU_ITEM = 'manageIntegrationReviewApproveMenuItem';
+export const MANAGE_INTEGRATION_INSTALL_MENU_ITEM = 'manageIntegrationInstallMenuItem';
+export const MANAGE_INTEGRATION_DOWNLOAD_ZIP_MENU_ITEM = 'manageIntegrationDownloadZipMenuItem';
+export const MANAGE_INTEGRATION_EDIT_MENU_ITEM = 'manageIntegrationEditMenuItem';
+export const MANAGE_INTEGRATION_DELETE_MENU_ITEM = 'manageIntegrationDeleteMenuItem';
+export const MANAGE_INTEGRATION_REVIEW_APPROVE_INLINE_BTN =
+  'manageIntegrationReviewApproveInlineBtn';
+export const MANAGE_INTEGRATION_EDIT_INLINE_BTN = 'manageIntegrationEditInlineBtn';
+export const MANAGE_INTEGRATIONS_TABLE_ERROR = 'manageIntegrationsTableError';
+export const MANAGE_INTEGRATIONS_SEARCH_INPUT = 'manageIntegrationsSearchInput';

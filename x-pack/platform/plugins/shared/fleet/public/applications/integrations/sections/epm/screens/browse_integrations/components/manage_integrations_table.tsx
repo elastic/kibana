@@ -760,6 +760,7 @@ export const ManageIntegrationsTable: React.FC<{
     box: {
       incremental: true,
       placeholder: 'Search integrations',
+      'data-test-subj': 'manageIntegrationsSearchInput',
     },
     toolsRight: [filterButtons],
   };
@@ -830,6 +831,7 @@ export const ManageIntegrationsTable: React.FC<{
         announceOnMount
         color="danger"
         iconType="error"
+        data-test-subj="manageIntegrationsTableError"
         title={
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.errorTitle"

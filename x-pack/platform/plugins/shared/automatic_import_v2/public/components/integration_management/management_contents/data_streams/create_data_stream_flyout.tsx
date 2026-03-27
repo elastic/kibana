@@ -36,6 +36,7 @@ import {
   type DataStream,
   type InputType,
 } from '../../../../../common';
+import { PLUGIN_ID } from '../../../../../common/constants';
 import type { LogsSourceOption } from '../../forms/types';
 import { useIntegrationForm } from '../../forms/integration_form';
 import * as i18n from './translations';
@@ -134,9 +135,9 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const styles = useLayoutStyles();
   const { integrationId: currentIntegrationId } = useParams<{ integrationId?: string }>();
   const { reportAnalyzeLogsTriggered } = useTelemetry();
-  const { notifications } = useKibana().services;
+  const { notifications, application } = useKibana().services;
 
-  const { integration, refetch: refetchIntegration } = useGetIntegrationById(currentIntegrationId);
+  const { integration } = useGetIntegrationById(currentIntegrationId);
   const { form, formData } = useIntegrationForm();
 
   const { indices, isLoading: isLoadingIndices } = useFetchIndices();
@@ -307,7 +308,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         });
       }
 
-      await createUpdateIntegrationMutation.mutateAsync({
+      const result = await createUpdateIntegrationMutation.mutateAsync({
         connectorId: formData.connectorId,
         integrationId,
         title: formData.title,
@@ -316,8 +317,11 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         dataStreams: [newDataStream],
       });
 
-      refetchIntegration();
       onClose();
+
+      if (!currentIntegrationId && result.integration_id) {
+        application.navigateToApp(PLUGIN_ID, { path: `/edit/${result.integration_id}` });
+      }
     } catch (error) {
       notifications.toasts.addError(error instanceof Error ? error : new Error('Unknown error'), {
         title: i18n.CREATE_DATA_STREAM_ERROR,
@@ -336,10 +340,10 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     logSample,
     selectedIndex,
     uploadedFileName,
-    refetchIntegration,
     onClose,
     reportAnalyzeLogsTriggered,
     notifications,
+    application,
   ]);
 
   return (

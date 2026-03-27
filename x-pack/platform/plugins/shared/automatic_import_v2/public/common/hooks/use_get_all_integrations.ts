@@ -26,11 +26,10 @@ export function useGetAllIntegrations(): UseGetAllIntegrationsResult {
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['all-integrations'],
-    queryFn: async () => {
-      return getAllIntegrations({ http });
+    queryFn: async ({ signal }) => {
+      return getAllIntegrations({ http, abortSignal: signal });
     },
     refetchInterval: 30 * 1000,
-    refetchOnWindowFocus: true,
   });
 
   return {
