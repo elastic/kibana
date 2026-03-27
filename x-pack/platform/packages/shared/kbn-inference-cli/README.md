@@ -67,7 +67,15 @@ You can connect your local Elasticsearch to the Elastic Inference Service (EIS) 
 
 3. **Credentials**: The script automatically detects Elasticsearch credentials from:
    - Environment variables: `ES_USERNAME`/`ES_PASSWORD` or `ELASTICSEARCH_USERNAME`/`ELASTICSEARCH_PASSWORD`
-   - Default credentials: `elastic:changeme` (hosted) or `elastic_serverless:changeme` (serverless)
+   - Default credentials: `elastic:changeme` (stateful) or `elastic_serverless:changeme` (serverless)
+
+4. **Custom host/port** (optional): By default the script connects to `localhost:9200` (trying both HTTPS and HTTP). Override with:
+
+   ```bash
+   export ES_HOST=my-host              # tries both HTTPS and HTTP
+   export ES_HOST=https://my-host      # uses HTTPS only
+   export ES_PORT=9220
+   ```
 
 ### Usage
 

@@ -23,7 +23,7 @@ interface ElasticsearchConnection {
 }
 
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
-const EIS_SNAPSHOT_CMD = `yarn es snapshot --license trial -E xpack.inference.elastic.url=${EIS_QA_URL}`;
+const EIS_URL_FLAG = `-E xpack.inference.elastic.url=${EIS_QA_URL}`;
 
 const createBasicAuthHeader = (credentials: ElasticsearchCredentials): string =>
   Buffer.from(`${credentials.username}:${credentials.password}`).toString('base64');
@@ -90,8 +90,13 @@ async function testCredentials(
 }
 
 async function getES(log: ToolingLog) {
-  const localhost = 'localhost:9200';
-  const protocols = ['https', 'http'];
+  const rawHost = process.env.ES_HOST || 'localhost';
+  const port = process.env.ES_PORT || '9200';
+
+  const protocolMatch = rawHost.match(/^(https?):\/\/(.+)$/);
+  const protocols = protocolMatch ? [protocolMatch[1]] : ['https', 'http'];
+  const hostname = protocolMatch ? protocolMatch[2] : rawHost;
+  const esAddress = `${hostname}:${port}`;
 
   const envUsername = process.env.ES_USERNAME || process.env.ELASTICSEARCH_USERNAME;
   const envPassword = process.env.ES_PASSWORD || process.env.ELASTICSEARCH_PASSWORD;
@@ -116,7 +121,7 @@ async function getES(log: ToolingLog) {
   );
 
   for (const protocol of protocols) {
-    const baseUrl = `${protocol}://${localhost}`;
+    const baseUrl = `${protocol}://${esAddress}`;
 
     for (const credentials of credentialsToTry) {
       const isSsl = protocol === 'https';
@@ -148,11 +153,11 @@ async function getES(log: ToolingLog) {
 
   throw new Error(
     [
-      'Could not connect to Elasticsearch at localhost:9200.',
+      `Could not connect to Elasticsearch at ${esAddress}.`,
       '',
-      'Make sure Elasticsearch is running:',
+      `Make sure Elasticsearch is running with the EIS URL flag:`,
       '',
-      `  ${chalk.cyan(EIS_SNAPSHOT_CMD)}`,
+      `  ${chalk.cyan(EIS_URL_FLAG)}`,
       '',
       'If using custom credentials, set ES_USERNAME and ES_PASSWORD environment variables.',
     ].join('\n')
@@ -163,34 +168,43 @@ async function getEisApiKeyFromVault(vaultAddress: string): Promise<string> {
   const secretPath = 'secret/kibana-issues/dev/inference/kibana-eis-ccm';
 
   let stdout: string;
+  let stderr: string;
   try {
-    ({ stdout } = await execa('vault', ['read', '-field', 'key', secretPath], {
+    ({ stdout, stderr } = await execa('vault', ['read', '-field', 'key', secretPath], {
       env: { VAULT_ADDR: vaultAddress },
     }));
   } catch (error) {
-    throw new Error(
-      [
-        'Failed to read EIS API key from vault.',
-        '',
-        'Make sure you are logged in:',
-        '',
-        `  ${chalk.cyan(`VAULT_ADDR=${vaultAddress} vault login --method oidc`)}`,
-        '',
-        'See https://docs.elastic.dev/vault for setup instructions.',
-      ].join('\n'),
-      { cause: error }
-    );
+    const vaultStderr = error.stderr?.trim();
+    const parts = [
+      'Failed to read EIS API key from vault.',
+      ...(vaultStderr ? [`Vault output: ${vaultStderr}`] : []),
+      '',
+      'Make sure you are logged in:',
+      '',
+      `  ${chalk.cyan(`VAULT_ADDR=${vaultAddress} vault login --method oidc`)}`,
+      '',
+      'See https://docs.elastic.dev/vault for setup instructions.',
+    ];
+    throw new Error(parts.join('\n'), { cause: error });
   }
 
   const apiKey = stdout.trim();
   if (!apiKey) {
-    throw new Error('Vault returned an empty API key — the secret may be missing or blank.');
+    const parts = ['Vault returned an empty API key.'];
+    const vaultOutput = stderr.trim();
+    if (vaultOutput) {
+      parts.push(`Vault output: ${vaultOutput}`);
+    }
+    throw new Error(parts.join(' '));
   }
 
   return apiKey;
 }
 
-async function getEisEndpoint(es: ElasticsearchConnection): Promise<string | undefined> {
+async function getEisEndpoint(
+  es: ElasticsearchConnection,
+  log: ToolingLog
+): Promise<string | undefined> {
   try {
     const { statusCode, data } = await httpRequest(
       `${es.baseUrl}/_cluster/settings?include_defaults=true&flat_settings=true`,
@@ -204,6 +218,7 @@ async function getEisEndpoint(es: ElasticsearchConnection): Promise<string | und
     );
 
     if (statusCode !== 200) {
+      log.warning(`Failed to get cluster settings: HTTP ${statusCode}`);
       return undefined;
     }
 
@@ -215,6 +230,7 @@ async function getEisEndpoint(es: ElasticsearchConnection): Promise<string | und
       undefined
     );
   } catch (error) {
+    log.warning(`Error fetching cluster settings: ${error.message}`);
     return undefined;
   }
 }
@@ -261,7 +277,7 @@ async function setCcmApiKey(
             '',
             'Make sure Elasticsearch was started with the EIS URL flag:',
             '',
-            `  ${chalk.cyan(EIS_SNAPSHOT_CMD)}`,
+            `  ${chalk.cyan(EIS_URL_FLAG)}`,
           ].join('\n')
         );
       }
@@ -288,7 +304,7 @@ export async function ensureEis({ log }: { log: ToolingLog }) {
   const es = await getES(log);
 
   // Step 2: Check if the EIS endpoint is configured
-  const eisEndpoint = await getEisEndpoint(es);
+  const eisEndpoint = await getEisEndpoint(es, log);
   if (eisEndpoint) {
     log.info(`EIS endpoint: ${chalk.cyan(eisEndpoint)}`);
   } else {
