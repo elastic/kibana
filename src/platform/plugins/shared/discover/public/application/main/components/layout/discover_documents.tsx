@@ -26,7 +26,6 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
-  RenderDocumentViewMeta,
   UnifiedDataTableProps,
   UnifiedDataTableRestorableState,
   UseColumnsProps,
@@ -148,6 +147,7 @@ function DiscoverDocumentsComponent({
     ];
   });
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
+  const renderDocumentViewMeta = useCurrentTabSelector((state) => state.renderDocViewMeta);
   const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
   const isEsqlMode = useIsEsqlMode();
   const dataStateContainer = useCurrentTabDataStateContainer();
@@ -211,7 +211,6 @@ function DiscoverDocumentsComponent({
     [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
-  const [renderDocumentViewMeta, setRenderDocumentViewMeta] = useState<RenderDocumentViewMeta>();
   const docViewerRef = useRef<DocViewerApi>(null);
   const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const setExpandedDoc = useCallback(
@@ -234,6 +233,16 @@ function DiscoverDocumentsComponent({
       }
     },
     [dispatch, setExpandedDocAction]
+  );
+
+  const setRenderDocViewMetaAction = useCurrentTabAction(internalStateActions.setRenderDocViewMeta);
+  const setRenderDocumentViewMeta = useCallback<
+    NonNullable<UnifiedDataTableProps['setRenderDocumentViewMeta']>
+  >(
+    (meta) => {
+      dispatch(setRenderDocViewMetaAction({ renderDocViewMeta: meta }));
+    },
+    [dispatch, setRenderDocViewMetaAction]
   );
 
   const latestGrid = useLatest(grid);

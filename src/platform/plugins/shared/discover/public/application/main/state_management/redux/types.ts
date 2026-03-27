@@ -25,6 +25,7 @@ import type {
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { RenderDocumentViewMeta } from '@kbn/unified-data-table';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -196,6 +197,7 @@ export interface TabState extends TabItem {
     docViewer?: Partial<DocViewerRestorableState>;
   };
   expandedDoc: DataTableRecord | undefined;
+  renderDocViewMeta: RenderDocumentViewMeta | undefined;
   initialDocViewerTabId?: string;
 }
 

@@ -229,6 +229,10 @@ export const internalStateSlice = createSlice({
           tab.uiState.docViewer = {};
         }
 
+        if (!action.payload.expandedDoc) {
+          tab.renderDocViewMeta = undefined;
+        }
+
         tab.expandedDoc = action.payload.expandedDoc;
         tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
 
@@ -241,6 +245,15 @@ export const internalStateSlice = createSlice({
             },
           };
         }
+      });
+    },
+
+    setRenderDocViewMeta: (
+      state,
+      action: TabAction<{ renderDocViewMeta: TabState['renderDocViewMeta'] }>
+    ) => {
+      withTab(state, action.payload, (tab) => {
+        tab.renderDocViewMeta = action.payload.renderDocViewMeta;
       });
     },
 
@@ -380,6 +393,7 @@ export const internalStateSlice = createSlice({
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
         tab.expandedDoc = undefined;
+        tab.renderDocViewMeta = undefined;
         tab.initialDocViewerTabId = undefined;
         tab.uiState.docViewer = {};
       }),

@@ -401,10 +401,35 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), secondTabId).initialDocViewerTabId).toBe('JSON');
   });
 
+  it('should set renderDocViewMeta for a specific tab', async () => {
+    const { store } = await createTestStore();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+    const renderDocViewMeta = {
+      displayedColumns: ['@timestamp'],
+      displayedRows: [mockDoc],
+    };
+
+    expect(selectTab(store.getState(), tabId).renderDocViewMeta).toBeUndefined();
+
+    store.dispatch(
+      internalStateActions.setRenderDocViewMeta({
+        tabId,
+        renderDocViewMeta,
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).renderDocViewMeta).toEqual(renderDocViewMeta);
+  });
+
   it('should clear expandedDoc state when resetOnSavedSearchChange is dispatched', async () => {
     const { store } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+    const renderDocViewMeta = {
+      displayedColumns: ['@timestamp'],
+      displayedRows: [mockDoc],
+    };
 
     store.dispatch(
       internalStateActions.setExpandedDoc({
@@ -413,12 +438,52 @@ describe('InternalStateStore', () => {
         initialDocViewerTabId: 'Table',
       })
     );
+    store.dispatch(
+      internalStateActions.setRenderDocViewMeta({
+        tabId,
+        renderDocViewMeta,
+      })
+    );
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
 
     store.dispatch(internalStateActions.resetOnSavedSearchChange({ tabId }));
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).renderDocViewMeta).toBeUndefined();
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBeUndefined();
+  });
+
+  it('should clear renderDocViewMeta when expandedDoc is closed', async () => {
+    const { store } = await createTestStore();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+    const renderDocViewMeta = {
+      displayedColumns: ['@timestamp'],
+      displayedRows: [mockDoc],
+    };
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: mockDoc,
+      })
+    );
+    store.dispatch(
+      internalStateActions.setRenderDocViewMeta({
+        tabId,
+        renderDocViewMeta,
+      })
+    );
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: undefined,
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).renderDocViewMeta).toBeUndefined();
   });
 });

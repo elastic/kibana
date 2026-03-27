@@ -41,5 +41,6 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     snapshotsByProfileId: {},
   },
   expandedDoc: undefined,
+  renderDocViewMeta: undefined,
   uiState: {},
 };

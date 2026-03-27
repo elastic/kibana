@@ -756,15 +756,24 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     // When the document view is rendered externally, we need to provide some metadata
     // to the consumer to allow them to properly render the doc viewer component
+    const prevRenderDocumentViewMeta = useRef<RenderDocumentViewMeta>();
+
     useEffect(() => {
       if (renderDocumentView !== 'external' || !setRenderDocumentViewMeta) {
         return;
       }
 
-      if (expandedDoc) {
-        setRenderDocumentViewMeta({ displayedColumns, displayedRows });
-      } else {
+      const prevMeta = prevRenderDocumentViewMeta.current;
+      const metaChanged =
+        prevMeta?.displayedColumns !== displayedColumns ||
+        prevMeta?.displayedRows !== displayedRows;
+
+      if (!expandedDoc) {
         setRenderDocumentViewMeta(undefined);
+      } else if (metaChanged) {
+        const nextMeta: RenderDocumentViewMeta = { displayedColumns, displayedRows };
+        setRenderDocumentViewMeta(nextMeta);
+        prevRenderDocumentViewMeta.current = nextMeta;
       }
     }, [
       displayedColumns,
