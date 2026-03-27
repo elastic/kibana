@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { AgentProfileStorage, AgentProperties } from './client/storage';
 import type { AgentRef } from '../../../../common/http_api/skills';
@@ -14,8 +13,6 @@ import { updateRequestToEs } from './client/converters';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 
 const SEARCH_SIZE = 1000;
-
-const STABLE_AGENT_SORT: Sort = [{ id: 'asc' }, { updated_at: 'asc' }];
 
 export interface SkillRefCleanupParams {
   storage: AgentProfileStorage;
@@ -29,10 +26,6 @@ export type SkillRefCleanupRunResult = AgentsUsingSkillsResult;
 
 function getSkillIdsFromSource(source: AgentProperties): string[] {
   return source.config?.skill_ids ?? source.configuration?.skill_ids ?? [];
-}
-
-function referencesSkillIds(skillIds: string[], skillIdSet: Set<string>): boolean {
-  return skillIds.some((sid) => skillIdSet.has(sid));
 }
 
 function stripSkillIds(skillIds: string[], removeIds: string[]): string[] {
@@ -53,74 +46,48 @@ export async function runSkillRefCleanup({
   logger,
   checkOnly = false,
 }: SkillRefCleanupParams): Promise<SkillRefCleanupRunResult> {
-  const skillIdSet = new Set(skillIds);
+  if (skillIds.length === 0) {
+    return { agents: [] };
+  }
+
   const agents: AgentRef[] = [];
   const bulkOperations: Array<{ index: { _id: string; document: AgentProperties } }> = [];
   const now = new Date();
-  const logPrefix = checkOnly ? 'Get agents using skills' : 'Skill ref cleanup';
-
-  let searchAfter: Array<string | number> | undefined;
 
   const client = storage.getClient();
 
-  while (true) {
-    const response = await client.search({
-      track_total_hits: false,
-      size: SEARCH_SIZE,
-      sort: STABLE_AGENT_SORT,
-      ...(searchAfter ? { search_after: searchAfter } : {}),
-      query: {
-        bool: {
-          filter: [createSpaceDslFilter(spaceId)],
-        },
+  const response = await client.search({
+    track_total_hits: false,
+    size: SEARCH_SIZE,
+    query: {
+      bool: {
+        filter: [createSpaceDslFilter(spaceId), { terms: { 'config.skill_ids': skillIds } }],
       },
-    });
+    },
+  });
 
-    const hits = response.hits.hits;
-    if (hits.length === 0) {
-      break;
+  const hits = response.hits.hits;
+
+  for (const hit of hits) {
+    const source = hit._source;
+    if (!source) continue;
+
+    const currentSkillIds = getSkillIdsFromSource(source);
+
+    agents.push(toAgentRef(source, String(hit._id)));
+
+    if (!checkOnly) {
+      const newSkillIds = stripSkillIds(currentSkillIds, skillIds);
+      const updated = updateRequestToEs({
+        agentId: source.id ?? hit._id,
+        currentProps: source,
+        update: { configuration: { skill_ids: newSkillIds } },
+        updateDate: now,
+      });
+      bulkOperations.push({
+        index: { _id: String(hit._id), document: updated },
+      });
     }
-
-    if (hits.length >= SEARCH_SIZE && logger) {
-      logger.warn(`${logPrefix}: page at search limit (size=${SEARCH_SIZE}, spaceId=${spaceId}).`);
-    }
-
-    for (const hit of hits) {
-      const source = hit._source;
-      if (!source) continue;
-
-      const currentSkillIds = getSkillIdsFromSource(source);
-      if (!referencesSkillIds(currentSkillIds, skillIdSet)) continue;
-
-      agents.push(toAgentRef(source, String(hit._id)));
-
-      if (!checkOnly) {
-        const newSkillIds = stripSkillIds(currentSkillIds, skillIds);
-        const updated = updateRequestToEs({
-          agentId: source.id ?? hit._id,
-          currentProps: source,
-          update: { configuration: { skill_ids: newSkillIds } },
-          updateDate: now,
-        });
-        bulkOperations.push({
-          index: { _id: String(hit._id), document: updated },
-        });
-      }
-    }
-
-    if (hits.length < SEARCH_SIZE) {
-      break;
-    }
-
-    const lastHit = hits[hits.length - 1];
-    const lastSort = lastHit.sort as Array<string | number> | undefined;
-    if (!lastSort?.length) {
-      if (logger) {
-        logger.warn(`${logPrefix}: last hit missing sort; stopping pagination.`);
-      }
-      break;
-    }
-    searchAfter = lastSort;
   }
 
   if (checkOnly) {
