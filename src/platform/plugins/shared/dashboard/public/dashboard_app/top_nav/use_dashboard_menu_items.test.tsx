@@ -96,17 +96,17 @@ describe('useDashboardMenuItems', () => {
 
     const viewModeExportMenuItem = result.current.viewModeTopNavConfig.items!.find(
       ({ id }) => id === 'export'
-    ) as AppMenuPopoverItem;
-
-    const viewModeExportItemIds = viewModeExportMenuItem.items!.map((item) => item.id);
-    expect(viewModeExportItemIds).toContain('exportSourceDashboard');
+    );
+    expect(viewModeExportMenuItem).toBeDefined();
+    expect((viewModeExportMenuItem as unknown as { run?: unknown }).run).toBeDefined();
+    expect((viewModeExportMenuItem as unknown as AppMenuPopoverItem).items).toBeUndefined();
 
     const editModeExportMenuItem = result.current.editModeTopNavConfig.items!.find(
       ({ id }) => id === 'export'
-    ) as AppMenuPopoverItem;
-
-    const editModeExportItemIds = editModeExportMenuItem.items!.map((item) => item.id);
-    expect(editModeExportItemIds).toContain('exportSourceDashboard');
+    );
+    expect(editModeExportMenuItem).toBeDefined();
+    expect((editModeExportMenuItem as unknown as { run?: unknown }).run).toBeDefined();
+    expect((editModeExportMenuItem as unknown as AppMenuPopoverItem).items).toBeUndefined();
   });
 
   test('includes Export top-nav item with JSON and Reporting items when export and exportDerivatives integrations are available', () => {

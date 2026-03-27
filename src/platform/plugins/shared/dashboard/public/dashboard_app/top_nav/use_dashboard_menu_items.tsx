@@ -247,6 +247,29 @@ export const useDashboardMenuItems = ({
    */
 
   const menuItems = useMemo(() => {
+    const exportMenuItem: AppMenuItemType =
+      exportItems.length === 1
+        ? {
+            order: 3,
+            label: topNavStrings.export.label,
+            id: 'export',
+            iconType: 'exportAction',
+            testId: 'exportTopNavButton',
+            disableButton: disableTopNav,
+            run: (params) => exportItems[0].run?.(params),
+          }
+        : {
+            order: 3,
+            label: topNavStrings.export.label,
+            id: 'export',
+            iconType: 'exportAction',
+            testId: 'exportTopNavButton',
+            disableButton: disableTopNav,
+            items: exportItems,
+            popoverWidth: 160,
+            popoverTestId: 'exportPopoverPanel',
+          };
+
     return {
       // Regular menu items
       fullScreen: {
@@ -305,17 +328,7 @@ export const useDashboardMenuItems = ({
         run: () => showShare(),
       } as AppMenuItemType,
 
-      export: {
-        order: 3,
-        label: topNavStrings.export.label,
-        id: 'export',
-        iconType: 'exportAction',
-        testId: 'exportTopNavButton',
-        disableButton: disableTopNav,
-        items: exportItems,
-        popoverWidth: 160,
-        popoverTestId: 'exportPopoverPanel',
-      } as AppMenuItemType,
+      export: exportMenuItem,
 
       settings: {
         order: 5,
@@ -436,8 +449,11 @@ export const useDashboardMenuItems = ({
     }
 
     if (shareService) {
-      items.push(menuItems.export);
       items.push(menuItems.share);
+      if (hasExportMenuItems) {
+        // only render the export button if we have integrations
+        items.push(menuItems.export);
+      }
     }
 
     if (showResetChange) {
@@ -473,6 +489,7 @@ export const useDashboardMenuItems = ({
     dashboardApi.isManaged,
     showResetChange,
     isLabsEnabled,
+    hasExportMenuItems,
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
@@ -480,12 +497,12 @@ export const useDashboardMenuItems = ({
 
     const items: AppMenuItemType[] = [menuItems.switchToViewMode, menuItems.settings];
 
-    if (shareService && hasExportMenuItems) {
-      items.push(menuItems.export);
-    }
-
     if (shareService) {
       items.push(menuItems.share);
+      if (hasExportMenuItems) {
+        // only render the export button if we have integrations
+        items.push(menuItems.export);
+      }
     }
 
     if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
