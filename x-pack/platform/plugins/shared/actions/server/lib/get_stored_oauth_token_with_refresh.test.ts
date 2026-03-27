@@ -331,6 +331,37 @@ describe('getStoredTokenWithRefresh', () => {
       expect(result2).toBe('stored-per-user-access-token');
     });
 
+    it.each([
+      {
+        label: 'shared mode (simple lock key)',
+        extraOpts: {},
+        connectorToken: validToken,
+        expectedLockKey: (connectorId: string) => connectorId,
+      },
+      {
+        label: 'per-user mode (composite lock key)',
+        extraOpts: { isPerUser: true as const, profileUid: 'profile-cleanup-test' },
+        connectorToken: validPerUserToken,
+        expectedLockKey: (connectorId: string) => `${connectorId}:profile-cleanup-test`,
+      },
+    ])(
+      'removes the lock entry after all queued calls complete to prevent memory leaks ($label)',
+      async ({ extraOpts, connectorToken, expectedLockKey }) => {
+        const deleteSpy = jest.spyOn(Map.prototype, 'delete');
+        const connectorId = 'connector-cleanup-test';
+
+        connectorTokenClient.get.mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...connectorToken, connectorId },
+        });
+
+        await getStoredTokenWithRefresh({ ...baseOpts, connectorId, ...extraOpts });
+
+        expect(deleteSpy).toHaveBeenCalledWith(expectedLockKey(connectorId));
+        deleteSpy.mockRestore();
+      }
+    );
+
     it('allows concurrent per-user calls for different users on the same connector to refresh independently', async () => {
       const lockedConnectorId = 'connector-lock-per-user-diff';
       // Different profileUids => different lock keys => independent execution.

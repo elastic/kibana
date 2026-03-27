@@ -195,7 +195,7 @@ export const getStoredTokenWithRefresh = async ({
   });
 
   if (lock.pendingCount === 0 && lock.activeCount === 0) {
-    tokenRefreshLocks.delete(connectorId);
+    tokenRefreshLocks.delete(lockKey);
   }
 
   return result;
