@@ -25,14 +25,7 @@ import {
   useSiemReadinessApi,
 } from '@kbn/siem-readiness';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
-import {
-  INTEGRATIONS_INSTALLED_TOOLTIP,
-  INTEGRATIONS_UNINSTALLED_TOOLTIP,
-  INTEGRATIONS_ENABLED_TOOLTIP,
-  INTEGRATIONS_ENABLED,
-  INTEGRATIONS_DISABLED,
-  INTEGRATIONS_UNINSTALLED,
-} from '../../../../../detection_engine/common/components/related_integrations/translations';
+import { createIntegrationStatusMapFromSets } from '../create_integration_status_maps';
 
 export const AllRuleCoveragePanel: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -85,21 +78,15 @@ export const AllRuleCoveragePanel: React.FC = () => {
   }, [relatedIntegrationNames, enabledPackagesSet, getIntegrationDisplayName]);
 
   const enabledIntegrationsStatusMap = useMemo(() => {
-    const map = new Map<string, { status: string; badgeColor: string; tooltip: string }>();
     const enabledIntegrations = relatedIntegrationNames.filter((name) =>
       enabledPackagesSet.has(name)
     );
-
-    for (const name of enabledIntegrations) {
-      map.set(name, {
-        status: INTEGRATIONS_ENABLED,
-        badgeColor: 'success',
-        tooltip: INTEGRATIONS_ENABLED_TOOLTIP,
-      });
-    }
-
-    return map;
-  }, [relatedIntegrationNames, enabledPackagesSet]);
+    return createIntegrationStatusMapFromSets(
+      enabledIntegrations,
+      enabledPackagesSet,
+      disabledPackagesSet
+    );
+  }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet]);
 
   const missingOrDisabledIntegrationsOptions = useMemo(() => {
     return relatedIntegrationNames
@@ -116,21 +103,14 @@ export const AllRuleCoveragePanel: React.FC = () => {
   }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet, getIntegrationDisplayName]);
 
   const missingOrDisabledStatusMap = useMemo(() => {
-    const map = new Map<string, { status: string; badgeColor: string; tooltip: string }>();
     const missingOrDisabledIntegrations = relatedIntegrationNames.filter(
       (name) => !enabledPackagesSet.has(name)
     );
-
-    for (const name of missingOrDisabledIntegrations) {
-      const isDisabled = disabledPackagesSet.has(name);
-      map.set(name, {
-        status: isDisabled ? INTEGRATIONS_DISABLED : INTEGRATIONS_UNINSTALLED,
-        badgeColor: isDisabled ? 'primary' : 'default',
-        tooltip: isDisabled ? INTEGRATIONS_INSTALLED_TOOLTIP : INTEGRATIONS_UNINSTALLED_TOOLTIP,
-      });
-    }
-
-    return map;
+    return createIntegrationStatusMapFromSets(
+      missingOrDisabledIntegrations,
+      enabledPackagesSet,
+      disabledPackagesSet
+    );
   }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet]);
 
   const chartBaseTheme = useMemo(
