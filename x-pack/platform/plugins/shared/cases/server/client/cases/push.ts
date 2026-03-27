@@ -265,7 +265,7 @@ export const push = async (
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
-            attachmentId: comment.id,
+            savedObjectId: comment.id,
             updatedAttributes: {
               pushed_at: pushedDate,
               pushed_by: { username, full_name, email, profile_uid },
