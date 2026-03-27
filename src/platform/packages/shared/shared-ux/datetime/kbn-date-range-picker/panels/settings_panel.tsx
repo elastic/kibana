@@ -37,7 +37,7 @@ import { useTimeZoneDisplay } from '../hooks/use_time_zone_display';
 
 const ADVANCED_SETTINGS_URL_TIME_ZONE = '/app/management/kibana/settings?query=dateFormat:tz';
 const ADVANCED_SETTINGS_URL_LEGACY_PICKER =
-  '/app/management/kibana/settings?query=timepicker:useLegacyTimePicker';
+  '/app/management/kibana/settings?query=timepicker:useDateRangePicker';
 
 /**
  * Settings panel for the date range picker, accessible from the main panel gear button.
