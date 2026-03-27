@@ -323,6 +323,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 isEdit={false}
                 onSubmitSuccess={onSubmitSuccess}
                 enforceAdaptiveAllocations={enforceAdaptiveAllocations}
+                allowedTaskTypes={['text_embedding', 'sparse_embedding']}
               />
             </Suspense>
           )}
