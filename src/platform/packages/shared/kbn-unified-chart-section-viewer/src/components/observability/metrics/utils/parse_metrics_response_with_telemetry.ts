@@ -30,6 +30,12 @@ export const createInitialMetricsTelemetry = (): MetricsTelemetry => ({
 });
 
 /**
+ * Dimension names that are internal metadata and should not be exposed to users.
+ * See: https://github.com/elastic/observability-dev/issues/5412
+ */
+const INTERNAL_DIMENSION_EXACT_NAMES = new Set(['_metric_names_hash', 'unit']);
+
+/**
  * Dimension name prefixes that indicate internal metadata fields.
  * Any dimension whose name starts with one of these prefixes will be hidden.
  */
