@@ -168,7 +168,13 @@ export const RuleResponseEndpointAction = z.object({
 });
 
 export type ResponseAction = z.infer<typeof ResponseAction>;
-export const ResponseAction = z.union([OsqueryResponseAction, EndpointResponseAction]);
+export const ResponseAction = z.discriminatedUnion('action_type_id', [
+  OsqueryResponseAction,
+  EndpointResponseAction,
+]);
 
 export type RuleResponseAction = z.infer<typeof RuleResponseAction>;
-export const RuleResponseAction = z.union([RuleResponseOsqueryAction, RuleResponseEndpointAction]);
+export const RuleResponseAction = z.discriminatedUnion('actionTypeId', [
+  RuleResponseOsqueryAction,
+  RuleResponseEndpointAction,
+]);
