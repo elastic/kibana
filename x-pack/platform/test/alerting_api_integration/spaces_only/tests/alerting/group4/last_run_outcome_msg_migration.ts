@@ -34,7 +34,7 @@ export default function lastRunOutcomeMsgMigrationTests({ getService }: FtrProvi
       await objectRemover.removeAll();
     });
 
-    async function getAlertFromEs(ruleId: string): Promise<RawRule> {
+    async function getRuleFromEs(ruleId: string): Promise<RawRule> {
       const response = await es.get<{ alert: RawRule }>(
         {
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
@@ -79,7 +79,7 @@ export default function lastRunOutcomeMsgMigrationTests({ getService }: FtrProvi
 
       await injectLegacyStringOutcomeMsg(createdRule.id);
 
-      const beforeBulk = await getAlertFromEs(createdRule.id);
+      const beforeBulk = await getRuleFromEs(createdRule.id);
       expect((beforeBulk.lastRun as { outcomeMsg?: unknown } | undefined)?.outcomeMsg).to.eql(
         LEGACY_OUTCOME_MSG
       );
@@ -92,7 +92,7 @@ export default function lastRunOutcomeMsgMigrationTests({ getService }: FtrProvi
         })
         .expect(200);
 
-      const afterBulk = await getAlertFromEs(createdRule.id);
+      const afterBulk = await getRuleFromEs(createdRule.id);
       expect(afterBulk.lastRun?.outcomeMsg).to.eql([LEGACY_OUTCOME_MSG]);
       expect(afterBulk.enabled).to.eql(false);
 
@@ -126,7 +126,7 @@ export default function lastRunOutcomeMsgMigrationTests({ getService }: FtrProvi
 
       await injectLegacyStringOutcomeMsg(createdRule.id);
 
-      const beforeBulk = await getAlertFromEs(createdRule.id);
+      const beforeBulk = await getRuleFromEs(createdRule.id);
       expect((beforeBulk.lastRun as { outcomeMsg?: unknown } | undefined)?.outcomeMsg).to.eql(
         LEGACY_OUTCOME_MSG
       );
@@ -139,7 +139,7 @@ export default function lastRunOutcomeMsgMigrationTests({ getService }: FtrProvi
         })
         .expect(200);
 
-      const afterBulk = await getAlertFromEs(createdRule.id);
+      const afterBulk = await getRuleFromEs(createdRule.id);
       expect(afterBulk.lastRun?.outcomeMsg).to.eql([LEGACY_OUTCOME_MSG]);
       expect(afterBulk.enabled).to.eql(true);
 
