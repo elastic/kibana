@@ -9,9 +9,7 @@
   "exclude": ["types/**/*", "**/__fixtures__/**/*", "target/**/*"],
   "kbn_references": [
     "@kbn/kbn-client",
-    "@kbn/dev-utils",
     "@kbn/dev-validation-runner",
-    "@kbn/moon",
     "@kbn/std",
     "@kbn/test-es-server",
     "@kbn/tooling-log",

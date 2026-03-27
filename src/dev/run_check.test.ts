@@ -140,7 +140,10 @@ describe('run_check', () => {
     cpusSpy = jest.spyOn(Os, 'cpus').mockReturnValue(new Array(8).fill({}) as any);
     mockReadValidationRunFlags.mockReturnValue({});
     mockResolveValidationBaseContext.mockResolvedValue(baseContext);
-    mockExistsSync.mockImplementation((p: string) => p.endsWith('jest.config.js'));
+    mockExistsSync.mockImplementation(
+      (p: string) =>
+        p === '/repo/packages/foo/jest.config.js' || p === '/repo/packages/bar/jest.config.js'
+    );
     mockExecuteEslintValidation.mockResolvedValue({
       fileCount: 3,
       fixedFiles: [],
