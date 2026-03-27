@@ -82,7 +82,7 @@ export interface ESQLExpressionWithParams {
   params?: Record<string, string | number>;
 }
 
-/** Result from filters toESQL: FORK step + EVAL mapping _fork to filter labels. */
+/** Result from filters toESQL: FORK + STATS BY _fork + EVAL mapping _fork to filter labels. */
 export interface ESQLFiltersForkResult extends ESQLExpressionWithParams {
   forkCommand: string;
   forkLabelEval: string;

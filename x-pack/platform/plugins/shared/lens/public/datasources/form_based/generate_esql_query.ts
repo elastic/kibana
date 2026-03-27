@@ -302,8 +302,8 @@ export function generateEsqlQuery(
   }
 
   // Process buckets
-  // Filters bucket uses toESQL (FORK + EVAL mapping _fork to filter labels);
-  // pipeline steps applied before STATS
+  // Filters bucket uses toESQL (FORK + STATS BY _fork + EVAL mapping _fork to filter labels);
+  // FORK/STATS run first; EVAL applies after aggregation
   let forkCommand: string | null = null;
   let forkLabelEval: string | null = null;
   const resolvedBucketExprs = new Map<number, string>();
@@ -439,17 +439,25 @@ export function generateEsqlQuery(
   const validBuckets = bucketsResult.map((b) => b.esql);
 
   if (validBuckets.length > 0) {
-    // Filters bucket: add FORK then EVAL (map _fork to filter labels), then STATS BY filter
+    // Filters bucket: FORK, then STATS BY _fork (not filter — filter is added by EVAL after STATS)
     if (forkCommand !== null) {
       queryParts.push(forkCommand);
     }
-    if (forkLabelEval !== null) {
+    if (forkLabelEval !== null && validMetrics.length === 0) {
       queryParts.push(`EVAL ${forkLabelEval}`);
+      queryParts.push(`DROP _fork`);
     }
     if (validMetrics.length > 0) {
-      const byClause = validBuckets.join(', ');
+      const byClause =
+        forkLabelEval !== null
+          ? validBuckets.map((b) => (b === 'filter' ? '_fork' : b)).join(', ')
+          : validBuckets.join(', ');
       const statsBody = `${validMetrics.join(', ')} BY ${byClause}`;
       queryParts.push(`STATS ${statsBody}`);
+    }
+    if (forkLabelEval !== null && validMetrics.length > 0) {
+      queryParts.push(`EVAL ${forkLabelEval}`);
+      queryParts.push(`DROP _fork`);
     }
 
     // Build sort fields, excluding date fields (date_histogram columns)

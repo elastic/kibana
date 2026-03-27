@@ -134,6 +134,7 @@ export const filtersOperation: OperationDefinition<
     });
     if (validFilters.length === 0) return undefined;
     if (validFilters.length > FORK_MAX_BRANCHES) return undefined;
+
     const branchClauses = validFilters.map((f: Filter) => {
       const cmd = f.input!.language === 'kuery' ? 'KQL' : 'QSTR';
       const query = f.input!.query.replace(/"""/g, '').trim();
