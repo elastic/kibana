@@ -112,8 +112,8 @@ export const command = {
 
     await Promise.all([
       time('prepare webpack bundles for packages', async () => {
-        log.info('extract relevant versions for packages and pre-build webpack bundles');
-        await moonRun([':extract-version-dependencies', ':build-webpack'], {
+        log.info('pre-build webpack bundles');
+        await moonRun([':build-webpack'], {
           pipe: !quiet,
           quiet,
           noCache: forceInstall,
