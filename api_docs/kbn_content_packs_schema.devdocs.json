@@ -1182,8 +1182,8 @@
             "pluginId": "@kbn/lens-common",
             "scope": "common",
             "docId": "kibKbnLensCommonPluginApi",
-            "section": "def-common.XYState",
-            "text": "XYState"
+            "section": "def-common.XYPersistedState",
+            "text": "XYPersistedState"
           },
           "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {

@@ -6,7 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiPageHeader, EuiPageSection, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiPageSection,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useParams } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -54,9 +62,23 @@ const SiemReadinessDashboard = () => {
   return (
     <div>
       <EuiPageHeader
-        pageTitle={i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
-          defaultMessage: 'SIEM Readiness',
-        })}
+        pageTitle={
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
+                defaultMessage: 'SIEM Readiness',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={i18n.translate('xpack.securitySolution.siemReadiness.betaBadgeLabel', {
+                  defaultMessage: 'Beta',
+                })}
+                data-test-subj="siemReadinessBetaBadge"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         bottomBorder={true}
         rightSideItems={[
           <EuiButtonEmpty
