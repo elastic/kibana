@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  escapeAndPreserveHighlightTags,
-  getHighlightedFieldValue,
-} from './highlight_utils';
+import { escapeAndPreserveHighlightTags, getHighlightedFieldValue } from './highlight_utils';
 
 // Must match the html tags defined in @kbn/field-formats-plugin (html_tags.ts)
 const PRE = '<mark class="ffSearch__highlight">';
@@ -85,14 +82,14 @@ describe('getHighlightedFieldValue', () => {
   });
 
   it('escapes HTML in the field value while preserving highlight tags', () => {
-    expect(
-      getHighlightedFieldValue('<b>test</b>', [`${ES_PRE}<b>test</b>${ES_POST}`])
-    ).toBe(`${PRE}&lt;b&gt;test&lt;/b&gt;${POST}`);
+    expect(getHighlightedFieldValue('<b>test</b>', [`${ES_PRE}<b>test</b>${ES_POST}`])).toBe(
+      `${PRE}&lt;b&gt;test&lt;/b&gt;${POST}`
+    );
   });
 
   it('returns escaped value when highlights do not match field text', () => {
-    expect(
-      getHighlightedFieldValue('no match here', [`${ES_PRE}other text${ES_POST}`])
-    ).toBe('no match here');
+    expect(getHighlightedFieldValue('no match here', [`${ES_PRE}other text${ES_POST}`])).toBe(
+      'no match here'
+    );
   });
 });
