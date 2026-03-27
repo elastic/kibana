@@ -9,17 +9,22 @@ export { promptInjectionModule } from './modules/prompt_injection';
 export { privilegeEscalationModule } from './modules/privilege_escalation';
 export { infoExtractionModule } from './modules/info_extraction';
 export { jailbreakingModule } from './modules/jailbreaking';
-export { createGuardrailsEngine, DEFAULT_GUARDRAIL_RULES } from './guardrails';
-export { createRedTeamRunner, ALL_MODULES, MODULES_BY_NAME } from './runner';
-export type { RedTeamRunnerConfig, TaskResult } from './runner';
+export {
+  createGuardrailsEvaluator,
+  createGuardrailsEngine,
+  DEFAULT_GUARDRAIL_RULES,
+} from './guardrails';
+export { createRedTeamDataset, ALL_MODULES, MODULES_BY_NAME } from './dataset';
+export { getRedTeamEvaluators } from './evaluators';
+export type { RedTeamEvaluatorsConfig } from './evaluators';
 export type {
   AttackCategory,
   Severity,
   AttackExample,
   AttackModule,
   AttackModuleConfig,
-  AttackResult,
-  RedTeamRunSummary,
+  RedTeamDatasetConfig,
+  RedTeamDataset,
 } from './types';
 export type {
   GuardrailRule,

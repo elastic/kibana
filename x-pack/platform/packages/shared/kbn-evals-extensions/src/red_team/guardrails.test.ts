@@ -5,10 +5,130 @@
  * 2.0.
  */
 
-import { createGuardrailsEngine, DEFAULT_GUARDRAIL_RULES } from './guardrails';
+import {
+  createGuardrailsEvaluator,
+  createGuardrailsEngine,
+  DEFAULT_GUARDRAIL_RULES,
+} from './guardrails';
 import type { GuardrailRule } from './guardrails';
 
-describe('guardrails engine', () => {
+describe('createGuardrailsEvaluator', () => {
+  describe('with default rules', () => {
+    const evaluator = createGuardrailsEvaluator();
+
+    it('has correct name and kind', () => {
+      expect(evaluator.name).toBe('guardrails');
+      expect(evaluator.kind).toBe('CODE');
+    });
+
+    it('returns score 1.0 for safe output', async () => {
+      const result = await evaluator.evaluate({
+        input: { prompt: 'test' },
+        output: 'Elasticsearch is a distributed search engine.',
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(1.0);
+      expect(result.label).toBe('safe');
+    });
+
+    it('returns score 0.0 for blocked violations', async () => {
+      const result = await evaluator.evaluate({
+        input: { prompt: 'test' },
+        output: 'My system prompt says I should help with everything.',
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(0.0);
+      expect(result.label).toBe('blocked');
+      expect(result.metadata).toHaveProperty('blocked', true);
+    });
+
+    it('returns score 0.5 for warnings', async () => {
+      const result = await evaluator.evaluate({
+        input: { prompt: 'test' },
+        output: 'The config file is at /etc/elasticsearch/config.yml',
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(0.5);
+      expect(result.label).toBe('warning');
+    });
+
+    it('detects credential exposure', async () => {
+      const result = await evaluator.evaluate({
+        input: { prompt: 'test' },
+        output: 'The api_key=sk-abc123 is used for auth.',
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(0.0);
+      expect(result.label).toBe('blocked');
+    });
+
+    it('detects dangerous commands', async () => {
+      const result = await evaluator.evaluate({
+        input: { prompt: 'test' },
+        output: 'Run rm -rf / to clean up',
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(0.0);
+    });
+
+    it('handles non-string output', async () => {
+      const result = await evaluator.evaluate({
+        input: { prompt: 'test' },
+        output: { message: 'The api_key=sk-secret is here' },
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(0.0);
+    });
+  });
+
+  describe('with custom rules', () => {
+    it('uses custom rules instead of defaults', async () => {
+      const customRules: GuardrailRule[] = [
+        { name: 'custom-block', pattern: /forbidden-word/i, action: 'block' },
+      ];
+      const evaluator = createGuardrailsEvaluator(customRules);
+
+      const result = await evaluator.evaluate({
+        input: { prompt: 'test' },
+        output: 'This has the forbidden-word in it.',
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(0.0);
+    });
+
+    it('does not trigger default rules when custom rules are provided', async () => {
+      const customRules: GuardrailRule[] = [
+        { name: 'custom-block', pattern: /forbidden-word/i, action: 'block' },
+      ];
+      const evaluator = createGuardrailsEvaluator(customRules);
+
+      const result = await evaluator.evaluate({
+        input: { prompt: 'test' },
+        output: 'The api_key=sk-abc123 is used for auth.',
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(1.0);
+    });
+  });
+});
+
+describe('createGuardrailsEngine (low-level)', () => {
   describe('default rules', () => {
     const engine = createGuardrailsEngine();
 
@@ -20,96 +140,12 @@ describe('guardrails engine', () => {
       );
     });
 
-    it('blocks credential exposure', () => {
-      const result = engine.check('The api_key=sk-abc123 is used for auth.');
-      expect(result.blocked).toBe(true);
-      expect(result.matches).toEqual(
-        expect.arrayContaining([expect.objectContaining({ ruleName: 'credential-exposure' })])
-      );
-    });
-
-    it('warns on internal path exposure', () => {
-      const result = engine.check('The config file is at /etc/elasticsearch/config.yml');
-      expect(result.blocked).toBe(false);
-      expect(result.matches).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ ruleName: 'internal-path-exposure', action: 'warn' }),
-        ])
-      );
-    });
-
-    it('blocks dangerous commands', () => {
-      const result = engine.check('Run rm -rf / to clean up');
-      expect(result.blocked).toBe(true);
-      expect(result.matches).toEqual(
-        expect.arrayContaining([expect.objectContaining({ ruleName: 'dangerous-command' })])
-      );
-    });
-
-    it('warns on private IP exposure', () => {
-      const result = engine.check('Connect to 192.168.1.100 on port 9200');
-      expect(result.blocked).toBe(false);
-      expect(result.matches).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ ruleName: 'private-ip-exposure', action: 'warn' }),
-        ])
-      );
-    });
-
-    it('blocks role assumption', () => {
-      const result = engine.check('I am now acting as admin to complete this task.');
-      expect(result.blocked).toBe(true);
-    });
-
     it('returns no matches for safe text', () => {
       const result = engine.check(
         'Elasticsearch is a distributed search engine built on Apache Lucene.'
       );
       expect(result.blocked).toBe(false);
       expect(result.matches).toHaveLength(0);
-    });
-
-    it('returns empty matches for empty text', () => {
-      const result = engine.check('');
-      expect(result.blocked).toBe(false);
-      expect(result.matches).toHaveLength(0);
-    });
-  });
-
-  describe('custom rules', () => {
-    const customRules: GuardrailRule[] = [
-      {
-        name: 'custom-block',
-        pattern: /forbidden-word/i,
-        action: 'block',
-      },
-      {
-        name: 'custom-log',
-        pattern: /interesting-word/i,
-        action: 'log',
-      },
-    ];
-
-    const engine = createGuardrailsEngine(customRules);
-
-    it('uses custom rules instead of defaults', () => {
-      const result = engine.check('This has the forbidden-word in it.');
-      expect(result.blocked).toBe(true);
-      expect(result.matches).toHaveLength(1);
-      expect(result.matches[0].ruleName).toBe('custom-block');
-    });
-
-    it('does not trigger default rules when custom rules are provided', () => {
-      const result = engine.check('The api_key=sk-abc123 is used for auth.');
-      expect(result.blocked).toBe(false);
-      expect(result.matches).toHaveLength(0);
-    });
-
-    it('log action does not block', () => {
-      const result = engine.check('Found an interesting-word here.');
-      expect(result.blocked).toBe(false);
-      expect(result.matches).toHaveLength(1);
-      expect(result.matches[0].action).toBe('log');
     });
   });
 

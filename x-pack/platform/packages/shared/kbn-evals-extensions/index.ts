@@ -6,10 +6,14 @@
  */
 
 /**
- * @kbn/evals-extensions - Advanced evaluation capabilities
+ * @kbn/evals-extensions — Advanced evaluation capabilities for @kbn/evals.
  *
- * This package provides standalone extensions for @kbn/evals.
- * It does NOT modify the core @kbn/evals package.
+ * Provides red-team adversarial testing tools designed to work natively with
+ * `executorClient.runExperiment()` from @kbn/evals:
+ *
+ * - **Attack modules** generate adversarial prompt datasets
+ * - **Guardrails evaluator** scans output for security violations
+ * - **Dataset builder** produces `EvaluationDataset<AttackExample>` for the framework
  *
  * ## Architecture
  *
@@ -17,12 +21,23 @@
  * - kbn-evals-extensions -> imports from -> kbn-evals
  * - kbn-evals -> MUST NOT import from -> kbn-evals-extensions
  *
+ * ## Usage
+ *
+ * ```ts
+ * import { createRedTeamDataset, getRedTeamEvaluators } from '@kbn/evals-extensions';
+ *
+ * const dataset = createRedTeamDataset({ modules: ['prompt-injection'] });
+ * await executorClient.runExperiment({ dataset, task }, getRedTeamEvaluators());
+ * ```
+ *
  * @packageDocumentation
  */
 
 export {
-  createRedTeamRunner,
+  createRedTeamDataset,
+  createGuardrailsEvaluator,
   createGuardrailsEngine,
+  getRedTeamEvaluators,
   DEFAULT_GUARDRAIL_RULES,
   promptInjectionModule,
   privilegeEscalationModule,
@@ -38,12 +53,11 @@ export type {
   AttackExample,
   AttackModule,
   AttackModuleConfig,
-  AttackResult,
-  RedTeamRunSummary,
+  RedTeamDatasetConfig,
+  RedTeamDataset,
   GuardrailRule,
   GuardrailAction,
   GuardrailMatch,
   GuardrailCheckResult,
-  RedTeamRunnerConfig,
-  TaskResult,
+  RedTeamEvaluatorsConfig,
 } from './src/red_team';

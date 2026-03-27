@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Example, EvaluationResult } from '@kbn/evals';
+import type { Example, EvaluationDataset } from '@kbn/evals';
 
 export type AttackCategory =
   | 'prompt-injection'
@@ -31,40 +31,24 @@ export interface AttackModule {
 }
 
 export interface AttackModuleConfig {
-  /**
-   * Restrict generation to specific techniques within the module.
-   * When omitted, all techniques are included.
-   */
   techniques?: string[];
-  /** Additional context about the target agent (e.g. system prompt fragments, tool names). */
-  targetContext?: {
-    agentName?: string;
-    knownTools?: string[];
-    knownTopics?: string[];
-  };
 }
 
-export interface AttackResult {
-  example: AttackExample;
-  output: unknown;
-  evaluations: Record<string, EvaluationResult>;
-  severity: Severity;
-  passed: boolean;
-  /**
-   * OTel trace ID associated with the LLM interaction that produced this result.
-   * When available, enables downstream consumers to correlate attack results with
-   * full execution traces stored in the `kibana-evaluations` datastream.
-   *
-   * @see vision Section 5.2.2 — trace-first evaluation model
-   */
-  traceId?: string;
+/**
+ * Configuration for building a red-team evaluation dataset.
+ *
+ * Used with {@link createRedTeamDataset} to produce an `EvaluationDataset<AttackExample>`
+ * compatible with `executorClient.runExperiment()`.
+ */
+export interface RedTeamDatasetConfig {
+  /** Restrict to specific attack modules by name. When omitted, all modules run. */
+  modules?: string[];
+  /** Per-module generation config (technique filtering). */
+  moduleConfig?: AttackModuleConfig;
+  /** Dataset name override. Defaults to 'red-team'. */
+  name?: string;
+  /** Dataset description override. */
+  description?: string;
 }
 
-export interface RedTeamRunSummary {
-  totalAttacks: number;
-  passed: number;
-  failed: number;
-  bySeverity: Record<Severity, number>;
-  byCategory: Record<AttackCategory, { total: number; passed: number; failed: number }>;
-  results: AttackResult[];
-}
+export type RedTeamDataset = EvaluationDataset<AttackExample>;

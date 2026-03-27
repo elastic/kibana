@@ -6,8 +6,10 @@
  */
 
 import {
-  createRedTeamRunner,
+  createRedTeamDataset,
+  createGuardrailsEvaluator,
   createGuardrailsEngine,
+  getRedTeamEvaluators,
   DEFAULT_GUARDRAIL_RULES,
   promptInjectionModule,
   privilegeEscalationModule,
@@ -25,12 +27,20 @@ describe('@kbn/evals-extensions', () => {
   });
 
   describe('red-team exports', () => {
-    it('exports createRedTeamRunner', () => {
-      expect(typeof createRedTeamRunner).toBe('function');
+    it('exports createRedTeamDataset', () => {
+      expect(typeof createRedTeamDataset).toBe('function');
+    });
+
+    it('exports createGuardrailsEvaluator', () => {
+      expect(typeof createGuardrailsEvaluator).toBe('function');
     });
 
     it('exports createGuardrailsEngine', () => {
       expect(typeof createGuardrailsEngine).toBe('function');
+    });
+
+    it('exports getRedTeamEvaluators', () => {
+      expect(typeof getRedTeamEvaluators).toBe('function');
     });
 
     it('exports DEFAULT_GUARDRAIL_RULES', () => {
@@ -47,6 +57,36 @@ describe('@kbn/evals-extensions', () => {
 
     it('exports ALL_MODULES with 4 modules', () => {
       expect(ALL_MODULES).toHaveLength(4);
+    });
+  });
+
+  describe('framework integration', () => {
+    it('createRedTeamDataset returns EvaluationDataset shape', () => {
+      const dataset = createRedTeamDataset({ modules: ['prompt-injection'] });
+
+      expect(dataset).toHaveProperty('name');
+      expect(dataset).toHaveProperty('description');
+      expect(dataset).toHaveProperty('examples');
+      expect(Array.isArray(dataset.examples)).toBe(true);
+    });
+
+    it('createGuardrailsEvaluator returns Evaluator shape', () => {
+      const evaluator = createGuardrailsEvaluator();
+
+      expect(evaluator).toHaveProperty('name', 'guardrails');
+      expect(evaluator).toHaveProperty('kind', 'CODE');
+      expect(typeof evaluator.evaluate).toBe('function');
+    });
+
+    it('getRedTeamEvaluators returns array of Evaluators', () => {
+      const evaluators = getRedTeamEvaluators();
+
+      expect(Array.isArray(evaluators)).toBe(true);
+      for (const evaluator of evaluators) {
+        expect(evaluator).toHaveProperty('name');
+        expect(evaluator).toHaveProperty('kind');
+        expect(typeof evaluator.evaluate).toBe('function');
+      }
     });
   });
 
