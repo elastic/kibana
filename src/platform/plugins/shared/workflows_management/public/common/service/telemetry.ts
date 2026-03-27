@@ -8,7 +8,10 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import type { WorkflowTriggerTab } from '../../features/run_workflow/ui/types';
+import type {
+  WorkflowStepTriggerTab,
+  WorkflowTriggerTab,
+} from '../../features/run_workflow/ui/types';
 import type { YamlValidationResult } from '../../features/validate_workflow_yaml/model/types';
 import {
   WorkflowAiChatEventTypes,
@@ -88,6 +91,7 @@ export class WorkflowsBaseTelemetry {
       hasDescription: metadata.hasDescription,
       tagCount: metadata.tagCount,
       constCount: metadata.constCount,
+      hasTriggerConditions: metadata.hasTriggerConditions,
       ...this.getBaseResultParams(error),
     });
   };
@@ -367,8 +371,9 @@ export class WorkflowsBaseTelemetry {
     error?: Error;
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
+    triggerTab?: WorkflowStepTriggerTab;
   }) => {
-    const { workflowYaml, stepId, error, editorType, origin } = params;
+    const { workflowYaml, stepId, error, editorType, origin, triggerTab } = params;
 
     // Extract step information from workflow YAML
     const stepInfo = workflowYaml ? extractStepInfoFromWorkflowYaml(workflowYaml, stepId) : null;
@@ -385,6 +390,7 @@ export class WorkflowsBaseTelemetry {
       ...(connectorType && { connectorType }),
       ...(editorType && { editorType }),
       ...(origin && { origin }),
+      ...(triggerTab && { triggerTab }),
       ...this.getBaseResultParams(error),
     });
   };

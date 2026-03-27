@@ -23,7 +23,7 @@ import {
   generateFieldHintCases,
   formatJsonProperty,
   buildEntityEnrichment,
-  checkEnrichmentAvailability,
+  checkIfEntitiesIndexLookupMode,
 } from './utils';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEdge } from './types';
@@ -33,7 +33,6 @@ interface BuildEsqlQueryParams {
   originEventIds: OriginEventId[];
   originAlertIds: OriginEventId[];
   isLookupIndexAvailable: boolean;
-  isEnrichPolicyExists: boolean;
   spaceId: string;
   alertsMappingsIncluded: boolean;
   pinnedIds?: string[];
@@ -78,13 +77,7 @@ export const fetchEvents = async ({
     }
   });
 
-  // Check if the entities lookup index exists and is in lookup mode (preferred)
-  // If not, fall back to checking if the enrich policy exists (deprecated)
-  const { isLookupIndexAvailable, isEnrichPolicyExists } = await checkEnrichmentAvailability(
-    esClient,
-    logger,
-    spaceId
-  );
+  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
@@ -94,7 +87,6 @@ export const fetchEvents = async ({
     originEventIds,
     originAlertIds,
     isLookupIndexAvailable,
-    isEnrichPolicyExists,
     spaceId,
     alertsMappingsIncluded,
     pinnedIds,
@@ -195,7 +187,7 @@ const buildPinnedEsql = (pinnedIds?: string[]): string => {
 
 /**
  * Generates ESQL statements for building entity fields with enrichment data.
- * This is used when entity store enrichment is available (via LOOKUP JOIN or ENRICH).
+ * This is used when entity store enrichment is available (via LOOKUP JOIN).
  * Uses REPLACE to fix "{," pattern that occurs when first property is null.
  */
 const buildEnrichedEntityFieldsEsql = (): string => {
@@ -247,7 +239,6 @@ const buildEsqlQuery = ({
   originEventIds,
   originAlertIds,
   isLookupIndexAvailable,
-  isEnrichPolicyExists,
   spaceId,
   alertsMappingsIncluded,
   pinnedIds,
@@ -298,9 +289,9 @@ ${targetFieldHintCases},
     ""
 )
 ${
-  isLookupIndexAvailable || isEnrichPolicyExists
+  isLookupIndexAvailable
     ? `
-${buildEntityEnrichment(isLookupIndexAvailable, isEnrichPolicyExists, spaceId)}
+${buildEntityEnrichment(isLookupIndexAvailable, spaceId)}
 
 ${buildEnrichedEntityFieldsEsql()}
 `

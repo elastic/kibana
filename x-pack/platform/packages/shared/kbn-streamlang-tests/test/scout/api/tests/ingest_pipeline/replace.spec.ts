@@ -30,7 +30,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'An error occurred' }];
       await testBed.ingest(indexName, docs, processors);
@@ -55,7 +55,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'An error occurred' }];
       await testBed.ingest(indexName, docs, processors);
@@ -80,7 +80,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'Error code 404 found' }];
       await testBed.ingest(indexName, docs, processors);
@@ -104,7 +104,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'User alice has 3 new messages' }];
       await testBed.ingest(indexName, docs, processors);
@@ -130,7 +130,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
         const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -154,7 +154,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
       await testBed.ingest(indexName, docs, processors);
@@ -184,7 +184,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         { message: 'An error occurred', event: { kind: 'test' } },
@@ -231,7 +231,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { message: 'An error occurred', event: { kind: 'test' } },
@@ -282,7 +282,7 @@ apiTest.describe(
           ],
         };
 
-        expect(() => transpile(streamlangDSL)).toThrow(
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
         );
       });

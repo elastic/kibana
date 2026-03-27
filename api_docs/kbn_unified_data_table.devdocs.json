@@ -2241,7 +2241,7 @@
         "label": "DataGridDensity",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
