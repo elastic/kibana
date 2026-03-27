@@ -206,6 +206,7 @@ describe('WorkflowsBaseTelemetry', () => {
         inputCount: 0,
         constCount: 0,
         triggerCount: 0,
+        hasTriggerConditions: false,
         settingsUsed: ['concurrency'],
         hasDescription: false,
         tagCount: 0,
