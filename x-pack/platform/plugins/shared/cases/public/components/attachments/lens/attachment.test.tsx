@@ -27,7 +27,7 @@ describe('getVisualizationAttachmentType', () => {
       attributes: { state: { query: {} } },
       timeRange: {},
     },
-    attachmentId: 'test',
+    savedObjectId: 'test',
     caseData: { title: basicCase.title, id: basicCase.id },
   };
 
