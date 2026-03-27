@@ -372,7 +372,7 @@ export const QueryBarTopRow = React.memo(
       dataViews,
     } = kibana.services;
 
-    const shouldUseLegacyTimePicker = uiSettings.get(UI_SETTINGS.TIMEPICKER_USE_LEGACY_TIME_PICKER);
+    const shouldUseLegacyTimePicker = !uiSettings.get(UI_SETTINGS.TIMEPICKER_USE_DATE_RANGE_PICKER);
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 

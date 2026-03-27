@@ -67,7 +67,7 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
         from: 'now-15m',
         to: 'now',
       };
-    case UI_SETTINGS.TIMEPICKER_USE_LEGACY_TIME_PICKER:
+    case UI_SETTINGS.TIMEPICKER_USE_DATE_RANGE_PICKER:
       return false;
     default:
       throw new Error(`Unexpected config key: ${key}`);

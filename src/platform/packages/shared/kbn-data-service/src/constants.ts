@@ -26,7 +26,7 @@ export const UI_SETTINGS = {
   TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: 'timepicker:refreshIntervalDefaults',
   TIMEPICKER_QUICK_RANGES: 'timepicker:quickRanges',
   TIMEPICKER_TIME_DEFAULTS: 'timepicker:timeDefaults',
-  TIMEPICKER_USE_LEGACY_TIME_PICKER: 'timepicker:useLegacyTimePicker',
+  TIMEPICKER_USE_DATE_RANGE_PICKER: 'timepicker:useDateRangePicker',
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
   AUTOCOMPLETE_USE_TIMERANGE: 'autocomplete:useTimeRange',

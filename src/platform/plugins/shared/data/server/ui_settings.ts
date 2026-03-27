@@ -492,16 +492,18 @@ export function getUiSettings(
             })
           ),
     },
-    [UI_SETTINGS.TIMEPICKER_USE_LEGACY_TIME_PICKER]: {
-      name: i18n.translate('data.advancedSettings.timepicker.useLegacyTimePickerTitle', {
-        defaultMessage: 'Legacy time picker',
+    [UI_SETTINGS.TIMEPICKER_USE_DATE_RANGE_PICKER]: {
+      name: i18n.translate('data.advancedSettings.timepicker.useDateRangePickerTitle', {
+        defaultMessage: 'New date range picker',
       }),
-      value: false,
-      // TODO improve wording, specify in which parts of Kibana this new time picker is used
-      description: i18n.translate('data.advancedSettings.timepicker.useLegacyTimePickerText', {
-        defaultMessage: 'Use the legacy time picker instead of the new date range picker.',
+      value: true,
+      description: i18n.translate('data.advancedSettings.timepicker.useDateRangePickerText', {
+        defaultMessage:
+          'Use the new picker for time filtering in Discover, Dashboards and some parts of Kibana. When disabled, the legacy picker is used instead.',
       }),
       schema: schema.boolean(),
+      requiresPageReload: true,
+      technicalPreview: true,
     },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
       name: i18n.translate('data.advancedSettings.pinFiltersTitle', {

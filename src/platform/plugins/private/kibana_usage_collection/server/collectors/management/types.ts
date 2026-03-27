@@ -109,7 +109,7 @@ export interface UsageStats {
   'timepicker:timeDefaults': string;
   'timepicker:refreshIntervalDefaults': string;
   'timepicker:quickRanges': string;
-  'timepicker:useLegacyTimePicker': boolean;
+  'timepicker:useDateRangePicker': boolean;
   'theme:version': string;
   'theme:darkMode': boolean;
   'theme:name': string;
