@@ -7,8 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { StepSelectionValues } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import { z } from '@kbn/zod/v4';
+
+import { validateCustomProperties } from './validate_custom_properties';
+import { stepSchemas } from '../../../../common/step_schemas';
+import {
+  getCachedOption,
+  getCachedSearchOption,
+  getCacheKeyForValue,
+  setCachedOption,
+} from '../../../shared/lib/custom_property_selection_cache';
+import type { CustomPropertyItem } from '../model/types';
 
 // Mock the dependencies
 jest.mock('../../../../common/step_schemas', () => ({
@@ -27,17 +38,6 @@ jest.mock('../../../shared/lib/custom_property_selection_cache', () => ({
   getCacheKeyForValue: jest.fn(),
   setCachedOption: jest.fn(),
 }));
-
-import { validateCustomProperties } from './validate_custom_properties';
-import { stepSchemas } from '../../../../common/step_schemas';
-import {
-  getCachedOption,
-  getCachedSearchOption,
-  getCacheKeyForValue,
-  setCachedOption,
-} from '../../../shared/lib/custom_property_selection_cache';
-import type { StepSelectionValues } from '@kbn/workflows';
-import type { CustomPropertyItem } from '../model/types';
 
 const EMPTY_VALUES: StepSelectionValues = { config: {}, input: {} };
 

@@ -27,14 +27,18 @@ export interface StepPropInfo {
   path: string[];
   keyNode: YAML.Scalar<unknown>;
   /** Value node: always a scalar (leaf property). Intermediate map nodes are not recorded in propInfos. */
-  valueNode: YAML.Scalar<unknown>;
+  valueNode: YAML.Scalar<unknown> | YAML.YAMLMap<unknown, unknown>;
 }
 
 /**
- * Get plain JavaScript value from a step property value node (scalar).
+ * Get plain JavaScript value from a step property value node.
+ * Handles scalars (returns `.value`) and collection nodes like sequences
+ * (returns the JSON representation via `.toJSON()`).
  */
 export function getValueFromValueNode(valueNode: StepPropInfo['valueNode']): unknown {
   if (!valueNode) return undefined;
+  if (YAML.isScalar(valueNode)) return valueNode.value;
+  if ('toJSON' in valueNode && typeof valueNode.toJSON === 'function') return valueNode.toJSON();
   return (valueNode as { value?: unknown }).value;
 }
 

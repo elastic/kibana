@@ -450,9 +450,6 @@ interface SelectionContext {
 For example, if the YAML step has `with: { owner: securitySolution }`, the handler
 can read `context.values.input.owner`. Missing properties are `undefined`.
 
-Only scalar leaf values are included — intermediate YAML map nodes that have no
-scalar value are not represented.
-
 #### Example Implementation
 
 For a complete working example, see the `external_step` implementation in `examples/workflows_extensions_example`:

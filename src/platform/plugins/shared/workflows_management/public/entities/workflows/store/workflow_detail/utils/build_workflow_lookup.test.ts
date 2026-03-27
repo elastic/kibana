@@ -634,6 +634,20 @@ steps:
     expect(values.input).toEqual({ inputs: { field1: 'value1', field2: 'value2' } });
   });
 
+  it('should handle array values under with', () => {
+    const step = getStep(`
+steps:
+  - name: s1
+    type: my.step
+    with:
+      field1:
+        - value1
+        - value2
+`);
+    const values = buildStepSelectionValues(step);
+    expect(values.input).toEqual({ field1: ['value1', 'value2'] });
+  });
+
   it('should return empty objects when step has no custom properties', () => {
     const step = getStep(`
 steps:

@@ -8,7 +8,7 @@
 import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { getCaseStepCommonDefinition } from '../../common/workflows/steps/get_case';
-import { caseIdInputEditorHandlers } from './case_id_selection_handler';
+// import { caseIdInputEditorHandlers } from './case_id_selection_handler';
 
 export const getCaseStepDefinition = createPublicStepDefinition({
   ...getCaseStepCommonDefinition,
@@ -18,5 +18,5 @@ export const getCaseStepDefinition = createPublicStepDefinition({
     }))
   ),
   // TODO: enable one case_id can be a template AND an inputHandler
-  editorHandlers: caseIdInputEditorHandlers,
+  // editorHandlers: caseIdInputEditorHandlers,
 });

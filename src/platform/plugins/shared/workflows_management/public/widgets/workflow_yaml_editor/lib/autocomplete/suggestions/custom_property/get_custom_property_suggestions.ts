@@ -15,8 +15,8 @@ import {
   type StepPropertyHandler,
 } from '@kbn/workflows';
 import {
-  getValueFromValueNode,
   buildStepSelectionValues,
+  getValueFromValueNode,
 } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import { cacheSearchOptions } from '../../../../../../shared/lib/custom_property_selection_cache';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
