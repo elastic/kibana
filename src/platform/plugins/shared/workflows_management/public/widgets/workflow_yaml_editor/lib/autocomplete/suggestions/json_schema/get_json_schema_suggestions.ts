@@ -94,7 +94,6 @@ function shouldProvideEnumSuggestions(
 export function getJsonSchemaSuggestions(
   autocompleteContext: ExtendedAutocompleteContext
 ): monaco.languages.CompletionItem[] {
-  console.log('getJsonSchemaSuggestions');
   const { path, range, workflowDefinition, lineUpToCursor } = autocompleteContext;
 
   const enumResult = shouldProvideEnumSuggestions(lineUpToCursor, path);
