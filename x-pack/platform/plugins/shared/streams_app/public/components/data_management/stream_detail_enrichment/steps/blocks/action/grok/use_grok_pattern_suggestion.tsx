@@ -8,11 +8,6 @@
 import type { useAbortController } from '@kbn/react-hooks';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
-import {
-  assembleGrokProcessor,
-  groupMessagesByPattern,
-  extractGrokPatternDangerouslySlow,
-} from '@kbn/grok-heuristics';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { lastValueFrom } from 'rxjs';
 import { useFetchErrorToast } from '../../../../../../../hooks/use_fetch_error_toast';
@@ -58,7 +53,7 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
     params: GrokPatternSuggestionParams | null
   ): Promise<GrokPatternSuggestionResult | undefined> {
     if (params === null) {
-      return Promise.resolve(undefined); // Reset to initial value
+      return Promise.resolve(undefined);
     }
 
     // Prepare samples by running partial simulation if needed
@@ -73,100 +68,69 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
     // Extract string messages from the target field
     const messages = extractMessagesFromField(samples, params.fieldName);
 
-    const groupedMessages = groupMessagesByPattern(messages);
-
     const finishTrackingAndReport = telemetryClient.startTrackingAIGrokSuggestionLatency({
       name: params.streamName,
       field: params.fieldName,
       connector_id: params.connectorId,
     });
 
-    const patternGroups = groupedMessages.map((group) => ({
-      messages: group.messages,
-      nodes: extractGrokPatternDangerouslySlow(group.messages),
-    }));
-
-    const groupErrors: Error[] = [];
-
-    const combinedGrokProcessor = await assembleGrokProcessor({
-      from: params.fieldName,
-      patternGroups,
-      reviewFn: async (reviewFields, reviewMessages) => {
-        try {
-          const reviewResult = await lastValueFrom(
-            streamsRepositoryClient.stream(
-              'POST /internal/streams/{name}/processing/_suggestions/grok',
-              {
-                signal: abortController.signal,
-                params: {
-                  path: { name: params.streamName },
-                  body: {
-                    connector_id: params.connectorId,
-                    field_name: params.fieldName,
-                    sample_messages: reviewMessages,
-                    review_fields: reviewFields,
-                  },
-                },
-              }
-            )
-          );
-
-          if (reviewResult.grokProcessor === null) {
-            throw new NoSuggestionsError();
+    try {
+      const { grokProcessor } = await lastValueFrom(
+        streamsRepositoryClient.stream(
+          'POST /internal/streams/{name}/processing/_suggestions/grok',
+          {
+            signal: abortController.signal,
+            params: {
+              path: { name: params.streamName },
+              body: {
+                connector_id: params.connectorId,
+                field_name: params.fieldName,
+                sample_messages: messages,
+              },
+            },
           }
+        )
+      );
 
-          return reviewResult.grokProcessor;
-        } catch (error) {
-          groupErrors.push(error as Error);
-          throw error;
-        }
-      },
-    });
-
-    if (!combinedGrokProcessor) {
-      finishTrackingAndReport(0, [0]);
-
-      const aggregateError = new AggregateError(groupErrors);
-
-      const allNoSuggestions = groupErrors.every((error) => isNoSuggestionsError(error));
-      if (allNoSuggestions) {
+      if (!grokProcessor) {
         throw new NoSuggestionsError();
       }
 
-      const hasNonAbortError = groupErrors.some((error) => !isRequestAbortedError(error));
-      if (hasNonAbortError) {
-        showFetchErrorToast(aggregateError);
-      }
-
-      throw aggregateError;
-    }
-
-    const simulationResult = await streamsRepositoryClient.fetch(
-      'POST /internal/streams/{name}/processing/_simulate',
-      {
-        signal: abortController.signal,
-        params: {
-          path: { name: params.streamName },
-          body: {
-            documents: samples,
-            processing: {
-              steps: [
-                {
-                  ...combinedGrokProcessor,
-                  customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
-                },
-              ],
+      const simulationResult = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/processing/_simulate',
+        {
+          signal: abortController.signal,
+          params: {
+            path: { name: params.streamName },
+            body: {
+              documents: samples,
+              processing: {
+                steps: [
+                  {
+                    ...grokProcessor,
+                    customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
+                  },
+                ],
+              },
             },
           },
-        },
+        }
+      );
+
+      finishTrackingAndReport(1, [
+        simulationResult.processors_metrics[SUGGESTED_GROK_PROCESSOR_ID].parsed_rate,
+      ]);
+
+      return { grokProcessor, simulationResult };
+    } catch (error) {
+      finishTrackingAndReport(0, [0]);
+
+      if (!isNoSuggestionsError(error) && !isRequestAbortedError(error)) {
+        showFetchErrorToast(error as Error);
       }
-    );
 
-    finishTrackingAndReport(1, [
-      simulationResult.processors_metrics[SUGGESTED_GROK_PROCESSOR_ID].parsed_rate,
-    ]);
-
-    return { grokProcessor: combinedGrokProcessor, simulationResult };
+      throw error;
+    }
   }
 
   return useAsyncFn(suggestGrokPattern, [
