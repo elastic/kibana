@@ -9,8 +9,6 @@
 
 import { escape } from 'lodash';
 
-// TODO: Remove these utils once we have a proper way to access the highlight tags from the field formats plugin.
-
 // Duplicated from @kbn/field-formats-plugin because packages cannot depend on plugins.
 const HTML_HIGHLIGHT_PRE_TAG = '<mark class="ffSearch__highlight">';
 const HTML_HIGHLIGHT_POST_TAG = '</mark>';
