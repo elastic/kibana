@@ -20,14 +20,19 @@ export const UnhealthyTooltip = ({ configId }: { configId: string }) => {
 
   const tooltipContent =
     unhealthyStatuses.length > 0 ? (
-      <>
-        {unhealthyStatuses.map((s, i) => (
-          <React.Fragment key={s.locationId}>
-            {i > 0 && <br />}
-            {`${s.locationLabel}: ${getStatusLabel(s.status) ?? UNHEALTHY_TOOLTIP_BADGE}`}
-          </React.Fragment>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {unhealthyStatuses.map((s) => (
+          <div key={s.locationId} style={{ display: 'flex', gap: '6px' }}>
+            <span style={{ minWidth: '6px' }}>•</span>
+            <div>
+              <div style={{ fontWeight: 600 }}>{s.locationLabel}</div>
+              <div style={{ fontSize: '12px', color: '#666' }}>
+                {getStatusLabel(s.status) ?? UNHEALTHY_TOOLTIP_BADGE}
+              </div>
+            </div>
+          </div>
         ))}
-      </>
+      </div>
     ) : (
       UNHEALTHY_TOOLTIP_BADGE
     );
