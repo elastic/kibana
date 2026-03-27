@@ -24,6 +24,7 @@ import type { MigrationHint } from '../../../features/validate_workflow_yaml/lib
 interface OpenAgentChatOptions {
   initialMessage?: string;
   autoSendInitialMessage?: boolean;
+  sessionTag?: string;
 }
 
 interface MigrationHintPanelProps {
@@ -47,8 +48,9 @@ export const MigrationHintPanel: React.FC<MigrationHintPanelProps> = ({
     onMigrateWithAi({
       initialMessage: `Perform the following migration on this workflow:\n\n${hint.hoverMessage.trimEnd()}`,
       autoSendInitialMessage: true,
+      sessionTag: `workflow-migrate:${hint.id}`,
     });
-  }, [onMigrateWithAi, hint.hoverMessage]);
+  }, [onMigrateWithAi, hint.hoverMessage, hint.id]);
 
   return (
     <EuiPanel
