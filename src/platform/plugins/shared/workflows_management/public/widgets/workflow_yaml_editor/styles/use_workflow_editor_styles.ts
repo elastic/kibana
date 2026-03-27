@@ -117,7 +117,7 @@ export const useWorkflowEditorStyles = () => {
             height: '14px',
             fontSize: '14px',
             lineHeight: '14px',
-            color: euiTheme.colors.warning,
+            color: euiTheme.colors.danger,
             textAlign: 'center',
           },
         },
