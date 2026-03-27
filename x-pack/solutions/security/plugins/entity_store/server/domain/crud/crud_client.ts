@@ -11,6 +11,7 @@ import type {
   BulkUpdateAction,
   QueryDslQueryContainer,
   Result,
+  SortOrder,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
@@ -20,6 +21,12 @@ import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index'
 import { BadCRUDRequestError, EntityNotFoundError, EntityAlreadyExistsError } from '../errors';
 import { hashEuid, validateAndTransformDoc } from './utils';
 import { runWithSpan } from '../../telemetry/traces';
+import {
+  searchEntitiesV2,
+  type SearchEntitiesV2Inspect,
+  type SearchEntitiesV2Params,
+  type SearchEntitiesV2Result,
+} from '../search_entities/search_entities';
 
 const RETRY_ON_CONFLICT = 3;
 
@@ -33,11 +40,22 @@ export interface ListEntitiesParams {
   filter?: QueryDslQueryContainer;
   size?: number;
   searchAfter?: Array<string | number>;
+  /** Page/search mode (unified latest index); mutually exclusive with KQL `filter` / cursor params on the route. */
+  entityTypes?: EntityType[];
+  filterQuery?: string;
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: SortOrder;
 }
 
 export interface ListEntitiesResult {
   entities: Entity[];
   nextSearchAfter?: Array<string | number>;
+  total?: number;
+  page?: number;
+  per_page?: number;
+  inspect?: SearchEntitiesV2Inspect;
 }
 
 export interface BulkObject {
@@ -172,6 +190,39 @@ export class CRUDClient {
       configurable: true,
       writable: true,
     });
+
+    const baseSearchLatestEntities = this.searchLatestEntities.bind(this);
+    const tracedSearchLatestEntities = (
+      params: SearchEntitiesV2Params
+    ): Promise<SearchEntitiesV2Result> =>
+      runWithSpan({
+        name: 'entityStore.crud.search_latest_entities',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'search_latest_entities',
+        },
+        cb: () => baseSearchLatestEntities(params),
+      });
+
+    Object.defineProperty(this, 'searchLatestEntities', {
+      value: tracedSearchLatestEntities,
+      configurable: true,
+      writable: true,
+    });
+  }
+
+  /**
+   * Page/search over the v2 unified LATEST entities index (normalized hits, optional JSON `filterQuery`, entity-type filter).
+   * Prefer {@link listEntities} from HTTP routes; this remains for direct server callers.
+   */
+  public async searchLatestEntities(
+    params: SearchEntitiesV2Params
+  ): Promise<SearchEntitiesV2Result> {
+    return searchEntitiesV2({
+      esClient: this.esClient,
+      namespace: this.namespace,
+      ...params,
+    });
   }
 
   // updateEntity takes a single entity patch and applies it to an existing
@@ -303,14 +354,42 @@ export class CRUDClient {
     }
   }
 
-  // listEntities searches the LATEST index for all entities.
-  // An optional DSL filter can be provided and is applied as an additional
-  // filter clause on the search query, e.g. to scope results by additional
-  // field conditions. Supports size and searchAfter for pagination.
+  // listEntities searches the LATEST index: cursor mode (KQL-derived DSL + search_after) or
+  // page mode (same semantics as searchEntitiesV2: sort, from/size, entity types, JSON filterQuery).
   public async listEntities(params?: ListEntitiesParams): Promise<ListEntitiesResult> {
-    this.logger.debug('Listing entities');
+    const p = params ?? {};
+    const pageMode =
+      p.page != null ||
+      p.perPage != null ||
+      p.sortField != null ||
+      p.sortOrder != null ||
+      p.filterQuery != null ||
+      (p.entityTypes != null && p.entityTypes.length > 0);
 
-    const { filter, size, searchAfter } = params ?? {};
+    if (pageMode) {
+      this.logger.debug('Listing entities (page mode)');
+      const { records, total, inspect } = await searchEntitiesV2({
+        esClient: this.esClient,
+        namespace: this.namespace,
+        entityTypes: p.entityTypes ?? [],
+        filterQuery: p.filterQuery,
+        page: p.page ?? 1,
+        perPage: p.perPage ?? 10,
+        sortField: p.sortField ?? '@timestamp',
+        sortOrder: p.sortOrder ?? 'desc',
+      });
+      return {
+        entities: records,
+        total,
+        page: p.page ?? 1,
+        per_page: p.perPage ?? 10,
+        inspect,
+      };
+    }
+
+    this.logger.debug('Listing entities (cursor mode)');
+
+    const { filter, size, searchAfter } = p;
 
     const query: QueryDslQueryContainer = filter
       ? { bool: { filter: [filter] } }

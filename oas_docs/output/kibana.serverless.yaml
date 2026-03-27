@@ -82725,6 +82725,9 @@ components:
             last_activity:
               format: date-time
               type: string
+            last_seen:
+              format: date-time
+              type: string
         name:
           type: string
         relationships:
@@ -82962,6 +82965,33 @@ components:
               type: array
             name:
               type: string
+            os:
+              additionalProperties: false
+              description: ECS host.os fields materialized on the entity latest index (v2).
+              type: object
+              properties:
+                family:
+                  type: string
+                full:
+                  type: string
+                kernel:
+                  type: string
+                name:
+                  oneOf:
+                    - type: string
+                    - items:
+                        type: string
+                      type: array
+                platform:
+                  type: string
+                type:
+                  oneOf:
+                    - type: string
+                    - items:
+                        type: string
+                      type: array
+                version:
+                  type: string
             risk:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
             type:

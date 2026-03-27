@@ -89,6 +89,39 @@ describe('crud_client utils', () => {
       );
     });
 
+    it('on forced user update, trusts doc entity.id when it disagrees with generated EUID', () => {
+      const doc: Entity = { entity: { id: 'store-id' } };
+      expect(
+        validateDocIdentification(doc, 'derived-id', {
+          force: true,
+          operation: 'update',
+          entityType: 'user',
+        })
+      ).toBe('store-id');
+    });
+
+    it('forced update still throws on id mismatch when entity type is not user', () => {
+      const doc: Entity = { entity: { id: 'store-id' } };
+      expect(() =>
+        validateDocIdentification(doc, 'derived-id', {
+          force: true,
+          operation: 'update',
+          entityType: 'host',
+        })
+      ).toThrow(
+        new BadCRUDRequestError('Supplied ID store-id does not match generated EUID derived-id')
+      );
+    });
+
+    it('still throws on create when doc entity.id disagrees with generated EUID even if force', () => {
+      const doc: Entity = { entity: { id: 'store-id' } };
+      expect(() =>
+        validateDocIdentification(doc, 'derived-id', { force: true, operation: 'create' })
+      ).toThrow(
+        new BadCRUDRequestError('Supplied ID store-id does not match generated EUID derived-id')
+      );
+    });
+
     it('throws when doc has no entity.id and generatedId is undefined', () => {
       const doc = { host: { name: 'some-host' } } as Entity;
       expect(() => validateDocIdentification(doc, undefined)).toThrow(
@@ -114,6 +147,33 @@ describe('crud_client utils', () => {
     });
 
     it('throws when doc entity.id does not match generatedId', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
+
+      const doc: Entity = { entity: { id: 'doc-id' }, host: { name: 'some-host' } };
+      expect(() =>
+        validateAndTransformDoc('update', 'generic', 'default', doc, 'generated-id', false)
+      ).toThrow(
+        new BadCRUDRequestError('Supplied ID doc-id does not match generated EUID generated-id')
+      );
+    });
+
+    it('forced user update uses doc entity.id when it does not match generatedId', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('user', []));
+
+      const doc: Entity = { entity: { id: 'doc-id' }, user: { name: 'u' } };
+      const result = validateAndTransformDoc(
+        'update',
+        'user',
+        'default',
+        doc,
+        'generated-id',
+        true
+      );
+
+      expect(result.id).toBe('doc-id');
+    });
+
+    it('forced update on non-user type throws when doc entity.id does not match generatedId', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
       const doc: Entity = { entity: { id: 'doc-id' }, host: { name: 'some-host' } };
