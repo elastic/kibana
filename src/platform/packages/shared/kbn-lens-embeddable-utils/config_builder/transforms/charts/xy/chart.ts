@@ -259,11 +259,26 @@ function convertXExtent(extent: AxisExtentConfig | undefined): {
   return {};
 }
 
+/**
+ * Returns the first map key whose value strictly equals the provided value.
+ */
+function findKeyByValue<T extends Record<string, unknown>>(
+  map: T,
+  value: unknown
+): Extract<keyof T, string> | undefined {
+  return Object.keys(map).find((key): key is Extract<keyof T, string> => map[key] === value);
+}
+
 function convertAxisSettingsToAPIFormat(
   config: XYPersistedState,
   layers: Record<string, DataSourceStateLayer>
 ): Pick<XYState, 'axis'> | {} {
   const axis: EditableAxisType = {};
+
+  const { labelsOrientation } = config;
+  const xLabelsOrientation = findKeyByValue(orientationDictionary, labelsOrientation?.x);
+  const yLeftLabelsOrientation = findKeyByValue(orientationDictionary, labelsOrientation?.yLeft);
+  const yRightLabelsOrientation = findKeyByValue(orientationDictionary, labelsOrientation?.yRight);
 
   let xAxisScale: XAxisType['scale'];
   const firstLayer = config.layers[0];
@@ -300,15 +315,7 @@ function convertAxisSettingsToAPIFormat(
         ? { visible: config.gridlinesVisibilitySettings.x }
         : undefined,
     ...convertXExtent(config.xExtent),
-    ...(config.labelsOrientation?.x != null
-      ? {
-          labels: {
-            orientation: Object.entries(orientationDictionary).find(
-              ([_, value]) => value === config.labelsOrientation?.x
-            )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
-          },
-        }
-      : {}),
+    labels: xLabelsOrientation ? { orientation: xLabelsOrientation } : undefined,
     scale: xAxisScale,
   } satisfies XAxisType);
   if (Object.keys(xAxis).length) {
@@ -336,15 +343,7 @@ function convertAxisSettingsToAPIFormat(
         ? { visible: config.gridlinesVisibilitySettings.yLeft }
         : undefined,
     ...convertExtendsToAPIFormat(config.yLeftExtent),
-    ...(config.labelsOrientation?.yLeft != null
-      ? {
-          labels: {
-            orientation: Object.entries(orientationDictionary).find(
-              ([_, value]) => value === config.labelsOrientation?.yLeft
-            )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
-          },
-        }
-      : {}),
+    labels: yLeftLabelsOrientation ? { orientation: yLeftLabelsOrientation } : undefined,
   } satisfies YAxisType);
   if (Object.keys(leftAxis).length) {
     axis.left = leftAxis;
@@ -371,15 +370,7 @@ function convertAxisSettingsToAPIFormat(
         ? { visible: config.gridlinesVisibilitySettings.yRight }
         : undefined,
     ...convertExtendsToAPIFormat(config.yRightExtent),
-    ...(config.labelsOrientation?.yRight != null
-      ? {
-          labels: {
-            orientation: Object.entries(orientationDictionary).find(
-              ([_, value]) => value === config.labelsOrientation?.yRight
-            )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
-          },
-        }
-      : {}),
+    labels: yRightLabelsOrientation ? { orientation: yRightLabelsOrientation } : undefined,
   });
 
   if (Object.keys(rightAxis).length) {
