@@ -32,8 +32,6 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
-import { dynamic } from '@kbn/shared-ux-utility';
-import { i18n } from '@kbn/i18n';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
@@ -47,6 +45,7 @@ import {
   OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_WIRED_STREAMS_AUTO_ENABLED_EVENT,
 } from '../common/telemetry_events';
+
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
 
@@ -81,17 +80,13 @@ export class ObservabilityOnboardingPlugin
   implements Plugin<ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart>
 {
   private locators?: ObservabilityOnboardingPluginLocators;
-  private isServerless = false;
 
   constructor(private readonly ctx: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ObservabilityOnboardingPluginSetupDeps) {
-    this.isServerless =
-      Boolean(plugins.cloud?.isServerlessEnabled) ||
-      this.ctx.env.packageInfo.buildFlavor === 'serverless';
     const stackVersion = this.ctx.env.packageInfo.version;
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
-    const isServerless = this.isServerless;
+    const isServerlessBuild = this.ctx.env.packageInfo.buildFlavor === 'serverless';
     const isDevEnvironment = this.ctx.env.mode.dev;
     const pluginSetupDeps = plugins;
 
@@ -110,6 +105,7 @@ export class ObservabilityOnboardingPlugin
         ]);
 
         const { createCallApi } = await import('./services/rest/create_call_api');
+
         createCallApi(core);
 
         return renderApp({
@@ -121,7 +117,7 @@ export class ObservabilityOnboardingPlugin
           context: {
             isDev: isDevEnvironment,
             isCloud: Boolean(pluginSetupDeps.cloud?.isCloudEnabled),
-            isServerless,
+            isServerless: Boolean(pluginSetupDeps.cloud?.isServerlessEnabled) || isServerlessBuild,
             stackVersion,
             cloudServiceProvider: pluginSetupDeps.cloud?.csp,
           },
@@ -148,46 +144,13 @@ export class ObservabilityOnboardingPlugin
       getLocator: () => this.locators?.onboarding,
     };
   }
-  public start(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
-    this.registerIngestFlows(core, plugins);
+  public async start(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
+    if (plugins.ingestHub) {
+      const { registerIngestFlows } = await import('./ingest_hub/register_ingest_flows');
+      registerIngestFlows(core, plugins);
+    }
     return {
       locators: this.locators,
     };
-  }
-
-  private registerIngestFlows(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
-    if (!plugins.ingestHub) {
-      return;
-    }
-
-    const deps = {
-      core,
-      plugins,
-      isServerless: this.isServerless,
-    };
-
-    const KubernetesFlow = dynamic(async () => {
-      const [{ createIngestFlowComponent }, { KubernetesPanel }] = await Promise.all([
-        import('./ingest_hub/render_ingest_flow'),
-        import('./application/quickstart_flows/kubernetes'),
-      ]);
-      return { default: createIngestFlowComponent(deps, KubernetesPanel) };
-    });
-
-    plugins.ingestHub.registerIngestFlow({
-      id: 'kubernetes',
-      title: i18n.translate('xpack.observability_onboarding.ingestHub.kubernetes.title', {
-        defaultMessage: 'Kubernetes',
-      }),
-      description: i18n.translate(
-        'xpack.observability_onboarding.ingestHub.kubernetes.description',
-        { defaultMessage: 'Monitor your Kubernetes cluster with Elastic Agent' }
-      ),
-      icon: 'logoKubernetes',
-      category: i18n.translate('xpack.observability_onboarding.ingestHub.category.containers', {
-        defaultMessage: 'Containers',
-      }),
-      component: KubernetesFlow,
-    });
   }
 }
