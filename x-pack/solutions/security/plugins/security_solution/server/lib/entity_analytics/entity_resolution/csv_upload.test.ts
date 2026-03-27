@@ -19,15 +19,10 @@ const createMockStream = (csvContent: string): HapiReadableStream => {
   return stream;
 };
 
-const createMockEntity = (
-  entityId: string,
-  resolvedTo?: string
-): Record<string, unknown> => ({
+const createMockEntity = (entityId: string, resolvedTo?: string): Record<string, unknown> => ({
   entity: {
     id: entityId,
-    ...(resolvedTo
-      ? { relationships: { resolution: { resolved_to: resolvedTo } } }
-      : {}),
+    ...(resolvedTo ? { relationships: { resolution: { resolved_to: resolvedTo } } } : {}),
   },
 });
 

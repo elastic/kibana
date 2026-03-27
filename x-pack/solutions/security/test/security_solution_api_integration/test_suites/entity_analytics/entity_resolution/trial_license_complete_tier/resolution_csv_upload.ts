@@ -118,10 +118,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should link matching entities to a target', async () => {
-      const csv = [
-        'type,user.email,resolved_to',
-        `user,shared@test.com,${TEST_PREFIX}golden`,
-      ].join('\n');
+      const csv = ['type,user.email,resolved_to', `user,shared@test.com,${TEST_PREFIX}golden`].join(
+        '\n'
+      );
 
       const { body, status } = await uploadCsv(csv);
 
@@ -136,10 +135,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should be idempotent on re-upload', async () => {
-      const csv = [
-        'type,user.email,resolved_to',
-        `user,shared@test.com,${TEST_PREFIX}golden`,
-      ].join('\n');
+      const csv = ['type,user.email,resolved_to', `user,shared@test.com,${TEST_PREFIX}golden`].join(
+        '\n'
+      );
 
       // First upload
       await uploadCsv(csv);
@@ -153,10 +151,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return unmatched when no entities match', async () => {
-      const csv = [
-        'type,user.email,resolved_to',
-        `user,nobody@test.com,${TEST_PREFIX}golden`,
-      ].join('\n');
+      const csv = ['type,user.email,resolved_to', `user,nobody@test.com,${TEST_PREFIX}golden`].join(
+        '\n'
+      );
 
       const { body } = await uploadCsv(csv);
 
@@ -165,10 +162,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should filter out the target entity itself from matches', async () => {
-      const csv = [
-        'type,user.email,resolved_to',
-        `user,golden@test.com,${TEST_PREFIX}golden`,
-      ].join('\n');
+      const csv = ['type,user.email,resolved_to', `user,golden@test.com,${TEST_PREFIX}golden`].join(
+        '\n'
+      );
 
       const { body } = await uploadCsv(csv);
 

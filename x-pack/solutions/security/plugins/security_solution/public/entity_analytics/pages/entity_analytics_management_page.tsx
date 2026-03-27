@@ -88,9 +88,7 @@ export const EntityAnalyticsManagementPage = () => {
   }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
 
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
-  const [isEntityStoreV2Enabled] = useUiSetting$<boolean>(
-    'securitySolution:entityStoreEnableV2'
-  );
+  const [isEntityStoreV2Enabled] = useUiSetting$<boolean>('securitySolution:entityStoreEnableV2');
 
   const entityStoreStatus = useEntityStoreStatus();
   const entityTypes = useEntityStoreTypes();
