@@ -264,6 +264,14 @@ export const createMetricThresholdExecutor =
           )
         : [];
 
+    const dataViewsService = await services.getDataViews();
+    let dataView;
+    try {
+      dataView = await dataViewsService.create({ title: config.metricAlias });
+    } catch (e) {
+      // ignore — dataView stays undefined and toElasticsearchQuery degrades gracefully
+    }
+
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
@@ -271,6 +279,7 @@ export const createMetricThresholdExecutor =
       compositeSize,
       alertOnGroupDisappear,
       logger,
+      dataView,
       state.lastRunTimestamp,
       { end: startedAt.valueOf() },
       convertStringsToMissingGroupsRecord(previousMissingGroups)

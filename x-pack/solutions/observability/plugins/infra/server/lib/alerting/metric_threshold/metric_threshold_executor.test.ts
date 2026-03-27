@@ -904,7 +904,7 @@ describe('The metric threshold rule type', () => {
         stateResult2
       );
       expect(stateResult3.missingGroups).toEqual([{ key: 'b', bucketKey: { groupBy0: 'b' } }]);
-      expect(mockedEvaluateRule.mock.calls[2][8]).toEqual([
+      expect(mockedEvaluateRule.mock.calls[2][9]).toEqual([
         { bucketKey: { groupBy0: 'b' }, key: 'b' },
       ]);
     });
