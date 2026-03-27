@@ -44,7 +44,6 @@ export interface ESQLDataCascadeProps
     | 'renderDocumentView'
     | 'externalCustomRenderers'
     | 'onUpdateDataGridDensity'
-    | 'expandedDoc'
     | 'setExpandedDoc'
     | 'setRenderDocumentViewMeta'
   > {

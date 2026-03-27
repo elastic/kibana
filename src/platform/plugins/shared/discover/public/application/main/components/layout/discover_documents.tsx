@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -53,6 +53,7 @@ import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-vi
 import useLatest from 'react-use/lib/useLatest';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { BehaviorSubject } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import {
@@ -357,51 +358,6 @@ function DiscoverDocumentsComponent({
     [dispatch, setInitialDocViewerTabIdAction]
   );
 
-  const renderDocumentView = useCallback(
-    (
-      hit: DataTableRecord,
-      displayedRows: DataTableRecord[],
-      displayedColumns: string[],
-      customColumnsMeta?: DataTableColumnsMeta
-    ) => (
-      <DiscoverGridFlyout
-        dataView={dataView}
-        hit={hit}
-        hits={displayedRows}
-        // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
-        columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
-        savedSearchId={persistedDiscoverSession?.id!}
-        query={query}
-        initialTabId={initialDocViewerTabId}
-        onFilter={onAddFilter}
-        onRemoveColumn={onRemoveColumnWithTracking}
-        onAddColumn={onAddColumnWithTracking}
-        onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
-        docViewerRef={docViewerRef}
-        docViewerExtensionActions={docViewerExtensionActions}
-        onUpdateSelectedTabId={onUpdateSelectedTabId}
-        initialDocViewerState={docViewerUiState}
-        onInitialDocViewerStateChange={onInitialDocViewerStateChange}
-      />
-    ),
-    [
-      dataView,
-      persistedDiscoverSession?.id,
-      query,
-      initialDocViewerTabId,
-      onAddFilter,
-      onRemoveColumnWithTracking,
-      onAddColumnWithTracking,
-      setExpandedDoc,
-      docViewerExtensionActions,
-      onUpdateSelectedTabId,
-      docViewerUiState,
-      onInitialDocViewerStateChange,
-    ]
-  );
-
   const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
   const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
   const onInitialStateChange = useCallback(
@@ -475,6 +431,12 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen]
   );
 
+  const [expandedDoc$] = useState(() => new BehaviorSubject(expandedDoc));
+
+  useEffect(() => {
+    expandedDoc$.next(expandedDoc);
+  }, [expandedDoc, expandedDoc$]);
+
   const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
     (runtimeState) => runtimeState.cascadedDocumentsFetcher$
   );
@@ -501,6 +463,7 @@ function DiscoverDocumentsComponent({
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
       viewModeToggle,
+      expandedDoc$,
       cascadeGroupingChangeHandler: (newSelectedCascadeGroups) => {
         dispatch(setSelectedCascadeGroups({ selectedCascadeGroups: newSelectedCascadeGroups }));
       },
@@ -512,6 +475,7 @@ function DiscoverDocumentsComponent({
     cascadedDocumentsFetcher,
     dispatch,
     esqlVariables,
+    expandedDoc$,
     onUpdateESQLQuery,
     query,
     requestParams.timeRangeAbsolute,
@@ -608,14 +572,29 @@ function DiscoverDocumentsComponent({
           />
         </CellActionsProvider>
       </div>
-      {expandedDoc &&
-        renderDocumentViewMeta &&
-        renderDocumentView(
-          expandedDoc,
-          renderDocumentViewMeta.displayedRows,
-          renderDocumentViewMeta.displayedColumns,
-          columnsMeta
-        )}
+      {expandedDoc && renderDocumentViewMeta && (
+        <DiscoverGridFlyout
+          dataView={dataView}
+          hit={expandedDoc}
+          hits={renderDocumentViewMeta.displayedRows}
+          // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
+          columns={renderDocumentViewMeta.displayedColumns}
+          columnsMeta={columnsMeta}
+          savedSearchId={persistedDiscoverSession?.id!}
+          query={query}
+          initialTabId={initialDocViewerTabId}
+          onFilter={onAddFilter}
+          onRemoveColumn={onRemoveColumnWithTracking}
+          onAddColumn={onAddColumnWithTracking}
+          onClose={() => setExpandedDoc(undefined)}
+          setExpandedDoc={setExpandedDoc}
+          docViewerRef={docViewerRef}
+          docViewerExtensionActions={docViewerExtensionActions}
+          onUpdateSelectedTabId={onUpdateSelectedTabId}
+          initialDocViewerState={docViewerUiState}
+          onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+        />
+      )}
     </EuiFlexItem>
   );
 }
