@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
 import { useKibana } from '../hooks/use_kibana';
@@ -20,39 +19,6 @@ import { InferenceEndpointsHeader } from './inference_endpoints_header';
 import { ExternalInferenceHeader } from './external_inference_header';
 import { AddInferenceFlyoutWrapper } from './add_inference_endpoints/add_inference_flyout_wrapper';
 import { ExternalInferenceEmptyPrompt } from './external_inference_empty_prompt';
-
-const PageContent: React.FC<{
-  isLoading: boolean;
-  isEisEnabled: boolean;
-  showEmptyState: boolean;
-  inferenceEndpoints: InferenceAPIConfigResponse[];
-  onFlyoutOpen: () => void;
-}> = ({ isLoading, isEisEnabled, showEmptyState, inferenceEndpoints, onFlyoutOpen }) => {
-  if (isLoading) {
-    return (
-      <EuiPageTemplate.Section alignment="center" data-test-subj="inferenceEndpointsLoading">
-        <EuiLoadingSpinner size="l" />
-      </EuiPageTemplate.Section>
-    );
-  }
-
-  if (showEmptyState) {
-    return <ExternalInferenceEmptyPrompt onFlyoutOpen={onFlyoutOpen} />;
-  }
-
-  return (
-    <>
-      {isEisEnabled ? (
-        <ExternalInferenceHeader onFlyoutOpen={onFlyoutOpen} />
-      ) : (
-        <InferenceEndpointsHeader onFlyoutOpen={onFlyoutOpen} />
-      )}
-      <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
-        <TabularPage inferenceEndpoints={inferenceEndpoints} isEisEnabled={isEisEnabled} />
-      </EuiPageTemplate.Section>
-    </>
-  );
-};
 
 export const InferenceEndpoints: React.FC = () => {
   const { services } = useKibana();
@@ -88,15 +54,35 @@ export const InferenceEndpoints: React.FC = () => {
 
   const showEmptyState = isEisEnabled && inferenceEndpoints.length === 0;
 
+  if (isLoading) {
+    return (
+      <EuiPageTemplate.Section alignment="center" data-test-subj="inferenceEndpointsLoading">
+        <EuiLoadingSpinner size="l" />
+      </EuiPageTemplate.Section>
+    );
+  }
+
+  if (showEmptyState) {
+    return (
+      <>
+        <ExternalInferenceEmptyPrompt onFlyoutOpen={onFlyoutOpen} />
+        {isAddInferenceFlyoutOpen && (
+          <AddInferenceFlyoutWrapper onFlyoutClose={onFlyoutClose} reloadFn={reload} />
+        )}
+      </>
+    );
+  }
+
   return (
     <>
-      <PageContent
-        isLoading={isLoading}
-        isEisEnabled={isEisEnabled}
-        showEmptyState={showEmptyState}
-        inferenceEndpoints={inferenceEndpoints}
-        onFlyoutOpen={onFlyoutOpen}
-      />
+      {isEisEnabled ? (
+        <ExternalInferenceHeader onFlyoutOpen={onFlyoutOpen} />
+      ) : (
+        <InferenceEndpointsHeader onFlyoutOpen={onFlyoutOpen} />
+      )}
+      <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
+        <TabularPage inferenceEndpoints={inferenceEndpoints} isEisEnabled={isEisEnabled} />
+      </EuiPageTemplate.Section>
       {isAddInferenceFlyoutOpen && (
         <AddInferenceFlyoutWrapper onFlyoutClose={onFlyoutClose} reloadFn={reload} />
       )}
