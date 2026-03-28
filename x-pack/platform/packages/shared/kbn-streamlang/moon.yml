@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/tinymath'
   - '@kbn/grok-ui'
+  - '@kbn/index-management-shared-types'
 tags:
   - shared-common
   - package

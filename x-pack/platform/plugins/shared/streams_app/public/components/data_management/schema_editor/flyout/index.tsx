@@ -171,7 +171,7 @@ export const SchemaEditorFlyout = ({
         <>
           <EuiCallOut
             color="primary"
-            iconType="visMapCoordinate"
+            iconType="waypoint"
             title={i18n.translate('xpack.streams.schemaEditorFlyout.geoPointSuggestionTitle', {
               defaultMessage: 'Map as geo_point?',
             })}

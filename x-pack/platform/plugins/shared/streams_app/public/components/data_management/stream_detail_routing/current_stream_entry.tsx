@@ -89,7 +89,7 @@ export function CurrentStreamEntry({
                 {!isLast && (
                   <EuiFlexItem grow={false}>
                     <EuiIcon
-                      type="arrowRight"
+                      type="chevronSingleRight"
                       size="s"
                       color="subdued"
                       css={css`

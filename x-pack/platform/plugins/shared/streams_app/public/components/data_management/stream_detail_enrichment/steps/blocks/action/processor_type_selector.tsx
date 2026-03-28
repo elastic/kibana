@@ -630,6 +630,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  enrich: {
+    type: 'enrich' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.enrichInputDisplay',
+      {
+        defaultMessage: 'Enrich',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.enrichHelpText"
+          defaultMessage="{enrichLink} a document with data from another index."
+          values={{
+            enrichLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsEnrichPolicyLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.enrich}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.enrichLinkLabel', {
+                  defaultMessage: 'Enrich',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -680,6 +711,7 @@ const PROCESSOR_GROUP_MAP: Record<
   join: 'set',
   concat: 'set',
   network_direction: 'set',
+  enrich: 'set',
 };
 
 const getProcessorDescription =

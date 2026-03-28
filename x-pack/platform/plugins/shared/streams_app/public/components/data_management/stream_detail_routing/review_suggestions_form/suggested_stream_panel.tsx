@@ -205,7 +205,7 @@ export function SuggestedStreamPanel({
       <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            iconType={isSelected ? 'eyeClosed' : 'eye'}
+            iconType={isSelected ? 'eyeSlash' : 'eye'}
             isSelected={isSelected}
             size="s"
             onClick={() => onPreview(!isSelected)}

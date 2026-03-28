@@ -6,30 +6,40 @@
  */
 
 import {
+  EuiBadge,
+  EuiBasicTable,
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiTitle,
+  useEuiTheme,
+  type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { TaskStatus } from '@kbn/streams-schema';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import type { Insight } from '@kbn/streams-schema';
+import type { Insight, InsightImpactLevel } from '@kbn/streams-schema';
+import { AssetImage } from '../../../asset_image';
 import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTaskPolling } from '../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../util/errors';
 import { FeedbackButtons } from './feedback_buttons';
-import { InsightCard } from './insight_card';
+import { impactBadgeColors, impactLabels } from './insight_constants';
+import { InsightFlyout } from './insight_flyout';
 
 export function Summary({ count }: { count: number }) {
   const {
     core: { notifications },
   } = useKibana();
+  const { euiTheme } = useEuiTheme();
 
   const {
     scheduleInsightsDiscoveryTask,
@@ -37,6 +47,9 @@ export function Summary({ count }: { count: number }) {
     acknowledgeInsightsDiscoveryTask,
     cancelInsightsDiscoveryTask,
   } = useInsightsDiscoveryApi();
+
+  const [insights, setInsights] = useState<Insight[] | null>(null);
+  const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null);
 
   const [{ value: task }, getTaskStatus] = useAsyncFn(getInsightsDiscoveryTaskStatus);
   const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async () => {
@@ -57,6 +70,12 @@ export function Summary({ count }: { count: number }) {
   useEffect(() => {
     const previousStatus = previousTaskStatusRef.current;
     previousTaskStatusRef.current = task?.status;
+
+    if (task?.status === TaskStatus.InProgress && previousStatus !== TaskStatus.InProgress) {
+      setInsights(null);
+      setSelectedInsight(null); // <-- add this
+      return;
+    }
 
     if (task?.status === TaskStatus.Failed) {
       notifications.toasts.addError(getFormattedError(new Error(task.error)), {
@@ -90,67 +109,177 @@ export function Summary({ count }: { count: number }) {
     onCancel: cancelInsightsDiscoveryTask,
   });
 
-  const [insights, setInsights] = useState<Insight[] | null>(null);
+  const handleSelectInsight = useCallback((insight: Insight) => setSelectedInsight(insight), []);
+  const handleCloseFlyout = useCallback(() => setSelectedInsight(null), []);
 
-  const onGenerateInsightsClick = async () => {
-    await scheduleTask();
-  };
-
-  const onRegenerateInsightsClick = async () => {
+  const onRunDiscoveryClick = async () => {
     await acknowledgeInsightsDiscoveryTask();
     await scheduleTask();
-
-    setInsights(null);
   };
 
-  const isGenerateButtonPending =
+  const isTaskPending =
     task?.status === TaskStatus.InProgress || isCancellingTask || isSchedulingTask;
+
+  const columns = useMemo<Array<EuiBasicTableColumn<Insight>>>(
+    () => [
+      {
+        field: 'id',
+        name: '',
+        width: '40px',
+        render: (_: string, insight: Insight) => {
+          const isSelected = selectedInsight?.id === insight.id;
+          return (
+            <EuiButtonIcon
+              data-test-subj="streamsInsightExpandButton"
+              iconType={isSelected ? 'minimize' : 'expand'}
+              aria-label={
+                isSelected
+                  ? i18n.translate('xpack.streams.insights.table.minimizeAriaLabel', {
+                      defaultMessage: 'Close insight details',
+                    })
+                  : i18n.translate('xpack.streams.insights.table.expandAriaLabel', {
+                      defaultMessage: 'View insight details',
+                    })
+              }
+              onClick={() => (isSelected ? handleCloseFlyout() : handleSelectInsight(insight))}
+            />
+          );
+        },
+      },
+      {
+        field: 'title',
+        name: i18n.translate('xpack.streams.insights.table.titleColumn', {
+          defaultMessage: 'Significant event',
+        }),
+        render: (title: string, insight: Insight) => (
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="xs"
+            css={css`
+              max-width: 100%;
+              overflow: hidden;
+            `}
+          >
+            <EuiFlexItem>
+              <EuiLink
+                onClick={() => handleSelectInsight(insight)}
+                data-test-subj="streamsInsightTitleLink"
+                title={title}
+                css={css`
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  display: block;
+                  max-width: 100%;
+                `}
+              >
+                {title}
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText
+                size="xs"
+                color="subdued"
+                title={insight.description}
+                css={css`
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  max-width: 100%;
+                  display: block;
+                  width: 100%;
+                `}
+              >
+                {insight.description}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
+      {
+        field: 'impact',
+        name: i18n.translate('xpack.streams.insights.table.severityColumn', {
+          defaultMessage: 'Severity',
+        }),
+        width: '120px',
+        render: (impact: InsightImpactLevel) => (
+          <EuiBadge color={impactBadgeColors[impact]}>{impactLabels[impact]}</EuiBadge>
+        ),
+      },
+      {
+        field: 'generated_at',
+        name: i18n.translate('xpack.streams.insights.table.generatedAtColumn', {
+          defaultMessage: 'Discovered',
+        }),
+        width: '150px',
+        render: (generatedAt: string) => (
+          <EuiText size="s" color="subdued">
+            {moment(generatedAt).fromNow()}
+          </EuiText>
+        ),
+      },
+    ],
+    [handleSelectInsight, handleCloseFlyout, selectedInsight]
+  );
 
   if (insights && insights.length > 0) {
     return (
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiPanel hasBorder paddingSize="none">
-            <EuiPanel color="subdued" hasShadow={false}>
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <FeedbackButtons />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill={true}
-                    iconType="refresh"
-                    onClick={onRegenerateInsightsClick}
-                    disabled={isSchedulingTask}
-                    isLoading={isSchedulingTask}
-                    data-test-subj="significant_events_regenerate_insights_button"
-                  >
-                    {i18n.translate('xpack.streams.insights.regenerateButtonLabel', {
-                      defaultMessage: 'Re-discover Significant Events',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-            <EuiPanel hasShadow={false}>
-              <EuiFlexGroup direction="column" gutterSize="m">
-                {insights.map((insight, idx) => (
-                  <EuiFlexItem key={idx}>
-                    <InsightCard insight={insight} index={idx} />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <FeedbackButtons />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  iconType="sparkles"
+                  onClick={onRunDiscoveryClick}
+                  isDisabled={isSchedulingTask}
+                  isLoading={isSchedulingTask}
+                  data-test-subj="significant_events_run_discovery_button"
+                >
+                  {i18n.translate('xpack.streams.insights.runDiscoveryButtonLabel', {
+                    defaultMessage: 'Run a discovery',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBasicTable
+              data-test-subj="streamsInsightsTable"
+              columns={columns}
+              items={insights}
+              itemId="id"
+              tableLayout="fixed"
+              rowProps={(insight: Insight) => ({
+                style: {
+                  height: '68px',
+                  background:
+                    selectedInsight?.id === insight.id
+                      ? euiTheme.colors.backgroundBaseInteractiveSelect
+                      : undefined,
+                },
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {selectedInsight && <InsightFlyout insight={selectedInsight} onClose={handleCloseFlyout} />}
+      </>
     );
   }
 
   return (
     <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
       <EuiFlexItem grow={false}>
-        <EuiPanel color="subdued">
+        <EuiPanel color="subdued" paddingSize="l">
           <EuiFlexGroup
             direction="column"
             alignItems="center"
@@ -158,7 +287,7 @@ export function Summary({ count }: { count: number }) {
             style={{ minHeight: '30vh', minWidth: '40vh' }}
           >
             <EuiFlexItem grow={false}>
-              <EuiIcon type="createAdvancedJob" size="xxl" aria-hidden={true} />
+              <AssetImage type="significantEventsEmptyState" size="m" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
@@ -167,10 +296,8 @@ export function Summary({ count }: { count: number }) {
                     'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundTitle',
                     {
                       defaultMessage:
-                        '{count} significant {count, plural, one {event} other {events}} detected',
-                      values: {
-                        count,
-                      },
+                        '{count} {count, plural, one {event} other {events}} detected',
+                      values: { count },
                     }
                   )}
                 </h2>
@@ -188,14 +315,14 @@ export function Summary({ count }: { count: number }) {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
+              <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiButton
                   fill
                   size="m"
                   iconType="sparkles"
-                  onClick={onGenerateInsightsClick}
-                  isDisabled={isGenerateButtonPending}
-                  isLoading={isGenerateButtonPending}
+                  onClick={() => scheduleTask()}
+                  isDisabled={isTaskPending}
+                  isLoading={isTaskPending}
                   data-test-subj="significant_events_generate_insights_button"
                 >
                   {task?.status === TaskStatus.InProgress
@@ -206,7 +333,6 @@ export function Summary({ count }: { count: number }) {
                         defaultMessage: 'Discover Significant Events',
                       })}
                 </EuiButton>
-
                 {(task?.status === TaskStatus.InProgress || isCancellingTask) && (
                   <EuiButton
                     onClick={cancelTask}
