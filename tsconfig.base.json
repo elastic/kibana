@@ -1162,6 +1162,8 @@
       "@kbn/evals-plugin/*": ["x-pack/platform/plugins/shared/evals/*"],
       "@kbn/evals-suite-agent-builder": ["x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder"],
       "@kbn/evals-suite-agent-builder/*": ["x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/*"],
+      "@kbn/evals-suite-attack-discovery": ["x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery"],
+      "@kbn/evals-suite-attack-discovery/*": ["x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/*"],
       "@kbn/evals-suite-endpoint": ["x-pack/solutions/security/packages/kbn-evals-suite-endpoint"],
       "@kbn/evals-suite-endpoint/*": ["x-pack/solutions/security/packages/kbn-evals-suite-endpoint/*"],
       "@kbn/evals-suite-entity-analytics": ["x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics"],
