@@ -63,8 +63,8 @@ const defaultFormState = {
 };
 
 const defaultModelSettingsState = {
-  state: { defaultModelId: 'NO_DEFAULT_CONNECTOR', disallowOtherModels: false },
-  savedState: { defaultModelId: 'NO_DEFAULT_CONNECTOR', disallowOtherModels: false },
+  state: { defaultModelId: 'NO_DEFAULT_MODEL', disallowOtherModels: false },
+  savedState: { defaultModelId: 'NO_DEFAULT_MODEL', disallowOtherModels: false },
   isDirty: false,
   setDefaultModelId: jest.fn(),
   setDisallowOtherModels: jest.fn(),
