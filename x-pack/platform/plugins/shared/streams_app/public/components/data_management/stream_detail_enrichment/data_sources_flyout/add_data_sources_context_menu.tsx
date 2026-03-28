@@ -26,7 +26,7 @@ export const AddDataSourcesContextMenu = () => {
   const menuItems = [
     {
       name: DATA_SOURCES_I18N.contextMenu.addKqlDataSource,
-      icon: 'search',
+      icon: 'magnify',
       'data-test-subj': 'streamsAppProcessingAddKqlDataSource',
       onClick: () => {
         addDataSource(defaultKqlSamplesDataSource);
@@ -35,7 +35,7 @@ export const AddDataSourcesContextMenu = () => {
     },
     {
       name: DATA_SOURCES_I18N.contextMenu.addCustomSamples,
-      icon: 'visText',
+      icon: 'text',
       'data-test-subj': 'streamsAppProcessingAddCustomDataSource',
       onClick: () => {
         addDataSource(createDefaultCustomSamplesDataSource(streamName));
@@ -49,7 +49,7 @@ export const AddDataSourcesContextMenu = () => {
       data-test-subj="streamsAppProcessingAddDataSourcesContextMenu"
       id="data-sources-menu"
       button={
-        <EuiButton size="s" iconType="arrowDown" iconSide="right" onClick={toggleMenu}>
+        <EuiButton size="s" iconType="chevronSingleDown" iconSide="right" onClick={toggleMenu}>
           {DATA_SOURCES_I18N.contextMenu.addDataSource}
         </EuiButton>
       }
