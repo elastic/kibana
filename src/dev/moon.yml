@@ -53,8 +53,6 @@ dependsOn:
   - '@kbn/yarn-lock-validator'
   - '@kbn/sort-package-json'
   - '@kbn/babel-register'
-  - '@kbn/dev-validation-runner'
-  - '@kbn/moon'
 tags:
   - tooling
   - package
@@ -70,7 +68,6 @@ fileGroups:
     - '**/*.cjs'
     - '!target/**/*'
     - '!packages/**/*'
-    - '!type_check_validation_loader.js'
 tasks:
   jest:
     command: node
