@@ -83,9 +83,12 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
         ${logicalCSS('right', 'var(--euiPushFlyoutOffsetInlineEnd, 0px)')}
         background-color: ${euiTheme.colors.backgroundBasePlain};
 
-        .embPanel,
-        .embPanel__hoverActions {
+        .embPanel {
           z-index: auto !important;
+        }
+
+        .embPanel__hoverActions {
+          z-index: ${Number(euiTheme.levels.flyout) - 2} !important;
         }
       `,
       [METRICS_GRID_RESTRICT_BODY_CLASS]: css`
