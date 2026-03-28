@@ -22,6 +22,7 @@ import {
   UncommonProcessQueryTabBody,
   SessionsTabBody,
 } from './navigation';
+import { hostNameExistsFilter } from './details/helpers';
 
 export const HostsTabs = React.memo<HostsTabsProps>(
   ({ deleteQuery, filterQuery, from, indexNames, isInitializing, setQuery, to, type }) => {
@@ -52,7 +53,7 @@ export const HostsTabs = React.memo<HostsTabsProps>(
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody
-            additionalFilters={[]}
+            additionalFilters={hostNameExistsFilter}
             tableId={TableId.hostsPageEvents}
             {...tabProps}
           />

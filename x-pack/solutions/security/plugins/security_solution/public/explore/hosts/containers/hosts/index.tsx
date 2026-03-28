@@ -5,192 +5,146 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { inputsModel, State } from '../../../../common/store';
+import type { HostsRequestOptionsInput } from '../../../../../common/api/search_strategy';
+import type { State } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { hostsModel } from '../../store';
-import { hostsActions, hostsSelectors } from '../../store';
-import type { HostsEdges, PageInfoPaginated } from '../../../../../common/search_strategy';
+import { hostsSelectors } from '../../store';
+import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
+import { HostsQueries } from '../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../common/typed_json';
-import type { HostEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
-import type { HostItem } from '../../../../../common/search_strategy/security_solution/hosts/common';
-import { HostsFields } from '../../../../../common/api/search_strategy/hosts/model/sort';
-import { HostsTableType } from '../../store/model';
 
-import type { InspectResponse } from '../../../../types';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { useEntitiesListQuery } from '../../../../entity_analytics/components/entity_store/hooks/use_entities_list_query';
+import * as i18n from './translations';
+import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import type { HostsArgs } from './hosts_table_query_types';
+import { HOSTS_ALL_TABLE_QUERY_ID } from './hosts_table_query_types';
 
-export const ID = 'hostsAllQuery';
+export const ID = HOSTS_ALL_TABLE_QUERY_ID;
 
-type LoadPage = (newActivePage: number) => void;
-export interface HostsArgs {
-  endDate: string;
-  hosts: HostsEdges[];
-  id: string;
-  inspect: InspectResponse;
-  isInspected: boolean;
-  loadPage: LoadPage;
-  pageInfo: PageInfoPaginated;
-  refetch: inputsModel.Refetch;
-  startDate: string;
-  totalCount: number;
-}
+export type { HostsArgs } from './hosts_table_query_types';
 
 interface UseAllHost {
   endDate: string;
   filterQuery?: ESTermQuery | string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
 }
 
-/**
- * Maps Entity Store HostEntity.host to HostEcs (HostItem.host uses HostEcs with array fields).
- * Entity store stores host.os.name and host.os.version per ECS (may be missing from HostEntity schema).
- */
-const mapEntityHostToHostEcs = (host: HostEntity['host']) => {
-  if (!host) return undefined;
-  const hostWithOs = host as HostEntity['host'] & { os?: { name?: string[]; version?: string } };
-  const osName = hostWithOs.os?.name;
-  const osVersion = hostWithOs.os?.version;
-  return {
-    name: [host.name],
-    id: host.id,
-    ip: host.ip,
-    mac: host.mac,
-    architecture: host.architecture,
-    ...(host.hostname?.length && { hostname: host.hostname }),
-    ...(host.domain?.length && { domain: host.domain }),
-    ...(host.type?.length && { type: host.type }),
-    ...((osName != null || osVersion != null) && {
-      os: {
-        ...(osName != null && {
-          name: Array.isArray(osName) ? osName : [osName as string],
-        }),
-        ...(osVersion != null && {
-          version: Array.isArray(osVersion) ? osVersion : [osVersion as string],
-        }),
-      },
-    }),
-  };
-};
-
-/**
- * Maps Entity Store HostEntity to HostsEdges (node: HostItem, cursor)
- */
-const mapEntityToHostsEdge = (entity: HostEntity): HostsEdges => {
-  const lastSeen = entity.entity?.lifecycle?.last_activity ?? entity['@timestamp'] ?? '';
-  const node: HostItem = {
-    host: mapEntityHostToHostEcs(entity.host),
-    lastSeen: Array.isArray(lastSeen) ? lastSeen : [lastSeen],
-    risk: entity.entity?.risk?.calculated_level,
-    criticality: entity.asset?.criticality,
-  };
-  const cursorValue = entity.entity?.id ?? entity.host?.entity?.id ?? entity.host?.id?.[0] ?? '';
-  return { node, cursor: { value: cursorValue, tiebreaker: null } };
-};
-
-const ENTITY_STORE_INDEX_PATTERN_V2 = (namespace: string) =>
-  `.entities.v2.latest.security_${namespace}`;
-
 export const useAllHost = ({
   endDate,
   filterQuery,
+  indexNames,
   skip = false,
   startDate,
   type,
 }: UseAllHost): [boolean, HostsArgs] => {
-  const dispatch = useDispatch();
-  const spaceId = useSpaceId();
   const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state: State) =>
     getHostsSelector(state, type)
   );
 
-  // Map sort field to Entity Store format
-  const entitySortField = useMemo(() => {
-    const fieldMap: Record<string, string> = {
-      [HostsFields.hostName]: 'host.name',
-      [HostsFields.lastSeen]: '@timestamp',
-      'host.name': 'host.name',
-      '@timestamp': '@timestamp',
-    };
-    return fieldMap[sortField] ?? sortField;
-  }, [sortField]);
-
-  const entityFilterQuery = useMemo(() => {
-    const filter = createFilter(filterQuery);
-    if (!filter || filter === '{}' || filter === '""') {
-      return undefined;
-    }
-    return filter;
-  }, [filterQuery]);
+  const [hostsRequest, setHostRequest] = useState<HostsRequestOptionsInput | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      dispatch(
-        hostsActions.updateTableActivePage({
-          activePage: newActivePage,
-          hostsType: type,
-          tableType: HostsTableType.hosts,
-        })
-      );
+      setHostRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
-    [dispatch, type]
+    [limit]
   );
 
-  const { data, isLoading, refetch } = useEntitiesListQuery({
-    entityTypes: ['host'],
-    page: activePage + 1,
-    perPage: limit,
-    sortField: entitySortField,
-    sortOrder: direction,
-    filterQuery: entityFilterQuery,
-    skip,
+  const {
+    loading,
+    result: response,
+    search,
+    refetch,
+    inspect,
+  } = useSearchStrategy<HostsQueries.hosts>({
+    factoryQueryType: HostsQueries.hosts,
+    initialResult: {
+      edges: [],
+      totalCount: -1,
+      pageInfo: {
+        activePage: 0,
+        fakeTotalCount: 0,
+        showMorePagesIndicator: false,
+      },
+    },
+    errorMessage: i18n.FAIL_ALL_HOST,
+    abort: skip,
   });
 
-  const hostsResponse = useMemo(() => {
-    const hosts: HostsEdges[] = (data?.records ?? [])
-      .filter((entity): entity is HostEntity => 'host' in entity)
-      .map(mapEntityToHostsEdge);
-
-    const totalCount = data?.total ?? 0;
-    const currentPage = data?.page ?? 1;
-    const perPage = data?.per_page ?? limit;
-    const totalPages = Math.ceil(totalCount / perPage);
-
-    const pageInfo: PageInfoPaginated = {
-      activePage: currentPage - 1,
-      fakeTotalCount: totalCount,
-      showMorePagesIndicator: currentPage < totalPages,
-    };
-
-    const namespace = spaceId ?? 'default';
-    const inspect: InspectResponse = data?.inspect
-      ? {
-          dsl: data.inspect.dsl ?? [],
-          response: data.inspect.response ?? [],
-          indexPattern: [ENTITY_STORE_INDEX_PATTERN_V2(namespace)],
-        }
-      : { dsl: [], response: [], indexPattern: [ENTITY_STORE_INDEX_PATTERN_V2(namespace)] };
-
-    return {
+  const hostsResponse = useMemo(
+    () => ({
       endDate,
-      hosts,
-      id: ID,
+      hosts: response.edges,
+      id: HOSTS_ALL_TABLE_QUERY_ID,
       inspect,
       isInspected: false,
       loadPage: wrappedLoadMore,
-      pageInfo,
-      refetch: refetch as inputsModel.Refetch,
+      pageInfo: response.pageInfo,
+      refetch,
       startDate,
-      totalCount,
-    };
-  }, [data, endDate, limit, spaceId, startDate, wrappedLoadMore, refetch]);
+      totalCount: response.totalCount,
+    }),
+    [
+      endDate,
+      inspect,
+      refetch,
+      response.edges,
+      response.pageInfo,
+      response.totalCount,
+      startDate,
+      wrappedLoadMore,
+    ]
+  );
 
-  return [isLoading, hostsResponse];
+  useEffect(() => {
+    setHostRequest((prevRequest) => {
+      const myRequest: HostsRequestOptionsInput = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: HostsQueries.hosts,
+        filterQuery: createFilter(filterQuery),
+        pagination: generateTablePaginationOptions(activePage, limit),
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
+        sort: {
+          direction,
+          field: sortField,
+        },
+      };
+      if (!deepEqual(prevRequest, myRequest)) {
+        return myRequest;
+      }
+      return prevRequest;
+    });
+  }, [activePage, direction, endDate, filterQuery, indexNames, limit, startDate, sortField]);
+
+  useEffect(() => {
+    if (!skip && hostsRequest) {
+      search(hostsRequest);
+    }
+  }, [hostsRequest, search, skip]);
+
+  return [loading, hostsResponse];
 };
+
+export { useAllEntityStoreHosts } from './use_all_entity_store_hosts';

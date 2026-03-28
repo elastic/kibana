@@ -7,6 +7,8 @@
 
 import type { Filter } from '@kbn/es-query';
 
+export { hostNameExistsFilter } from '../../../../common/components/visualization_actions/utils';
+
 export const getHostDetailsPageFilters = (hostName: string): Filter[] => [
   {
     meta: {

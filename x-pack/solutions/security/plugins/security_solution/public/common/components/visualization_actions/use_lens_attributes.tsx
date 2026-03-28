@@ -86,11 +86,17 @@ export const useLensAttributes = ({
       if (pageName === SecurityPageName.network) {
         return sourceOrDestinationIpExistsFilter;
       }
+      if (
+        extraOptions?.entityStoreV2Enabled === true &&
+        (pageName === SecurityPageName.hosts || pageName === SecurityPageName.users)
+      ) {
+        return [];
+      }
       return fieldNameExistsFilter(pageName);
     }
 
     return [];
-  }, [pageName, tabName]);
+  }, [extraOptions?.entityStoreV2Enabled, pageName, tabName]);
 
   const pageFilters = useMemo(() => {
     if (

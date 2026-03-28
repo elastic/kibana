@@ -7,6 +7,8 @@
 
 import type { Filter } from '@kbn/es-query';
 
+export { userNameExistsFilter } from '../../../../common/components/visualization_actions/utils';
+
 export const getUsersDetailsPageFilters = (userName: string): Filter[] => [
   {
     meta: {
@@ -27,38 +29,6 @@ export const getUsersDetailsPageFilters = (userName: string): Filter[] => [
           type: 'phrase',
         },
       },
-    },
-  },
-];
-
-export const userNameExistsFilter: Filter[] = [
-  {
-    query: {
-      bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                {
-                  exists: {
-                    field: 'user.name',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ],
-      },
-    },
-    meta: {
-      alias: '',
-      disabled: false,
-      key: 'bool',
-      negate: false,
-      type: 'custom',
-      value:
-        '{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "user.name"}}],"minimum_should_match": 1}}]}}}',
     },
   },
 ];
