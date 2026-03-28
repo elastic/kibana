@@ -6,7 +6,10 @@
  */
 
 import { CountTimeframeStrategy } from './count_timeframe_strategy';
-import type { AlertEpisodeStatus, AlertEventStatus } from '../../../resources/datastreams/alert_events';
+import type {
+  AlertEpisodeStatus,
+  AlertEventStatus,
+} from '../../../resources/datastreams/alert_events';
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { createRuleResponse } from '../../test_utils';

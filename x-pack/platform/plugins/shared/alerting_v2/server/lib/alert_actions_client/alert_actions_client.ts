@@ -14,7 +14,10 @@ import type {
   BulkGetAlertActionsResponse,
   CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
-import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/datastreams/alert_actions';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  type AlertAction,
+} from '../../resources/datastreams/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { type QueryServiceContract } from '../services/query_service/query_service';
