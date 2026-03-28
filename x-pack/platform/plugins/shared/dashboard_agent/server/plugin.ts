@@ -26,10 +26,18 @@ export class DashboardAgentPlugin
     >
 {
   setup(
-    _coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
+    coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
     setupDeps: DashboardAgentSetupDependencies
   ): DashboardAgentPluginSetup {
-    setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
+    // Create a getter for the dashboard client that will be available after start
+    const getDashboardClient = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.dashboard.client;
+    };
+
+    setupDeps.agentBuilder.attachments.registerType(
+      createDashboardAttachmentType({ getDashboardClient })
+    );
     setupDeps.agentBuilder.sml.registerType(dashboardSmlType);
     registerSkills(setupDeps.agentBuilder);
     return {};

@@ -193,6 +193,7 @@ export function registerAttachmentRoutes({
           request,
           spaceId,
           savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
+          requestHandlerContext: ctx,
         };
 
         const staleResults = await stateManager.evaluateStalenessForActiveAttachments(
@@ -313,10 +314,11 @@ export function registerAttachmentRoutes({
         try {
           const [coreStart] = await coreSetup.getStartServices();
           const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
-          const resolveContext = {
+          const resolveContext: AttachmentResolveContext = {
             request,
             spaceId,
             savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
+            requestHandlerContext: ctx,
           };
 
           attachment = await stateManager.add(

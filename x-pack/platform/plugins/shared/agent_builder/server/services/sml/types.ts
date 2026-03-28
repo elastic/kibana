@@ -11,7 +11,7 @@ import type {
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest, RequestHandlerContext } from '@kbn/core-http-server';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 
 /**
@@ -53,6 +53,11 @@ export interface SmlToAttachmentContext {
   request: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
   spaceId: string;
+  /**
+   * The request handler context for the current request.
+   * Provides access to core services and plugin contexts.
+   */
+  requestHandlerContext: RequestHandlerContext;
 }
 
 /**

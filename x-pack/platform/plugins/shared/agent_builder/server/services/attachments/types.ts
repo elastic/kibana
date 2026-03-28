@@ -10,7 +10,9 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import type { ValidateAttachmentResult } from './validate_attachment';
 
 export interface AttachmentServiceSetup {
-  registerType(attachmentType: AttachmentTypeDefinition): void;
+  registerType<TType extends string, TContent>(
+    attachmentType: AttachmentTypeDefinition<TType, TContent>
+  ): void;
 }
 
 export interface AttachmentServiceStart {

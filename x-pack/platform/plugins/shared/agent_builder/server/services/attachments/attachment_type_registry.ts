@@ -8,7 +8,9 @@
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 
 export interface AttachmentTypeRegistry {
-  register(attachmentType: AttachmentTypeDefinition): void;
+  register<TType extends string, TContent>(
+    attachmentType: AttachmentTypeDefinition<TType, TContent>
+  ): void;
   has(attachmentTypeId: string): boolean;
   get(attachmentTypeId: string): AttachmentTypeDefinition | undefined;
   list(): AttachmentTypeDefinition[];
@@ -23,11 +25,11 @@ class AttachmentTypeRegistryImpl implements AttachmentTypeRegistry {
 
   constructor() {}
 
-  register(type: AttachmentTypeDefinition) {
+  register<TType extends string, TContent>(type: AttachmentTypeDefinition<TType, TContent>) {
     if (this.attachmentTypes.has(type.id)) {
       throw new Error(`Attachment type with id ${type.id} already registered`);
     }
-    this.attachmentTypes.set(type.id, type);
+    this.attachmentTypes.set(type.id, type as AttachmentTypeDefinition);
   }
 
   has(toolId: string): boolean {
