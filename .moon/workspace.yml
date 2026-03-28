@@ -2,11 +2,15 @@
 $schema: https://moonrepo.dev/schemas/workspace.json
 
 projects:
+  # Glob-based discovery skips dotfile directories, so `.buildkite` is registered
+  # explicitly via `sources` below.
   globs:
     - src/**/moon.yml
     - x-pack/**/moon.yml
     - examples/**/moon.yml
     - packages/**/moon.yml
+  sources:
+    kibana-buildkite: .buildkite
 vcs:
   defaultBranch: main
   client: git
