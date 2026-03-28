@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/evals-common'
   - '@kbn/safer-lodash-set'
   - '@kbn/test'
+  - '@kbn/es-errors'
 tags:
   - test-helper
   - package
