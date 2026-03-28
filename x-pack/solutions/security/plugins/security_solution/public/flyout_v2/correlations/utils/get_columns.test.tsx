@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { formatDate } from '@elastic/eui';
+import { EntityStoreEuidApiProvider } from '@kbn/entity-store/public';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TestProviders } from '../../../common/mock';
@@ -24,6 +25,7 @@ jest.mock('../../../common/lib/kibana', () => ({
       telemetry: { reportEvent: jest.fn() },
     },
   }),
+  useUiSetting: jest.fn(() => false),
 }));
 
 const scopeId = 'test-scope';
@@ -32,7 +34,11 @@ const mockOnShowAlert = jest.fn();
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 const renderColumn = (element: React.ReactElement) =>
-  render(<TestProviders>{element}</TestProviders>);
+  render(
+    <TestProviders>
+      <EntityStoreEuidApiProvider>{element}</EntityStoreEuidApiProvider>
+    </TestProviders>
+  );
 
 describe('getColumns', () => {
   beforeEach(() => {
