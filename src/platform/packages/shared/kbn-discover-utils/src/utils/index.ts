@@ -31,3 +31,4 @@ export * from './escape_preserve_highlight_tags';
 export * from './sorting';
 export { DiscoverFlyouts, dismissAllFlyoutsExceptFor, dismissFlyouts } from './dismiss_flyouts';
 export { prepareDataViewForEditing } from './prepare_data_view_for_editing';
+export { getEsqlDataView } from './get_esql_data_view';

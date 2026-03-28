@@ -6,7 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import type { Logger, CoreSetup, CoreStart } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger, CoreSetup, CoreStart } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -49,16 +49,30 @@ import {
   RESCHEDULE_DELAY_MS,
   TAGS,
 } from './constants';
+import {
+  UIAM_PROVISIONING_RUN_EVENT,
+  type UiamProvisioningRunEventData,
+} from './event_based_telemetry';
 
 export class UiamApiKeyProvisioningTask {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
+  private readonly analytics: AnalyticsServiceSetup;
   private isTaskScheduled: boolean | undefined = undefined;
   private featureFlagSubscription: Subscription | undefined;
 
-  constructor({ logger, isServerless }: { logger: Logger; isServerless: boolean }) {
+  constructor({
+    logger,
+    isServerless,
+    analytics,
+  }: {
+    logger: Logger;
+    isServerless: boolean;
+    analytics: AnalyticsServiceSetup;
+  }) {
     this.logger = logger;
     this.isServerless = isServerless;
+    this.analytics = analytics;
   }
 
   register({
@@ -85,7 +99,32 @@ export class UiamApiKeyProvisioningTask {
         stateSchemaByVersion,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
-            run: async () => this.runTask(taskInstance, core),
+            run: async () => {
+              let caughtError: Error | undefined;
+              let result: Awaited<ReturnType<typeof this.runTask>> | undefined;
+              try {
+                result = await this.runTask(taskInstance, core);
+              } catch (error) {
+                caughtError = error instanceof Error ? error : new Error(String(error));
+              }
+
+              const telemetry: UiamProvisioningRunEventData = result?.telemetry ?? {
+                total: 0,
+                completed: 0,
+                failed: 0,
+                skipped: 0,
+                has_more_to_provision: false,
+                has_error: true,
+                run_number: 0,
+              };
+              this.reportProvisioningRunEvent(telemetry);
+
+              if (caughtError) {
+                throw caughtError;
+              }
+              const { telemetry: _, ...taskResult } = result!;
+              return taskResult;
+            },
             cancel: async () => {},
           };
         },
@@ -179,7 +218,11 @@ export class UiamApiKeyProvisioningTask {
   private runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup<AlertingPluginsStart>
-  ): Promise<{ state: LatestTaskStateSchema; runAt?: Date; error?: Error }> => {
+  ): Promise<{
+    state: LatestTaskStateSchema;
+    runAt?: Date;
+    telemetry: UiamProvisioningRunEventData;
+  }> => {
     const state = (taskInstance.state ?? emptyState) as LatestTaskStateSchema;
     const context = await createProvisioningRunContext(core);
 
@@ -203,13 +246,25 @@ export class UiamApiKeyProvisioningTask {
     );
 
     const nextState = { runs: state.runs + 1 };
+    const completed = provisioningStatusForCompletedRules.length;
+    const failed =
+      provisioningStatusForFailedConversions.length + provisioningStatusForFailedRules.length;
+    const skipped = provisioningStatusForSkippedRules.length;
+
+    const telemetry: UiamProvisioningRunEventData = {
+      total: completed + failed + skipped,
+      completed,
+      failed,
+      skipped,
+      has_more_to_provision: hasMoreToProvision,
+      has_error: false,
+      run_number: nextState.runs,
+    };
+
     if (hasMoreToProvision) {
-      return {
-        state: nextState,
-        runAt: new Date(Date.now() + RESCHEDULE_DELAY_MS),
-      };
+      return { state: nextState, runAt: new Date(Date.now() + RESCHEDULE_DELAY_MS), telemetry };
     }
-    return { state: nextState };
+    return { state: nextState, telemetry };
   };
 
   private getApiKeysToConvert = async (
@@ -342,6 +397,14 @@ export class UiamApiKeyProvisioningTask {
       this.logger.error(`Error writing provisioning status: ${getErrorMessage(e)}`, {
         error: { stack_trace: e instanceof Error ? e.stack : undefined, tags: TAGS },
       });
+    }
+  };
+
+  private reportProvisioningRunEvent = (telemetry: UiamProvisioningRunEventData): void => {
+    try {
+      this.analytics.reportEvent(UIAM_PROVISIONING_RUN_EVENT.eventType, telemetry);
+    } catch (e) {
+      this.logger.debug(`Failed to report UIAM provisioning run telemetry event: ${e}`);
     }
   };
 }

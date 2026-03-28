@@ -15,10 +15,13 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from '@kbn/task-manager-plugin/server';
+import type { IEventLogService } from '@kbn/event-log-plugin/server';
 
 export interface TaskManagerDependenciesPluginSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
+  eventLog: IEventLogService;
 }
 
 export interface TaskManagerDependenciesPluginStart {
@@ -37,6 +40,11 @@ export class TaskManagerDependenciesPlugin {
     });
 
     plugin.taskManager.registerCanEncryptedSavedObjects(plugin.encryptedSavedObjects.canEncrypt);
+
+    plugin.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+    plugin.taskManager.registerTaskEventLogger(
+      plugin.eventLog.getLogger({ event: { provider: EVENT_LOG_PROVIDER } })
+    );
   }
 
   public start(_: CoreStart, plugin: TaskManagerDependenciesPluginStart) {
