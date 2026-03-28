@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceConnectorsResponse } from '../../common/types';
 import { useKibana } from './use_kibana';
 
 const INFERENCE_CONNECTORS_API = '/internal/inference/connectors';
@@ -31,7 +32,7 @@ export const useConnectors = (): UseConnectorsResult => {
       setLoading(true);
       setError(undefined);
       try {
-        const res = await http.get<{ connectors: InferenceConnector[] }>(INFERENCE_CONNECTORS_API, {
+        const res = await http.get<InferenceConnectorsResponse>(INFERENCE_CONNECTORS_API, {
           signal,
         });
         setConnectors(res.connectors);

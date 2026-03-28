@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceConnectorsResponse } from '../../common/types';
 import { NO_DEFAULT_MODEL } from '../../common/constants';
 import { useKibana } from './use_kibana';
 
@@ -30,7 +30,7 @@ export const useConnectorExists = (connectorId: string): { exists: boolean; load
     setLoading(true);
 
     http
-      .get<{ connectors: InferenceConnector[] }>(INFERENCE_CONNECTORS_API, {
+      .get<InferenceConnectorsResponse>(INFERENCE_CONNECTORS_API, {
         signal: controller.signal,
       })
       .then((res) => {
