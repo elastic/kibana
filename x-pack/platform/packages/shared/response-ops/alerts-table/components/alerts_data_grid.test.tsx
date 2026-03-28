@@ -535,7 +535,7 @@ describe('AlertsDataGrid', () => {
           />
         );
 
-        await expect(screen.findByTestId('alertFlyout')).rejects.toThrow();
+        expect(screen.queryByTestId('alertFlyout')).not.toBeInTheDocument();
         expect(screen.queryByTestId('expandedAlertView')).not.toBeInTheDocument();
       });
     });

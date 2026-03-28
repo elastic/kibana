@@ -26,6 +26,7 @@ import type {
   ConcatProcessor,
   NetworkDirectionProcessor,
   JsonExtractProcessor,
+  EnrichProcessor,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
@@ -81,6 +82,7 @@ export type NetworkDirectionFormState = Omit<
   internal_networks?: InternalNetworksValue[];
   internal_networks_field?: string;
 };
+export type EnrichFormState = EnrichProcessor;
 
 export type SpecialisedFormState =
   | GrokFormState
@@ -101,7 +103,8 @@ export type SpecialisedFormState =
   | SortFormState
   | ConcatFormState
   | JsonExtractFormState
-  | NetworkDirectionFormState;
+  | NetworkDirectionFormState
+  | EnrichFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
 export type ConditionBlockFormState = StreamlangConditionBlockWithUIAttributes;

@@ -16845,6 +16845,10 @@
                 "path": "x-pack/solutions/search/plugins/search_playground/server/routes/saved_playgrounds.ts"
               },
               {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/status.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/find_endpoint_list_item_route.ts"
               },
@@ -16991,10 +16995,6 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/privileges/get_missing_privileges.ts"
-              },
-              {
-                "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/status.ts"
               },
               {
                 "plugin": "entityStore",
@@ -17207,6 +17207,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/privileges.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/lead_generation/routes/get_leads.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -19329,6 +19333,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_details/routes/entity_details_highlight.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/lead_generation/routes/generate_leads.ts"
               },
               {
                 "plugin": "securitySolution",

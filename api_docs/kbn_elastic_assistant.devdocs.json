@@ -441,7 +441,7 @@
           "React.FunctionComponent<Props>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/connector_selector_inline/connector_selector_inline.tsx",
-        "lineNumber": 77,
+        "lineNumber": 78,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3204,7 +3204,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/connector_selector/index.tsx",
-        "lineNumber": 55,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3480,7 +3480,7 @@
         "label": "ManagementSettingsTabs",
         "description": [],
         "signature": [
-          "\"anonymization\" | \"connectors\" | \"knowledge_base\" | \"conversations\" | \"quick_prompts\" | \"system_prompts\" | \"evaluation\""
+          "\"anonymization\" | \"connectors\" | \"knowledge_base\" | \"conversations\" | \"evaluation\" | \"quick_prompts\" | \"system_prompts\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/types.ts",
         "lineNumber": 20,

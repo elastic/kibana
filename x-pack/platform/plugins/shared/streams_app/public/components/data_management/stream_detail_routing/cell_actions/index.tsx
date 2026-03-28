@@ -62,7 +62,7 @@ const FilterBtn = ({
       : {}
   );
 
-  const iconType = mode === '+' ? 'plusInCircle' : 'minusInCircle';
+  const iconType = mode === '+' ? 'plusCircle' : 'minusCircle';
   const operator = getOperator(context[rowIndex][columnId] as StringOrNumberOrBoolean, mode);
   const condition = getCondition(
     context[rowIndex][columnId] as StringOrNumberOrBoolean,

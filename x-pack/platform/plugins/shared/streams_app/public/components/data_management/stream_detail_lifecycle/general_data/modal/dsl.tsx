@@ -103,7 +103,7 @@ export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButton
               <EuiFormAppend
                 element="button"
                 label={selectedUnit.name}
-                iconRight="arrowDown"
+                iconRight="chevronSingleDown"
                 disabled={isDisabled}
                 onClick={openUnitMenu}
                 data-test-subj="streamsAppDslModalButton"
