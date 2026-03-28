@@ -6,6 +6,7 @@
  */
 
 import { filter, type Observable, type Subscription } from 'rxjs';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -17,9 +18,11 @@ import {
   ATTACHMENT_REF_OPERATION,
   getLatestVersion,
 } from '@kbn/agent-builder-common/attachments';
+import { createManualChangesTracker } from './manual_changes_tracker';
 export interface OnAttachmentMountParams extends AttachmentLifecycleParams<DashboardAttachment> {
   dashboardPlugin: DashboardStart;
   chat$: Observable<ChatEvent>;
+  addAttachment: (attachment: AttachmentInput) => void;
 }
 
 /**
@@ -34,9 +37,11 @@ export const onAttachmentMount = ({
   chat$,
   getAttachment,
   updateOrigin,
+  addAttachment,
 }: OnAttachmentMountParams) => {
   let savedObjectIdSubscription: Subscription | undefined;
   let liveChangesSubscription: Subscription | undefined;
+  let manualChangesSubscription: Subscription | undefined;
 
   // Subscribe to dashboard API changes to manage savedObjectId$ subscription lifecycle
   const apiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
@@ -44,6 +49,8 @@ export const onAttachmentMount = ({
     savedObjectIdSubscription = undefined;
     liveChangesSubscription?.unsubscribe();
     liveChangesSubscription = undefined;
+    manualChangesSubscription?.unsubscribe();
+    manualChangesSubscription = undefined;
     if (!api) return;
 
     let previousSavedObjectId = api.savedObjectId$.value;
@@ -105,11 +112,18 @@ export const onAttachmentMount = ({
       api.setState(attachmentToDashboardState(attachment));
       setTimeout(() => api!.scrollToBottom(), 0);
     });
+
+    manualChangesSubscription = createManualChangesTracker({
+      api,
+      getAttachment,
+      addAttachment,
+    });
   });
 
   return () => {
     apiSubscription.unsubscribe();
     savedObjectIdSubscription?.unsubscribe();
     liveChangesSubscription?.unsubscribe();
+    manualChangesSubscription?.unsubscribe();
   };
 };
