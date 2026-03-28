@@ -35,6 +35,7 @@ describe('InsightClient', () => {
       bulk: jest.fn(),
       clean: jest.fn(),
       existsIndex: jest.fn(),
+      migrateDocuments: jest.fn(),
     } as jest.Mocked<IStorageClient<InsightStorageSettings, Insight>>);
 
   const defaultGeneratedAt = '2024-01-15T12:00:00.000Z';
