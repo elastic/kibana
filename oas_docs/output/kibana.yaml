@@ -88241,6 +88241,11 @@ components:
         - name
         - type
     Security_Detections_API_ResponseAction:
+      discriminator:
+        mapping:
+          .endpoint: '#/components/schemas/Security_Detections_API_EndpointResponseAction'
+          .osquery: '#/components/schemas/Security_Detections_API_OsqueryResponseAction'
+        propertyName: action_type_id
       oneOf:
         - $ref: '#/components/schemas/Security_Detections_API_OsqueryResponseAction'
         - $ref: '#/components/schemas/Security_Detections_API_EndpointResponseAction'
@@ -88457,6 +88462,15 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRuleCreateProps'
         - $ref: '#/components/schemas/Security_Detections_API_EsqlRuleCreateProps'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/Security_Detections_API_EqlRuleCreateProps'
+          esql: '#/components/schemas/Security_Detections_API_EsqlRuleCreateProps'
+          machine_learning: '#/components/schemas/Security_Detections_API_MachineLearningRuleCreateProps'
+          new_terms: '#/components/schemas/Security_Detections_API_NewTermsRuleCreateProps'
+          query: '#/components/schemas/Security_Detections_API_QueryRuleCreateProps'
+          saved_query: '#/components/schemas/Security_Detections_API_SavedQueryRuleCreateProps'
+          threat_match: '#/components/schemas/Security_Detections_API_ThreatMatchRuleCreateProps'
+          threshold: '#/components/schemas/Security_Detections_API_ThresholdRuleCreateProps'
         propertyName: type
     Security_Detections_API_RuleDescription:
       description: The rule’s description.
@@ -88717,6 +88731,15 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRule'
         - $ref: '#/components/schemas/Security_Detections_API_EsqlRule'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/Security_Detections_API_EqlRule'
+          esql: '#/components/schemas/Security_Detections_API_EsqlRule'
+          machine_learning: '#/components/schemas/Security_Detections_API_MachineLearningRule'
+          new_terms: '#/components/schemas/Security_Detections_API_NewTermsRule'
+          query: '#/components/schemas/Security_Detections_API_QueryRule'
+          saved_query: '#/components/schemas/Security_Detections_API_SavedQueryRule'
+          threat_match: '#/components/schemas/Security_Detections_API_ThreatMatchRule'
+          threshold: '#/components/schemas/Security_Detections_API_ThresholdRule'
         propertyName: type
     Security_Detections_API_RuleRevision:
       description: |
@@ -88753,6 +88776,15 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRuleUpdateProps'
         - $ref: '#/components/schemas/Security_Detections_API_EsqlRuleUpdateProps'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/Security_Detections_API_EqlRuleUpdateProps'
+          esql: '#/components/schemas/Security_Detections_API_EsqlRuleUpdateProps'
+          machine_learning: '#/components/schemas/Security_Detections_API_MachineLearningRuleUpdateProps'
+          new_terms: '#/components/schemas/Security_Detections_API_NewTermsRuleUpdateProps'
+          query: '#/components/schemas/Security_Detections_API_QueryRuleUpdateProps'
+          saved_query: '#/components/schemas/Security_Detections_API_SavedQueryRuleUpdateProps'
+          threat_match: '#/components/schemas/Security_Detections_API_ThreatMatchRuleUpdateProps'
+          threshold: '#/components/schemas/Security_Detections_API_ThresholdRuleUpdateProps'
         propertyName: type
     Security_Detections_API_RuleVersion:
       description: |
