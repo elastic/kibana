@@ -15,11 +15,11 @@ import type { LeadEntity } from './types';
  */
 export const entityRecordToLeadEntity = (record: Entity): LeadEntity => {
   const entityField = (record as Record<string, unknown>).entity as
-    | { name?: string; type?: string; id?: string }
+    | { name?: string; type?: string; id?: string; EngineMetadata?: { Type?: string } }
     | undefined;
   return {
     record,
-    type: entityField?.type ?? 'unknown',
+    type: entityField?.EngineMetadata?.Type ?? entityField?.type ?? 'unknown',
     name: entityField?.name ?? entityField?.id ?? 'unknown',
   };
 };

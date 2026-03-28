@@ -17,6 +17,7 @@ import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createLeadGenerationService } from '../services/lead_generation_service';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 const GenerateLeadsRequestBody = z.object({
   mode: z.enum(['adhoc', 'scheduled']).optional().default('adhoc'),
@@ -43,7 +44,7 @@ export const generateLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], 
         },
       },
 
-      async (context, request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -62,7 +63,7 @@ export const generateLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], 
 
           void (async () => {
             try {
-              await service.generate(request.body.mode ?? 'adhoc');
+              await service.generate(request.body.mode ?? 'adhoc', executionUuid);
               logger.info(
                 `[LeadGeneration] Background generation completed (executionUuid=${executionUuid})`
               );
@@ -79,6 +80,6 @@ export const generateLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], 
           const error = transformError(e);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });
         }
-      }
+      })
     );
 };

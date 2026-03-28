@@ -366,11 +366,12 @@ describe('LeadDataClient', () => {
       expect(esClient.updateByQuery).not.toHaveBeenCalled();
     });
 
-    it('returns 0 on error', async () => {
+    it('throws on error so the route can surface it', async () => {
       esClient.updateByQuery.mockRejectedValueOnce(new Error('cluster error'));
 
-      const count = await client.bulkUpdateLeads(['a'], { status: 'dismissed' });
-      expect(count).toBe(0);
+      await expect(client.bulkUpdateLeads(['a'], { status: 'dismissed' })).rejects.toThrow(
+        'cluster error'
+      );
     });
   });
 

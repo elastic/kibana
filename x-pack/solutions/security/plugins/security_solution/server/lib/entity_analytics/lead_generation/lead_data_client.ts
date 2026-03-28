@@ -276,7 +276,15 @@ export const createLeadDataClient = ({
 
       return { leads, total, page, perPage };
     } catch (e) {
-      logger.debug(`[LeadGeneration] Leads indices not available yet: ${e}`);
+      const isIndexNotFound =
+        (e as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type ===
+        'index_not_found_exception';
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      if (isIndexNotFound) {
+        logger.debug(`[LeadGeneration] Leads indices not available yet: ${errorMessage}`);
+      } else {
+        logger.error(`[LeadGeneration] Unable to find leads due to error: ${errorMessage}`);
+      }
       return { leads: [], total: 0, page, perPage };
     }
   };
@@ -354,25 +362,20 @@ export const createLeadDataClient = ({
   ): Promise<number> => {
     if (ids.length === 0) return 0;
 
-    try {
-      const resp = await esClient.updateByQuery({
-        index: allIndices,
-        query: { terms: { id: [...ids] } },
-        script: {
-          source: `ctx._source['status'] = params.status`,
-          lang: 'painless',
-          params: { status: updates.status },
-        },
-        refresh: true,
-        conflicts: 'proceed',
-        slices: 'auto',
-        ignore_unavailable: true,
-      });
-      return resp.updated ?? 0;
-    } catch (e) {
-      logger.error(`[LeadGeneration] Error bulk-updating leads: ${e}`);
-      return 0;
-    }
+    const resp = await esClient.updateByQuery({
+      index: allIndices,
+      query: { terms: { id: [...ids] } },
+      script: {
+        source: `ctx._source['status'] = params.status`,
+        lang: 'painless',
+        params: { status: updates.status },
+      },
+      refresh: true,
+      conflicts: 'proceed',
+      slices: 'auto',
+      ignore_unavailable: true,
+    });
+    return resp.updated ?? 0;
   };
 
   // -----------------------------------------------------------------------

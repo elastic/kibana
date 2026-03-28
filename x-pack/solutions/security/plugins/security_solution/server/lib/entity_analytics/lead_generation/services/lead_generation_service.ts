@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityStoreDataClient } from '../../entity_store/entity_store_data_client';
 import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
@@ -67,7 +66,7 @@ export const createLeadGenerationService = ({
   entityStoreDataClient,
   riskScoreDataClient,
 }: LeadGenerationServiceDeps) => ({
-  async generate(mode: LeadGenerationMode): Promise<GenerateResult> {
+  async generate(mode: LeadGenerationMode, executionId: string): Promise<GenerateResult> {
     const routeStart = Date.now();
 
     const fetchStart = Date.now();
@@ -103,7 +102,6 @@ export const createLeadGenerationService = ({
       `[LeadGeneration] Engine pipeline: ${Date.now() - generateStart}ms (${leads.length} leads)`
     );
 
-    const executionId = uuidv4();
     const formattedLeads = leads.map((lead) => formatLeadForResponse(lead, executionId));
 
     const persistStart = Date.now();

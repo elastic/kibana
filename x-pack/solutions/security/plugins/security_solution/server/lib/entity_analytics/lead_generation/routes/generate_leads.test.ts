@@ -215,7 +215,23 @@ describe('lead generation helpers', () => {
   });
 
   describe('entityRecordToLeadEntity', () => {
-    it('prefers entity.type and uses entity.name', () => {
+    it('prefers EngineMetadata.Type over entity.type', () => {
+      const record = {
+        entity: {
+          id: 'euid-1',
+          name: 'alice',
+          type: 'user',
+          EngineMetadata: { Type: 'host' },
+        },
+      } as never;
+      const result = entityRecordToLeadEntity(record);
+
+      expect(result.type).toBe('host');
+      expect(result.name).toBe('alice');
+      expect(result.record).toBe(record);
+    });
+
+    it('falls back to entity.type when EngineMetadata.Type is absent', () => {
       const record = {
         entity: {
           id: 'euid-1',
@@ -227,7 +243,6 @@ describe('lead generation helpers', () => {
 
       expect(result.type).toBe('user');
       expect(result.name).toBe('alice');
-      expect(result.record).toBe(record);
     });
 
     it('falls back to entity.id for name when entity.name is missing', () => {
