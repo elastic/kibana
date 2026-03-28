@@ -195,6 +195,8 @@ export class RepoSourceClassifier {
           return 'static';
         case 'shared-common':
           return 'common package';
+        case 'tooling':
+          return 'tooling';
         case 'core':
         case 'plugin':
           // classification in plugins is more complicated, fall through to remaining logic
