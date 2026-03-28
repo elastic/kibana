@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { Dimension, ParsedMetricItem } from '../../../types';
+import type { Dimension, MetricUnit, ParsedMetricItem } from '../../../types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
@@ -30,7 +30,7 @@ interface UseChartLayersParams {
  * Resolves the unit for a metric by normalizing and selecting the best option.
  * Normalizes raw units (e.g., 'byte' -> 'bytes') and handles multiple units.
  */
-const resolveMetricUnit = (metricName: string, units: (string | null | undefined)[]): string | undefined => {
+const resolveMetricUnit = (metricName: string, units: (string | null | undefined)[]): MetricUnit | undefined => {
   // Filter out null/undefined values and normalize each unit
   const normalizedUnits = units
     .filter((u) => u != null)
