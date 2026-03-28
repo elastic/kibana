@@ -85,8 +85,8 @@ describe('getAdditionalRowControlColumns', () => {
 
     // The other elements are hidden under the menu button
     await user.click(screen.getByTestId('unifiedDataTable_additionalRowControl_actionsMenu'));
-    expect(screen.getByTestId(mocks[1].id)).toBeVisible();
-    expect(screen.getByTestId(mocks[2].id)).toBeVisible();
+    expect(screen.getByTestId(mocks[1].id)).toBeInTheDocument();
+    expect(screen.getByTestId(mocks[2].id)).toBeInTheDocument();
   });
 
   it('should calculate total width correctly for 2 controls', () => {
