@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
+import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { LeadEntity } from './types';
 
 const ENTITY_PAGE_SIZE = 1000;

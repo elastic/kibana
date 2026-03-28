@@ -267,7 +267,7 @@ describe('lead generation helpers', () => {
 
   describe('fetchAllLeadEntities', () => {
     const makeEntity = (name: string) =>
-      ({ entity: { name, type: 'user', id: `euid-${name}` } }) as never;
+      ({ entity: { name, type: 'user', id: `euid-${name}` } } as never);
 
     const createMockCRUDClient = (
       pages: Array<{
@@ -294,9 +294,7 @@ describe('lead generation helpers', () => {
     });
 
     it('fetches a single page of entities', async () => {
-      const client = createMockCRUDClient([
-        { entities: [makeEntity('alice'), makeEntity('bob')] },
-      ]);
+      const client = createMockCRUDClient([{ entities: [makeEntity('alice'), makeEntity('bob')] }]);
       const result = await fetchAllLeadEntities(client);
 
       expect(result).toHaveLength(2);
@@ -326,9 +324,7 @@ describe('lead generation helpers', () => {
     });
 
     it('converts entities to LeadEntity format', async () => {
-      const client = createMockCRUDClient([
-        { entities: [makeEntity('alice')] },
-      ]);
+      const client = createMockCRUDClient([{ entities: [makeEntity('alice')] }]);
       const result = await fetchAllLeadEntities(client);
 
       expect(result[0]).toEqual({
