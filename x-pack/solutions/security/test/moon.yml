@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/rison'
   - '@kbn/core-chrome-browser'
   - '@kbn/management-settings-ids'
+  - '@kbn/kbn-client'
 tags:
   - test-helper
   - package

@@ -30,7 +30,7 @@ dependsOn:
   - '@kbn/apm-config-loader'
   - '@kbn/repo-info'
   - '@kbn/std'
-  - '@kbn/test'
+  - '@kbn/kbn-client'
   - '@kbn/inference-prompt-utils'
 tags:
   - test-helper

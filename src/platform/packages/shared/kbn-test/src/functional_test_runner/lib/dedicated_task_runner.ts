@@ -12,7 +12,7 @@ import Url from 'url';
 import type { ToolingLog } from '@kbn/tooling-log';
 import Supertest from 'supertest';
 
-import { KbnClient } from '../../kbn_client';
+import { KbnClient } from '@kbn/kbn-client';
 import type { Config } from './config';
 import { getKibanaCliArg } from '../../functional_tests/lib/kibana_cli_args';
 
