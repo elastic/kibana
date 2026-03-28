@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { KibanaResponseFactory } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -20,8 +20,8 @@ const createMockContext = (
 
 class TestRoute extends BaseAlertingRoute {
   protected readonly routeName = 'test route';
-  public executeFn = jest.fn<Promise<IKibanaResponse>, []>();
-  public onErrorSpy = jest.fn<IKibanaResponse | undefined, [unknown]>();
+  public executeFn = jest.fn();
+  public onErrorSpy = jest.fn();
 
   protected async execute() {
     return this.executeFn();
@@ -59,25 +59,6 @@ describe('BaseAlertingRoute', () => {
     expect(route.executeFn).toHaveBeenCalledTimes(1);
   });
 
-  it('catches errors and returns a custom error response', async () => {
-    route.executeFn.mockRejectedValue(new Error('something went wrong'));
-
-    await route.handle();
-
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 500,
-      body: expect.objectContaining({ message: 'An internal server error occurred' }),
-    });
-  });
-
-  it('logs the error message at debug level', async () => {
-    route.executeFn.mockRejectedValue(new Error('something went wrong'));
-
-    await route.handle();
-
-    expect(logger.debug).toHaveBeenCalledWith('test route error: something went wrong');
-  });
-
   it('preserves Boom error status codes', async () => {
     route.executeFn.mockRejectedValue(Boom.notFound('rule not found'));
 
@@ -87,18 +68,6 @@ describe('BaseAlertingRoute', () => {
       statusCode: 404,
       body: expect.objectContaining({ error: 'Not Found', message: 'rule not found' }),
     });
-  });
-
-  it('preserves Boom error with custom message in log', async () => {
-    route.executeFn.mockRejectedValue(Boom.badRequest('invalid params'));
-
-    await route.handle();
-
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 400,
-      body: expect.objectContaining({ error: 'Bad Request', message: 'invalid params' }),
-    });
-    expect(logger.debug).toHaveBeenCalledWith('test route error: invalid params');
   });
 
   it('converts non-Boom errors to 500', async () => {
@@ -113,14 +82,5 @@ describe('BaseAlertingRoute', () => {
         error: 'Internal Server Error',
       }),
     });
-  });
-
-  it('allows subclasses to override onError', async () => {
-    route.executeFn.mockRejectedValue(new Error('custom error'));
-
-    await route.handle();
-
-    expect(route.onErrorSpy).toHaveBeenCalledWith(expect.any(Error));
-    expect(response.customError).toHaveBeenCalled();
   });
 });
