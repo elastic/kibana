@@ -80,6 +80,7 @@ dependsOn:
   - '@kbn/core-security-server-mocks'
   - '@kbn/kql'
   - '@kbn/scout'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - plugin
   - prod
