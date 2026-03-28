@@ -83,7 +83,8 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
         ${logicalCSS('right', 'var(--euiPushFlyoutOffsetInlineEnd, 0px)')}
         background-color: ${euiTheme.colors.backgroundBasePlain};
 
-        .embPanel {
+        .embPanel,
+        .embPanel__hoverActions {
           z-index: auto !important;
         }
       `,
