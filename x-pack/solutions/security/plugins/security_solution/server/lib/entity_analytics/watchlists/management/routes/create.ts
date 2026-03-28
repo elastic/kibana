@@ -15,6 +15,7 @@ import { WATCHLISTS_URL } from '../../../../../../common/entity_analytics/watchl
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../watchlist_config';
+import { WatchlistEntitySourceClient } from '../../entity_sources/infra';
 import { getRequestSavedObjectClient } from '../../shared/utils';
 
 export const createWatchlistRoute = (
@@ -46,15 +47,46 @@ export const createWatchlistRoute = (
           try {
             const secSol = await context.securitySolution;
             const core = await context.core;
+            const namespace = secSol.getSpaceId();
+            const soClient = getRequestSavedObjectClient(core);
 
             const watchlistClient = new WatchlistConfigClient({
               logger,
-              namespace: secSol.getSpaceId(),
-              soClient: getRequestSavedObjectClient(core),
+              namespace,
+              soClient,
               esClient: core.elasticsearch.client.asCurrentUser,
             });
-            const body = await watchlistClient.create(request.body);
-            return response.ok({ body });
+
+            const { entitySource: entitySourceInput, ...watchlistInput } = request.body;
+
+            // Step 1: Create the watchlist
+            const watchlist = await watchlistClient.create(watchlistInput);
+
+            // Step 2: If an entity source was provided, create and link it (with rollback)
+            if (entitySourceInput) {
+              if (!watchlist.id) {
+                throw new Error('Watchlist creation succeeded but no ID was returned');
+              }
+
+              const sourceClient = new WatchlistEntitySourceClient({
+                soClient,
+                namespace,
+              });
+
+              try {
+                const entitySource = await sourceClient.create(entitySourceInput);
+                await watchlistClient.addEntitySourceReference(watchlist.id, entitySource.id);
+                return response.ok({ body: { ...watchlist, entitySource } });
+              } catch (e) {
+                logger.error(
+                  `Entity source creation failed, rolling back watchlist ${watchlist.id}`
+                );
+                await watchlistClient.delete(watchlist.id);
+                throw e;
+              }
+            }
+
+            return response.ok({ body: watchlist });
           } catch (e) {
             const error = transformError(e);
             logger.error(`Failed to create watchlist: ${error.message}`);
