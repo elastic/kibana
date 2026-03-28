@@ -197,6 +197,7 @@ export interface TabState extends TabItem {
     docViewer?: Partial<DocViewerRestorableState>;
   };
   expandedDoc: DataTableRecord | undefined;
+  expandedDocOwner: string | undefined;
   renderDocViewMeta: RenderDocumentViewMeta | undefined;
   initialDocViewerTabId?: string;
 }

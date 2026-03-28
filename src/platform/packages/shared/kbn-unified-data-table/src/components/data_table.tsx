@@ -345,7 +345,7 @@ interface InternalUnifiedDataTableProps {
   renderDocumentView?: RenderDocumentViewCallback | 'external';
   /**
    * Callback to set associated metadata when rendering the document view,
-   * only used when {@link renderDocumentView} is set to `manual`
+   * only used when {@link renderDocumentView} is set to `external`
    */
   setRenderDocumentViewMeta?: (meta: RenderDocumentViewMeta | undefined) => void;
   /**

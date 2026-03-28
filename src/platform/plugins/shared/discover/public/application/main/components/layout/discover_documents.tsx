@@ -78,6 +78,7 @@ import type {
 } from '../../../../context_awareness';
 import { useAdditionalCellActions, useProfileAccessor } from '../../../../context_awareness';
 import {
+  DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -147,6 +148,7 @@ function DiscoverDocumentsComponent({
     ];
   });
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
+  const expandedDocOwner = useCurrentTabSelector((state) => state.expandedDocOwner);
   const renderDocumentViewMeta = useCurrentTabSelector((state) => state.renderDocViewMeta);
   const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
   const isEsqlMode = useIsEsqlMode();
@@ -213,26 +215,33 @@ function DiscoverDocumentsComponent({
 
   const docViewerRef = useRef<DocViewerApi>(null);
   const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
-  const setExpandedDoc = useCallback(
-    (
-      doc: DataTableRecord | undefined,
-      options?: {
-        initialTabId?: string;
-        initialTabState?: object;
-      }
-    ) => {
-      dispatch(
-        setExpandedDocAction({
-          expandedDoc: doc,
-          initialDocViewerTabId: options?.initialTabId,
-          initialDocViewerTabState: options?.initialTabState,
-        })
-      );
-      if (options?.initialTabId) {
-        docViewerRef.current?.setSelectedTabId(options.initialTabId);
-      }
-    },
+  const getSetExpandedDocForOwner = useCallback(
+    (ownerId: string): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
+      (
+        doc: DataTableRecord | undefined,
+        options?: {
+          initialTabId?: string;
+          initialTabState?: object;
+        }
+      ) => {
+        dispatch(
+          setExpandedDocAction({
+            expandedDoc: doc,
+            expandedDocOwner: doc ? ownerId : undefined,
+            initialDocViewerTabId: options?.initialTabId,
+            initialDocViewerTabState: options?.initialTabState,
+          })
+        );
+        if (options?.initialTabId) {
+          docViewerRef.current?.setSelectedTabId(options.initialTabId);
+        }
+      },
     [dispatch, setExpandedDocAction]
+  );
+
+  const setExpandedDoc = useMemo(
+    () => getSetExpandedDocForOwner(DEFAULT_EXPANDED_DOC_OWNER),
+    [getSetExpandedDocForOwner]
   );
 
   const setRenderDocViewMetaAction = useCurrentTabAction(internalStateActions.setRenderDocViewMeta);
@@ -243,6 +252,23 @@ function DiscoverDocumentsComponent({
       dispatch(setRenderDocViewMetaAction({ renderDocViewMeta: meta }));
     },
     [dispatch, setRenderDocViewMetaAction]
+  );
+
+  const getSetRenderDocumentViewMetaForOwner = useCallback(
+    (ownerId: string): UnifiedDataTableProps['setRenderDocumentViewMeta'] | undefined => {
+      return expandedDocOwner === ownerId ? setRenderDocumentViewMeta : undefined;
+    },
+    [expandedDocOwner, setRenderDocumentViewMeta]
+  );
+
+  const setRenderDocumentViewMetaForMainGrid = useMemo(
+    () => getSetRenderDocumentViewMetaForOwner(DEFAULT_EXPANDED_DOC_OWNER),
+    [getSetRenderDocumentViewMetaForOwner]
+  );
+
+  const setExpandedDocForCurrentOwner = useMemo(
+    () => getSetExpandedDocForOwner(expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER),
+    [expandedDocOwner, getSetExpandedDocForOwner]
   );
 
   const latestGrid = useLatest(grid);
@@ -441,10 +467,12 @@ function DiscoverDocumentsComponent({
   );
 
   const [expandedDoc$] = useState(() => new BehaviorSubject(expandedDoc));
+  const [expandedDocOwner$] = useState(() => new BehaviorSubject(expandedDocOwner));
 
   useEffect(() => {
     expandedDoc$.next(expandedDoc);
-  }, [expandedDoc, expandedDoc$]);
+    expandedDocOwner$.next(expandedDocOwner);
+  }, [expandedDoc, expandedDoc$, expandedDocOwner, expandedDocOwner$]);
 
   const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
     (runtimeState) => runtimeState.cascadedDocumentsFetcher$
@@ -473,6 +501,9 @@ function DiscoverDocumentsComponent({
       timeRange: requestParams.timeRangeAbsolute,
       viewModeToggle,
       expandedDoc$,
+      expandedDocOwner$,
+      getSetExpandedDocForOwner,
+      getSetRenderDocumentViewMetaForOwner,
       cascadeGroupingChangeHandler: (newSelectedCascadeGroups) => {
         dispatch(setSelectedCascadeGroups({ selectedCascadeGroups: newSelectedCascadeGroups }));
       },
@@ -485,6 +516,9 @@ function DiscoverDocumentsComponent({
     dispatch,
     esqlVariables,
     expandedDoc$,
+    expandedDocOwner$,
+    getSetExpandedDocForOwner,
+    getSetRenderDocumentViewMetaForOwner,
     onUpdateESQLQuery,
     query,
     requestParams.timeRangeAbsolute,
@@ -524,7 +558,7 @@ function DiscoverDocumentsComponent({
             cascadedDocumentsContext={cascadedDocumentsContext}
             columns={currentColumns}
             columnsMeta={columnsMeta}
-            expandedDoc={expandedDoc}
+            expandedDoc={expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER ? expandedDoc : undefined}
             dataView={dataView}
             loadingState={
               isDataLoading
@@ -562,7 +596,7 @@ function DiscoverDocumentsComponent({
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
             renderDocumentView="external"
-            setRenderDocumentViewMeta={setRenderDocumentViewMeta}
+            setRenderDocumentViewMeta={setRenderDocumentViewMetaForMainGrid}
             renderCustomToolbar={renderCustomToolbarWithElements}
             services={services}
             totalHits={totalHits}
@@ -596,7 +630,7 @@ function DiscoverDocumentsComponent({
           onRemoveColumn={onRemoveColumnWithTracking}
           onAddColumn={onAddColumnWithTracking}
           onClose={() => setExpandedDoc(undefined)}
-          setExpandedDoc={setExpandedDoc}
+          setExpandedDoc={setExpandedDocForCurrentOwner}
           docViewerRef={docViewerRef}
           docViewerExtensionActions={docViewerExtensionActions}
           onUpdateSelectedTabId={onUpdateSelectedTabId}

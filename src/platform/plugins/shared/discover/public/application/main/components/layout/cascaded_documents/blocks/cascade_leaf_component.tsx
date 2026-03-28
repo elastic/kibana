@@ -35,8 +35,6 @@ interface ESQLDataCascadeLeafCellProps
       | 'showKeyboardShortcuts'
       | 'externalCustomRenderers'
       | 'onUpdateDataGridDensity'
-      | 'setExpandedDoc'
-      | 'setRenderDocumentViewMeta'
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
@@ -200,8 +198,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     dataView,
     showKeyboardShortcuts,
     externalCustomRenderers,
-    setExpandedDoc,
-    setRenderDocumentViewMeta,
     getScrollElement,
     getScrollMargin,
     getScrollOffset,
@@ -209,8 +205,22 @@ export const ESQLDataCascadeLeafCell = React.memo(
     onUpdateDataGridDensity,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
-    const { expandedDoc$ } = useCascadedDocumentsContext();
+    const {
+      expandedDoc$,
+      expandedDocOwner$,
+      getSetExpandedDocForOwner,
+      getSetRenderDocumentViewMetaForOwner,
+    } = useCascadedDocumentsContext();
     const expandedDoc = useObservable(expandedDoc$, expandedDoc$.getValue());
+    const expandedDocOwner = useObservable(expandedDocOwner$, expandedDocOwner$.getValue());
+    const setExpandedDoc = useMemo(
+      () => getSetExpandedDocForOwner(cellId),
+      [cellId, getSetExpandedDocForOwner]
+    );
+    const setRenderDocumentViewMeta = useMemo(
+      () => getSetRenderDocumentViewMetaForOwner(cellId),
+      [cellId, getSetRenderDocumentViewMetaForOwner]
+    );
 
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
@@ -303,7 +313,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         columns={selectedColumns}
         onSetColumns={setSelectedColumns}
         renderCustomToolbar={renderCustomToolbarWithElements}
-        expandedDoc={expandedDoc}
+        expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}
         setExpandedDoc={setExpandedDoc}
         dataGridDensityState={cascadeDataGridDensityState}
         onUpdateDataGridDensity={setCascadeDataGridDensityState}

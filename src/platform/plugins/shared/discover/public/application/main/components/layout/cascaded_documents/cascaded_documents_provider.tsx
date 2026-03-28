@@ -13,6 +13,7 @@ import type { ReactElement } from 'react';
 import { createContext, useContext } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type {
   CascadedDocumentsState,
   DiscoverAppState,
@@ -29,6 +30,13 @@ export interface CascadedDocumentsContext
   timeRange: TimeRange | undefined;
   viewModeToggle: ReactElement | undefined;
   expandedDoc$: BehaviorSubject<DataTableRecord | undefined>;
+  expandedDocOwner$: BehaviorSubject<string | undefined>;
+  getSetExpandedDocForOwner: (
+    ownerId: string
+  ) => NonNullable<UnifiedDataTableProps['setExpandedDoc']>;
+  getSetRenderDocumentViewMetaForOwner: (
+    ownerId: string
+  ) => UnifiedDataTableProps['setRenderDocumentViewMeta'] | undefined;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;
   openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;

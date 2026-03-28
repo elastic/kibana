@@ -53,6 +53,7 @@ import {
   initializeSingleTab,
   type RawAppStatePayload,
 } from './actions';
+import { DEFAULT_EXPANDED_DOC_OWNER } from './constants';
 import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
@@ -218,22 +219,28 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
+        expandedDocOwner?: string;
         initialDocViewerTabId?: string;
         initialDocViewerTabState?: object;
       }>
     ) => {
       withTab(state, action.payload, (tab) => {
+        const nextExpandedDocOwner = action.payload.expandedDoc
+          ? action.payload.expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER
+          : undefined;
+
         if (tab.expandedDoc?.id !== action.payload.expandedDoc?.id) {
           // Reset the initialDocViewerTabId and docViewer when changing expandedDoc to a different document
           tab.initialDocViewerTabId = undefined;
           tab.uiState.docViewer = {};
         }
 
-        if (!action.payload.expandedDoc) {
+        if (!action.payload.expandedDoc || tab.expandedDocOwner !== nextExpandedDocOwner) {
           tab.renderDocViewMeta = undefined;
         }
 
         tab.expandedDoc = action.payload.expandedDoc;
+        tab.expandedDocOwner = nextExpandedDocOwner;
         tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
 
         if (action.payload.initialDocViewerTabId && action.payload.initialDocViewerTabState) {
