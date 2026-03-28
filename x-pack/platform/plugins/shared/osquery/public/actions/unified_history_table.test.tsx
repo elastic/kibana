@@ -85,17 +85,20 @@ const mockHistory = ({
   nextPage,
   isLoading = false,
   isFetching = false,
+  isPlaceholderData = false,
 }: {
   data?: UnifiedHistoryResponse['data'];
   hasMore?: boolean;
   nextPage?: string;
   isLoading?: boolean;
   isFetching?: boolean;
+  isPlaceholderData?: boolean;
 }) => {
   useUnifiedHistoryMock.mockReturnValue({
     data: { data, hasMore, nextPage },
     isLoading,
     isFetching,
+    isPlaceholderData,
     refetch: jest.fn(),
   } as never);
 };
@@ -480,6 +483,26 @@ describe('UnifiedHistoryTable', () => {
       expect(useUnifiedHistoryMock).toHaveBeenCalledWith(
         expect.objectContaining({ sortDirection: 'desc' })
       );
+    });
+  });
+
+  describe('pagination', () => {
+    it('does not advertise extra pages while showing placeholder (stale) data', () => {
+      const rows = Array.from({ length: 20 }, () => createMockLiveRow());
+      mockHistory({
+        data: rows,
+        hasMore: true,
+        nextPage: 'cursor-abc',
+        isPlaceholderData: true,
+      });
+
+      const { container } = renderWithProviders(<UnifiedHistoryTable />);
+
+      // When data is stale (placeholder), the forward arrow should be disabled
+      // even though the stale response has hasMore: true.
+      const nextButton = container.querySelector('[data-test-subj="pagination-button-next"]');
+      expect(nextButton).toBeTruthy();
+      expect(nextButton).toBeDisabled();
     });
   });
 });

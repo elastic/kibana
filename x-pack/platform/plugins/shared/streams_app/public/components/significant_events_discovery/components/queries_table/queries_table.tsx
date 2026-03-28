@@ -226,7 +226,7 @@ export function QueriesTable() {
           return (
             <EuiButtonIcon
               data-test-subj="queriesDiscoveryDetailsButton"
-              iconType={isSelected ? 'minimize' : 'expand'}
+              iconType={isSelected ? 'minimize' : 'maximize'}
               aria-label={DETAILS_BUTTON_ARIA_LABEL}
               onClick={() => handleSelectQuery(item)}
             />

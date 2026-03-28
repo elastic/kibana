@@ -119,7 +119,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
             data-test-subj="streamsAppFieldSummaryOpenInParentButton"
             size="s"
             color="primary"
-            iconType="popout"
+            iconType="external"
             href={router.link('/{key}/management/{tab}', {
               path: {
                 key: field.parent,
