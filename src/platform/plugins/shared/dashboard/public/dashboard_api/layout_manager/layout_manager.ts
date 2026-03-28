@@ -34,10 +34,10 @@ import { i18n } from '@kbn/i18n';
 import type { SerializedTitles, PanelPackage } from '@kbn/presentation-publishing';
 import {
   childrenUnsavedChanges$,
+  apiCanApplySerializedState,
   apiHasLibraryTransforms,
   apiHasSerializableState,
   apiPublishesTitle,
-  apiPublishesUnsavedChanges,
   getTitle,
   logStateDiff,
   shouldLogStateDiff,
@@ -159,7 +159,10 @@ export function initializeLayoutManager(
     for (const uuid of Object.keys(currentChildren)) {
       if (layoutToApply.panels[uuid] || layoutToApply.pinnedPanels[uuid]) {
         const child = currentChildren[uuid];
-        if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+        const nextChildState = childStateToApply[uuid];
+        if (apiCanApplySerializedState(child)) {
+          child.applySerializedState(nextChildState);
+        }
       } else {
         // if reset resulted in panel removal, we need to update the list of children
         delete currentChildren[uuid];
