@@ -82,6 +82,10 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
         inset: 0;
         ${logicalCSS('right', 'var(--euiPushFlyoutOffsetInlineEnd, 0px)')}
         background-color: ${euiTheme.colors.backgroundBasePlain};
+
+        .embPanel {
+          z-index: auto !important;
+        }
       `,
       [METRICS_GRID_RESTRICT_BODY_CLASS]: css`
         overflow: hidden;
