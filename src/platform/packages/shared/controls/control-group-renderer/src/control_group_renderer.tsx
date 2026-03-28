@@ -22,7 +22,7 @@ import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  apiPublishesUnsavedChanges,
+  apiCanApplySerializedState,
   useSearchApi,
   type EmbeddableApiContext,
   type ViewMode,
@@ -181,8 +181,8 @@ export const ControlGroupRenderer = ({
           };
         });
         lastSavedState$Ref.current.next(newState);
-        asyncForEach(Object.values(parentApi.children$.getValue()), async (child) => {
-          if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+        asyncForEach(Object.entries(parentApi.children$.getValue()), async ([id, child]) => {
+          if (apiCanApplySerializedState(child)) child.applySerializedState(newState[id]);
         });
       },
     };

@@ -27,6 +27,10 @@ export {
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
 export {
+  apiCanApplySerializedState,
+  type CanApplySerializedState,
+} from './interfaces/can_apply_serialized_state';
+export {
   apiCanLockHoverActions,
   type CanLockHoverActions,
 } from './interfaces/can_lock_hover_actions';
@@ -102,6 +106,7 @@ export {
   type HasLibraryTransforms,
 } from './interfaces/has_library_transforms';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
+export { type HasEmbeddableStateManager } from './interfaces/has_embeddable_state_manager';
 export {
   apiHasSerializableState,
   type HasSerializableState,
