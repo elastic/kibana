@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/axe-config'
   - '@kbn/peggy'
   - '@kbn/test-docker-servers'
+  - '@kbn/test'
 tags:
   - test-helper
   - package
