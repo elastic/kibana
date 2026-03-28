@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -36,8 +35,7 @@ import { AlertsByStatus } from '../../../../overview/components/detection_respon
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import type { HostItem } from '../../../../../common/search_strategy';
-import { LastEventIndexKey } from '../../../../../common/search_strategy';
+import { type HostItem, LastEventIndexKey } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
@@ -82,16 +80,10 @@ import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
 
+const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
 
-const HostDetailsComponent: React.FC<HostDetailsProps> = ({
-  detailName: detailNameProp,
-  entityIdentifiers,
-  hostDetailsPagePath,
-}) => {
-  const { detailName: detailNameFromParams } = useParams<{ detailName?: string }>();
-  const displayName =
-    (detailNameFromParams ? decodeURIComponent(detailNameFromParams) : null) ?? detailNameProp ?? '';
+const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
   const dispatch = useDispatch();
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -111,8 +103,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
   } = useKibana();
 
   const hostDetailsPageFilters: Filter[] = useMemo(
-    () => getHostDetailsPageFilters(entityIdentifiers),
-    [entityIdentifiers]
+    () => getHostDetailsPageFilters(detailName),
+    [detailName]
   );
 
   const isEnterprisePlus = useLicense().isEnterprise();
@@ -152,7 +144,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
-    entityIdentifiers,
+    hostName: detailName,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
@@ -194,10 +186,18 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
 
   useEffect(() => {
     dispatch(setHostDetailsTablesActivePageToZero());
-  }, [dispatch, displayName]);
+  }, [dispatch, detailName]);
 
   const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
   const canReadAlerts = hasAlertsRead && hasIndexRead;
+
+  const entityFilter = useMemo(
+    () => ({
+      field: ES_HOST_FIELD,
+      value: detailName,
+    }),
+    [detailName]
+  );
 
   const additionalFilters = useMemo(
     () => (rawFilteredQuery ? [rawFilteredQuery] : []),
@@ -215,7 +215,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
   const refetchRiskScore = useRefetchOverviewPageRiskScore(HOST_OVERVIEW_RISK_SCORE_QUERY_ID);
-  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(EntityType.host, displayName, {
+  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(EntityType.host, detailName, {
     onSuccess: refetchRiskScore,
   });
 
@@ -252,12 +252,12 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                 border
                 subtitle={
                   <LastEventTime
-                    entityIdentifiers={entityIdentifiers}
                     indexKey={LastEventIndexKey.hostDetails}
+                    hostName={detailName}
                     indexNames={selectedPatterns}
                   />
                 }
-                title={displayName}
+                title={detailName}
                 rightSideItems={[
                   hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id && (
                     <ResponderActionButton
@@ -295,7 +295,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                     setQuery={setQuery}
                     refetch={refetch}
                     inspect={inspect}
-                    entityIdentifiers={entityIdentifiers}
+                    hostName={detailName}
                     indexNames={selectedPatterns}
                     jobNameById={jobNameById}
                     scopeId={PageScope.explore}
@@ -311,7 +311,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                     <EuiFlexItem>
                       <AlertsByStatus
                         signalIndexName={signalIndexName}
-                        entityIdentifiers={entityIdentifiers}
+                        entityFilter={entityFilter}
                         additionalFilters={additionalFilters}
                       />
                     </EuiFlexItem>
@@ -330,9 +330,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
               <TabNavigation
                 navTabs={navTabsHostDetails({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  hostName: displayName,
+                  hostName: detailName,
                   isEnterprise: isEnterprisePlus,
-                  entityIdentifiers,
                 })}
               />
 
@@ -346,12 +345,13 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
               hostDetailsFilter={hostDetailsPageFilters}
               to={to}
               from={from}
-              detailName={displayName}
-              entityIdentifiers={entityIdentifiers}
+              detailName={detailName}
               type={HostsType.details}
               setQuery={setQuery}
               filterQuery={stringifiedAdditionalFilters}
               hostDetailsPagePath={hostDetailsPagePath}
+              identityFields={{}}
+              entityId={''}
             />
           </SecuritySolutionPageWrapper>
         </>

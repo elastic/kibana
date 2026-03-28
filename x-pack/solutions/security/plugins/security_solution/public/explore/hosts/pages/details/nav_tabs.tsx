@@ -16,15 +16,15 @@ export const navTabsHostDetails = ({
   hasMlUserPermissions,
   hostName,
   isEnterprise,
-  entityIdentifiers,
+  identityFields,
 }: {
   hostName: string;
   hasMlUserPermissions: boolean;
   isEnterprise?: boolean;
-  entityIdentifiers?: Record<string, string>;
+  identityFields?: Record<string, string>;
 }): HostDetailsNavTab => {
   const getTabHref = (tabName: HostsTableType) =>
-    `${HOSTS_PATH}${getTabsOnHostDetailsUrl(hostName, tabName, undefined, entityIdentifiers)}`;
+    `${HOSTS_PATH}${getTabsOnHostDetailsUrl(hostName, tabName, undefined, identityFields)}`;
   const hiddenTabs = [];
 
   const hostDetailsNavTabs = {

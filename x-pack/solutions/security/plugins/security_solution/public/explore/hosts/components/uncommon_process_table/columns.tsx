@@ -10,34 +10,19 @@ import type { HostEcs } from '@kbn/securitysolution-ecs';
 import type { Columns } from '../../../components/paginated_table';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/empty_value';
-import {
-  getRowItemsWithActions,
-  getRowItemsWithActionsForEntities,
-  type RowItemWithEntityIdentifiers,
-} from '../../../../common/components/tables/helpers';
-import type {
-  HostsUncommonProcessesEdges,
-  HostsUncommonProcessHostItem,
-} from '../../../../../common/search_strategy';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
+import type { HostsUncommonProcessesEdges } from '../../../../../common/search_strategy';
 import { HostsType } from '../../store/model';
 import * as i18n from './translations';
 
 export type UncommonProcessTableColumns = Array<Columns<HostsUncommonProcessesEdges>>;
 
-/** Extracts host display names (always host.name). */
 export const getHostNames = (hosts: HostEcs[]): string[] => {
   if (!hosts) return [];
   return hosts
     .filter((host) => host.name != null && host.name[0] != null)
     .map((host) => (host.name != null && host.name[0] != null ? host.name[0] : ''));
 };
-
-/** Display always uses host.name; entityIdentifiers used for link URL resolution */
-const toHostRowItems = (hosts: HostsUncommonProcessHostItem[]): RowItemWithEntityIdentifiers[] =>
-  (hosts ?? []).flatMap((host) => {
-    const name = host.name?.[0];
-    return name != null ? [{ value: name, entityIdentifiers: host.entityIdentifiers }] : [];
-  });
 
 export const getUncommonColumns = (): UncommonProcessTableColumns => [
   {
@@ -74,13 +59,11 @@ export const getUncommonColumns = (): UncommonProcessTableColumns => [
     mobileOptions: { show: true },
     width: '25%',
     render: ({ node }) =>
-      getRowItemsWithActionsForEntities({
-        items: toHostRowItems(node.hosts),
+      getRowItemsWithActions({
+        values: getHostNames(node.hosts),
         fieldName: 'host.name',
         idPrefix: `uncommon-process-table-${node._id}-processHost`,
-        render: (item) => (
-          <HostDetailsLink hostName={item.value} entityIdentifiers={item.entityIdentifiers} />
-        ),
+        render: (item) => <HostDetailsLink hostName={item} />,
       }),
   },
   {

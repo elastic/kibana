@@ -10,8 +10,7 @@ import { useEuiTheme } from '@elastic/eui';
 
 import type { StatItems } from '../../../../components/stat_items';
 import { getKpiHostAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_area';
-import { getKpiHostMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_metric';
-import { useSpaceId } from '../../../../../common/hooks/use_space_id';
+import { kpiHostMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_metric';
 import { KpiBaseComponent } from '../../../../components/kpi';
 import type { HostsKpiProps } from '../types';
 import * as i18n from './translations';
@@ -20,7 +19,6 @@ export const ID = 'hostsKpiHostsQuery';
 
 export const useGetHostsStatItems: () => Readonly<StatItems[]> = () => {
   const { euiTheme } = useEuiTheme();
-  const spaceId = useSpaceId();
   return useMemo(
     () => [
       {
@@ -30,15 +28,15 @@ export const useGetHostsStatItems: () => Readonly<StatItems[]> = () => {
             key: 'hosts',
             color: euiTheme.colors.vis.euiColorVis1,
             icon: 'storage',
-            lensAttributes: getKpiHostMetricLensAttributes(spaceId),
+            lensAttributes: kpiHostMetricLensAttributes,
           },
         ],
         enableAreaChart: true,
         description: i18n.HOSTS,
-        getAreaChartLensAttributes: getKpiHostAreaLensAttributes(spaceId),
+        getAreaChartLensAttributes: getKpiHostAreaLensAttributes,
       },
     ],
-    [euiTheme.colors.vis.euiColorVis1, spaceId]
+    [euiTheme.colors.vis.euiColorVis1]
   );
 };
 

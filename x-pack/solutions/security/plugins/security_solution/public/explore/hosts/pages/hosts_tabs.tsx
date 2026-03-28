@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -22,7 +22,6 @@ import {
   UncommonProcessQueryTabBody,
   SessionsTabBody,
 } from './navigation';
-import { hostEUIDExistsFilter } from '../../../common/components/visualization_actions/utils';
 
 export const HostsTabs = React.memo<HostsTabsProps>(
   ({ deleteQuery, filterQuery, from, indexNames, isInitializing, setQuery, to, type }) => {
@@ -36,8 +35,6 @@ export const HostsTabs = React.memo<HostsTabsProps>(
       startDate: from,
       type,
     };
-
-    const hostEUIDFilter = useMemo(() => hostEUIDExistsFilter(), []);
 
     return (
       <Routes>
@@ -55,7 +52,7 @@ export const HostsTabs = React.memo<HostsTabsProps>(
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody
-            additionalFilters={hostEUIDFilter}
+            additionalFilters={[]}
             tableId={TableId.hostsPageEvents}
             {...tabProps}
           />

@@ -70,7 +70,8 @@ export const HostsContainer = React.memo(() => (
         <HostDetails
           detailName={decodeURIComponent(detailName)}
           hostDetailsPagePath={hostDetailsPagePath}
-          entityIdentifiers={parseEntityIdentifiersFromParams(detailName, entityIdentifiersSegment)}
+          identityFields={parseEntityIdentifiersFromParams(detailName, entityIdentifiersSegment)}
+          entityId={''}
         />
       )}
     />
@@ -84,7 +85,8 @@ export const HostsContainer = React.memo(() => (
         <HostDetails
           detailName={decodeURIComponent(detailName)}
           hostDetailsPagePath={hostDetailsPagePath}
-          entityIdentifiers={parseEntityIdentifiersFromParams(detailName, undefined)}
+          identityFields={parseEntityIdentifiersFromParams(detailName, undefined)}
+          entityId={''}
         />
       )}
     />

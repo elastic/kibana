@@ -34,7 +34,8 @@ export interface HostsUncommonProcessesEdges {
 
 /** Host with entityIdentifiers for HostDetailsLink URL resolution */
 export type HostsUncommonProcessHostItem = HostEcs & {
-  entityIdentifiers?: Record<string, string>;
+  identityFields?: Record<string, string>;
+  entityId?: string;
 };
 
 export interface HostsUncommonProcessItem {
@@ -57,7 +58,7 @@ export interface HostsUncommonProcessHost {
   id: string[] | undefined;
   name: string[] | undefined;
   /** Entity identifiers for HostDetailsLink URL resolution (host.entity.id, host.id, host.name, host.hostname) */
-  entityIdentifiers?: Record<string, string>;
+  identityFields?: Record<string, string>;
 }
 
 export interface HostsUncommonProcessHit extends Hit {

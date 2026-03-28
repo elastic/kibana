@@ -29,8 +29,6 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
     to,
     type,
     detailName,
-    entityIdentifiers,
-    userDetailFilter,
   }) => {
     const tabProps = {
       deleteQuery,
@@ -41,7 +39,6 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
       setQuery,
       startDate: from,
       type,
-      entityIdentifiers,
     };
 
     return (
@@ -54,7 +51,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.events})`}>
           <EventsQueryTabBody
-            additionalFilters={userDetailFilter}
+            additionalFilters={[]}
             tableId={TableId.usersPageEvents}
             {...tabProps}
           />

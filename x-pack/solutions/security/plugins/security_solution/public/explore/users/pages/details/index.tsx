@@ -18,6 +18,7 @@ import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
@@ -56,7 +57,6 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
-import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import type { UserSummaryProps } from '../../../../overview/components/user_overview';
@@ -78,13 +78,12 @@ import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_sel
 import { PageLoader } from '../../../../common/components/page_loader';
 
 const QUERY_ID = 'UsersDetailsQueryId';
+const ES_USER_FIELD = 'user.name';
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
-  entityIdentifiers,
+  detailName,
   usersDetailsPagePath,
-  encodedEntityIdentifiersSegment,
 }) => {
-  const detailName = useMemo(() => entityIdentifiers['user.name'], [entityIdentifiers]);
   const dispatch = useDispatch();
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -106,8 +105,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   } = useKibana();
 
   const usersDetailsPageFilters: Filter[] = useMemo(
-    () => getUsersDetailsPageFilters(entityIdentifiers),
-    [entityIdentifiers]
+    () => getUsersDetailsPageFilters(detailName),
+    [detailName]
   );
 
   const {
@@ -171,7 +170,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     id: QUERY_ID,
     endDate: to,
     startDate: from,
-    entityIdentifiers,
+    userName: detailName,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
@@ -192,6 +191,14 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
       );
     },
     [dispatch]
+  );
+
+  const entityFilter = useMemo(
+    () => ({
+      field: ES_USER_FIELD,
+      value: detailName,
+    }),
+    [detailName]
   );
 
   const entity = useMemo(() => ({ type: EntityType.user, name: detailName }), [detailName]);
@@ -235,9 +242,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             <HeaderPage
               subtitle={
                 <LastEventTime
-                  entityIdentifiers={entityIdentifiers}
                   indexKey={LastEventIndexKey.userDetails}
                   indexNames={selectedPatterns}
+                  userName={detailName}
                 />
               }
               title={detailName}
@@ -254,14 +261,14 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             )}
 
             <AnomalyTableProvider
-              criteriaFields={getCriteriaFromUsersType(UsersType.details, entityIdentifiers)}
+              criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
               startDate={from}
               endDate={to}
               skip={isInitializing}
             >
               {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
                 <UserOverview
-                  entityIdentifiers={entityIdentifiers}
+                  userName={detailName}
                   id={QUERY_ID}
                   isInDetailsSidePanel={false}
                   data={userDetails}
@@ -286,13 +293,13 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   <EuiFlexItem>
                     <AlertsByStatus
                       signalIndexName={signalIndexName}
-                      entityIdentifiers={entityIdentifiers}
+                      entityFilter={entityFilter}
                       additionalFilters={additionalFilters}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
-                      entityIdentifiers={entityIdentifiers}
+                      entityFilter={entityFilter}
                       signalIndexName={signalIndexName}
                       additionalFilters={additionalFilters}
                     />
@@ -303,17 +310,12 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             )}
 
             <TabNavigation
-              navTabs={navTabsUsersDetails(
-                detailName,
-                hasMlUserPermissions(capabilities),
-                entityIdentifiers
-              )}
+              navTabs={navTabsUsersDetails(detailName, hasMlUserPermissions(capabilities))}
             />
             <EuiSpacer />
             <UsersDetailsTabs
               deleteQuery={deleteQuery}
               detailName={detailName}
-              entityIdentifiers={entityIdentifiers}
               filterQuery={stringifiedAdditionalFilters}
               from={from}
               indexNames={selectedPatterns}
@@ -330,14 +332,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
         <EmptyPrompt />
       )}
 
-      <SpyRoute
-        pageName={SecurityPageName.users}
-        state={
-          encodedEntityIdentifiersSegment
-            ? { entityIdentifiers: encodedEntityIdentifiersSegment }
-            : undefined
-        }
-      />
+      <SpyRoute pageName={SecurityPageName.users} />
     </>
   );
 };

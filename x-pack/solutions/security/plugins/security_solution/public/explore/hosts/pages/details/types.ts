@@ -15,13 +15,15 @@ import type { hostsModel } from '../../store';
 
 interface HostBodyComponentDispatchProps {
   detailName: string;
-  entityIdentifiers: Record<string, string>;
+  identityFields?: Record<string, string>;
+  entityId?: string;
   hostDetailsPagePath: string;
 }
 
 export interface HostDetailsProps {
   detailName: string;
-  entityIdentifiers: Record<string, string>;
+  identityFields: Record<string, string>;
+  entityId: string;
   hostDetailsPagePath: string;
 }
 
@@ -45,4 +47,6 @@ export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
     filterQuery?: string;
     dataViewSpec?: DataViewSpec;
     type: hostsModel.HostsType;
+    identityFields?: Record<string, string>;
+    entityId: string;
   };

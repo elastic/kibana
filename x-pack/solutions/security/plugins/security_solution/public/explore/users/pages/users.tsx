@@ -67,11 +67,7 @@ const StyledFullHeightContainer = styled.div`
   flex: 1 1 auto;
 `;
 
-const UsersComponent = ({
-  encodedEntityIdentifiersSegment,
-}: {
-  encodedEntityIdentifiersSegment?: string;
-}) => {
+const UsersComponent = () => {
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -94,7 +90,7 @@ const UsersComponent = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const { uiSettings } = useKibana().services;
 
-  const { tabName } = useParams<{ tabName: string; entityIdentifiers?: string }>();
+  const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
     if (tabName === UsersTableType.events) {
       return [...globalFilters, ...userNameExistsFilter];
@@ -183,10 +179,7 @@ const UsersComponent = ({
   );
 
   const capabilities = useMlCapabilities();
-  const navTabs = useMemo(
-    () => navTabsUsers(hasMlUserPermissions(capabilities), encodedEntityIdentifiersSegment),
-    [capabilities, encodedEntityIdentifiersSegment]
-  );
+  const navTabs = useMemo(() => navTabsUsers(hasMlUserPermissions(capabilities)), [capabilities]);
 
   if (newDataViewPickerEnabled && status === 'pristine') {
     return <PageLoader />;
@@ -208,11 +201,7 @@ const UsersComponent = ({
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <HeaderPage
               subtitle={
-                <LastEventTime
-                  entityIdentifiers={{}}
-                  indexKey={LastEventIndexKey.users}
-                  indexNames={selectedPatterns}
-                />
+                <LastEventTime indexKey={LastEventIndexKey.users} indexNames={selectedPatterns} />
               }
               border
               title={i18n.PAGE_TITLE}
@@ -242,14 +231,7 @@ const UsersComponent = ({
         <EmptyPrompt />
       )}
 
-      <SpyRoute
-        pageName={SecurityPageName.users}
-        state={
-          encodedEntityIdentifiersSegment
-            ? { entityIdentifiers: encodedEntityIdentifiersSegment }
-            : undefined
-        }
-      />
+      <SpyRoute pageName={SecurityPageName.users} />
     </>
   );
 };

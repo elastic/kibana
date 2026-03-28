@@ -16,8 +16,8 @@ import { FirstLastSeenQuery } from '../model/factory_query_type';
 
 export const firstLastSeenRequestOptionsSchema = requestBasicOptionsSchema.extend({
   order,
-  entityIdentifiers: z.record(z.string(), z.string()),
-  spaceId: z.string().optional(),
+  field: z.string(),
+  value: z.string(),
   factoryQueryType: z.literal(FirstLastSeenQuery),
 });
 

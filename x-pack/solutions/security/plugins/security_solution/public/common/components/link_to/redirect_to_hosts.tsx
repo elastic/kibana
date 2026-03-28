@@ -8,7 +8,6 @@
 import { HostsTableType } from '../../../explore/hosts/store/model';
 import { HOSTS_PATH } from '../../../../common/constants';
 import { appendSearch } from './helpers';
-import type { EntityIdentifiers } from './redirect_to_users';
 import { encodeEntityIdentifiersForUrl } from './redirect_to_users';
 
 export const getHostsUrl = (search?: string) => `${HOSTS_PATH}${appendSearch(search)}`;
@@ -21,24 +20,22 @@ const DEFAULT_HOST_TAB = HostsTableType.events;
 export const getHostDetailsUrl = (
   detailName: string,
   search?: string,
-  entityIdentifiers?: EntityIdentifiers
+  identityFields?: Record<string, string>,
+  entityId?: string
 ) => {
-  return getTabsOnHostDetailsUrl(
-    detailName,
-    DEFAULT_HOST_TAB,
-    search,
-    entityIdentifiers
-  );
+  return getTabsOnHostDetailsUrl(detailName, DEFAULT_HOST_TAB, search, identityFields, entityId);
 };
 
 export const getTabsOnHostDetailsUrl = (
   detailName: string,
   tabName: HostsTableType,
   search?: string,
-  entityIdentifiers?: EntityIdentifiers
+  identityFields?: Record<string, string>,
+  entityId?: string
 ) => {
   const base = `/name/${encodeURIComponent(detailName)}/${tabName}`;
   const segment =
-    entityIdentifiers !== undefined ? `/${encodeEntityIdentifiersForUrl(entityIdentifiers)}` : '';
-  return `${base}${segment}${appendSearch(search)}`;
+    identityFields !== undefined ? `/${encodeEntityIdentifiersForUrl(identityFields)}` : '';
+  const entityIdSegment = entityId !== undefined ? `/${entityId}` : '';
+  return `${base}${segment}${entityIdSegment}${appendSearch(search)}`;
 };

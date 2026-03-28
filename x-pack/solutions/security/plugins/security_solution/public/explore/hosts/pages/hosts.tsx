@@ -51,7 +51,6 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
-import { hostEUIDExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
@@ -90,9 +89,8 @@ const HostsComponent = () => {
   const { uiSettings } = useKibana().services;
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
-    const hostEUIDFilter = hostEUIDExistsFilter();
     if (tabName === HostsTableType.events) {
-      return [...globalFilters, ...hostEUIDFilter];
+      return [...globalFilters];
     }
 
     if (tabName === HostsTableType.risk) {
@@ -201,7 +199,7 @@ const HostsComponent = () => {
               <HeaderPage
                 subtitle={
                   <LastEventTime
-                    entityIdentifiers={{}}
+                    hostName={''}
                     indexKey={LastEventIndexKey.hosts}
                     indexNames={selectedPatterns}
                   />
