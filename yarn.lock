@@ -4711,6 +4711,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-episodes-ui@link:x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui":
+  version "0.0.0"
+  uid ""
+
+"@kbn/alerting-v2-plugin@link:x-pack/platform/plugins/shared/alerting_v2":
+  version "0.0.0"
+  uid ""
+
+"@kbn/alerting-v2-rule-form@link:x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form":
+  version "0.0.0"
+  uid ""
+
+"@kbn/alerting-v2-schemas@link:x-pack/platform/packages/shared/response-ops/alerting-v2-schemas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerts-as-data-utils@link:src/platform/packages/shared/kbn-alerts-as-data-utils":
   version "0.0.0"
   uid ""
@@ -4840,6 +4856,10 @@
   uid ""
 
 "@kbn/as-code-filters-transforms@link:src/platform/packages/shared/as-code/filters-transforms":
+  version "0.0.0"
+  uid ""
+
+"@kbn/as-code-shared-schemas@link:src/platform/packages/shared/as-code/shared-schemas":
   version "0.0.0"
   uid ""
 
@@ -6840,6 +6860,10 @@
   uid ""
 
 "@kbn/evals-suite-agent-builder@link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-attack-discovery@link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery":
   version "0.0.0"
   uid ""
 
@@ -9776,6 +9800,10 @@
   uid ""
 
 "@kbn/xstate-utils@link:src/platform/packages/shared/kbn-xstate-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/yaml-rule-editor@link:x-pack/platform/packages/shared/response-ops/yaml-rule-editor":
   version "0.0.0"
   uid ""
 
@@ -13485,7 +13513,7 @@
     superjson "^1.10.0"
     use-sync-external-store "^1.2.0"
 
-"@tanstack/react-query@4.29.12":
+"@tanstack/react-query@4.29.12", "@tanstack/react-query@^4.29.5":
   version "4.29.12"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.29.12.tgz#de111cf1d6c389b86acacfaf972302914cfa1208"
   integrity sha512-zhcN6+zF6cxprxhTHQajHGlvxgK8npnp9uLe9yaWhGc6sYcPWXzyO4raL4HomUzQOPzu3jLvkriJQ7BOrDM8vA==
@@ -16219,10 +16247,10 @@ anymatch@^3.0.3, anymatch@^3.1.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-"apache-arrow@18.x - 21.x", "apache-arrow@20.x - 21.x":
-  version "21.0.0"
-  resolved "https://registry.yarnpkg.com/apache-arrow/-/apache-arrow-21.0.0.tgz#e73f0b731511273ab26b576cd4c661213c08d2b1"
-  integrity sha512-UueXr0y7S6SB6ToIEON0ZIwRln1EY05NIMXKfPu8fumASypkXXHEb6LRTZGh7vnYoQ9TgqNMNN1937wyY9lyFQ==
+"apache-arrow@18.x - 21.x", "apache-arrow@20.x - 21.x", apache-arrow@21.1.0:
+  version "21.1.0"
+  resolved "https://registry.yarnpkg.com/apache-arrow/-/apache-arrow-21.1.0.tgz#0b8d0a844d7a86cc29902f3561bf8be7844b7b36"
+  integrity sha512-kQrYLxhC+NTVVZ4CCzGF6L/uPVOzJmD1T3XgbiUnP7oTeVFOFgEUu6IKNwCDkpFoBVqDKQivlX4RUFqqnWFlEA==
   dependencies:
     "@swc/helpers" "^0.5.11"
     "@types/command-line-args" "^5.2.3"
@@ -16681,7 +16709,7 @@ axe-core@~4.11.0:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.11.0.tgz#16f74d6482e343ff263d4f4503829e9ee91a86b6"
   integrity sha512-ilYanEU8vxxBexpJd8cWM4ElSQq4QctCLKih0TSfjIfCQTeyH/6zVrmIJfLPrKTKJRbiG+cfnZbQIjAlJmF1jQ==
 
-axios@1.13.5, axios@^1.11.0, axios@^1.12.0, axios@^1.8.2:
+axios@1.13.5:
   version "1.13.5"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.5.tgz#5e464688fa127e11a660a2c49441c009f6567a43"
   integrity sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==
@@ -16689,6 +16717,15 @@ axios@1.13.5, axios@^1.11.0, axios@^1.12.0, axios@^1.8.2:
     follow-redirects "^1.15.11"
     form-data "^4.0.5"
     proxy-from-env "^1.1.0"
+
+axios@^1.11.0, axios@^1.13.5, axios@^1.8.2:
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.14.0.tgz#7c29f4cf2ea91ef05018d5aa5399bf23ed3120eb"
+  integrity sha512-3Y8yrqLSwjuzpXuZ0oIYZ/XGgLwUIBU3uLvbcpb0pidD9ctpShJd43KSlEEkVQg6DS0G9NKyzOvBfUtDKEyHvQ==
+  dependencies:
+    follow-redirects "^1.15.11"
+    form-data "^4.0.5"
+    proxy-from-env "^2.1.0"
 
 axobject-query@^3.1.1:
   version "3.2.1"
@@ -17543,13 +17580,13 @@ call-bind@^1.0.0, call-bind@^1.0.2, call-bind@^1.0.5, call-bind@^1.0.6, call-bin
     get-intrinsic "^1.2.4"
     set-function-length "^1.2.2"
 
-call-bound@^1.0.2, call-bound@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/call-bound/-/call-bound-1.0.3.tgz#41cfd032b593e39176a71533ab4f384aa04fd681"
-  integrity sha512-YTd+6wGlNlPxSuri7Y6X8tY2dmm12UMH66RpKMhiX6rsk5wXXnYgbUcOt8kiS31/AjfoTOvCsE+w8nZQLQnzHA==
+call-bound@^1.0.2, call-bound@^1.0.3, call-bound@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/call-bound/-/call-bound-1.0.4.tgz#238de935d2a2a692928c538c7ccfa91067fd062a"
+  integrity sha512-+ys997U96po4Kx/ABpBCqhA9EuxJaQWDQg7295H4hBphv3IZg0boBKuwYpt4YXp6MZ5AmZQnU/tyMTlRpaSejg==
   dependencies:
-    call-bind-apply-helpers "^1.0.1"
-    get-intrinsic "^1.2.6"
+    call-bind-apply-helpers "^1.0.2"
+    get-intrinsic "^1.3.0"
 
 call-me-maybe@^1.0.1, call-me-maybe@^1.0.2:
   version "1.0.2"
@@ -17856,17 +17893,17 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@145.0.0:
-  version "145.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-145.0.0.tgz#994cdb278b1fe9b8f98f60ab63cf3f372544db04"
-  integrity sha512-rnqHS3u+OEdhaS3PmV7V8KYHBLiIOrIKMkRZSEaQcQXnpqHQTPBrS/1x7r0MJvuywtv2qFQYNbd5yXUmuxFvmg==
+chromedriver@146.0.3:
+  version "146.0.3"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-146.0.3.tgz#546a156b5807e70263c6e9a6d5fa16ad22c5188a"
+  integrity sha512-RFhEoG3bmI+TaDm/9vDNntkxM76Sb/VIxvX3kHPzfQ3wvmE+PPSTw6gnD+Oa+dcJAc/kg/vQAwMrOUs8E1LdyQ==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
-    axios "^1.12.0"
+    axios "^1.13.5"
     compare-versions "^6.1.0"
     extract-zip "^2.0.1"
-    proxy-agent "^6.4.0"
-    proxy-from-env "^1.1.0"
+    proxy-agent "^6.5.0"
+    proxy-from-env "^2.0.0"
     tcp-port-used "^1.0.2"
 
 chromium-bidi@11.0.0:
@@ -22424,7 +22461,7 @@ get-east-asian-width@^1.0.0, get-east-asian-width@^1.5.0:
   resolved "https://registry.yarnpkg.com/get-east-asian-width/-/get-east-asian-width-1.5.0.tgz#ce7008fe345edcf5497a6f557cfa54bc318a9ce7"
   integrity sha512-CQ+bEO+Tva/qlmw24dCejulK5pMzVnUOFOijVogd3KQs07HnRIgp8TGipvCCRT06xeYEbpbgwaCxglFyiuIcmA==
 
-get-intrinsic@^1.1.3, get-intrinsic@^1.2.1, get-intrinsic@^1.2.2, get-intrinsic@^1.2.3, get-intrinsic@^1.2.4, get-intrinsic@^1.2.5, get-intrinsic@^1.2.6:
+get-intrinsic@^1.1.3, get-intrinsic@^1.2.1, get-intrinsic@^1.2.2, get-intrinsic@^1.2.3, get-intrinsic@^1.2.4, get-intrinsic@^1.2.5, get-intrinsic@^1.2.6, get-intrinsic@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/get-intrinsic/-/get-intrinsic-1.3.0.tgz#743f0e3b6964a93a5491ed1bffaae054d7f98d01"
   integrity sha512-9fSjSaos/fRIVIp+xSJlE6lfwhES7LNtKaCBIamHsjr2na1BiABJPo0mOjjz8GJDURarmCPGqaiVg5mfjb98CQ==
@@ -25386,11 +25423,15 @@ json-stable-stringify-without-jsonify@^1.0.1:
   integrity sha1-nbe1lJatPzz+8wp1FC0tkwrXJlE=
 
 json-stable-stringify@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/json-stable-stringify/-/json-stable-stringify-1.0.1.tgz#9a759d39c5f2ff503fd5300646ed445f88c4f9af"
-  integrity sha1-mnWdOcXy/1A/1TAGRu1EX4jE+a8=
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/json-stable-stringify/-/json-stable-stringify-1.3.0.tgz#8903cfac42ea1a0f97f35d63a4ce0518f0cc6a70"
+  integrity sha512-qtYiSSFlwot9XHtF9bD9c7rwKjr+RecWT//ZnPvSmEjpV5mmPOCN4j8UjY5hbjNkOwZ/jQv3J6R1/pL7RwgMsg==
   dependencies:
-    jsonify "~0.0.0"
+    call-bind "^1.0.8"
+    call-bound "^1.0.4"
+    isarray "^2.0.5"
+    jsonify "^0.0.1"
+    object-keys "^1.1.1"
 
 json-stringify-pretty-compact@^3.0.0:
   version "3.0.0"
@@ -25447,10 +25488,10 @@ jsonfile@^6.0.1:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-jsonify@~0.0.0:
-  version "0.0.0"
-  resolved "https://registry.yarnpkg.com/jsonify/-/jsonify-0.0.0.tgz#2c74b6ee41d93ca51b7b5aaee8f503631d252a73"
-  integrity sha1-LHS27kHZPKUbe1qu6PUDYx0lKnM=
+jsonify@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/jsonify/-/jsonify-0.0.1.tgz#2aa3111dae3d34a0f151c63f3a45d995d9420978"
+  integrity sha512-2/Ki0GcmuqSrgFyelQq9M05y7PS0mEwuIzrf3f1fPqkVDVRvZrPZtVSMHxdgo8Aq0sxAOb/cr2aqqA3LeWHVPg==
 
 jsonpath-plus@^10.0.0:
   version "10.3.0"
@@ -29694,7 +29735,7 @@ proxy-addr@^2.0.7, proxy-addr@~2.0.7:
     forwarded "0.2.0"
     ipaddr.js "1.9.1"
 
-proxy-agent@^6.4.0, proxy-agent@^6.5.0:
+proxy-agent@^6.5.0:
   version "6.5.0"
   resolved "https://registry.yarnpkg.com/proxy-agent/-/proxy-agent-6.5.0.tgz#9e49acba8e4ee234aacb539f89ed9c23d02f232d"
   integrity sha512-TmatMXdr2KlRiA2CyDu8GqR8EjahTG3aY3nXjdzFyoZbmB8hrBsTyMezhULIXKnC0jpfjlmiZ3+EaCzoInSu/A==
@@ -29717,6 +29758,11 @@ proxy-from-env@1.1.0, proxy-from-env@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/proxy-from-env/-/proxy-from-env-1.1.0.tgz#e102f16ca355424865755d2c9e8ea4f24d58c3e2"
   integrity sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==
+
+proxy-from-env@^2.0.0, proxy-from-env@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/proxy-from-env/-/proxy-from-env-2.1.0.tgz#a7487568adad577cfaaa7e88c49cab3ab3081aba"
+  integrity sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==
 
 proxy@2.1.1:
   version "2.1.1"
@@ -31686,15 +31732,15 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@4.40.0:
-  version "4.40.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.40.0.tgz#2872adbb2d3cde87585f5ba863daf51c2521ca26"
-  integrity sha512-dU0QbnVKdPmoNP8OtMCazRdtU2Ux6Wl4FEpG1iwUbDeajJK1dBAywBLrC1D7YFRtogHzN96AbXBgBAJaarcysw==
+selenium-webdriver@4.41.0:
+  version "4.41.0"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.41.0.tgz#53b4e459462c4df64a99d5aedd15d4520a7c9977"
+  integrity sha512-1XxuKVhr9az24xwixPBEDGSZP+P0z3ZOnCmr9Oiep0MlJN2Mk+flIjD3iBS9BgyjS4g14dikMqnrYUPIjhQBhA==
   dependencies:
     "@bazel/runfiles" "^6.5.0"
     jszip "^3.10.1"
     tmp "^0.2.5"
-    ws "^8.18.3"
+    ws "^8.19.0"
 
 self-signed-cert@^1.0.1:
   version "1.0.1"
