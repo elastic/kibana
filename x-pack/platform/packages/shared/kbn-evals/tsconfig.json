@@ -26,6 +26,7 @@
     "@kbn/config-schema",
     "@kbn/evals-common",
     "@kbn/safer-lodash-set",
-    "@kbn/test"
+    "@kbn/test",
+    "@kbn/es-errors"
   ]
 }
