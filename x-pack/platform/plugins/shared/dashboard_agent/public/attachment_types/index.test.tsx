@@ -64,19 +64,55 @@ const createMockVersionedAttachment = (
   origin,
 });
 
-const createMockDashboardApi = (savedObjectId?: string) => {
+const createMockDashboardApi = (
+  savedObjectId?: string
+): DashboardApi & {
+  setSavedObjectId: (id: string | undefined) => void;
+  setState: jest.Mock;
+  scrollToBottom: jest.Mock;
+  getSerializedState: jest.Mock;
+} => {
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
+  const layout$ = new BehaviorSubject({});
+  const title$ = new BehaviorSubject<string>('');
+  const description$ = new BehaviorSubject<string | undefined>('');
+  const filters$ = new BehaviorSubject<undefined>(undefined);
+  const query$ = new BehaviorSubject<undefined>(undefined);
+  const timeRange$ = new BehaviorSubject<undefined>(undefined);
+  const projectRouting$ = new BehaviorSubject<undefined>(undefined);
+  const hideTitle$ = new BehaviorSubject<boolean>(false);
+  const hideBorder$ = new BehaviorSubject<boolean>(false);
+  const settings = {
+    autoApplyFilters$: new BehaviorSubject<boolean>(true),
+    syncColors$: new BehaviorSubject<boolean>(true),
+    syncCursor$: new BehaviorSubject<boolean>(true),
+    syncTooltips$: new BehaviorSubject<boolean>(true),
+    useMargins$: new BehaviorSubject<boolean>(true),
+  };
   const setState = jest.fn();
   const scrollToBottom = jest.fn();
+  const getSerializedState = jest.fn().mockReturnValue({ attributes: { title: '', panels: [] } });
   return {
     savedObjectId$,
+    layout$,
+    title$,
+    description$,
+    filters$,
+    query$,
+    timeRange$,
+    projectRouting$,
+    hideTitle$,
+    hideBorder$,
+    settings,
     setState,
     scrollToBottom,
+    getSerializedState,
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
   } as unknown as DashboardApi & {
     setSavedObjectId: (id: string | undefined) => void;
     setState: jest.Mock;
     scrollToBottom: jest.Mock;
+    getSerializedState: jest.Mock;
   };
 };
 
@@ -116,8 +152,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       findById: jest.fn().mockResolvedValue({ status: 'success' }),
     });
 
+    const mockAddAttachment = jest.fn();
     const agentBuilder: AgentBuilderPluginStart = {
       attachments: { addAttachmentType },
+      addAttachment: mockAddAttachment,
       updateAttachmentOrigin,
       events: { chat$ },
     } as unknown as AgentBuilderPluginStart;
@@ -172,7 +210,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
+      const cleanup = uiDefinition.onAttachmentMount!({
+        getAttachment,
+        updateOrigin,
+      });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       // First save triggers update
@@ -191,7 +232,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1', 'original-dashboard-id');
       const mockApi = createMockDashboardApi('different-dashboard-id');
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
+      const cleanup = uiDefinition.onAttachmentMount!({
+        getAttachment,
+        updateOrigin,
+      });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       mockApi.setSavedObjectId('newly-saved-id');
 
@@ -203,7 +247,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
+      const cleanup = uiDefinition.onAttachmentMount!({
+        getAttachment,
+        updateOrigin,
+      });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
       cleanup?.();
 
@@ -225,7 +272,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
+      const cleanup = uiDefinition.onAttachmentMount!({
+        getAttachment,
+        updateOrigin,
+      });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       // Updated operation triggers state update
@@ -260,7 +310,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
+      const cleanup = uiDefinition.onAttachmentMount!({
+        getAttachment,
+        updateOrigin,
+      });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       // Read operation - no update
@@ -348,7 +401,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       const { getAttachment } = createMockAttachment('attachment-1');
       const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount!({ getAttachment, updateOrigin });
+      const cleanup = uiDefinition.onAttachmentMount!({
+        getAttachment,
+        updateOrigin,
+      });
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       // API becomes unavailable
