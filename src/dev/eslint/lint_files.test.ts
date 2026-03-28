@@ -138,4 +138,30 @@ describe('lintFiles', () => {
     expect(result.failedFiles).toEqual(['src/broken.ts']);
     expect(result.lintedFileCount).toBe(2);
   });
+
+  it('counts warnings for files that also have errors', async () => {
+    mockLintFiles.mockResolvedValue([
+      {
+        errorCount: 1,
+        filePath: `${REPO_ROOT}/src/mixed.ts`,
+        output: undefined,
+        warningCount: 2,
+      },
+    ]);
+    mockLoadFormatter.mockResolvedValue({
+      format: jest.fn().mockReturnValue('mixed output'),
+    });
+
+    const log = new ToolingLog();
+    jest.spyOn(log, 'error').mockImplementation(() => undefined);
+
+    const result = await lintFiles(log, [new File(`${REPO_ROOT}/src/mixed.ts`)], { fix: false });
+
+    expect(result).toEqual({
+      failedFiles: ['src/mixed.ts'],
+      fixedFiles: [],
+      lintedFileCount: 1,
+      warningCount: 2,
+    });
+  });
 });

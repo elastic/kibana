@@ -60,7 +60,6 @@ export const runLegacyTypeCheckCli = () => {
       );
 
       const createdConfigs = await createTypeCheckConfigs(log, projects, TS_PROJECTS);
-
       let tscFailed = false;
       try {
         log.info(
@@ -91,33 +90,35 @@ export const runLegacyTypeCheckCli = () => {
         tscFailed = true;
       }
 
-      const localChanges = shouldUseArchive ? await detectLocalChanges() : [];
-      const hasLocalChanges = localChanges.length > 0;
+      try {
+        const localChanges = shouldUseArchive ? await detectLocalChanges() : [];
+        const hasLocalChanges = localChanges.length > 0;
 
-      if (shouldUseArchive) {
-        if (hasLocalChanges) {
-          const changedFiles = localChanges.join('\n');
-          const message = `uncommitted changes were detected after the TypeScript build. TypeScript cache artifacts must be generated from a clean working tree.\nChanged files:\n${changedFiles}`;
+        if (shouldUseArchive) {
+          if (hasLocalChanges) {
+            const changedFiles = localChanges.join('\n');
+            const message = `uncommitted changes were detected after the TypeScript build. TypeScript cache artifacts must be generated from a clean working tree.\nChanged files:\n${changedFiles}`;
 
-          if (isCiEnvironment()) {
-            throw new Error(`Cancelling TypeScript cache archive because ${message}`);
+            if (isCiEnvironment()) {
+              throw new Error(`Cancelling TypeScript cache archive because ${message}`);
+            }
+
+            log.info(`Skipping TypeScript cache archive because ${message}`);
+          } else {
+            await archiveTSBuildArtifacts(log);
           }
-
-          log.info(`Skipping TypeScript cache archive because ${message}`);
         } else {
-          await archiveTSBuildArtifacts(log);
+          log.verbose('Skipping TypeScript cache archive because --with-archive was not provided.');
         }
-      } else {
-        log.verbose('Skipping TypeScript cache archive because --with-archive was not provided.');
-      }
+      } finally {
+        if (flagsReader.boolean('cleanup')) {
+          log.verbose('cleaning up');
+          await cleanupRootRefsConfig();
 
-      if (flagsReader.boolean('cleanup')) {
-        log.verbose('cleaning up');
-        await cleanupRootRefsConfig();
-
-        await asyncForEachWithLimit(createdConfigs, 40, async (path) => {
-          await Fsp.unlink(path);
-        });
+          await asyncForEachWithLimit(createdConfigs, 40, async (path) => {
+            await Fsp.unlink(path);
+          });
+        }
       }
 
       if (tscFailed) {

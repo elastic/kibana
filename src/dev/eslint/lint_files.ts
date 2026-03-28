@@ -61,7 +61,9 @@ export async function lintFiles(
     if (report.errorCount !== 0) {
       foundError = true;
       failedFiles.push(Path.relative(REPO_ROOT, report.filePath));
-    } else if (report.warningCount !== 0) {
+    }
+
+    if (report.warningCount !== 0) {
       warningCount += report.warningCount;
       foundWarning = true;
     }

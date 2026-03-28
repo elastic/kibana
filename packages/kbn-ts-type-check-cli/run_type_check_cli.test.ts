@@ -15,7 +15,7 @@ import {
   summarizeAffectedMoonProjects,
 } from '@kbn/moon';
 import { countCommitsBetweenRefs, hasStagedChanges } from '@kbn/dev-utils';
-import { updateRootRefsConfig } from './root_refs_config';
+import { cleanupRootRefsConfig, updateRootRefsConfig } from './root_refs_config';
 import { isCiEnvironment } from './src/archive/utils';
 
 const tsProjectsState: { projects: any[] } = {
@@ -126,6 +126,7 @@ const mockSummarizeAffectedMoonProjects = summarizeAffectedMoonProjects as unkno
 const mockCountCommitsBetweenRefs = countCommitsBetweenRefs as unknown as jest.Mock;
 const mockHasStagedChanges = hasStagedChanges as unknown as jest.Mock;
 const mockUpdateRootRefsConfig = updateRootRefsConfig as unknown as jest.Mock;
+const mockCleanupRootRefsConfig = cleanupRootRefsConfig as unknown as jest.Mock;
 const mockIsCiEnvironment = isCiEnvironment as unknown as jest.Mock;
 const mockArchiveTSBuildArtifacts = jest.requireMock('./src/archive/archive_ts_build_artifacts')
   .archiveTSBuildArtifacts as jest.Mock;
@@ -260,6 +261,24 @@ describe('run_type_check_cli', () => {
         args: expect.arrayContaining(['-b', 'packages/foo/tsconfig.type_check.json', '--pretty']),
       })
     );
+  });
+
+  it('legacy CLI cleans up generated configs before failing CI archive validation', async () => {
+    tsProjectsState.projects = [createProject()];
+    mockIsCiEnvironment.mockReturnValue(true);
+    mockExeca.mockResolvedValue({
+      stdout: ' M packages/foo/tsconfig.type_check.json',
+    });
+
+    const ctx = createContext({ cleanup: true, 'with-archive': true });
+
+    await expect(legacyHandler(ctx)).rejects.toThrow(
+      'Cancelling TypeScript cache archive because uncommitted changes were detected after the TypeScript build.'
+    );
+
+    expect(mockCleanupRootRefsConfig).toHaveBeenCalledTimes(1);
+    expect(fsPromises.unlink).toHaveBeenCalledWith('/repo/packages/foo/tsconfig.type_check.json');
+    expect(mockArchiveTSBuildArtifacts).not.toHaveBeenCalled();
   });
 
   it('uses branch profile affected selection when validation flags are provided', async () => {
