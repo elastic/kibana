@@ -14,16 +14,26 @@ import type { StreamsAppKibanaContext } from '../../../../hooks/use_kibana';
 
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_stream_detail');
+jest.mock('../../../../hooks/use_streams_privileges');
+jest.mock('../../../../hooks/use_streams_app_router', () => ({
+  useStreamsAppRouter: () => ({
+    link: jest.fn(() => '/mock-stream-link'),
+  }),
+}));
 jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: jest.fn(),
 }));
 
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
+import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseStreamDetail = useStreamDetail as jest.MockedFunction<typeof useStreamDetail>;
+const mockUseStreamsPrivileges = useStreamsPrivileges as jest.MockedFunction<
+  typeof useStreamsPrivileges
+>;
 const mockUseUnsavedChangesPrompt = useUnsavedChangesPrompt as jest.MockedFunction<
   typeof useUnsavedChangesPrompt
 >;
@@ -123,6 +133,10 @@ describe('Settings', () => {
       loading: false,
       refresh: mockRefreshDefinition,
     });
+
+    mockUseStreamsPrivileges.mockReturnValue({
+      features: { overviewPage: { enabled: true } },
+    } as ReturnType<typeof useStreamsPrivileges>);
 
     mockUseUnsavedChangesPrompt.mockImplementation(() => {});
   });

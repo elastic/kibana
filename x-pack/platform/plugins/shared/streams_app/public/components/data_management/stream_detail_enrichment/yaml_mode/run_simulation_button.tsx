@@ -41,7 +41,7 @@ export const RunSimulationButton = () => {
     >
       <span style={{ display: 'inline-flex' }}>
         <EuiButtonIcon
-          iconType="playFilled"
+          iconType="play"
           aria-label={i18n.translate(
             'xpack.streams.enrichment.yamlMode.runSimulationButton.ariaLabel',
             {

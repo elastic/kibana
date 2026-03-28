@@ -201,7 +201,7 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
                   data-test-subj="streamsAppSchemaEditorViewRequestButton"
                   color="text"
                   size="s"
-                  iconType="editorCodeBlock"
+                  iconType="code"
                   onClick={onBottomBarViewCodeClick}
                 >
                   {viewCodeButtonText}

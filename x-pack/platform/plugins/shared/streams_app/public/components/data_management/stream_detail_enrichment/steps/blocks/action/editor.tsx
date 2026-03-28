@@ -64,6 +64,7 @@ import { ConcatProcessorForm } from './concat';
 import { JoinProcessorForm } from './join';
 import { JsonExtractProcessorForm } from './json_extract';
 import { NetworkDirectionProcessorForm } from './network_direction';
+import { EnrichProcessorForm } from './enrich';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -169,6 +170,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 {type === 'join' && <JoinProcessorForm />}
                 {type === 'json_extract' && <JsonExtractProcessorForm />}
                 {type === 'network_direction' && <NetworkDirectionProcessorForm />}
+                {type === 'enrich' && <EnrichProcessorForm />}
                 {!SPECIALISED_TYPES.includes(type) && (
                   <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
                 )}

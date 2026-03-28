@@ -7,7 +7,7 @@
 
 import type { EvaluationCriterion } from '@kbn/evals';
 import type { GcsConfig } from '../../../src/data_generators/replay';
-import type { ValidKIFeatureType } from '../../../src/evaluators/ki_feature_extraction_evaluators';
+import type { ValidKIFeatureType } from '../../../src/evaluators/ki_feature_extraction/evaluators';
 
 interface ScenarioMetadata {
   difficulty: 'easy' | 'medium' | 'hard';
@@ -48,6 +48,7 @@ export interface KIFeatureExtractionScenario {
     min_features?: number;
     max_features?: number;
     required_types?: ValidKIFeatureType[];
+    expect_entity_filters?: boolean;
     expected_ground_truth: string;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;

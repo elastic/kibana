@@ -7,8 +7,8 @@
   "types": "index.d.ts",
   "peerDependencies": {
     "@elastic/eui": ">=112.0.0",
-    "@emotion/css": ">=11.0.0",
-    "@emotion/react": ">=11.0.0",
+    "@emotion/css": ">=11.13.5",
+    "@emotion/react": ">=11.14.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },

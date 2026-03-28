@@ -160,7 +160,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                     `}
                   >
                     <EuiButtonIcon
-                      iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                      iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
                       onClick={toggle}
                       aria-label={i18n.translate(
                         'xpack.streams.streamDetailView.managementTab.enrichment.toggleNestedStepsButtonAriaLabel',
