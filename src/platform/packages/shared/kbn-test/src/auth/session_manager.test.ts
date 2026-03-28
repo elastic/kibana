@@ -35,7 +35,7 @@ const readCloudUsersFromFileMock = jest.spyOn(helper, 'readCloudUsersFromFile');
 
 const getTestToken = () => 'kbn_cookie_' + crypto.randomBytes(16).toString('hex');
 
-jest.mock('../kbn_client/kbn_client', () => {
+jest.mock('@kbn/kbn-client', () => {
   return {
     KbnClient: jest.fn(),
   };
@@ -52,7 +52,7 @@ describe('SamlSessionManager', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       jest
-        .requireMock('../kbn_client/kbn_client')
+        .requireMock('@kbn/kbn-client')
         .KbnClient.mockImplementation(() => ({ version: { get } }));
       get.mockImplementation(() => Promise.resolve('8.12.0'));
 
@@ -236,7 +236,7 @@ describe('SamlSessionManager', () => {
       beforeEach(() => {
         jest.resetAllMocks();
         jest
-          .requireMock('../kbn_client/kbn_client')
+          .requireMock('@kbn/kbn-client')
           .KbnClient.mockImplementation(() => ({ version: { get } }));
         get.mockImplementationOnce(() => Promise.resolve('8.12.0'));
 
@@ -262,7 +262,7 @@ describe('SamlSessionManager', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       jest
-        .requireMock('../kbn_client/kbn_client')
+        .requireMock('@kbn/kbn-client')
         .KbnClient.mockImplementation(() => ({ version: { get } }));
       get.mockImplementationOnce(() => Promise.resolve('8.12.0'));
 

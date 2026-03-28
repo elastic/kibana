@@ -151,10 +151,6 @@ export const GetEnrollmentSettingsResponseSchema = schema.object({
         is_managed: schema.boolean(),
         is_default_fleet_server: schema.maybe(schema.boolean()),
         has_fleet_server: schema.maybe(schema.boolean()),
-        fleet_server_host_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-        download_source_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-        space_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
-        data_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
       }),
       { maxSize: 10000 }
     ),

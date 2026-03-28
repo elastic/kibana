@@ -9,7 +9,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import Url from 'url';
-import { KbnClient } from '../kbn_client';
+import { KbnClient } from '@kbn/kbn-client';
 import { isValidHostname, readCloudUsersFromFile } from './helper';
 import {
   createCloudSAMLSession,

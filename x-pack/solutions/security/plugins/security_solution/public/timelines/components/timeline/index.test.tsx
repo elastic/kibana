@@ -207,7 +207,7 @@ describe('StatefulTimeline', () => {
         <StatefulTimeline {...props} />
       </TestProviders>
     );
-    expect(mockDispatch).toBeCalledTimes(1);
+    expect(mockDispatch).toBeCalledTimes(2);
     expect(mockDispatch).toHaveBeenNthCalledWith(1, {
       payload: {
         id: TimelineId.test,

@@ -1,6 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
+    key: defend-workflows
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
