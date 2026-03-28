@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { useContext, useEffect, useMemo } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { buildTimeRangeFilter } from '../../../../../common/lib/kuery';
 import { DataViewContext } from '..';
 import type { EntitiesBaseURLQuery } from './use_entity_url_state';
 
@@ -51,7 +53,9 @@ export const useBaseEsQuery = ({ filters = [], query, pageFilters = [] }: Entiti
     uiSettings,
   } = useKibana().services;
   const { dataView } = useContext(DataViewContext);
-  const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
+  const { from, to } = useGlobalTime();
+  const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
+  const { filterQuery: globalFilterQuery } = useGlobalFilterQuery({ extraFilter: timeRangeFilter });
   const allowLeadingWildcards = uiSettings.get('query:allowLeadingWildcards');
   const config: EsQueryConfig = useMemo(() => ({ allowLeadingWildcards }), [allowLeadingWildcards]);
   const baseEsQuery = useMemo(() => {
