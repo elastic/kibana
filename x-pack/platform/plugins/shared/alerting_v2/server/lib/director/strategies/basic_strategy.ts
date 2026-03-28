@@ -7,7 +7,10 @@
 
 import { injectable } from 'inversify';
 import type { AlertEventStatus } from '../../../resources/datastreams/alert_events';
-import { alertEpisodeStatus, type AlertEpisodeStatus } from '../../../resources/datastreams/alert_events';
+import {
+  alertEpisodeStatus,
+  type AlertEpisodeStatus,
+} from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '../../rules_client/types';
 import type { ITransitionStrategy, StateTransitionContext, StateTransitionResult } from './types';
 

@@ -6,7 +6,10 @@
  */
 
 import { esql, type ComposerQuery } from '@elastic/esql';
-import type { AlertEventStatus, AlertEpisodeStatus } from '../../resources/datastreams/alert_events';
+import type {
+  AlertEventStatus,
+  AlertEpisodeStatus,
+} from '../../resources/datastreams/alert_events';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
 
 interface GetLatestAlertEventStateQueryParams {
