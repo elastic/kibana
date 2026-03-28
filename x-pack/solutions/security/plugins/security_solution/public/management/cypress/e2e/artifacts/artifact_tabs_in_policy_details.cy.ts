@@ -108,24 +108,18 @@ describe(
           removeExceptionsList(testData.createRequestBody.list_id);
         });
 
-        it(
-          `[NONE] User cannot see the tab for ${testData.title}`,
-          // there is no such role in Serverless environment that can read policy but cannot read artifacts
-          { tags: ['@skipInServerless'] },
-          () => {
-            loginWithPrivilegeNone(testData.privilegePrefix);
-            visitPolicyDetailsPage(policyId);
-
-            cy.get(`#${testData.tabId}`).should('not.exist');
-          }
-        );
-
         context(`Given there are no ${testData.title} entries`, () => {
           it(
-            `[READ] User CANNOT add ${testData.title} artifact`,
-            // there is no such role in Serverless environment that only reads artifacts
+            `[NONE/READ] User cannot see tab or add ${testData.title} artifact`,
+            // there is no such role in Serverless environment that can read policy but cannot read artifacts
             { tags: ['@skipInServerless'] },
             () => {
+              // NONE: cannot see the tab
+              loginWithPrivilegeNone(testData.privilegePrefix);
+              visitPolicyDetailsPage(policyId);
+              cy.get(`#${testData.tabId}`).should('not.exist');
+
+              // READ: can see tab but cannot add
               loginWithPrivilegeRead(testData.privilegePrefix);
               visitArtifactTab(testData.tabId);
 

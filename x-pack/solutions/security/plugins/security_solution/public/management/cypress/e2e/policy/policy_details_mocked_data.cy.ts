@@ -48,13 +48,15 @@ describe.skip('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
   describe('Malware Protection card', () => {
     const malwareTestSubj = getPolicySettingsFormTestSubjects().malware;
 
-    it('user should be able to see related rules', () => {
+    it('related rules link, protection level toggles notification, and enable/disable persists to yaml', () => {
+      // --- Related rules ---
       cy.getByTestSubj(malwareTestSubj.card).contains('related detection rules').click();
-
       cy.url().should('contain', 'app/security/rules/management');
-    });
 
-    it('changing protection level should enable or disable user notification', () => {
+      // Navigate back to policy details
+      visitPolicyDetailsPage(indexedHostsData.data.integrationPolicies[0].id);
+
+      // --- Protection level toggles notification ---
       cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).click();
       cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).should(
         'have.attr',
@@ -75,7 +77,7 @@ describe.skip('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
       cy.getByTestSubj(malwareTestSubj.notifyUserCheckbox).should('be.checked');
     });
 
-    it('disabling protection should disable notification in yaml for every OS', () => {
+    it('disabling protection should disable notification in yaml and enable protection for every OS', () => {
       // Enable malware protection and user notification
       cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).click();
       cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).should(
@@ -105,9 +107,8 @@ describe.skip('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
         expect(policyConfig.windows.popup.malware.enabled).to.equal(false);
         expect(policyConfig.linux.popup.malware.enabled).to.equal(false);
       });
-    });
 
-    it('user should be able to enable Malware protection for every OS in yaml', () => {
+      // --- Enable Malware protection for every OS ---
       yieldPolicyConfig().then((policyConfig) => {
         expect(policyConfig.linux.malware.mode).to.equal(ProtectionModes.off);
         expect(policyConfig.mac.malware.mode).to.equal(ProtectionModes.off);
@@ -133,13 +134,15 @@ describe.skip('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
   describe('Ransomware Protection card', () => {
     const ransomwareTestSubj = getPolicySettingsFormTestSubjects().ransomware;
 
-    it('user should be able to see related rules', () => {
+    it('related rules link and protection level toggles notification', () => {
+      // --- Related rules ---
       cy.getByTestSubj(ransomwareTestSubj.card).contains('related detection rules').click();
-
       cy.url().should('contain', 'app/security/rules/management');
-    });
 
-    it('changing protection level should enable or disable user notification', () => {
+      // Navigate back to policy details
+      visitPolicyDetailsPage(indexedHostsData.data.integrationPolicies[0].id);
+
+      // --- Protection level toggles notification ---
       cy.getByTestSubj(ransomwareTestSubj.enableDisableSwitch).click();
       cy.getByTestSubj(ransomwareTestSubj.enableDisableSwitch).should(
         'have.attr',
@@ -166,7 +169,8 @@ describe.skip('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
   describe('Advanced settings', () => {
     const testSubjects = getPolicySettingsFormTestSubjects().advancedSection;
 
-    it('should show empty text inputs except for some settings', () => {
+    it('should show correct default inputs and persist advanced settings to yaml', () => {
+      // --- Empty text inputs except for some defaults ---
       const settingsWithDefaultValues = [
         'mac.advanced.capture_env_vars',
         'linux.advanced.capture_env_vars',
@@ -185,9 +189,8 @@ describe.skip('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
             cy.wrap($child).find('input').should('have.value', '');
           }
         });
-    });
 
-    it('should add advanced settings to policy yaml only when they are set', () => {
+      // --- Add advanced settings to policy yaml only when set ---
       // Initially config should only contain the two default entries
       yieldPolicyConfig().then((policyConfig) => {
         expect(policyConfig.linux.advanced).to.have.keys(['capture_env_vars']);
@@ -196,7 +199,6 @@ describe.skip('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       // Set agent.connection_delay entry for every OS
-      cy.getByTestSubj(testSubjects.showHideButton).click();
       cy.getByTestSubj(testSubjects.settingsContainer)
         .children()
         .each(($child) => {

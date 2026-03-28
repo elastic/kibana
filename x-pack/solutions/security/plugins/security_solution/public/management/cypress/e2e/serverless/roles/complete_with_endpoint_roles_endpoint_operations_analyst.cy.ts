@@ -67,31 +67,31 @@ describe(
         login(ROLE.endpoint_operations_analyst);
       });
 
-      for (const { id, title } of artifactPagesFullAccess) {
-        it(`should have CRUD access to: ${title}`, () => {
+      it('should have CRUD access to all artifact pages', () => {
+        for (const { id } of artifactPagesFullAccess) {
           ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
-        });
-      }
-
-      for (const { url, title } of grantedAccessPages) {
-        it(`should have access to: ${title}`, () => {
-          cy.visit(url);
-          getNoPrivilegesPage().should('not.exist');
-        });
-      }
-
-      Object.entries(consoleHelpPanelResponseActionsTestSubj).forEach(([action, testSubj]) => {
-        it(`should have access to response action: ${action}`, () => {
-          visitEndpointList();
-          openConsoleFromEndpointList();
-          openConsoleHelpPanel();
-          cy.getByTestSubj(testSubj).should('exist');
-        });
+        }
       });
 
-      it('should have access to Fleet', () => {
+      it('should have access to granted pages and Fleet', () => {
+        for (const { url } of grantedAccessPages) {
+          cy.visit(url);
+          getNoPrivilegesPage().should('not.exist');
+        }
+
+        // Fleet access
         visitFleetAgentList();
         getFleetAgentListTable().should('exist');
+      });
+
+      it('should have access to all response actions', () => {
+        visitEndpointList();
+        openConsoleFromEndpointList();
+        openConsoleHelpPanel();
+
+        Object.entries(consoleHelpPanelResponseActionsTestSubj).forEach(([, testSubj]) => {
+          cy.getByTestSubj(testSubj).should('exist');
+        });
       });
     });
   }

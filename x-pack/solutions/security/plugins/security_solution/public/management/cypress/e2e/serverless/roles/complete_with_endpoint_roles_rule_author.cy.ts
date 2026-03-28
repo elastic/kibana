@@ -63,39 +63,29 @@ describe(
         login(ROLE.rule_author);
       });
 
-      for (const { id, title } of artifactPagesFullAccess) {
-        it(`should have CRUD access to: ${title}`, () => {
+      it('should have CRUD access to artifact pages, Endpoint list, policy management, and Read access to HIE', () => {
+        for (const { id } of artifactPagesFullAccess) {
           ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
-        });
-      }
+        }
 
-      it('should have access to Endpoint list page', () => {
         ensureEndpointListPageAuthzAccess('all', true);
-      });
 
-      it('should have access to policy management', () => {
         visitPolicyList();
         getNoPrivilegesPage().should('not.exist');
-      });
 
-      it(`should have Read access only to: Host Isolation Exceptions`, () => {
         ensureArtifactPageAuthzAccess(
           'read',
           pageById.hostIsolationExceptions.id as EndpointArtifactPageId
         );
       });
 
-      it('should NOT have access to Fleet', () => {
+      it('should NOT have access to Fleet, have Response Actions Log access, and NOT execute actions', () => {
         visitFleetAgentList();
         ensureFleetPermissionDeniedScreen();
-      });
 
-      it('should have access to Response Actions Log', () => {
         cy.visit(pageById.responseActionLog);
         getNoPrivilegesPage().should('not.exist');
-      });
 
-      it('should NOT have access to execute response actions', () => {
         visitEndpointList();
         openRowActionMenu().findByTestSubj('console').should('not.exist');
       });

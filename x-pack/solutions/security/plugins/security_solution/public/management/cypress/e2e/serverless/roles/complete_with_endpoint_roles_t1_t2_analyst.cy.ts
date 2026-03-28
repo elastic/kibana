@@ -56,30 +56,23 @@ describe(
           login(roleName);
         });
 
-        it('should have READ access to Endpoint list page', () => {
+        it('should have READ access to Endpoint list and correct page access restrictions', () => {
           ensureEndpointListPageAuthzAccess('read', true);
+
+          for (const { id, url } of deniedPages) {
+            cy.visit(url);
+            if (id === 'responseActionLog' && roleName === 't2_analyst') {
+              getNoPrivilegesPage().should('not.exist');
+            } else {
+              getNoPrivilegesPage().should('exist');
+            }
+          }
         });
 
-        for (const { id, url, title } of deniedPages) {
-          if (id === 'responseActionLog' && roleName === 't2_analyst') {
-            it(`should have access to: ${title}`, () => {
-              cy.visit(url);
-              getNoPrivilegesPage().should('not.exist');
-            });
-          } else {
-            it(`should NOT have access to: ${title}`, () => {
-              cy.visit(url);
-              getNoPrivilegesPage().should('exist');
-            });
-          }
-        }
-
-        it('should NOT have access to Fleet', () => {
+        it('should NOT have access to Fleet or execute response actions', () => {
           visitFleetAgentList();
           ensureFleetPermissionDeniedScreen();
-        });
 
-        it('should NOT have access to execute response actions', () => {
           visitEndpointList();
           openRowActionMenu().findByTestSubj('console').should('not.exist');
         });

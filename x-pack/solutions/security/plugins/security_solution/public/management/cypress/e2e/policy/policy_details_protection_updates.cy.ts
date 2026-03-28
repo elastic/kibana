@@ -60,7 +60,8 @@ describe(
           }
         });
 
-        it('should render the protection updates tab content', () => {
+        it('should render tab content, show unsaved changes modal, and update manifest version', () => {
+          // --- Render protection updates tab content ---
           loadProtectionUpdatesUrl(policy.id);
           cy.getByTestSubj('protection-updates-warning-callout');
           cy.getByTestSubj('protection-updates-automatic-updates-enabled');
@@ -78,11 +79,8 @@ describe(
           cy.getByTestSubj('protection-updates-manifest-name-note-title');
           cy.getByTestSubj('protection-updates-manifest-note');
           expectSavedButtonToBeEnabled();
-        });
 
-        it('should display warning modal when user has unsaved changes', () => {
-          loadProtectionUpdatesUrl(policy.id);
-          clickAutomaticUpdatesToggle();
+          // --- Warning modal for unsaved changes ---
           cy.getByTestSubj('policySettingsTab').click();
           cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {
             cy.getByTestSubj('confirmModalCancelButton').click();
@@ -93,9 +91,8 @@ describe(
             cy.getByTestSubj('confirmModalConfirmButton').click();
           });
           cy.url().should('include', 'settings');
-        });
 
-        it('should successfully update the manifest version to custom date', () => {
+          // --- Update manifest version to custom date ---
           const todayMinusTwoDays = moment.utc().subtract(2, 'days');
 
           loadProtectionUpdatesUrl(policy.id);
@@ -249,97 +246,66 @@ describe(
       });
 
       describe('Renders read only protection updates for user without write permissions', () => {
-        describe('With note field', () => {
-          let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-          let policy: PolicyData;
-          const oneWeekAgo = moment.utc().subtract(1, 'weeks');
+        let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+        let policy: PolicyData;
+        const oneWeekAgo = moment.utc().subtract(1, 'weeks');
 
-          beforeEach(() => {
-            login(ROLE.t3_analyst);
-            getEndpointIntegrationVersion().then((version) => {
-              createAgentPolicyTask(version).then((data) => {
-                indexedPolicy = data;
-                policy = indexedPolicy.integrationPolicies[0];
-                setCustomProtectionUpdatesManifestVersion(
-                  policy.id,
-                  oneWeekAgo.format('YYYY-MM-DD')
-                );
-                setCustomProtectionUpdatesNote(policy.id, testNote);
-              });
+        beforeEach(() => {
+          login(ROLE.t3_analyst);
+          getEndpointIntegrationVersion().then((version) => {
+            createAgentPolicyTask(version).then((data) => {
+              indexedPolicy = data;
+              policy = indexedPolicy.integrationPolicies[0];
+              setCustomProtectionUpdatesManifestVersion(policy.id, oneWeekAgo.format('YYYY-MM-DD'));
             });
-          });
-
-          afterEach(() => {
-            if (indexedPolicy) {
-              cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
-            }
-          });
-
-          it('should render the protection updates tab content', () => {
-            loadProtectionUpdatesUrl(policy.id);
-            getAutomaticUpdatesToggle().should('not.exist');
-            cy.getByTestSubj('protection-updates-state-view-mode');
-            cy.getByTestSubj('protection-updates-manifest-name-title');
-
-            cy.getByTestSubj('protection-updates-manifest-name-deployed-version-title');
-            cy.getByTestSubj('protection-updates-deployed-version').contains(
-              oneWeekAgo.format('MMMM DD, YYYY')
-            );
-            cy.getByTestSubj('protection-updates-manifest-name-version-to-deploy-title');
-            cy.getByTestSubj('protection-updates-version-to-deploy-view-mode');
-            cy.getByTestSubj('protection-updates-version-to-deploy-picker').should('not.exist');
-
-            cy.getByTestSubj('protection-updates-manifest-name-note-title');
-            cy.getByTestSubj('protection-updates-manifest-note').should('not.exist');
-            cy.getByTestSubj('protection-updates-manifest-note-view-mode').contains(testNote);
-            expectSavedButtonToBeDisabled();
           });
         });
 
-        describe('Without note field', () => {
-          let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-          let policy: PolicyData;
-          const oneWeekAgo = moment.utc().subtract(1, 'weeks');
+        afterEach(() => {
+          if (indexedPolicy) {
+            cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+          }
+        });
 
-          beforeEach(() => {
-            login(ROLE.t3_analyst);
-            getEndpointIntegrationVersion().then((version) => {
-              createAgentPolicyTask(version).then((data) => {
-                indexedPolicy = data;
-                policy = indexedPolicy.integrationPolicies[0];
-                setCustomProtectionUpdatesManifestVersion(
-                  policy.id,
-                  oneWeekAgo.format('YYYY-MM-DD')
-                );
-              });
-            });
-          });
+        it('should render read-only protection updates tab content with and without note', () => {
+          // --- Without note field ---
+          loadProtectionUpdatesUrl(policy.id);
+          getAutomaticUpdatesToggle().should('not.exist');
+          cy.getByTestSubj('protection-updates-state-view-mode');
+          cy.getByTestSubj('protection-updates-manifest-name-title');
 
-          afterEach(() => {
-            if (indexedPolicy) {
-              cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
-            }
-          });
+          cy.getByTestSubj('protection-updates-manifest-name-deployed-version-title');
+          cy.getByTestSubj('protection-updates-deployed-version').contains(
+            oneWeekAgo.format('MMMM DD, YYYY')
+          );
+          cy.getByTestSubj('protection-updates-manifest-name-version-to-deploy-title');
+          cy.getByTestSubj('protection-updates-version-to-deploy-view-mode');
+          cy.getByTestSubj('protection-updates-version-to-deploy-picker').should('not.exist');
 
-          it('should render the protection updates tab content', () => {
-            loadProtectionUpdatesUrl(policy.id);
-            getAutomaticUpdatesToggle().should('not.exist');
-            cy.getByTestSubj('protection-updates-state-view-mode');
-            cy.getByTestSubj('protection-updates-manifest-name-title');
+          cy.getByTestSubj('protection-updates-manifest-name-note-title').should('not.exist');
+          cy.getByTestSubj('protection-updates-manifest-note').should('not.exist');
+          cy.getByTestSubj('protection-updates-manifest-note-view-mode').should('not.exist');
+          expectSavedButtonToBeDisabled();
 
-            cy.getByTestSubj('protection-updates-manifest-name-deployed-version-title');
-            cy.getByTestSubj('protection-updates-deployed-version').contains(
-              oneWeekAgo.format('MMMM DD, YYYY')
-            );
-            cy.getByTestSubj('protection-updates-manifest-name-version-to-deploy-title');
-            cy.getByTestSubj('protection-updates-version-to-deploy-view-mode');
-            cy.getByTestSubj('protection-updates-version-to-deploy-picker').should('not.exist');
+          // --- With note field ---
+          setCustomProtectionUpdatesNote(policy.id, testNote);
+          loadProtectionUpdatesUrl(policy.id);
+          getAutomaticUpdatesToggle().should('not.exist');
+          cy.getByTestSubj('protection-updates-state-view-mode');
+          cy.getByTestSubj('protection-updates-manifest-name-title');
 
-            cy.getByTestSubj('protection-updates-manifest-name-note-title').should('not.exist');
-            cy.getByTestSubj('protection-updates-manifest-note').should('not.exist');
-            cy.getByTestSubj('protection-updates-manifest-note-view-mode').should('not.exist');
-            expectSavedButtonToBeDisabled();
-          });
+          cy.getByTestSubj('protection-updates-manifest-name-deployed-version-title');
+          cy.getByTestSubj('protection-updates-deployed-version').contains(
+            oneWeekAgo.format('MMMM DD, YYYY')
+          );
+          cy.getByTestSubj('protection-updates-manifest-name-version-to-deploy-title');
+          cy.getByTestSubj('protection-updates-version-to-deploy-view-mode');
+          cy.getByTestSubj('protection-updates-version-to-deploy-picker').should('not.exist');
+
+          cy.getByTestSubj('protection-updates-manifest-name-note-title');
+          cy.getByTestSubj('protection-updates-manifest-note').should('not.exist');
+          cy.getByTestSubj('protection-updates-manifest-note-view-mode').contains(testNote);
+          expectSavedButtonToBeDisabled();
         });
       });
     });

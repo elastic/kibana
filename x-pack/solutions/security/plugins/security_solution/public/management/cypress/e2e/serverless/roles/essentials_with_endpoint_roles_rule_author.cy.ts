@@ -62,17 +62,13 @@ describe.skip(
         login(ROLE.rule_author);
       });
 
-      for (const { id, title } of artifactPagesFullAccess) {
-        it(`should have CRUD access to: ${title}`, () => {
+      it('should have CRUD access to artifact pages, Endpoint list, and policy management', () => {
+        for (const { id } of artifactPagesFullAccess) {
           ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
-        });
-      }
+        }
 
-      it('should have access to Endpoint list page', () => {
         ensureEndpointListPageAuthzAccess('all', true);
-      });
 
-      it('should have access to policy management', () => {
         ensurePolicyListPageAuthzAccess('all', true);
         ensurePolicyDetailsPageAuthzAccess(
           loadedEndpoints.data.integrationPolicies[0].id,
@@ -81,14 +77,12 @@ describe.skip(
         );
       });
 
-      it(`should NOT have access to Host Isolation Exceptions`, () => {
+      it('should NOT have access to Host Isolation Exceptions or Fleet', () => {
         ensureArtifactPageAuthzAccess(
           'none',
           pageById.hostIsolationExceptions.id as EndpointArtifactPageId
         );
-      });
 
-      it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
         ensureFleetPermissionDeniedScreen();
       });

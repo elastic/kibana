@@ -39,18 +39,14 @@ describe.skip(
           login(roleName);
         });
 
-        it('should have READ access to Endpoint list page', () => {
+        it('should have READ access to Endpoint list and NOT have access to denied pages or Fleet', () => {
           ensureEndpointListPageAuthzAccess('read', true);
-        });
 
-        for (const { url, title } of deniedPages) {
-          it(`should NOT have access to: ${title}`, () => {
+          for (const { url } of deniedPages) {
             cy.visit(url);
             getNoPrivilegesPage().should('exist');
-          });
-        }
+          }
 
-        it('should NOT have access to Fleet', () => {
           visitFleetAgentList();
           ensureFleetPermissionDeniedScreen();
         });

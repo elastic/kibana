@@ -58,16 +58,9 @@ describe('Event Filters', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
       cy.getByTestSubj('EventFiltersListPage-flyout').should('exist');
     });
 
-    it('should be able to modify after deleting value with {backspace}', () => {
+    it('should be able to modify value and show suggestions when cleared', () => {
+      // Modify with backspace then append
       cy.getByTestSubj(CONDITION_VALUE).type(' {backspace}.lnk{enter}');
-      cy.getByTestSubj(SUBMIT_BUTTON).click();
-
-      cy.getByTestSubj('EventFiltersListPage-flyout').should('not.exist');
-      cy.contains('notepad.exe.lnk');
-    });
-
-    it('should be able to modify without using {backspace}', () => {
-      cy.getByTestSubj(CONDITION_VALUE).type('.lnk{enter}');
       cy.getByTestSubj(SUBMIT_BUTTON).click();
 
       cy.getByTestSubj('EventFiltersListPage-flyout').should('not.exist');

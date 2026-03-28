@@ -40,7 +40,18 @@ describe('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServerless'
   });
 
   describe('Sorting', () => {
-    it('Sorts by enrollment date descending order by default', () => {
+    const validateSortingInResponse = (field: string, direction: 'asc' | 'desc') =>
+      cy.wait(`@request.${field}`).then((subject) => {
+        expect(subject.response?.statusCode).to.equal(200);
+
+        const body = subject.response?.body as MetadataListResponse;
+        expect(body.total).to.equal(3);
+        expect(body.sortField).to.equal(field);
+        expect(body.sortDirection).to.equal(direction);
+      });
+
+    it('Sorts by enrollment date by default, supports sorting by any field, and accepts URL sort params', () => {
+      // --- Default sorting: enrollment date descending ---
       cy.intercept('api/endpoint/metadata*').as('getEndpointMetadataRequest');
 
       loadPage(APP_ENDPOINTS_PATH);
@@ -54,11 +65,8 @@ describe('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServerless'
 
       // no column shows sorting to be on
       cy.get('.euiTableHeaderButton-isSorted').should('not.exist');
-    });
 
-    it('User can sort by any field', () => {
-      loadPage(APP_ENDPOINTS_PATH);
-
+      // --- Sort by any field ---
       const fields = Object.values(EndpointSortableField).filter(
         // enrolled_at is not present in the table, it's just the default sorting
         (value) => value !== EndpointSortableField.ENROLLED_AT
@@ -78,9 +86,8 @@ describe('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServerless'
         cy.get('@header').should('have.attr', 'aria-sort', 'descending');
         cy.get('.euiTableHeaderButton-isSorted').should('exist');
       }
-    });
 
-    it('Sorting can be passed via URL', () => {
+      // --- Sorting via URL ---
       cy.intercept('api/endpoint/metadata*').as(`request.host_status`);
 
       loadPage(`${APP_ENDPOINTS_PATH}?sort_field=host_status&sort_direction=desc`);
@@ -92,15 +99,5 @@ describe('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServerless'
         'descending'
       );
     });
-
-    const validateSortingInResponse = (field: string, direction: 'asc' | 'desc') =>
-      cy.wait(`@request.${field}`).then((subject) => {
-        expect(subject.response?.statusCode).to.equal(200);
-
-        const body = subject.response?.body as MetadataListResponse;
-        expect(body.total).to.equal(3);
-        expect(body.sortField).to.equal(field);
-        expect(body.sortDirection).to.equal(direction);
-      });
   });
 });

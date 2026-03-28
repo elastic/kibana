@@ -137,14 +137,14 @@ describe(
         deleteConnectors();
       });
 
-      it('should properly initialize workflow insights with a connector already defined', () => {
+      it('should properly initialize with connector and disable Scan during ongoing scan', () => {
+        // Initialize with connector already defined
         loadEndpointDetailsFlyout(endpointId);
         chooseConnectorButtonExistsWithLabel(connectorName);
         surveySectionDoesNotExist();
         scanButtonShouldBe('enabled');
-      });
 
-      it('should disable Scan button if there is an ongoing scan', () => {
+        // Disable Scan button when there is an ongoing scan
         stubDefendInsightsApiResponse();
         loadEndpointDetailsFlyout(endpointId);
         scanButtonShouldBe('disabled');

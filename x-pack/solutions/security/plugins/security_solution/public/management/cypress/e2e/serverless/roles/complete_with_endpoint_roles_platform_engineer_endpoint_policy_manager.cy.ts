@@ -64,25 +64,22 @@ describe(
           login(roleName);
         });
 
-        for (const { id, title } of artifactPagesFullAccess) {
-          it(`should have CRUD access to: ${title}`, () => {
+        it('should have CRUD access to all artifact pages, granted pages, and Fleet', () => {
+          for (const { id } of artifactPagesFullAccess) {
             ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
-          });
-        }
+          }
 
-        for (const { url, title } of grantedAccessPages) {
-          it(`should have access to: ${title}`, () => {
+          for (const { url } of grantedAccessPages) {
             cy.visit(url);
             getNoPrivilegesPage().should('not.exist');
-          });
-        }
+          }
 
-        it('should have access to Fleet', () => {
+          // Fleet access
           visitFleetAgentList();
           getFleetAgentListTable().should('exist');
         });
 
-        it('should have access to Response Actions Log', () => {
+        it('should have correct Response Actions Log access and NOT execute response actions', () => {
           cy.visit(pageById.responseActionLog);
 
           if (roleName === 'endpoint_policy_manager') {
@@ -90,9 +87,7 @@ describe(
           } else {
             getNoPrivilegesPage().should('not.exist');
           }
-        });
 
-        it('should NOT have access to execute response actions', () => {
           visitEndpointList();
           openRowActionMenu().findByTestSubj('console').should('not.exist');
         });

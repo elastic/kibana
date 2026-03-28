@@ -59,35 +59,27 @@ describe(
         login(ROLE.threat_intelligence_analyst);
       });
 
-      it('should have access to Endpoint list page', () => {
+      it('should have access to Endpoint list and Blocklist, and NOT have access to denied pages', () => {
         ensureEndpointListPageAuthzAccess('read', true);
-      });
 
-      it(`should have CRUD access to: Blocklist`, () => {
         cy.visit(pageById.blocklist.url);
         getArtifactListEmptyStateAddButton(pageById.blocklist.id as EndpointArtifactPageId).should(
           'exist'
         );
-      });
 
-      for (const { url, title } of deniedPages) {
-        it(`should NOT have access to: ${title}`, () => {
+        for (const { url } of deniedPages) {
           cy.visit(url);
           getNoPrivilegesPage().should('exist');
-        });
-      }
+        }
+      });
 
-      it('should NOT have access to Fleet', () => {
+      it('should NOT have access to Fleet, have Response Actions Log access, and NOT execute actions', () => {
         visitFleetAgentList();
         ensureFleetPermissionDeniedScreen();
-      });
 
-      it('should have access to Response Actions Log', () => {
         cy.visit(pageById.responseActionLog);
         getNoPrivilegesPage().should('not.exist');
-      });
 
-      it('should NOT have access to execute response actions', () => {
         visitEndpointList();
         openRowActionMenu().findByTestSubj('console').should('not.exist');
       });

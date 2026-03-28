@@ -69,7 +69,8 @@ describe(
     });
 
     describe('Renders Trusted Devices form fields', () => {
-      it('Correctly renders trusted devices form for Windows only with Username field', () => {
+      it('Correctly renders form fields, options for Windows, and limited options for Windows and Mac', () => {
+        // --- Windows with Username field ---
         openTrustedDevices({ create: true });
 
         selectOs('Windows');
@@ -77,9 +78,8 @@ describe(
         selectField('Username');
         selectOperator('is');
         fillValue('test-user');
-      });
 
-      it('Renders all field options correctly for Windows only', () => {
+        // --- All field options for Windows ---
         openTrustedDevices({ create: true });
         selectOs('Windows');
 
@@ -95,9 +95,8 @@ describe(
           selectField(field);
           cy.getByTestSubj('trustedDevices-form-fieldSelect').should('contain', field);
         });
-      });
 
-      it('Shows limited field options for Windows and Mac (no Username)', () => {
+        // --- Limited fields for Windows and Mac (no Username) ---
         openTrustedDevices({ create: true });
         selectOs('Windows and Mac');
 

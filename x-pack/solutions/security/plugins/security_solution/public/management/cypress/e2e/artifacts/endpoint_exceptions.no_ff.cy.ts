@@ -23,31 +23,28 @@ describe('Endpoint exceptions - preserving behaviour without `endpointExceptions
       });
     };
 
-    it('should not display Endpoint Exceptions in Administration page', () => {
+    it('should not display Endpoint Exceptions anywhere and show Not Found when accessed directly', () => {
       loginWithReadAccess();
+
+      // Administration page
       cy.visit('app/security/manage');
       cy.getByTestSubj('LandingItem').should('not.contain', 'Endpoint exceptions');
-    });
 
-    it('should not display Endpoint Exceptions in Manage side panel', () => {
-      loginWithReadAccess();
+      // Manage side panel
       cy.visit(APP_PATH);
-
       essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ENDPOINT_EXCEPTIONS);
       cy.getByTestSubj('solutionSideNavPanel')
         .find(essSecurityHeaders.ENDPOINT_EXCEPTIONS)
         .should('not.exist');
-    });
 
-    it('should display Not Found page when opening url directly', () => {
-      loginWithReadAccess();
+      // Direct URL
       cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
       cy.getByTestSubj('notFoundPage').should('exist');
     });
   });
 
   describe('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
-    it('should not display Endpoint Exceptions in Assets side panel ', () => {
+    it('should not display Endpoint Exceptions and show Not Found when accessed directly', () => {
       // instead of testing with the lowest access (READ), we're testing with t3_analyst with WRITE access,
       // as we neither have any role with READ access, nor custom roles on serverless yet
       login(ROLE.t3_analyst);
@@ -58,10 +55,8 @@ describe('Endpoint exceptions - preserving behaviour without `endpointExceptions
         serverlessSecurityHeaders.ENDPOINT_EXCEPTIONS
       );
       cy.get(serverlessSecurityHeaders.ENDPOINT_EXCEPTIONS).should('not.exist');
-    });
 
-    it('should display Not Found page when opening url directly', () => {
-      login(ROLE.t3_analyst);
+      // Direct URL
       cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
       cy.getByTestSubj('notFoundPage').should('exist');
     });

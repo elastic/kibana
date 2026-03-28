@@ -42,25 +42,19 @@ describe.skip(
         login(ROLE.threat_intelligence_analyst);
       });
 
-      it('should have access to Endpoint list page', () => {
+      it('should have access to Endpoint list and Blocklist, and NOT have access to denied pages or Fleet', () => {
         ensureEndpointListPageAuthzAccess('read', true);
-      });
 
-      it(`should have ALL access to: Blocklist`, () => {
         cy.visit(pageById.blocklist.url);
         getArtifactListEmptyStateAddButton(pageById.blocklist.id as EndpointArtifactPageId).should(
           'exist'
         );
-      });
 
-      for (const { url, title } of deniedPages) {
-        it(`should NOT have access to: ${title}`, () => {
+        for (const { url } of deniedPages) {
           cy.visit(url);
           getNoPrivilegesPage().should('exist');
-        });
-      }
+        }
 
-      it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
         ensureFleetPermissionDeniedScreen();
       });

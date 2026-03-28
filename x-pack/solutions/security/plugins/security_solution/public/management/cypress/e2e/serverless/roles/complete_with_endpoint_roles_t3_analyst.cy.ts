@@ -82,47 +82,37 @@ describe(
         login(ROLE.t3_analyst);
       });
 
-      it('should have access to Endpoint list page', () => {
+      it('should have access to Endpoint list, Policy Management, and all artifact pages', () => {
         ensureEndpointListPageAuthzAccess('all', true);
-      });
 
-      it('should have read access to Endpoint Policy Management', () => {
         ensurePolicyListPageAuthzAccess('read', true);
         ensurePolicyDetailsPageAuthzAccess(
           loadedEndpoints.data.integrationPolicies[0].id,
           'read',
           true
         );
-      });
 
-      for (const { title, id } of artifactPagesFullAccess) {
-        it(`should have CRUD access to: ${title}`, () => {
+        for (const { id } of artifactPagesFullAccess) {
           ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
-        });
-      }
+        }
+      });
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
         ensureFleetPermissionDeniedScreen();
       });
 
-      describe('Response Actions access', () => {
-        beforeEach(() => {
-          visitEndpointList();
-          openConsoleFromEndpointList();
-          openConsoleHelpPanel();
-        });
+      it('should have correct response action access (granted and denied)', () => {
+        visitEndpointList();
+        openConsoleFromEndpointList();
+        openConsoleHelpPanel();
 
-        for (const [action, testSubj] of Object.entries(grantedResponseActions)) {
-          it(`should have access to execute action: ${action}`, () => {
-            cy.getByTestSubj(testSubj).should('exist');
-          });
+        for (const [, testSubj] of Object.entries(grantedResponseActions)) {
+          cy.getByTestSubj(testSubj).should('exist');
         }
 
-        for (const [action, testSubj] of Object.entries(deniedResponseActions)) {
-          it(`should NOT have access to execute: ${action}`, () => {
-            cy.getByTestSubj(testSubj).should('not.exist');
-          });
+        for (const [, testSubj] of Object.entries(deniedResponseActions)) {
+          cy.getByTestSubj(testSubj).should('not.exist');
         }
       });
     });

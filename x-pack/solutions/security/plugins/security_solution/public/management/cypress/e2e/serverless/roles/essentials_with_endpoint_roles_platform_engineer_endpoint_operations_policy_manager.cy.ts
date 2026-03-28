@@ -50,27 +50,21 @@ describe.skip(
           login(roleName);
         });
 
-        for (const { id, title } of artifactPagesFullAccess) {
-          it(`should have CRUD access to: ${title}`, () => {
+        it('should have CRUD access to artifact pages, granted pages, no HIE access, and Fleet access', () => {
+          for (const { id } of artifactPagesFullAccess) {
             ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
-          });
-        }
+          }
 
-        for (const { url, title } of grantedAccessPages) {
-          it(`should have access to: ${title}`, () => {
+          for (const { url } of grantedAccessPages) {
             cy.visit(url);
             getNoPrivilegesPage().should('not.exist');
-          });
-        }
+          }
 
-        it(`should NOT have access to Host Isolation Exceptions`, () => {
           ensureArtifactPageAuthzAccess(
             'none',
             pageById.hostIsolationExceptions.id as EndpointArtifactPageId
           );
-        });
 
-        it('should have access to Fleet', () => {
           visitFleetAgentList();
           getFleetAgentListTable().should('exist');
         });
