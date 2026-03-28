@@ -32,61 +32,66 @@ describe('FormattedKey', () => {
   });
 });
 
+const dateProps = {
+  dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+  dateTimezone: 'Browser',
+};
+
 describe('FormattedValue', () => {
   it('renders object values as pretty-printed JSON', () => {
     const obj = { foo: 'bar', nested: { a: 1 } };
-    const { container } = renderWithTheme(<FormattedValue value={obj} keyName="data" />);
+    const { container } = renderWithTheme(<FormattedValue value={obj} {...dateProps} />);
     expect(container.querySelector('pre')?.textContent).toBe(JSON.stringify(obj, null, 4));
   });
 
   it('renders boolean true as string', () => {
-    const { container } = renderWithTheme(<FormattedValue value={true} keyName="active" />);
+    const { container } = renderWithTheme(<FormattedValue value={true} {...dateProps} />);
     expect(container.textContent).toBe('true');
   });
 
   it('renders boolean false as string', () => {
-    const { container } = renderWithTheme(<FormattedValue value={false} keyName="active" />);
+    const { container } = renderWithTheme(<FormattedValue value={false} {...dateProps} />);
     expect(container.textContent).toBe('false');
   });
 
   it('renders number values as string', () => {
-    const { container } = renderWithTheme(<FormattedValue value={42} keyName="count" />);
+    const { container } = renderWithTheme(<FormattedValue value={42} {...dateProps} />);
     expect(container.textContent).toBe('42');
   });
 
   it('renders N/A for null values', () => {
-    const { container } = renderWithTheme(<FormattedValue value={null} keyName="missing" />);
+    const { container } = renderWithTheme(<FormattedValue value={null} {...dateProps} />);
     expect(container.textContent).toBe('N/A');
   });
 
   it('renders N/A for empty string values', () => {
-    const { container } = renderWithTheme(<FormattedValue value="" keyName="empty" />);
+    const { container } = renderWithTheme(<FormattedValue value="" {...dateProps} />);
     expect(container.textContent).toBe('N/A');
   });
 
-  it('renders plain string values as-is', () => {
-    const { container } = renderWithTheme(<FormattedValue value="hello world" keyName="msg" />);
-    expect(container.textContent).toBe('hello world');
-  });
-
-  it('formats @timestamp values in UTC', () => {
+  it('formats date values with default settings', () => {
     const { container } = renderWithTheme(
-      <FormattedValue value="2024-06-15T14:30:45.123Z" keyName="@timestamp" />
-    );
-    expect(container.textContent).toBe('Jun 15, 2024 @ 14:30:45.123');
-  });
-
-  it('formats non-@timestamp date values in local time', () => {
-    const { container } = renderWithTheme(
-      <FormattedValue value="2024-06-15T14:30:45.123Z" keyName="event.created" />
+      <FormattedValue value="2024-06-15T14:30:45.123Z" {...dateProps} />
     );
     expect(container.textContent).toMatch(/Jun 15, 2024 @ \d{2}:\d{2}:45\.123/);
   });
 
-  it('does not format invalid date strings', () => {
+  it('formats date values with custom settings', () => {
     const { container } = renderWithTheme(
-      <FormattedValue value="not-a-date" keyName="@timestamp" />
+      <FormattedValue
+        value="2024-06-15T14:30:45.123+01:00"
+        dateFormat="HH:mm:ss.SSS"
+        dateTimezone="UTC"
+      />
     );
-    expect(container.textContent).toBe('not-a-date');
+    expect(container.textContent).toMatch('13:30:45.123');
   });
+
+  it.each([['hello world'], ['synth-service-2'], ['1.3.4'], ['1234567'], ['service-1']])(
+    'renders plain string "%s" as-is',
+    (value) => {
+      const { container } = renderWithTheme(<FormattedValue value={value} {...dateProps} />);
+      expect(container.textContent).toBe(value);
+    }
+  );
 });

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dashboards-selector'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/actionable-obs-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/dashboards-selector'
+  title: '@kbn/dashboards-selector'
   description: Moon project for @kbn/dashboards-selector
   channel: ''
   owner: '@elastic/actionable-obs-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/dashboards/dashboards-selector
+  sourceRoot: src/platform/packages/shared/dashboards/dashboards-selector
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/ui-actions-plugin'
@@ -34,14 +33,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

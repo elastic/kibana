@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { omit, pick } from 'lodash';
 
 import { FLEET_SERVER_PACKAGE } from '../../../common/constants';
@@ -42,9 +43,14 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
-  // Get all possible fleet server or scoped normal agent policies
+  const unscopedSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+  // Fetch all fleet server policies once (cross-space). Used for both the space-filtered
+  // policy list and the global has_active check.
+  const allFleetServerPolicies = await getFleetServerPolicies(unscopedSoClient);
+
+  // Get the space-filtered policy list and the scoped agent policy for host/output lookups
   const { fleetServerPolicies, scopedAgentPolicy: scopedAgentPolicyResponse } =
-    await getFleetServerOrAgentPolicies(soClient, agentPolicyId);
+    await getFleetServerOrAgentPolicies(soClient, agentPolicyId, allFleetServerPolicies);
   const scopedAgentPolicy = scopedAgentPolicyResponse || {
     id: undefined,
     name: undefined,
@@ -54,11 +60,21 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   };
   // Check if there is any active fleet server enrolled into the fleet server policies policies
   if (fleetServerPolicies) {
-    settingsResponse.fleet_server.policies = fleetServerPolicies;
+    settingsResponse.fleet_server.policies = fleetServerPolicies.map(
+      ({ id, name, is_managed, is_default_fleet_server, has_fleet_server }) => ({
+        id,
+        name,
+        is_managed,
+        is_default_fleet_server,
+        has_fleet_server,
+      })
+    );
+    // has_active is a global check: fleet servers in any space count as active.
+    // Use all cross-space policies
     settingsResponse.fleet_server.has_active = await hasFleetServersForPolicies(
       esClient,
-      appContextService.getInternalUserSOClientWithoutSpaceExtension(),
-      fleetServerPolicies,
+      unscopedSoClient,
+      allFleetServerPolicies,
       true
     );
   }
@@ -127,25 +143,41 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   return response.ok({ body: settingsResponse });
 };
 
+const mapPolicy = (policy: AgentPolicy) => ({
+  id: policy.id,
+  name: policy.name,
+  is_managed: policy.is_managed,
+  is_default_fleet_server: policy.is_default_fleet_server,
+  has_fleet_server: policy.has_fleet_server,
+  fleet_server_host_id: policy.fleet_server_host_id,
+  download_source_id: policy.download_source_id,
+  space_ids: policy.space_ids,
+  data_output_id: policy.data_output_id,
+});
+
+const filterPoliciesForCurrentSpace = (
+  soClient: SavedObjectsClientContract,
+  allFleetServerPolicies?: AgentPolicy[]
+) => {
+  // Filter the pre-fetched cross-space policies to those visible in the current space
+  const currentSpaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+  const currentSpacePolicies = (allFleetServerPolicies ?? []).filter((p) => {
+    if (!p.space_ids || p.space_ids.length === 0) {
+      return currentSpaceId === DEFAULT_SPACE_ID;
+    }
+    return p.space_ids.includes(currentSpaceId);
+  });
+  return currentSpacePolicies;
+};
+
 export const getFleetServerOrAgentPolicies = async (
   soClient: SavedObjectsClientContract,
-  agentPolicyId?: string
+  agentPolicyId?: string,
+  allFleetServerPolicies?: AgentPolicy[]
 ): Promise<{
   fleetServerPolicies?: EnrollmentSettingsFleetServerPolicy[];
   scopedAgentPolicy?: EnrollmentSettingsFleetServerPolicy;
 }> => {
-  const mapPolicy = (policy: AgentPolicy) => ({
-    id: policy.id,
-    name: policy.name,
-    is_managed: policy.is_managed,
-    is_default_fleet_server: policy.is_default_fleet_server,
-    has_fleet_server: policy.has_fleet_server,
-    fleet_server_host_id: policy.fleet_server_host_id,
-    download_source_id: policy.download_source_id,
-    space_ids: policy.space_ids,
-    data_output_id: policy.data_output_id,
-  });
-
   // If an agent policy is specified, return only that policy
   if (agentPolicyId) {
     const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId, true);
@@ -164,11 +196,8 @@ export const getFleetServerOrAgentPolicies = async (
     return {};
   }
 
-  // If an agent policy is not specified, return all fleet server policies
-  const fleetServerPolicies = (
-    await getFleetServerPolicies(appContextService.getInternalUserSOClientWithoutSpaceExtension())
-  ).map(mapPolicy);
-  return { fleetServerPolicies };
+  const currentSpacePolicies = filterPoliciesForCurrentSpace(soClient, allFleetServerPolicies);
+  return { fleetServerPolicies: currentSpacePolicies.map(mapPolicy) };
 };
 
 export const getDownloadSource = async (

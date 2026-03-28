@@ -11,7 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import Url from 'url';
 import type { ServerlessProjectType } from '@kbn/es';
 import { createHash } from 'crypto';
-import { KbnClient } from '../kbn_client';
+import { KbnClient } from '@kbn/kbn-client';
 import { isValidHostname, readCloudUsersFromFile } from './helper';
 import type { Session } from './saml_auth';
 import { createCloudSAMLSession, createLocalSAMLSession, getSecurityProfile } from './saml_auth';

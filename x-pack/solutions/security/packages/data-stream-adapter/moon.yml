@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/data-stream-adapter'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-threat-hunting'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/data-stream-adapter'
+  title: '@kbn/data-stream-adapter'
   description: Moon project for @kbn/data-stream-adapter
   channel: ''
   owner: '@elastic/security-threat-hunting'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/data-stream-adapter
+  sourceRoot: x-pack/solutions/security/packages/data-stream-adapter
 dependsOn:
   - '@kbn/core'
   - '@kbn/index-adapter'
@@ -33,14 +32,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
