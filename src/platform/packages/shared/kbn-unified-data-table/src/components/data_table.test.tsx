@@ -923,6 +923,47 @@ describe('UnifiedDataTable', () => {
     EXTENDED_JEST_TIMEOUT
   );
 
+  it(
+    'should provide and clear document view metadata when rendered externally',
+    async () => {
+      const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+      const [expandedDoc] = rows;
+      const setRenderDocumentViewMeta = jest.fn();
+
+      if (!expandedDoc) {
+        throw new Error('Expected at least one row for external document view test');
+      }
+
+      const component = await getComponent({
+        ...getProps(),
+        rows,
+        expandedDoc,
+        setExpandedDoc: jest.fn(),
+        renderDocumentView: 'external',
+        setRenderDocumentViewMeta,
+      });
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith({
+          displayedRows: rows,
+          displayedColumns: ['_source'],
+        });
+      });
+
+      setRenderDocumentViewMeta.mockClear();
+
+      await act(async () => {
+        component.setProps({ expandedDoc: undefined });
+        component.update();
+      });
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith(undefined);
+      });
+    },
+    EXTENDED_JEST_TIMEOUT
+  );
+
   describe('externalAdditionalControls', () => {
     it(
       'should render external additional toolbar controls',
