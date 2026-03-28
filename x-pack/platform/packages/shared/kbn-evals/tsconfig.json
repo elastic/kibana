@@ -25,11 +25,6 @@
     "@kbn/repo-info",
     "@kbn/std",
     "@kbn/kbn-client",
-    "@kbn/test-es-server",
     "@kbn/inference-prompt-utils",
-    "@kbn/tracing-utils",
-    "@kbn/dev-cli-errors",
-    "@kbn/config-schema",
-    "@kbn/evals-common"
   ]
 }
