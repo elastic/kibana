@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger, StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
@@ -16,14 +16,20 @@ import { GENERATE_LEADS_URL } from '../../../../../common/entity_analytics/lead_
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import type { StartPlugins } from '../../../../plugin';
 import { createLeadGenerationService } from '../services/lead_generation_service';
+import { fetchAllLeadEntities } from '../entity_conversion';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 const GenerateLeadsRequestBody = z.object({
   mode: z.enum(['adhoc', 'scheduled']).optional().default('adhoc'),
 });
 
-export const generateLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const generateLeadsRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger,
+  getStartServices: StartServicesAccessor<StartPlugins>
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -53,11 +59,14 @@ export const generateLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], 
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
           const executionUuid = uuidv4();
 
+          const [, startPlugins] = await getStartServices();
+          const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
+
           const service = createLeadGenerationService({
             esClient,
             logger,
             spaceId,
-            entityStoreDataClient: securitySolution.getEntityStoreDataClient(),
+            fetchEntities: () => fetchAllLeadEntities(crudClient),
             riskScoreDataClient: securitySolution.getRiskScoreDataClient(),
           });
 

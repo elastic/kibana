@@ -18,7 +18,7 @@ export {
   createTemporalStateModule,
   createBehavioralAnalysisModule,
 } from './observation_modules';
-export { entityRecordToLeadEntity } from './entity_conversion';
+export { entityRecordToLeadEntity, fetchAllLeadEntities } from './entity_conversion';
 export { createLeadGenerationService } from './services/lead_generation_service';
 export type {
   Lead,

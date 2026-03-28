@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { EntityStoreDataClient } from '../../entity_store/entity_store_data_client';
 import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import type { LeadGenerationMode } from '../../../../../common/entity_analytics/lead_generation/constants';
 import { getLeadsIndexName } from '../../../../../common/entity_analytics/lead_generation/constants';
@@ -15,42 +14,13 @@ import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
 import { createRiskScoreModule } from '../observation_modules/risk_score_module';
 import { createTemporalStateModule } from '../observation_modules/temporal_state_module';
 import { createBehavioralAnalysisModule } from '../observation_modules/behavioral_analysis_module';
-import { entityRecordToLeadEntity } from '../entity_conversion';
-import type { Lead } from '../types';
-
-const ENTITY_SOURCE_FIELDS = [
-  '@timestamp',
-  'entity.name',
-  'entity.type',
-  'entity.EngineMetadata.Type',
-  'entity.id',
-  'entity.risk',
-  'entity.attributes',
-  'entity.behaviors',
-  'entity.lifecycle',
-  'entity.relationships',
-  'user.name',
-  'user.id',
-  'user.email',
-  'user.full_name',
-  'user.roles',
-  'user.domain',
-  'host.name',
-  'host.hostname',
-  'host.id',
-  'host.ip',
-  'host.os.name',
-  'host.type',
-  'host.domain',
-  'host.architecture',
-  'asset.criticality',
-];
+import type { Lead, LeadEntity } from '../types';
 
 interface LeadGenerationServiceDeps {
   readonly esClient: ElasticsearchClient;
   readonly logger: Logger;
   readonly spaceId: string;
-  readonly entityStoreDataClient: EntityStoreDataClient;
+  readonly fetchEntities: () => Promise<LeadEntity[]>;
   readonly riskScoreDataClient: RiskScoreDataClient;
 }
 
@@ -63,27 +33,23 @@ export const createLeadGenerationService = ({
   esClient,
   logger,
   spaceId,
-  entityStoreDataClient,
+  fetchEntities,
   riskScoreDataClient,
 }: LeadGenerationServiceDeps) => ({
   async generate(mode: LeadGenerationMode, executionId: string): Promise<GenerateResult> {
     const routeStart = Date.now();
 
     const fetchStart = Date.now();
-    const entityRecords = await entityStoreDataClient.fetchAllUnifiedLatestEntities({
-      sourceFields: ENTITY_SOURCE_FIELDS,
-    });
+    const leadEntities = await fetchEntities();
     logger.debug(
       `[LeadGeneration] Entity fetch: ${Date.now() - fetchStart}ms (${
-        entityRecords.length
-      } records)`
+        leadEntities.length
+      } entities)`
     );
 
-    if (entityRecords.length === 0) {
+    if (leadEntities.length === 0) {
       return { leads: [], total: 0 };
     }
-
-    const leadEntities = entityRecords.map(entityRecordToLeadEntity);
 
     const engine = createLeadGenerationEngine({ logger });
     engine.registerModule(createRiskScoreModule({ riskScoreDataClient, logger }));
