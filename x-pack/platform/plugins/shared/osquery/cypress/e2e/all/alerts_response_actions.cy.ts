@@ -7,12 +7,20 @@
 
 import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { checkActionItemsInResults, loadRuleAlerts, navigateToRule } from '../../tasks/live_query';
+import {
+  checkActionItemsInResults,
+  inputQuery,
+  loadRuleAlerts,
+  navigateToRule,
+  submitQuery,
+  takeOsqueryActionWithParams,
+} from '../../tasks/live_query';
+import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
 describe(
-  'Alert Flyout Automated Action Results',
+  'Alert Response Actions',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     let ruleId: string;
@@ -27,15 +35,15 @@ describe(
       });
     });
 
-    beforeEach(() => {
-      navigateToRule(ruleName);
-    });
-
     after(() => {
       cleanupRule(ruleId);
     });
 
-    it('can visit discover from response action results', { tags: ['@ess'] }, () => {
+    // Combines: discover, lens, and timeline from automated action results (3 tests → 1)
+    it('can visit discover, lens, and add to timeline from response action results', { tags: ['@ess'] }, () => {
+      navigateToRule(ruleName);
+
+      // Discover
       const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
@@ -58,20 +66,14 @@ describe(
           });
           cy.contains(discoverRegex);
         });
-    });
 
-    it('can visit lens from response action results', { tags: ['@ess'] }, () => {
+      // Lens
+      navigateToRule(ruleName);
       const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
       cy.getBySel('securitySolutionFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: true,
-        timeline: true,
-      });
       cy.getBySel('osquery-results-comment')
         .first()
         .within(() => {
@@ -98,6 +100,7 @@ describe(
       'can add to timeline from response action results',
       { tags: ['@ess', '@serverless'] },
       () => {
+        navigateToRule(ruleName);
         const timelineRegex = new RegExp(`Added ${UUID_REGEX} to Timeline`);
         const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
         cy.getBySel('expand-event').first().click();
@@ -125,5 +128,45 @@ describe(
         cy.contains(filterRegex);
       }
     );
+
+    it('should substitute parameters in investigation guide', () => {
+      loadRuleAlerts(ruleName);
+      navigateToRule(ruleName);
+      cy.getBySel('expand-event').first().click();
+      cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();
+      cy.contains('Get processes').should('be.visible').dblclick({ force: true });
+      cy.get(OSQUERY_FLYOUT_BODY_EDITOR).click();
+      cy.getBySel('flyout-body-osquery').contains(/SELECT \* FROM os_version where name='.*';/);
+      cy.getBySel('flyout-body-osquery').find('input[value="host.os.platform"]').should('exist');
+      cy.getBySel('flyout-body-osquery').contains('platform');
+    });
+
+    it('should be able to run take action query against all enrolled agents', () => {
+      loadRuleAlerts(ruleName);
+      navigateToRule(ruleName);
+      cy.getBySel('expand-event').first().click();
+      cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click({ force: true });
+      cy.getBySel('osquery-action-item').click();
+      cy.getBySel('agentSelection').within(() => {
+        cy.getBySel('comboBoxClearButton').click();
+        cy.getBySel('comboBoxInput').type('All{downArrow}{enter}{esc}');
+        cy.contains('All agents');
+      });
+      inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
+        parseSpecialCharSequences: false,
+      });
+      submitQuery();
+      cy.getBySel('flyout-body-osquery').within(() => {
+        cy.get('[data-grid-row-index]', { timeout: 6000000 }).should('have.length.at.least', 2);
+      });
+    });
+
+    it('should substitute params in osquery ran from timelines alerts', () => {
+      loadRuleAlerts(ruleName);
+      navigateToRule(ruleName);
+      cy.getBySel('send-alert-to-timeline-button').first().click();
+      cy.getBySel('docTableExpandToggleColumn').first().click();
+      takeOsqueryActionWithParams();
+    });
   }
 );

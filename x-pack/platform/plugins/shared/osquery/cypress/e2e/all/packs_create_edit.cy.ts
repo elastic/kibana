@@ -37,6 +37,30 @@ import { loadSavedQuery, cleanupSavedQuery, cleanupPack, loadPack } from '../../
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
+/** Helper to fetch the first package policy's policy_ids */
+const getFirstPolicyIds = () =>
+  request<{ items: PackagePolicy[] }>({
+    url: '/internal/osquery/fleet_wrapper/package_policies',
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.internal.v1,
+    },
+  }).then((response) => response.body.items[0].policy_ids);
+
+/** Helper to create a standard test pack with a single saved query */
+const createStandardPack = (savedQueryName: string) =>
+  getFirstPolicyIds().then((policyIds) =>
+    loadPack({
+      policy_ids: policyIds,
+      queries: {
+        [savedQueryName]: {
+          ecs_mapping: {},
+          interval: 60,
+          query: 'select * from uptime;',
+        },
+      },
+    })
+  );
+
 describe(
   'Packs - Create and Edit',
   // TODO: failing on MKI https://github.com/elastic/kibana/issues/200302
@@ -135,7 +159,7 @@ describe(
         getIdFormField().type('Query1');
         inputQuery('select * from uptime;');
         cy.getBySel('timeout-input').clear().type('601');
-        cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
+        cy.wait(500);
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
         cy.getBySel(ADD_QUERY_BUTTON).click();
@@ -147,7 +171,7 @@ describe(
 
         cy.getBySel('resultsTypeField').click();
         cy.contains('Differential').click();
-        cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
+        cy.wait(500);
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
         cy.getBySel(ADD_QUERY_BUTTON).click();
@@ -158,7 +182,7 @@ describe(
         cy.getBySel('timeout-input').clear().type('603');
         cy.getBySel('resultsTypeField').click();
         cy.contains('Differential (Ignore removals)').click();
-        cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
+        cy.wait(500);
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
         cy.getBySel(SAVE_PACK_BUTTON).click();
@@ -246,7 +270,7 @@ describe(
       });
     });
 
-    describe('Check if pack is created', { tags: ['@ess', '@serverless'] }, () => {
+    describe('Create pack from saved query', { tags: ['@ess', '@serverless'] }, () => {
       let packId: string;
       let packName: string;
 
@@ -288,372 +312,195 @@ describe(
       });
     });
 
-    describe('to click the edit button and edit pack', { tags: ['@ess', '@serverless'] }, () => {
-      let packId: string;
-      let packName: string;
-      let newQueryName: string;
-
-      beforeEach(() => {
-        request<{ items: PackagePolicy[] }>({
-          url: '/internal/osquery/fleet_wrapper/package_policies',
-          headers: {
-            'Elastic-Api-Version': API_VERSIONS.internal.v1,
-          },
-        })
-          .then((response) =>
-            loadPack({
-              policy_ids: response.body.items[0].policy_ids,
-              queries: {
-                [savedQueryName]: {
-                  ecs_mapping: {},
-                  interval: 60,
-                  query: 'select * from uptime;',
-                },
-              },
-            })
-          )
-          .then((pack) => {
-            packId = pack.saved_object_id;
-            packName = pack.name;
-          });
-        newQueryName = 'new-query-name' + generateRandomStringName(1)[0];
-      });
-
-      afterEach(() => {
-        cleanupPack(packId);
-      });
-
-      it('', () => {
-        preparePack(packName);
-        cy.getBySel('edit-pack-button').click();
-
-        cy.contains(`Edit ${packName}`);
-        cy.getBySel(ADD_QUERY_BUTTON).click();
-
-        cy.contains('Attach next query');
-        inputQuery('select * from uptime');
-        cy.get(formFieldInputSelector('id')).type(`${savedQueryName}{downArrow}{enter}`);
-
-        cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
-        cy.contains('ID must be unique').should('exist');
-        cy.get(formFieldInputSelector('id')).type(`${newQueryName}{downArrow}{enter}`);
-        cy.contains('ID must be unique').should('not.exist');
-        cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
-        cy.get(TABLE_ROWS).contains(newQueryName);
-        cy.getBySel(UPDATE_PACK_BUTTON).click();
-        closeModalIfVisible();
-        cy.contains(`Successfully updated "${packName}" pack`);
-        closeToastIfVisible();
-      });
-    });
-
+    // Combines: edit pack, ID validation, deactivate/activate, delete queries, and delete pack
     describe(
-      'should trigger validation when saved query is being chosen',
+      'pack edit operations and lifecycle',
       { tags: ['@ess', '@serverless'] },
       () => {
         let packId: string;
         let packName: string;
 
-        before(() => {
-          request<{ items: PackagePolicy[] }>({
-            url: '/internal/osquery/fleet_wrapper/package_policies',
-            headers: {
-              'Elastic-Api-Version': API_VERSIONS.internal.v1,
-            },
-          })
-            .then((response) =>
-              loadPack({
-                policy_ids: response.body.items[0].policy_ids,
-                queries: {
-                  [savedQueryName]: {
-                    ecs_mapping: {},
-                    interval: 60,
-                    query: 'select * from uptime;',
-                  },
-                },
-              })
-            )
-            .then((pack) => {
-              packId = pack.saved_object_id;
-              packName = pack.name;
-            });
+        beforeEach(() => {
+          createStandardPack(savedQueryName).then((pack) => {
+            packId = pack.saved_object_id;
+            packName = pack.name;
+          });
         });
 
-        after(() => {
+        afterEach(() => {
           cleanupPack(packId);
         });
 
-        it('', () => {
+        it('should edit pack, validate unique ID, and manage queries', () => {
+          const newQueryName = 'new-query-name' + generateRandomStringName(1)[0];
+
+          // Edit pack: add new query with unique ID validation
+          preparePack(packName);
+          cy.getBySel('edit-pack-button').click();
+          cy.contains(`Edit ${packName}`);
+          cy.getBySel(ADD_QUERY_BUTTON).click();
+          cy.contains('Attach next query');
+          inputQuery('select * from uptime');
+          cy.get(formFieldInputSelector('id')).type(`${savedQueryName}{downArrow}{enter}`);
+          cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
+          cy.contains('ID must be unique').should('exist');
+          cy.get(formFieldInputSelector('id')).type(`${newQueryName}{downArrow}{enter}`);
+          cy.contains('ID must be unique').should('not.exist');
+          cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
+          cy.get(TABLE_ROWS).contains(newQueryName);
+          cy.getBySel(UPDATE_PACK_BUTTON).click();
+          closeModalIfVisible();
+          cy.contains(`Successfully updated "${packName}" pack`);
+          closeToastIfVisible();
+        });
+
+        it('should trigger validation when saved query is chosen with existing ID', () => {
           preparePack(packName);
           cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
-
           cy.getBySel(ADD_QUERY_BUTTON).click();
-
           cy.contains('Attach next query');
           cy.getBySel('globalLoadingIndicator').should('not.exist');
           cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
           cy.contains('ID must be unique').should('not.exist');
           cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
           cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
-
           cy.contains('ID must be unique').should('exist');
           cy.getBySel(FLYOUT_SAVED_QUERY_CANCEL_BUTTON).click();
+        });
+
+        it('should deactivate, activate, and delete all queries in pack', () => {
+          // Deactivate and activate
+          cy.contains('Packs').click();
+          changePackActiveStatus(packName);
+          changePackActiveStatus(packName);
+
+          // Delete all queries
+          preparePack(packName);
+          cy.contains(/^Edit$/).click();
+          cy.getBySel('checkboxSelectAll').click();
+          cy.contains(/^Delete \d+ quer(y|ies)/).click();
+          cy.contains(/^Update pack$/).click();
+          closeModalIfVisible();
+          cy.get('a').contains(packName).click();
+          cy.contains(`${packName} details`).should('exist');
+          cy.contains(/^No items found/).should('exist');
+        });
+
+        it('should delete pack', () => {
+          preparePack(packName);
+          cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
+          deleteAndConfirm('pack');
         });
       }
     );
 
-    describe('should open lens in new tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
-      let packId: string;
-      let packName: string;
+    describe(
+      'should verify that packs are triggered',
+      { tags: ['@ess', '@serverless'] },
+      () => {
+        let packId: string;
+        let packName: string;
 
-      beforeEach(() => {
-        request<{ items: PackagePolicy[] }>({
-          url: '/internal/osquery/fleet_wrapper/package_policies',
-          headers: {
-            'Elastic-Api-Version': API_VERSIONS.internal.v1,
-          },
-        })
-          .then((response) =>
-            loadPack({
-              policy_ids: response.body.items[0].policy_ids,
-              queries: {
-                [savedQueryName]: {
-                  ecs_mapping: {},
-                  interval: 60,
-                  query: 'select * from uptime;',
-                },
-              },
-            })
-          )
-          .then((pack) => {
+        beforeEach(() => {
+          createStandardPack(savedQueryName).then((pack) => {
             packId = pack.saved_object_id;
             packName = pack.name;
           });
-      });
+        });
 
-      afterEach(() => {
-        cleanupPack(packId);
-      });
+        afterEach(() => {
+          cleanupPack(packId);
+        });
 
-      it('', { tags: ['@ess', '@brokenInServerless'] }, () => {
-        let lensUrl = '';
-        cy.window().then((win) => {
-          cy.stub(win, 'open')
-            .as('windowOpen')
-            .callsFake((url) => {
-              lensUrl = url;
+        it('', () => {
+          preparePack(packName);
+          cy.contains(`${packName} details`).should('exist');
+
+          recurse<string>(
+            () => {
+              cy.getBySel('docsLoading').should('exist');
+              cy.getBySel('docsLoading').should('not.exist');
+
+              return cy
+                .get('tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent')
+                .invoke('text');
+            },
+            (response) => response !== '-',
+            {
+              timeout: 300000,
+              post: () => {
+                cy.reload();
+              },
+            }
+          );
+          cy.getBySel('last-results-date').should('exist');
+          cy.getBySel('docs-count-badge').contains('1');
+          cy.getBySel('agent-count-badge').contains('1');
+          cy.getBySel('packResultsErrorsEmpty').should('have.length', 1);
+        });
+      }
+    );
+
+    // Combines: open lens + open discover in new tab
+    describe(
+      'should open lens and discover in new tab',
+      { tags: ['@ess', '@brokenInServerless'] },
+      () => {
+        let packId: string;
+        let packName: string;
+
+        before(() => {
+          createStandardPack(savedQueryName).then((pack) => {
+            packId = pack.saved_object_id;
+            packName = pack.name;
+          });
+        });
+
+        after(() => {
+          cleanupPack(packId);
+        });
+
+        it('should open lens from pack details', () => {
+          let lensUrl = '';
+          cy.window().then((win) => {
+            cy.stub(win, 'open')
+              .as('windowOpen')
+              .callsFake((url) => {
+                lensUrl = url;
+              });
+          });
+          preparePack(packName);
+          cy.getBySel('docsLoading').should('exist');
+          cy.getBySel('docsLoading').should('not.exist');
+          cy.get(`[aria-label="View in Lens"]`).eq(0).click();
+          cy.window()
+            .its('open')
+            .then(() => {
+              cy.visit(lensUrl);
+            });
+          cy.getBySel('lnsWorkspace').should('exist');
+          cy.getBySel('breadcrumbs').contains(
+            `Action pack_default--${packName}_${savedQueryName}`
+          );
+        });
+
+        it('should open discover from pack details', () => {
+          preparePack(packName);
+          cy.getBySel('docsLoading').should('exist');
+          cy.getBySel('docsLoading').should('not.exist');
+          cy.get(`[aria-label="View in Discover"]`)
+            .eq(0)
+            .should('have.attr', 'href')
+            .then(($href) => {
+              const actionId = `pack_default--${packName}_${savedQueryName}`;
+              expect($href).to.include(encodeURIComponent(actionId));
+              // @ts-expect-error-next-line href string - check types
+              cy.visit($href);
+              cy.getBySel('breadcrumbs').contains('Discover').should('exist');
             });
         });
-        preparePack(packName);
-        cy.getBySel('docsLoading').should('exist');
-        cy.getBySel('docsLoading').should('not.exist');
-        cy.get(`[aria-label="View in Lens"]`).eq(0).click();
-        cy.window()
-          .its('open')
-          .then(() => {
-            cy.visit(lensUrl);
-          });
-        cy.getBySel('lnsWorkspace').should('exist');
-        cy.getBySel('breadcrumbs').contains(`Action pack_default--${packName}_${savedQueryName}`);
-      });
-    });
-
-    describe('should open discover in new tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
-      let packId: string;
-      let packName: string;
-
-      before(() => {
-        request<{ items: PackagePolicy[] }>({
-          url: '/internal/osquery/fleet_wrapper/package_policies',
-          headers: {
-            'Elastic-Api-Version': API_VERSIONS.internal.v1,
-          },
-        })
-          .then((response) =>
-            loadPack({
-              policy_ids: response.body.items[0].policy_ids,
-              queries: {
-                [savedQueryName]: {
-                  ecs_mapping: {},
-                  interval: 60,
-                  query: 'select * from uptime;',
-                },
-              },
-            })
-          )
-          .then((pack) => {
-            packId = pack.saved_object_id;
-            packName = pack.name;
-          });
-      });
-
-      after(() => {
-        cleanupPack(packId);
-      });
-
-      it('', () => {
-        preparePack(packName);
-        cy.getBySel('docsLoading').should('exist');
-        cy.getBySel('docsLoading').should('not.exist');
-        cy.get(`[aria-label="View in Discover"]`)
-          .eq(0)
-          .should('have.attr', 'href')
-          .then(($href) => {
-            const actionId = `pack_default--${packName}_${savedQueryName}`;
-            expect($href).to.include(encodeURIComponent(actionId));
-            // @ts-expect-error-next-line href string - check types
-            cy.visit($href);
-            cy.getBySel('breadcrumbs').contains('Discover').should('exist');
-          });
-      });
-    });
-
-    describe('deactivate and activate pack', { tags: ['@ess', '@serverless'] }, () => {
-      let packId: string;
-      let packName: string;
-
-      beforeEach(() => {
-        request<{ items: PackagePolicy[] }>({
-          url: '/internal/osquery/fleet_wrapper/package_policies',
-          headers: {
-            'Elastic-Api-Version': API_VERSIONS.internal.v1,
-          },
-        })
-          .then((response) =>
-            loadPack({
-              policy_ids: response.body.items[0].policy_ids,
-              queries: {
-                [savedQueryName]: {
-                  ecs_mapping: {},
-                  interval: 60,
-                  query: 'select * from uptime;',
-                },
-              },
-            })
-          )
-          .then((pack) => {
-            packId = pack.saved_object_id;
-            packName = pack.name;
-          });
-      });
-
-      afterEach(() => {
-        cleanupPack(packId);
-      });
-
-      it('', () => {
-        cy.contains('Packs').click();
-        changePackActiveStatus(packName);
-        changePackActiveStatus(packName);
-      });
-    });
-
-    describe('should verify that packs are triggered', { tags: ['@ess', '@serverless'] }, () => {
-      let packId: string;
-      let packName: string;
-
-      beforeEach(() => {
-        request<{ items: PackagePolicy[] }>({
-          url: '/internal/osquery/fleet_wrapper/package_policies',
-          headers: {
-            'Elastic-Api-Version': API_VERSIONS.internal.v1,
-          },
-        })
-          .then((response) =>
-            loadPack({
-              policy_ids: response.body.items[0].policy_ids,
-              queries: {
-                [savedQueryName]: { ecs_mapping: {}, interval: 60, query: 'select * from uptime;' },
-              },
-            })
-          )
-          .then((pack) => {
-            packId = pack.saved_object_id;
-            packName = pack.name;
-          });
-      });
-
-      afterEach(() => {
-        cleanupPack(packId);
-      });
-
-      it('', () => {
-        preparePack(packName);
-        cy.contains(`${packName} details`).should('exist');
-
-        recurse<string>(
-          () => {
-            cy.getBySel('docsLoading').should('exist');
-            cy.getBySel('docsLoading').should('not.exist');
-
-            return cy
-              .get('tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent')
-              .invoke('text');
-          },
-          (response) => response !== '-',
-          {
-            timeout: 300000,
-            post: () => {
-              cy.reload();
-            },
-          }
-        );
-        cy.getBySel('last-results-date').should('exist');
-        cy.getBySel('docs-count-badge').contains('1');
-        cy.getBySel('agent-count-badge').contains('1');
-        cy.getBySel('packResultsErrorsEmpty').should('have.length', 1);
-      });
-    });
-
-    describe('delete all queries in the pack', { tags: ['@ess', '@serverless'] }, () => {
-      let packId: string;
-      let packName: string;
-
-      beforeEach(() => {
-        request<{ items: PackagePolicy[] }>({
-          url: '/internal/osquery/fleet_wrapper/package_policies',
-          headers: {
-            'Elastic-Api-Version': API_VERSIONS.internal.v1,
-          },
-        })
-          .then((response) =>
-            loadPack({
-              policy_ids: response.body.items[0].policy_ids,
-              queries: {
-                [savedQueryName]: {
-                  ecs_mapping: {},
-                  interval: 60,
-                  query: 'select * from uptime;',
-                },
-              },
-            })
-          )
-          .then((pack) => {
-            packId = pack.saved_object_id;
-            packName = pack.name;
-          });
-      });
-
-      afterEach(() => {
-        cleanupPack(packId);
-      });
-
-      it('', () => {
-        preparePack(packName);
-        cy.contains(/^Edit$/).click();
-
-        cy.getBySel('checkboxSelectAll').click();
-
-        cy.contains(/^Delete \d+ quer(y|ies)/).click();
-        cy.contains(/^Update pack$/).click();
-
-        closeModalIfVisible();
-
-        cy.get('a').contains(packName).click();
-        cy.contains(`${packName} details`).should('exist');
-        cy.contains(/^No items found/).should('exist');
-      });
-    });
+      }
+    );
 
     describe(
       'enable changing saved queries and ecs_mappings',
@@ -663,28 +510,10 @@ describe(
         let packName: string;
 
         beforeEach(() => {
-          request<{ items: PackagePolicy[] }>({
-            url: '/internal/osquery/fleet_wrapper/package_policies',
-            headers: {
-              'Elastic-Api-Version': API_VERSIONS.internal.v1,
-            },
-          })
-            .then((response) =>
-              loadPack({
-                policy_ids: response.body.items[0].policy_ids,
-                queries: {
-                  [savedQueryName]: {
-                    ecs_mapping: {},
-                    interval: 60,
-                    query: 'select * from uptime;',
-                  },
-                },
-              })
-            )
-            .then((pack) => {
-              packId = pack.saved_object_id;
-              packName = pack.name;
-            });
+          createStandardPack(savedQueryName).then((pack) => {
+            packId = pack.saved_object_id;
+            packName = pack.name;
+          });
         });
 
         afterEach(() => {
@@ -737,45 +566,5 @@ describe(
         });
       }
     );
-
-    describe('to click delete button', { tags: ['@ess', '@serverless'] }, () => {
-      let packName: string;
-      let packId: string;
-
-      beforeEach(() => {
-        request<{ items: PackagePolicy[] }>({
-          url: '/internal/osquery/fleet_wrapper/package_policies',
-          headers: {
-            'Elastic-Api-Version': API_VERSIONS.internal.v1,
-          },
-        })
-          .then((response) =>
-            loadPack({
-              policy_ids: response.body.items[0].policy_ids,
-              queries: {
-                [savedQueryName]: {
-                  ecs_mapping: {},
-                  interval: 60,
-                  query: 'select * from uptime;',
-                },
-              },
-            })
-          )
-          .then((pack) => {
-            packName = pack.name;
-            packId = pack.saved_object_id;
-          });
-      });
-      afterEach(() => {
-        cleanupPack(packId);
-      });
-
-      it('', { tags: ['@ess', '@serverless'] }, () => {
-        preparePack(packName);
-
-        cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
-        deleteAndConfirm('pack');
-      });
-    });
   }
 );

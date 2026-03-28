@@ -30,65 +30,43 @@ describe('Add to Cases', () => {
     });
   });
 
-  describe('observability', { tags: ['@ess'] }, () => {
-    let caseId: string;
-    let caseTitle: string;
-    beforeEach(() => {
-      loadCase('observability').then((caseInfo) => {
-        caseId = caseInfo.id;
-        caseTitle = caseInfo.title;
+  const caseTypes: Array<{
+    owner: string;
+    tags: string[];
+  }> = [
+    { owner: 'observability', tags: ['@ess'] },
+    { owner: 'securitySolution', tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
+  ];
+
+  caseTypes.forEach(({ owner, tags }) => {
+    describe(owner, { tags }, () => {
+      let caseId: string;
+      let caseTitle: string;
+      beforeEach(() => {
+        loadCase(owner).then((caseInfo) => {
+          caseId = caseInfo.id;
+          caseTitle = caseInfo.title;
+        });
+        cy.login(ServerlessRoleName.SOC_MANAGER, false);
+        navigateTo('/app/osquery');
       });
-      cy.login(ServerlessRoleName.SOC_MANAGER, false);
-      navigateTo('/app/osquery');
-    });
 
-    afterEach(() => {
-      cleanupCase(caseId);
-    });
-
-    it('should add result to a case without showing add to timeline button', () => {
-      addLiveQueryToCase(liveQueryId, caseId);
-      cy.contains(`Case ${caseTitle} updated`);
-      viewRecentCaseAndCheckResults();
-
-      cy.contains(liveQueryQuery);
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: false,
-        timeline: false,
+      afterEach(() => {
+        cleanupCase(caseId);
       });
-    });
-  });
 
-  describe('security', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
-    let caseId: string;
-    let caseTitle: string;
+      it('should add result to a case without showing add to timeline button', () => {
+        addLiveQueryToCase(liveQueryId, caseId);
+        cy.contains(`Case ${caseTitle} updated`);
+        viewRecentCaseAndCheckResults();
 
-    beforeEach(() => {
-      loadCase('securitySolution').then((caseInfo) => {
-        caseId = caseInfo.id;
-        caseTitle = caseInfo.title;
-      });
-      cy.login(ServerlessRoleName.SOC_MANAGER, false);
-      navigateTo('/app/osquery');
-    });
-
-    afterEach(() => {
-      cleanupCase(caseId);
-    });
-
-    it('should add result to a case without showing add to timeline button', () => {
-      addLiveQueryToCase(liveQueryId, caseId);
-      cy.contains(`Case ${caseTitle} updated`);
-      viewRecentCaseAndCheckResults();
-
-      cy.contains('SELECT * FROM os_version;');
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: false,
-        timeline: false,
+        cy.contains(liveQueryQuery);
+        checkActionItemsInResults({
+          lens: true,
+          discover: true,
+          cases: false,
+          timeline: false,
+        });
       });
     });
   });

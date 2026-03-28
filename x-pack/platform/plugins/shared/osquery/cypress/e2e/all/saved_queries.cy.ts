@@ -17,6 +17,7 @@ import {
   customActionRunSavedQuerySelector,
   EDIT_PACK_HEADER_BUTTON,
   SAVED_QUERY_DROPDOWN_SELECT,
+  UPDATE_QUERY_BUTTON,
 } from '../../screens/packs';
 import { preparePack } from '../../tasks/packs';
 import {
@@ -259,34 +260,34 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cleanupSavedQuery(savedQueryId);
     });
 
-    it('checks result type on prebuilt saved query', () => {
-      // Navigate to page 2 where users_elastic is located
+    it('checks result type, runs prebuilt query with case, and verifies delete permissions', () => {
+      // Check result type on prebuilt saved query
       cy.getBySel('pagination-button-1').click();
       cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
       cy.getBySel('resultsTypeField').within(() => {
         cy.contains('Snapshot');
       });
-    });
 
-    it('user can run prebuilt saved query and add to case', () => {
-      // Navigate to page 2 where users_elastic is located
+      // Run prebuilt saved query and add to case
+      navigateTo('/app/osquery/saved_queries');
+      cy.getBySel('tablePaginationPopoverButton').click();
+      cy.getBySel('tablePagination-50-rows').click();
       cy.getBySel('pagination-button-1').click();
       cy.get(customActionRunSavedQuerySelector('users_elastic')).click();
-
       selectAllAgents();
       submitQuery();
       checkResults();
       addToCase(caseId);
       viewRecentCaseAndCheckResults();
-    });
 
-    it('user can not delete prebuilt saved query but can delete normal saved query', () => {
-      // Navigate to page 2 where users_elastic is located
+      // Verify: can't delete prebuilt but can delete normal saved query
+      navigateTo('/app/osquery/saved_queries');
+      cy.getBySel('tablePaginationPopoverButton').click();
+      cy.getBySel('tablePagination-50-rows').click();
       cy.getBySel('pagination-button-1').click();
       cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
       cy.contains('Delete query').should('not.exist');
       navigateTo(`/app/osquery/saved_queries/${savedQueryId}`);
-
       deleteAndConfirm('query');
     });
 
@@ -330,6 +331,61 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('User ID').should('not.exist');
       cy.contains('Differential (Ignore removals)').should('exist');
       cy.get(`[aria-labelledby="flyoutTitle"]`).contains('Cancel').click();
+    });
+  });
+
+  describe('edit saved query', () => {
+    let editSavedQueryName: string;
+    let editSavedQueryId: string;
+
+    before(() => {
+      loadSavedQuery().then((data) => {
+        editSavedQueryId = data.saved_object_id;
+        editSavedQueryName = data.id;
+      });
+    });
+
+    beforeEach(() => {
+      cy.login(ServerlessRoleName.SOC_MANAGER);
+      navigateTo('/app/osquery/saved_queries');
+    });
+
+    after(() => {
+      cleanupSavedQuery(editSavedQueryId);
+    });
+
+    it('by changing ecs mappings and platforms', () => {
+      cy.get(customActionEditSavedQuerySelector(editSavedQueryName)).click();
+      cy.contains('Custom key/value pairs.').should('exist');
+      cy.contains('Hours of uptime').should('exist');
+      cy.get('[data-test-subj="ECSMappingEditorForm"]')
+        .first()
+        .within(() => {
+          cy.get(`[aria-label="Delete ECS mapping row"]`).click();
+        });
+
+      cy.getBySel('osquery-platform-checkbox-group').within(() => {
+        cy.get('input[id="linux"]').should('be.checked');
+        cy.get('input[id="darwin"]').should('be.checked');
+        cy.get('input[id="windows"]').should('not.be.checked');
+      });
+
+      cy.get('#windows').check({ force: true });
+
+      cy.getBySel(UPDATE_QUERY_BUTTON).click();
+
+      cy.wait(5000);
+
+      cy.get(customActionEditSavedQuerySelector(editSavedQueryName)).click();
+
+      cy.contains('Custom key/value pairs').should('not.exist');
+      cy.contains('Hours of uptime').should('not.exist');
+
+      cy.getBySel('osquery-platform-checkbox-group').within(() => {
+        cy.get('input[id="linux"]').should('be.checked');
+        cy.get('input[id="darwin"]').should('be.checked');
+        cy.get('input[id="windows"]').should('be.checked');
+      });
     });
   });
 });
