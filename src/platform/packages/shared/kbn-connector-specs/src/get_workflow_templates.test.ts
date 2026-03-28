@@ -15,7 +15,7 @@ describe('getWorkflowTemplatesForConnector', () => {
   });
 
   it('returns empty array for connector without agentBuilderWorkflows', () => {
-    expect(getWorkflowTemplatesForConnector('.github')).toEqual([]);
+    expect(getWorkflowTemplatesForConnector('.one_password')).toEqual([]);
   });
 
   it('returns workflow YAML strings for .slack2', () => {

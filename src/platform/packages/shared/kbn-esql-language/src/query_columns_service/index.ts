@@ -136,7 +136,10 @@ export class QueryColumns {
     }
 
     const fields = await getFieldsFromES(queryToES, this.resourceRetriever);
-    QueryColumns.setCache(queryToES, fields);
+    // Only cache non-empty results to avoid persisting failures from aborted requests
+    if (fields.length > 0) {
+      QueryColumns.setCache(queryToES, fields);
+    }
     return fields;
   };
 

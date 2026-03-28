@@ -18,7 +18,7 @@ import {
   replaySignificantEventsSnapshot,
 } from '../../../src/data_generators/replay';
 import { evaluate } from '../../../src/evaluate';
-import { createKIFeatureExtractionEvaluators } from '../../../src/evaluators/ki_feature_extraction_evaluators';
+import { createKIFeatureExtractionEvaluators } from '../../../src/evaluators/ki_feature_extraction/evaluators';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,

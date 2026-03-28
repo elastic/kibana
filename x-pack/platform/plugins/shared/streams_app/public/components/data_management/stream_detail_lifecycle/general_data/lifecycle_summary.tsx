@@ -59,7 +59,7 @@ const maxDownsampleStepsTooltip = i18n.translate(
 
 const renderAddPhaseButton = (label: string) => (buttonProps: IlmPhaseSelectRenderButtonProps) => {
   const button = (
-    <EuiButton {...buttonProps} color="text" size="s" iconType="arrowDown" iconSide="right">
+    <EuiButton {...buttonProps} color="text" size="s" iconType="chevronSingleDown" iconSide="right">
       {label}
     </EuiButton>
   );

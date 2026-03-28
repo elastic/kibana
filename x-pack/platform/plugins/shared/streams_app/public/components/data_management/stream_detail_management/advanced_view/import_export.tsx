@@ -51,18 +51,14 @@ export function ImportExportPanel({
             right={
               <EuiFlexGroup gutterSize="m" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiButton iconType="importAction" onClick={() => setIsImportFlyoutOpen(true)}>
+                  <EuiButton iconType="download" onClick={() => setIsImportFlyoutOpen(true)}>
                     {i18n.translate('xpack.streams.streamDetailView.importButtonLabel', {
                       defaultMessage: 'Import',
                     })}
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    iconType="exportAction"
-                    fill
-                    onClick={() => setIsExportFlyoutOpen(true)}
-                  >
+                  <EuiButton iconType="upload" fill onClick={() => setIsExportFlyoutOpen(true)}>
                     {i18n.translate('xpack.streams.streamDetailView.exportButtonLabel', {
                       defaultMessage: 'Export',
                     })}

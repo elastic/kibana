@@ -52,6 +52,7 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-security-server'
   - '@kbn/inference-common'
+  - '@kbn/inference-plugin'
 tags:
   - plugin
   - prod

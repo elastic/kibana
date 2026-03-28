@@ -20,7 +20,6 @@ const createPluginDefinition = (id: string, skillIds: string[]): PluginDefinitio
   manifest: {},
   skill_ids: skillIds,
   unmanaged_assets: {
-    commands: [],
     agents: [],
     hooks: [],
     mcp_servers: [],

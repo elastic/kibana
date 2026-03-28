@@ -21,8 +21,8 @@ import {
   SIGEVENTS_SNAPSHOT_RUN,
 } from '../../../src/data_generators/replay';
 import { evaluate } from '../../../src/evaluate';
-import { createKIQueryGenerationEvaluators } from '../../../src/evaluators/ki_query_generation_evaluators';
-import { createScenarioCriteriaLlmEvaluator } from '../../../src/evaluators/scenario_criteria_llm_evaluator';
+import { createKIQueryGenerationEvaluators } from '../../../src/evaluators/ki_query_generation/evaluators';
+import { createScenarioCriteriaLlmEvaluator } from '../../../src/evaluators/scenario_criteria/evaluators';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
