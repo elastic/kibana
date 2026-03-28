@@ -11,9 +11,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as cp from 'child_process';
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { extractMigrationInfo, getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
