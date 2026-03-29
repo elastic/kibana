@@ -11,9 +11,14 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { EntityStoreApp } from './components/app';
 
 export const renderApp = (coreStart: CoreStart, { element }: AppMountParameters) => {
-  const { http, rendering } = coreStart;
+  const { http, notifications, rendering } = coreStart;
 
-  ReactDOM.render(rendering.addContext(<EntityStoreApp http={http} />), element);
+  ReactDOM.render(
+    rendering.addContext(
+      <EntityStoreApp http={http} notifications={notifications} />
+    ),
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

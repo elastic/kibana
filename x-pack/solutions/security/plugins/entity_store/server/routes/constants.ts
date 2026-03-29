@@ -8,6 +8,10 @@
 import type { AuthzEnabled } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
+import {
+  LogExtractionUpdateParams as LogExtractionUpdateParamsSchema,
+  type LogExtractionUpdateParams as LogExtractionUpdateParamsType,
+} from '../../common/log_extraction_params';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
@@ -26,26 +30,8 @@ export const LogExtractionInstallParams = LogExtractionConfig.pick({
   docsLimit: true,
 }).partial();
 
-export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
-
-export const LogExtractionUpdateParams = z.object({
-  filter: z.string().optional(),
-  fieldHistoryLength: z.number().int().optional(),
-  additionalIndexPatterns: z.array(z.string()).optional(),
-  lookbackPeriod: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  frequency: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  delay: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  docsLimit: z.number().int().positive().optional(),
-});
+export const LogExtractionUpdateParams = LogExtractionUpdateParamsSchema;
+export type LogExtractionUpdateParams = LogExtractionUpdateParamsType;
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;
 
