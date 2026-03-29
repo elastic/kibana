@@ -27,9 +27,7 @@ const CommentAttachmentChildrenLazy = React.lazy(async () => {
 
   const CommentAttachmentChildren: React.FC<UnifiedValueAttachmentViewProps> = (props) => (
     <CommentChildren
-      // TODO: attachmentId here means saved object id
-      // it's a legacy term that should be renamed to savedObjectId
-      commentId={props.attachmentId}
+      commentId={props.savedObjectId}
       content={props.data.content as string}
       caseId={props.caseData.id}
       version={props.version}
@@ -55,15 +53,15 @@ const CommentActionsLazy = React.lazy(() =>
 const getCommentClassName = (props: UnifiedCommentViewProps): string | undefined => {
   if (!props.rowContext) return undefined;
 
-  const { attachmentId, caseData } = props;
+  const { savedObjectId, caseData } = props;
   const { selectedOutlineCommentId, manageMarkdownEditIds, loadingCommentIds, appId } =
     props.rowContext;
 
-  const outlined = attachmentId === selectedOutlineCommentId;
-  const isEdit = manageMarkdownEditIds.includes(attachmentId);
-  const isLoading = loadingCommentIds.includes(attachmentId);
+  const outlined = savedObjectId === selectedOutlineCommentId;
+  const isEdit = manageMarkdownEditIds.includes(savedObjectId);
+  const isLoading = loadingCommentIds.includes(savedObjectId);
   const draftFooter =
-    !isEdit && !isLoading && hasDraftComment(appId, caseData.id, attachmentId, props.data.content);
+    !isEdit && !isLoading && hasDraftComment(appId, caseData.id, savedObjectId, props.data.content);
 
   return classNames('userAction__comment', {
     outlined,
@@ -94,9 +92,7 @@ const getCommentAttachmentViewObject = (props: UnifiedValueAttachmentViewProps) 
           return (
             <React.Suspense fallback={null}>
               <CommentActionsLazy
-                // TODO: attachmentId here meant saved object id
-                // it's a legacy term that should be renamed to savedObjectId
-                commentId={viewProps.attachmentId}
+                commentId={viewProps.savedObjectId}
                 content={viewProps.data.content as string}
               />
             </React.Suspense>

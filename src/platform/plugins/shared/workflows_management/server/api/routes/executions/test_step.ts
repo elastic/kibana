@@ -42,6 +42,11 @@ export function registerTestStepRoute(deps: RouteDependencies) {
               workflowId: schema.maybe(
                 schema.string({ meta: { description: 'ID of the workflow containing the step.' } })
               ),
+              executionContext: schema.maybe(
+                schema.recordOf(schema.string(), schema.any(), {
+                  meta: { description: 'Execution context for the step execution.' },
+                })
+              ),
               contextOverride: schema.recordOf(schema.string(), schema.any(), {
                 meta: { description: 'Context overrides for the step execution.' },
               }),
@@ -59,6 +64,7 @@ export function registerTestStepRoute(deps: RouteDependencies) {
             request.body.workflowYaml,
             request.body.stepId,
             request.body.workflowId,
+            request.body.executionContext,
             request.body.contextOverride,
             spaceId,
             request
