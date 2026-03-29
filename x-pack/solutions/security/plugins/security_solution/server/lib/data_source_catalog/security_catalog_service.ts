@@ -22,12 +22,14 @@ interface StartParams {
   esClient: ElasticsearchClient;
   packageClient?: PackageClientLike;
   configPatterns?: string[];
+  refreshInterval?: string;
 }
 
 export class SecurityCatalogService {
   private patterns: string[] = [];
   private esClient?: ElasticsearchClient;
   private packageClient?: PackageClientLike;
+  private refreshInterval = DEFAULT_REFRESH_INTERVAL;
 
   constructor(private readonly logger: Logger) {}
 
@@ -55,7 +57,7 @@ export class SecurityCatalogService {
         id: CATALOG_REFRESH_TASK_ID,
         taskType: CATALOG_REFRESH_TASK_TYPE,
         scope: ['securitySolution'],
-        schedule: { interval: DEFAULT_REFRESH_INTERVAL },
+        schedule: { interval: this.refreshInterval },
         state: {},
         params: {},
       });
@@ -65,10 +67,13 @@ export class SecurityCatalogService {
     }
   }
 
-  async start({ esClient, packageClient, configPatterns }: StartParams): Promise<void> {
+  async start({ esClient, packageClient, configPatterns, refreshInterval }: StartParams): Promise<void> {
     this.patterns = getSecurityPatterns(configPatterns);
     this.esClient = esClient;
     this.packageClient = packageClient;
+    if (refreshInterval) {
+      this.refreshInterval = refreshInterval;
+    }
 
     try {
       const result = await refreshCatalog({

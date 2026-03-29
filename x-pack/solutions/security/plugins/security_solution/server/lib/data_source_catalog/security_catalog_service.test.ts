@@ -82,7 +82,7 @@ describe('SecurityCatalogService', () => {
     );
   });
 
-  it('scheduleRefresh() schedules the task', async () => {
+  it('scheduleRefresh() schedules the task with default interval', async () => {
     const service = new SecurityCatalogService(logger);
     await service.scheduleRefresh(mockTaskManagerStart);
 
@@ -92,6 +92,30 @@ describe('SecurityCatalogService', () => {
         id: 'security:data-source-catalog:refresh-stats:1.0.0',
         taskType: 'security:data-source-catalog:refresh-stats',
         scope: ['securitySolution'],
+        schedule: { interval: '6h' },
+      })
+    );
+  });
+
+  it('scheduleRefresh() uses custom interval when provided via start()', async () => {
+    const service = new SecurityCatalogService(logger);
+    await service.start({ esClient, refreshInterval: '1h' });
+    await service.scheduleRefresh(mockTaskManagerStart);
+
+    expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({
+        schedule: { interval: '1h' },
+      })
+    );
+  });
+
+  it('scheduleRefresh() keeps default interval when refreshInterval is not provided', async () => {
+    const service = new SecurityCatalogService(logger);
+    await service.start({ esClient });
+    await service.scheduleRefresh(mockTaskManagerStart);
+
+    expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({
         schedule: { interval: '6h' },
       })
     );
