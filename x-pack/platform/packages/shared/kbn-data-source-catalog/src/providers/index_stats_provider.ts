@@ -21,7 +21,6 @@ export async function fetchIndexStats(
     esClient.indices.stats({
       index: names.join(','),
       metric: ['docs', 'store'],
-      ignore_unavailable: true,
     }),
     fetchFreshness(esClient, names),
   ]);

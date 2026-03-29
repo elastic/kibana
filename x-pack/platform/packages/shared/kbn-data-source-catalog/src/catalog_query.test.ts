@@ -70,13 +70,11 @@ describe('CatalogQuery', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: CATALOG_INDEX_NAME,
-        body: expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([
-                { wildcard: { name: { value: 'logs-endpoint.*' } } },
-              ]),
-            }),
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([
+              { wildcard: { name: { value: 'logs-endpoint.*' } } },
+            ]),
           }),
         }),
       })
@@ -88,14 +86,11 @@ describe('CatalogQuery', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: CATALOG_INDEX_NAME,
-        body: expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([
-                { term: { 'integration.package_name': 'endpoint' } },
-              ]),
-            }),
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([
+              { term: { 'integration.package_name': 'endpoint' } },
+            ]),
           }),
         }),
       })
@@ -107,24 +102,22 @@ describe('CatalogQuery', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([
-                {
-                  nested: {
-                    path: 'mapping.fields',
-                    query: { term: { 'mapping.fields.name': 'source.ip' } },
-                  },
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([
+              {
+                nested: {
+                  path: 'mapping.fields',
+                  query: { term: { 'mapping.fields.name': 'source.ip' } },
                 },
-                {
-                  nested: {
-                    path: 'mapping.fields',
-                    query: { term: { 'mapping.fields.name': 'destination.port' } },
-                  },
+              },
+              {
+                nested: {
+                  path: 'mapping.fields',
+                  query: { term: { 'mapping.fields.name': 'destination.port' } },
                 },
-              ]),
-            }),
+              },
+            ]),
           }),
         }),
       })
@@ -136,11 +129,9 @@ describe('CatalogQuery', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([{ term: { 'stats.is_active': true } }]),
-            }),
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([{ term: { 'stats.is_active': true } }]),
           }),
         }),
       })
@@ -152,20 +143,18 @@ describe('CatalogQuery', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              should: expect.arrayContaining([
-                {
-                  multi_match: {
-                    query: 'network endpoint',
-                    fields: ['name.text', 'integration.description', 'semantic.summary'],
-                    type: 'best_fields',
-                  },
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            should: expect.arrayContaining([
+              {
+                multi_match: {
+                  query: 'network endpoint',
+                  fields: ['name.text', 'integration.description', 'semantic.summary'],
+                  type: 'best_fields',
                 },
-              ]),
-              minimum_should_match: 1,
-            }),
+              },
+            ]),
+            minimum_should_match: 1,
           }),
         }),
       })
@@ -176,9 +165,7 @@ describe('CatalogQuery', () => {
     await catalogQuery.search({});
 
     expect(esClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: expect.objectContaining({ size: 10 }),
-      })
+      expect.objectContaining({ size: 10 })
     );
   });
 

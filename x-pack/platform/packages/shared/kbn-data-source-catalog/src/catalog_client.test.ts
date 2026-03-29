@@ -43,13 +43,11 @@ describe('CatalogClient', () => {
       expect(esClient.indices.exists).toHaveBeenCalledWith({ index: CATALOG_INDEX_NAME });
       expect(esClient.indices.create).toHaveBeenCalledWith({
         index: CATALOG_INDEX_NAME,
-        body: {
-          mappings: catalogIndexMapping,
-          settings: {
-            number_of_shards: 1,
-            number_of_replicas: 0,
-            auto_expand_replicas: '0-1',
-          },
+        mappings: catalogIndexMapping,
+        settings: {
+          number_of_shards: 1,
+          number_of_replicas: 0,
+          auto_expand_replicas: '0-1',
         },
       });
     });
@@ -72,7 +70,7 @@ describe('CatalogClient', () => {
       await catalogClient.bulkUpsert(entries);
 
       expect(esClient.bulk).toHaveBeenCalledWith({
-        body: [
+        operations: [
           { index: { _index: CATALOG_INDEX_NAME, _id: 'a' } },
           entries[0],
           { index: { _index: CATALOG_INDEX_NAME, _id: 'b' } },
@@ -87,7 +85,7 @@ describe('CatalogClient', () => {
         errors: true,
         took: 1,
         items: [
-          { index: { _index: CATALOG_INDEX_NAME, _id: 'a', error: { reason: 'mapping error' } } },
+          { index: { _index: CATALOG_INDEX_NAME, _id: 'a', status: 400, error: { type: 'mapper_parsing_exception', reason: 'mapping error' } } },
         ],
       });
 
@@ -109,7 +107,7 @@ describe('CatalogClient', () => {
 
       expect(esClient.deleteByQuery).toHaveBeenCalledWith({
         index: CATALOG_INDEX_NAME,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
         refresh: true,
       });
     });

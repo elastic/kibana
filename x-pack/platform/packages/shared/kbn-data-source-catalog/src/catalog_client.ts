@@ -20,13 +20,11 @@ export class CatalogClient {
     }
     await this.esClient.indices.create({
       index: CATALOG_INDEX_NAME,
-      body: {
-        mappings: catalogIndexMapping,
-        settings: {
-          number_of_shards: 1,
-          number_of_replicas: 0,
-          auto_expand_replicas: '0-1',
-        },
+      mappings: catalogIndexMapping,
+      settings: {
+        number_of_shards: 1,
+        number_of_replicas: 0,
+        auto_expand_replicas: '0-1',
       },
     });
   }
@@ -36,12 +34,12 @@ export class CatalogClient {
       return;
     }
 
-    const body = entries.flatMap((entry) => [
+    const operations = entries.flatMap((entry) => [
       { index: { _index: CATALOG_INDEX_NAME, _id: entry.id } },
       entry,
     ]);
 
-    const result = await this.esClient.bulk({ body, refresh: 'wait_for' });
+    const result = await this.esClient.bulk({ operations, refresh: 'wait_for' });
 
     if (result.errors) {
       const errorItems = result.items
@@ -55,7 +53,7 @@ export class CatalogClient {
   async deleteAll(): Promise<void> {
     await this.esClient.deleteByQuery({
       index: CATALOG_INDEX_NAME,
-      body: { query: { match_all: {} } },
+      query: { match_all: {} },
       refresh: true,
     });
   }

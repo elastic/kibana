@@ -73,7 +73,8 @@ export class CatalogQuery {
 
     const result = await this.esClient.search<DataSourceEntry>({
       index: CATALOG_INDEX_NAME,
-      body: { query, size },
+      query,
+      size,
     });
 
     const total =

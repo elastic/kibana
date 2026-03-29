@@ -77,8 +77,8 @@ describe('refreshCatalog', () => {
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
 
     // Verify the bulk body includes integration metadata
-    const bulkCall = esClient.bulk.mock.calls[0][0] as { body: unknown[] };
-    const entryDoc = bulkCall.body[1] as Record<string, unknown>;
+    const bulkCall = esClient.bulk.mock.calls[0][0] as { operations: unknown[] };
+    const entryDoc = bulkCall.operations[1] as Record<string, unknown>;
 
     expect(entryDoc.integration).toBeDefined();
     expect((entryDoc.integration as Record<string, unknown>).package_name).toBe('nginx');
@@ -126,8 +126,8 @@ describe('refreshCatalog', () => {
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
 
     // Verify the entry has no integration metadata
-    const bulkCall = esClient.bulk.mock.calls[0][0] as { body: unknown[] };
-    const entryDoc = bulkCall.body[1] as Record<string, unknown>;
+    const bulkCall = esClient.bulk.mock.calls[0][0] as { operations: unknown[] };
+    const entryDoc = bulkCall.operations[1] as Record<string, unknown>;
 
     expect(entryDoc.integration).toBeUndefined();
   });
@@ -184,8 +184,8 @@ describe('refreshCatalog', () => {
     expect(esClient.msearch).toHaveBeenCalled();
 
     // Verify bulk body includes stats
-    const bulkCall = esClient.bulk.mock.calls[0][0] as { body: unknown[] };
-    const bulkBody = bulkCall.body[1] as Record<string, unknown>;
+    const bulkCall = esClient.bulk.mock.calls[0][0] as { operations: unknown[] };
+    const bulkBody = bulkCall.operations[1] as Record<string, unknown>;
     expect(bulkBody.stats).toBeDefined();
     expect((bulkBody.stats as Record<string, unknown>).doc_count).toBe(1000);
   });

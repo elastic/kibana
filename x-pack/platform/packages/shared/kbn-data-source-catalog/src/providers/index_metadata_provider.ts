@@ -47,7 +47,9 @@ export async function discoverIndexMetadata(
     esClient.indices.getIndexTemplate({ name: '*' }).catch(() => ({ index_templates: [] })),
   ]);
 
-  const templateMap = buildTemplateMap(templatesResult.index_templates);
+  const templateMap = buildTemplateMap(
+    templatesResult.index_templates as Array<{ name: string; index_template: { index_patterns?: string[]; template?: { mappings?: { _meta?: Record<string, unknown> } } } }>
+  );
   const now = new Date().toISOString();
 
   return dataSources.map((ds) => {
@@ -125,19 +127,13 @@ function prioritizeFields(fields: FieldMetadata[], limit: number): FieldMetadata
 }
 
 function buildTemplateMap(
-  templates: Array<{ name: string; index_template: Record<string, unknown> }>
+  templates: Array<{ name: string; index_template: { index_patterns?: string[]; template?: { mappings?: { _meta?: Record<string, unknown> } } } }>
 ): TemplateEntry[] {
-  return templates.map((t) => {
-    const template = t.index_template as {
-      index_patterns?: string[];
-      template?: { mappings?: { _meta?: Record<string, unknown> } };
-    };
-    return {
-      name: t.name,
-      patterns: template.index_patterns ?? [],
-      meta: template.template?.mappings?._meta,
-    };
-  });
+  return templates.map((t) => ({
+    name: t.name,
+    patterns: t.index_template.index_patterns ?? [],
+    meta: t.index_template.template?.mappings?._meta,
+  }));
 }
 
 function findMatchingTemplate(
