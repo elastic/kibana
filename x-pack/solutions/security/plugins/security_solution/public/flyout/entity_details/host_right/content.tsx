@@ -23,6 +23,7 @@ import type { EntityDetailsPath } from '../shared/components/left_panel/left_pan
 import type { IdentityFields } from '../../document_details/shared/utils';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { HostItem } from '../../../../common/search_strategy';
+import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
@@ -32,6 +33,7 @@ interface HostPanelContentProps {
   contextID: string;
   scopeId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  navigateToGraphView: () => void;
   identityFields: IdentityFields;
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
@@ -54,6 +56,7 @@ export const HostPanelContent = ({
   contextID,
   scopeId,
   openDetailsPanel,
+  navigateToGraphView,
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
@@ -61,6 +64,8 @@ export const HostPanelContent = ({
   onSaveAssetCriticalityViaEntityStore,
   skipRiskAndCriticality = false,
 }: HostPanelContentProps) => {
+  const entityId = entityRecord?.entity.id;
+
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
@@ -106,6 +111,17 @@ export const HostPanelContent = ({
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.host}
       />
+      {entityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            onExpandGraph={navigateToGraphView}
+          />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       <ObservedDataSection
         observedHost={observedHost}
         contextID={contextID}

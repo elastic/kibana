@@ -12,10 +12,10 @@ import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common';
-import type { GetFieldsData } from './use_get_fields_data';
-import { getField, getFieldArray } from '../utils';
-import { useBasicDataFromDetailsData } from './use_basic_data_from_details_data';
-import { useShouldShowGraph } from '../../../shared/hooks/use_should_show_graph';
+import type { GetFieldsData } from '../../document_details/shared/hooks/use_get_fields_data';
+import { getField, getFieldArray } from '../../document_details/shared/utils';
+import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
+import { useShouldShowGraph } from './use_should_show_graph';
 
 export interface UseGraphPreviewParams {
   /**
@@ -65,14 +65,9 @@ export interface UseGraphPreviewResult {
 
   /**
    * Boolean indicating if graph visualization is fully available
-   * Combines: data availability (event ids, actor ids and action) + valid license + entity store running
+   * Combines: valid license + feature enabled in settings
    */
   shouldShowGraph: boolean;
-
-  /**
-   * Boolean indicating if the event has all required data fields for graph visualization
-   */
-  hasGraphData: boolean;
 
   /**
    * Boolean indicating if the event is an alert or not
@@ -110,15 +105,15 @@ export const useGraphPreview = ({
   const action: string[] | undefined = get(['event', 'action'], ecsData);
 
   // Check if graph has all required data fields for graph visualization
-  const hasGraphData =
+  const hasGraphRepresentation =
     Boolean(timestamp) &&
     Boolean(action?.length) &&
     eventIds.length > 0 &&
     actorIds.length > 0 &&
     targetIds.length > 0;
 
-  // Combine all conditions: data availability + license + entity store running
-  const shouldShowGraph = useShouldShowGraph() && hasGraphData;
+  // Combine all conditions: data availability + license + feature flag
+  const shouldShowGraph = useShouldShowGraph() && hasGraphRepresentation;
 
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
@@ -129,7 +124,6 @@ export const useGraphPreview = ({
     action,
     targetIds,
     shouldShowGraph,
-    hasGraphData,
     isAlert,
   };
 };

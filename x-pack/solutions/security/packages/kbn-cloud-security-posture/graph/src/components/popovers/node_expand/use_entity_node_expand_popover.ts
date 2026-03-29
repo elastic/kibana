@@ -16,6 +16,7 @@ import {
   isFilterActiveForScope,
   emitEntityRelationshipToggle,
   isEntityRelationshipExpandedForScope,
+  isInitialEntityForScope,
 } from '../../filters/filter_store';
 
 /**
@@ -41,6 +42,7 @@ export const useEntityNodeExpandPopover = (
       const isSingleEntity = docMode === 'single-entity';
       const isGroupedEntities = docMode === 'grouped-entities';
       const isEnriched = isEntityNodeEnriched(node.data);
+      const isInitialEntity = isInitialEntityForScope(scopeId, node.id);
 
       return getEntityExpandItems({
         nodeId: node.id,
@@ -60,9 +62,10 @@ export const useEntityNodeExpandPopover = (
             (isSingleEntity || isGroupedEntities) && onOpenEventPreview !== undefined,
         },
         isEntityRelationshipsExpanded: isEntityRelationshipExpandedForScope(scopeId, node.id),
+        isInitialEntity,
         toggleEntityRelationships: (action) =>
           emitEntityRelationshipToggle(scopeId, node.id, action),
-        showEntityRelationshipsDisabled: !isEnriched,
+        showEntityRelationshipsDisabled: !isEnriched || isInitialEntity,
         showEntityDetailsDisabled: isSingleEntity && !isEnriched,
       });
     },

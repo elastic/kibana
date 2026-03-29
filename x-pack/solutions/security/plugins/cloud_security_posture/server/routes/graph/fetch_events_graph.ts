@@ -21,7 +21,7 @@ import {
 } from '@kbn/cloud-security-posture-common/constants';
 import {
   generateFieldHintCases,
-  formatJsonProperty,
+  concatJsonObjectPropertyEsqlExprSafe,
   buildEntityEnrichment,
   checkIfEntitiesIndexLookupMode,
 } from './utils';
@@ -199,9 +199,9 @@ const buildEnrichedEntityFieldsEsql = (): string => {
     CONCAT(",\\"entity\\":", "{",
       "\\"availableInEntityStore\\":true",
       ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
-      ${formatJsonProperty('name', 'actorEntityName')},
-      ${formatJsonProperty('type', 'actorEntityType')},
-      ${formatJsonProperty('sub_type', 'actorEntitySubType')},
+      ${concatJsonObjectPropertyEsqlExprSafe('name', 'actorEntityName')},
+      ${concatJsonObjectPropertyEsqlExprSafe('type', 'actorEntityType')},
+      ${concatJsonObjectPropertyEsqlExprSafe('sub_type', 'actorEntitySubType')},
       CASE(
         actorHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
@@ -218,9 +218,9 @@ const buildEnrichedEntityFieldsEsql = (): string => {
     CONCAT(",\\"entity\\":", "{",
       "\\"availableInEntityStore\\":true",
       ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
-      ${formatJsonProperty('name', 'targetEntityName')},
-      ${formatJsonProperty('type', 'targetEntityType')},
-      ${formatJsonProperty('sub_type', 'targetEntitySubType')},
+      ${concatJsonObjectPropertyEsqlExprSafe('name', 'targetEntityName')},
+      ${concatJsonObjectPropertyEsqlExprSafe('type', 'targetEntityType')},
+      ${concatJsonObjectPropertyEsqlExprSafe('sub_type', 'targetEntitySubType')},
       CASE(
         targetHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),

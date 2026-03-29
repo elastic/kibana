@@ -16,6 +16,7 @@ import type {
   LeftPanelTabsType,
   EntityDetailsLeftPanelTab,
 } from '../shared/components/left_panel/left_panel_header';
+import { getGraphViewTab } from '../shared/components/left';
 
 import type { HostDetailsPanelProps } from '.';
 import { HostDetailsPanelKey } from '.';
@@ -75,7 +76,9 @@ export const useTabs = ({
           ]
         : [];
 
-    return [...riskScoreTab, ...insightsTab];
+    const graphViewTab = entityId ? [getGraphViewTab({ entityId, scopeId })] : [];
+
+    return [...riskScoreTab, ...insightsTab, ...graphViewTab];
   }, [
     isRiskScoreExist,
     hostName,

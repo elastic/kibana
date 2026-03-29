@@ -25,6 +25,7 @@ export interface ServiceDetailsPanelProps extends Record<string, unknown> {
   identityFields: IdentityFields;
   path?: PanelPath;
   scopeId: string;
+  entityId?: string;
 }
 export interface ServiceDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'service_details';
@@ -37,19 +38,21 @@ export const ServiceDetailsPanel = ({
   identityFields,
   path,
   scopeId,
+  entityId,
 }: ServiceDetailsPanelProps) => {
   const serviceName = useMemo(
     () => getServiceNameFromEntityIdentifiers(identityFields ?? {}),
     [identityFields]
   );
-  const tabs = useTabs(serviceName, scopeId);
+  const tabs = useTabs(serviceName, scopeId, entityId);
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(
     isRiskScoreExist,
     identityFields ?? {},
     scopeId,
     tabs,
-    path
+    path,
+    entityId
   );
 
   if (!selectedTabId) {
@@ -73,7 +76,8 @@ const useSelectedTab = (
   identityFields: IdentityFields,
   scopeId: string,
   tabs: LeftPanelTabsType,
-  path: PanelPath | undefined
+  path: PanelPath | undefined,
+  entityId?: string
 ) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
 
@@ -91,6 +95,7 @@ const useSelectedTab = (
         identityFields,
         isRiskScoreExist,
         scopeId,
+        entityId,
         path: {
           tab: tabId,
         },

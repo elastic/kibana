@@ -25,6 +25,7 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 import type { UserItem } from '../../../../common/search_strategy';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -40,6 +41,7 @@ interface UserPanelContentProps {
   scopeId: string;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  navigagteToGraphView: () => void;
   isPreviewMode: boolean;
   entityRecord?: Entity;
   criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
@@ -56,6 +58,7 @@ export const UserPanelContent = ({
   contextID,
   scopeId,
   openDetailsPanel,
+  navigagteToGraphView,
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
@@ -63,6 +66,7 @@ export const UserPanelContent = ({
   onSaveAssetCriticalityViaEntityStore,
   skipRiskAndCriticality = false,
 }: UserPanelContentProps) => {
+  const entityId = entityRecord?.entity.id;
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
@@ -88,7 +92,7 @@ export const UserPanelContent = ({
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
               entityType={EntityType.user}
-              entityId={entityRecord?.entity.id}
+              entityId={entityId}
             />
             <EuiHorizontalRule />
           </>
@@ -108,6 +112,17 @@ export const UserPanelContent = ({
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.user}
       />
+      {entityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            onExpandGraph={navigagteToGraphView}
+          />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       <ObservedDataSection
         identityFields={identityFields}
         userName={userName}

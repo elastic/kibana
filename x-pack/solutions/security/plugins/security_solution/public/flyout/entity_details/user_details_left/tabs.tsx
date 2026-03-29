@@ -25,6 +25,7 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../document_details/shared/utils';
+import { getGraphViewTab } from '../shared/components/left';
 
 export const useTabs = (
   managedUser: ManagedUserHits,
@@ -38,6 +39,7 @@ export const useTabs = (
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
+
     const entraManagedUser = managedUser[ManagedUserDatasetKey.ENTRA];
     const oktaManagedUser = managedUser[ManagedUserDatasetKey.OKTA];
 
@@ -69,6 +71,10 @@ export const useTabs = (
           entityType: EntityType.user,
         })
       );
+    }
+
+    if (entityId) {
+      tabs.push(getGraphViewTab({ entityId, scopeId }));
     }
 
     return tabs;

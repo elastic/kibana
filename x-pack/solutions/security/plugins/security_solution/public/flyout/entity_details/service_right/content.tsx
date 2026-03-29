@@ -19,6 +19,7 @@ import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
+import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 
 export const OBSERVED_SERVICE_QUERY_ID = 'observedServiceDetailsQuery';
 
@@ -29,8 +30,10 @@ interface ServicePanelContentProps {
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
+  isPreviewMode: boolean;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  navigateToGraphView: () => void;
   entityRecord?: Entity;
 }
 
@@ -42,9 +45,13 @@ export const ServicePanelContent = ({
   recalculatingScore,
   contextID,
   scopeId,
+  isPreviewMode,
   openDetailsPanel,
+  navigateToGraphView,
   onAssetCriticalityChange,
 }: ServicePanelContentProps) => {
+  const entityId = entityRecord?.entity.id;
+
   const observedFields = useObservedServiceItems(observedService);
 
   return (
@@ -56,7 +63,7 @@ export const ServicePanelContent = ({
             recalculatingScore={recalculatingScore}
             queryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
-            isPreviewMode={false}
+            isPreviewMode={isPreviewMode}
             entityType={EntityType.service}
             entityId={entityRecord?.entity.id}
           />
@@ -67,6 +74,17 @@ export const ServicePanelContent = ({
         entity={{ name: serviceName, type: EntityType.service }}
         onChange={onAssetCriticalityChange}
       />
+      {entityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            onExpandGraph={navigateToGraphView}
+          />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       <ObservedEntity
         observedData={{ ...observedService, entityId: entityRecord?.entity.id }}
         contextID={contextID}

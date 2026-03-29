@@ -27,6 +27,7 @@ import { ENTITY_RELATIONSHIP_LABELS } from '@kbn/cloud-security-posture-common/c
 import {
   type EventEdge,
   type RelationshipEdge,
+  type EntityRecord,
   NON_ENRICHED_ENTITY_TYPE_PLURAL,
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
@@ -64,6 +65,7 @@ export const parseRecords = (
   logger: Logger,
   eventRecords: EventEdge[] = [],
   relationshipRecords: RelationshipEdge[] = [],
+  entityRecords: EntityRecord[] = [],
   nodesLimit?: number
 ): Pick<GraphResponse, 'nodes' | 'edges' | 'messages'> => {
   const ctx: ParseContext = {
@@ -78,7 +80,7 @@ export const parseRecords = (
   logger.trace(
     `Parsing records [events: ${eventRecords.length}] [relationships: ${
       relationshipRecords.length
-    }] [nodesLimit: ${nodesLimit ?? 'none'}]`
+    }] [entities: ${entityRecords.length}] [nodesLimit: ${nodesLimit ?? 'none'}]`
   );
 
   // Process event records
@@ -101,6 +103,23 @@ export const parseRecords = (
 
   // Create edges and groups for both
   createEdgesAndGroups(ctx);
+
+  for (const entity of entityRecords) {
+    if (ctx.nodesMap[entity.id] === undefined) {
+      createEntityNode(
+        ctx.nodesMap,
+        {
+          nodeId: entity.id,
+          idsCount: 1,
+          entityType: entity.type,
+          entitySubType: entity.sub_type,
+          entityName: entity.name,
+          docData: entity.docData ? castArray(entity.docData) : [],
+        },
+        ctx.logger
+      );
+    }
+  }
 
   logger.trace(
     `Parsed [nodes: ${Object.keys(ctx.nodesMap).length}, edges: ${
@@ -190,7 +209,8 @@ const createEntityNode = (
     entityName?: string | string[] | null;
     docData?: Array<string | null> | string;
     hostIps?: string[];
-  }
+  },
+  logger?: Logger
 ): void => {
   const { nodeId, idsCount, entityType, entitySubType, entityName, docData, hostIps } = params;
 
@@ -202,7 +222,14 @@ const createEntityNode = (
   const documentsData: NodeDocumentDataModel[] = docData
     ? castArray(docData)
         .filter((d): d is string => d != null)
-        .map((d) => JSON.parse(d))
+        .map((d) => {
+          try {
+            return JSON.parse(d);
+          } catch (e) {
+            logger?.error(`Failed to parse document data for node [${nodeId}]: ${e}`);
+            throw e;
+          }
+        })
     : [];
 
   nodesMap[nodeId] = {

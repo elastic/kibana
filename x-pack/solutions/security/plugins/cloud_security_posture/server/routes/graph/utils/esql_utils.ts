@@ -75,11 +75,43 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
  * CONCAT("{", "\"required\":true", formatJsonProperty('optional', 'val'), "}")
  * ```
  */
-export const formatJsonProperty = (propertyName: string, valueVar: string): string => {
+export const concatJsonObjectPropertyEsqlExprSafe = (
+  propertyName: string,
+  esqlVariable: string
+): string => {
   // CONCAT returns null if any argument is null, so if valueVar is null,
   // the entire CONCAT returns null, and COALESCE returns empty string
-  return `COALESCE(CONCAT(",\\"${propertyName}\\":\\"", ${valueVar}, "\\""), "")`;
+  return `COALESCE(CONCAT("\\"${propertyName}\\":\\"", ${esqlVariable}, "\\""), "")`;
 };
+
+export const concatJsonObjectPropertyString = (
+  propertyName: string,
+  stringValue: string
+): string => {
+  return `CONCAT("\\"${propertyName}\\":\\"", "${stringValue}", "\\"")`;
+};
+
+export const concatJsonObjectPropertyBool = (propertyName: string, boolValue: boolean): string => {
+  return `CONCAT("\\"${propertyName}\\":", "${boolValue}")`;
+};
+
+export const concatJsonObjectPropertyEsqlExpr = (
+  propertyName: string,
+  esqlExpr: string
+): string => {
+  return `CONCAT("\\"${propertyName}\\":", ${esqlExpr})`;
+};
+
+export const concatJsonObjectPropertyEsqlExprAsString = (
+  propertyName: string,
+  esqlExpr: string
+): string => {
+  return `CONCAT("\\"${propertyName}\\":\\"", ${esqlExpr}, "\\"")`;
+};
+
+export const JSON_OBJECT_SEPARATOR = '","';
+export const JSON_OBJECT_START = '"{"';
+export const JSON_OBJECT_END = '"}"';
 
 /**
  * Generates ESQL statements for entity enrichment using LOOKUP JOIN.

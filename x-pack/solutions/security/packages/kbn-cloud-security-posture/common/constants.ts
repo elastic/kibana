@@ -122,26 +122,24 @@ export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_<space>';
  * to batch the FORK queries.
  */
 export const ENTITY_RELATIONSHIP_FIELDS = [
-  'Accesses_frequently',
-  'Communicates_with',
-  'Depends_on',
-  'Owns',
-  'Supervises',
+  'accesses_frequently',
+  'communicates_with',
+  'depends_on',
+  'owns',
+  'supervises',
 ] as const;
 
 // Keys must match ENTITY_RELATIONSHIP_FIELDS values which use Entity Store naming convention
-/* eslint-disable @typescript-eslint/naming-convention */
 export const ENTITY_RELATIONSHIP_LABELS: Record<
   (typeof ENTITY_RELATIONSHIP_FIELDS)[number],
   string
 > = {
-  Accesses_frequently: 'Accesses frequently',
-  Communicates_with: 'Communicates with',
-  Depends_on: 'Depends on',
-  Owns: 'Owns',
-  Supervises: 'Supervises',
+  accesses_frequently: 'Accesses frequently',
+  communicates_with: 'Communicates with',
+  depends_on: 'Depends on',
+  owns: 'Owns',
+  supervises: 'Supervises',
 };
-/* eslint-enable @typescript-eslint/naming-convention */
 
 /**
  * ECS entity actor fields used for graph visualization.
