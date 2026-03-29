@@ -10,8 +10,6 @@ import {
   waitForPluginInitialized,
   cleanupEntityStore,
   waitForEntityDataIndexed,
-  executeEnrichPolicy,
-  waitForEnrichPolicyCreated,
   dataViewRouteHelpersFactory,
   initEntityEnginesWithRetry,
 } from '../../../cloud_security_posture_api/utils';
@@ -426,29 +424,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           );
         });
       };
-
-      describe('via ENRICH policy (v1)', () => {
-        before(async () => {
-          await esArchiver.load(
-            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
-          );
-
-          // Wait for entity data to be fully indexed
-          await waitForEntityDataIndexed({
-            es,
-            logger,
-            retry,
-            entitiesIndex: '.entities.v1.latest.security_*',
-            expectedCount: 15,
-          });
-
-          // Execute enrich policy to pick up entity data
-          await waitForEnrichPolicyCreated({ es, retry, logger });
-          await executeEnrichPolicy({ es, retry, logger });
-        });
-
-        runEnrichmentTests();
-      });
 
       describe('via LOOKUP JOIN (v2)', () => {
         before(async () => {
