@@ -8,34 +8,37 @@
 import { HostsTableType } from '../../../explore/hosts/store/model';
 import { HOSTS_PATH } from '../../../../common/constants';
 import { appendSearch } from './helpers';
-import { encodeEntityIdentifiersForUrl } from './redirect_to_users';
+import { mergeEntityResolutionIntoUrlState } from './entity_resolution_query_params';
 
-export const getHostsUrl = (search?: string) => `${HOSTS_PATH}${appendSearch(search)}`;
+export const getHostsUrl = (urlStateQuery?: string) =>
+  `${HOSTS_PATH}${appendSearch(urlStateQuery)}`;
 
-export const getTabsOnHostsUrl = (tabName: HostsTableType, search?: string) =>
-  `/${tabName}${appendSearch(search)}`;
+export const getTabsOnHostsUrl = (tabName: HostsTableType, urlStateQuery?: string) =>
+  `/${tabName}${appendSearch(urlStateQuery)}`;
 
 const DEFAULT_HOST_TAB = HostsTableType.events;
 
 export const getHostDetailsUrl = (
   detailName: string,
-  search?: string,
-  identityFields?: Record<string, string>,
-  entityId?: string
-) => {
-  return getTabsOnHostDetailsUrl(detailName, DEFAULT_HOST_TAB, search, identityFields, entityId);
-};
+  urlStateQuery?: string,
+  entityId?: string,
+  identityFields?: Record<string, string>
+) => getTabsOnHostDetailsUrl(detailName, DEFAULT_HOST_TAB, urlStateQuery, entityId, identityFields);
 
+/** Parameter order matches getTabsOnUsersDetailsUrl (urlStateQuery, entityId, identityFields). */
 export const getTabsOnHostDetailsUrl = (
   detailName: string,
   tabName: HostsTableType,
-  search?: string,
-  identityFields?: Record<string, string>,
-  entityId?: string
+  urlStateQuery?: string,
+  entityId?: string,
+  identityFields?: Record<string, string>
 ) => {
   const base = `/name/${encodeURIComponent(detailName)}/${tabName}`;
-  const segment =
-    identityFields !== undefined ? `/${encodeEntityIdentifiersForUrl(identityFields)}` : '';
-  const entityIdSegment = entityId !== undefined ? `/${entityId}` : '';
-  return `${base}${segment}${entityIdSegment}${appendSearch(search)}`;
+  const query = mergeEntityResolutionIntoUrlState(urlStateQuery, {
+    entityId,
+    identityFields,
+    displayName: detailName,
+    entityType: 'host',
+  });
+  return query === '' ? base : `${base}${query}`;
 };

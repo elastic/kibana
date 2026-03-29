@@ -62,6 +62,7 @@ const mapHostEntityRecordToHostsEdge = (record: HostEntity): HostsEdges | null =
     lastSeen: lastSeenIso != null ? [lastSeenIso] : undefined,
     risk: riskLevel,
     criticality: record.asset?.criticality,
+    entityId: record.entity.id,
   };
 
   return {

@@ -16,6 +16,7 @@ import { HostDetailsLink } from '../../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import type { HostsTableColumns } from '.';
 import * as i18n from './translations';
+import type { HostsEdges } from '../../../../../common/search_strategy/security_solution/hosts';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { VIEW_HOSTS_BY_SEVERITY } from '../../../../entity_analytics/components/host_risk_score_table/translations';
@@ -33,8 +34,9 @@ export const getHostsColumns = (
       truncateText: false,
       mobileOptions: { show: true },
       sortable: true,
-      render: (hostName) => {
+      render: (hostName, hostEdge: HostsEdges) => {
         if (hostName != null && hostName.length > 0) {
+          const name = hostName[0];
           return (
             <SecurityCellActions
               mode={CellActionsMode.HOVER_DOWN}
@@ -42,11 +44,14 @@ export const getHostsColumns = (
               showActionTooltips
               triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
               data={{
-                value: hostName[0],
+                value: name,
                 field: 'host.name',
               }}
             >
-              <HostDetailsLink hostName={hostName[0]} />
+              <HostDetailsLink
+                hostName={name}
+                entityId={hostEdge.node.entityId ?? undefined}
+              />
             </SecurityCellActions>
           );
         }

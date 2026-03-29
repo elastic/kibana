@@ -45,12 +45,21 @@ const mapUserEntityRecordToUser = (record: UserEntity): User | null => {
   const domain = domainValues != null && domainValues.length > 0 ? domainValues[0] : '';
   const riskLevel = record.user?.risk?.calculated_level as RiskSeverity | undefined;
 
+  const identityFields: Record<string, string> = {
+    'user.name': userName,
+  };
+  if (domain !== '') {
+    identityFields['user.domain'] = domain;
+  }
+
   return {
     name: userName,
     lastSeen: lastSeenIso ?? '',
     domain,
     risk: riskLevel,
     criticality: record.asset?.criticality,
+    entityId: record.entity.id,
+    identityFields,
   };
 };
 

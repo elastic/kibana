@@ -6,12 +6,12 @@
  */
 
 import type { UsersTableType } from '../../../explore/users/store/model';
-import { appendSearch } from './helpers';
+import { mergeEntityResolutionIntoUrlState } from './entity_resolution_query_params';
 
 export type EntityIdentifiers = Record<string, string>;
 
 /**
- * Encodes entityIdentifiers for use as a single URL path segment (base64url).
+ * Encodes entity identifiers as a single base64url blob (legacy path-segment URLs only).
  */
 export const encodeEntityIdentifiersForUrl = (
   identityFields: Record<string, string>,
@@ -23,7 +23,7 @@ export const encodeEntityIdentifiersForUrl = (
 };
 
 /**
- * Decodes entityIdentifiers from a URL path segment. Returns null if invalid.
+ * Decodes entity identifiers from a legacy base64url path segment. Returns null if invalid.
  */
 export const decodeEntityIdentifiersFromUrl = (encoded: string): EntityIdentifiers | null => {
   if (!encoded) return null;
@@ -38,52 +38,69 @@ export const decodeEntityIdentifiersFromUrl = (encoded: string): EntityIdentifie
   }
 };
 
-const getEntityIdentifiersSegment = (
-  detailName: string,
-  identityFields?: Record<string, string>,
-  entityId?: string
-): string => {
-  if (identityFields === undefined) {
-    return encodeEntityIdentifiersForUrl({ 'user.name': detailName });
+/**
+ * Parses the legacy encoded entity-identifiers path segment (redirect compatibility).
+ */
+export const parseEntityIdentifiersFromUrlParam = (
+  encoded: string | undefined
+): { entityId?: string; identityFields?: Record<string, string> } => {
+  if (encoded == null || encoded === '') {
+    return {};
   }
-  return encodeEntityIdentifiersForUrl(identityFields, entityId);
+  const decoded = decodeEntityIdentifiersFromUrl(encoded);
+  if (!decoded) {
+    return {};
+  }
+  const { entityId: rawEntityId, ...rest } = decoded;
+  const entityId = typeof rawEntityId === 'string' && rawEntityId !== '' ? rawEntityId : undefined;
+  const identityFields =
+    Object.keys(rest).length > 0 ? (rest as Record<string, string>) : undefined;
+  return { entityId, identityFields };
 };
 
 export const getUsersDetailsUrl = (
   detailName: string,
-  search?: string,
+  urlStateQuery?: string,
   identityFields?: Record<string, string>,
   entityId?: string
 ) => {
-  const segment = getEntityIdentifiersSegment(detailName, identityFields, entityId);
-  return `/name/${encodeURIComponent(detailName)}/${segment}${appendSearch(search)}`;
+  const base = `/name/${encodeURIComponent(detailName)}`;
+  const query = mergeEntityResolutionIntoUrlState(urlStateQuery, {
+    entityId,
+    identityFields,
+    displayName: detailName,
+    entityType: 'user',
+  });
+  return query === '' ? base : `${base}${query}`;
 };
 
 export const getTabsOnUsersDetailsUrl = (
   detailName: string,
   tabName: UsersTableType,
-  search?: string,
-  identityFields?: Record<string, string>,
-  entityId?: string
+  urlStateQuery?: string,
+  entityId?: string,
+  identityFields?: Record<string, string>
 ) => {
-  const segment = getEntityIdentifiersSegment(detailName, identityFields, entityId);
-  return `/name/${encodeURIComponent(detailName)}/${segment}/${tabName}${appendSearch(search)}`;
-};
-
-const getEntityIdentifiersSegmentForList = (
-  entityIdentifiers?: EntityIdentifiers | string
-): string | undefined => {
-  if (entityIdentifiers === undefined) return undefined;
-  if (typeof entityIdentifiers === 'string') return entityIdentifiers;
-  return encodeEntityIdentifiersForUrl(entityIdentifiers);
+  const base = `/name/${encodeURIComponent(detailName)}/${tabName}`;
+  const query = mergeEntityResolutionIntoUrlState(urlStateQuery, {
+    entityId,
+    identityFields,
+    displayName: detailName,
+    entityType: 'user',
+  });
+  return query === '' ? base : `${base}${query}`;
 };
 
 export const getTabsOnUsersUrl = (
   tabName: UsersTableType,
-  search?: string,
+  urlStateQuery?: string,
   entityIdentifiers?: EntityIdentifiers | string
 ) => {
-  const segment = getEntityIdentifiersSegmentForList(entityIdentifiers);
-  const tabPath = `/${tabName}${appendSearch(search)}`;
-  return segment ? `/${segment}${tabPath}` : tabPath;
+  const resolution =
+    typeof entityIdentifiers === 'string'
+      ? { entityId: entityIdentifiers }
+      : { identityFields: entityIdentifiers };
+  const query = mergeEntityResolutionIntoUrlState(urlStateQuery, resolution);
+  const tabPath = `/${tabName}`;
+  return query === '' ? tabPath : `${tabPath}${query}`;
 };

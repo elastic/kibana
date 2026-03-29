@@ -12,11 +12,13 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import { SecurityCellActions, CellActionsMode } from '../../../../common/components/cell_actions';
 import { UserDetailsLink } from '../../../../common/components/links';
 import {
   getEmptyTagValue,
   getOrEmptyTagFromValue,
 } from '../../../../common/components/empty_value';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 import type {
   Columns,
@@ -86,15 +88,27 @@ const getUsersColumns = (
       truncateText: false,
       sortable: true,
       mobileOptions: { show: true },
-      render: (name) =>
-        name != null && name.length > 0
-          ? getRowItemsWithActions({
-              fieldName: 'user.name',
-              values: [name],
-              idPrefix: `users-table-${name}-name`,
-              render: (item) => <UserDetailsLink userName={item} />,
-            })
-          : getOrEmptyTagFromValue(name),
+      render: (name, user: User) =>
+        name != null && name.length > 0 ? (
+          <SecurityCellActions
+            mode={CellActionsMode.HOVER_DOWN}
+            visibleCellActions={5}
+            showActionTooltips
+            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
+            data={{
+              value: name,
+              field: 'user.name',
+            }}
+          >
+            <UserDetailsLink
+              userName={name}
+              entityId={user.entityId}
+              identityFields={user.identityFields}
+            />
+          </SecurityCellActions>
+        ) : (
+          getOrEmptyTagFromValue(name)
+        ),
     },
     {
       field: 'lastSeen',

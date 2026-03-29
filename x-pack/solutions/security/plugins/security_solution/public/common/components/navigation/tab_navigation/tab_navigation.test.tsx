@@ -75,4 +75,21 @@ describe('Table Navigation', () => {
       `/app/securitySolutionUI/hosts/name/siem-window/authentications${SEARCH_QUERY}`
     );
   });
+
+  test('does not append location.search when href already encodes query (host details tabs)', () => {
+    const propsWithEmbeddedSearch: TabNavigationProps = {
+      navTabs: navTabsHostDetails({
+        hostName,
+        hasMlUserPermissions: mockHasMlUserPermissions,
+        urlStateQuery: SEARCH_QUERY,
+      }),
+    };
+
+    render(<TabNavigationComponent {...propsWithEmbeddedSearch} />);
+
+    const firstTab = screen.getByTestId(`navigation-${HostsTableType.authentications}`);
+    const { href } = firstTab as HTMLAnchorElement;
+    expect((href.match(/\?/g) ?? []).length).toBe(1);
+    expect(href).toContain('search=test');
+  });
 });

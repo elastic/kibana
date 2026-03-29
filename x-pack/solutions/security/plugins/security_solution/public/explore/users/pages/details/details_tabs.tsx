@@ -29,35 +29,51 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
     to,
     type,
     detailName,
+    userDetailFilter,
+    userDetailsIdentityFilterQuery,
+    identityFields,
+    entityId,
   }) => {
     const tabProps = {
       deleteQuery,
       endDate: to,
       filterQuery,
-      indexNames,
       skip: isInitializing || filterQuery === undefined,
       setQuery,
       startDate: from,
       type,
+      indexNames,
+      identityFields,
+      entityId,
     };
 
     return (
       <Routes>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
+          <AuthenticationsQueryTabBody
+            {...tabProps}
+            identityScopedFilterQuery={userDetailsIdentityFilterQuery}
+            userName={detailName}
+          />
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesUserTable} />
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.events})`}>
           <EventsQueryTabBody
-            additionalFilters={[]}
+            additionalFilters={userDetailFilter}
+            histogramFilterQuery={userDetailsIdentityFilterQuery}
             tableId={TableId.usersPageEvents}
             {...tabProps}
           />
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>
-          <RiskDetailsTabBody {...tabProps} riskEntity={EntityType.user} entityName={detailName} />
+          <RiskDetailsTabBody
+            {...tabProps}
+            riskEntity={EntityType.user}
+            entityName={detailName}
+            identityScopedFilterQuery={userDetailsIdentityFilterQuery}
+          />
         </Route>
       </Routes>
     );

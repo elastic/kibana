@@ -9,28 +9,26 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { decodeEntityIdentifiersFromUrl } from '../../../common/components/link_to/redirect_to_users';
 import { HOSTS_PATH } from '../../../../common/constants';
+import {
+  mergeEntityResolutionIntoUrlState,
+  parseEntityIdentifiersFromUrlParam,
+  parseEntityResolutionFromUrlState,
+} from '../../../common/components/link_to';
 import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
 
 import { MlHostConditionalContainer } from '../../../common/components/ml/conditional_links/ml_host_conditional_container';
 import { Hosts } from './hosts';
-import {
-  hostDetailsPagePath,
-  hostDetailsPagePathWithEntityIdentifiers,
-  hostDetailsPagePathWithEntityIdentifiersSegment,
-} from './types';
+import { hostDetailsPagePath } from './types';
 
-const parseEntityIdentifiersFromParams = (
-  detailName: string,
-  entityIdentifiersSegment: string | undefined
-): Record<string, string> => {
-  const decoded = entityIdentifiersSegment
-    ? decodeEntityIdentifiersFromUrl(entityIdentifiersSegment)
-    : null;
-  return decoded ?? { 'host.name': decodeURIComponent(detailName) };
-};
+const HOST_DETAILS_TAB_NAMES =
+  `${HostsTableType.events}|` +
+  `${HostsTableType.authentications}|` +
+  `${HostsTableType.uncommonProcesses}|` +
+  `${HostsTableType.anomalies}|` +
+  `${HostsTableType.risk}|` +
+  `${HostsTableType.sessions}`;
 
 const getHostsTabPath = () =>
   `${HOSTS_PATH}/:tabName(` +
@@ -40,6 +38,12 @@ const getHostsTabPath = () =>
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.risk}|` +
   `${HostsTableType.sessions})`;
+
+const getHostDetailsTabPath = () => `${hostDetailsPagePath}/:tabName(${HOST_DETAILS_TAB_NAMES})`;
+
+/** Legacy bookmarked URLs with a base64 entity segment after the tab name. */
+const getHostDetailsLegacyEntityTabPath = () =>
+  `${hostDetailsPagePath}/:tabName(${HOST_DETAILS_TAB_NAMES})/:legacyEntityIdentifiers`;
 
 export const HostsContainer = React.memo(() => (
   <Routes>
@@ -61,69 +65,53 @@ export const HostsContainer = React.memo(() => (
       <Hosts />
     </Route>
     <Route
-      path={hostDetailsPagePathWithEntityIdentifiersSegment}
+      path={getHostDetailsLegacyEntityTabPath()}
       render={({
         match: {
-          params: { detailName, entityIdentifiers: entityIdentifiersSegment },
+          params: { detailName, tabName, legacyEntityIdentifiers },
         },
-      }) => (
-        <HostDetails
-          detailName={decodeURIComponent(detailName)}
-          hostDetailsPagePath={hostDetailsPagePath}
-          identityFields={parseEntityIdentifiersFromParams(detailName, entityIdentifiersSegment)}
-          entityId={''}
-        />
-      )}
+        location,
+      }) => {
+        const { entityId, identityFields } =
+          parseEntityIdentifiersFromUrlParam(legacyEntityIdentifiers);
+        const urlStateQuery = mergeEntityResolutionIntoUrlState(location.search, {
+          entityId,
+          identityFields,
+          displayName: decodeURIComponent(detailName),
+          entityType: 'host',
+        });
+        return (
+          <Redirect
+            to={{
+              pathname: `${HOSTS_PATH}/name/${detailName}/${tabName}`,
+              search: urlStateQuery.replace(/^\?/, ''),
+            }}
+          />
+        );
+      }}
     />
     <Route
-      path={hostDetailsPagePathWithEntityIdentifiers}
+      path={getHostDetailsTabPath()}
       render={({
         match: {
           params: { detailName },
         },
-      }) => (
-        <HostDetails
-          detailName={decodeURIComponent(detailName)}
-          hostDetailsPagePath={hostDetailsPagePath}
-          identityFields={parseEntityIdentifiersFromParams(detailName, undefined)}
-          entityId={''}
-        />
-      )}
-    />
-    <Route // Compatibility: old format had entityIdentifiers before tabName. Redirect to entityIdentifiers after tabName.
-      path={`${HOSTS_PATH}/name/:detailName/:entityIdentifiersSegment/:tabName`}
-      render={({
-        match: {
-          params: { detailName, entityIdentifiersSegment, tabName },
-        },
-        location: { search = '' },
-      }) => (
-        <Redirect
-          to={{
-            pathname: `${HOSTS_PATH}/name/${detailName}/${tabName}/${entityIdentifiersSegment}`,
-            search,
-          }}
-        />
-      )}
-    />
-    <Route // Compatibility: old format had entityIdentifiers without tab. Redirect to events tab.
-      path={`${HOSTS_PATH}/name/:detailName/:entityIdentifiersSegment`}
-      render={({
-        match: {
-          params: { detailName, entityIdentifiersSegment },
-        },
-        location: { search = '' },
-      }) => (
-        <Redirect
-          to={{
-            pathname: `${HOSTS_PATH}/name/${detailName}/${HostsTableType.events}/${entityIdentifiersSegment}`,
-            search,
-          }}
-        />
-      )}
+        location,
+      }) => {
+        const { entityId, identityFields } = parseEntityResolutionFromUrlState(location.search);
+        return (
+          <HostDetails
+            hostDetailsPagePath={hostDetailsPagePath}
+            detailName={decodeURIComponent(detailName)}
+            entityId={entityId}
+            identityFields={identityFields}
+          />
+        );
+      }}
     />
     <Route // Redirect to the first tab when tabName is not present.
-      path={`${HOSTS_PATH}/name/:detailName`}
+      exact
+      path={hostDetailsPagePath}
       render={({
         match: {
           params: { detailName },

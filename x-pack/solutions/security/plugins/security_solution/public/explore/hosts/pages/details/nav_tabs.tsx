@@ -16,15 +16,26 @@ export const navTabsHostDetails = ({
   hasMlUserPermissions,
   hostName,
   isEnterprise,
+  entityId,
   identityFields,
+  urlStateQuery = '',
 }: {
   hostName: string;
   hasMlUserPermissions: boolean;
   isEnterprise?: boolean;
+  entityId?: string;
   identityFields?: Record<string, string>;
+  /** Current location.search (timerange, timeline, entityId, identityFields, …) */
+  urlStateQuery?: string;
 }): HostDetailsNavTab => {
   const getTabHref = (tabName: HostsTableType) =>
-    `${HOSTS_PATH}${getTabsOnHostDetailsUrl(hostName, tabName, undefined, identityFields)}`;
+    `${HOSTS_PATH}${getTabsOnHostDetailsUrl(
+      hostName,
+      tabName,
+      urlStateQuery,
+      entityId,
+      identityFields
+    )}`;
   const hiddenTabs = [];
 
   const hostDetailsNavTabs = {

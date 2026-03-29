@@ -16,9 +16,8 @@ const HOST_DETAILS_TAB_NAMES =
 /** Base path for host details (used by details_tabs for route matching) */
 export const hostDetailsPagePath = `${HOSTS_PATH}/name/:detailName`;
 
-/** Path for host details. entityIdentifiers come after tabName for precise entity resolution */
+/** Path for host details tabs (entity resolution uses URL search params). */
 export const hostDetailsPagePathWithEntityIdentifiers = `${hostDetailsPagePath}/:tabName(${HOST_DETAILS_TAB_NAMES})`;
-export const hostDetailsPagePathWithEntityIdentifiersSegment = `${hostDetailsPagePathWithEntityIdentifiers}/:entityIdentifiers`;
 
 export type HostsTabsProps = GlobalTimeArgs & {
   filterQuery?: string;
