@@ -149,7 +149,7 @@ describe(
       it('Check if result type is correct', () => {
         const packName = 'ResultType' + generateRandomStringName(1)[0];
 
-        cy.contains('Packs').click();
+        navigateTo('/app/osquery/packs');
         cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
         cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
 
@@ -286,7 +286,7 @@ describe(
       });
 
       it('should add a pack from a saved query', () => {
-        cy.contains('Packs').click();
+        navigateTo('/app/osquery/packs');
 
         cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
         cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
@@ -367,7 +367,7 @@ describe(
 
       it('should deactivate, activate, and delete all queries in pack', () => {
         // Deactivate and activate
-        cy.contains('Packs').click();
+        navigateTo('/app/osquery/packs');
         changePackActiveStatus(packName);
         changePackActiveStatus(packName);
 
