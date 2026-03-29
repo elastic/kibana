@@ -91,7 +91,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     expect(entities.hits.hits).toHaveLength(expectedResultCount);
-    // it's deterministic because of the MD5 id;
+    // it's deterministic because of the SHA-256 id;
     expect(entities.hits.hits).toMatchObject(expectedHostEntities);
   });
 
@@ -128,7 +128,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     expect(entities.hits.hits).toHaveLength(expectedResultCount);
-    // it's deterministic because of the MD5 id
+    // it's deterministic because of the SHA-256 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedUserEntities);
     // All user entities must have entity.namespace (from fieldEvaluations) and entity.confidence (from whenConditionTrueSetFieldsPreAgg)
@@ -171,7 +171,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     expect(entities.hits.hits).toHaveLength(2);
-    // it's deterministic because of the MD5 id
+    // it's deterministic because of the SHA-256 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedServiceEntities);
   });
@@ -207,7 +207,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     expect(entities.hits.hits).toHaveLength(1);
-    // it's deterministic because of the MD5 id
+    // it's deterministic because of the SHA-256 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedGenericEntities);
   });
@@ -413,7 +413,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
   });
 
-  apiTest.skip(
+  apiTest(
     'Should apply user postAggFilter: IDP asset/iam paths and entity.id-after-LOOKUP; omit when no keep branch',
     async ({ apiClient, esClient }) => {
       const from = '2026-03-01T10:00:00Z';
@@ -545,7 +545,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     }
   );
 
-  apiTest.skip(
+  apiTest(
     'Should only enrich (update) existing entities when entity already exists for both IDP and non-IDP, no new entity creation',
     async ({ apiClient, esClient }) => {
       const from = '2026-03-02T10:00:00Z';

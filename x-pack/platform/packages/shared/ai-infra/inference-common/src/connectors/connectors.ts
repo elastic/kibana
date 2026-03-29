@@ -47,6 +47,12 @@ export interface InferenceConnector {
    * `metadata.display.name` on the underlying ES inference endpoint.
    */
   isPreconfigured: boolean;
+  /** Present when sourced from a stack connector that exposes deprecation state. */
+  isDeprecated?: boolean;
+  /** Present when sourced from a stack connector that exposes connector-type deprecation. */
+  isConnectorTypeDeprecated?: boolean;
+  /** Present when sourced from a stack connector that exposes missing-secrets state. */
+  isMissingSecrets?: boolean;
 }
 
 export interface InferenceConnectorCapabilities {
@@ -67,6 +73,9 @@ export interface RawConnector {
   name: string;
   config?: Record<string, any>;
   isPreconfigured?: boolean;
+  isDeprecated?: boolean;
+  isConnectorTypeDeprecated?: boolean;
+  isMissingSecrets?: boolean;
 }
 
 export interface RawInferenceConnector {
@@ -75,4 +84,7 @@ export interface RawInferenceConnector {
   name: string;
   config?: Record<string, any>;
   isPreconfigured?: boolean;
+  isDeprecated?: boolean;
+  isConnectorTypeDeprecated?: boolean;
+  isMissingSecrets?: boolean;
 }

@@ -41,8 +41,6 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/grok-ui'
-  - '@kbn/grok-heuristics'
-  - '@kbn/dissect-heuristics'
   - '@kbn/streams-plugin'
   - '@kbn/search-types'
   - '@kbn/xstate-utils'
@@ -125,26 +123,6 @@ fileGroups:
     - test/scout/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}
