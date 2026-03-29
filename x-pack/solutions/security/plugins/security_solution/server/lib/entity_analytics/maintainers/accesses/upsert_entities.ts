@@ -28,7 +28,7 @@ function buildEntityDoc(record: ProcessedEntityRecord): Entity {
   } as Entity;
 }
 
-export async function upsertEntityRelationships(
+export async function updateEntityRelationships(
   crudClient: EntityUpdateClient,
   logger: Logger,
   records: ProcessedEntityRecord[]
@@ -39,14 +39,14 @@ export async function upsertEntityRelationships(
 
   const entities = records.map((r) => ({ type: entityType, doc: buildEntityDoc(r) }));
 
-  logger.info(`Upserting ${entities.length} entity relationship records via CRUD bulk API`);
+  logger.info(`Updating ${entities.length} entity relationship records via CRUD bulk API`);
   const errors = await crudClient.bulkUpdateEntity({ objects: entities, force: true });
 
-  const upserted = records.length - errors.length;
+  const updatedCount = records.length - errors.length;
   if (errors.length > 0) {
-    logger.error(`Failed to upsert ${errors.length} entity records: ${JSON.stringify(errors)}`);
+    logger.error(`Failed to update ${errors.length} entity records: ${JSON.stringify(errors)}`);
   }
 
-  logger.info(`Upserted ${upserted} entity relationship records`);
-  return upserted;
+  logger.info(`Updated ${updatedCount} entity relationship records`);
+  return updatedCount;
 }

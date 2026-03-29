@@ -107,7 +107,7 @@ ${userFieldEvalsLine}| EVAL actorUserId = ${userIdEval}
 | WHERE targetEntityId IS NOT NULL AND targetEntityId != ""
 | STATS access_count = COUNT(*), _userId = MIN(user.id), _ns = MIN(entity.namespace) BY actorUserId, targetEntityId
 | EVAL access_type = CASE(
-    access_count > 4, "accesses_frequently",
+    access_count >= 4, "accesses_frequently",
     "accesses_infrequently"
   )
 | STATS targets = VALUES(targetEntityId), _userId = MIN(_userId), _ns = MIN(_ns) BY access_type, actorUserId

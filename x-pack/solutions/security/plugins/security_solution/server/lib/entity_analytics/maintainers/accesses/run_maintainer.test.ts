@@ -14,7 +14,7 @@ import type { CompositeAfterKey, ProcessedEntityRecord } from './types';
 import type { AccessesIntegrationConfig } from './integrations';
 
 const mockPostprocessEsqlResults = jest.fn((): ProcessedEntityRecord[] => []);
-const mockUpsertEntityRelationships = jest.fn(() => Promise.resolve(0));
+const mockUpdateEntityRelationships = jest.fn(() => Promise.resolve(0));
 
 jest.mock('./postprocess_records', () => ({
   postprocessEsqlResults: (...args: Parameters<typeof mockPostprocessEsqlResults>) =>
@@ -22,8 +22,8 @@ jest.mock('./postprocess_records', () => ({
 }));
 
 jest.mock('./upsert_entities', () => ({
-  upsertEntityRelationships: (...args: Parameters<typeof mockUpsertEntityRelationships>) =>
-    mockUpsertEntityRelationships(...args),
+  updateEntityRelationships: (...args: Parameters<typeof mockUpdateEntityRelationships>) =>
+    mockUpdateEntityRelationships(...args),
 }));
 
 function createMockIntegration(
@@ -86,7 +86,7 @@ describe('runMaintainer', () => {
     jest.clearAllMocks();
     mockIntegration = createMockIntegration();
     mockPostprocessEsqlResults.mockReturnValue([]);
-    mockUpsertEntityRelationships.mockResolvedValue(0);
+    mockUpdateEntityRelationships.mockResolvedValue(0);
   });
 
   describe('pagination', () => {
@@ -247,7 +247,7 @@ describe('runMaintainer', () => {
         .mockReturnValueOnce(page1Records)
         .mockReturnValueOnce(page2Records);
 
-      mockUpsertEntityRelationships.mockResolvedValue(2);
+      mockUpdateEntityRelationships.mockResolvedValue(2);
 
       const result = await runMaintainer({
         esClient,
@@ -257,8 +257,8 @@ describe('runMaintainer', () => {
         integrations: [mockIntegration],
       });
 
-      expect(mockUpsertEntityRelationships).toHaveBeenCalledTimes(1);
-      expect(mockUpsertEntityRelationships).toHaveBeenCalledWith(crudClient, logger, [
+      expect(mockUpdateEntityRelationships).toHaveBeenCalledTimes(1);
+      expect(mockUpdateEntityRelationships).toHaveBeenCalledWith(crudClient, logger, [
         ...page1Records,
         ...page2Records,
       ]);
@@ -277,7 +277,7 @@ describe('runMaintainer', () => {
         integrations: [mockIntegration],
       });
 
-      expect(mockUpsertEntityRelationships).toHaveBeenCalledWith(crudClient, logger, []);
+      expect(mockUpdateEntityRelationships).toHaveBeenCalledWith(crudClient, logger, []);
     });
   });
 
@@ -313,7 +313,7 @@ describe('runMaintainer', () => {
       ];
 
       mockPostprocessEsqlResults.mockReturnValueOnce(records1).mockReturnValueOnce(records2);
-      mockUpsertEntityRelationships.mockResolvedValue(2);
+      mockUpdateEntityRelationships.mockResolvedValue(2);
 
       const result = await runMaintainer({
         esClient,
@@ -326,7 +326,7 @@ describe('runMaintainer', () => {
       expect(esClient.search).toHaveBeenCalledTimes(2);
       expect(integration1.buildCompositeAggQuery).toHaveBeenCalledTimes(1);
       expect(integration2.buildCompositeAggQuery).toHaveBeenCalledTimes(1);
-      expect(mockUpsertEntityRelationships).toHaveBeenCalledWith(crudClient, logger, [
+      expect(mockUpdateEntityRelationships).toHaveBeenCalledWith(crudClient, logger, [
         ...records1,
         ...records2,
       ]);
@@ -432,7 +432,7 @@ describe('runMaintainer', () => {
       ];
       esClient.esql.query.mockResolvedValueOnce(createEsqlResponse() as never);
       mockPostprocessEsqlResults.mockReturnValueOnce(records);
-      mockUpsertEntityRelationships.mockResolvedValue(1);
+      mockUpdateEntityRelationships.mockResolvedValue(1);
 
       const result = await runMaintainer({
         esClient,

@@ -13,7 +13,7 @@ import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constant
 import type { CompositeAfterKey, CompositeBucket, ProcessedEntityRecord } from './types';
 import { INTEGRATION_CONFIGS, type AccessesIntegrationConfig } from './integrations';
 import { postprocessEsqlResults } from './postprocess_records';
-import { upsertEntityRelationships } from './upsert_entities';
+import { updateEntityRelationships } from './upsert_entities';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isIndexNotFound(err: any): boolean {
@@ -121,7 +121,16 @@ export async function runMaintainer({
       logger.info(`[${integration.id}] Running ES|QL query:\n${esqlQuery}`);
       logger.info(`[${integration.id}] Bucket user filter: ${JSON.stringify(bucketFilter)}`);
 
-      const esqlResult = await esClient.esql.query({ query: esqlQuery, filter: esqlFilter });
+      let esqlResult;
+      try {
+        esqlResult = await esClient.esql.query({ query: esqlQuery, filter: esqlFilter });
+      } catch (err) {
+        // Break instead of rethrowing so a failure on one integration's ES|QL
+        // query only skips the rest of that integration's pages, allowing the
+        // outer loop to continue processing the remaining integrations.
+        logger.error(`[${integration.id}] ES|QL query failed: ${errMsg(err)}`);
+        break;
+      }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const columns = (esqlResult as any).columns as Array<{ name: string; type: string }>;
@@ -150,7 +159,7 @@ export async function runMaintainer({
     } while (afterKey);
   }
 
-  totalUpserted = await upsertEntityRelationships(crudClient, logger, allRecords);
+  totalUpserted = await updateEntityRelationships(crudClient, logger, allRecords);
 
   return {
     totalBuckets,
