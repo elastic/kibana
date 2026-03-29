@@ -80,6 +80,7 @@ import {
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { translations } from '../constants/translations';
+import { gapReasonType } from '../../common/constants';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import type { ContextOpts } from '../lib/alerting_event_logger/alerting_event_logger';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -3453,8 +3454,9 @@ describe('Task Runner', () => {
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
   });
 
-  test('when there is a gap, report it to alert event log', async () => {
+  test('when there is a gap, report it with reason to alert event log', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     jest.spyOn(RuleMonitoringService.prototype, 'getMonitoring').mockImplementation(() => {
       return {
         run: {
@@ -3468,6 +3470,9 @@ describe('Task Runner', () => {
               gap_range: {
                 gte: '2021-09-01T00:00:00.000Z',
                 lte: '2021-09-01T00:00:00.001Z',
+              },
+              gap_reason: {
+                type: gapReasonType.RULE_DISABLED,
               },
             },
           },
@@ -3487,6 +3492,7 @@ describe('Task Runner', () => {
 
     expect(alertingEventLogger.reportGap).toHaveBeenCalledWith({
       gap: { gte: '2021-09-01T00:00:00.000Z', lte: '2021-09-01T00:00:00.001Z' },
+      reason: { type: gapReasonType.RULE_DISABLED },
     });
   });
 
