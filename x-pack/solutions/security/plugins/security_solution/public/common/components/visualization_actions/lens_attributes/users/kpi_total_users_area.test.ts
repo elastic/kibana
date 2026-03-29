@@ -77,7 +77,8 @@ describe('getKpiTotalUsersAreaLensAttributes', () => {
 
     const formBased = attrs?.state.datasourceStates?.formBased;
     const layer = formBased?.layers && Object.values(formBased.layers)[0];
-    const metricColumn = layer?.columns && Object.values(layer.columns).find((c) => c.isBucketed === false);
+    const metricColumn =
+      layer?.columns && Object.values(layer.columns).find((c) => c.isBucketed === false);
     expect(
       metricColumn && 'sourceField' in metricColumn ? metricColumn.sourceField : undefined
     ).toBe('entity.id');

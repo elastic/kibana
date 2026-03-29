@@ -48,10 +48,7 @@ export const getHostsColumns = (
                 field: 'host.name',
               }}
             >
-              <HostDetailsLink
-                hostName={name}
-                entityId={hostEdge.node.entityId ?? undefined}
-              />
+              <HostDetailsLink hostName={name} entityId={hostEdge.node.entityId ?? undefined} />
             </SecurityCellActions>
           );
         }
