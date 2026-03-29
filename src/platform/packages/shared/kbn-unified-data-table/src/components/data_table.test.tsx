@@ -924,7 +924,7 @@ describe('UnifiedDataTable', () => {
   );
 
   it(
-    'should provide and clear document view metadata when rendered externally',
+    'should provide, clear, and re-provide document view metadata when rendered externally',
     async () => {
       const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
       const [expandedDoc] = rows;
@@ -959,6 +959,20 @@ describe('UnifiedDataTable', () => {
 
       await waitFor(() => {
         expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith(undefined);
+      });
+
+      setRenderDocumentViewMeta.mockClear();
+
+      await act(async () => {
+        component.setProps({ expandedDoc });
+        component.update();
+      });
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith({
+          displayedRows: rows,
+          displayedColumns: ['_source'],
+        });
       });
     },
     EXTENDED_JEST_TIMEOUT

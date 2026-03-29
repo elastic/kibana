@@ -760,6 +760,13 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     useEffect(() => {
       if (renderDocumentView !== 'external' || !setRenderDocumentViewMeta) {
+        prevRenderDocumentViewMeta.current = undefined;
+        return;
+      }
+
+      if (!expandedDoc) {
+        prevRenderDocumentViewMeta.current = undefined;
+        setRenderDocumentViewMeta(undefined);
         return;
       }
 
@@ -768,9 +775,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         prevMeta?.displayedColumns !== displayedColumns ||
         prevMeta?.displayedRows !== displayedRows;
 
-      if (!expandedDoc) {
-        setRenderDocumentViewMeta(undefined);
-      } else if (metaChanged) {
+      if (metaChanged) {
         const nextMeta: RenderDocumentViewMeta = { displayedColumns, displayedRows };
         setRenderDocumentViewMeta(nextMeta);
         prevRenderDocumentViewMeta.current = nextMeta;
