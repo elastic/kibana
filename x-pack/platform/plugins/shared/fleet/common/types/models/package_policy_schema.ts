@@ -72,7 +72,7 @@ const PackagePolicyStreamsSchema = {
   ),
   data_stream: schema.object({
     dataset: schema.string(),
-    type: schema.string(),
+    type: schema.maybe(schema.string()),
     elasticsearch: schema.maybe(
       schema.object({
         privileges: schema.maybe(

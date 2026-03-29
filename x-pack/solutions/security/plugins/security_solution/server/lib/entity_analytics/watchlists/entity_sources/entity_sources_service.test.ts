@@ -12,17 +12,15 @@ import {
 } from '@kbn/core/server/mocks';
 import { createEntitySourcesService } from './entity_sources_service';
 
-const mockListEntitySources = jest.fn();
-
 jest.mock('../management/watchlist_config');
-jest.mock('../../privilege_monitoring/saved_objects', () => ({
-  MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
-    list: mockListEntitySources,
-  })),
-}));
+jest.mock('./infra/entity_source_client');
 jest.mock('../entities/service');
 jest.mock('./sync/index_sync');
 jest.mock('../entities/utils');
+
+const { mockListEntitySources } = jest.requireMock('./infra/entity_source_client') as {
+  mockListEntitySources: jest.Mock;
+};
 
 const { mockWatchlistGet, mockGetEntitySourceIds } = jest.requireMock(
   '../management/watchlist_config'
@@ -59,7 +57,7 @@ describe('createEntitySourcesService', () => {
         {
           id: 'source-a',
           type: 'index',
-          indexPattern: 'user.id',
+          identifierField: 'user.id',
         },
         {
           id: 'source-b',
