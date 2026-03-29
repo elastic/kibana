@@ -182,6 +182,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           break;
 
         case 'finish':
+          setIsActive(false);
           // Touch interactions are followed by a compatibility/emulated `mousedown`,
           // meaning the browser fires a mouse down event after touchend.
           // We detect this "ghost mouse down" to prevent duplicated toggling of the section collapse state on touch devices.
@@ -193,7 +194,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
             toggleIsCollapsed();
           }
 
-          setIsActive(false);
           hasBeenDragged.current = false;
           resetHeaderStyles();
           break;
@@ -251,6 +251,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         gutterSize="xs"
         responsive={false}
         alignItems="center"
+        id={`kbnGridSectionHeader-${sectionId}`}
         css={(theme) => styles.headerStyles(theme, sectionId, readOnly)}
         className={classNames('kbnGridSectionHeader', {
           'kbnGridSectionHeader--active': isActive,
@@ -324,12 +325,12 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                     <EuiButtonIcon
                       iconType="move"
                       color="text"
-                      onKeyDown={handleSectionDragStart}
                       className="kbnGridSection--dragHandle"
                       aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
                         defaultMessage: 'Move section',
                       })}
                       data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
+                      onKeyDown={handleSectionDragStart}
                     />
                   </EuiFlexItem>
                 </>
@@ -365,13 +366,13 @@ const styles = {
       gridRowStart: `span 1`,
       gridRowEnd: `start-${sectionId}`,
       height: `${euiTheme.size.xl}`,
+      touchAction: 'none', // prevents default drag behaviour on mobile
       ...(readOnly
         ? {
             cursor: 'pointer',
           }
         : {
             userSelect: 'none',
-            touchAction: 'none',
             '&:hover': {
               cursor: 'move',
               backgroundColor: `${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)}`,
@@ -385,8 +386,6 @@ const styles = {
       },
       '.kbnGridSection--dragHandle': {
         cursor: 'move',
-        touchAction: 'none',
-        pointerEvents: 'none',
         '&:active, &:hover, &:focus': {
           transform: 'none !important', // prevent "bump up" that EUI adds on hover
           backgroundColor: 'transparent',
@@ -411,18 +410,13 @@ const styles = {
       // these styles ensure that dragged sections are rendered **above** everything else + the move icon stays visible
       '&.kbnGridSectionHeader--active': {
         zIndex: euiTheme.levels.modal,
-        pointerEvents: 'auto',
-        userSelect: 'none',
-        backgroundColor: euiTheme.colors.backgroundBasePlain,
+        backgroundColor: euiTheme.colors.backgroundBasePlain, // needed to prevent the bug with transparent background while dragging
         '.kbnGridSection--dragHandle': {
           cursor: 'move',
           userSelect: 'none',
           opacity: 1,
           pointerEvents: 'none',
         },
-      },
-      '&.kbnGridSectionHeader--active button, &.kbnGridSectionHeader--active a': {
-        pointerEvents: 'none',
       },
     }),
 };
