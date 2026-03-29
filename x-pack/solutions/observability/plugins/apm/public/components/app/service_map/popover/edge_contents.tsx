@@ -68,7 +68,7 @@ export function EdgeContents({
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map'
   );
-  const { offset, comparisonEnabled, rangeFrom, rangeTo, kuery } = query;
+  const { offset, comparisonEnabled, rangeFrom, rangeTo } = query;
 
   const isEdgeSelection = isEdge(selection);
   const edgeSelectionData = isEdgeSelection ? selection.data : undefined;
@@ -139,7 +139,6 @@ export function EdgeContents({
               rangeFrom={rangeFrom}
               rangeTo={rangeTo}
               queryParams={{
-                kuery,
                 serviceName: sourceServiceName,
                 environment,
                 dependencyName,

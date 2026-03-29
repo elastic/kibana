@@ -17,6 +17,7 @@ import {
 } from '.';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
+import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 
 jest.mock('./waterfall_flyout/span_flyout', () => ({
   spanFlyoutId: 'spanDetailFlyout',
@@ -76,6 +77,7 @@ describe('FullScreenWaterfall', () => {
 
   beforeAll(() => {
     setUnifiedDocViewerServices({
+      ...mockUnifiedDocViewerServices,
       discoverShared: {
         features: {
           registry: {

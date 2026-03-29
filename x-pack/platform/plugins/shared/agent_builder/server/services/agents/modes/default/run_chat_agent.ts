@@ -20,7 +20,6 @@ import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
-import { ChatEventType } from '@kbn/agent-builder-common';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import { createResultTransformer } from '../utils/create_result_transformer';
 import {
@@ -201,6 +200,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   // Context-aware compaction: check if conversation history exceeds the
   // model's context window budget and apply hybrid compaction if needed.
+  // We pass events.emit directly (not the manualEvents$-based eventEmitter)
+  // so compaction events reach the SSE stream immediately during the await,
+  // rather than being buffered in the ReplaySubject and replayed after.
   const contextBudget = computeContextBudget(model.connector);
   const compactionResult = await compactConversation({
     processedConversation,
@@ -209,27 +211,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     existingSummary: conversation?.state?.compaction_summary,
     logger,
     abortSignal,
+    eventEmitter: events.emit,
   });
 
   // Reassign to the (possibly compacted) conversation for prompt construction
   processedConversation = compactionResult.processedConversation;
-
-  // Emit compaction lifecycle events via the eventEmitter. Because manualEvents$
-  // is a ReplaySubject these will be delivered to subscribers even though the
-  // merged stream hasn't been subscribed to yet.
-  if (compactionResult.compactionTriggered) {
-    eventEmitter({
-      type: ChatEventType.compactionStarted as const,
-      data: { token_count_before: compactionResult.tokensBefore ?? 0 },
-    });
-    eventEmitter({
-      type: ChatEventType.compactionCompleted as const,
-      data: {
-        token_count_after: compactionResult.tokensAfter ?? 0,
-        summarized_round_count: compactionResult.summarizedRoundCount ?? 0,
-      },
-    });
-  }
 
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,

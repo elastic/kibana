@@ -20,18 +20,6 @@ import {
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
 
-const tagcloudStateMetricOptionsSchema = {
-  /**
-   * Whether to show the metric label
-   */
-  show_metric_label: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Show metric label' },
-      defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
-    })
-  ),
-};
-
 const tagcloudStateTagsByOptionsSchema = {
   /**
    * Color configuration
@@ -63,6 +51,25 @@ const tagcloudStateSharedOptionsSchema = {
       { meta: { description: 'Minimum and maximum font size for the tags' } }
     )
   ),
+  /**
+   * Show the metric caption
+   */
+  caption: schema.maybe(
+    schema.object(
+      {
+        visible: schema.boolean({
+          meta: { description: 'Show caption' },
+          defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showCaption,
+        }),
+      },
+      {
+        meta: {
+          description:
+            'Caption configuration representing the metric and the tag_by operations labels',
+        },
+      }
+    )
+  ),
 };
 
 export const tagcloudStateSchemaNoESQL = schema.object(
@@ -76,9 +83,7 @@ export const tagcloudStateSchemaNoESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-      tagcloudStateMetricOptionsSchema
-    ),
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({}),
     /**
      * Configure how to break down to tags
      */
@@ -97,7 +102,7 @@ export const tagcloudStateSchemaESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: esqlColumnWithFormatSchema.extends(tagcloudStateMetricOptionsSchema),
+    metric: esqlColumnWithFormatSchema,
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
      */
