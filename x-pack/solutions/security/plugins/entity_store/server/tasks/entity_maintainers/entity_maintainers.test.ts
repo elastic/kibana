@@ -53,7 +53,7 @@ function createMockDeps() {
     registerTaskDefinitions: mockRegisterTaskDefinitions.mockImplementation((defs) => defs),
   };
   const mockEsClient = {};
-  const start = {
+  const coreStart = {
     savedObjects: {
       createInternalRepository: mockCreateInternalRepository.mockReturnValue({}),
     },
@@ -62,12 +62,15 @@ function createMockDeps() {
         asScoped: () => ({ asCurrentUser: mockEsClient }),
       },
     },
+  };
+  const plugins = {
     licensing: {
       getLicense: mockGetLicense,
     },
   };
+  const startContract = { createCRUDClient: jest.fn() };
   const core = {
-    getStartServices: mockGetStartServices.mockResolvedValue([start]),
+    getStartServices: mockGetStartServices.mockResolvedValue([coreStart, plugins, startContract]),
   };
   const analytics = { reportEvent: jest.fn() };
   return {
