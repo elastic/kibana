@@ -23,9 +23,9 @@ export class AppMenuPageObject extends FtrService {
     }
   }
 
-  async clickMenuItem(testId: string) {
+  async clickMenuItem(testId: string, { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
     await this.retry.try(async () => {
-      if (await this.testSubjects.exists(testId, { timeout: 1000 })) {
+      if (!isInOverflowMenu && (await this.testSubjects.exists(testId, { timeout: 1000 }))) {
         await this.testSubjects.click(testId);
         return;
       }
@@ -35,7 +35,10 @@ export class AppMenuPageObject extends FtrService {
 
       await this.testSubjects.existOrFail(APP_MENU_OVERFLOW_BUTTON);
       await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
-      await this.testSubjects.existOrFail(testId);
+
+      // Verify the popover actually opened
+      await this.testSubjects.existOrFail(APP_MENU_POPOVER, { timeout: 3000 });
+      await this.testSubjects.existOrFail(testId, { timeout: 5000 });
       await this.testSubjects.click(testId);
     });
   }
@@ -69,7 +72,6 @@ export class AppMenuPageObject extends FtrService {
       }
     }
 
-    // Delegate to testSubjects.existOrFail to throw the standard error
     await this.testSubjects.existOrFail(testId);
   }
 }

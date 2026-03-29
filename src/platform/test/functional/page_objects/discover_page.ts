@@ -56,10 +56,8 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async isOnDashboardsEditMode() {
-    const [newButton, openButton] = await Promise.all([
-      this.appMenu.menuItemExists('discoverNewButton'),
-      this.appMenu.menuItemExists('discoverOpenButton'),
-    ]);
+    const newButton = await this.appMenu.menuItemExists('discoverNewButton');
+    const openButton = await this.appMenu.menuItemExists('discoverOpenButton');
 
     return !newButton && !openButton;
   }
@@ -236,8 +234,8 @@ export class DiscoverPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
-  public async clickNewSearchButton() {
-    await this.appMenu.clickMenuItem('discoverNewButton');
+  public async clickNewSearchButton({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+    await this.appMenu.clickMenuItem('discoverNewButton', { isInOverflowMenu });
     await this.testSubjects.moveMouseTo('dscHideSidebarButton'); // cancel tooltips
     await this.header.waitUntilLoadingHasFinished();
   }

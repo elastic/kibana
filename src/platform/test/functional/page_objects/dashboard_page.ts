@@ -50,6 +50,7 @@ export class DashboardPageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
   private readonly appsMenu = this.ctx.getService('appsMenu');
   private readonly toasts = this.ctx.getService('toasts');
 
@@ -388,12 +389,16 @@ export class DashboardPageObject extends FtrService {
 
   public async clickDiscardChanges(accept = true) {
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists('dashboardDiscardChangesMenuItem'))) {
-        await this.openSaveSplitMenu();
-      }
-      await this.expectDiscardChangesButtonEnabled();
       this.log.debug('clickDiscardChanges');
-      await this.testSubjects.click('dashboardDiscardChangesMenuItem');
+      if (await this.appMenu.menuItemExists('dashboardDiscardChangesMenuItem')) {
+        // Item is in the app menu (directly visible or in the overflow)
+        await this.appMenu.clickMenuItem('dashboardDiscardChangesMenuItem');
+      } else {
+        // Item is inside the save split button dropdown
+        await this.openSaveSplitMenu();
+        await this.expectDiscardChangesButtonEnabled();
+        await this.testSubjects.click('dashboardDiscardChangesMenuItem');
+      }
     });
     await this.common.expectConfirmModalOpenState(true);
     if (accept) {

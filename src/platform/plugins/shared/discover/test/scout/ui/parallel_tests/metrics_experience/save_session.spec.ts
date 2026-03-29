@@ -70,7 +70,9 @@ spaceTest.describe(
 
       await spaceTest.step('start a new Discover session', async () => {
         await discover.clickNewSearch();
-        await expect(metricsExperience.grid).toBeHidden();
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+        ).toBeHidden();
       });
 
       await spaceTest.step('load the saved search', async () => {

@@ -76,22 +76,45 @@ export class DiscoverApp {
       .or(this.page.testSubj.locator('dataView-switch-link'));
   }
 
-  private async clickAppMenuItem(testId: string) {
+  private async clickAppMenuItem(
+    testId: string,
+    { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
+  ) {
     const item = this.page.testSubj.locator(testId);
-    if (await item.isVisible()) {
+    if (!isInOverflowMenu && (await item.isVisible())) {
       await item.click();
       return;
     }
     const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
+    const popover = this.page.testSubj.locator('app-menu-popover');
+
+    // Dismiss any stale popovers
+    if (await popover.isVisible()) {
+      await overflowButton.click();
+      await expect(popover).toBeHidden();
+    }
+
     await expect(overflowButton).toBeVisible();
     await overflowButton.click();
+
+    // If the click was consumed by closing a stale overlay, the popover won't be open.
+    // Click the overflow button again if needed.
+    const popoverOpened = await popover
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!popoverOpened) {
+      await overflowButton.click();
+    }
+
+    await expect(popover).toBeVisible();
     const menuItem = this.page.testSubj.locator(testId);
     await expect(menuItem).toBeVisible();
     await menuItem.click();
   }
 
-  async clickNewSearch() {
-    await this.clickAppMenuItem('discoverNewButton');
+  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
     await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
     await this.page.waitForLoadingIndicatorHidden();
     await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
