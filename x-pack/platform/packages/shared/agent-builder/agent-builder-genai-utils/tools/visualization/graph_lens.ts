@@ -72,15 +72,6 @@ function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
   return queries;
 }
 
-/**
- * Helper to get a single existing ESQL query (for backward compatibility).
- * Returns the first query if multiple exist.
- */
-function getExistingEsqlQuery(config: VisualizationConfig | null): string | null {
-  const queries = getExistingEsqlQueries(config);
-  return queries.length > 0 ? queries[0] : null;
-}
-
 const VisualizationStateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
@@ -108,7 +99,8 @@ export const createVisualizationGraph = (
   model: ScopedModel,
   logger: Logger,
   events: ToolEventEmitter,
-  esClient: IScopedClusterClient
+  esClient: IScopedClusterClient,
+  { includeTimeRange = true }: { includeTimeRange?: boolean } = {}
 ) => {
   // Node: Generate ES|QL query
   const generateESQLNode = async (state: VisualizationState) => {
@@ -417,7 +409,7 @@ What is the most appropriate time range for this visualization?`,
     return {
       validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
       error: lastValidateAction?.success ? null : lastValidateAction?.error || null,
-      esqlQuery: lastGenerateEsqlAction?.query,
+      esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
       timeRange: lastTimeRangeAction?.timeRange ?? null,
     };
   };
@@ -426,10 +418,15 @@ What is the most appropriate time range for this visualization?`,
   const shouldRetryRouter = (state: VisualizationState): string => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
 
-    // Success case - generate time range before finalizing
+    // Success case - optionally generate a time range before finalizing
     if (lastValidateAction?.success) {
-      logger.debug('Configuration validated successfully, generating time range');
-      return GENERATE_TIME_RANGE_NODE;
+      if (includeTimeRange) {
+        logger.debug('Configuration validated successfully, generating time range');
+        return GENERATE_TIME_RANGE_NODE;
+      }
+
+      logger.debug('Configuration validated successfully, skipping time range generation');
+      return 'finalize';
     }
 
     // Failure case - max attempts reached
@@ -445,16 +442,16 @@ What is the most appropriate time range for this visualization?`,
     return GENERATE_CONFIG_NODE;
   };
 
-  // Router: Decide whether to generate ESQL or use existing
+  // Router: Use an explicit ES|QL query when provided, otherwise generate one.
+  // Existing config is still valuable because generateESQLNode includes the
+  // prior query as context when regenerating edits.
   const shouldGenerateESQLRouter = (state: VisualizationState): string => {
-    // If we have existing config with a query, skip ES|QL generation
-    const existingQuery = getExistingEsqlQuery(state.parsedExistingConfig);
-    if (existingQuery) {
-      logger.debug('Using existing ES|QL query from parsed config');
+    if (state.esqlQuery) {
+      logger.debug('Using provided ES|QL query');
       return GENERATE_CONFIG_NODE;
     }
 
-    logger.debug('No existing query found, generating new ES|QL query');
+    logger.debug('No ES|QL query provided, generating ES|QL query');
     return GENERATE_ESQL_NODE;
   };
 

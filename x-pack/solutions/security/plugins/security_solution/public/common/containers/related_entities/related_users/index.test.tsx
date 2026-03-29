@@ -67,6 +67,15 @@ describe('useHostRelatedUsers', () => {
 
     expect(mockSearch).not.toHaveBeenCalled();
   });
+
+  it('does not run search when hostName is missing', () => {
+    const { indexNames, from, skip } = defaultProps;
+    renderHook(() => useHostRelatedUsers({ indexNames, from, skip }), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
   it('skip = true will cancel any running request', () => {
     const props = {
       ...defaultProps,
