@@ -22,6 +22,9 @@ import { useDebounceFn } from '@kbn/react-hooks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
+import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { QueryBar } from '../../../common/components/query_bar';
 import { useKibana } from '../../../common/lib/kibana';
 import { useFetchWatchlistIndices } from './hooks/use_fetch_watchlist_indices';
@@ -68,6 +71,26 @@ const ENTITY_FIELD_OPTIONS = Object.keys(ENTITY_FIELD_MAP).map((key) => ({
  */
 export const getIdentifierFields = (selected: string): string[] =>
   ENTITY_FIELD_MAP[selected] ?? [selected];
+
+/**
+ * Builds an entitySource payload for the IndexPattern mode.
+ */
+const buildIndexEntitySource = (
+  patterns: Array<EuiComboBoxOptionOption<string>>,
+  field: string,
+  query: Query
+): CreateWatchlistRequestBodyInput['entitySource'] => {
+  const indexPatternValue = patterns.map((opt) => opt.label).join(',');
+  const identifierFields = field ? getIdentifierFields(field) : [];
+
+  return {
+    type: 'index',
+    name: indexPatternValue || 'index-pattern-source',
+    indexPattern: indexPatternValue || undefined,
+    identifierField: identifierFields.length > 0 ? identifierFields.join(',') : undefined, // TODO check this
+    filter: query.query ? { kuery: query.query as string } : undefined,
+  };
+};
 
 const DEBOUNCE_OPTIONS = { wait: 300 };
 
@@ -120,10 +143,18 @@ const FilterQueryRow: FC<FilterQueryRowProps> = ({
   </EuiFormRow>
 );
 
-export const RuleBasedSourceInput: React.FC = () => {
+export interface RuleBasedSourceInputProps {
+  onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
+    key: K,
+    value: CreateWatchlistRequestBodyInput[K]
+  ) => void;
+}
+
+export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({ onFieldChange }) => {
   const {
     services: { data },
   } = useKibana();
+  const { sourcererDataView } = useSourcererDataView(PageScope.default);
 
   const [ruleFilter, setRuleFilter] = useState<string>('entityStore');
   const [dataView, setDataView] = useState<DataView>();
@@ -156,33 +187,74 @@ export const RuleBasedSourceInput: React.FC = () => {
     return () => subscription.unsubscribe();
   }, [filterManager]);
 
+  // Create a DataView from the sourcerer spec (same pattern as AlertFiltersKqlBar)
   useEffect(() => {
-    let isSubscribed = true;
-    const loadDefaultDataView = async () => {
-      const defaultDataView = await data.dataViews.getDefaultDataView();
-      if (isSubscribed && defaultDataView) {
-        setDataView(defaultDataView);
+    let dv: DataView;
+    const createDataView = async () => {
+      if (sourcererDataView) {
+        dv = await data.dataViews.create(sourcererDataView);
+        setDataView(dv);
       }
     };
-
-    loadDefaultDataView();
+    createDataView();
 
     return () => {
-      isSubscribed = false;
+      if (dv?.id) {
+        data.dataViews.clearInstanceCache(dv.id);
+      }
     };
-  }, [data.dataViews]);
+  }, [data.dataViews, sourcererDataView]);
 
-  const onSubmitQuery = useCallback((query: Query) => {
-    setFilterQuery(query);
-  }, []);
+  const onSubmitQuery = useCallback(
+    (query: Query) => {
+      setFilterQuery(query);
+      if (ruleFilter === 'entityStore') {
+        onFieldChange('entitySource', {
+          type: 'store',
+          name: 'entity-store-filter',
+          filter: { kuery: query.query as string },
+        });
+      } else {
+        onFieldChange(
+          'entitySource',
+          buildIndexEntitySource(selectedIndexPatterns, entityField, query)
+        );
+      }
+    },
+    [ruleFilter, onFieldChange, selectedIndexPatterns, entityField]
+  );
 
   const onSavedQuery = useCallback((newSavedQuery: SavedQuery | undefined) => {
     setSavedQuery(newSavedQuery);
   }, []);
 
-  const onRuleButtonChange = useCallback((optionId: string) => {
-    setRuleFilter(optionId);
-  }, []);
+  const onRuleButtonChange = useCallback(
+    (optionId: string) => {
+      setRuleFilter(optionId);
+      // Clear entitySource when switching modes so stale data isn't sent
+      onFieldChange('entitySource', undefined);
+    },
+    [onFieldChange]
+  );
+
+  const onIndexPatternsChange = useCallback(
+    (selected: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedIndexPatterns(selected);
+      onFieldChange('entitySource', buildIndexEntitySource(selected, entityField, filterQuery));
+    },
+    [entityField, filterQuery, onFieldChange]
+  );
+
+  const onEntityFieldChange = useCallback(
+    (value: string) => {
+      setEntityField(value);
+      onFieldChange(
+        'entitySource',
+        buildIndexEntitySource(selectedIndexPatterns, value, filterQuery)
+      );
+    },
+    [selectedIndexPatterns, filterQuery, onFieldChange]
+  );
 
   const isEntityStore = ruleFilter === 'entityStore';
 
@@ -207,7 +279,7 @@ export const RuleBasedSourceInput: React.FC = () => {
             placeholder={WATCHLIST_INDEX_PATTERN_PLACEHOLDER}
             options={indexOptions}
             selectedOptions={selectedIndexPatterns}
-            onChange={setSelectedIndexPatterns}
+            onChange={onIndexPatternsChange}
             isClearable={true}
             onSearchChange={(query) => {
               debouncedSetIndexSearchQuery.run(query);
@@ -237,7 +309,7 @@ export const RuleBasedSourceInput: React.FC = () => {
                 valueOfSelected={entityField}
                 placeholder={WATCHLIST_ENTITY_FIELD_PLACEHOLDER}
                 options={ENTITY_FIELD_OPTIONS}
-                onChange={(value) => setEntityField(value)}
+                onChange={onEntityFieldChange}
                 aria-label={WATCHLIST_ENTITY_FIELD_ARIA_LABEL}
                 style={{ width: 240 }}
               />
