@@ -9,6 +9,7 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { LicenseCheckState, LicenseType } from '@kbn/licensing-types';
 import {
   EntityMaintainerTaskStatus,
   EntityMaintainerTelemetryEventType,
@@ -24,6 +25,11 @@ import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { wrapTaskRun } from '../../telemetry/traces';
+
+/** Used when `RegisterEntityMaintainerConfig.minLicense` is omitted (minimum Kibana tier). */
+export const DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE: LicenseType = 'basic';
+
+const ENTITY_MAINTAINER_LICENSE_CHECK_VALID = 'valid' as const satisfies LicenseCheckState;
 
 function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.enum.entityMaintainer].type}:${id}`;
@@ -76,7 +82,8 @@ export function registerEntityMaintainerTask({
 }): void {
   logger.debug(`Registering entity maintainer task: ${config.id}`);
   const { title } = TasksConfig[EntityStoreTaskType.enum.entityMaintainer];
-  const { run, interval, initialState, description, id, setup } = config;
+  const { run, interval, initialState, description, id, setup, minLicense } = config;
+  const effectiveMinLicense = minLicense ?? DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE;
   const type = getTaskType(id);
 
   void core
@@ -86,6 +93,7 @@ export function registerEntityMaintainerTask({
         id,
         interval,
         description,
+        minLicense: effectiveMinLicense,
       });
 
       taskManager.registerTaskDefinitions({
@@ -106,6 +114,15 @@ export function registerEntityMaintainerTask({
 
               if (currentStatus.taskStatus === EntityMaintainerTaskStatus.STOPPED) {
                 logger.debug(`Entity maintainer task is stopped, skipping run`);
+                return {
+                  state: currentStatus,
+                };
+              }
+
+              const license = await start.licensing.getLicense();
+              const checkResult = license.check('entityStore', effectiveMinLicense);
+              if (checkResult.state !== ENTITY_MAINTAINER_LICENSE_CHECK_VALID) {
+                logger.debug(`Entity maintainer "${id}" skipped: insufficient or inactive license`);
                 return {
                   state: currentStatus,
                 };
