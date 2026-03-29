@@ -75,7 +75,6 @@ describe('buildReadme', () => {
     expect(markdown).toContain('<summary>Exported fields</summary>');
     expect(markdown).toContain('## Audit');
     expect(markdown).toContain('Audit trail.');
-    expect(markdown).toContain('### Exported Fields');
     expect(markdown).toContain('| Field | Type |');
     expect(markdown).toContain('| event.action | keyword |');
     expect(markdown).toContain('| source.ip | ip |');
@@ -95,9 +94,9 @@ describe('buildReadme', () => {
 
     const markdown = buildReadme(integration, [ds], map);
 
-    expect(markdown).not.toContain('### Example');
-    expect(markdown).toContain('### Exported Fields');
+    expect(markdown).not.toContain('An example event for');
     expect(markdown).toContain('<summary>Exported fields</summary>');
+    expect(markdown).toContain('| Field | Type |');
   });
 
   it('omits Exported Fields when field mapping is empty', () => {
@@ -111,8 +110,10 @@ describe('buildReadme', () => {
 
     const markdown = buildReadme(integration, [ds], map);
 
-    expect(markdown).toContain('### Example');
-    expect(markdown).not.toContain('### Exported Fields');
+    expect(markdown).toContain('An example event for `logs`');
+    expect(markdown).toContain('"a": 1');
+    expect(markdown).not.toContain('<summary>Exported fields</summary>');
+    expect(markdown).not.toContain('| Field | Type |');
   });
 
   it('renders only integration section when there are no data streams', () => {

@@ -9,7 +9,10 @@ import type { IntegrationAttributes, DataStreamAttributes } from '../saved_objec
 import type { FieldMappingEntry } from '../saved_objects/saved_objects_service';
 
 const escapeMarkdownTableCell = (value: string): string =>
-  value.replace(/\|/g, '\\|').replace(/\r?\n/g, ' ').trim();
+  value
+    .replaceAll('|', '\\|')
+    .replace(/\r\n|\r|\n/g, ' ')
+    .trim();
 
 const buildExportedFieldsTable = (fieldMappings: FieldMappingEntry[]): string => {
   if (fieldMappings.length === 0) {
