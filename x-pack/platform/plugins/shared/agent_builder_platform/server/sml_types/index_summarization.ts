@@ -1,21 +1,23 @@
 
-import { Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SmlContext, SmlData, SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
 import { SmlDocument, SmlToAttachmentContext } from '@kbn/agent-builder-plugin/server/services/sml/types';
 import { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { EsqlColumn } from '@elastic/elasticsearch/lib/helpers';
+import { AttachmentType, IndexAttachmentData } from '@kbn/agent-builder-common/attachments/attachment_types';
 
 const INDEX_SUMMARIZATION_SML_TYPE = 'index_summarization';
 
 interface IndexSummarizationSmlTypeDeps {
     logger: Logger;
     getActionsClient: (request: KibanaRequest) => Promise<ActionsClient>;
+    getEsClient: (request: KibanaRequest) => Promise<ElasticsearchClient>;
 }
 
 export const createIndexSummarizationSmlType = (deps: IndexSummarizationSmlTypeDeps): SmlTypeDefinition => {
-    const { getActionsClient, logger } = deps;    
+    const { getActionsClient, getEsClient, logger } = deps;    
 
     return {
         id: INDEX_SUMMARIZATION_SML_TYPE,
@@ -137,8 +139,22 @@ ${JSON.stringify(sampleDocuments, null, 2)}
             return undefined; // TODO: Implement logic to fetch index summarization data
         },
         toAttachment: async (item: SmlDocument, context: SmlToAttachmentContext): Promise<AttachmentInput<string, unknown> | undefined> => {
-            // TODO: Implement logic to convert index summarization data to attachment format
-            return undefined;
+            const indexData: any = (await getEsClient(context.request)).indices.get({ index: item.origin_id});
+            const mappings = indexData[item.origin_id].mappings?.properties;
+            let fieldMappings: Record<string, string> = {};
+            for (const fieldName in mappings) {
+                fieldMappings[fieldName] = mappings[fieldName].type;
+            }
+
+            const data: IndexAttachmentData = {
+                index_name: item.origin_id,
+                summary_text: item.content,
+                field_types: fieldMappings,
+            }
+            return {
+                type: AttachmentType.index,
+                data,
+            };
         }
     };
 };

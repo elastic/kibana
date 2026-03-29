@@ -18,6 +18,7 @@ export enum AttachmentType {
   esql = 'esql',
   visualization = 'visualization',
   connector = 'connector',
+  index = 'index',
 }
 
 interface AttachmentDataMap {
@@ -26,6 +27,7 @@ interface AttachmentDataMap {
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.visualization]: VisualizationAttachmentData;
   [AttachmentType.connector]: ConnectorAttachmentData;
+  [AttachmentType.index]: IndexAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -176,4 +178,11 @@ export interface ConnectorAttachmentData {
   }>;
 }
 
+export interface IndexAttachmentData {
+  index_name: string;
+  summary_text: string;
+  field_types: Record<string, string>;
+}
+
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];
+
