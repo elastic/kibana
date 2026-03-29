@@ -30,41 +30,42 @@ export async function pngsToPdf({
   eventLogger,
 }: PngsToPdfArgs): Promise<{ buffer: Buffer; pages: number }> {
   const { kbnLogger } = eventLogger;
-  const transactionEnd = eventLogger.startTransaction(Transactions.PDF);
 
-  let buffer: Uint8Array | null = null;
-  let pdfMaker: PdfMaker | null = null;
-  try {
-    pdfMaker = new PdfMaker(layout, logo, packageInfo, kbnLogger);
-    if (title) {
-      pdfMaker.setTitle(title);
-    }
-    results.forEach((result) => {
-      result.screenshots.forEach((png) => {
-        const spanEnd = eventLogger.logPdfEvent(
-          'add image to PDF file',
-          Actions.ADD_IMAGE,
-          'output'
-        );
-        pdfMaker?.addImage(png.data, {
-          title: png.title ?? undefined,
-          description: png.description ?? undefined,
+  return eventLogger.withTransaction(Transactions.PDF, async (setLabels) => {
+    let buffer: Uint8Array | null = null;
+    let pdfMaker: PdfMaker | null = null;
+    try {
+      pdfMaker = new PdfMaker(layout, logo, packageInfo, kbnLogger);
+      if (title) {
+        pdfMaker.setTitle(title);
+      }
+      results.forEach((result) => {
+        result.screenshots.forEach((png) => {
+          const spanEnd = eventLogger.logPdfEvent(
+            'add image to PDF file',
+            Actions.ADD_IMAGE,
+            'output'
+          );
+          pdfMaker?.addImage(png.data, {
+            title: png.title ?? undefined,
+            description: png.description ?? undefined,
+          });
+          spanEnd();
         });
-        spanEnd();
       });
-    });
 
-    const spanEnd = eventLogger.logPdfEvent('compile PDF file', Actions.COMPILE, 'output');
-    buffer = await pdfMaker.generate();
-    spanEnd();
+      const spanEnd = eventLogger.logPdfEvent('compile PDF file', Actions.COMPILE, 'output');
+      buffer = await pdfMaker.generate();
+      spanEnd();
 
-    const byteLength = buffer?.byteLength ?? 0;
-    transactionEnd({ labels: { byte_length_pdf: byteLength, pdf_pages: pdfMaker.getPageCount() } });
-  } catch (error) {
-    kbnLogger.error(error);
-    eventLogger.error(error, Actions.COMPILE);
-    throw error;
-  }
+      const byteLength = buffer?.byteLength ?? 0;
+      setLabels({ byte_length_pdf: byteLength, pdf_pages: pdfMaker.getPageCount() });
+    } catch (error) {
+      kbnLogger.error(error);
+      eventLogger.error(error, Actions.COMPILE);
+      throw error;
+    }
 
-  return { buffer: Buffer.from(buffer.buffer), pages: pdfMaker.getPageCount() };
+    return { buffer: Buffer.from(buffer.buffer), pages: pdfMaker.getPageCount() };
+  });
 }
