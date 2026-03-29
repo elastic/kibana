@@ -102,9 +102,15 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(<ExampleScoresTable examples={examples} onTraceClick={onTraceClick} />);
+    render(
+      <ExampleScoresTable
+        examples={examples}
+        onExampleClick={jest.fn()}
+        onTraceClick={onTraceClick}
+      />
+    );
 
-    expect(screen.getByText('example-id-00000...')).toBeInTheDocument();
+    expect(screen.getByText('3: example-id-00...')).toBeInTheDocument();
 
     const pagination = screen.getByRole('navigation', {
       name: 'Select repetition for example example-id-0000000000000001',
@@ -121,7 +127,10 @@ describe('ExampleScoresTable', () => {
         name: 'Open trace 6d8639157ac4141c0000000000000001',
       })
     );
-    expect(onTraceClick).toHaveBeenCalledWith('6d8639157ac4141c0000000000000001');
+    expect(onTraceClick).toHaveBeenCalledWith(
+      '6d8639157ac4141c0000000000000001',
+      'example-id-0000000000000001'
+    );
 
     const nextPageButton = screen.getByRole('button', { name: 'Next page' });
     fireEvent.click(nextPageButton);
@@ -132,7 +141,10 @@ describe('ExampleScoresTable', () => {
         name: 'Open trace 6d8639157ac4141c0000000000000002',
       })
     );
-    expect(onTraceClick).toHaveBeenCalledWith('6d8639157ac4141c0000000000000002');
+    expect(onTraceClick).toHaveBeenCalledWith(
+      '6d8639157ac4141c0000000000000002',
+      'example-id-0000000000000001'
+    );
   });
 
   it('does not render repetition pagination for single-repetition rows', () => {
@@ -154,14 +166,16 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
+    render(
+      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
+    );
 
     expect(
       screen.queryByRole('navigation', {
         name: 'Select repetition for example example-id-single-repetition',
       })
     ).not.toBeInTheDocument();
-    expect(screen.getByText('example-id-singl...')).toBeInTheDocument();
+    expect(screen.getByText('1: example-id-si...')).toBeInTheDocument();
   });
 
   it('renders evaluator label as a badge when present', () => {
@@ -181,7 +195,9 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
+    render(
+      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
+    );
 
     expect(screen.getByText('Factuality:')).toBeInTheDocument();
     expect(screen.getByText('0.80')).toBeInTheDocument();
@@ -206,7 +222,9 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
+    render(
+      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
+    );
 
     expect(screen.getByText('Relevance:')).toBeInTheDocument();
     expect(screen.getByText('0.90')).toBeInTheDocument();
@@ -239,7 +257,13 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(<ExampleScoresTable examples={examples} onTraceClick={onTraceClick} />);
+    render(
+      <ExampleScoresTable
+        examples={examples}
+        onExampleClick={jest.fn()}
+        onTraceClick={onTraceClick}
+      />
+    );
 
     const accordion = screen.getByLabelText('Toggle details for evaluator Criteria');
     const accordionButton = accordion.querySelector('.euiAccordion__button') as HTMLButtonElement;
@@ -250,7 +274,7 @@ describe('ExampleScoresTable', () => {
     });
     fireEvent.click(viewTraceButton);
 
-    expect(onTraceClick).toHaveBeenCalledWith('eval-trace-abc123');
+    expect(onTraceClick).toHaveBeenCalledWith('eval-trace-abc123', 'example-with-eval-trace');
   });
 
   it('does not render accordion when no details are available', () => {
@@ -269,7 +293,9 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
+    render(
+      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
+    );
 
     expect(screen.getByText('SimpleScore:')).toBeInTheDocument();
     expect(screen.getByText('1.00')).toBeInTheDocument();
