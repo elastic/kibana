@@ -11,12 +11,8 @@ export type WorkflowsConfig = Record<string, unknown>;
 
 export type WorkflowsSecrets = Record<string, unknown>;
 
-export interface AlertStates {
-  [key: string]: boolean;
-  new: boolean;
-  ongoing: boolean;
-  recovered: boolean;
-}
+export type AlertStateId = 'new' | 'ongoing' | 'recovered';
+export type AlertStates = Record<AlertStateId, boolean>;
 
 export interface WorkflowsActionParams {
   subAction: string;

@@ -833,7 +833,7 @@ describe('WorkflowsParamsFields', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Run workflow for')).toBeInTheDocument();
+        expect(screen.getAllByText('Run workflow for').length).toBeGreaterThan(0);
         expect(screen.getByLabelText('New alerts')).toBeInTheDocument();
         expect(screen.getByLabelText('Ongoing alerts')).toBeInTheDocument();
         expect(screen.getByLabelText('Recovered alerts')).toBeInTheDocument();
