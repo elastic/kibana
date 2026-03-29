@@ -6,7 +6,7 @@
  */
 
 import type { AuthzEnabled } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
 import {
   LogExtractionUpdateParams as LogExtractionUpdateParamsSchema,
