@@ -95,6 +95,13 @@ module.exports = (request, options) => {
     return APM_AGENT_MOCK;
   }
 
+  if (request === 'react-day-picker') {
+    return Path.resolve(
+      REPO_ROOT,
+      'src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/calendar/__mocks__/react-day-picker.tsx'
+    );
+  }
+
   const reqExt = Path.extname(request);
   if (reqExt) {
     const pRequest = parseRequestOrExtSuffix(request);
