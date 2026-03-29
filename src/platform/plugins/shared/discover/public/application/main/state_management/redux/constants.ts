@@ -44,6 +44,6 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   },
   expandedDoc: undefined,
   expandedDocOwner: undefined,
-  renderDocViewMeta: undefined,
+  renderDocumentViewMeta: undefined,
   uiState: {},
 };

@@ -150,7 +150,7 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
-          "renderDocViewMeta": undefined,
+          "renderDocumentViewMeta": undefined,
           "uiState": Object {},
         }
       `);
@@ -243,7 +243,7 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
-          "renderDocViewMeta": undefined,
+          "renderDocumentViewMeta": undefined,
           "uiState": Object {},
         }
       `);

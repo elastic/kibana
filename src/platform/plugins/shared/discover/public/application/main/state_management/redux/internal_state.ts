@@ -236,7 +236,7 @@ export const internalStateSlice = createSlice({
         }
 
         if (!action.payload.expandedDoc || tab.expandedDocOwner !== nextExpandedDocOwner) {
-          tab.renderDocViewMeta = undefined;
+          tab.renderDocumentViewMeta = undefined;
         }
 
         tab.expandedDoc = action.payload.expandedDoc;
@@ -255,12 +255,12 @@ export const internalStateSlice = createSlice({
       });
     },
 
-    setRenderDocViewMeta: (
+    setRenderDocumentViewMeta: (
       state,
-      action: TabAction<{ renderDocViewMeta: TabState['renderDocViewMeta'] }>
+      action: TabAction<Pick<TabState, 'renderDocumentViewMeta'>>
     ) => {
       withTab(state, action.payload, (tab) => {
-        tab.renderDocViewMeta = action.payload.renderDocViewMeta;
+        tab.renderDocumentViewMeta = action.payload.renderDocumentViewMeta;
       });
     },
 
@@ -400,7 +400,7 @@ export const internalStateSlice = createSlice({
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
         tab.expandedDoc = undefined;
-        tab.renderDocViewMeta = undefined;
+        tab.renderDocumentViewMeta = undefined;
         tab.initialDocViewerTabId = undefined;
         tab.uiState.docViewer = {};
       }),

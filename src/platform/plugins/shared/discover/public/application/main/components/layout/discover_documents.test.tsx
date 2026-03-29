@@ -277,9 +277,9 @@ describe('Discover documents layout', () => {
       );
 
       toolkit.internalState.dispatch(
-        internalStateActions.setRenderDocViewMeta({
+        internalStateActions.setRenderDocumentViewMeta({
           tabId,
-          renderDocViewMeta: {
+          renderDocumentViewMeta: {
             displayedRows: [expandedDoc, nextExpandedDoc],
             displayedColumns: ['bytes'],
           },

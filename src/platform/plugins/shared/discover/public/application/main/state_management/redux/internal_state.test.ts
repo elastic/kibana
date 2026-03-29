@@ -423,11 +423,11 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), secondTabId).initialDocViewerTabId).toBe('JSON');
   });
 
-  it('should clear renderDocViewMeta when expandedDoc owner changes', async () => {
+  it('should clear renderDocumentViewMeta when expandedDoc owner changes', async () => {
     const { store } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
-    const renderDocViewMeta = {
+    const renderDocumentViewMeta = {
       displayedColumns: ['@timestamp'],
       displayedRows: [mockDoc],
     };
@@ -440,9 +440,9 @@ describe('InternalStateStore', () => {
       })
     );
     store.dispatch(
-      internalStateActions.setRenderDocViewMeta({
+      internalStateActions.setRenderDocumentViewMeta({
         tabId,
-        renderDocViewMeta,
+        renderDocumentViewMeta,
       })
     );
 
@@ -456,35 +456,37 @@ describe('InternalStateStore', () => {
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBe('grid-2');
-    expect(selectTab(store.getState(), tabId).renderDocViewMeta).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
   });
 
-  it('should set renderDocViewMeta for a specific tab', async () => {
+  it('should set renderDocumentViewMeta for a specific tab', async () => {
     const { store } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
-    const renderDocViewMeta = {
+    const renderDocumentViewMeta = {
       displayedColumns: ['@timestamp'],
       displayedRows: [mockDoc],
     };
 
-    expect(selectTab(store.getState(), tabId).renderDocViewMeta).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
 
     store.dispatch(
-      internalStateActions.setRenderDocViewMeta({
+      internalStateActions.setRenderDocumentViewMeta({
         tabId,
-        renderDocViewMeta,
+        renderDocumentViewMeta,
       })
     );
 
-    expect(selectTab(store.getState(), tabId).renderDocViewMeta).toEqual(renderDocViewMeta);
+    expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toEqual(
+      renderDocumentViewMeta
+    );
   });
 
   it('should clear expandedDoc state when resetOnSavedSearchChange is dispatched', async () => {
     const { store } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
-    const renderDocViewMeta = {
+    const renderDocumentViewMeta = {
       displayedColumns: ['@timestamp'],
       displayedRows: [mockDoc],
     };
@@ -497,9 +499,9 @@ describe('InternalStateStore', () => {
       })
     );
     store.dispatch(
-      internalStateActions.setRenderDocViewMeta({
+      internalStateActions.setRenderDocumentViewMeta({
         tabId,
-        renderDocViewMeta,
+        renderDocumentViewMeta,
       })
     );
 
@@ -508,15 +510,15 @@ describe('InternalStateStore', () => {
     store.dispatch(internalStateActions.resetOnSavedSearchChange({ tabId }));
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
-    expect(selectTab(store.getState(), tabId).renderDocViewMeta).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBeUndefined();
   });
 
-  it('should clear renderDocViewMeta when expandedDoc is closed', async () => {
+  it('should clear renderDocumentViewMeta when expandedDoc is closed', async () => {
     const { store } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
-    const renderDocViewMeta = {
+    const renderDocumentViewMeta = {
       displayedColumns: ['@timestamp'],
       displayedRows: [mockDoc],
     };
@@ -529,9 +531,9 @@ describe('InternalStateStore', () => {
       })
     );
     store.dispatch(
-      internalStateActions.setRenderDocViewMeta({
+      internalStateActions.setRenderDocumentViewMeta({
         tabId,
-        renderDocViewMeta,
+        renderDocumentViewMeta,
       })
     );
 
@@ -544,6 +546,6 @@ describe('InternalStateStore', () => {
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBeUndefined();
-    expect(selectTab(store.getState(), tabId).renderDocViewMeta).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
   });
 });

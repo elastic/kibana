@@ -208,18 +208,18 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const {
       expandedDoc$,
       expandedDocOwner$,
-      getSetExpandedDocForOwner,
-      getSetRenderDocumentViewMetaForOwner,
+      getExpandedDocSetter,
+      getRenderDocumentViewMetaSetter,
     } = useCascadedDocumentsContext();
     const expandedDoc = useObservable(expandedDoc$, expandedDoc$.getValue());
     const expandedDocOwner = useObservable(expandedDocOwner$, expandedDocOwner$.getValue());
     const setExpandedDoc = useMemo(
-      () => getSetExpandedDocForOwner(cellId),
-      [cellId, getSetExpandedDocForOwner]
+      () => getExpandedDocSetter(cellId),
+      [cellId, getExpandedDocSetter]
     );
     const setRenderDocumentViewMeta = useMemo(
-      () => getSetRenderDocumentViewMetaForOwner(cellId),
-      [cellId, getSetRenderDocumentViewMetaForOwner]
+      () => getRenderDocumentViewMetaSetter(cellId),
+      [cellId, getRenderDocumentViewMetaSetter]
     );
 
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(

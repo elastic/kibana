@@ -198,7 +198,7 @@ export interface TabState extends TabItem {
   };
   expandedDoc: DataTableRecord | undefined;
   expandedDocOwner: string | undefined;
-  renderDocViewMeta: RenderDocumentViewMeta | undefined;
+  renderDocumentViewMeta: RenderDocumentViewMeta | undefined;
   initialDocViewerTabId?: string;
 }
 

@@ -31,11 +31,9 @@ export interface CascadedDocumentsContext
   viewModeToggle: ReactElement | undefined;
   expandedDoc$: BehaviorSubject<DataTableRecord | undefined>;
   expandedDocOwner$: BehaviorSubject<string | undefined>;
-  getSetExpandedDocForOwner: (
-    ownerId: string
-  ) => NonNullable<UnifiedDataTableProps['setExpandedDoc']>;
-  getSetRenderDocumentViewMetaForOwner: (
-    ownerId: string
+  getExpandedDocSetter: (owner: string) => NonNullable<UnifiedDataTableProps['setExpandedDoc']>;
+  getRenderDocumentViewMetaSetter: (
+    owner: string
   ) => UnifiedDataTableProps['setRenderDocumentViewMeta'] | undefined;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;

@@ -99,20 +99,20 @@ const createContextValue = ({
   >;
   services: DiscoverServices;
 }) => {
-  const getSetExpandedDocForOwner = jest.fn(
-    (ownerId: string): NonNullable<UnifiedDataTableProps['setExpandedDoc']> => {
-      if (ownerId !== cellId) {
-        throw new Error(`Unexpected ownerId: ${ownerId}`);
+  const getExpandedDocSetter = jest.fn(
+    (owner: string): NonNullable<UnifiedDataTableProps['setExpandedDoc']> => {
+      if (owner !== cellId) {
+        throw new Error(`Unexpected owner: ${owner}`);
       }
 
       return ownerBoundSetExpandedDoc;
     }
   );
 
-  const getSetRenderDocumentViewMetaForOwner = jest.fn(
-    (ownerId: string): UnifiedDataTableProps['setRenderDocumentViewMeta'] | undefined => {
-      if (ownerId !== cellId) {
-        throw new Error(`Unexpected ownerId: ${ownerId}`);
+  const getRenderDocumentViewMetaSetter = jest.fn(
+    (owner: string): UnifiedDataTableProps['setRenderDocumentViewMeta'] | undefined => {
+      if (owner !== cellId) {
+        throw new Error(`Unexpected owner: ${owner}`);
       }
 
       return currentOwner === cellId ? ownerBoundSetRenderDocumentViewMeta : undefined;
@@ -129,8 +129,8 @@ const createContextValue = ({
     viewModeToggle: undefined,
     expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(expandedDoc),
     expandedDocOwner$: new BehaviorSubject<string | undefined>(currentOwner),
-    getSetExpandedDocForOwner,
-    getSetRenderDocumentViewMetaForOwner,
+    getExpandedDocSetter,
+    getRenderDocumentViewMetaSetter,
     cascadeGroupingChangeHandler: jest.fn(),
     onUpdateESQLQuery: jest.fn(),
     openInNewTab: jest.fn(),
@@ -138,8 +138,8 @@ const createContextValue = ({
 
   return {
     contextValue,
-    getSetExpandedDocForOwner,
-    getSetRenderDocumentViewMetaForOwner,
+    getExpandedDocSetter,
+    getRenderDocumentViewMetaSetter,
   };
 };
 
@@ -152,7 +152,7 @@ describe('ESQLDataCascadeLeafCell', () => {
     const services = createDiscoverServicesMock();
     const ownerBoundSetExpandedDoc = jest.fn();
     const ownerBoundSetRenderDocumentViewMeta = jest.fn();
-    const { contextValue, getSetExpandedDocForOwner, getSetRenderDocumentViewMetaForOwner } =
+    const { contextValue, getExpandedDocSetter, getRenderDocumentViewMetaSetter } =
       createContextValue({
         currentOwner: cellId,
         ownerBoundSetExpandedDoc,
@@ -164,8 +164,8 @@ describe('ESQLDataCascadeLeafCell', () => {
 
     const unifiedDataTableProps = unifiedDataTableMock.mock.lastCall?.[0]!;
 
-    expect(getSetExpandedDocForOwner).toHaveBeenCalledWith(cellId);
-    expect(getSetRenderDocumentViewMetaForOwner).toHaveBeenCalledWith(cellId);
+    expect(getExpandedDocSetter).toHaveBeenCalledWith(cellId);
+    expect(getRenderDocumentViewMetaSetter).toHaveBeenCalledWith(cellId);
     expect(unifiedDataTableProps.consumer).toBe(`discover_esql_cascade_row_leaf_${cellId}`);
     expect(unifiedDataTableProps.rows).toEqual(cellData);
     expect(unifiedDataTableProps.renderDocumentView).toBe('external');
@@ -206,8 +206,8 @@ describe('ESQLDataCascadeLeafCell', () => {
     view.rerender(renderLeafCellWithContext({ contextValue: nextContext.contextValue, services }));
 
     unifiedDataTableProps = unifiedDataTableMock.mock.lastCall?.[0]!;
-    expect(nextContext.getSetExpandedDocForOwner).toHaveBeenCalledWith(cellId);
-    expect(nextContext.getSetRenderDocumentViewMetaForOwner).toHaveBeenCalledWith(cellId);
+    expect(nextContext.getExpandedDocSetter).toHaveBeenCalledWith(cellId);
+    expect(nextContext.getRenderDocumentViewMetaSetter).toHaveBeenCalledWith(cellId);
     expect(unifiedDataTableProps.expandedDoc).toEqual(expandedDoc);
     expect(unifiedDataTableProps.setExpandedDoc).toBe(ownerBoundSetExpandedDoc);
     expect(unifiedDataTableProps.setRenderDocumentViewMeta).toBe(

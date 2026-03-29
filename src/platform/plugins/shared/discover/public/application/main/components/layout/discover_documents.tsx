@@ -149,7 +149,7 @@ function DiscoverDocumentsComponent({
   });
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
   const expandedDocOwner = useCurrentTabSelector((state) => state.expandedDocOwner);
-  const renderDocumentViewMeta = useCurrentTabSelector((state) => state.renderDocViewMeta);
+  const renderDocumentViewMeta = useCurrentTabSelector((state) => state.renderDocumentViewMeta);
   const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
   const isEsqlMode = useIsEsqlMode();
   const dataStateContainer = useCurrentTabDataStateContainer();
@@ -214,9 +214,9 @@ function DiscoverDocumentsComponent({
   );
 
   const docViewerRef = useRef<DocViewerApi>(null);
-  const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
-  const getSetExpandedDocForOwner = useCallback(
-    (ownerId: string): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
+  const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
+  const getExpandedDocSetter = useCallback(
+    (owner: string): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
       (
         doc: DataTableRecord | undefined,
         options?: {
@@ -225,9 +225,9 @@ function DiscoverDocumentsComponent({
         }
       ) => {
         dispatch(
-          setExpandedDocAction({
+          setExpandedDoc({
             expandedDoc: doc,
-            expandedDocOwner: doc ? ownerId : undefined,
+            expandedDocOwner: doc ? owner : undefined,
             initialDocViewerTabId: options?.initialTabId,
             initialDocViewerTabState: options?.initialTabState,
           })
@@ -236,39 +236,36 @@ function DiscoverDocumentsComponent({
           docViewerRef.current?.setSelectedTabId(options.initialTabId);
         }
       },
-    [dispatch, setExpandedDocAction]
+    [dispatch, setExpandedDoc]
   );
 
-  const setExpandedDoc = useMemo(
-    () => getSetExpandedDocForOwner(DEFAULT_EXPANDED_DOC_OWNER),
-    [getSetExpandedDocForOwner]
-  );
-
-  const setRenderDocViewMetaAction = useCurrentTabAction(internalStateActions.setRenderDocViewMeta);
-  const setRenderDocumentViewMeta = useCallback<
-    NonNullable<UnifiedDataTableProps['setRenderDocumentViewMeta']>
-  >(
-    (meta) => {
-      dispatch(setRenderDocViewMetaAction({ renderDocViewMeta: meta }));
-    },
-    [dispatch, setRenderDocViewMetaAction]
-  );
-
-  const getSetRenderDocumentViewMetaForOwner = useCallback(
-    (ownerId: string): UnifiedDataTableProps['setRenderDocumentViewMeta'] | undefined => {
-      return expandedDocOwner === ownerId ? setRenderDocumentViewMeta : undefined;
-    },
-    [expandedDocOwner, setRenderDocumentViewMeta]
-  );
-
-  const setRenderDocumentViewMetaForMainGrid = useMemo(
-    () => getSetRenderDocumentViewMetaForOwner(DEFAULT_EXPANDED_DOC_OWNER),
-    [getSetRenderDocumentViewMetaForOwner]
+  const setExpandedDocForDefaultOwner = useMemo(
+    () => getExpandedDocSetter(DEFAULT_EXPANDED_DOC_OWNER),
+    [getExpandedDocSetter]
   );
 
   const setExpandedDocForCurrentOwner = useMemo(
-    () => getSetExpandedDocForOwner(expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER),
-    [expandedDocOwner, getSetExpandedDocForOwner]
+    () => getExpandedDocSetter(expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER),
+    [expandedDocOwner, getExpandedDocSetter]
+  );
+
+  const setRenderDocumentViewMeta = useCurrentTabAction(
+    internalStateActions.setRenderDocumentViewMeta
+  );
+  const getRenderDocumentViewMetaSetter = useCallback(
+    (owner: string): UnifiedDataTableProps['setRenderDocumentViewMeta'] | undefined => {
+      if (expandedDocOwner === owner) {
+        return (meta) => {
+          dispatch(setRenderDocumentViewMeta({ renderDocumentViewMeta: meta }));
+        };
+      }
+    },
+    [dispatch, expandedDocOwner, setRenderDocumentViewMeta]
+  );
+
+  const setRenderDocumentViewMetaForDefaultOwner = useMemo(
+    () => getRenderDocumentViewMetaSetter(DEFAULT_EXPANDED_DOC_OWNER),
+    [getRenderDocumentViewMetaSetter]
   );
 
   const latestGrid = useLatest(grid);
@@ -502,8 +499,8 @@ function DiscoverDocumentsComponent({
       viewModeToggle,
       expandedDoc$,
       expandedDocOwner$,
-      getSetExpandedDocForOwner,
-      getSetRenderDocumentViewMetaForOwner,
+      getExpandedDocSetter,
+      getRenderDocumentViewMetaSetter,
       cascadeGroupingChangeHandler: (newSelectedCascadeGroups) => {
         dispatch(setSelectedCascadeGroups({ selectedCascadeGroups: newSelectedCascadeGroups }));
       },
@@ -517,8 +514,8 @@ function DiscoverDocumentsComponent({
     esqlVariables,
     expandedDoc$,
     expandedDocOwner$,
-    getSetExpandedDocForOwner,
-    getSetRenderDocumentViewMetaForOwner,
+    getExpandedDocSetter,
+    getRenderDocumentViewMetaSetter,
     onUpdateESQLQuery,
     query,
     requestParams.timeRangeAbsolute,
@@ -571,7 +568,7 @@ function DiscoverDocumentsComponent({
             sort={(sort as SortOrder[]) || []}
             searchDescription={persistedDiscoverSession?.description}
             searchTitle={persistedDiscoverSession?.title} // TODO: should it be rather a tab label?
-            setExpandedDoc={setExpandedDoc}
+            setExpandedDoc={setExpandedDocForDefaultOwner}
             showTimeCol={showTimeCol}
             settings={grid}
             onFilter={onAddFilter as DocViewFilterFn}
@@ -596,7 +593,7 @@ function DiscoverDocumentsComponent({
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
             renderDocumentView="external"
-            setRenderDocumentViewMeta={setRenderDocumentViewMetaForMainGrid}
+            setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
             services={services}
             totalHits={totalHits}
@@ -629,7 +626,7 @@ function DiscoverDocumentsComponent({
           onFilter={onAddFilter}
           onRemoveColumn={onRemoveColumnWithTracking}
           onAddColumn={onAddColumnWithTracking}
-          onClose={() => setExpandedDoc(undefined)}
+          onClose={() => setExpandedDocForCurrentOwner(undefined)}
           setExpandedDoc={setExpandedDocForCurrentOwner}
           docViewerRef={docViewerRef}
           docViewerExtensionActions={docViewerExtensionActions}
