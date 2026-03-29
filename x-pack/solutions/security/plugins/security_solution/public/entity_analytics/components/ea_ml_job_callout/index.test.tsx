@@ -8,6 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
+import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 import { TestProviders } from '../../../common/mock';
 import { useInstalledSecurityJobs } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 import { EaMlJobCallout } from '.';
@@ -26,22 +27,26 @@ describe('EaMlJobCallout', () => {
   it('renders when pre-EA jobs are installed', () => {
     mockUseInstalledSecurityJobs.mockReturnValue({
       loading: false,
-      jobs: [{ id: 'v3_linux_rare_metadata_process' }],
+      isMlUser: true,
+      isLicensed: true,
+      jobs: [{ id: 'v3_linux_rare_metadata_process' } as MlSummaryJob],
     });
-    const { getByTestId, getByText } = render(
+    const { getByTestId, getAllByText, getByText } = render(
       <TestProviders>
         <EaMlJobCallout />
       </TestProviders>
     );
     expect(getByTestId('callout-ea-ml-job-callout')).toBeInTheDocument();
-    expect(getByText('9.4')).toBeInTheDocument();
+    expect(getAllByText('9.4').length).toBeGreaterThan(0);
     expect(getByText('_ea')).toBeInTheDocument();
   });
 
   it('does not render if only EA jobs are installed', () => {
     mockUseInstalledSecurityJobs.mockReturnValue({
       loading: false,
-      jobs: [{ id: 'v3_linux_rare_metadata_process_ea' }],
+      isMlUser: true,
+      isLicensed: true,
+      jobs: [{ id: 'v3_linux_rare_metadata_process_ea' } as MlSummaryJob],
     });
     const { queryByTestId } = render(
       <TestProviders>
@@ -54,6 +59,8 @@ describe('EaMlJobCallout', () => {
   it('does not render while jobs are loading', () => {
     mockUseInstalledSecurityJobs.mockReturnValue({
       loading: true,
+      isMlUser: true,
+      isLicensed: true,
       jobs: [],
     });
     const { queryByTestId } = render(
