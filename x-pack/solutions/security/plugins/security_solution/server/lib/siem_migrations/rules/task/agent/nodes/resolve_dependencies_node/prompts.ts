@@ -52,7 +52,7 @@ The custom_rule data model represents the logic and actions of a correlation rul
 
 - Metadata: Basic information like rule name, ID, status (enabled/disabled), type (Event, Flow, Common, Offense), scope (Local/Global), and owner.
 - Flattened Detection Logic: The core "IF" logic, consisting of one or more tests (like checking QIDs, IP addresses, categories, custom properties, matching building blocks, or applying thresholds/sequences). These tests are evaluated sequentially. It is important to pay attention to the "negate" attribute of each test which indicates whether the condition is checking for existence or non-existence of the specified criteria.
-- Responses/Actions: The "THEN" part, defining what happens when all tests are met. This includes actions like generating new events, creating/modifying offenses, sending notifications (email, SNMP), updating reference data, or running custom scripts.This section must be ignored.
+- Responses/Actions: The "THEN" part, defining what happens when all tests are met. This includes actions like generating new events, creating/modifying offenses, sending notifications (email, SNMP), updating reference data, or running custom scripts. This section must be ignored.
 - Dependencies: Rules often depend on other QRadar objects, which are typically exported alongside them:
   - Building Blocks: Reusable sets of tests referenced within rules.
   - QID Map Entries (qidmap): Definitions for custom events checked by rules.
@@ -96,6 +96,214 @@ Event or Flow Payload tests check for certain strings, patterns within the compl
 #### How to resolve Event/Flow Payload test conditions:
 
 It is extremely important to be clear and precise, and mention that string or pattern needs to be searched in complete event payload and not in particular field. There is no single field exists for event/flow/source payload. You must add special note to mention the same.
+
+### Flow Type Tests (com.q1labs.semsources.cre.tests.FlowType)
+
+Flow Type tests check whether a flow matches Standard, Superflow A, Superflow B, Superflow C, or Overflow. Flow type is not a stored field—it is derived from aggregation and thresholds. Describe it according to the definition below for each Flow type.
+
+**Important:** Flow type is not a stored field. Do not describe it as "check if flow.type equals Standard" or "filter by the flow type field." The downstream system must derive flow type from aggregation and thresholds.
+
+#### How to identify Flow Type dependencies:
+
+- Flow Type tests can be extracted from test conditions "com.q1labs.semsources.cre.tests.FlowType"
+- They are often mentioned in human-readable test descriptions in \`<text>\` tag, e.g., "when the flow type is one of Standard", "when the flow type is one of Superflow A", "when the flow type is one of Superflow B", "when the flow type is one of Superflow C", "when the flow type is one of Superflow A, Superflow B, Superflow C"
+
+#### How to resolve Flow Type test conditions:
+
+**Standard Flow:**
+- **How to phrase:** "Standard Flow is not a stored field value — it is derived by aggregating raw flow records into 5-tuple conversations. There is no field equality check for this condition. Within each (typically short) time window—often one minute, but in general any window that is short enough that abnormal communication patterns stand out yet long enough that minor jitter or a few normal connections don't get split across too many buckets—summarize ordinary bidirectional conversations between hosts into standard flow records that capture who talked to whom, on which application/protocol, with how many bytes and packets and for how long, so that later detections (like scans, DDoS, or exfiltration) can reason over these flows instead of raw packets."
+
+- Decide the time window
+"First, choose a time window for summarising traffic (for example, one minute, or any window that is short enough to keep flows reasonably fresh but long enough to cover a typical connection's lifetime). Then create a 'time_window' field by truncating the event timestamp to that interval — the downstream translator will implement this as a timestamp bucketing operation."
+
+- Select and filter the data
+"Read from your network traffic indices and keep only records that represent standard flows (normal bidirectional sessions) and that have at least source IP, destination IP, ports, protocol, bytes, and packets populated."
+
+- Define the notion of a flow
+"Treat a flow as a conversation identified by the 5‑tuple (source IP, source port, destination IP, destination port, protocol), plus its start and end times, and use that as the unit of aggregation instead of individual packets."
+
+- Aggregate per window and per flow key
+"Group the data by the flow key and time window. For each group, calculate total bytes, total packets, first‑seen time, last‑seen time, and any other useful attributes (like application ID or VLAN), effectively turning many low‑level events into one standard flow record."
+
+- Keep flows that matter
+"Optionally apply simple filters, such as discarding flows with extremely low volume or very short duration, so you keep only flows that are meaningful for analysis and reporting."
+
+- Return useful fields
+"Finally, return the standard flow fields—source and destination addresses and ports, protocol or application, byte and packet counts, start and end times, and the time window—so an analyst or detection rule can reason about normal traffic patterns and spot deviations later (such as scans, floods, or suspicious data transfers)."
+
+
+---
+
+**Superflow A (Network Scan):**
+- "Superflow A is not a stored field value — it is identified by finding source hosts that contacted an unusually large number of distinct destination IPs within a time window (fan-out / network scan pattern). Do not represent this as a field equality check. Within each (typically short) time window—often one minute, but in general any window that is short enough that scan‑like patterns stand out as abnormal yet long enough that minor jitter, retries, or a few normal connections don't get split across too many buckets—find hosts that talk to an unusually large number of different destination IPs (fans‑out "one‑to‑many"), using thresholds that you tune so they are high enough to avoid normal service discovery or load‑balancing but low enough to reliably catch real network scans, and then show those scanning source hosts with the counts and lists of the destinations they touched because that pattern looks like active network reconnaissance."
+- **How to phrase:**
+
+- Decide the time window
+"First, choose a short time window (for example, one minute, or any window that is short enough that scan bursts look abnormal but long enough that minor jitter and retries are still in the same bucket). Then create a 'time_window' field by truncating the event timestamp to that interval — the downstream translator will implement this as a timestamp bucketing operation."
+
+- Select and filter the data
+"Read from your network traffic indices, expand the action field if needed, and keep only events that represent network flows and that have at least source IP, destination IP, and protocol populated."
+
+- Decide the scope (internal vs external)
+"Decide whether you are looking for internal hosts scanning outward, external hosts scanning inward, or any direction, and filter the flows accordingly—for example, keep only flows where the source IP is in your internal ranges if you want to find internal scanners."
+
+- Aggregate per window and per source
+"Group the data by time window and source IP. For each group, calculate how many distinct destination IPs that source contacted in that window, and optionally collect the list of those destination IPs."
+
+- Apply tuned thresholds
+"Apply thresholds that you've tuned for your environment. Keep only those groups where the number of distinct destination IPs contacted by a single source in that window is above some threshold. The threshold should be high enough not to flag normal client behaviour (like a web proxy or a monitoring system talking to many servers), but low enough to catch real sweep‑style network scans."
+
+- Return useful fields
+"Finally, return the source IP (the suspected scanner), the time window, the count of distinct destination IPs, and the list or a sample of those destinations so an analyst can see which host is scanning, how broadly, and whom it is touching."
+
+---
+
+**Superflow B (DDoS):**
+- "Superflow B is not a stored field value — it is identified by finding hosts sending or receiving an unusually large volume of traffic within a time window (flood / DDoS pattern). Do not represent this as a field equality check. Within each (typically short) time window—often one minute, but in general any window that is short enough that abnormal traffic spikes stand out yet long enough that minor jitter, retries, or a few normal connections don't get split across too many buckets—find hosts that are sending or receiving an unusually large volume of traffic to or from one or many peers, using thresholds that you tune so they are high enough to avoid normal bursts but low enough to reliably catch real DDoS‑like floods, and then show those source/destination pairs (or victim hosts) with the key volume metrics because that pattern looks like a possible DDoS attack."
+- **How to phrase:**
+
+- Decide the time window
+"First, choose a short time window (for example, one minute, or any window that is short enough that DDoS spikes look abnormal but long enough that minor jitter and normal bursts from applications are still in the same bucket). Then create a 'time_window' field by truncating the event timestamp to that interval — the downstream translator will implement this as a timestamp bucketing operation."
+
+- Select and filter the data
+"Read from your network traffic indices, expand the action field if needed, and keep only events that represent network flows and that have source IP, destination IP, and the basic volume fields populated (such as bytes, packets, or flow count)."
+
+- Decide the traffic direction / scope
+"Decide whether you are looking for external‑to‑internal DDoS (victim inside), internal‑to‑external (outbound floods), or any direction, and filter the flows accordingly—for example, keep only flows where the destination IP is in your internal ranges if you want to find internal victims."
+
+- Aggregate per window and per host (and optionally per peer)
+"Group the data by time window and destination IP (the potential victim), and optionally by source IP or by high‑level categories like country or ASN. For each group, calculate metrics such as total bytes, total packets, and number of distinct source IPs hitting that destination."
+
+- Apply tuned thresholds
+"Apply thresholds that you've tuned for your environment. Keep only those groups where the total volume (bytes or packets) in the window is above some threshold, or where the number of distinct source IPs targeting the same destination is above a threshold. These thresholds should be high enough not to alert on normal traffic bursts, content delivery, or backups, but low enough to catch real DDoS‑like patterns."
+
+- Return useful fields
+"Finally, return the suspected victim IP, the time window, the key volume metrics (bytes, packets, flow count, number of distinct sources), and, if useful, a sample or list of source IPs so an analyst can quickly see which host is being flooded, how hard, and by whom."
+
+---
+
+**Superflow C (Port Scan):**
+- "Superflow C is not a stored field value — it is identified by finding source hosts that contacted a single destination on an unusually large number of distinct ports within a time window (port scan pattern). Do not represent this as a field equality check. Within each (typically short) time window—often one minute, but in general any window that is short enough that a scan stands out as abnormal yet long enough that minor jitter, retries, or a few normal connections don't get split across too many buckets—find internal machines that connect to another host on lots of different ports (or several important/sensitive ports), using thresholds that you tune so they are high enough to avoid normal traffic but low enough to reliably catch real scans, and then show those source/destination pairs with the counts and lists of ports they touched because that pattern looks like potential port scanning or reconnaissance."
+- **How to phrase:**
+
+- Decide the time window
+"First, choose a short time window (for example, one minute, or any window that is short enough that scans look abnormal but long enough that minor jitter and retries are still in the same bucket). Then create a 'time_window' field by truncating the event timestamp to that interval — the downstream translator will implement this as a timestamp bucketing operation."
+
+- Select and filter the data
+"Read from your network traffic indices, expand the action field if needed, and keep only events that represent network flows and that have source IP, destination IP, and destination port populated."
+
+- Limit to internal sources
+"Filter the flows so that only events with source IPs in your internal/private ranges (like 10.x.x.x, 172.16–31.x.x, 192.168.x.x) are kept, because you are looking for internal hosts scanning other systems."
+
+- Mark sensitive ports
+"Add a field that marks whether the destination port is one of your sensitive ports list (for example, SSH, RDP, SMB, LDAP, etc.), so you can count them separately from all ports."
+
+- Aggregate per window and per src–dst pair
+"Group the data by time window, source IP, and destination IP. For each group, calculate how many distinct destination ports were contacted in total, how many distinct sensitive ports were contacted, and collect the lists of ports and sensitive ports."
+
+- Apply tuned thresholds
+"Apply thresholds that you've tuned for your environment. Keep only those groups where the number of distinct ports in that window is above some threshold, or the number of distinct sensitive ports is above a (usually lower) threshold. The thresholds should be high enough not to flag normal behaviour but low enough to catch real scans."
+
+- Return useful fields
+"Finally, return the source IP, destination IP, the time window, and the port counts and lists so an analyst can see which internal host was scanning which target and on which ports."
+
+---
+
+**Overflow:**
+- "Overflow is not a stored field value — it is identified by detecting records where the flow collector was receiving more traffic than it could process, causing it to emit overflow summaries instead of full flow records. Do not represent this as a field equality check. Within each (typically short) time window—often one minute, but in general any window that is short enough that abnormal traffic bursts stand out yet long enough that minor jitter and routine peaks don't get split across too many buckets—watch for situations where the flow system itself is receiving more traffic than it can safely process and starts generating overflow summaries instead of full flows, using thresholds that you tune so they are high enough to cover normal busy periods but low enough to still flag true overload conditions, and then surface those overflow records with their volume metrics because that pattern means 'we are dropping flow detail and might be blind to some attacks.'"
+- **How to phrase:**
+
+- Decide the time window
+"First, choose a short time window (for example, one minute, or any window that is short enough that overload spikes look abnormal but long enough that minor jitter or short busy bursts are still in the same bucket). Then create a 'time_window' field by truncating the event timestamp to that interval — the downstream translator will implement this as a timestamp bucketing operation."
+
+- Select and filter the data
+"Read from your flow/telemetry indices and keep only records that represent overflow or flow‑capacity conditions (for example, special source/destination markers or specific event types that indicate overflow), along with their packet and byte counters."
+
+- Identify overflow indicators
+"Filter the data so that you only keep entries that indicate the collector is in overflow mode (for example, special internal IPs or flags used to represent 'overflow'), because those represent traffic that wasn't fully parsed into normal flows."
+
+- Aggregate per window (and optionally per protocol or collector)
+"Group the data by time window, and optionally by protocol, appliance, or collector. For each group, calculate total bytes, total packets, and count of overflow records in that interval to understand how severe the overload is."
+
+- Apply tuned thresholds
+"Apply thresholds that you've tuned for your environment. Keep only those groups where the overflow volume or overflow record count in that window is above some threshold. The threshold should be high enough not to alert on tiny, harmless blips, but low enough to catch real overload where you're losing meaningful flow visibility."
+
+- Return useful fields
+"Finally, return the time window, the affected collector or protocol, and the overflow byte/packet counts so an analyst can see when and where the system was overloaded and how much traffic was summarized instead of captured as detailed flows."
+
+### TCP Flags Tests
+
+- com.q1labs.semsources.cre.tests.TCPFlags
+- com.q1labs.semsources.cre.tests.TCPFlagsCombo
+
+TCP Flags tests check source or destination TCP flag combinations (e.g., SR, SF, FUP, SRAFU, FUPSAR78). Both source and destination TCP flags are stored in the single field \`netflow.tcp_control_bits\`. There are no separate source/destination TCP flag fields — always use \`netflow.tcp_control_bits\` regardless of whether the condition refers to source or destination flags.
+
+\`netflow.tcp_control_bits\` is a single integer field that encodes all TCP control flags simultaneously. Each flag occupies one bit position and has a fixed numeric value (FIN=1, SYN=2, RST=4, PSH=8, ACK=16, URG=32). Because multiple flags can be active at the same time, the field value is the arithmetic sum of all active flags. This means a TCP flags condition cannot be described as a range check or a simple equality — it must always be described as a bitwise AND check against a combined mask value.
+
+#### TCP Flag Bit Values:
+
+| Bit | Flag | Value |
+|-----|------|-------|
+| FIN | Finish | 1 |
+| SYN | Synchronize | 2 |
+| RST | Reset | 4 |
+| PSH | Push | 8 |
+| ACK | Acknowledgment | 16 |
+| URG | Urgent | 32 |
+| Bit7 (Reserved) | Reserved | 64 |
+| Bit8 (Reserved) | Reserved | 128 |
+
+#### Common QRadar Combinations (QRadar name → numeric value):
+
+| QRadar String | Flags | Numeric Value |
+|---------------|-------|---------------|
+| SR | SYN+RST | 6 |
+| SF | SYN+FIN | 3 |
+| FUP | FIN+URG+PSH | 41 |
+| SRAFU | SYN+RST+ACK+FIN+URG | 55 |
+| FUPSAR | FIN+URG+PSH+SYN+ACK+RST | 63 |
+| FUPSAR78 | All flags | 255 |
+
+#### How to identify TCP Flags dependencies:
+
+- TCP Flags tests can be extracted from test conditions \`com.q1labs.semsources.cre.tests.TCPFlags\`, \`com.q1labs.semsources.cre.tests.TCPFlagsCombo\`
+- They are often mentioned in human-readable test descriptions, e.g., "when the source TCP flags are any of SR, SF, FUP, FUPSAR78, SRAFU", "when the destination TCP flags are any of SR, SF"
+
+#### How to describe TCP Flags conditions in natural language:
+
+Every TCP flags condition description MUST contain all four of the following elements:
+
+1. **Direction** — state whether it is source or destination TCP flags.
+2. **Field name** — always name the field as \`netflow.tcp_control_bits\`. Never use any other field name. The following names do not exist and must never appear: \`tcp.flags\`, \`source.tcp.flags\`, \`destination.tcp.flags\`, or any boolean subfield such as \`source.tcp.flags.syn\` or \`destination.tcp.flags.ack\`.
+3. **Arithmetic derivation** — show the step-by-step calculation that produces the combined mask value. Never state only the final number without showing how it was derived.
+4. **Check type** — state explicitly what kind of check is being performed (bitwise AND for presence, bitwise AND for absence, or exact equality), using plain English. Never describe the check as a range or boundary comparison.
+
+#### Required natural language format:
+
+**For "includes any of":**
+- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` match any of [FLAG NAMES] — combined bitmask: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using a bitwise AND check for presence."
+
+**For negated "includes any of":**
+- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` do NOT match any of [FLAG NAMES] — combined bitmask: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using a bitwise AND check for absence."
+
+**For "includes all of":**
+- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` include ALL of [FLAG NAMES] — combined bitmask: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using a bitwise AND check that all bits are present."
+
+**For "are exactly":**
+- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` are exactly [FLAG NAMES] — exact value: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using an exact equality check."
+
+#### Concrete example — "source TCP flags are any of SR, SF, FUP, SRAFU, FUPSAR78":
+- "Check if the source TCP flags in \`netflow.tcp_control_bits\` match any of SR, SF, FUP, SRAFU, FUPSAR78 — combined bitmask: SR=6 + SF=3 + FUP=41 + SRAFU=55 + FUPSAR78=255 = 360, using a bitwise AND check for presence."
+
+#### What a correct description must NOT say:
+
+- **Do not describe it as a range:** "where the TCP control bits value is between 360 and 360" or "greater than or equal to 360 and less than or equal to 360" — a combined bitmask value is not a range boundary.
+- **Do not describe it as a simple equality:** "where the TCP control bits value equals 360" — equality only applies when the intent is that exactly those flags and no others are set simultaneously.
+- **Do not omit the derivation:** "where the TCP control bits bitmask is 360" — stating only the final number without showing how it was calculated is incomplete.
+- **Do not use invented field names:** "where \`source.tcp.flags\` contains SR" or "where \`tcp.flags\` is SF" — these fields do not exist.
+- **Do not use boolean subfields:** "where \`source.tcp.flags.syn\` is true" — TCP flag subfields do not exist.
+
+
 
 ### Reference Sets and Lookups
 
@@ -177,6 +385,7 @@ The downstream system does **not** understand what a "Building Block" or a "Depe
     - Bullet list of data source names.
     - Use only data sources that are clearly implied by the rule and its dependencies.
     - Pay special attention to Software Entity names as data sources. For example Cloudflare, Zcaler.
+    - QRadar data can sometimes have network flow data which may arise from either Neflow Integration or Network Packet Capture Integration. Below are the differences between the two. Depending on the fields and level of detail given in the rule, Choose the correct data source and add it.
 
   #### Flattened Detection Logic ( including the negate attribute handling)
     - This is the plain English \`combined\` detection logic of current rule and its dependencies, which means precise and detailed detection logic of dependencies should be included here.
@@ -192,7 +401,7 @@ The downstream system does **not** understand what a "Building Block" or a "Depe
     - Bullet list, one entry per lookup.
     - Use the exact syntax \`LOOKUP JOIN ...\` as shown in the example.
 
-<response_format>
+</response_format>
 
 <example_response>
 
@@ -209,10 +418,10 @@ The downstream system does **not** understand what a "Building Block" or a "Depe
   - condition 1
   - condition 2
 
- #### Reference Sets / Lookups
+  #### Reference Sets / Lookups
 
-For each reference set, output a bullet in the following pattern:
-- LOOKUP JOIN to check if value of field \`<source_field>\` [exists / does NOT exist] in the lookup field \`value\` of lookup index "<lookup_index_name_without_spaces>".
+  For each reference set, output a bullet in the following pattern:
+  - LOOKUP JOIN to check if value of field \`<source_field>\` [exists / does NOT exist] in the lookup field \`value\` of lookup index "<lookup_index_name_without_spaces>".
 
 </example_response>
     `,
