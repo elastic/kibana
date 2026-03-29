@@ -8,6 +8,18 @@
 
 ---
 
+## TL;DR
+
+Background execution identity in Kibana (workflows, alerting, agent builder) is tied to whoever last saved/triggered the resource. If that user leaves or their permissions change, things break silently. There is no way to scope permissions or decouple execution from a human.
+
+**Recommendation:** A platform-level Execution Identity service (new shared Kibana plugin) providing named service accounts with scoped permissions, access lists, and lifecycle management. Under the hood, backed by ES API keys. The Kibana-side architecture is validated by a working PoC.
+
+**Key finding:** ES cannot create truly independent service accounts today. Every API key is limited by its creator's privileges (`limited_by`). We have workarounds (create keys on behalf of a superuser), but the long-term fix is a small ES change: allow API key creation without `limited_by` for authorized platform services. ES already has this concept for built-in service accounts -- we just need it exposed for user-defined ones.
+
+**Open topics:** Plugin ownership (platform IAM vs workflows team), Cloud vs Project scope, cross-team adoption (alerting, agent builder), migration path for existing resources.
+
+---
+
 ## Problem Statement
 
 Background execution identity across Kibana is **implicit and fragile**. Every feature that runs work in the background -- workflows, alerting rules, agent builder actions -- derives its execution identity from the human user who last saved or triggered the resource.
@@ -51,13 +63,6 @@ Submit requests as a dedicated ES user. **Not viable:** requires a real ES user 
 ### 3. ES API Keys (Chosen Approach)
 
 Create ES API keys with scoped permissions. This is the mechanism Task Manager and Alerting already use for background execution. **Viable with a known limitation:** ES always limits a key's permissions to the creator's own privileges, so the SA's effective permissions depend on who creates it. We have workarounds for this (see "The Intersection Problem" in the Solution section) and a long-term path via solution #1.
-
-### What We Can Learn From Other Platforms
-
-- **GCP** separates SA creation, role binding, and usage (`actAs`) into three independent gates. None of them intersect with the creator's own permissions. This is the model our access-list design mirrors -- separating "who can create SAs" from "who can use them."
-- **Grafana** implemented SAs as "special users" in the existing user table, reusing all RBAC infrastructure without rewriting the auth layer. Takeaway: reuse existing identity infrastructure rather than inventing a parallel system. Their auto-migration from API keys to SAs is also a pattern we'll need for existing workflows.
-
-ES does not have independent platform-managed principals today. Our Kibana-layer abstraction bridges this gap.
 
 ---
 
@@ -120,7 +125,7 @@ flowchart TD
 
 ### Privilege Escalation Prevention
 
-Two gates, mirroring GCP's `actAs` model:
+Two gates, inspired by GCP's model where SA creation, role binding, and usage (`actAs`) are separated so that none intersect with the creator's own permissions:
 
 1. **Gate 1 -- SA creation**: Only users with `manage_execution_identities` Kibana privilege can create/edit SAs.
 2. **Gate 2 -- SA binding**: When a workflow author assigns an SA, the system checks the access list. Only authorized users/roles can bind. This prevents a low-privilege user from running a workflow with high-privilege SA permissions.
@@ -281,7 +286,7 @@ The PoC branch (`feature/poc-execution-identity`) validates the Kibana-side arch
 | Agent Builder integration | Medium | Honor workflow identity when invoking |
 | Space scoping in access lists | Medium | Space-aware binding checks |
 | UIAM compatibility | Low | Serverless parity |
-| Migration for existing workflows | Medium | Backfill creator identity on existing resources |
+| Migration for existing workflows | Medium | Backfill creator identity on existing resources. Grafana's approach -- auto-migrating all API keys to SAs at startup with server-level locking -- is a useful reference. |
 
 ---
 
