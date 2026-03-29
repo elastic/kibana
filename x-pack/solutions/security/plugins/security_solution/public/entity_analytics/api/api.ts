@@ -77,7 +77,10 @@ import {
   RISK_SCORE_ENTITY_CALCULATION_URL,
   RISK_SCORE_PREVIEW_URL,
 } from '../../../common/constants';
-import { WATCHLISTS_URL } from '../../../common/entity_analytics/watchlists/constants';
+import {
+  WATCHLISTS_URL,
+  WATCHLISTS_INDICES_URL,
+} from '../../../common/entity_analytics/watchlists/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
@@ -557,6 +560,22 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'DELETE',
       });
 
+    /**
+     * Search indices with entity fields for watchlists
+     */
+    const searchWatchlistIndices = async (params: {
+      query: string | undefined;
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<string[]>(WATCHLISTS_INDICES_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          searchQuery: params.query,
+        },
+        signal: params.signal,
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -586,6 +605,7 @@ export const useEntityAnalyticsRoutes = () => {
       getWatchlist,
       updateWatchlist,
       deleteWatchlist,
+      searchWatchlistIndices,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,
