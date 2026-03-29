@@ -70,7 +70,7 @@ interface WorkflowManagementAuditLogDeps {
 }
 
 /**
- * Audit logger for workflow management (aligned with Agent Builder's `AuditLogService`).
+ * Audit logger for workflow management.
  * Instantiated once with deps; each method takes only `request` + params.
  * Best-effort: sync throws are caught; audit never affects HTTP responses.
  */
