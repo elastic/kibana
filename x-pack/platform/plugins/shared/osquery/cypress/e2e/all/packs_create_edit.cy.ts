@@ -462,6 +462,10 @@ describe(
 
         it('should open lens from pack details', () => {
           let lensUrl = '';
+          preparePack(packName);
+          cy.getBySel('docsLoading').should('exist');
+          cy.getBySel('docsLoading').should('not.exist');
+          // Stub window.open AFTER preparePack navigates — cy.visit() resets stubs
           cy.window().then((win) => {
             cy.stub(win, 'open')
               .as('windowOpen')
@@ -469,16 +473,13 @@ describe(
                 lensUrl = url;
               });
           });
-          preparePack(packName);
-          cy.getBySel('docsLoading').should('exist');
-          cy.getBySel('docsLoading').should('not.exist');
           cy.get(`[aria-label="View in Lens"]`).eq(0).click();
-          cy.window()
-            .its('open')
-            .then(() => {
-              cy.visit(lensUrl);
-            });
-          cy.getBySel('lnsWorkspace').should('exist');
+          cy.get('@windowOpen').should('have.been.calledOnce');
+          cy.then(() => {
+            expect(lensUrl).to.not.be.empty;
+            cy.visit(lensUrl);
+          });
+          cy.getBySel('lnsWorkspace', { timeout: 120000 }).should('exist');
           cy.getBySel('breadcrumbs').contains(
             `Action pack_default--${packName}_${savedQueryName}`
           );
