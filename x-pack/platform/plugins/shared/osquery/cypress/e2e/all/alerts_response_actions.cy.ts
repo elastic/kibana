@@ -40,61 +40,65 @@ describe(
     });
 
     // Combines: discover, lens, and timeline from automated action results (3 tests → 1)
-    it('can visit discover, lens, and add to timeline from response action results', { tags: ['@ess'] }, () => {
-      navigateToRule(ruleName);
+    it(
+      'can visit discover, lens, and add to timeline from response action results',
+      { tags: ['@ess'] },
+      () => {
+        navigateToRule(ruleName);
 
-      // Discover
-      const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
-      cy.getBySel('expand-event').first().click();
-      cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
-      cy.getBySel('securitySolutionFlyoutResponseButton').click();
-      cy.getBySel('responseActionsViewWrapper').should('exist');
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: true,
-        timeline: true,
-      });
-      cy.contains('View in Discover')
-        .should('exist')
-        .should('have.attr', 'href')
-        .then(($href) => {
-          // @ts-expect-error-next-line href string - check types
-          cy.visit($href);
-          cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-            cy.contains(/action_data\.query\s*.+;/);
-          });
-          cy.contains(discoverRegex);
+        // Discover
+        const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
+        cy.getBySel('expand-event').first().click();
+        cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
+        cy.getBySel('securitySolutionFlyoutResponseButton').click();
+        cy.getBySel('responseActionsViewWrapper').should('exist');
+        checkActionItemsInResults({
+          lens: true,
+          discover: true,
+          cases: true,
+          timeline: true,
         });
+        cy.contains('View in Discover')
+          .should('exist')
+          .should('have.attr', 'href')
+          .then(($href) => {
+            // @ts-expect-error-next-line href string - check types
+            cy.visit($href);
+            cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
+              cy.contains(/action_data\.query\s*.+;/);
+            });
+            cy.contains(discoverRegex);
+          });
 
-      // Lens
-      navigateToRule(ruleName);
-      const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
-      cy.getBySel('expand-event').first().click();
-      cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
-      cy.getBySel('securitySolutionFlyoutResponseButton').click();
-      cy.getBySel('responseActionsViewWrapper').should('exist');
-      cy.getBySel('osquery-results-comment')
-        .first()
-        .within(() => {
-          let lensUrl = '';
-          cy.window().then((win) => {
-            cy.stub(win, 'open')
-              .as('windowOpen')
-              .callsFake((url) => {
-                lensUrl = url;
+        // Lens
+        navigateToRule(ruleName);
+        const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
+        cy.getBySel('expand-event').first().click();
+        cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
+        cy.getBySel('securitySolutionFlyoutResponseButton').click();
+        cy.getBySel('responseActionsViewWrapper').should('exist');
+        cy.getBySel('osquery-results-comment')
+          .first()
+          .within(() => {
+            let lensUrl = '';
+            cy.window().then((win) => {
+              cy.stub(win, 'open')
+                .as('windowOpen')
+                .callsFake((url) => {
+                  lensUrl = url;
+                });
+            });
+            cy.get(`[aria-label="View in Lens"]`).click();
+            cy.window()
+              .its('open')
+              .then(() => {
+                cy.visit(lensUrl);
               });
           });
-          cy.get(`[aria-label="View in Lens"]`).click();
-          cy.window()
-            .its('open')
-            .then(() => {
-              cy.visit(lensUrl);
-            });
-        });
-      cy.getBySel('lnsWorkspace').should('exist');
-      cy.getBySel('breadcrumbs').contains(lensRegex);
-    });
+        cy.getBySel('lnsWorkspace').should('exist');
+        cy.getBySel('breadcrumbs').contains(lensRegex);
+      }
+    );
 
     it(
       'can add to timeline from response action results',
