@@ -123,9 +123,10 @@
     "@kbn/content-management-utils",
     "@kbn/presentation-publishing-schemas",
     "@kbn/maintenance-windows-plugin",
-    "@kbn/scout-oblt",
     "@kbn/observability-agent-builder-plugin",
-    "@kbn/agent-builder-plugin"
+    "@kbn/agent-builder-plugin",
+    "@kbn/scout-oblt",
+    "@kbn/core-saved-objects-utils-server"
   ],
   "exclude": ["target/**/*"]
 }

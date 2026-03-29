@@ -10,10 +10,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { servicenowDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-servicenow-connector';
 const CONNECTOR_ID = 'fake-servicenow-connector-uuid';
@@ -38,9 +37,9 @@ describe('servicenow workflows', () => {
   let transportRequestMock: jest.Mock;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(servicenowDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.servicenow_search', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 

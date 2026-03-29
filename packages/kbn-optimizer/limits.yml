@@ -6,7 +6,8 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
-  apm: 42431
+  alertingVTwo: 415712
+  apm: 25363
   apmSourcesAccess: 2278
   automaticImport: 12162
   automaticImportVTwo: 17130
@@ -33,7 +34,7 @@ pageLoadAssetSize:
   dashboard: 20000
   dashboardAgent: 5135
   dashboardMarkdown: 6219
-  data: 496626
+  data: 496967
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
@@ -45,7 +46,7 @@ pageLoadAssetSize:
   dataVisualizer: 32778
   developerToolbar: 4467
   devTools: 8109
-  discover: 28241
+  discover: 28240
   discoverEnhanced: 5509
   discoverShared: 2322
   elasticAssistant: 338870
@@ -176,7 +177,7 @@ pageLoadAssetSize:
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 10000
+  streams: 11422
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
@@ -210,5 +211,5 @@ pageLoadAssetSize:
   visualizations: 52210
   watcher: 10485
   workflowsExtensions: 89850
-  workflowsManagement: 25000
+  workflowsManagement: 30804
   workplaceAIApp: 73317
