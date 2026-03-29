@@ -49,45 +49,37 @@ const RULE_TOGGLE_BUTTONS = [
 ];
 
 /**
- * Maps each dropdown option to the actual field(s) it represents.
- * Composite options (e.g. entity.name) expand to multiple fields
- * that are OR-ed together in the request.
+ * Real ES field names that can be used as the identifier field for index-type sources.
+ * Each value must match an actual field in the user's index so the backend
+ * terms query can correlate entities correctly.
  */
-const ENTITY_FIELD_MAP: Record<string, string[]> = {
-  'entity.name': ['user.name', 'service.name', 'host.name'],
-  'host.id': ['host.id'],
-  'user.email': ['user.email'],
-  'entity.id': ['entity.id'],
-};
-
-const ENTITY_FIELD_OPTIONS = Object.keys(ENTITY_FIELD_MAP).map((key) => ({
-  value: key,
-  inputDisplay: key,
-}));
-
-/**
- * Resolves a selected dropdown value to the underlying field(s).
- * e.g. 'entity.name' → ['user.name', 'service.name', 'host.name']
- */
-export const getIdentifierFields = (selected: string): string[] =>
-  ENTITY_FIELD_MAP[selected] ?? [selected];
+const ENTITY_FIELD_OPTIONS = [
+  { value: 'host.name', inputDisplay: 'host.name' },
+  { value: 'user.name', inputDisplay: 'user.name' },
+  { value: 'service.name', inputDisplay: 'service.name' },
+  { value: 'host.id', inputDisplay: 'host.id' },
+  { value: 'user.email', inputDisplay: 'user.email' },
+];
 
 /**
  * Builds an entitySource payload for the IndexPattern mode.
  */
 const buildIndexEntitySource = (
+  watchlistName: string,
   patterns: Array<EuiComboBoxOptionOption<string>>,
   field: string,
   query: Query
 ): CreateWatchlistRequestBodyInput['entitySource'] => {
   const indexPatternValue = patterns.map((opt) => opt.label).join(',');
-  const identifierFields = field ? getIdentifierFields(field) : [];
+  const sourceName = watchlistName
+    ? `${watchlistName}-${indexPatternValue || 'index'}`
+    : indexPatternValue || 'index-pattern-source';
 
   return {
     type: 'index',
-    name: indexPatternValue || 'index-pattern-source',
+    name: sourceName,
     indexPattern: indexPatternValue || undefined,
-    identifierField: identifierFields.length > 0 ? identifierFields.join(',') : undefined, // TODO check this
+    identifierField: field || undefined,
     filter: query.query ? { kuery: query.query as string } : undefined,
   };
 };
@@ -144,13 +136,17 @@ const FilterQueryRow: FC<FilterQueryRowProps> = ({
 );
 
 export interface RuleBasedSourceInputProps {
+  watchlistName: string;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
 }
 
-export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({ onFieldChange }) => {
+export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
+  watchlistName,
+  onFieldChange,
+}) => {
   const {
     services: { data },
   } = useKibana();
@@ -211,17 +207,17 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({ onFi
       if (ruleFilter === 'entityStore') {
         onFieldChange('entitySource', {
           type: 'store',
-          name: 'entity-store-filter',
+          name: watchlistName ? `${watchlistName}-store` : 'entity-store-filter',
           filter: { kuery: query.query as string },
         });
       } else {
         onFieldChange(
           'entitySource',
-          buildIndexEntitySource(selectedIndexPatterns, entityField, query)
+          buildIndexEntitySource(watchlistName, selectedIndexPatterns, entityField, query)
         );
       }
     },
-    [ruleFilter, onFieldChange, selectedIndexPatterns, entityField]
+    [ruleFilter, onFieldChange, selectedIndexPatterns, entityField, watchlistName]
   );
 
   const onSavedQuery = useCallback((newSavedQuery: SavedQuery | undefined) => {
@@ -240,9 +236,12 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({ onFi
   const onIndexPatternsChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedIndexPatterns(selected);
-      onFieldChange('entitySource', buildIndexEntitySource(selected, entityField, filterQuery));
+      onFieldChange(
+        'entitySource',
+        buildIndexEntitySource(watchlistName, selected, entityField, filterQuery)
+      );
     },
-    [entityField, filterQuery, onFieldChange]
+    [entityField, filterQuery, onFieldChange, watchlistName]
   );
 
   const onEntityFieldChange = useCallback(
@@ -250,10 +249,10 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({ onFi
       setEntityField(value);
       onFieldChange(
         'entitySource',
-        buildIndexEntitySource(selectedIndexPatterns, value, filterQuery)
+        buildIndexEntitySource(watchlistName, selectedIndexPatterns, value, filterQuery)
       );
     },
-    [selectedIndexPatterns, filterQuery, onFieldChange]
+    [selectedIndexPatterns, filterQuery, onFieldChange, watchlistName]
   );
 
   const isEntityStore = ruleFilter === 'entityStore';
