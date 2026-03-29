@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../common/mock';
@@ -13,44 +13,54 @@ import { useInstalledSecurityJobs } from '../../../common/components/ml/hooks/us
 import { EaMlJobCallout } from '.';
 
 jest.mock('../../../common/components/ml/hooks/use_installed_security_jobs');
+jest.mock('../../../common/components/callouts/use_callout_storage', () => ({
+  useCallOutStorage: () => ({
+    isVisible: () => true,
+    dismiss: jest.fn(),
+  }),
+}));
+
+const mockUseInstalledSecurityJobs = jest.mocked(useInstalledSecurityJobs);
 
 describe('EaMlJobCallout', () => {
   it('renders when pre-EA jobs are installed', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValue({
+    mockUseInstalledSecurityJobs.mockReturnValue({
       loading: false,
       jobs: [{ id: 'v3_linux_rare_metadata_process' }],
     });
-    const wrapper = mount(
+    const { getByTestId, getByText } = render(
       <TestProviders>
         <EaMlJobCallout />
       </TestProviders>
     );
-    expect(wrapper.exists('[data-test-subj="callout-ea-ml-job-callout"]')).toEqual(true);
+    expect(getByTestId('callout-ea-ml-job-callout')).toBeInTheDocument();
+    expect(getByText('9.4')).toBeInTheDocument();
+    expect(getByText('_ea')).toBeInTheDocument();
   });
 
   it('does not render if only EA jobs are installed', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValue({
+    mockUseInstalledSecurityJobs.mockReturnValue({
       loading: false,
       jobs: [{ id: 'v3_linux_rare_metadata_process_ea' }],
     });
-    const wrapper = mount(
+    const { queryByTestId } = render(
       <TestProviders>
         <EaMlJobCallout />
       </TestProviders>
     );
-    expect(wrapper.exists('[data-test-subj="callout-ea-ml-job-callout"]')).toEqual(false);
+    expect(queryByTestId('callout-ea-ml-job-callout')).not.toBeInTheDocument();
   });
 
   it('does not render while jobs are loading', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValue({
+    mockUseInstalledSecurityJobs.mockReturnValue({
       loading: true,
       jobs: [],
     });
-    const wrapper = mount(
+    const { queryByTestId } = render(
       <TestProviders>
         <EaMlJobCallout />
       </TestProviders>
     );
-    expect(wrapper.exists('[data-test-subj="callout-ea-ml-job-callout"]')).toEqual(false);
+    expect(queryByTestId('callout-ea-ml-job-callout')).not.toBeInTheDocument();
   });
 });
