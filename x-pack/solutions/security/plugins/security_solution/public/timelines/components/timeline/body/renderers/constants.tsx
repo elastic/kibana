@@ -7,6 +7,9 @@
 
 export const DATE_FIELD_TYPE = 'date';
 export const HOST_NAME_FIELD_NAME = 'host.name';
+export const HOST_HOSTNAME_FIELD_NAME = 'host.hostname';
+export const HOST_ID_FIELD_NAME = 'host.id';
+export const HOST_ENTITY_ID_FIELD_NAME = 'host.entity.id';
 export const USER_NAME_FIELD_NAME = 'user.name';
 export const HOST_IP_FIELD_NAME = 'host.ip';
 export const IP_FIELD_TYPE = 'ip';
