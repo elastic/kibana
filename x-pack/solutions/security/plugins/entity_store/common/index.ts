@@ -6,6 +6,11 @@
  */
 
 /**
+ * Lightweight `@kbn/entity-store/common` barrel (webpack `common` entry).
+ * Keeps page-load size small: no euid / streamlang here — use `euid_helpers` or `loadEuidApi()`.
+ *
+ * @example
+ * import { euid, type EntityType } from '@kbn/entity-store/common/euid_helpers';
  * Public API for the entity_store plugin.
  * Exports only constants and types needed on every load (including browser).
  * For EUID translation helpers (DSL/ESQL/Painless, entity types), use common/euid_helpers.
@@ -79,6 +84,8 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
+export type { Entity } from './domain/definitions/entity.gen';
+
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */
   requiresOneOf: string[];
@@ -86,7 +93,8 @@ export interface IdentitySourceFields {
   identitySourceFields: string[];
 }
 
-export type { Entity, AssetCriticalityLevel } from './domain/definitions/entity.gen';
+export type { NonEcsTimelineDataRow } from './domain/euid/non_ecs_timeline_data';
+export type { AssetCriticalityLevel } from './domain/definitions/entity.gen';
 
 export {
   ENTITY_LATEST,
