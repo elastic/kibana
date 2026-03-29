@@ -929,11 +929,6 @@ describe('UnifiedDataTable', () => {
       const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
       const [expandedDoc] = rows;
       const setRenderDocumentViewMeta = jest.fn();
-
-      if (!expandedDoc) {
-        throw new Error('Expected at least one row for external document view test');
-      }
-
       const component = await getComponent({
         ...getProps(),
         rows,
