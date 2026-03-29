@@ -161,6 +161,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
       switch (type) {
         case 'init':
+          isGhostMouseDown.current = false;
           if (isTouch) {
             isGhostMouseDown.current = true; // sets flag to detect the next mouse down event fired automatically by the browser after the touchend event on touch devices
           }
@@ -174,7 +175,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         case 'update':
           if (!hasBeenDragged.current) {
             handleFirstDrag();
-            isGhostMouseDown.current = false; // reset the flag if the user actually drags the section, in this case the browser wont fire the "ghost" mouse down event after touchend, so we can just reset the flag here
           }
           headerRef.style.transform = `translate(${event!.translate.left}px, ${
             event!.translate.top
@@ -188,12 +188,11 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           // We detect this "ghost mouse down" to prevent duplicated toggling of the section collapse state on touch devices.
           // while still executing the rest of the sectionInteractionSubscription logic
           // so that active header styles (e.g., hover icons like delete and drag) remain visible.
-          if (isMouse && isGhostMouseDown.current) {
-            isGhostMouseDown.current = false;
-          } else if (!hasBeenDragged.current) {
+          if (!hasBeenDragged.current && !isGhostMouseDown.current) {
             toggleIsCollapsed();
           }
 
+          isGhostMouseDown.current = false;
           hasBeenDragged.current = false;
           resetHeaderStyles();
           break;
