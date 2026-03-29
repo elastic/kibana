@@ -869,7 +869,7 @@ export function XYChart({
                     labelOptions: legend.shouldTruncate
                       ? {
                           maxLines: legend?.maxLines ?? 1,
-                          widthLimit: legend.listLayoutMaxWidth ?? 250,
+                          widthLimit: legend.maxPixels ?? 250,
                         }
                       : {
                           maxLines: 0,

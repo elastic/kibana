@@ -48,6 +48,7 @@ export type ActionsComponentProps = Pick<
   | 'disablePinAction'
   | 'disableTimelineAction'
   | 'ecsData'
+  | 'eventData'
   | 'eventId'
   | 'eventIdToNoteIds'
   | 'hit'
@@ -67,6 +68,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   disablePinAction = true,
   disableTimelineAction = false,
   ecsData,
+  eventData,
   eventId,
   eventIdToNoteIds,
   hit,
@@ -204,6 +206,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
             key="add-event-note"
             timelineType={timelineType}
             notesCount={documentBasedNotes.length}
+            eventData={eventData}
             eventId={eventId}
             toggleShowNotes={toggleShowNotes}
           />

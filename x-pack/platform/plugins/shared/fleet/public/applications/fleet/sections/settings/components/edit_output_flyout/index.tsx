@@ -207,7 +207,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               announceOnMount
               data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
               title={generateWarningMessage()}
-              iconType="alert"
+              iconType="warning"
               color="warning"
               size="s"
               heading="p"
@@ -319,6 +319,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               <EuiSelect
                 fullWidth
                 data-test-subj="settingsOutputsFlyout.typeInput"
+                aria-label={i18n.translate('xpack.fleet.settings.editOutputFlyout.typeInputLabel', {
+                  defaultMessage: 'Type',
+                })}
                 {...inputs.typeInput.props}
                 options={OUTPUT_TYPE_OPTIONS}
               />
@@ -515,7 +518,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 <EuiCallOut
                   announceOnMount
                   color="warning"
-                  iconType="alert"
+                  iconType="warning"
                   size="s"
                   title={
                     <FormattedMessage

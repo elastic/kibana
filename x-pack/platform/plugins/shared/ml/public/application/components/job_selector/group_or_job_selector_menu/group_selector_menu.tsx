@@ -78,7 +78,7 @@ export const GroupSelectorMenu = ({
               defaultMessage: 'Remove group from {page}',
               values: { page },
             }),
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             disabled: removeGroupDisabled,
             onClick: () => {
               onRemoveJobId([groupId, ...jobIds]);

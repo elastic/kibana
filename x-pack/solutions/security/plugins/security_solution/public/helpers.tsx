@@ -38,7 +38,7 @@ import type { InspectResponse, StartedSubPlugins, StartServices } from './types'
 import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store';
 import { TimelineId } from '../common/types';
-import { hasAccessToSecuritySolution } from './helpers_access';
+import { hasAccessToAttackDiscovery, hasAccessToSecuritySolution } from './helpers_access';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {
@@ -233,6 +233,9 @@ export const getSubPluginRoutesByCapabilities = (
 export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabilities): boolean => {
   if (CASES_SUB_PLUGIN_KEY === pluginKey) {
     return capabilities[CASES_FEATURE_ID].read_cases === true;
+  }
+  if (pluginKey === 'attackDiscovery') {
+    return hasAccessToAttackDiscovery(capabilities);
   }
   return hasAccessToSecuritySolution(capabilities);
 };

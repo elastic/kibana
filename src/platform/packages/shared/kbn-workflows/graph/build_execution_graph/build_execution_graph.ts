@@ -24,6 +24,7 @@ import type {
   StepWithForeach,
   StepWithIfCondition,
   StepWithOnFailure,
+  SwitchStep,
   TimeoutProp,
   WaitForInputStep,
   WaitStep,
@@ -38,23 +39,29 @@ import type {
   WorkflowYaml,
 } from '../../spec/schema';
 import type {
+  EnterCaseBranchNode,
   EnterConditionBranchNode,
   EnterContinueNode,
+  EnterDefaultBranchNode,
   EnterFallbackPathNode,
   EnterForeachNode,
   EnterIfNode,
   EnterNormalPathNode,
   EnterRetryNode,
+  EnterSwitchNode,
   EnterTimeoutZoneNode,
   EnterTryBlockNode,
   EnterWhileNode,
+  ExitCaseBranchNode,
   ExitConditionBranchNode,
   ExitContinueNode,
+  ExitDefaultBranchNode,
   ExitFallbackPathNode,
   ExitForeachNode,
   ExitIfNode,
   ExitNormalPathNode,
   ExitRetryNode,
+  ExitSwitchNode,
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
   ExitWhileNode,
@@ -69,7 +76,14 @@ import type {
 import { isLoopEnterNode } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
-const flowControlStepTypes = new Set(['if', 'foreach', 'while', 'loop.break', 'loop.continue']);
+const flowControlStepTypes = new Set([
+  'if',
+  'foreach',
+  'while',
+  'loop.break',
+  'loop.continue',
+  'switch',
+]);
 const disallowedWorkflowLevelOnFailureSteps = new Set(['wait']);
 
 /** Context used during the graph construction to keep track of settings and avoid cycles */
@@ -125,6 +139,10 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if (currentStep.type === 'if') {
     return createIfGraph(getStepId(currentStep, context), currentStep as IfStep, context);
+  }
+
+  if (currentStep.type === 'switch') {
+    return createSwitchGraph(getStepId(currentStep, context), currentStep as SwitchStep, context);
   }
 
   if (currentStep.type === 'loop.break') {
@@ -424,6 +442,99 @@ function createIfGraphForIfStepLevel(
     steps: [omit(stepWithIfCondition, ['if'])],
   } as IfStep;
   return createIfGraph(generatedStepId, ifStep, context);
+}
+
+function createSwitchGraph(
+  stepId: string,
+  switchStep: SwitchStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
+  const enterSwitchNodeId = `enterSwitch_${stepId}`;
+  const exitSwitchNodeId = `exitSwitch_${stepId}`;
+
+  const enterSwitchNode: EnterSwitchNode = {
+    id: enterSwitchNodeId,
+    type: 'enter-switch',
+    stepId,
+    stepType: switchStep.type,
+    exitNodeId: exitSwitchNodeId,
+    configuration: {
+      ...omit(switchStep, ['cases', 'default']),
+    },
+  };
+  context.stack.push(enterSwitchNode);
+  graph.setNode(enterSwitchNodeId, enterSwitchNode);
+
+  const exitSwitchNode: ExitSwitchNode = {
+    type: 'exit-switch',
+    id: exitSwitchNodeId,
+    stepId,
+    stepType: switchStep.type,
+    startNodeId: enterSwitchNodeId,
+  };
+  graph.setNode(exitSwitchNodeId, exitSwitchNode);
+
+  const cases = switchStep.cases || [];
+  for (let i = 0; i < cases.length; i++) {
+    const caseItem = cases[i];
+    const enterCaseId = `enterCase_${stepId}_${i}`;
+    const exitCaseId = `exitCase_${stepId}_${i}`;
+
+    const enterCaseNode: EnterCaseBranchNode = {
+      id: enterCaseId,
+      type: 'enter-case-branch',
+      match: caseItem.match,
+      index: i,
+      stepId,
+      stepType: switchStep.type,
+    };
+    graph.setNode(enterCaseId, enterCaseNode);
+    graph.setEdge(enterSwitchNodeId, enterCaseId);
+
+    const exitCaseNode: ExitCaseBranchNode = {
+      id: exitCaseId,
+      type: 'exit-case-branch',
+      startNodeId: enterCaseId,
+      stepId,
+      stepType: switchStep.type,
+    };
+
+    const caseGraph = createStepsSequence(caseItem.steps || [], context);
+    insertGraphBetweenNodes(graph, caseGraph, enterCaseId, exitCaseId);
+    graph.setNode(exitCaseId, exitCaseNode);
+    graph.setEdge(exitCaseId, exitSwitchNodeId);
+  }
+
+  if (switchStep.default?.length) {
+    const enterDefaultId = `enterDefault_${stepId}`;
+    const exitDefaultId = `exitDefault_${stepId}`;
+
+    const enterDefaultNode: EnterDefaultBranchNode = {
+      id: enterDefaultId,
+      type: 'enter-default-branch',
+      stepId,
+      stepType: switchStep.type,
+    };
+    graph.setNode(enterDefaultId, enterDefaultNode);
+    graph.setEdge(enterSwitchNodeId, enterDefaultId);
+
+    const exitDefaultNode: ExitDefaultBranchNode = {
+      id: exitDefaultId,
+      type: 'exit-default-branch',
+      startNodeId: enterDefaultId,
+      stepId,
+      stepType: switchStep.type,
+    };
+
+    const defaultGraph = createStepsSequence(switchStep.default, context);
+    insertGraphBetweenNodes(graph, defaultGraph, enterDefaultId, exitDefaultId);
+    graph.setNode(exitDefaultId, exitDefaultNode);
+    graph.setEdge(exitDefaultId, exitSwitchNodeId);
+  }
+
+  context.stack.pop();
+  return graph;
 }
 
 function applyOnFailure(

@@ -214,8 +214,7 @@
     "src/core/packages/user-settings": "'user-settings' should be snake_case",
     "src/core/test-helpers": "'test-helpers' should be snake_case",
     "src/platform/packages/private/analytics/utils/analytics_collection_utils": "'analytics_collection_utils' should be kebab-case",
-    "src/platform/packages/shared/kbn-router-to-openapispec/openapi-types.d.ts": "'openapi-types.d.ts' should be snake_case",
-    "src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many-dashboards.json": "'many-dashboards.json' should be snake_case"
+    "src/platform/packages/shared/kbn-router-to-openapispec/openapi-types.d.ts": "'openapi-types.d.ts' should be snake_case"
   },
   "@elastic/kibana-esql": {
     "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/Readme.md": "'Readme.md' should be snake_case"

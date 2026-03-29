@@ -12,11 +12,15 @@ import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isNotEmptyCondition } from '../definitions/common_fields';
 import {
+  applyWhenConditionTrueSetFields,
+  documentPassesCalculatedIdentityPipelineGate,
   getDocument,
+  getEffectiveEuidRanking,
   getFieldValue,
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
   getSourceFieldNames,
+  mergeDocumentsFilterAndPostAgg,
 } from './commons';
 import {
   applyFieldEvaluations,
@@ -27,7 +31,8 @@ import type { FieldEvaluation } from '../definitions/entity_schema';
 
 /**
  * Returns a DSL filter that matches documents considered for the given entity type.
- * This is the translation of {@link CalculatedEntityIdentity.documentsFilter}.
+ * Combines documentsFilter and postAggFilter (when present) so the filter is
+ * equivalent to the ESQL extraction logic: only IDP or non-IDP documents pass.
  *
  * This is the DSL equivalent of {@link getEuidEsqlDocumentsContainsIdFilter}.
  * Use it to pre-filter searches/aggregations to only documents that could
@@ -43,13 +48,16 @@ import type { FieldEvaluation } from '../definitions/entity_schema';
 export function getEuidDslDocumentsContainsIdFilter(
   entityType: EntityType
 ): QueryDslQueryContainer {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
   if (isSingleFieldIdentity(identityField)) {
     return conditionToQueryDsl(
       isNotEmptyCondition(identityField.singleField)
     ) as QueryDslQueryContainer;
   }
-  return conditionToQueryDsl(identityField.documentsFilter) as QueryDslQueryContainer;
+  return conditionToQueryDsl(
+    mergeDocumentsFilterAndPostAgg(identityField.documentsFilter, entityDefinition.postAggFilter)
+  ) as QueryDslQueryContainer;
 }
 
 /**
@@ -71,8 +79,9 @@ export function getEuidDslDocumentsContainsIdFilter(
  * //       { term: { 'host.name': 'server1' } },
  * //       { term: { 'host.domain': 'example.com' } }
  * //     ],
- * //     must_not: [
- * //       { exists: { field: 'host.entity.id' } }, ...
+ * //     must: [
+ * //       { bool: { should: [ { bool: { must_not: [{ exists: { field: 'host.id' } }] } }, { term: { 'host.id': '' } } ], minimum_should_match: 1 } },
+ * //       ...
  * //     ]
  * //   }
  * // }
@@ -80,7 +89,10 @@ export function getEuidDslDocumentsContainsIdFilter(
  *
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
- * @returns An Elasticsearch DSL query container, or undefined if the document does not contain enough identifying information.
+ * @returns An Elasticsearch DSL query container, or `undefined` if the document does not contain enough
+ *   identifying information, or if it would not pass the entity's `documentsFilter` ∧ `postAggFilter`
+ *   (same gate as `getEuidDslDocumentsContainsIdFilter` / logs extraction) after field evaluations
+ *   and `whenConditionTrueSetFieldsPreAgg`.
  */
 export function getEuidDslFilterBasedOnDocument(
   entityType: EntityType,
@@ -91,7 +103,8 @@ export function getEuidDslFilterBasedOnDocument(
   }
 
   doc = getDocument(doc);
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
     const value = getFieldValue(doc, identityField.singleField);
@@ -109,7 +122,17 @@ export function getEuidDslFilterBasedOnDocument(
     const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, identityField.euidFields);
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  }
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
+  }
+  if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
+    return undefined;
+  }
+  const effectiveRanking = getEffectiveEuidRanking(doc, identityField);
+  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, effectiveRanking);
   if (fieldsToBeFilteredOn.rankingPosition === -1) {
     return undefined;
   }
@@ -131,20 +154,26 @@ export function getEuidDslFilterBasedOnDocument(
     },
   };
 
-  const toBeFilteredOut = getFieldsToBeFilteredOut(
-    identityField.euidFields,
-    fieldsToBeFilteredOn
-  ).filter((field) => !evaluatedDestinations.has(field));
+  const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
+    (field) => !evaluatedDestinations.has(field)
+  );
   if (toBeFilteredOut.length > 0) {
+    const priorMust = Array.isArray(dsl.bool?.must) ? dsl.bool.must : [];
     dsl.bool = {
       ...dsl.bool,
-      must_not: toBeFilteredOut.map((field) => ({ exists: { field } })),
+      must: [...priorMust, ...toBeFilteredOut.map(fieldMissingOrEmptyDsl)],
     };
   }
 
   if (identityField.fieldEvaluations?.length) {
     const filterList = Array.isArray(dsl.bool?.filter) ? dsl.bool.filter : [];
     for (const evaluation of identityField.fieldEvaluations) {
+      const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
+      const sourceFields = [...exactMatchFields, ...prefixMatchFields];
+      const hasEvaluatedSource = sourceFields.some((f) => evaluatedDestinations.has(f));
+      if (hasEvaluatedSource) {
+        continue;
+      }
       const spec = getSourceMatchSpec(doc, evaluation);
       filterList.push(buildSourceClauseDsl(evaluation, spec) as QueryDslQueryContainer);
     }
@@ -152,6 +181,19 @@ export function getEuidDslFilterBasedOnDocument(
   }
 
   return dsl;
+}
+
+/**
+ * Document matches when the field is missing or equals "" — aligned with getFieldValue (empty is not
+ * identity) and ESQL `esqlIsNullOrEmpty` for higher-ranked fields we skipped.
+ */
+function fieldMissingOrEmptyDsl(field: string): QueryDslQueryContainer {
+  return {
+    bool: {
+      should: [{ bool: { must_not: [{ exists: { field } }] } }, { term: { [field]: '' } }],
+      minimum_should_match: 1,
+    },
+  };
 }
 
 function buildSourceClauseDsl(
@@ -162,15 +204,9 @@ function buildSourceClauseDsl(
   const allSourceFields = [...exactMatchFields, ...prefixMatchFields];
 
   if (spec.type === 'unknown') {
-    const mustNotExistOrEmpty = allSourceFields.map((field) => ({
-      bool: {
-        should: [{ bool: { must_not: [{ exists: { field } }] } }, { term: { [field]: '' } }],
-        minimum_should_match: 1,
-      },
-    }));
     return {
       bool: {
-        must: mustNotExistOrEmpty,
+        must: allSourceFields.map((field) => fieldMissingOrEmptyDsl(field)),
       },
     };
   }

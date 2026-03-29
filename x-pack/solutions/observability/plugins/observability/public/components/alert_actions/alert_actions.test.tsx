@@ -232,7 +232,7 @@ describe('ObservabilityActions component', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().prop('href')).toBe(
-        '/app/observability/alerts/rules/06f53080-0f91-11ed-9d86-013908b232ef'
+        '/app/rules/rule/06f53080-0f91-11ed-9d86-013908b232ef'
       );
     });
   });

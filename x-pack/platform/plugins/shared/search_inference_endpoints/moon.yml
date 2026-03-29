@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/kibana-react-plugin'
-  - '@kbn/ml-plugin'
   - '@kbn/ml-trained-models-utils'
   - '@kbn/shared-ux-router'
   - '@kbn/core-http-server'
@@ -52,6 +51,8 @@ dependsOn:
   - '@kbn/cloud-connect-plugin'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-security-server'
+  - '@kbn/inference-common'
+  - '@kbn/inference-plugin'
 tags:
   - plugin
   - prod
@@ -65,26 +66,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

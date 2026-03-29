@@ -14,20 +14,15 @@ import { assetCriticalityPublicListRoute } from './list';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assetCriticalityPublicBulkUploadRoute } from './bulk_upload';
 
-export const registerAssetCriticalityRoutes = ({
-  router,
-  logger,
-  config,
-  getStartServices,
-}: EntityAnalyticsRoutesDeps) => {
+export const registerAssetCriticalityRoutes = (deps: EntityAnalyticsRoutesDeps) => {
   // Internal routes
-  assetCriticalityInternalPrivilegesRoute(router, logger, getStartServices);
-  assetCriticalityInternalStatusRoute(router, logger);
+  assetCriticalityInternalPrivilegesRoute(deps);
+  assetCriticalityInternalStatusRoute(deps);
   // Public routes
-  assetCriticalityPublicCSVUploadRoute(router, logger, config, getStartServices);
-  assetCriticalityPublicBulkUploadRoute(router, logger, config);
-  assetCriticalityPublicDeleteRoute(router, logger);
-  assetCriticalityPublicGetRoute(router, logger);
-  assetCriticalityPublicListRoute(router, logger);
-  assetCriticalityPublicUpsertRoute(router, logger);
+  assetCriticalityPublicCSVUploadRoute(deps);
+  assetCriticalityPublicBulkUploadRoute(deps);
+  assetCriticalityPublicDeleteRoute(deps);
+  assetCriticalityPublicGetRoute(deps);
+  assetCriticalityPublicListRoute(deps);
+  assetCriticalityPublicUpsertRoute(deps);
 };

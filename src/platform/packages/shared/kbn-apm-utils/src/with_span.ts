@@ -9,6 +9,7 @@
 
 import type { Logger } from 'elastic-apm-node';
 import agent from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import asyncHooks from 'async_hooks';
 
 export interface SpanOptions {
@@ -70,7 +71,8 @@ export async function withSpan<T>(
   ];
 
   if (!agent.isStarted()) {
-    const promise = cb();
+    // If Elastic APM is not started, let's use OTel's withActiveSpan instead in case it's started.
+    const promise = withActiveSpan(name, { attributes: { 'span.type': type } }, () => cb());
     // make sure tests that mock out the callback with a sync
     // function don't fail.
     if (typeof promise === 'object' && 'then' in promise) {

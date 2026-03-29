@@ -4,10 +4,13 @@ This guide covers the complete process of adding custom filters or tags to the t
 
 Adding a new filter/tag requires updates in multiple places:
 
-1. **Engine registration** (server-side)
-2. **UI parsing** (frontend validation)
-3. **Autocompletion** (UI suggestions)
-4. **OSS contribution** (optional, recommended)
+1. **Engine registration** (server-side execution)
+2. **UI parsing** (frontend validation — prevents editor errors)
+3. **UI hover evaluation** (frontend expression evaluator — enables hover tooltips)
+4. **Autocompletion** (UI suggestions in Monaco editor)
+5. **Foreach schema awareness** (if the filter changes the output type, e.g. object → array)
+6. **Tests** (server-side and schema tests)
+7. **OSS contribution** (optional, recommended)
 
 ## Step 1: Register in the Engine
 
@@ -89,7 +92,29 @@ function getLiquidInstance(): Liquid {
 
 **Why?** This prevents parsing errors when users type the filter in the UI editor.
 
-## Step 3: Add to Autocompletion
+## Step 3: Register in the UI Hover Expression Evaluator
+
+The hover tooltip in the YAML editor evaluates template expressions client-side to show live values.
+Custom filters must also be registered here, otherwise hover evaluation falls back to path-only
+resolution and shows incorrect results (or "undefined").
+
+**File:** `src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/template_expression/evaluate_expression.ts`
+
+```typescript
+// Register custom filters that match server-side exactly
+liquidEngine.registerFilter('my_custom_filter', (value: unknown): unknown => {
+  // Full implementation (same as server-side) — this runs during hover evaluation
+  if (typeof value !== 'string') {
+    return value;
+  }
+  return transformedValue;
+});
+```
+
+**Why?** Unlike the validation instance (Step 2) which only needs a no-op stub, the hover evaluator
+needs the **real implementation** since it evaluates expressions against actual execution data.
+
+## Step 4: Add to Autocompletion
 
 Add your filter to the autocompletion provider:
 
@@ -113,7 +138,30 @@ export const LIQUID_FILTERS = [
 - `insertText`: Snippet for autocompletion (use `${1:placeholder}` for arguments)
 - `example`: Usage example
 
-## Step 4: Write Tests
+## Step 5: Update Foreach Schema Awareness (if type-changing)
+
+If your filter transforms the output type (e.g., `entries` converts an object to an array of `{key, value}` pairs),
+the foreach schema resolver needs to know about it. Otherwise, the editor will show "Expected array for foreach
+iteration, but got object" when using `| your_filter` in a `foreach:` expression.
+
+**File:** `src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_foreach_state_schema.ts`
+
+Add a check for your filter in the `getForeachItemSchema` function, before the final `else` branch
+that throws `InvalidForeachParameterError`:
+
+```typescript
+} else if (iterableSchema instanceof z.ZodObject && hasMyFilter) {
+  // my_filter converts objects to arrays of a known shape
+  return z.object({ /* your item schema */ });
+} else {
+  throw new InvalidForeachParameterError(...);
+}
+```
+
+**When is this needed?** Only when the filter changes the type in a way that affects `foreach` iteration
+(e.g., object → array). Filters that preserve the type (e.g., `json_parse`, `upcase`) don't need this.
+
+## Step 6: Write Tests
 
 Add tests for your filter:
 
@@ -137,7 +185,7 @@ describe('my_custom_filter', () => {
 });
 ```
 
-## Step 5: Contribute to OSS (Optional)
+## Step 7: Contribute to OSS (Optional)
 
 If you want to contribute your filter to the [liquidjs](https://github.com/harttle/liquidjs) project:
 

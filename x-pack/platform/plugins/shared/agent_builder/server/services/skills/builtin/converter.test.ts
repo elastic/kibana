@@ -92,4 +92,25 @@ describe('convertBuiltinSkill', () => {
 
     expect(result.referencedContent).toBeUndefined();
   });
+
+  it('sets experimental to false when not provided', () => {
+    const skill = createMockSkillDefinition();
+    const result = convertBuiltinSkill(skill);
+
+    expect(result.experimental).toBe(false);
+  });
+
+  it('carries experimental: true when set on the skill definition', () => {
+    const skill = createMockSkillDefinition({ experimental: true });
+    const result = convertBuiltinSkill(skill);
+
+    expect(result.experimental).toBe(true);
+  });
+
+  it('carries experimental: false when explicitly set to false', () => {
+    const skill = createMockSkillDefinition({ experimental: false });
+    const result = convertBuiltinSkill(skill);
+
+    expect(result.experimental).toBe(false);
+  });
 });

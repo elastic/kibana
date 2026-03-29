@@ -19,7 +19,10 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
+import type {
+  UnifiedDataTableSettings,
+  UnifiedDataTableRestorableState,
+} from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
@@ -64,7 +67,9 @@ const resultsTableContainerCss = {
 
 const unifiedTableWrapperCss = {
   flex: '1 1 auto',
-  minHeight: 200,
+  '.euiDataGrid__controls': {
+    paddingLeft: '8px',
+  },
 };
 
 const gridStyleOverride = {
@@ -163,6 +168,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const { dataView, isLoading: isDataViewLoading } = useOsqueryDataView();
 
+  const [filteredDataView, setFilteredDataView] = useState(dataView);
   const [persistedPageSize, setPersistedPageSize] = usePersistedPageSize(
     RESULTS_PAGE_SIZE_STORAGE_KEY
   );
@@ -190,7 +196,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   } = useResultsFiltering(
     {
       enabled: true,
-      dataView,
+      dataView: filteredDataView,
       actionId,
       scheduleId,
       executionCount,
@@ -264,6 +270,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [allResultsData?.edges, ecsMapping]
   );
 
+  const [isCompareActive, setIsCompareActive] = useState(false);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
 
   const externalCustomRenderers = useMemo(
@@ -319,6 +326,14 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     },
     []
   );
+
+  // Remount the grid on fullscreen exit to reset internal EuiDataGrid column widths that persist from the wider viewport.
+  const [gridKey, setGridKey] = useState(0);
+  const handleFullScreenChange = useCallback((isFullScreen: boolean) => {
+    if (!isFullScreen) {
+      setGridKey((k) => k + 1);
+    }
+  }, []);
 
   // Auto-compute visible columns from result data when user hasn't set them manually.
   // Deduplicates osquery.* fields by their short name (second segment) — e.g.
@@ -423,12 +438,21 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       }
     };
 
-    allResultsData.edges.slice(0, 5).forEach((edge) => collectPaths(edge._source));
+    allResultsData.edges.slice(0, 5).forEach((edge) => {
+      collectPaths(edge._source);
+      // Also include field names from `edge.fields` — the table displays data
+      // from `fields` (via flattenOsqueryHit), so the SearchBar data view must
+      // know about them for filter badges to resolve correctly.
+      if (edge.fields) {
+        for (const fieldName of Object.keys(edge.fields)) {
+          names.add(fieldName);
+        }
+      }
+    });
 
     return Array.from(names).sort().join(',');
   }, [allResultsData?.edges]);
 
-  const [filteredDataView, setFilteredDataView] = useState(dataView);
   useEffect(() => {
     if (!dataView) return;
     if (!sourceFieldNamesKey) {
@@ -457,6 +481,15 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const searchBarIndexPatterns = useMemo(
     () => (filteredDataView ? [filteredDataView] : []),
     [filteredDataView]
+  );
+
+  const handleInitialStateChange = useCallback(
+    (state: Partial<UnifiedDataTableRestorableState>) => {
+      if (state.isCompareActive !== undefined) {
+        setIsCompareActive(state.isCompareActive);
+      }
+    },
+    []
   );
 
   const handleCloseFlyout = useCallback(() => {
@@ -526,7 +559,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     <>
       {isLive && <EuiProgress color="primary" size="xs" css={euiProgressCss} />}
 
-      <div css={resultsTableContainerCss}>
+      <div css={resultsTableContainerCss} data-test-subj="osqueryResultsPanel">
         {/* Search bar with KQL autocomplete and filter pills */}
         <div css={searchBarWrapperCss}>
           <SearchBar
@@ -556,6 +589,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                 getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
               >
                 <UnifiedDataTable
+                  key={gridKey}
                   ariaLabelledBy="osquery-results"
                   dataView={dataView}
                   columns={visibleColumns}
@@ -572,6 +606,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   settings={mergedGridSettings}
                   showTimeCol={false}
                   showFullScreenButton={appName === OSQUERY_PLUGIN_NAME}
+                  onFullScreenChange={handleFullScreenChange}
                   canDragAndDropColumns
                   isSortEnabled
                   isPaginationEnabled={false}
@@ -584,6 +619,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   services={unifiedDataTableServices}
                   consumer="osquery"
                   enableComparisonMode
+                  onInitialStateChange={handleInitialStateChange}
                   showColumnTokens
                   controlColumnIds={CONTROL_COLUMN_IDS}
                   onFilter={handleFilterForGrid}
@@ -592,15 +628,17 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
               </CellActionsProvider>
             </div>
 
-            <EuiTablePagination
-              pageCount={totalPages}
-              activePage={pagination.pageIndex}
-              onChangePage={handleServerPageChange}
-              itemsPerPage={pagination.pageSize}
-              onChangeItemsPerPage={handleServerPageSizeChange}
-              itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
-              showPerPageOptions
-            />
+            {!isCompareActive && (
+              <EuiTablePagination
+                pageCount={totalPages}
+                activePage={pagination.pageIndex}
+                onChangePage={handleServerPageChange}
+                itemsPerPage={pagination.pageSize}
+                onChangeItemsPerPage={handleServerPageSizeChange}
+                itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
+                showPerPageOptions
+              />
+            )}
           </>
         ) : (
           <EuiPanel hasShadow={false} data-test-subj="osqueryResultsPanel">
