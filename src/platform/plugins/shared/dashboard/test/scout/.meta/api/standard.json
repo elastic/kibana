@@ -1,5 +1,5 @@
 {
-  "sha1": "e41aa65daaa372f96f78b8f7301ddb9f04a9f197",
+  "sha1": "2f4f9a3d03259ae9c5d68ddf23b0a9528df6af5d",
   "tests": [
     {
       "id": "65fe2f541b6ad11-864f48536870f42",
@@ -23,7 +23,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 35,
+        "line": 37,
         "column": 10
       }
     },
@@ -49,7 +49,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 53,
+        "line": 55,
         "column": 10
       }
     },
@@ -75,7 +75,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 73,
+        "line": 75,
         "column": 10
       }
     },
@@ -101,7 +101,59 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 91,
+        "line": 93,
+        "column": 10
+      }
+    },
+    {
+      "id": "65fe2f541b6ad11-967f24ae200a1e9",
+      "title": "dashboards - create validation - returns error when id is too long",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
+        "line": 111,
+        "column": 10
+      }
+    },
+    {
+      "id": "65fe2f541b6ad11-6593cb89ca9fca7",
+      "title": "dashboards - create validation - returns error when id contains invalid characters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
+        "line": 131,
         "column": 10
       }
     },
@@ -127,7 +179,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 109,
+        "line": 154,
         "column": 10
       }
     },
@@ -153,7 +205,33 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 125,
+        "line": 170,
+        "column": 10
+      }
+    },
+    {
+      "id": "65fe2f541b6ad11-e084839ef25aebf",
+      "title": "dashboards - create validation - returns error if user does not have permission to create a dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
+        "line": 189,
         "column": 10
       }
     },
@@ -179,7 +257,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/delete_dashboard.spec.ts",
-        "line": 34,
+        "line": 36,
         "column": 10
       }
     },
@@ -205,7 +283,33 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/delete_dashboard.spec.ts",
-        "line": 50,
+        "line": 52,
+        "column": 10
+      }
+    },
+    {
+      "id": "04c61aca5175965-3843f1d2c2a7233",
+      "title": "dashboards - delete authorization - should return 403 if the user is not authorized to delete the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/delete_dashboard.spec.ts",
+        "line": 64,
         "column": 10
       }
     },
@@ -283,13 +387,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 29,
+        "line": 47,
         "column": 10
       }
     },
     {
-      "id": "d188e7edb1b6249-e1ba09c19952828",
-      "title": "dashboards - search should narrow results by search",
+      "id": "d188e7edb1b6249-04271a969a64836",
+      "title": "dashboards - search should narrow results by query",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -309,7 +413,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 45,
+        "line": 62,
         "column": 10
       }
     },
@@ -335,7 +439,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 62,
+        "line": 76,
         "column": 10
       }
     },
@@ -361,7 +465,111 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 79,
+        "line": 90,
+        "column": 10
+      }
+    },
+    {
+      "id": "d188e7edb1b6249-1aae22d74f35b83",
+      "title": "dashboards - search should narrow results by tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
+        "line": 108,
+        "column": 10
+      }
+    },
+    {
+      "id": "d188e7edb1b6249-301a7785a137584",
+      "title": "dashboards - search should narrow results by tags with multiple values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
+        "line": 124,
+        "column": 10
+      }
+    },
+    {
+      "id": "d188e7edb1b6249-4f418d4f5e50fec",
+      "title": "dashboards - search should narrow results by excluded_tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
+        "line": 139,
+        "column": 10
+      }
+    },
+    {
+      "id": "d188e7edb1b6249-63761233440669f",
+      "title": "dashboards - search should narrow results by excluded_tags with multiple values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
+        "line": 156,
         "column": 10
       }
     },
@@ -387,7 +595,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 35,
+        "line": 37,
         "column": 10
       }
     },
@@ -413,7 +621,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 52,
+        "line": 54,
         "column": 10
       }
     },
@@ -439,7 +647,33 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 71,
+        "line": 73,
+        "column": 10
+      }
+    },
+    {
+      "id": "2e698b8125bdc32-8b330e6d0053d14",
+      "title": "dashboards - update validation - returns error when access_control is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
+        "line": 89,
         "column": 10
       }
     },
@@ -465,7 +699,33 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 87,
+        "line": 110,
+        "column": 10
+      }
+    },
+    {
+      "id": "2e698b8125bdc32-19cff49d1b8bc8b",
+      "title": "dashboards - update validation - returns error if user does not have permission to update a dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
+        "line": 129,
         "column": 10
       }
     }

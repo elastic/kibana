@@ -35,7 +35,7 @@ export const IntegrationStatusBadge: React.FunctionComponent<{
       <EuiBadge
         color="danger"
         data-test-subj="integrationSyncFailedBadge"
-        iconType="errorFilled"
+        iconType="errorFill"
         {...onClickProps}
       >
         <FormattedMessage

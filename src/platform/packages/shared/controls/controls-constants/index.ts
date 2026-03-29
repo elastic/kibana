@@ -13,10 +13,7 @@ export {
   CONTROL_WIDTH_MEDIUM,
   CONTROL_WIDTH_SMALL,
   DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-  DEFAULT_IGNORE_VALIDATIONS,
-  DEFAULT_USE_GLOBAL_FILTERS,
+  DEFAULT_PINNED_CONTROL_STATE,
 } from './src/controls_group_constants';
 
 export {
@@ -24,8 +21,15 @@ export {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
+  DEFAULT_DATA_CONTROL_STATE,
 } from './src/control_constants';
-export { DEFAULT_SEARCH_TECHNIQUE, OPTIONS_LIST_DEFAULT_SORT } from './src/options_list_constants';
+export {
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
+  MAX_OPTIONS_LIST_REQUEST_SIZE,
+} from './src/options_list_constants';
+export { DEFAULT_RANGE_SLIDER_STATE } from './src/range_slider_constants';
+export { DEFAULT_TIME_SLIDER_STATE } from './src/time_slider_constants';
 
 export {
   ACTION_CREATE_CONTROL,

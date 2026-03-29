@@ -1,5 +1,5 @@
 {
-  "sha1": "61df940c69f918db6888e8a992ebcf8771c2fcc6",
+  "sha1": "310fd38a2eca48ef5de007b544f28a05d0f31823",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -71,6 +71,30 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/breakdown_by_dimension.spec.ts",
         "line": 35,
+        "column": 14
+      }
+    },
+    {
+      "id": "2f18391bfe0b2d7-896ca919fb9b0e1",
+      "title": "Metrics in Discover - Brush to Zoom should narrow time range when brushing a chart in the grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/brush_to_zoom.spec.ts",
+        "line": 47,
         "column": 14
       }
     },
@@ -571,6 +595,54 @@
       }
     },
     {
+      "id": "5581ea680cc5e84-af3779e74d07e98",
+      "title": "Metrics in Discover - Save Session should save and restore a metrics session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/save_session.spec.ts",
+        "line": 49,
+        "column": 14
+      }
+    },
+    {
+      "id": "73e407c42e91ae1-cb5ac16f8b0b490",
+      "title": "Metrics in Discover - Share Session should preserve metrics view state through a shared URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/share_session.spec.ts",
+        "line": 48,
+        "column": 14
+      }
+    },
+    {
       "id": "e5122822a21b3b2-d64cae306a0fa14",
       "title": "Traces in Discover - Custom columns should display trace-specific columns in data view mode",
       "expectedStatus": "passed",
@@ -725,8 +797,8 @@
       }
     },
     {
-      "id": "df7f704800ddfee-e8ad6dbd660a203",
-      "title": "Traces in Discover - Explore from APM Transaction Detail - Waterfall size warning \"view in Discover\" link opens traces experience",
+      "id": "df7f704800ddfee-907d1e2585aa1b6",
+      "title": "Traces in Discover - Explore from APM Transaction Detail - Legacy waterfall size warning \"view in Discover\" link opens traces experience",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -743,6 +815,28 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
         "line": 256,
+        "column": 14
+      }
+    },
+    {
+      "id": "df7f704800ddfee-b27782d1c9e1c78",
+      "title": "Traces in Discover - Explore from APM Transaction Detail - Unified waterfall size warning \"view in Discover\" link opens traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
+        "line": 301,
         "column": 14
       }
     },
@@ -764,7 +858,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 301,
+        "line": 345,
         "column": 14
       }
     },
@@ -1318,7 +1412,29 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
-        "line": 56,
+        "line": 62,
+        "column": 14
+      }
+    },
+    {
+      "id": "53f97d0c42b6e9b-468dcad4f4d6384",
+      "title": "Traces in Discover - Waterfall flyout usage Selected span is scrolled into view when opening the full-screen waterfall",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
+        "line": 196,
         "column": 14
       }
     },
@@ -1340,7 +1456,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/waterfall_flyout_usage.spec.ts",
-        "line": 190,
+        "line": 223,
         "column": 14
       }
     }

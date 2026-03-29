@@ -41,9 +41,7 @@ import {
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_DE_HEALTH_UI_SETTING,
-  ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
-  ENABLE_SIEM_READINESS_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
@@ -201,24 +199,6 @@ export const initUiSettings = (
       solutionViews: ['classic', 'security'],
     },
     ...getDefaultColdAndFrozenTiersSettings(),
-    [ENABLE_GRAPH_VISUALIZATION_SETTING]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableGraphVisualizationLabel', {
-        defaultMessage: 'Enable graph visualization',
-      }),
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.enableGraphVisualizationDescription',
-        {
-          defaultMessage: `Enable the Graph Visualization feature within the Security Solution.`,
-        }
-      ),
-      type: 'boolean',
-      value: false,
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
-      solutionViews: ['classic', 'security'],
-      technicalPreview: true,
-    },
     ...(experimentalFeatures.enableAlertsAndAttacksAlignment && {
       [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: {
         name: i18n.translate(
@@ -261,26 +241,6 @@ export const initUiSettings = (
       solutionViews: ['classic', 'security'],
       technicalPreview: true,
     },
-    ...(experimentalFeatures.siemReadinessDashboard && {
-      [ENABLE_SIEM_READINESS_SETTING]: {
-        name: i18n.translate('xpack.securitySolution.uiSettings.enableSiemReadinessLabel', {
-          defaultMessage: 'Enable SIEM Readiness Dashboard',
-        }),
-        description: i18n.translate(
-          'xpack.securitySolution.uiSettings.enableSiemReadinessDescription',
-          {
-            defaultMessage: `Enable the SIEM Readiness Dashboard within Security Solution. When enabled, you can access the new SIEM Readiness page through the navigation menu.`,
-          }
-        ),
-        type: 'boolean',
-        value: false,
-        category: [APP_ID],
-        requiresPageReload: true,
-        schema: schema.boolean(),
-        solutionViews: ['classic', 'security'],
-        technicalPreview: true,
-      },
-    }),
     [ENABLE_CLOUD_CONNECTOR_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
         defaultMessage: 'Enable Cloud Connector',

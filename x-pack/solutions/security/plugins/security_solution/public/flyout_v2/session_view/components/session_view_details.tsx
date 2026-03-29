@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import type { ResolverCellActionRenderer } from '../../../resolver/types';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { DocumentFlyoutWrapper } from '../../document/document_flyout_wrapper';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { PREFIX } from '../../../flyout/shared/test_ids';
@@ -47,7 +47,7 @@ export interface SessionViewDetailsProps {
   /**
    * Renderer used by Session View panels for field cell actions.
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
   /**
    * Callback function to jump to a specific event in SessionView
    */

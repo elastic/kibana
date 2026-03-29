@@ -593,7 +593,96 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.normalizeLogLinesForUpload",
+        "type": "Function",
+        "tags": [],
+        "label": "normalizeLogLinesForUpload",
+        "description": [],
+        "signature": [
+          "(lines: readonly string[]) => ",
+          {
+            "pluginId": "automaticImportVTwo",
+            "scope": "common",
+            "docId": "kibAutomaticImportVTwoPluginApi",
+            "section": "def-common.NormalizeLogSamplesResult",
+            "text": "NormalizeLogSamplesResult"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/upload_samples_limits.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-common.normalizeLogLinesForUpload.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "lines",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/upload_samples_limits.ts",
+            "lineNumber": 22,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.normalizeLogSamplesFromFileContent",
+        "type": "Function",
+        "tags": [],
+        "label": "normalizeLogSamplesFromFileContent",
+        "description": [],
+        "signature": [
+          "(content: string) => ",
+          {
+            "pluginId": "automaticImportVTwo",
+            "scope": "common",
+            "docId": "kibAutomaticImportVTwoPluginApi",
+            "section": "def-common.NormalizeLogSamplesResult",
+            "text": "NormalizeLogSamplesResult"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/upload_samples_limits.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-common.normalizeLogSamplesFromFileContent.$1",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/upload_samples_limits.ts",
+            "lineNumber": 18,
+            "columnNumber": 52,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "automaticImportVTwo",
@@ -1055,6 +1144,51 @@
             "description": [],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/telemetry/types.ts",
             "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.NormalizeLogSamplesResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "NormalizeLogSamplesResult",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/upload_samples_limits.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-common.NormalizeLogSamplesResult.samples",
+            "type": "Array",
+            "tags": [],
+            "label": "samples",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/upload_samples_limits.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-common.NormalizeLogSamplesResult.linesOmittedOverLimit",
+            "type": "number",
+            "tags": [],
+            "label": "linesOmittedOverLimit",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/upload_samples_limits.ts",
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2460,6 +2594,59 @@
       },
       {
         "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.UpdateDataStreamPipelineRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateDataStreamPipelineRequestBody",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 136,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.UpdateDataStreamPipelineRequestBody",
+        "type": "Any",
+        "tags": [],
+        "label": "UpdateDataStreamPipelineRequestBody",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 139,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.UPLOAD_SAMPLES_MAX_LINES",
+        "type": "number",
+        "tags": [],
+        "label": "UPLOAD_SAMPLES_MAX_LINES",
+        "description": [
+          "\nMaximum number of log lines in a single upload request."
+        ],
+        "signature": [
+          "1000"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/upload_samples_limits.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
         "id": "def-common.UploadIntegrationClickedPayload",
         "type": "Type",
         "tags": [],
@@ -2486,7 +2673,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
-        "lineNumber": 171,
+        "lineNumber": 183,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2503,7 +2690,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
-        "lineNumber": 174,
+        "lineNumber": 186,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2520,7 +2707,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
-        "lineNumber": 154,
+        "lineNumber": 166,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2537,7 +2724,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
-        "lineNumber": 157,
+        "lineNumber": 169,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2554,7 +2741,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
-        "lineNumber": 196,
+        "lineNumber": 210,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2571,7 +2758,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
-        "lineNumber": 197,
+        "lineNumber": 211,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

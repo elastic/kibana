@@ -21,8 +21,7 @@ import {
 } from '../fixtures/entity_extraction_expected';
 import { forceLogExtraction, ingestDoc, searchDocById } from '../fixtures/helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/257443
-apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
@@ -60,7 +59,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
   });
 
   apiTest('Should extract properly extract host', async ({ apiClient, esClient }) => {
-    const expectedResultCount = 19;
+    const expectedResultCount = 20;
 
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
@@ -92,11 +91,13 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
     });
 
     expect(entities.hits.hits).toHaveLength(expectedResultCount);
-    // it's deterministic because of the MD5 id;
+    // it's deterministic because of the SHA-256 id;
     expect(entities.hits.hits).toMatchObject(expectedHostEntities);
   });
 
   apiTest('Should extract properly extract user', async ({ apiClient, esClient }) => {
+    const expectedResultCount = 25;
+
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
       {
@@ -111,7 +112,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
     expect(extractionResponse.body.pages).toBe(1);
-    expect(extractionResponse.body.count).toBe(24);
+    expect(extractionResponse.body.count).toBe(expectedResultCount);
 
     const entities = await esClient.search({
       index: '.entities.v2.latest.security_default',
@@ -126,8 +127,8 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(24);
-    // it's deterministic because of the MD5 id
+    expect(entities.hits.hits).toHaveLength(expectedResultCount);
+    // it's deterministic because of the SHA-256 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedUserEntities);
     // All user entities must have entity.namespace (from fieldEvaluations) and entity.confidence (from whenConditionTrueSetFieldsPreAgg)
@@ -170,7 +171,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
     });
 
     expect(entities.hits.hits).toHaveLength(2);
-    // it's deterministic because of the MD5 id
+    // it's deterministic because of the SHA-256 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedServiceEntities);
   });
@@ -206,7 +207,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
     });
 
     expect(entities.hits.hits).toHaveLength(1);
-    // it's deterministic because of the MD5 id
+    // it's deterministic because of the SHA-256 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedGenericEntities);
   });
@@ -536,7 +537,7 @@ apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_T
         entity: {
           id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
           type: 'Identity',
-          name: 'IDP IAM AD InLatest Updated',
+          name: 'IDP IAM AD InLatest',
           namespace: 'active_directory',
           confidence: ENTITY_CONFIDENCE.High,
         },

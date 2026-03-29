@@ -320,6 +320,9 @@ export const useEsqlDataCascadeRowActionHelpers = ({
           panelPaddingSize="none"
           anchorPosition="upLeft"
           container={container}
+          aria-label={i18n.translate('discover.dataCascade.rowActions.popoverAriaLabel', {
+            defaultMessage: 'Row actions',
+          })}
         >
           <ContextMenu
             close={closePopover}

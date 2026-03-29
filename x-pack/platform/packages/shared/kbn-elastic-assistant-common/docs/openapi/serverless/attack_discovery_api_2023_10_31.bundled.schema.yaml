@@ -2469,6 +2469,11 @@ components:
         id:
           description: The unique ID of the attack discovery
           type: string
+        index:
+          description: >-
+            The concrete Elasticsearch index where this attack discovery is
+            stored
+          type: string
         mitre_attack_tactics:
           description: An optional array of MITRE ATT&CK tactic for the attack discovery
           items:

@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { MarkdownSearchRequestBody, MarkdownSearchResponseBody } from './types';
+export type { MarkdownSearchRequestQuery, MarkdownSearchResponseBody } from './types';
 export { registerSearchRoute } from './register_search_route';

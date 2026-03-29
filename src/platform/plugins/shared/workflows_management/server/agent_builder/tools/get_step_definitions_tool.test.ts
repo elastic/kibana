@@ -26,9 +26,7 @@ const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, contex
 describe('registerGetStepDefinitionsTool', () => {
   let registeredTool: BuiltinToolDefinition;
   const api = {
-    getAvailableConnectors: jest
-      .fn()
-      .mockResolvedValue({ connectorsByType: {}, totalConnectors: 0 }),
+    getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
   } as any;
 
   beforeEach(async () => {
