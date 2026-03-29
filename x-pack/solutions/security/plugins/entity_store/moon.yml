@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/core-plugins-server'
-  - '@kbn/developer-examples-plugin'
   - '@kbn/zod'
   - '@kbn/logging'
   - '@kbn/zod-helpers'
@@ -45,6 +44,7 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/tracing-utils'
   - '@kbn/esql-language'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod
