@@ -13,7 +13,7 @@ import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constant
 import type { CompositeAfterKey, CompositeBucket, ProcessedEntityRecord } from './types';
 import { INTEGRATION_CONFIGS, type AccessesIntegrationConfig } from './integrations';
 import { postprocessEsqlResults } from './postprocess_records';
-import { updateEntityRelationships } from './upsert_entities';
+import { updateEntityRelationships } from './update_entities';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isIndexNotFound(err: any): boolean {

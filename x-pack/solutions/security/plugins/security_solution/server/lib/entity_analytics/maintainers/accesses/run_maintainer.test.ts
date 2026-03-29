@@ -21,7 +21,7 @@ jest.mock('./postprocess_records', () => ({
     mockPostprocessEsqlResults(...args),
 }));
 
-jest.mock('./upsert_entities', () => ({
+jest.mock('./update_entities', () => ({
   updateEntityRelationships: (...args: Parameters<typeof mockUpdateEntityRelationships>) =>
     mockUpdateEntityRelationships(...args),
 }));
