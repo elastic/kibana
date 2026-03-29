@@ -24,7 +24,6 @@ import {
 } from './commons';
 import {
   applyFieldEvaluations,
-  getFieldEvaluationsFromDefinition,
   getSourceMatchSpec,
   type SourceMatchSpec,
 } from './field_evaluations';
@@ -118,7 +117,7 @@ export function getEuidDslFilterBasedOnDocument(
     };
   }
 
-  const fieldEvaluations = getFieldEvaluationsFromDefinition(entityDefinition);
+  const fieldEvaluations = identityField.fieldEvaluations ?? [];
   if (fieldEvaluations.length > 0) {
     const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     doc = { ...doc, ...evaluated };
@@ -152,20 +151,22 @@ export function getEuidDslFilterBasedOnDocument(
       })),
     },
   };
+  const boolQuery = dsl.bool!;
 
   const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
     (field) => !evaluatedDestinations.has(field)
   );
   if (toBeFilteredOut.length > 0) {
-    const priorMust = Array.isArray(dsl.bool?.must) ? dsl.bool.must : [];
+    const priorMust = Array.isArray(boolQuery.must) ? boolQuery.must : [];
     dsl.bool = {
-      ...dsl.bool,
+      ...boolQuery,
       must: [...priorMust, ...toBeFilteredOut.map(fieldMissingOrEmptyDsl)],
     };
   }
 
   if (fieldEvaluations.length > 0) {
-    const filterList = Array.isArray(dsl.bool?.filter) ? dsl.bool.filter : [];
+    const currentBoolQuery = dsl.bool!;
+    const filterList = Array.isArray(currentBoolQuery.filter) ? currentBoolQuery.filter : [];
     for (const evaluation of fieldEvaluations) {
       const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
       const sourceFields = [...exactMatchFields, ...prefixMatchFields];

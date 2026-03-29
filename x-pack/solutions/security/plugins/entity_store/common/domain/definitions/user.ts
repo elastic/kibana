@@ -7,10 +7,10 @@
 
 import type { Condition } from '@kbn/streamlang';
 import {
+  ENTITY_SOURCE_FIELD_EVALUATION,
   fieldNotOneOfCondition,
   getCommonFieldDescriptions,
   getEntityFieldsDescriptions,
-  getEntitySourceFieldEvaluations,
   isNotEmptyCondition,
 } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
@@ -76,7 +76,7 @@ const nonIdpPostAggFilter = nonIdpDocumentFilter;
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
   name: `Security 'user' Entity Store Definition`,
-  fieldEvaluations: getEntitySourceFieldEvaluations(),
+  fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   identityField: {
     fieldEvaluations: [
       {

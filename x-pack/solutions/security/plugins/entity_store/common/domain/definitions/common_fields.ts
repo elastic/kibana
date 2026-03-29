@@ -187,18 +187,16 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
   ];
 };
 
-export const getEntitySourceFieldEvaluations = (): FieldEvaluation[] => [
-  {
-    destination: ENTITY_SOURCE_FIELD,
-    sources: [
-      { field: 'event.module' },
-      { field: 'event.dataset' },
-      { field: 'data_stream.dataset' },
-    ],
-    fallbackValue: null,
-    whenClauses: [],
-  },
-];
+export const ENTITY_SOURCE_FIELD_EVALUATION: FieldEvaluation = {
+  destination: ENTITY_SOURCE_FIELD,
+  sources: [
+    { field: 'event.module' },
+    { field: 'event.dataset' },
+    { field: 'data_stream.dataset' },
+  ],
+  fallbackValue: null,
+  whenClauses: [],
+};
 
 export function isNotEmptyCondition(field: string): Condition {
   return {

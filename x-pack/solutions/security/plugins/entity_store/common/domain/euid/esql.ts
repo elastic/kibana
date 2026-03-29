@@ -78,7 +78,7 @@ export function getEuidEsqlFilterBasedOnDocument(
     return `(${identityField.singleField} == "${escapeEsqlString(value)}")`;
   }
 
-  const fieldEvaluations = getFieldEvaluationsFromDefinition(entityDefinition);
+  const fieldEvaluations = identityField.fieldEvaluations ?? [];
   if (fieldEvaluations.length > 0) {
     const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     doc = { ...doc, ...evaluated };

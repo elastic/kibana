@@ -16,7 +16,7 @@ import {
   getFieldValue,
   isEuidField,
 } from './commons';
-import { applyFieldEvaluations, getFieldEvaluationsFromDefinition } from './field_evaluations';
+import { applyFieldEvaluations } from './field_evaluations';
 
 /**
  * Constructs an entity id from the provided entity type and document.
@@ -57,7 +57,7 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     return `${entityType}:${value}`;
   }
 
-  const fieldEvaluations = getFieldEvaluationsFromDefinition(entityDefinition);
+  const fieldEvaluations = identityField.fieldEvaluations ?? [];
   if (fieldEvaluations.length > 0) {
     const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     doc = { ...doc, ...evaluated };
@@ -95,7 +95,7 @@ function getComposedFieldValues(doc: any, euidFields: EuidAttribute[][]): string
       return attr.sep;
     });
 
-    if (composedFieldValues.every((value) => value !== undefined)) {
+    if (composedFieldValues.every((value): value is string => value !== undefined)) {
       return composedFieldValues;
     }
   }

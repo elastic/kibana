@@ -15,7 +15,6 @@ import type {
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField } from './commons';
-import { getFieldEvaluationsFromDefinition } from './field_evaluations';
 
 /**
  * Keyword runtime field scripts must call emit(); they cannot return a value from the script root.
@@ -128,7 +127,7 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
 
   const evaluatedVars = new Map<string, string>();
   let preamble = '';
-  const fieldEvaluations = getFieldEvaluationsFromDefinition(entityDefinition);
+  const fieldEvaluations = identityField.fieldEvaluations ?? [];
   if (fieldEvaluations.length > 0) {
     const result = buildFieldEvaluationsPreamble(fieldEvaluations);
     preamble = result.preamble + ' ';
