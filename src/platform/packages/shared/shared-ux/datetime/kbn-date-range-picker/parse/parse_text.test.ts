@@ -70,7 +70,7 @@ describe('textToTimeRange', () => {
   it('parses a single absolute instant to now', () => {
     const range = textToTimeRange('Feb 3 2016, 19:00');
 
-    expect(range.start).toBe('Feb 3 2016, 19:00');
+    expect(range.start).toBe(new Date(2016, 1, 3, 19, 0).toISOString());
     expect(range.end).toBe('now');
     expect(range.type).toEqual([DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW]);
     expect(range.isInvalid).toBe(false);
@@ -79,8 +79,8 @@ describe('textToTimeRange', () => {
   it('parses ranges using built-in and custom delimiters', () => {
     const withTo = textToTimeRange('2016-02-03 to 2026-02-03');
 
-    expect(withTo.start).toBe('2016-02-03');
-    expect(withTo.end).toBe('2026-02-03');
+    expect(withTo.start).toBe(new Date(2016, 1, 3).toISOString());
+    expect(withTo.end).toBe(new Date(2026, 1, 3).toISOString());
     expect(withTo.type).toEqual([DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE]);
     expect(withTo.isInvalid).toBe(false);
 
@@ -104,15 +104,15 @@ describe('textToTimeRange', () => {
     const range = textToTimeRange('2026-02-03 to 2016-02-03');
 
     expect(range.isInvalid).toBe(true);
-    expect(range.start).toBe('2026-02-03');
-    expect(range.end).toBe('2016-02-03');
+    expect(range.start).toBe(new Date(2026, 1, 3).toISOString());
+    expect(range.end).toBe(new Date(2016, 1, 3).toISOString());
   });
 
   it('parses local precise format (no Z) as local time', () => {
     const range = textToTimeRange('2026-03-09T15:36:07.801');
 
     expect(range.isInvalid).toBe(false);
-    expect(range.start).toBe('2026-03-09T15:36:07.801');
+    expect(range.start).toBe(new Date(2026, 2, 9, 15, 36, 7, 801).toISOString());
     expect(range.end).toBe('now');
     expect(range.startDate).not.toBeNull();
     expect(range.startDate?.getHours()).toBe(15);
@@ -271,7 +271,15 @@ describe('textToTimeRange', () => {
     ])('parses partial input "%s"', (text, expected) => {
       const range = textToTimeRange(text);
 
-      expect(range.start).toBe(text);
+      // start should be normalized to ISO
+      const expectedDate = new Date(
+        expected.year,
+        expected.month,
+        expected.day,
+        expected.hour,
+        expected.minute
+      );
+      expect(range.start).toBe(expectedDate.toISOString());
       expect(range.end).toBe('now');
       expect(range.type).toEqual([DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW]);
 

@@ -455,8 +455,14 @@ function instantToDateString(
   const unixDate = unixTimestampToDate(trimmed);
   if (unixDate) return unixDate.toISOString();
 
-  // Absolute date / dateMath / ISO fallback
-  if (dateStringToDate(trimmed, formats) !== null) return trimmed;
+  // DateMath with rounding only (e.g. "now/d", "now/w") — preserve as-is.
+  // These aren't caught by the shorthand regex which expects a count.
+  if (/^now\/[smhdwMy]$/.test(trimmed)) return trimmed;
+
+  // Absolute date / ISO fallback — normalize to ISO so that
+  // timeRange.start/end and onChange always emit ISO or dateMath strings.
+  const absoluteDate = dateStringToDate(trimmed, formats);
+  if (absoluteDate !== null) return absoluteDate.toISOString();
 
   return null;
 }
