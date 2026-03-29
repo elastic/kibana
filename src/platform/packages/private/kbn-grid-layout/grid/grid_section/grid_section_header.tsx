@@ -31,6 +31,7 @@ export interface GridSectionHeaderProps {
 export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderProps) => {
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
   const isGhostMouseDown = useRef<boolean>(false);
+  const hasBeenDragged = useRef(false);
 
   const { gridLayoutStateManager } = useGridLayoutContext();
   const startDrag = useGridLayoutSectionEvents({ sectionId });
@@ -44,7 +45,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
   const [panelCount, setPanelCount] = useState<number>(
     Object.keys(gridLayoutStateManager.gridLayout$.getValue()[sectionId]?.panels ?? {}).length
   );
-  const hasDraggedHeaderRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -80,14 +80,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     if (!(target instanceof Element)) return false;
     return Boolean(target.closest('[data-no-drag]'));
   };
-
-  const handleHeaderClick = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      if (shouldIgnoreHeaderClick(e.target)) return;
-      toggleIsCollapsed();
-    },
-    [toggleIsCollapsed]
-  );
 
   const handleSectionDragStart = useCallback(
     (e: UserInteractionEvent) => {
@@ -150,7 +142,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       const handleFirstDrag = () => {
         collapseSectionOnDrag();
         setIsActive(true);
-        hasDraggedHeaderRef.current = true;
+        hasBeenDragged.current = true;
 
         const width = headerRef.getBoundingClientRect().width;
         headerRef.style.width = `${width}px`;
@@ -172,7 +164,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           if (isTouch) {
             isGhostMouseDown.current = true; // sets flag to detect the next mouse down event fired automatically by the browser after the touchend event on touch devices
           }
-          hasDraggedHeaderRef.current = false;
+          hasBeenDragged.current = false;
           if (isKeyboard) {
             // we want active drag styles to be applied on keyboard drag from the start, whereas for mouse/touch we only want to apply drag styles if there is actual movement (i.e., distinguish between click and drag)
             handleFirstDrag();
@@ -180,8 +172,9 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           break;
 
         case 'update':
-          if (!hasDraggedHeaderRef.current) {
+          if (!hasBeenDragged.current) {
             handleFirstDrag();
+            isGhostMouseDown.current = false; // reset the flag if the user actually drags the section, in this case the browser wont fire the "ghost" mouse down event after touchend, so we can just reset the flag here
           }
           headerRef.style.transform = `translate(${event!.translate.left}px, ${
             event!.translate.top
@@ -196,12 +189,12 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           // so that active header styles (e.g., hover icons like delete and drag) remain visible.
           if (isMouse && isGhostMouseDown.current) {
             isGhostMouseDown.current = false;
-          } else if (!hasDraggedHeaderRef.current) {
+          } else if (!hasBeenDragged.current) {
             toggleIsCollapsed();
           }
 
           setIsActive(false);
-          hasDraggedHeaderRef.current = false;
+          hasBeenDragged.current = false;
           resetHeaderStyles();
           break;
       }
@@ -272,9 +265,10 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         ref={(element: HTMLDivElement | null) => {
           gridLayoutStateManager.headerRefs.current[sectionId] = element;
         }}
-        onMouseDown={readOnly ? undefined : handleSectionDragStart}
+        onMouseDown={readOnly ? toggleIsCollapsed : handleSectionDragStart}
         onTouchStart={readOnly ? undefined : handleSectionDragStart}
-        onClick={readOnly ? handleHeaderClick : undefined}
+        // using onTouchStart in readOnly mode will cause the problem with duplicated toggle on touch devices
+        // see more in the description for `isGhostMouseDown`
       >
         <GridSectionTitle
           sectionId={sectionId}
