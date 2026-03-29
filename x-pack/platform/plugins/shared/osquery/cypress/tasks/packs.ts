@@ -11,9 +11,10 @@ import type { UsePacksResponse } from '@kbn/osquery-plugin/public/packs/use_pack
 import { request } from './common';
 import { closeModalIfVisible, closeToastIfVisible } from './integrations';
 import { cleanupPack } from './api_fixtures';
+import { navigateTo } from './navigation';
 
 export const preparePack = (packName: string) => {
-  cy.contains('Packs').click();
+  navigateTo('/app/osquery/packs');
   cy.getBySel('tablePaginationPopoverButton').click();
   cy.getBySel('tablePagination-50-rows').click();
   const createdPack = cy.contains(packName);

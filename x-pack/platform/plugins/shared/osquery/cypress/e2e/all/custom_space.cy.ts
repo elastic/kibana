@@ -98,7 +98,7 @@ describe('ALL - Custom space', () => {
       });
 
       it('runs packs normally', () => {
-        cy.contains('Packs').click();
+        navigateTo('/app/osquery/packs');
         cy.contains('Create pack').click();
         cy.getBySel(`play-${packName}-button`).click();
         selectAllAgents();
