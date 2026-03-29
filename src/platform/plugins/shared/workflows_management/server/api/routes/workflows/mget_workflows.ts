@@ -14,9 +14,9 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
-import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 
-export function registerMgetWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerMgetWorkflowsRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/mget',
@@ -66,13 +66,13 @@ export function registerMgetWorkflowsRoute({ router, api, spaces }: RouteDepende
           const spaceId = spaces.getSpaceId(request);
           const { ids, source } = request.body;
           const workflows = await api.getWorkflowsSourceByIds(ids, spaceId, source);
-          await WorkflowManagementAuditLog.logWorkflowMget(context, {
+          audit.logWorkflowMget(request, {
             requestedCount: ids.length,
             returnedCount: workflows.length,
           });
           return response.ok({ body: workflows });
         } catch (error) {
-          await WorkflowManagementAuditLog.logWorkflowMgetFailed(context, error);
+          audit.logWorkflowMget(request, { error });
           return handleRouteError(response, error);
         }
       })

@@ -14,9 +14,9 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
-import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 
-export function registerTestStepRoute({ router, api, spaces }: RouteDependencies) {
+export function registerTestStepRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/step/test',
@@ -63,14 +63,19 @@ export function registerTestStepRoute({ router, api, spaces }: RouteDependencies
             spaceId,
             request
           );
-          await WorkflowManagementAuditLog.logWorkflowStepTest(context, {
+          audit.logWorkflowStepTest(request, {
             stepId: request.body.stepId,
             workflowExecutionId,
             workflowId: request.body.workflowId,
           });
           return response.ok({ body: { workflowExecutionId } });
         } catch (error) {
-          await WorkflowManagementAuditLog.logWorkflowStepTestFailed(context, error);
+          audit.logWorkflowStepTest(request, {
+            stepId: request.body.stepId,
+            workflowExecutionId: '',
+            workflowId: request.body.workflowId,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

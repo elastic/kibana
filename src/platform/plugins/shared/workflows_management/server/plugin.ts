@@ -15,6 +15,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
@@ -64,6 +65,7 @@ export class WorkflowsPlugin
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
+  private securityStart?: SecurityServiceStart;
   private triggerEventsClient: TriggerEventsDataStreamClient | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -193,7 +195,14 @@ export class WorkflowsPlugin
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
 
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger, this.spaces, getWorkflowExecutionEngine);
+    defineRoutes(
+      router,
+      this.api,
+      this.logger,
+      this.spaces,
+      getWorkflowExecutionEngine,
+      () => this.securityStart
+    );
 
     void core.plugins
       .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
@@ -223,6 +232,8 @@ export class WorkflowsPlugin
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.debug('Workflows Management: Start');
+
+    this.securityStart = core.security;
 
     void this.initializeTriggerEventsClient(core);
 

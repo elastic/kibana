@@ -17,9 +17,9 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
-import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 
-export function registerExportWorkflowsRoute({ router, api, logger, spaces }: RouteDependencies) {
+export function registerExportWorkflowsRoute(deps: RouteDependencies) {
+  const { router, api, logger, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/export',
@@ -86,7 +86,7 @@ export function registerExportWorkflowsRoute({ router, api, logger, spaces }: Ro
           const filename = `workflows_export_${timestamp}.zip`;
           const zipBuffer = await generateWorkflowsArchive(entries);
 
-          await WorkflowManagementAuditLog.logWorkflowsExported(context, {
+          audit.logWorkflowsExported(request, {
             ids: entries.map((e) => e.id),
           });
 
@@ -98,7 +98,7 @@ export function registerExportWorkflowsRoute({ router, api, logger, spaces }: Ro
             },
           });
         } catch (error) {
-          await WorkflowManagementAuditLog.logWorkflowExportFailed(context, error);
+          audit.logWorkflowsExported(request, { error });
           return handleRouteError(response, error);
         }
       })

@@ -13,6 +13,7 @@ import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { registerWorkflowRoutes } from '.';
 import type { RouteDependencies } from '../types';
 import { handleRouteError } from '../utils/route_error_handlers';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 
 jest.mock('../utils/route_error_handlers', () => ({
   handleRouteError: jest.fn((response: { customError: jest.Mock }, error: Error) =>
@@ -116,6 +117,7 @@ describe('Workflow routes', () => {
       api: mockApi as any,
       logger: mockLogger,
       spaces: mockSpaces as any,
+      audit: new WorkflowManagementAuditLog({ getSecurityServiceStart: () => undefined }),
     } as unknown as RouteDependencies);
   });
 

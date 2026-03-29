@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
-import type { WorkflowsRequestHandlerContext } from '../../../types';
 
-/** Stable action names for xpack.security.audit.ignore_filters */
+/**
+ * Stable action names for xpack.security.audit.ignore_filters.
+ * Bulk create/delete APIs use dedicated actions (`workflow_bulk_*`) so operators can filter bulk
+ * traffic without matching on message text.
+ */
 export const WorkflowManagementAuditActions = {
   CREATE: 'workflow_create',
+  BULK_CREATE: 'workflow_bulk_create',
   UPDATE: 'workflow_update',
   DELETE: 'workflow_delete',
   BULK_DELETE: 'workflow_bulk_delete',
@@ -59,174 +65,173 @@ function createEvent(
   return event;
 }
 
-async function writeAudit(
-  context: WorkflowsRequestHandlerContext,
-  event: AuditEvent
-): Promise<void> {
-  try {
-    const coreContext = await context.core;
-    await Promise.resolve(coreContext.security.audit.logger.log(event));
-  } catch {
-    // Best-effort only: never let audit affect the HTTP response.
-  }
+interface WorkflowManagementAuditLogDeps {
+  getSecurityServiceStart: () => SecurityServiceStart | undefined;
 }
 
-/** Facade for workflow management audit events (uses `context.core.security.audit.logger`). */
+/**
+ * Audit logger for workflow management (aligned with Agent Builder's `AuditLogService`).
+ * Instantiated once with deps; each method takes only `request` + params.
+ * Best-effort: sync throws are caught; audit never affects HTTP responses.
+ */
 export class WorkflowManagementAuditLog {
-  static async logWorkflowCreated(
-    context: WorkflowsRequestHandlerContext,
+  constructor(private readonly deps: WorkflowManagementAuditLogDeps) {}
+
+  private log(request: KibanaRequest, event: AuditEvent): void {
+    try {
+      const security = this.deps.getSecurityServiceStart();
+      if (!security) {
+        return;
+      }
+      security.audit.asScoped(request).log(event);
+    } catch {
+      // Best-effort only: never let audit affect the HTTP response.
+    }
+  }
+
+  logWorkflowCreated(
+    request: KibanaRequest,
     params: { id: string; viaBulkImport?: boolean }
-  ): Promise<void> {
+  ): void {
     const { id, viaBulkImport } = params;
     const message = viaBulkImport
       ? `User created workflow via bulk import [id=${id}]`
       : `User created workflow [id=${id}]`;
-    await writeAudit(
-      context,
-      createEvent(WorkflowManagementAuditActions.CREATE, 'creation', message)
-    );
+    const action = viaBulkImport
+      ? WorkflowManagementAuditActions.BULK_CREATE
+      : WorkflowManagementAuditActions.CREATE;
+    this.log(request, createEvent(action, 'creation', message));
   }
 
-  static async logWorkflowCreateFailed(
-    context: WorkflowsRequestHandlerContext,
+  logWorkflowCreateFailed(
+    request: KibanaRequest,
     error: unknown,
     options: { bulkOperation?: boolean } = {}
-  ): Promise<void> {
+  ): void {
     const message = options.bulkOperation
       ? 'User failed bulk workflow create'
       : 'User failed to create a workflow';
-    await writeAudit(
-      context,
-      createEvent(WorkflowManagementAuditActions.CREATE, 'creation', message, error)
-    );
+    const action = options.bulkOperation
+      ? WorkflowManagementAuditActions.BULK_CREATE
+      : WorkflowManagementAuditActions.CREATE;
+    this.log(request, createEvent(action, 'creation', message, error));
   }
 
-  static async logBulkCreateRowFailed(
-    context: WorkflowsRequestHandlerContext,
+  logBulkCreateRowFailed(
+    request: KibanaRequest,
     params: { index: number; id: string; error: string }
-  ): Promise<void> {
+  ): void {
     const { index, id, error: errorMessage } = params;
-    await writeAudit(
-      context,
+    this.log(
+      request,
       createEvent(
-        WorkflowManagementAuditActions.CREATE,
+        WorkflowManagementAuditActions.BULK_CREATE,
         'creation',
-        `User failed to create workflow via bulk import [index=${index}] [id=${id}]: ${errorMessage}`,
+        `User failed to create workflow via bulk import [index=${index}] [id=${id}]`,
         errorMessage
       )
     );
   }
 
   /**
-   * One `workflow_create` audit per created workflow and per failed bulk row (bulk POST /api/workflows).
+   * One `workflow_bulk_create` audit per created workflow and per failed bulk row (bulk POST /api/workflows).
    */
-  static async logBulkWorkflowCreateResults(
-    context: WorkflowsRequestHandlerContext,
+  logBulkWorkflowCreateResults(
+    request: KibanaRequest,
     params: {
       created: ReadonlyArray<{ id: string }>;
       failed: ReadonlyArray<{ index: number; id: string; error: string }>;
     }
-  ): Promise<void> {
+  ): void {
     for (const workflow of params.created) {
-      await WorkflowManagementAuditLog.logWorkflowCreated(context, {
-        id: workflow.id,
-        viaBulkImport: true,
-      });
+      this.log(
+        request,
+        createEvent(
+          WorkflowManagementAuditActions.BULK_CREATE,
+          'creation',
+          `User created workflow via bulk import [id=${workflow.id}]`
+        )
+      );
     }
     for (const row of params.failed) {
-      await WorkflowManagementAuditLog.logBulkCreateRowFailed(context, {
-        index: row.index,
-        id: row.id,
-        error: row.error,
-      });
+      this.log(
+        request,
+        createEvent(
+          WorkflowManagementAuditActions.BULK_CREATE,
+          'creation',
+          `User failed to create workflow via bulk import [index=${row.index}] [id=${row.id}]`,
+          row.error
+        )
+      );
     }
   }
 
-  static async logWorkflowUpdated(
-    context: WorkflowsRequestHandlerContext,
-    params: { id: string }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.UPDATE,
-        'change',
-        `User updated workflow [id=${params.id}]`
-      )
-    );
+  logWorkflowUpdated(request: KibanaRequest, params: { id: string; error?: unknown }): void {
+    const { id, error } = params;
+    const message =
+      error !== undefined
+        ? `User failed to update workflow [id=${id}]`
+        : `User updated workflow [id=${id}]`;
+    this.log(request, createEvent(WorkflowManagementAuditActions.UPDATE, 'change', message, error));
   }
 
-  static async logWorkflowUpdateFailed(
-    context: WorkflowsRequestHandlerContext,
-    params: { id: string; error: unknown }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.UPDATE,
-        'change',
-        `User failed to update workflow [id=${params.id}]`,
-        params.error
-      )
-    );
-  }
-
-  static async logWorkflowDeleted(
-    context: WorkflowsRequestHandlerContext,
-    params: { id: string; viaBulkDelete?: boolean }
-  ): Promise<void> {
-    const { id, viaBulkDelete } = params;
-    const message = viaBulkDelete
-      ? `User deleted workflow via bulk delete [id=${id}]`
-      : `User deleted workflow [id=${id}]`;
-    await writeAudit(
-      context,
-      createEvent(WorkflowManagementAuditActions.DELETE, 'deletion', message)
-    );
-  }
-
-  static async logWorkflowDeleteFailed(
-    context: WorkflowsRequestHandlerContext,
-    params: { id: string; error: unknown; viaBulkDelete?: boolean }
-  ): Promise<void> {
-    const { id, error, viaBulkDelete } = params;
-    const message = viaBulkDelete
-      ? `User failed to delete workflow via bulk delete [id=${id}]`
-      : `User failed to delete workflow [id=${id}]`;
-    await writeAudit(
-      context,
-      createEvent(WorkflowManagementAuditActions.DELETE, 'deletion', message, error)
-    );
+  logWorkflowDeleted(
+    request: KibanaRequest,
+    params: { id: string; viaBulkDelete?: boolean; error?: unknown }
+  ): void {
+    const { id, viaBulkDelete, error } = params;
+    let message: string;
+    if (error !== undefined) {
+      message = viaBulkDelete
+        ? `User failed to delete workflow via bulk delete [id=${id}]`
+        : `User failed to delete workflow [id=${id}]`;
+    } else {
+      message = viaBulkDelete
+        ? `User deleted workflow via bulk delete [id=${id}]`
+        : `User deleted workflow [id=${id}]`;
+    }
+    const action = viaBulkDelete
+      ? WorkflowManagementAuditActions.BULK_DELETE
+      : WorkflowManagementAuditActions.DELETE;
+    this.log(request, createEvent(action, 'deletion', message, error));
   }
 
   /**
-   * One `workflow_delete` audit event per successfully removed id and per failed id (bulk API).
+   * One `workflow_bulk_delete` audit event per successfully removed id and per failed id (bulk API).
    */
-  static async logBulkWorkflowDeleteResults(
-    context: WorkflowsRequestHandlerContext,
+  logBulkWorkflowDeleteResults(
+    request: KibanaRequest,
     params: {
       successfulIds: readonly string[];
       failures: ReadonlyArray<{ id: string; error: string }>;
     }
-  ): Promise<void> {
+  ): void {
     for (const id of params.successfulIds) {
-      await WorkflowManagementAuditLog.logWorkflowDeleted(context, { id, viaBulkDelete: true });
+      this.log(
+        request,
+        createEvent(
+          WorkflowManagementAuditActions.BULK_DELETE,
+          'deletion',
+          `User deleted workflow via bulk delete [id=${id}]`
+        )
+      );
     }
     for (const f of params.failures) {
-      await WorkflowManagementAuditLog.logWorkflowDeleteFailed(context, {
-        id: f.id,
-        error: new Error(f.error),
-        viaBulkDelete: true,
-      });
+      this.log(
+        request,
+        createEvent(
+          WorkflowManagementAuditActions.BULK_DELETE,
+          'deletion',
+          `User failed to delete workflow via bulk delete [id=${f.id}]`,
+          f.error
+        )
+      );
     }
   }
 
-  static async logBulkWorkflowDeleteFailed(
-    context: WorkflowsRequestHandlerContext,
-    error: unknown
-  ): Promise<void> {
-    await writeAudit(
-      context,
+  logBulkWorkflowDeleteFailed(request: KibanaRequest, error: unknown): void {
+    this.log(
+      request,
       createEvent(
         WorkflowManagementAuditActions.BULK_DELETE,
         'deletion',
@@ -236,43 +241,44 @@ export class WorkflowManagementAuditLog {
     );
   }
 
-  static async logWorkflowCloned(
-    context: WorkflowsRequestHandlerContext,
-    params: { sourceId: string; newId: string }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.CLONE,
-        'creation',
-        `User cloned workflow [sourceId=${params.sourceId}] to [id=${params.newId}]`
-      )
+  logWorkflowCloned(
+    request: KibanaRequest,
+    params: { sourceId: string; newId?: string; error?: unknown }
+  ): void {
+    const { sourceId, newId, error } = params;
+    const message =
+      error !== undefined
+        ? `User failed to clone workflow [id=${sourceId}]`
+        : `User cloned workflow [sourceId=${sourceId}] to [id=${newId}]`;
+    this.log(
+      request,
+      createEvent(WorkflowManagementAuditActions.CLONE, 'creation', message, error)
     );
   }
 
-  static async logWorkflowCloneFailed(
-    context: WorkflowsRequestHandlerContext,
-    params: { sourceId: string; error: unknown }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.CLONE,
-        'creation',
-        `User failed to clone workflow [id=${params.sourceId}]`,
-        params.error
-      )
-    );
-  }
-
-  /** One audit event per exported workflow id (bulk export). */
-  static async logWorkflowsExported(
-    context: WorkflowsRequestHandlerContext,
-    params: { ids: readonly string[] }
-  ): Promise<void> {
-    for (const id of params.ids) {
-      await writeAudit(
-        context,
+  /**
+   * Export audit: one `workflow_export` event per id on success; a single failure event when `error` is set.
+   */
+  logWorkflowsExported(
+    request: KibanaRequest,
+    params: { ids?: readonly string[]; error?: unknown }
+  ): void {
+    const { ids, error } = params;
+    if (error !== undefined) {
+      this.log(
+        request,
+        createEvent(
+          WorkflowManagementAuditActions.EXPORT,
+          'access',
+          'User failed to export workflows',
+          error
+        )
+      );
+      return;
+    }
+    for (const id of ids ?? []) {
+      this.log(
+        request,
         createEvent(
           WorkflowManagementAuditActions.EXPORT,
           'access',
@@ -282,231 +288,104 @@ export class WorkflowManagementAuditLog {
     }
   }
 
-  static async logWorkflowExported(
-    context: WorkflowsRequestHandlerContext,
-    params: { id: string }
-  ): Promise<void> {
-    await WorkflowManagementAuditLog.logWorkflowsExported(context, { ids: [params.id] });
+  logWorkflowAccessed(request: KibanaRequest, params: { id: string; error?: unknown }): void {
+    const { id, error } = params;
+    const message =
+      error !== undefined
+        ? `User failed to read workflow [id=${id}]`
+        : `User accessed workflow [id=${id}]`;
+    this.log(request, createEvent(WorkflowManagementAuditActions.GET, 'access', message, error));
   }
 
-  static async logWorkflowExportFailed(
-    context: WorkflowsRequestHandlerContext,
-    error: unknown
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.EXPORT,
-        'access',
-        'User failed to export workflows',
-        error
-      )
-    );
+  logWorkflowMget(
+    request: KibanaRequest,
+    params: { requestedCount?: number; returnedCount?: number; error?: unknown }
+  ): void {
+    const { error, requestedCount, returnedCount } = params;
+    const message =
+      error !== undefined
+        ? `User failed workflows mget: ${String(error)}`
+        : `User requested workflows by ids: requested ${requestedCount}, returned ${returnedCount}`;
+    this.log(request, createEvent(WorkflowManagementAuditActions.MGET, 'access', message, error));
   }
 
-  static async logWorkflowAccessed(
-    context: WorkflowsRequestHandlerContext,
-    params: { id: string }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.GET,
-        'access',
-        `User accessed workflow [id=${params.id}]`
-      )
-    );
+  logWorkflowRun(
+    request: KibanaRequest,
+    params: { workflowId: string; executionId?: string; error?: unknown }
+  ): void {
+    const { workflowId, executionId, error } = params;
+    const message =
+      error !== undefined
+        ? `User failed to run workflow [id=${workflowId}]`
+        : `User ran workflow [id=${workflowId}] [executionId=${executionId}]`;
+    this.log(request, createEvent(WorkflowManagementAuditActions.RUN, 'change', message, error));
   }
 
-  static async logWorkflowAccessFailed(
-    context: WorkflowsRequestHandlerContext,
-    params: { id: string; error: unknown }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.GET,
-        'access',
-        `User failed to read workflow [id=${params.id}]`,
-        params.error
-      )
-    );
+  logWorkflowTest(
+    request: KibanaRequest,
+    params: { workflowExecutionId: string; workflowId?: string; error?: unknown }
+  ): void {
+    const { workflowExecutionId, workflowId, error } = params;
+    const wfPart = workflowId !== undefined ? `[workflowId=${workflowId}]` : '[draft yaml]';
+    const executionPart =
+      workflowExecutionId !== undefined ? `[executionId=${workflowExecutionId}]` : '';
+    const message =
+      error !== undefined
+        ? `User failed to test workflow ${wfPart} ${executionPart}`
+        : `User tested workflow ${wfPart} ${executionPart}`;
+    this.log(request, createEvent(WorkflowManagementAuditActions.TEST, 'change', message, error));
   }
 
-  static async logWorkflowMget(
-    context: WorkflowsRequestHandlerContext,
-    params: { requestedCount: number; returnedCount: number }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.MGET,
-        'access',
-        `User requested workflows by ids: requested ${params.requestedCount}, returned ${params.returnedCount}`
-      )
-    );
-  }
-
-  static async logWorkflowMgetFailed(
-    context: WorkflowsRequestHandlerContext,
-    error: unknown
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.MGET,
-        'access',
-        'User failed workflows mget',
-        error
-      )
-    );
-  }
-
-  static async logWorkflowRun(
-    context: WorkflowsRequestHandlerContext,
-    params: { workflowId: string; executionId: string }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.RUN,
-        'change',
-        `User ran workflow [id=${params.workflowId}] [executionId=${params.executionId}]`
-      )
-    );
-  }
-
-  static async logWorkflowRunFailed(
-    context: WorkflowsRequestHandlerContext,
-    params: { workflowId: string; error: unknown }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.RUN,
-        'change',
-        `User failed to run workflow [id=${params.workflowId}]`,
-        params.error
-      )
-    );
-  }
-
-  static async logWorkflowTest(
-    context: WorkflowsRequestHandlerContext,
-    params: { workflowExecutionId: string; workflowId?: string }
-  ): Promise<void> {
-    const workflowRef =
-      params.workflowId !== undefined ? `[workflowId=${params.workflowId}]` : '[draft yaml]';
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.TEST,
-        'change',
-        `User tested workflow ${workflowRef} [executionId=${params.workflowExecutionId}]`
-      )
-    );
-  }
-
-  static async logWorkflowTestFailed(
-    context: WorkflowsRequestHandlerContext,
-    error: unknown
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(WorkflowManagementAuditActions.TEST, 'change', 'User failed workflow test', error)
-    );
-  }
-
-  static async logWorkflowStepTest(
-    context: WorkflowsRequestHandlerContext,
+  logWorkflowStepTest(
+    request: KibanaRequest,
     params: {
       stepId: string;
       workflowExecutionId: string;
       workflowId?: string;
+      error?: unknown;
     }
-  ): Promise<void> {
-    const wfPart =
-      params.workflowId !== undefined ? `[workflowId=${params.workflowId}]` : '[draft yaml]';
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.TEST_STEP,
-        'change',
-        `User tested workflow step [stepId=${params.stepId}] ${wfPart} [executionId=${params.workflowExecutionId}]`
-      )
+  ): void {
+    const { stepId, workflowExecutionId, workflowId, error } = params;
+    const wfPart = workflowId !== undefined ? `[workflowId=${workflowId}]` : '[draft yaml]';
+    const executionPart =
+      workflowExecutionId !== undefined ? `[executionId=${workflowExecutionId}]` : '';
+    const message =
+      error !== undefined
+        ? `User failed to test workflow step [stepId=${stepId}] ${wfPart} ${executionPart}`
+        : `User tested workflow step [stepId=${stepId}] ${wfPart} ${executionPart}`;
+    this.log(
+      request,
+      createEvent(WorkflowManagementAuditActions.TEST_STEP, 'change', message, error)
     );
   }
 
-  static async logWorkflowStepTestFailed(
-    context: WorkflowsRequestHandlerContext,
-    error: unknown
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.TEST_STEP,
-        'change',
-        'User failed workflow step test',
-        error
-      )
+  logExecutionCanceled(
+    request: KibanaRequest,
+    params: { executionId: string; error?: unknown }
+  ): void {
+    const { executionId, error } = params;
+    const message =
+      error !== undefined
+        ? `User failed to cancel workflow execution [executionId=${executionId}]`
+        : `User canceled workflow execution [executionId=${executionId}]`;
+    this.log(
+      request,
+      createEvent(WorkflowManagementAuditActions.CANCEL_EXECUTION, 'change', message, error)
     );
   }
 
-  static async logExecutionCanceled(
-    context: WorkflowsRequestHandlerContext,
-    params: { executionId: string }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.CANCEL_EXECUTION,
-        'change',
-        `User canceled workflow execution [executionId=${params.executionId}]`
-      )
-    );
-  }
-
-  static async logExecutionCancelFailed(
-    context: WorkflowsRequestHandlerContext,
-    params: { executionId: string; error: unknown }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.CANCEL_EXECUTION,
-        'change',
-        `User failed to cancel workflow execution [executionId=${params.executionId}]`,
-        params.error
-      )
-    );
-  }
-
-  static async logExecutionResumed(
-    context: WorkflowsRequestHandlerContext,
-    params: { executionId: string }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.RESUME_EXECUTION,
-        'change',
-        `User resumed workflow execution [executionId=${params.executionId}]`
-      )
-    );
-  }
-
-  static async logExecutionResumeFailed(
-    context: WorkflowsRequestHandlerContext,
-    params: { executionId: string; error: unknown }
-  ): Promise<void> {
-    await writeAudit(
-      context,
-      createEvent(
-        WorkflowManagementAuditActions.RESUME_EXECUTION,
-        'change',
-        `User failed to resume workflow execution [executionId=${params.executionId}]`,
-        params.error
-      )
+  logExecutionResumed(
+    request: KibanaRequest,
+    params: { executionId: string; error?: unknown }
+  ): void {
+    const { executionId, error } = params;
+    const message =
+      error !== undefined
+        ? `User failed to resume workflow execution [executionId=${executionId}]`
+        : `User resumed workflow execution [executionId=${executionId}]`;
+    this.log(
+      request,
+      createEvent(WorkflowManagementAuditActions.RESUME_EXECUTION, 'change', message, error)
     );
   }
 }
