@@ -218,8 +218,6 @@ describe('runMaintainer', () => {
       const page1Records: ProcessedEntityRecord[] = [
         {
           entityId: 'user-0',
-          userId: null,
-          entityNamespace: null,
           accesses_frequently: ['host-a'],
           accesses_infrequently: [],
         },
@@ -227,8 +225,6 @@ describe('runMaintainer', () => {
       const page2Records: ProcessedEntityRecord[] = [
         {
           entityId: 'user-last',
-          userId: null,
-          entityNamespace: null,
           accesses_frequently: [],
           accesses_infrequently: ['host-b'],
         },
@@ -304,8 +300,6 @@ describe('runMaintainer', () => {
       const records1: ProcessedEntityRecord[] = [
         {
           entityId: 'user-a',
-          userId: null,
-          entityNamespace: null,
           accesses_frequently: ['host-1'],
           accesses_infrequently: [],
         },
@@ -313,8 +307,6 @@ describe('runMaintainer', () => {
       const records2: ProcessedEntityRecord[] = [
         {
           entityId: 'user-b',
-          userId: null,
-          entityNamespace: null,
           accesses_frequently: [],
           accesses_infrequently: ['host-2'],
         },
@@ -434,8 +426,6 @@ describe('runMaintainer', () => {
       const records: ProcessedEntityRecord[] = [
         {
           entityId: 'user-1',
-          userId: null,
-          entityNamespace: null,
           accesses_frequently: [],
           accesses_infrequently: ['host-a'],
         },
