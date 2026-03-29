@@ -31,10 +31,40 @@ const mockEsClient = {} as ElasticsearchClient;
 const createState = (userQuery: string) => ({
   userQuery,
   catalogContext: '',
+  catalogDataSources: [],
+  suggestedRequiredFields: [],
+  suggestedRelatedIntegrations: [],
   rule: {},
   errors: [],
   warnings: [],
 });
+
+const mockEntry = {
+  id: 'test-1',
+  name: 'logs-endpoint.events.process-default',
+  type: 'data_stream' as const,
+  mapping: {
+    fields: [
+      { name: 'process.name', type: 'keyword', ecs: true, searchable: true, aggregatable: true },
+      { name: 'process.pid', type: 'long', ecs: true, searchable: true, aggregatable: true },
+      { name: 'non_ecs_field', type: 'keyword', ecs: false, searchable: true, aggregatable: true },
+    ],
+    total_field_count: 3,
+    ecs_field_count: 2,
+    ecs_field_coverage: 0.67,
+  },
+  integration: {
+    package_name: 'endpoint',
+    package_title: 'Elastic Endpoint',
+    package_version: '8.0.0',
+    integration_name: 'endpoint',
+    dataset: 'endpoint.events.process',
+    description: 'Elastic Endpoint integration',
+    data_stream_title: 'Process events',
+  },
+  catalog_version: 1,
+  refreshed_at: '2024-01-01T00:00:00Z',
+};
 
 describe('getDiscoverDataSourcesNode', () => {
   beforeEach(() => {
@@ -43,7 +73,7 @@ describe('getDiscoverDataSourcesNode', () => {
 
   it('returns catalogContext from catalog query', async () => {
     mockSearch.mockResolvedValue({
-      entries: [{ name: 'logs-endpoint.events.process-default' }],
+      entries: [mockEntry],
       total: 1,
     });
     (formatCatalogContextForPrompt as jest.Mock).mockReturnValue(
@@ -64,6 +94,64 @@ describe('getDiscoverDataSourcesNode', () => {
     });
   });
 
+  it('pre-populates suggestedRequiredFields with ECS fields from catalog entries', async () => {
+    mockSearch.mockResolvedValue({ entries: [mockEntry], total: 1 });
+    (formatCatalogContextForPrompt as jest.Mock).mockReturnValue('## Available Data Sources');
+
+    const node = getDiscoverDataSourcesNode({ esClient: mockEsClient, logger: mockLogger });
+    const result = await node(createState('detect powershell execution'));
+
+    expect(result.suggestedRequiredFields).toEqual([
+      { name: 'process.name', type: 'keyword', ecs: true },
+      { name: 'process.pid', type: 'long', ecs: true },
+    ]);
+    // non-ECS field must not appear
+    expect(result.suggestedRequiredFields).not.toContainEqual(
+      expect.objectContaining({ name: 'non_ecs_field' })
+    );
+  });
+
+  it('pre-populates suggestedRelatedIntegrations from catalog entries', async () => {
+    mockSearch.mockResolvedValue({ entries: [mockEntry], total: 1 });
+    (formatCatalogContextForPrompt as jest.Mock).mockReturnValue('## Available Data Sources');
+
+    const node = getDiscoverDataSourcesNode({ esClient: mockEsClient, logger: mockLogger });
+    const result = await node(createState('detect powershell execution'));
+
+    expect(result.suggestedRelatedIntegrations).toEqual([
+      { package: 'endpoint', version: '8.0.0', integration: 'endpoint' },
+    ]);
+  });
+
+  it('deduplicates suggestedRelatedIntegrations by package name', async () => {
+    const secondEntry = {
+      ...mockEntry,
+      id: 'test-2',
+      name: 'logs-endpoint.events.network-default',
+      integration: { ...mockEntry.integration, integration_name: 'network' },
+    };
+    mockSearch.mockResolvedValue({ entries: [mockEntry, secondEntry], total: 2 });
+    (formatCatalogContextForPrompt as jest.Mock).mockReturnValue('## Available Data Sources');
+
+    const node = getDiscoverDataSourcesNode({ esClient: mockEsClient, logger: mockLogger });
+    const result = await node(createState('detect lateral movement'));
+
+    // same package_name 'endpoint' — only first entry survives dedup
+    expect(result.suggestedRelatedIntegrations).toHaveLength(1);
+    expect(result.suggestedRelatedIntegrations![0].package).toBe('endpoint');
+  });
+
+  it('returns empty suggested fields and integrations when no entries found', async () => {
+    mockSearch.mockResolvedValue({ entries: [], total: 0 });
+    (formatCatalogContextForPrompt as jest.Mock).mockReturnValue('');
+
+    const node = getDiscoverDataSourcesNode({ esClient: mockEsClient, logger: mockLogger });
+    const result = await node(createState('detect powershell'));
+
+    expect(result.suggestedRequiredFields).toEqual([]);
+    expect(result.suggestedRelatedIntegrations).toEqual([]);
+  });
+
   it('returns empty context when no entries found', async () => {
     mockSearch.mockResolvedValue({ entries: [], total: 0 });
     (formatCatalogContextForPrompt as jest.Mock).mockReturnValue('');
@@ -75,9 +163,10 @@ describe('getDiscoverDataSourcesNode', () => {
     const result = await node(createState('detect powershell'));
 
     expect(result.catalogContext).toBe('');
+    expect(result.catalogDataSources).toEqual([]);
   });
 
-  it('returns empty context on error', async () => {
+  it('returns empty arrays on error', async () => {
     mockSearch.mockRejectedValue(new Error('index_not_found_exception'));
 
     const node = getDiscoverDataSourcesNode({
@@ -87,6 +176,9 @@ describe('getDiscoverDataSourcesNode', () => {
     const result = await node(createState('detect powershell'));
 
     expect(result.catalogContext).toBe('');
+    expect(result.catalogDataSources).toEqual([]);
+    expect(result.suggestedRequiredFields).toEqual([]);
+    expect(result.suggestedRelatedIntegrations).toEqual([]);
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Failed to query data source catalog')
     );
@@ -94,7 +186,7 @@ describe('getDiscoverDataSourcesNode', () => {
 
   it('reports progress via events', async () => {
     mockSearch.mockResolvedValue({
-      entries: [{ name: 'test-index' }],
+      entries: [mockEntry],
       total: 1,
     });
     (formatCatalogContextForPrompt as jest.Mock).mockReturnValue('## Available Data Sources');

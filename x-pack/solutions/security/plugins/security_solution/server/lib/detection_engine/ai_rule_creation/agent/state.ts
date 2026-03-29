@@ -8,6 +8,7 @@
 import { Annotation } from '@langchain/langgraph';
 import type { EsqlRuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleSchedule } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+import type { DataSourceEntry } from '@kbn/data-source-catalog';
 
 export const defaultSchedule: RuleSchedule = {
   interval: '5m',
@@ -38,6 +39,20 @@ export const RuleCreationAnnotation = Annotation.Root({
   userQuery: Annotation<string>(),
   catalogContext: Annotation<string>({
     default: () => '',
+    reducer: (current, update) => update ?? current,
+  }),
+  catalogDataSources: Annotation<DataSourceEntry[]>({
+    default: () => [],
+    reducer: (current, update) => update ?? current,
+  }),
+  suggestedRequiredFields: Annotation<Array<{ name: string; type: string; ecs: boolean }>>({
+    default: () => [],
+    reducer: (current, update) => update ?? current,
+  }),
+  suggestedRelatedIntegrations: Annotation<
+    Array<{ package: string; version: string; integration?: string }>
+  >({
+    default: () => [],
     reducer: (current, update) => update ?? current,
   }),
   rule: Annotation<Partial<EsqlRuleCreateProps>>({

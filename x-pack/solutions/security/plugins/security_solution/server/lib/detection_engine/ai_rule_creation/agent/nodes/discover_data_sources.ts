@@ -44,11 +44,37 @@ export const getDiscoverDataSourcesNode = ({
         events?.reportProgress('No matching data sources found in catalog');
       }
 
-      return { catalogContext };
+      // Extract suggested required_fields from catalog entries (top ECS fields from matching sources)
+      const suggestedRequiredFields = result.entries
+        .flatMap((entry) => entry.mapping.fields.filter((f) => f.ecs))
+        .slice(0, 20)
+        .map((f) => ({ name: f.name, type: f.type, ecs: f.ecs }));
+
+      // Extract related integrations, deduplicating by package name
+      const suggestedRelatedIntegrations = result.entries
+        .filter((entry) => entry.integration)
+        .map((entry) => ({
+          package: entry.integration!.package_name,
+          version: entry.integration!.package_version,
+          integration: entry.integration!.integration_name,
+        }))
+        .filter((v, i, a) => a.findIndex((t) => t.package === v.package) === i);
+
+      return {
+        catalogDataSources: result.entries,
+        catalogContext,
+        suggestedRequiredFields,
+        suggestedRelatedIntegrations,
+      };
     } catch (error) {
       // If catalog query fails, proceed without context (non-blocking)
       logger.warn(`Failed to query data source catalog: ${error}`);
-      return { catalogContext: '' };
+      return {
+        catalogDataSources: [],
+        catalogContext: '',
+        suggestedRequiredFields: [],
+        suggestedRelatedIntegrations: [],
+      };
     }
   };
 };
