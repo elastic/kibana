@@ -67,11 +67,6 @@ export const ADD_ENTITIES_TITLE = i18n.translate(
   { defaultMessage: 'Add entities to resolution group' }
 );
 
-export const ADD_ENTITIES_INFO = i18n.translate(
-  'xpack.securitySolution.entityResolution.addEntitiesInfo',
-  { defaultMessage: 'Search for entities to add to this resolution group' }
-);
-
 export const SEARCH_ENTITIES_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.entityResolution.searchPlaceholder',
   { defaultMessage: 'Search by entity name or ID' }

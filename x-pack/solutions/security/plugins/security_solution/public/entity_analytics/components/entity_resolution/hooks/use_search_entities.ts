@@ -64,9 +64,14 @@ export const useSearchEntities = ({
   page,
   perPage,
 }: UseSearchEntitiesParams) => {
+  // Stabilize: avoid re-building the query when the array reference changes
+  // but the contents are structurally equal (e.g. after group refetch).
+  // We derive a sorted JSON string key and parse it back inside useMemo so the
+  // callback has no dependency on the unstable array reference itself.
+  const excludeIdsKey = JSON.stringify(excludeEntityIds.slice().sort());
   const filterQuery = useMemo(
-    () => buildFilterQuery(excludeEntityIds, searchQuery),
-    [excludeEntityIds, searchQuery]
+    () => buildFilterQuery(JSON.parse(excludeIdsKey) as string[], searchQuery),
+    [excludeIdsKey, searchQuery]
   );
 
   return useEntitiesListQuery({

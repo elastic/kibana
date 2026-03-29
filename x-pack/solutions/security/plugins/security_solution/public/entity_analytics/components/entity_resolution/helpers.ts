@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
+
 /**
  * Safely extract a nested field value from a flat-keyed entity record.
  * Entity Store documents use dot-notation keys like 'entity.name'.
@@ -47,6 +49,13 @@ export interface TableEntityRow {
   entity: Record<string, unknown>;
   isSummary: boolean;
 }
+
+export const truncatedCellCss = css`
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
 
 export const getResolutionRiskScore = (entity: Record<string, unknown>): number | undefined => {
   const score = getEntityField(

@@ -28,7 +28,6 @@ import { RESOLUTION_GROUP_TAB_CONTENT_TEST_ID } from './test_ids';
 interface ResolutionGroupTabProps {
   entityId: string;
   entityType: EntityType;
-  scopeId: string;
 }
 
 export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId, entityType }) => {
@@ -42,6 +41,8 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
     isOpen: boolean;
     newEntity: Record<string, unknown> | null;
   }>({ isOpen: false, newEntity: null });
+  const [addingEntityId, setAddingEntityId] = useState<string | undefined>();
+  const [removingEntityId, setRemovingEntityId] = useState<string | undefined>();
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;
   const hasGroup = group && group.group_size > 1;
@@ -57,16 +58,21 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
 
   const handleRemoveEntity = useCallback(
     (removeEntityId: string) => {
-      unlinkEntities.mutate({ entity_ids: [removeEntityId] });
+      setRemovingEntityId(removeEntityId);
+      unlinkEntities.mutate(
+        { entity_ids: [removeEntityId] },
+        { onSettled: () => setRemovingEntityId(undefined) }
+      );
     },
     [unlinkEntities]
   );
 
   const handleAddEntity = useCallback(
     async (entity: Record<string, unknown>) => {
-      // Pre-flight: check if the entity being added already has its own resolution group
       const newEntityId = getEntityId(entity);
+      setAddingEntityId(newEntityId);
       try {
+        // Pre-flight: check if the entity being added already has its own resolution group
         const newEntityGroup = await http.fetch<ResolutionGroup>(RESOLUTION_GROUP_ROUTE, {
           version: '2',
           method: 'GET',
@@ -74,22 +80,26 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
         });
         if (newEntityGroup.group_size > 1) {
           addError(new Error(ENTITY_HAS_ALIASES_ERROR), { title: RESOLUTION_ERROR_TITLE });
+          setAddingEntityId(undefined);
           return;
         }
       } catch {
-        // If pre-flight fails, proceed anyway — the server will validate
+        // Pre-flight failed — proceed anyway, the server will validate on link
       }
 
       if (!hasGroup) {
         // First link — need confirmation modal to choose golden entity
+        setAddingEntityId(undefined);
         setModalState({ isOpen: true, newEntity: entity });
       } else {
         // Group already exists — link directly to current target
         if (targetEntityId) {
-          linkEntities.mutate({
-            target_id: targetEntityId,
-            entity_ids: [newEntityId],
-          });
+          linkEntities.mutate(
+            { target_id: targetEntityId, entity_ids: [newEntityId] },
+            { onSettled: () => setAddingEntityId(undefined) }
+          );
+        } else {
+          setAddingEntityId(undefined);
         }
       }
     },
@@ -131,14 +141,14 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
           showActions
           onRemoveEntity={handleRemoveEntity}
           targetEntityId={targetEntityId}
-          isRemovingEntity={unlinkEntities.isLoading}
+          removingEntityId={removingEntityId}
         />
         <EuiSpacer size="l" />
         <AddEntitiesSection
           entityType={entityType}
           excludeEntityIds={excludeEntityIds}
           onAddEntity={handleAddEntity}
-          isAddingEntity={linkEntities.isLoading}
+          addingEntityId={addingEntityId}
         />
       </div>
       {modalState.isOpen && modalState.newEntity && currentEntityForModal && (

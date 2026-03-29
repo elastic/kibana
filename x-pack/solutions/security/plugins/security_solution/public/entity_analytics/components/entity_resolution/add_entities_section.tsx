@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   EuiBasicTable,
   EuiButtonIcon,
@@ -15,10 +15,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { EntityType } from '@kbn/entity-store/public';
 import { useSearchEntities } from './hooks/use_search_entities';
-import { getEntityName, getEntityId, getEntitySource, getEntityRiskScore } from './helpers';
+import {
+  getEntityName,
+  getEntityId,
+  getEntitySource,
+  getEntityRiskScore,
+  truncatedCellCss,
+} from './helpers';
 import {
   ADD_ENTITIES_TITLE,
   SEARCH_ENTITIES_PLACEHOLDER,
@@ -35,34 +40,38 @@ import {
 } from './test_ids';
 
 const PAGE_SIZE = 10;
-
-const truncatedCellCss = css`
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
+const SEARCH_DEBOUNCE_MS = 300;
 
 interface AddEntitiesSectionProps {
   entityType: EntityType;
   excludeEntityIds: string[];
   onAddEntity: (entity: Record<string, unknown>) => void;
-  isAddingEntity?: boolean;
+  addingEntityId?: string;
 }
 
 export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
   entityType,
   excludeEntityIds,
   onAddEntity,
-  isAddingEntity = false,
+  addingEntityId,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [page, setPage] = useState(1);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedQuery(searchInput);
+      setPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(debounceTimerRef.current);
+  }, [searchInput]);
 
   const { data, isLoading } = useSearchEntities({
     entityType,
     excludeEntityIds,
-    searchQuery,
+    searchQuery: debouncedQuery,
     page,
     perPage: PAGE_SIZE,
   });
@@ -71,8 +80,7 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
   const total = data?.total ?? 0;
 
   const handleSearchChange = useCallback((value: string) => {
-    setSearchQuery(value);
-    setPage(1);
+    setSearchInput(value);
   }, []);
 
   const handlePageChange = useCallback(
@@ -119,19 +127,23 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
       {
         name: '',
         width: '60px',
-        render: (entity: Record<string, unknown>) => (
-          <EuiButtonIcon
-            iconType="plusInCircle"
-            color="primary"
-            aria-label={ADD_ENTITY_BUTTON}
-            onClick={() => onAddEntity(entity)}
-            disabled={isAddingEntity}
-            isLoading={isAddingEntity}
-          />
-        ),
+        render: (entity: Record<string, unknown>) => {
+          const entityId = getEntityId(entity);
+          const isThisEntityAdding = addingEntityId === entityId;
+          return (
+            <EuiButtonIcon
+              iconType="plusInCircle"
+              color="primary"
+              aria-label={ADD_ENTITY_BUTTON}
+              onClick={() => onAddEntity(entity)}
+              disabled={!!addingEntityId}
+              isLoading={isThisEntityAdding}
+            />
+          );
+        },
       },
     ],
-    [onAddEntity, isAddingEntity]
+    [onAddEntity, addingEntityId]
   );
 
   const pagination = useMemo(
@@ -153,7 +165,7 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
       <EuiFieldSearch
         data-test-subj={ADD_ENTITIES_SEARCH_TEST_ID}
         placeholder={SEARCH_ENTITIES_PLACEHOLDER}
-        value={searchQuery}
+        value={searchInput}
         onChange={(e) => handleSearchChange(e.target.value)}
         isClearable
         fullWidth

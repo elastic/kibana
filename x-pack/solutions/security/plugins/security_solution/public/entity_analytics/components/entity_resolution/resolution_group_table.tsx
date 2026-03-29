@@ -25,6 +25,7 @@ import {
   getEntitySource,
   getEntityRiskScore,
   getResolutionRiskScore,
+  truncatedCellCss,
   type TableEntityRow,
 } from './helpers';
 import {
@@ -45,15 +46,8 @@ export interface ResolutionGroupTableProps {
   showActions?: boolean;
   onRemoveEntity?: (entityId: string) => void;
   targetEntityId?: string;
-  isRemovingEntity?: boolean;
+  removingEntityId?: string;
 }
-
-const truncatedCellCss = css`
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
 
 export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   group,
@@ -61,7 +55,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   showActions = false,
   onRemoveEntity,
   targetEntityId,
-  isRemovingEntity = false,
+  removingEntityId,
 }) => {
   const { euiTheme } = useEuiTheme();
   const hasGroup = group && group.group_size > 1;
@@ -160,14 +154,15 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
           if (isSummary) return null;
           const entityId = getEntityId(entity);
           const isTarget = entityId === targetEntityId;
+          const isThisEntityRemoving = removingEntityId === entityId;
           return (
             <EuiButtonIcon
               iconType="cross"
               color="danger"
               aria-label={REMOVE_ENTITY_BUTTON}
-              disabled={isTarget || isRemovingEntity}
+              disabled={isTarget || !!removingEntityId}
               onClick={() => onRemoveEntity?.(entityId)}
-              isLoading={isRemovingEntity}
+              isLoading={isThisEntityRemoving}
             />
           );
         },
@@ -175,7 +170,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
     }
 
     return cols;
-  }, [showActions, targetEntityId, onRemoveEntity, isRemovingEntity]);
+  }, [showActions, targetEntityId, onRemoveEntity, removingEntityId]);
 
   const getRowProps = useCallback(
     (item: TableEntityRow) => {

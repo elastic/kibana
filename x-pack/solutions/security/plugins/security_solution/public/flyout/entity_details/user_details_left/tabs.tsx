@@ -74,9 +74,7 @@ export const useTabs = (
     }
 
     if (entityStoreEntityId) {
-      tabs.push(
-        getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'user', scopeId })
-      );
+      tabs.push(getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'user' }));
     }
 
     return tabs;
