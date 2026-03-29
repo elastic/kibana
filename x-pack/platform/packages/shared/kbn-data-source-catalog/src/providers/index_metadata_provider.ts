@@ -10,6 +10,7 @@ import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_FIELD_LIMIT, CATALOG_VERSION } from '../constants';
 import type { DataSourceEntry, DataSourceType, FieldMetadata } from '../types';
+import { globToRegex } from '../utils';
 
 interface ResolvedDataSource {
   name: string;
@@ -142,7 +143,7 @@ function findMatchingTemplate(
 ): { name: string; meta?: Record<string, unknown> } | undefined {
   for (const t of templates) {
     for (const pattern of t.patterns) {
-      const regex = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`);
+      const regex = globToRegex(pattern);
       if (regex.test(indexName)) {
         return { name: t.name, meta: t.meta };
       }

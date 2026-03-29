@@ -22,34 +22,40 @@ export interface FieldValidationResult {
 
 /**
  * Validates whether required fields exist in the catalog entries
- * matching the given index patterns. Returns advisory results --
+ * matching the given index pattern. Returns advisory results --
  * does not block rule activation.
  */
-export const validateRequiredFields = async (
+export async function validateRequiredFields(
   esClient: ElasticsearchClient,
-  indexPatterns: string[],
+  indexPattern: string,
   requiredFields: RequiredField[]
-): Promise<FieldValidationResult[]> => {
-  if (requiredFields.length === 0 || indexPatterns.length === 0) {
+): Promise<FieldValidationResult[]> {
+  if (requiredFields.length === 0 || !indexPattern) {
     return [];
   }
 
   const catalogQuery = new CatalogQuery(esClient);
-  const results: FieldValidationResult[] = [];
 
-  for (const field of requiredFields) {
-    const catalogResult = await catalogQuery.search({
-      namePattern: indexPatterns[0],
-      hasFields: [field.name],
-      size: 5,
-    });
+  // Single query: find all catalog entries matching the pattern
+  const catalogResult = await catalogQuery.search({
+    namePattern: indexPattern,
+    size: 50,
+  });
 
-    results.push({
-      field,
-      exists: catalogResult.entries.length > 0,
-      matchedIndices: catalogResult.entries.map((entry) => entry.name),
-    });
+  // Build a set of all field names across matching entries
+  const availableFields = new Set<string>();
+  for (const entry of catalogResult.entries) {
+    for (const field of entry.mapping.fields) {
+      availableFields.add(field.name);
+    }
   }
 
-  return results;
-};
+  // Check each required field against the set
+  return requiredFields.map((field) => ({
+    field,
+    exists: availableFields.has(field.name),
+    matchedIndices: catalogResult.entries
+      .filter((e) => e.mapping.fields.some((f) => f.name === field.name))
+      .map((e) => e.name),
+  }));
+}

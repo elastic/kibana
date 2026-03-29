@@ -18,15 +18,26 @@ export class CatalogClient {
     if (exists) {
       return;
     }
-    await this.esClient.indices.create({
-      index: CATALOG_INDEX_NAME,
-      mappings: catalogIndexMapping,
-      settings: {
-        number_of_shards: 1,
-        number_of_replicas: 0,
-        auto_expand_replicas: '0-1',
-      },
-    });
+    try {
+      await this.esClient.indices.create({
+        index: CATALOG_INDEX_NAME,
+        mappings: catalogIndexMapping,
+        settings: {
+          number_of_shards: 1,
+          auto_expand_replicas: '0-1',
+        },
+      });
+    } catch (error: unknown) {
+      // Handle race condition: another Kibana node may have created the index
+      const isAlreadyExists =
+        error instanceof Error &&
+        'meta' in error &&
+        (error as { meta?: { body?: { error?: { type?: string } } } }).meta?.body?.error?.type ===
+          'resource_already_exists_exception';
+      if (!isAlreadyExists) {
+        throw error;
+      }
+    }
   }
 
   async bulkUpsert(entries: DataSourceEntry[]): Promise<void> {

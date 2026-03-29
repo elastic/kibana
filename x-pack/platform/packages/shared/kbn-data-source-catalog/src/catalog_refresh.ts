@@ -12,6 +12,7 @@ import { fetchIntegrationMetadata, type PackageClientLike } from './providers/in
 import { fetchIndexStats } from './providers/index_stats_provider';
 import { generateHeuristicSummary } from './providers/heuristic_summary_provider';
 import type { DataSourceEntry, IntegrationMetadata } from './types';
+import { globToRegex } from './utils';
 
 interface RefreshCatalogParams {
   esClient: ElasticsearchClient;
@@ -82,7 +83,7 @@ function matchIntegration(
   integrationMap: Map<string, IntegrationMetadata>
 ): IntegrationMetadata | undefined {
   for (const [pattern, metadata] of integrationMap) {
-    const regex = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`);
+    const regex = globToRegex(pattern);
     if (regex.test(entry.name)) {
       return metadata;
     }

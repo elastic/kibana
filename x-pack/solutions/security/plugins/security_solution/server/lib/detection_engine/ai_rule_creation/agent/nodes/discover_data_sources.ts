@@ -52,12 +52,16 @@ export const getDiscoverDataSourcesNode = ({
 
       // Extract related integrations, deduplicating by package name
       const suggestedRelatedIntegrations = result.entries
-        .filter((entry) => entry.integration)
-        .map((entry) => ({
-          package: entry.integration!.package_name,
-          version: entry.integration!.package_version,
-          integration: entry.integration!.integration_name,
-        }))
+        .flatMap((entry) => {
+          if (!entry.integration) return [];
+          return [
+            {
+              package: entry.integration.package_name,
+              version: entry.integration.package_version,
+              integration: entry.integration.integration_name,
+            },
+          ];
+        })
         .filter((v, i, a) => a.findIndex((t) => t.package === v.package) === i);
 
       return {

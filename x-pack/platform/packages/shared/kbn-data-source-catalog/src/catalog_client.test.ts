@@ -46,7 +46,6 @@ describe('CatalogClient', () => {
         mappings: catalogIndexMapping,
         settings: {
           number_of_shards: 1,
-          number_of_replicas: 0,
           auto_expand_replicas: '0-1',
         },
       });
@@ -59,6 +58,24 @@ describe('CatalogClient', () => {
 
       expect(esClient.indices.exists).toHaveBeenCalledWith({ index: CATALOG_INDEX_NAME });
       expect(esClient.indices.create).not.toHaveBeenCalled();
+    });
+
+    it('does not throw when another node created the index concurrently', async () => {
+      esClient.indices.exists.mockResolvedValue(false);
+      const raceError = Object.assign(new Error('resource_already_exists_exception'), {
+        meta: { body: { error: { type: 'resource_already_exists_exception' } } },
+      });
+      esClient.indices.create.mockRejectedValue(raceError);
+
+      await expect(catalogClient.ensureIndex()).resolves.toBeUndefined();
+    });
+
+    it('re-throws non-race-condition errors from index creation', async () => {
+      esClient.indices.exists.mockResolvedValue(false);
+      const unexpectedError = new Error('unknown_error');
+      esClient.indices.create.mockRejectedValue(unexpectedError);
+
+      await expect(catalogClient.ensureIndex()).rejects.toThrow('unknown_error');
     });
   });
 
