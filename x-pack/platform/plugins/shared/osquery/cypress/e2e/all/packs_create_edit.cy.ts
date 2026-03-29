@@ -476,7 +476,7 @@ describe(
           cy.get(`[aria-label="View in Lens"]`).eq(0).click();
           cy.get('@windowOpen').should('have.been.calledOnce');
           cy.then(() => {
-            expect(lensUrl).to.not.be.empty;
+            expect(lensUrl).to.not.equal('');
             cy.visit(lensUrl);
           });
           cy.getBySel('lnsWorkspace', { timeout: 120000 }).should('exist');
