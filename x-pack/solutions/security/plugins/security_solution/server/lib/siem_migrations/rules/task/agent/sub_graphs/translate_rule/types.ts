@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import type { EsqlKnowledgeBase } from '../../../../../common/task/util/esql_knowledge_base';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
@@ -22,6 +23,7 @@ export type GraphNode = (
 ) => Promise<Partial<TranslateRuleState>>;
 
 export interface TranslateRuleGraphParams {
+  esClient: ElasticsearchClient;
   model: MigrateRuleGraphParams['model'];
   esqlKnowledgeBase: EsqlKnowledgeBase;
   ruleMigrationsRetriever: RuleMigrationsRetriever;

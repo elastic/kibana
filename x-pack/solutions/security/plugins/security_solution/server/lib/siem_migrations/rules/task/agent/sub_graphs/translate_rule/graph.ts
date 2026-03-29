@@ -20,6 +20,7 @@ import type { TranslateRuleGraphParams, TranslateRuleState } from './types';
 import { migrateRuleConfigSchema } from '../../state';
 
 export function getTranslateRuleGraph({
+  esClient,
   model,
   esqlKnowledgeBase,
   ruleMigrationsRetriever,
@@ -35,6 +36,7 @@ export function getTranslateRuleGraph({
   const validationNode = getValidationNode({ logger });
   const fixQueryErrorsNode = getFixQueryErrorsNode({ esqlKnowledgeBase, logger });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
+    esClient,
     model,
     ruleMigrationsRetriever,
     telemetryClient,

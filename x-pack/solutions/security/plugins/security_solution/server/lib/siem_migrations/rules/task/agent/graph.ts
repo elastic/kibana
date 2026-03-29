@@ -17,6 +17,7 @@ import { getResolveDepsNode } from './nodes/resolve_dependencies_node/resolve_de
 import { getVendorRouter } from './edges/vendor_edge';
 
 export function getRuleMigrationAgent({
+  esClient,
   model,
   esqlKnowledgeBase,
   ruleMigrationsRetriever,
@@ -34,6 +35,7 @@ export function getRuleMigrationAgent({
   const resolveDepsToolNode = new ToolNode([tools.getRulesByName, tools.getResourceByType]);
 
   const translationSubGraph = getTranslateRuleGraph({
+    esClient,
     model,
     esqlKnowledgeBase,
     ruleMigrationsRetriever,

@@ -90,6 +90,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
     );
 
     const agent = getRuleMigrationAgent({
+      esClient: this.data.esScopedClient.asInternalUser,
       esqlKnowledgeBase,
       model,
       ruleMigrationsRetriever: this.retriever,

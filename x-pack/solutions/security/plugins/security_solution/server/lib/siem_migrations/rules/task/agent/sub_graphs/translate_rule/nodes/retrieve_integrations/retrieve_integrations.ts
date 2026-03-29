@@ -6,8 +6,10 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { RuleMigrationsRetriever } from '../../../../../retrievers';
 import type { RuleMigrationTelemetryClient } from '../../../../../rule_migrations_telemetry_client';
+import { CatalogIntegrationEnricher } from '../../../../../retrievers/catalog_integration_enricher';
 import {
   cleanMarkdown,
   generateAssistantComment,
@@ -17,6 +19,7 @@ import { MATCH_INTEGRATION_PROMPT } from './prompts';
 import type { MigrateRuleGraphParams } from '../../../../types';
 
 interface GetRetrieveIntegrationsNodeParams {
+  esClient: ElasticsearchClient;
   model: MigrateRuleGraphParams['model'];
   telemetryClient: RuleMigrationTelemetryClient;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
@@ -28,10 +31,13 @@ interface GetMatchedIntegrationResponse {
 }
 
 export const getRetrieveIntegrationsNode = ({
+  esClient,
   model,
   ruleMigrationsRetriever,
   telemetryClient,
 }: GetRetrieveIntegrationsNodeParams): GraphNode => {
+  const catalogEnricher = new CatalogIntegrationEnricher(esClient);
+
   return async (state) => {
     const query = state.semantic_query;
     const integrations = await ruleMigrationsRetriever.integrations.search(query);
@@ -44,6 +50,9 @@ export const getRetrieveIntegrationsNode = ({
         comments: [generateAssistantComment(comment)],
       };
     }
+
+    // Enrich integration matches with catalog metadata (field lists, freshness, ECS coverage)
+    const catalogContext = await catalogEnricher.enrichIntegrations(integrations);
 
     const outputParser = new JsonOutputParser();
     const mostRelevantIntegration = MATCH_INTEGRATION_PROMPT.pipe(model).pipe(outputParser);
@@ -63,7 +72,7 @@ export const getRetrieveIntegrationsNode = ({
     /*
      * Takes the most relevant integration from the array of integration(s) returned by the semantic query, returns either the most relevant or none.
      */
-    const integrationsJson = JSON.stringify(integrationsInfo, null, 2);
+    const integrationsJson = JSON.stringify(integrationsInfo, null, 2) + catalogContext;
     const response = (await mostRelevantIntegration.invoke({
       integrations: integrationsJson,
       rule: JSON.stringify(ruleToMatch, null, 2),

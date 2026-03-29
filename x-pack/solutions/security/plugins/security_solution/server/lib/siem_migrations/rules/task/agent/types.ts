@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
 import type { AIMessageChunk } from '@langchain/core/messages';
@@ -36,6 +37,7 @@ export type ModelWithTools = Runnable<
 >;
 
 export interface MigrateRuleGraphParams {
+  esClient: ElasticsearchClient;
   esqlKnowledgeBase: EsqlKnowledgeBase;
   model: ChatModel;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
