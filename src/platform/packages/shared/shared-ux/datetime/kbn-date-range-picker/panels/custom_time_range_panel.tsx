@@ -99,13 +99,27 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
   const tabGroupId = useGeneratedHtmlId({ prefix: 'datePartTab' });
   const fonts = useEuiFontSize('xs');
 
+  const sideLabel = side === 'start' ? 'Start' : 'End';
+
   const tabOptions = useMemo(
     () => [
-      { id: `${tabGroupId}_${DATE_TYPE_RELATIVE}`, label: customTimeRangePanelTexts.relativeTab },
-      { id: `${tabGroupId}_${DATE_TYPE_ABSOLUTE}`, label: customTimeRangePanelTexts.absoluteTab },
-      { id: `${tabGroupId}_${DATE_TYPE_NOW}`, label: customTimeRangePanelTexts.nowTab },
+      {
+        id: `${tabGroupId}_${DATE_TYPE_RELATIVE}`,
+        label: customTimeRangePanelTexts.relativeTab,
+        'data-test-subj': `dateRangePicker${sideLabel}RelativeTab`,
+      },
+      {
+        id: `${tabGroupId}_${DATE_TYPE_ABSOLUTE}`,
+        label: customTimeRangePanelTexts.absoluteTab,
+        'data-test-subj': `dateRangePicker${sideLabel}AbsoluteTab`,
+      },
+      {
+        id: `${tabGroupId}_${DATE_TYPE_NOW}`,
+        label: customTimeRangePanelTexts.nowTab,
+        'data-test-subj': `dateRangePicker${sideLabel}NowTab`,
+      },
     ],
-    [tabGroupId]
+    [tabGroupId, sideLabel]
   );
 
   const selectedTabId = `${tabGroupId}_${state.type}`;
@@ -176,6 +190,7 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
                   onChange={onCountChange}
                   min={0}
                   aria-label={customTimeRangePanelTexts.countAriaLabel}
+                  data-test-subj={`dateRangePicker${sideLabel}RelativeCount`}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
@@ -187,6 +202,7 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
                   }`}
                   onChange={onUnitDirectionChange}
                   aria-label={customTimeRangePanelTexts.unitDirectionAriaLabel}
+                  data-test-subj={`dateRangePicker${sideLabel}RelativeUnitDirection`}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -198,6 +214,7 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
               value={state.absoluteText}
               onChange={onAbsoluteTextChange}
               aria-label={customTimeRangePanelTexts.absoluteDateAriaLabel(label)}
+              data-test-subj={`dateRangePicker${sideLabel}AbsoluteInput`}
             />
           )}
 

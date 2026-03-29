@@ -24,6 +24,7 @@ exports[`DateRangePicker renders 1`] = `
           >
             <button
               class="euiButtonEmpty euiFormControlButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFormControlButton-compressed-fullWidth"
+              data-date-range="now-20m to now"
               data-test-subj="dateRangePickerControlButton"
               type="button"
               value="Last 20 minutes"

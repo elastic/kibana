@@ -258,6 +258,7 @@ export function DateRangePickerControl() {
           >
             <EuiFormControlButton
               data-test-subj="dateRangePickerControlButton"
+              data-date-range={`${timeRange.start} to ${timeRange.end}`}
               buttonRef={buttonRef}
               aria-label={collapsed === 'auto' ? displayText : undefined}
               value={displayText}
