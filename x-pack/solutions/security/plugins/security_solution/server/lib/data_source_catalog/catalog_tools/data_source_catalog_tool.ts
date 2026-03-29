@@ -10,6 +10,7 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { CatalogQuery } from '@kbn/data-source-catalog';
 import { APP_UI_ID } from '../../../../common';
+import { formatCatalogContextForPrompt } from './format_catalog_context';
 
 export type DataSourceCatalogToolParams = AssistantToolParams & {
   esClient: NonNullable<AssistantToolParams['esClient']>;
@@ -46,39 +47,7 @@ export const DATA_SOURCE_CATALOG_TOOL: AssistantTool = {
         if (result.entries.length === 0) {
           return 'No data sources found matching your query.';
         }
-
-        const formatted = result.entries.map((entry) => {
-          const lines = [`**${entry.name}** (${entry.type})`];
-          if (entry.integration) {
-            lines.push(
-              `  Integration: ${entry.integration.package_title} — ${entry.integration.description}`
-            );
-          }
-          lines.push(
-            `  Fields: ${entry.mapping.total_field_count} total, ${
-              entry.mapping.ecs_field_count
-            } ECS (${Math.round(entry.mapping.ecs_field_coverage * 100)}% coverage)`
-          );
-          if (entry.stats) {
-            lines.push(
-              `  Data: ${entry.stats.doc_count.toLocaleString()} docs, freshness: ${
-                entry.stats.freshness_category
-              }`
-            );
-          }
-          if (entry.mapping.fields.length > 0) {
-            const topFields = entry.mapping.fields
-              .filter((f) => f.ecs)
-              .slice(0, 10)
-              .map((f) => f.name);
-            if (topFields.length > 0) {
-              lines.push(`  Key ECS fields: ${topFields.join(', ')}`);
-            }
-          }
-          return lines.join('\n');
-        });
-
-        return `Found ${result.total} data sources:\n\n${formatted.join('\n\n')}`;
+        return formatCatalogContextForPrompt(result.entries, input.maxResults ?? 10);
       },
       {
         name: 'DataSourceCatalogTool',
