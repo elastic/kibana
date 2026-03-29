@@ -72,6 +72,8 @@ export interface CatalogQueryParams {
   searchText?: string;
   activeOnly?: boolean;
   size?: number;
+  /** Optional embedding vector for semantic/kNN search */
+  embedding?: number[];
 }
 
 export interface CatalogQueryResult {

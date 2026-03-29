@@ -22,6 +22,7 @@ export class CatalogQuery {
       searchText,
       activeOnly,
       size = 10,
+      embedding,
     } = params;
 
     const filter: QueryDslQueryContainer[] = [];
@@ -71,10 +72,21 @@ export class CatalogQuery {
       },
     };
 
+    const knn = embedding
+      ? {
+          field: 'semantic.embedding',
+          query_vector: embedding,
+          k: size,
+          num_candidates: Math.max(size * 10, 100),
+          ...(filter.length > 0 ? { filter: { bool: { filter } } } : {}),
+        }
+      : undefined;
+
     const result = await this.esClient.search<DataSourceEntry>({
       index: CATALOG_INDEX_NAME,
       query,
       size,
+      ...(knn ? { knn } : {}),
     });
 
     const total =

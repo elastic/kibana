@@ -177,6 +177,22 @@ describe('CatalogQuery', () => {
     expect(result).toEqual({ entries: [], total: 0 });
   });
 
+  it('includes kNN search when embedding is provided', async () => {
+    const embedding = new Array(384).fill(0.1);
+    await catalogQuery.search({ embedding, size: 5 });
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        knn: expect.objectContaining({
+          field: 'semantic.embedding',
+          query_vector: embedding,
+          k: 5,
+          num_candidates: 100,
+        }),
+      })
+    );
+  });
+
   it('returns entries and total from search response', async () => {
     esClient.search.mockResolvedValue(makeSearchResponse([mockEntry], 42) as any);
 
