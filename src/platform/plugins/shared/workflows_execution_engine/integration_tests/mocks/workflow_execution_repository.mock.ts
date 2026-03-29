@@ -144,6 +144,30 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     }));
   }
 
+  public async searchRecoverableExecutions({
+    statuses,
+    minStartedAtIso,
+    size,
+  }: {
+    statuses: Array<EsWorkflowExecution['status']>;
+    minStartedAtIso: string;
+    size: number;
+  }): Promise<Array<{ id: string; spaceId: string; _source: EsWorkflowExecution }>> {
+    const minTime = new Date(minStartedAtIso).getTime();
+    const results = Array.from(this.workflowExecutions.values())
+      .filter(
+        (exec) => statuses.includes(exec.status) && new Date(exec.startedAt).getTime() <= minTime
+      )
+      .sort((a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime())
+      .slice(0, size);
+
+    return results.map((exec) => ({
+      id: exec.id,
+      spaceId: exec.spaceId,
+      _source: exec,
+    }));
+  }
+
   public async getRunningExecutionsByConcurrencyGroup(
     concurrencyGroupKey: string,
     spaceId: string,

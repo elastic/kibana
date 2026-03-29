@@ -57,11 +57,16 @@ import { generateExecutionTaskScope } from './utils';
 import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
+import { runWorkflowRecoveryScan } from './workflow_recovery/run_workflow_recovery_scan';
+import {
+  WORKFLOW_RECOVERY_SCAN_TASK_TYPE,
+  WORKFLOW_RECOVERY_TASK_ID,
+} from './workflow_recovery/workflow_recovery_constants';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
-import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
+import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
 
@@ -125,7 +130,7 @@ export class WorkflowsExecutionEnginePlugin
     }
 
     plugins.taskManager.registerTaskDefinitions({
-      'workflow:run': {
+      [WORKFLOW_RUN_TASK_TYPE]: {
         title: 'Run Workflow',
         description: 'Executes a workflow immediately',
         // Set high timeout for long-running workflows.
@@ -490,6 +495,35 @@ export class WorkflowsExecutionEnginePlugin
       },
     });
 
+    plugins.taskManager.registerTaskDefinitions({
+      [WORKFLOW_RECOVERY_SCAN_TASK_TYPE]: {
+        title: 'Workflow execution recovery scan',
+        description:
+          'Periodically scans for interrupted workflow executions and schedules workflow:resume using credentials from the original workflow:run task.',
+        timeout: '10m',
+        maxAttempts: 3,
+        createTaskRunner: () => {
+          return {
+            run: async () => {
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              await checkLicense(pluginsStart.licensing);
+
+              await this.initialize(coreStart);
+
+              await runWorkflowRecoveryScan({
+                coreStart,
+                taskManager: pluginsStart.taskManager,
+                config,
+                logger: logger.get('workflowRecovery'),
+                basePath: coreStart.http.basePath,
+                licensing: pluginsStart.licensing,
+              });
+            },
+          };
+        },
+      },
+    });
+
     return {};
   }
 
@@ -509,6 +543,27 @@ export class WorkflowsExecutionEnginePlugin
       workflowTaskManager,
       workflowExecutionRepository
     );
+
+    if (this.config.recovery.enabled) {
+      void plugins.taskManager
+        .ensureScheduled({
+          id: WORKFLOW_RECOVERY_TASK_ID,
+          taskType: WORKFLOW_RECOVERY_SCAN_TASK_TYPE,
+          scope: ['workflows', 'workflow-recovery'],
+          schedule: {
+            interval: `${this.config.recovery.intervalMinutes}m`,
+          },
+          state: {},
+          params: {},
+        })
+        .catch((err) => {
+          this.logger.error(
+            `Failed to ensure workflow recovery scan task: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+        });
+    }
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
@@ -584,7 +639,7 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       return {
         id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
-        taskType: 'workflow:run',
+        taskType: WORKFLOW_RUN_TASK_TYPE,
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
@@ -767,7 +822,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const taskInstance = {
         id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
-        taskType: 'workflow:run',
+        taskType: WORKFLOW_RUN_TASK_TYPE,
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,

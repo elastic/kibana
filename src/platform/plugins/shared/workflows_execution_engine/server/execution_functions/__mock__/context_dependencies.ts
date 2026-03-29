@@ -14,6 +14,8 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 
+import { DEFAULT_WORKFLOW_RECOVERY_CONFIG } from '../../config';
+
 export const mockContextDependencies = () => ({
   cloudSetup: cloudMock.createSetup(),
   coreStart: coreMock.createStart(),
@@ -28,5 +30,6 @@ export const mockContextDependencies = () => ({
     http: { allowedHosts: ['*'] },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb
     collectQueueMetrics: false,
+    recovery: DEFAULT_WORKFLOW_RECOVERY_CONFIG,
   },
 });

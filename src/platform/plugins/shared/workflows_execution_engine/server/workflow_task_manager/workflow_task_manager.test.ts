@@ -11,7 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
-import { WORKFLOW_RESUME_TASK_TYPE } from './types';
+import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams } from './types';
 import { WorkflowTaskManager } from './workflow_task_manager';
 import { generateExecutionTaskScope } from '../utils';
@@ -65,6 +65,7 @@ describe('WorkflowTaskManager', () => {
     mockTaskManager = {
       schedule: jest.fn(),
       fetch: jest.fn(),
+      get: jest.fn(),
       runSoon: jest.fn(),
     } as any;
     fakeRequest = jest.mocked({} as KibanaRequest);
@@ -311,6 +312,72 @@ describe('WorkflowTaskManager', () => {
       mockIdleTasks.forEach((task) => {
         expect(mockTaskManager.runSoon).toHaveBeenCalledWith(task.id);
       });
+    });
+  });
+
+  describe('hasActiveWorkflowExecutionTask', () => {
+    it('returns true when Task Manager returns a matching workflow task', async () => {
+      mockTaskManager.fetch.mockResolvedValue({ docs: [{ id: 't1' }] } as any);
+
+      await expect(workflowTaskManager.hasActiveWorkflowExecutionTask('exec-1')).resolves.toBe(
+        true
+      );
+
+      expect(mockTaskManager.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              must: expect.arrayContaining([
+                { term: { 'task.scope': 'workflow:execution:exec-1' } },
+                {
+                  terms: {
+                    'task.taskType': [WORKFLOW_RUN_TASK_TYPE, WORKFLOW_RESUME_TASK_TYPE],
+                  },
+                },
+              ]),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('returns false when no matching tasks exist', async () => {
+      mockTaskManager.fetch.mockResolvedValue({ docs: [] } as any);
+
+      await expect(workflowTaskManager.hasActiveWorkflowExecutionTask('exec-1')).resolves.toBe(
+        false
+      );
+    });
+  });
+
+  describe('findWorkflowRunTaskIdForExecution', () => {
+    it('returns the workflow:run task id when present', async () => {
+      mockTaskManager.fetch.mockResolvedValue({ docs: [{ id: 'run-task-1' }] } as any);
+
+      await expect(workflowTaskManager.findWorkflowRunTaskIdForExecution('exec-1')).resolves.toBe(
+        'run-task-1'
+      );
+
+      expect(mockTaskManager.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              must: expect.arrayContaining([
+                { term: { 'task.taskType': WORKFLOW_RUN_TASK_TYPE } },
+                { term: { 'task.scope': 'workflow:execution:exec-1' } },
+              ]),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('returns null when no workflow:run task is found', async () => {
+      mockTaskManager.fetch.mockResolvedValue({ docs: [] } as any);
+
+      await expect(
+        workflowTaskManager.findWorkflowRunTaskIdForExecution('exec-1')
+      ).resolves.toBeNull();
     });
   });
 });

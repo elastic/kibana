@@ -16,7 +16,10 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { StepExecutionRepositoryMock, WorkflowExecutionRepositoryMock } from './mocks';
 import { ScopedActionsClientMock, UnsecuredActionsClientMock } from './mocks/actions_plugin_mock';
 import { TaskManagerMock } from './mocks/task_manager.mock';
-import type { WorkflowsExecutionEngineConfig } from '../server/config';
+import {
+  DEFAULT_WORKFLOW_RECOVERY_CONFIG,
+  type WorkflowsExecutionEngineConfig,
+} from '../server/config';
 import { resumeWorkflow } from '../server/execution_functions';
 import { mockContextDependencies } from '../server/execution_functions/__mock__/context_dependencies';
 import { runWorkflow } from '../server/execution_functions/run_workflow';
@@ -55,6 +58,7 @@ export class WorkflowRunFixture {
     },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb default
     collectQueueMetrics: false,
+    recovery: DEFAULT_WORKFLOW_RECOVERY_CONFIG,
   };
   public readonly fakeKibanaRequest = {} as KibanaRequest;
   public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();
