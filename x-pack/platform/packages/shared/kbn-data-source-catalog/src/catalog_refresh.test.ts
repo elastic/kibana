@@ -55,16 +55,19 @@ describe('refreshCatalog', () => {
 
     // packageClient: returns a package whose data stream pattern matches the index
     const packageClient: PackageClientLike = {
-      getInstalledPackages: jest.fn().mockResolvedValue([
-        {
-          name: 'nginx',
-          version: '1.2.3',
-          title: 'Nginx',
-          description: 'Nginx integration',
-          status: 'installed',
-          dataStreams: [{ name: 'logs-nginx.access-*', title: 'Nginx Access Logs' }],
-        },
-      ]),
+      getInstalledPackages: jest.fn().mockResolvedValue({
+        items: [
+          {
+            name: 'nginx',
+            version: '1.2.3',
+            title: 'Nginx',
+            description: 'Nginx integration',
+            status: 'installed',
+            dataStreams: [{ name: 'logs-nginx.access-*', title: 'Nginx Access Logs' }],
+          },
+        ],
+        total: 1,
+      }),
     };
 
     const result = await refreshCatalog({

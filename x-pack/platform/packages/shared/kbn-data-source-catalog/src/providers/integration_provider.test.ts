@@ -18,20 +18,23 @@ describe('fetchIntegrationMetadata', () => {
   });
 
   it('returns a map of data stream name to integration metadata', async () => {
-    packageClient.getInstalledPackages.mockResolvedValue([
-      {
-        name: 'endpoint',
-        version: '8.14.0',
-        title: 'Elastic Endpoint',
-        description: 'Endpoint security integration',
-        status: 'installed',
-        dataStreams: [
-          { name: 'logs-endpoint.events.process-*', title: 'Endpoint Process Events' },
-          { name: 'logs-endpoint.events.network-*', title: 'Endpoint Network Events' },
-        ],
-        icons: [{ src: '/img/endpoint.svg', type: 'image/svg+xml' }],
-      },
-    ]);
+    packageClient.getInstalledPackages.mockResolvedValue({
+      items: [
+        {
+          name: 'endpoint',
+          version: '8.14.0',
+          title: 'Elastic Endpoint',
+          description: 'Endpoint security integration',
+          status: 'installed',
+          dataStreams: [
+            { name: 'logs-endpoint.events.process-*', title: 'Endpoint Process Events' },
+            { name: 'logs-endpoint.events.network-*', title: 'Endpoint Network Events' },
+          ],
+          icons: [{ src: '/img/endpoint.svg', type: 'image/svg+xml' }],
+        },
+      ],
+      total: 1,
+    });
 
     const result = await fetchIntegrationMetadata(packageClient);
 
@@ -55,14 +58,17 @@ describe('fetchIntegrationMetadata', () => {
   });
 
   it('handles packages with no data streams', async () => {
-    packageClient.getInstalledPackages.mockResolvedValue([
-      {
-        name: 'empty-package',
-        version: '1.0.0',
-        status: 'installed',
-        dataStreams: [],
-      },
-    ]);
+    packageClient.getInstalledPackages.mockResolvedValue({
+      items: [
+        {
+          name: 'empty-package',
+          version: '1.0.0',
+          status: 'installed',
+          dataStreams: [],
+        },
+      ],
+      total: 1,
+    });
 
     const result = await fetchIntegrationMetadata(packageClient);
 
@@ -70,7 +76,7 @@ describe('fetchIntegrationMetadata', () => {
   });
 
   it('returns empty map when no packages installed', async () => {
-    packageClient.getInstalledPackages.mockResolvedValue([]);
+    packageClient.getInstalledPackages.mockResolvedValue({ items: [], total: 0 });
 
     const result = await fetchIntegrationMetadata(packageClient);
 

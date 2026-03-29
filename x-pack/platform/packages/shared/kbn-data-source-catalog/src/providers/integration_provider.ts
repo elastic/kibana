@@ -7,8 +7,13 @@
 
 import type { IntegrationMetadata } from '../types';
 
+interface InstalledPackagesResponse {
+  items: InstalledPackage[];
+  total: number;
+}
+
 export interface PackageClientLike {
-  getInstalledPackages(params?: { perPage?: number; page?: number }): Promise<InstalledPackage[]>;
+  getInstalledPackages(params?: { perPage?: number; page?: number }): Promise<InstalledPackagesResponse>;
 }
 
 interface InstalledPackage {
@@ -33,10 +38,10 @@ function extractDataset(dataStreamName: string): string {
 export async function fetchIntegrationMetadata(
   packageClient: PackageClientLike
 ): Promise<Map<string, IntegrationMetadata>> {
-  const packages = await packageClient.getInstalledPackages({ perPage: 1000 });
+  const response = await packageClient.getInstalledPackages({ perPage: 1000 });
   const result = new Map<string, IntegrationMetadata>();
 
-  for (const pkg of packages) {
+  for (const pkg of response.items) {
     for (const ds of pkg.dataStreams) {
       result.set(ds.name, {
         package_name: pkg.name,
