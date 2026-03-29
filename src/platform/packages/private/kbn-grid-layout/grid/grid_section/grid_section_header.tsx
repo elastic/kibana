@@ -30,7 +30,7 @@ export interface GridSectionHeaderProps {
 
 export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderProps) => {
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
-  const lastTouchStartTimeRef = useRef<number>(0);
+  const ignoreCompabilityMouseEvent = useRef<boolean>(false);
 
   const { gridLayoutStateManager } = useGridLayoutContext();
   const startDrag = useGridLayoutSectionEvents({ sectionId });
@@ -96,24 +96,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     [startDrag]
   );
 
-  const handleSectionMouseDown = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      // Touch gestures can generate a subsequent synthetic mouse event (notably in mobile emulation),
-      // which would start a second interaction and cause the "click" toggle to run twice.
-      if (Date.now() - lastTouchStartTimeRef.current < 700) return;
-      handleSectionDragStart(e);
-    },
-    [handleSectionDragStart]
-  );
-
-  const handleSectionTouchStart = useCallback(
-    (e: React.TouchEvent<HTMLElement>) => {
-      lastTouchStartTimeRef.current = Date.now();
-      handleSectionDragStart(e);
-    },
-    [handleSectionDragStart]
-  );
-
   useEffect(() => {
     /**
      * This subscription is responsible for controlling whether or not the section title is
@@ -160,6 +142,9 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     const sectionInteractionSubscription = dragState$.subscribe(({ type, event }) => {
       const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
       if (!headerRef) return;
+      const isTouch = event?.sensorType === 'touch';
+      const isKeyboard = event?.sensorType === 'keyboard';
+      const isMouse = event?.sensorType === 'mouse';
 
       const handleFirstDrag = () => {
         collapseSectionOnDrag();
@@ -183,8 +168,12 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
       switch (type) {
         case 'init':
+          if (isTouch) {
+            ignoreCompabilityMouseEvent.current = true; // on touch devices, ignore the next mouse down event triggered automatically by the browser after the touchend event
+          }
+
           hasDraggedHeaderRef.current = false;
-          if (event?.sensorType === 'keyboard') {
+          if (isKeyboard) {
             handleFirstDrag();
           }
           break;
@@ -199,6 +188,12 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           break;
 
         case 'finish':
+          if (isMouse && ignoreCompabilityMouseEvent.current) {
+            ignoreCompabilityMouseEvent.current = false; // to prevent accidental section toggle on a touch device - we ignore the mouse down event which is triggered by the browser after a touch interaction and reset the ref for the next interaction
+            // technical comment: mouse down event is automatically triggered by the browser after the touchend event, so we need to ignore it to prevent toggle of collapse state on a touch device
+            return;
+          }
+
           const isClick = !hasDraggedHeaderRef.current;
           if (isClick) {
             toggleIsCollapsed();
@@ -276,8 +271,8 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         ref={(element: HTMLDivElement | null) => {
           gridLayoutStateManager.headerRefs.current[sectionId] = element;
         }}
-        onMouseDown={readOnly ? undefined : handleSectionMouseDown}
-        onTouchStart={readOnly ? undefined : handleSectionTouchStart}
+        onMouseDown={readOnly ? undefined : handleSectionDragStart}
+        onTouchStart={readOnly ? undefined : handleSectionDragStart}
         onClick={readOnly ? handleHeaderClick : undefined}
       >
         <GridSectionTitle
