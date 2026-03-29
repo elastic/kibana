@@ -313,133 +313,125 @@ describe(
     });
 
     // Combines: edit pack, ID validation, deactivate/activate, delete queries, and delete pack
-    describe(
-      'pack edit operations and lifecycle',
-      { tags: ['@ess', '@serverless'] },
-      () => {
-        let packId: string;
-        let packName: string;
+    describe('pack edit operations and lifecycle', { tags: ['@ess', '@serverless'] }, () => {
+      let packId: string;
+      let packName: string;
 
-        beforeEach(() => {
-          createStandardPack(savedQueryName).then((pack) => {
-            packId = pack.saved_object_id;
-            packName = pack.name;
-          });
+      beforeEach(() => {
+        createStandardPack(savedQueryName).then((pack) => {
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
+      });
 
-        afterEach(() => {
-          cleanupPack(packId);
+      afterEach(() => {
+        cleanupPack(packId);
+      });
+
+      it('should edit pack, validate unique ID, and manage queries', () => {
+        const newQueryName = 'new-query-name' + generateRandomStringName(1)[0];
+
+        // Edit pack: add new query with unique ID validation
+        preparePack(packName);
+        cy.getBySel('edit-pack-button').click();
+        cy.contains(`Edit ${packName}`);
+        cy.getBySel(ADD_QUERY_BUTTON).click();
+        cy.contains('Attach next query');
+        inputQuery('select * from uptime');
+        cy.get(formFieldInputSelector('id')).type(`${savedQueryName}{downArrow}{enter}`);
+        cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
+        cy.contains('ID must be unique').should('exist');
+        cy.get(formFieldInputSelector('id')).type(`${newQueryName}{downArrow}{enter}`);
+        cy.contains('ID must be unique').should('not.exist');
+        cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
+        cy.get(TABLE_ROWS).contains(newQueryName);
+        cy.getBySel(UPDATE_PACK_BUTTON).click();
+        closeModalIfVisible();
+        cy.contains(`Successfully updated "${packName}" pack`);
+        closeToastIfVisible();
+      });
+
+      it('should trigger validation when saved query is chosen with existing ID', () => {
+        preparePack(packName);
+        cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
+        cy.getBySel(ADD_QUERY_BUTTON).click();
+        cy.contains('Attach next query');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+        cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
+        cy.contains('ID must be unique').should('not.exist');
+        cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
+        cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
+        cy.contains('ID must be unique').should('exist');
+        cy.getBySel(FLYOUT_SAVED_QUERY_CANCEL_BUTTON).click();
+      });
+
+      it('should deactivate, activate, and delete all queries in pack', () => {
+        // Deactivate and activate
+        cy.contains('Packs').click();
+        changePackActiveStatus(packName);
+        changePackActiveStatus(packName);
+
+        // Delete all queries
+        preparePack(packName);
+        cy.contains(/^Edit$/).click();
+        cy.getBySel('checkboxSelectAll').click();
+        cy.contains(/^Delete \d+ quer(y|ies)/).click();
+        cy.contains(/^Update pack$/).click();
+        closeModalIfVisible();
+        cy.get('a').contains(packName).click();
+        cy.contains(`${packName} details`).should('exist');
+        cy.contains(/^No items found/).should('exist');
+      });
+
+      it('should delete pack', () => {
+        preparePack(packName);
+        cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
+        deleteAndConfirm('pack');
+      });
+    });
+
+    describe('should verify that packs are triggered', { tags: ['@ess', '@serverless'] }, () => {
+      let packId: string;
+      let packName: string;
+
+      beforeEach(() => {
+        createStandardPack(savedQueryName).then((pack) => {
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
+      });
 
-        it('should edit pack, validate unique ID, and manage queries', () => {
-          const newQueryName = 'new-query-name' + generateRandomStringName(1)[0];
+      afterEach(() => {
+        cleanupPack(packId);
+      });
 
-          // Edit pack: add new query with unique ID validation
-          preparePack(packName);
-          cy.getBySel('edit-pack-button').click();
-          cy.contains(`Edit ${packName}`);
-          cy.getBySel(ADD_QUERY_BUTTON).click();
-          cy.contains('Attach next query');
-          inputQuery('select * from uptime');
-          cy.get(formFieldInputSelector('id')).type(`${savedQueryName}{downArrow}{enter}`);
-          cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
-          cy.contains('ID must be unique').should('exist');
-          cy.get(formFieldInputSelector('id')).type(`${newQueryName}{downArrow}{enter}`);
-          cy.contains('ID must be unique').should('not.exist');
-          cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
-          cy.get(TABLE_ROWS).contains(newQueryName);
-          cy.getBySel(UPDATE_PACK_BUTTON).click();
-          closeModalIfVisible();
-          cy.contains(`Successfully updated "${packName}" pack`);
-          closeToastIfVisible();
-        });
+      it('', () => {
+        preparePack(packName);
+        cy.contains(`${packName} details`).should('exist');
 
-        it('should trigger validation when saved query is chosen with existing ID', () => {
-          preparePack(packName);
-          cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
-          cy.getBySel(ADD_QUERY_BUTTON).click();
-          cy.contains('Attach next query');
-          cy.getBySel('globalLoadingIndicator').should('not.exist');
-          cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
-          cy.contains('ID must be unique').should('not.exist');
-          cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
-          cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
-          cy.contains('ID must be unique').should('exist');
-          cy.getBySel(FLYOUT_SAVED_QUERY_CANCEL_BUTTON).click();
-        });
+        recurse<string>(
+          () => {
+            cy.getBySel('docsLoading').should('exist');
+            cy.getBySel('docsLoading').should('not.exist');
 
-        it('should deactivate, activate, and delete all queries in pack', () => {
-          // Deactivate and activate
-          cy.contains('Packs').click();
-          changePackActiveStatus(packName);
-          changePackActiveStatus(packName);
-
-          // Delete all queries
-          preparePack(packName);
-          cy.contains(/^Edit$/).click();
-          cy.getBySel('checkboxSelectAll').click();
-          cy.contains(/^Delete \d+ quer(y|ies)/).click();
-          cy.contains(/^Update pack$/).click();
-          closeModalIfVisible();
-          cy.get('a').contains(packName).click();
-          cy.contains(`${packName} details`).should('exist');
-          cy.contains(/^No items found/).should('exist');
-        });
-
-        it('should delete pack', () => {
-          preparePack(packName);
-          cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
-          deleteAndConfirm('pack');
-        });
-      }
-    );
-
-    describe(
-      'should verify that packs are triggered',
-      { tags: ['@ess', '@serverless'] },
-      () => {
-        let packId: string;
-        let packName: string;
-
-        beforeEach(() => {
-          createStandardPack(savedQueryName).then((pack) => {
-            packId = pack.saved_object_id;
-            packName = pack.name;
-          });
-        });
-
-        afterEach(() => {
-          cleanupPack(packId);
-        });
-
-        it('', () => {
-          preparePack(packName);
-          cy.contains(`${packName} details`).should('exist');
-
-          recurse<string>(
-            () => {
-              cy.getBySel('docsLoading').should('exist');
-              cy.getBySel('docsLoading').should('not.exist');
-
-              return cy
-                .get('tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent')
-                .invoke('text');
+            return cy
+              .get('tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent')
+              .invoke('text');
+          },
+          (response) => response !== '-',
+          {
+            timeout: 300000,
+            post: () => {
+              cy.reload();
             },
-            (response) => response !== '-',
-            {
-              timeout: 300000,
-              post: () => {
-                cy.reload();
-              },
-            }
-          );
-          cy.getBySel('last-results-date').should('exist');
-          cy.getBySel('docs-count-badge').contains('1');
-          cy.getBySel('agent-count-badge').contains('1');
-          cy.getBySel('packResultsErrorsEmpty').should('have.length', 1);
-        });
-      }
-    );
+          }
+        );
+        cy.getBySel('last-results-date').should('exist');
+        cy.getBySel('docs-count-badge').contains('1');
+        cy.getBySel('agent-count-badge').contains('1');
+        cy.getBySel('packResultsErrorsEmpty').should('have.length', 1);
+      });
+    });
 
     // Combines: open lens + open discover in new tab
     describe(
@@ -484,9 +476,7 @@ describe(
             cy.visit(lensUrl);
           });
           cy.getBySel('lnsWorkspace', { timeout: 120000 }).should('exist');
-          cy.getBySel('breadcrumbs').contains(
-            `Action pack_default--${packName}_${savedQueryName}`
-          );
+          cy.getBySel('breadcrumbs').contains(`Action pack_default--${packName}_${savedQueryName}`);
         });
 
         it('should open discover from pack details', () => {
