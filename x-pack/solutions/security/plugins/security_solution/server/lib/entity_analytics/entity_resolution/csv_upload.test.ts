@@ -8,6 +8,7 @@
 import { Readable } from 'stream';
 import type { Logger } from '@kbn/logging';
 import type { EntityStoreCRUDClient, ResolutionClient } from '@kbn/entity-store/server';
+import type { Entity } from '@kbn/entity-store/common';
 import { processResolutionCsvUpload } from './csv_upload';
 import type { HapiReadableStream } from '../../../types';
 
@@ -19,12 +20,13 @@ const createMockStream = (csvContent: string): HapiReadableStream => {
   return stream;
 };
 
-const createMockEntity = (entityId: string, resolvedTo?: string): Record<string, unknown> => ({
-  entity: {
-    id: entityId,
-    ...(resolvedTo ? { relationships: { resolution: { resolved_to: resolvedTo } } } : {}),
-  },
-});
+const createMockEntity = (entityId: string, resolvedTo?: string): Entity =>
+  ({
+    entity: {
+      id: entityId,
+      ...(resolvedTo ? { relationships: { resolution: { resolved_to: resolvedTo } } } : {}),
+    },
+  } as unknown as Entity);
 
 describe('processResolutionCsvUpload', () => {
   let mockCrudClient: jest.Mocked<EntityStoreCRUDClient>;
@@ -91,7 +93,7 @@ describe('processResolutionCsvUpload', () => {
     it('should accept all valid entity types', async () => {
       // target exists for all rows
       mockCrudClient.listEntities.mockResolvedValue({
-        entities: [createMockEntity('target:1') as any],
+        entities: [createMockEntity('target:1')],
         nextSearchAfter: undefined,
       });
 
@@ -132,7 +134,7 @@ describe('processResolutionCsvUpload', () => {
 
     it('should return error when target is an alias', async () => {
       mockCrudClient.listEntities.mockResolvedValue({
-        entities: [createMockEntity('target:alias', 'target:golden') as any],
+        entities: [createMockEntity('target:alias', 'target:golden')],
         nextSearchAfter: undefined,
       });
 
@@ -146,7 +148,7 @@ describe('processResolutionCsvUpload', () => {
     it('should cache target validation results', async () => {
       // Target exists and is valid
       mockCrudClient.listEntities.mockResolvedValue({
-        entities: [createMockEntity('target:1') as any],
+        entities: [createMockEntity('target:1')],
         nextSearchAfter: undefined,
       });
 
@@ -193,7 +195,7 @@ describe('processResolutionCsvUpload', () => {
       // Subsequent calls: entity matching
       mockCrudClient.listEntities
         .mockResolvedValueOnce({
-          entities: [createMockEntity('target:golden') as any],
+          entities: [createMockEntity('target:golden')],
           nextSearchAfter: undefined,
         })
         .mockResolvedValue({
@@ -215,12 +217,12 @@ describe('processResolutionCsvUpload', () => {
         .mockReset()
         // Target lookup
         .mockResolvedValueOnce({
-          entities: [createMockEntity('target:golden') as any],
+          entities: [createMockEntity('target:golden')],
           nextSearchAfter: undefined,
         })
         // Entity matching: returns only the target itself
         .mockResolvedValueOnce({
-          entities: [createMockEntity('target:golden') as any],
+          entities: [createMockEntity('target:golden')],
           nextSearchAfter: undefined,
         });
 
@@ -252,17 +254,17 @@ describe('processResolutionCsvUpload', () => {
         .mockReset()
         // Target lookup
         .mockResolvedValueOnce({
-          entities: [createMockEntity('target:golden') as any],
+          entities: [createMockEntity('target:golden')],
           nextSearchAfter: undefined,
         })
         // First page of matches
         .mockResolvedValueOnce({
-          entities: [createMockEntity('alias:1') as any],
+          entities: [createMockEntity('alias:1')],
           nextSearchAfter: [1234, 5678],
         })
         // Second page (empty = done)
         .mockResolvedValueOnce({
-          entities: [createMockEntity('alias:2') as any],
+          entities: [createMockEntity('alias:2')],
           nextSearchAfter: undefined,
         });
 
@@ -287,11 +289,11 @@ describe('processResolutionCsvUpload', () => {
       // Target lookup returns valid target, then entity match returns one alias
       mockCrudClient.listEntities
         .mockResolvedValueOnce({
-          entities: [createMockEntity('target:golden') as any],
+          entities: [createMockEntity('target:golden')],
           nextSearchAfter: undefined,
         })
         .mockResolvedValueOnce({
-          entities: [createMockEntity('alias:1') as any],
+          entities: [createMockEntity('alias:1')],
           nextSearchAfter: undefined,
         });
     });
@@ -342,7 +344,7 @@ describe('processResolutionCsvUpload', () => {
   describe('CSV parsing', () => {
     it('should normalize headers to lowercase and trim whitespace', async () => {
       mockCrudClient.listEntities.mockResolvedValue({
-        entities: [createMockEntity('target:1') as any],
+        entities: [createMockEntity('target:1')],
         nextSearchAfter: undefined,
       });
 
@@ -357,7 +359,7 @@ describe('processResolutionCsvUpload', () => {
 
     it('should trim values', async () => {
       mockCrudClient.listEntities.mockResolvedValue({
-        entities: [createMockEntity('target:1') as any],
+        entities: [createMockEntity('target:1')],
         nextSearchAfter: undefined,
       });
 
@@ -390,12 +392,12 @@ describe('processResolutionCsvUpload', () => {
       mockCrudClient.listEntities
         // Row 1: target lookup
         .mockResolvedValueOnce({
-          entities: [createMockEntity('target:1') as any],
+          entities: [createMockEntity('target:1')],
           nextSearchAfter: undefined,
         })
         // Row 1: entity matching
         .mockResolvedValueOnce({
-          entities: [createMockEntity('alias:1') as any],
+          entities: [createMockEntity('alias:1')],
           nextSearchAfter: undefined,
         })
         // Row 3: target lookup (cached from row 1)
