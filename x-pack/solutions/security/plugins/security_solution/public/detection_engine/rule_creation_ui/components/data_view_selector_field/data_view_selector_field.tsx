@@ -12,6 +12,7 @@ import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { isDataViewIdValid } from '../../validators/data_view_id_validator_factory';
 import { useDataViewListItems } from './use_data_view_list_items';
+import { CatalogSuggestions } from './catalog_suggestions';
 import * as i18n from './translations';
 
 const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
@@ -94,6 +95,7 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
           data-test-subj="detectionsDataViewSelectorDropdown"
         />
       </EuiFormRow>
+      <CatalogSuggestions />
     </>
   );
 }
