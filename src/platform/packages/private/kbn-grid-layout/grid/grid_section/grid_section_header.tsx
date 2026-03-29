@@ -71,9 +71,10 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
   const collapseSectionOnDrag = useCallback(() => {
     const section = gridLayoutStateManager.gridLayout$.getValue()[sectionId];
-    if (section && (section.isMainSection || section.isCollapsed)) return;
+    if (!section || section.isMainSection) return; // main sections cannot be collapsed
+    if (section.isCollapsed || panelCount === 0) return; // prevent collapsing if already collapsed or empty
     toggleIsCollapsed();
-  }, [gridLayoutStateManager, sectionId, toggleIsCollapsed]);
+  }, [gridLayoutStateManager, sectionId, toggleIsCollapsed, panelCount]);
 
   const shouldIgnoreHeaderClick = (target: EventTarget | null) => {
     if (!(target instanceof Element)) return false;
