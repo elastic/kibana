@@ -10,6 +10,7 @@ import { CatalogClient } from './catalog_client';
 import { discoverIndexMetadata } from './providers/index_metadata_provider';
 import { fetchIntegrationMetadata, type PackageClientLike } from './providers/integration_provider';
 import { fetchIndexStats } from './providers/index_stats_provider';
+import { generateHeuristicSummary } from './providers/heuristic_summary_provider';
 import type { DataSourceEntry, IntegrationMetadata } from './types';
 
 interface RefreshCatalogParams {
@@ -61,6 +62,11 @@ export async function refreshCatalog({
         entry.stats = stats;
       }
     }
+  }
+
+  // Step 5: Generate heuristic summaries for all entries
+  for (const entry of entries) {
+    entry.semantic = generateHeuristicSummary(entry);
   }
 
   await catalogClient.bulkUpsert(entries);

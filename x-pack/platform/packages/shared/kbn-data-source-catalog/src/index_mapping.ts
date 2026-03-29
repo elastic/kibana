@@ -68,6 +68,12 @@ export const catalogIndexMapping: MappingTypeMapping = {
         field_annotations: { type: 'object', enabled: false },
         topics: { type: 'keyword' },
         mitre_techniques: { type: 'keyword' },
+        embedding: {
+          type: 'dense_vector',
+          dims: 384,
+          index: true,
+          similarity: 'cosine',
+        },
       },
     },
     catalog_version: { type: 'integer' },

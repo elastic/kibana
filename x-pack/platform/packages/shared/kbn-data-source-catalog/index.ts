@@ -31,3 +31,4 @@ export { CatalogClient } from './src/catalog_client';
 export { CatalogQuery } from './src/catalog_query';
 export { refreshCatalog } from './src/catalog_refresh';
 export type { PackageClientLike } from './src/providers/integration_provider';
+export { generateHeuristicSummary } from './src/providers/heuristic_summary_provider';
