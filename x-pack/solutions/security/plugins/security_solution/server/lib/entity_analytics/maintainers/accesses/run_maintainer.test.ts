@@ -182,22 +182,25 @@ describe('runMaintainer', () => {
   });
 
   describe('ES|QL query failure', () => {
-    it('throws when ES|QL query fails', async () => {
+    it('logs the error and skips the integration instead of throwing', async () => {
       const buckets = [createBucket('user-1')];
       esClient.search.mockResolvedValueOnce(createAggResponse(buckets));
 
       const genericError = new Error('search_phase_execution_exception');
       esClient.esql.query.mockRejectedValueOnce(genericError);
 
-      await expect(
-        runMaintainer({
-          esClient,
-          logger,
-          namespace: 'default',
-          crudClient,
-          integrations: [mockIntegration],
-        })
-      ).rejects.toThrow('search_phase_execution_exception');
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        integrations: [mockIntegration],
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('search_phase_execution_exception')
+      );
+      expect(result.totalAccessRecords).toBe(0);
     });
   });
 
