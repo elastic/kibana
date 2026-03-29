@@ -144,7 +144,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       if (!headerRef) return;
       const isTouch = event?.sensorType === 'touch';
       const isKeyboard = event?.sensorType === 'keyboard';
-      const isMouse = event?.sensorType === 'mouse';
 
       const handleFirstDrag = () => {
         collapseSectionOnDrag();
