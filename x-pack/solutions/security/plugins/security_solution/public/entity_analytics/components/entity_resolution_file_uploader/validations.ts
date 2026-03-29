@@ -112,7 +112,7 @@ export const validateParsedRows = (
     const error = validateRow(row);
     if (error) {
       invalid.push(row);
-      errors.push({ message: error, index: i + 1 }); // 1-based original CSV row number
+      errors.push({ message: error, index: i + 2 }); // +2: 1-based + skip header row
     } else {
       valid.push(row);
     }
