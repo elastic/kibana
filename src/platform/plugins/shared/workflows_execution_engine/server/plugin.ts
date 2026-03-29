@@ -175,6 +175,7 @@ export class WorkflowsExecutionEnginePlugin
                 actions: pluginsStart.actions,
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
+                executionIdentity: pluginsStart.executionIdentity,
                 config,
               };
 
@@ -255,6 +256,7 @@ export class WorkflowsExecutionEnginePlugin
                 actions: pluginsStart.actions,
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
+                executionIdentity: pluginsStart.executionIdentity,
                 config,
               };
 
@@ -342,6 +344,7 @@ export class WorkflowsExecutionEnginePlugin
                 actions: pluginsStart.actions,
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
+                executionIdentity: pluginsStart.executionIdentity,
                 config,
               };
               const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -516,6 +519,7 @@ export class WorkflowsExecutionEnginePlugin
       actions: plugins.actions,
       taskManager: plugins.taskManager,
       workflowsExtensions: plugins.workflowsExtensions,
+      executionIdentity: plugins.executionIdentity,
       config: this.config,
     };
 

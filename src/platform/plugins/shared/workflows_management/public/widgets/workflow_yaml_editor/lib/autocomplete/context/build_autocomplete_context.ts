@@ -209,5 +209,7 @@ export function buildAutocompleteContext({
     },
     currentWorkflowId: editorState?.workflow?.id ?? null,
     workflowDefinition: workflowDefinition ?? null,
+
+    executionIdentities: editorState?.executionIdentities ?? [],
   };
 }

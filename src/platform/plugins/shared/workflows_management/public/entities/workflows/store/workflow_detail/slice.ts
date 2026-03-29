@@ -116,6 +116,12 @@ const workflowDetailSlice = createSlice({
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
     },
+    setExecutionIdentities: (
+      state,
+      action: { payload: WorkflowDetailState['executionIdentities'] }
+    ) => {
+      state.executionIdentities = action.payload;
+    },
     setWorkflows: (state, action: { payload: WorkflowDetailState['workflows'] }) => {
       state.workflows = action.payload;
     },
@@ -200,6 +206,7 @@ export const {
   setTestStepModalOpenStepId,
   clearReplay,
   setConnectors,
+  setExecutionIdentities,
   setWorkflows,
   setExecution,
   clearExecution,

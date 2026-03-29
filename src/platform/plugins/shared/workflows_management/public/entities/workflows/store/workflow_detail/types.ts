@@ -53,6 +53,8 @@ export interface WorkflowDetailState {
   };
   /** The connectors data */
   connectors?: ConnectorsResponse;
+  /** Execution identities (service accounts) for autocomplete */
+  executionIdentities?: Array<{ id: string; name: string; description: string }>;
   /** The workflows data for lookup by ID (always present, empty if not loaded yet) */
   workflows: WorkflowsResponse;
   /** The schema for the workflow, depends on the connectors available */

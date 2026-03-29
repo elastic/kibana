@@ -38,6 +38,7 @@ const storageSettings = {
       updated_at: types.date({}), // We sort by this
       // Non-searchable fields (stored but not indexed)
       yaml: types.text({ index: false }),
+      execution_identity: types.keyword({}),
       definition: types.object({ enabled: false }),
       deleted_at: types.date({}),
       valid: types.boolean({}),
@@ -55,6 +56,7 @@ export interface WorkflowProperties {
   tags: string[];
   triggerTypes: string[];
   yaml: string;
+  execution_identity?: string;
   definition: WorkflowYaml | null;
   createdBy: string;
   lastUpdatedBy: string;

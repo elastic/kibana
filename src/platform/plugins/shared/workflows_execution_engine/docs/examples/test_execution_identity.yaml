@@ -1,0 +1,14 @@
+version: '1'
+name: Execution Identity Test
+description: Test workflow that uses a service account to read a restricted index
+execution_identity: demo-sa
+triggers:
+  - type: manual
+steps:
+  - id: search_restricted_index
+    elasticsearch.search:
+      index: demo-sa-only
+      body:
+        query:
+          match_all: {}
+        size: 10

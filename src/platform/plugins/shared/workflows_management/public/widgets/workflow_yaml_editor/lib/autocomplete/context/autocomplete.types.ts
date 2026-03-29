@@ -63,6 +63,9 @@ export interface AutocompleteContext {
   workflows: WorkflowsResponse;
   currentWorkflowId: string | null;
   workflowDefinition: WorkflowYaml | null;
+
+  // execution identities for service account autocompletion
+  executionIdentities: Array<{ id: string; name: string; description: string }>;
 }
 
 // Extended context includes Monaco editor model and position for advanced autocompletion features

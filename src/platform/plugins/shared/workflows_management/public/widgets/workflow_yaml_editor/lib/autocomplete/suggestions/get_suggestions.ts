@@ -12,6 +12,7 @@ import { LoopStepTypes } from '@kbn/workflows';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
 import { getCustomPropertySuggestions } from './custom_property/get_custom_property_suggestions';
+import { getExecutionIdentitySuggestions } from './execution_identity/get_execution_identity_suggestions';
 import { getJsonSchemaSuggestions } from './json_schema/get_json_schema_suggestions';
 import {
   createLiquidBlockKeywordCompletions,
@@ -91,6 +92,9 @@ async function handleMatchTypeSuggestions(
   switch (lineParseResult.matchType) {
     case 'connector-id':
       return getConnectorIdSuggestions(autocompleteContext);
+
+    case 'execution-identity':
+      return getExecutionIdentitySuggestions(autocompleteContext);
 
     case 'workflow-id':
       return getWorkflowSuggestions(autocompleteContext);

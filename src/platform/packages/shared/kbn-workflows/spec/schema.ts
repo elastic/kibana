@@ -754,6 +754,10 @@ const WorkflowSchemaBase = z.object({
     .optional(),
   outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
   consts: WorkflowConstsSchema.optional(),
+  execution_identity: z
+    .string()
+    .optional()
+    .describe('Service account identity ID for workflow execution'),
   steps: z.array(StepSchema).min(1),
 });
 
@@ -835,6 +839,7 @@ const WorkflowSchemaForAutocompleteBase = z
       .optional()
       .catch(undefined),
     consts: WorkflowConstsSchema.optional(),
+    execution_identity: z.string().optional().catch(undefined),
     steps: z
       .array(
         z
