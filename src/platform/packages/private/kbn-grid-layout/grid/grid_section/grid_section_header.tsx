@@ -38,7 +38,7 @@ export interface GridSectionHeaderProps {
 export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderProps) => {
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
   const isGhostMouseDown = useRef<boolean>(false);
-  const hasBeenDragged = useRef(false);
+  const hasBeenDragged = useRef<boolean>(false);
 
   const { gridLayoutStateManager } = useGridLayoutContext();
   const startDrag = useGridLayoutSectionEvents({ sectionId });
@@ -423,9 +423,7 @@ const styles = {
         backgroundColor: euiTheme.colors.backgroundBasePlain, // needed to prevent the bug with transparent background while dragging
         '.kbnGridSection--dragHandle': {
           cursor: 'move',
-          userSelect: 'none',
           opacity: 1,
-          pointerEvents: 'none',
         },
       },
     }),
