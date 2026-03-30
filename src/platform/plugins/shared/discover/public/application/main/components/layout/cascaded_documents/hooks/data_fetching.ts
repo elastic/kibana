@@ -22,6 +22,7 @@ import useLatest from 'react-use/lib/useLatest';
 import { type ESQLDataGroupNode } from '../blocks';
 import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
 import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
+import { useCascadedDocumentsTelemetry } from '../telemetry';
 
 interface UseGroupedCascadeDataProps
   extends Pick<UnifiedDataTableProps, 'rows'>,
@@ -159,6 +160,7 @@ export function useDataCascadeRowExpansionHandlers({
   > {
   const { cascadedDocumentsFetcher, esqlQuery, esqlVariables, timeRange } =
     useCascadedDocumentsContext();
+  const { trackCascadeExpanded, trackCascadeCollapsed } = useCascadedDocumentsTelemetry();
 
   /**
    * Callback invoked when a group node gets expanded, used to fetch data for group nodes.
@@ -191,6 +193,8 @@ export function useDataCascadeRowExpansionHandlers({
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>
     >['onCascadeLeafNodeExpanded']
   >(({ row, nodePath, nodePathMap }) => {
+    trackCascadeExpanded(row.id);
+
     return cascadedDocumentsFetcher.fetchCascadedDocuments({
       nodeId: row.id,
       nodeType: 'leaf',
@@ -211,6 +215,8 @@ export function useDataCascadeRowExpansionHandlers({
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['onCascadeLeafNodeCollapsed']
     >
   >(({ row }) => {
+    trackCascadeCollapsed(row.id);
+
     cascadedDocumentsFetcher.cancelFetch(row.id);
   });
 
