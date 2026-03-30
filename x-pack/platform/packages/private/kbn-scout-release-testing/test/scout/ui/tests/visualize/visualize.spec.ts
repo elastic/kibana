@@ -77,9 +77,10 @@ test.describe('Visualize app', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('save Lens visualization to existing dashboard', async () => {
-      await pageObjects.lens.save('Test Lens Visualization', () =>
-        pageObjects.visualize.selectExistingDashboard(SAMPLE_DASHBOARD)
-      );
+      await pageObjects.lens.save('Test Lens Visualization', {
+        addToDashboard: 'existing',
+        dashboardTitle: SAMPLE_DASHBOARD,
+      });
     });
 
     await test.step('verify panel added to dashboard', async () => {

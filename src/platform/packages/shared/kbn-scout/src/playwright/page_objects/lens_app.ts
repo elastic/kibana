@@ -65,17 +65,39 @@ export class LensApp {
   }
 
   /**
-   * Opens the Lens save modal, fills in the title, and confirms.
-   * Use `beforeSave` to configure dashboard target or other modal options
-   * before the confirm button is clicked.
+   * Opens the Lens save modal, fills in the title, optionally selects
+   * a dashboard target, and confirms.
    */
-  async save(title: string, beforeSave?: () => Promise<void>) {
+  async save(
+    title: string,
+    options?:
+      | {
+          addToDashboard: 'existing';
+          dashboardTitle: string;
+        }
+      | {
+          addToDashboard: 'new';
+        }
+      | {
+          addToDashboard: 'none';
+        }
+  ) {
     await this.saveButton.click();
     await expect(this.saveModal).toBeVisible();
     await this.savedObjectTitleInput.fill(title);
-    if (beforeSave) {
-      await beforeSave();
+
+    if (options?.addToDashboard === 'existing') {
+      await this.page.locator('label[for="existing-dashboard-option"]').click();
+      await this.page.testSubj.locator('open-dashboard-picker').click();
+      await this.page.testSubj
+        .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
+        .click();
+    } else if (options?.addToDashboard === 'new') {
+      await this.page.locator('label[for="new-dashboard-option"]').click();
+    } else if (options?.addToDashboard === 'none') {
+      await this.page.locator('label[for="add-to-library-option"]').click();
     }
+
     await this.confirmSaveButton.click();
     await expect(this.saveModal).toBeHidden();
   }
