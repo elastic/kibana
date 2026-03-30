@@ -51,6 +51,7 @@ export const SharepointServer: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+    isTechnicalPreview: true,
   },
 
   auth: {
