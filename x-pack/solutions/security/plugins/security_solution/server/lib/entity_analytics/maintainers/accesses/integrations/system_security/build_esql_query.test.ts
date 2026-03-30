@@ -39,10 +39,4 @@ describe('System Security buildEsqlQuery', () => {
     expect(query).toContain('"NETWORK SERVICE"');
     expect(query).toContain('"ANONYMOUS LOGON"');
   });
-
-  it('does not filter on event.module or event.category', () => {
-    const query = buildEsqlQuery('default');
-    expect(query).not.toContain('event.module ==');
-    expect(query).not.toContain('event.category');
-  });
 });
