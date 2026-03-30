@@ -8,11 +8,7 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import {
-  inputsSelectors,
-  sourcererSelectors,
-  type inputsModel,
-} from '../../../../common/store';
+import { inputsSelectors, sourcererSelectors, type inputsModel } from '../../../../common/store';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import type { UserItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';

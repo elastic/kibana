@@ -40,7 +40,7 @@ import { formatInferenceProviderError } from '../../../../routes/utils/create_co
 import { resolveConnectorId } from '../../../../routes/utils/resolve_connector_id';
 import type { TaskContext } from '..';
 import type { TaskParams } from '../../types';
-import { PromptsConfigService } from '../../../saved_objects/significant_events/prompts_config_service';
+import { PromptsConfigService } from '../../../sig_events/saved_objects/prompts_config_service';
 import { cancellableTask } from '../../cancellable_task';
 import { MAX_FEATURE_AGE_MS } from '../../../streams/feature/feature_client';
 import { isDefinitionNotFoundError } from '../../../streams/errors/definition_not_found_error';
