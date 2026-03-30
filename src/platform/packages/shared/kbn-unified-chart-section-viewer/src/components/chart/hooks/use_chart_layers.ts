@@ -30,7 +30,10 @@ interface UseChartLayersParams {
  * Resolves the unit for a metric by normalizing and selecting the best option.
  * Normalizes raw units (e.g., 'byte' -> 'bytes') and handles multiple units.
  */
-const resolveMetricUnit = (metricName: string, units: (string | null | undefined)[]): MetricUnit | undefined => {
+const resolveMetricUnit = (
+  metricName: string,
+  units: (string | null | undefined)[]
+): MetricUnit | undefined => {
   // Filter out null/undefined values and normalize each unit
   const normalizedUnits = units
     .filter((u) => u != null)
