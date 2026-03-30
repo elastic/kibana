@@ -57,32 +57,23 @@ export function registerAlertingV2UsageCollector(
     schema: {
       has_errors: { type: 'boolean' },
       error_messages: { type: 'array', items: { type: 'keyword' } },
-
       count_total: { type: 'long' },
       count_enabled: { type: 'long' },
-
       count_by_kind: { DYNAMIC_KEY: { type: 'long' } },
       count_by_schedule: { DYNAMIC_KEY: { type: 'long' } },
       count_by_lookback: { DYNAMIC_KEY: { type: 'long' } },
-
       count_with_query_condition: { type: 'long' },
-
       count_with_recovery_policy: { type: 'long' },
       count_by_recovery_policy_type: { DYNAMIC_KEY: { type: 'long' } },
       count_with_recovery_query_condition: { type: 'long' },
-
       count_by_pending_timeframe: { DYNAMIC_KEY: { type: 'long' } },
       count_by_recovering_timeframe: { DYNAMIC_KEY: { type: 'long' } },
-
       count_with_grouping: { type: 'long' },
       avg_grouping_fields_count: { type: 'float' },
-
       count_with_no_data: { type: 'long' },
       count_by_no_data_behavior: { DYNAMIC_KEY: { type: 'long' } },
       count_by_no_data_timeframe: { DYNAMIC_KEY: { type: 'long' } },
-
       count_notification_policies: { type: 'long' },
-
       min_created_at: { type: 'date' },
 
       notification_policies_count: { type: 'long' },

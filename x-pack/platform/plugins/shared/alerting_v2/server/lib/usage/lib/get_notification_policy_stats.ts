@@ -7,39 +7,21 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
-
-const SO_TYPE = NOTIFICATION_POLICY_SAVED_OBJECT_TYPE;
-const TERMS_SIZE = 100;
-
-interface NotificationPolicyStatsAggregations {
-  unique_workflow_count: { value: number };
-  count_by_throttle_interval: { buckets: Array<{ key: string; doc_count: number }> };
-  count_with_group_by: { doc_count: number };
-  avg_group_by_fields_count: { value: number | null };
-  count_with_matcher: { doc_count: number };
-}
-
-export interface NotificationPolicyStats {
-  notification_policies_count: number;
-  notification_policies_unique_workflow_count: number;
-  notification_policies_count_with_matcher: number;
-  notification_policies_count_with_group_by: number;
-  notification_policies_avg_group_by_fields_count: number | null;
-  notification_policies_count_by_throttle_interval: Record<string, number>;
-}
+import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { TERMS_SIZE, bucketsToRecord } from './constants';
+import type { NotificationPolicyStatsAggregations, NotificationPolicyStatsResults } from './types';
 
 export async function getNotificationPolicyStats(
   esClient: ElasticsearchClient,
   logger: Logger
-): Promise<NotificationPolicyStats> {
+): Promise<NotificationPolicyStatsResults> {
   const response = await esClient.search({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     size: 0,
     track_total_hits: true,
     query: {
       bool: {
-        filter: [{ term: { type: SO_TYPE } }],
+        filter: [{ term: { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } }],
       },
     },
     // Runtime mappings for fields not indexed in the notification policy mappings
@@ -48,7 +30,7 @@ export async function getNotificationPolicyStats(
         type: 'boolean',
         script: {
           source: `
-            def np = params._source['${SO_TYPE}'];
+            def np = params._source['${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}'];
             if (np != null) {
               emit(np['matcher'] != null);
             } else {
@@ -61,7 +43,7 @@ export async function getNotificationPolicyStats(
         type: 'keyword',
         script: {
           source: `
-            def np = params._source['${SO_TYPE}'];
+            def np = params._source['${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}'];
             if (np != null) {
               def throttle = np['throttle'];
               if (throttle != null) {
@@ -76,7 +58,7 @@ export async function getNotificationPolicyStats(
         type: 'long',
         script: {
           source: `
-            def np = params._source['${SO_TYPE}'];
+            def np = params._source['${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}'];
             if (np != null) {
               def groupBy = np['groupBy'];
               if (groupBy != null) emit((long) groupBy.size());
@@ -87,7 +69,7 @@ export async function getNotificationPolicyStats(
     },
     aggs: {
       unique_workflow_count: {
-        cardinality: { field: `${SO_TYPE}.destinations.id` },
+        cardinality: { field: `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.destinations.id` },
       },
       count_with_matcher: {
         filter: { term: { np_has_matcher: true } },
@@ -96,7 +78,7 @@ export async function getNotificationPolicyStats(
         terms: { field: 'np_throttle_interval', size: TERMS_SIZE },
       },
       count_with_group_by: {
-        filter: { exists: { field: `${SO_TYPE}.groupBy` } },
+        filter: { exists: { field: `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.groupBy` } },
       },
       avg_group_by_fields_count: {
         avg: { field: 'np_group_by_count' },
@@ -115,13 +97,8 @@ export async function getNotificationPolicyStats(
     notification_policies_count_with_matcher: aggs.count_with_matcher.doc_count,
     notification_policies_count_with_group_by: aggs.count_with_group_by.doc_count,
     notification_policies_avg_group_by_fields_count: aggs.avg_group_by_fields_count.value,
-    notification_policies_count_by_throttle_interval:
-      aggs.count_by_throttle_interval.buckets.reduce<Record<string, number>>(
-        (acc, { key, doc_count: count }) => {
-          acc[key] = count;
-          return acc;
-        },
-        {}
-      ),
+    notification_policies_count_by_throttle_interval: bucketsToRecord(
+      aggs.count_by_throttle_interval.buckets
+    ),
   };
 }

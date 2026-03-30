@@ -7,66 +7,17 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { RULE_SAVED_OBJECT_TYPE, NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
-
-const TERMS_SIZE = 100;
-
-interface TermsBucket {
-  key: string;
-  doc_count: number;
-}
-
-interface RuleStatsAggregations {
-  count_enabled: { doc_count: number };
-  count_by_kind: { buckets: TermsBucket[] };
-  count_by_schedule: { buckets: TermsBucket[] };
-  count_by_lookback: { buckets: TermsBucket[] };
-  count_with_query_condition: { doc_count: number };
-  count_with_recovery_policy: { doc_count: number };
-  count_by_recovery_policy_type: { buckets: TermsBucket[] };
-  count_with_recovery_query_condition: { doc_count: number };
-  count_by_pending_timeframe: { buckets: TermsBucket[] };
-  count_by_recovering_timeframe: { buckets: TermsBucket[] };
-  count_with_grouping: { doc_count: number };
-  avg_grouping_fields_count: { value: number | null };
-  count_with_no_data: { doc_count: number };
-  count_by_no_data_behavior: { buckets: TermsBucket[] };
-  count_by_no_data_timeframe: { buckets: TermsBucket[] };
-  min_created_at: { value: number | null; value_as_string?: string };
-}
-
-function bucketsToRecord(buckets: TermsBucket[]): Record<string, number> {
-  return buckets.reduce<Record<string, number>>((acc, { key, doc_count: count }) => {
-    acc[key] = count;
-    return acc;
-  }, {});
-}
-
-export interface RuleStats {
-  count_total: number;
-  count_enabled: number;
-  count_by_kind: Record<string, number>;
-  count_by_schedule: Record<string, number>;
-  count_by_lookback: Record<string, number>;
-  count_with_query_condition: number;
-  count_with_recovery_policy: number;
-  count_by_recovery_policy_type: Record<string, number>;
-  count_with_recovery_query_condition: number;
-  count_by_pending_timeframe: Record<string, number>;
-  count_by_recovering_timeframe: Record<string, number>;
-  count_with_grouping: number;
-  avg_grouping_fields_count: number | null;
-  count_with_no_data: number;
-  count_by_no_data_behavior: Record<string, number>;
-  count_by_no_data_timeframe: Record<string, number>;
-  count_notification_policies: number;
-  min_created_at: string | null;
-}
+import {
+  RULE_SAVED_OBJECT_TYPE,
+  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../saved_objects';
+import { TERMS_SIZE, bucketsToRecord } from './constants';
+import type { RuleStatsAggregations, RuleStatsResults } from './types';
 
 export async function getRuleStats(
   esClient: ElasticsearchClient,
   logger: Logger
-): Promise<RuleStats> {
+): Promise<RuleStatsResults> {
   const [ruleStats, notificationPolicyCount] = await Promise.all([
     fetchRuleAggregations(esClient, logger),
     fetchNotificationPolicyCount(esClient, logger),
@@ -78,7 +29,7 @@ export async function getRuleStats(
 async function fetchRuleAggregations(
   esClient: ElasticsearchClient,
   logger: Logger
-): Promise<Omit<RuleStats, 'count_notification_policies'>> {
+): Promise<Omit<RuleStatsResults, 'count_notification_policies'>> {
   const response = await esClient.search({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     size: 0,
@@ -218,7 +169,6 @@ async function fetchRuleAggregations(
           exists: { field: `${RULE_SAVED_OBJECT_TYPE}.evaluation.query.condition` },
         },
       },
-      // recovery_policy: use runtime field (enabled:false in mappings)
       count_with_recovery_policy: {
         filter: { exists: { field: 'rule_recovery_policy_type' } },
       },
@@ -228,21 +178,18 @@ async function fetchRuleAggregations(
       count_with_recovery_query_condition: {
         filter: { term: { rule_has_recovery_query_condition: true } },
       },
-      // state_transition: use runtime fields (enabled:false in mappings)
       count_by_pending_timeframe: {
         terms: { field: 'rule_pending_timeframe', size: TERMS_SIZE },
       },
       count_by_recovering_timeframe: {
         terms: { field: 'rule_recovering_timeframe', size: TERMS_SIZE },
       },
-      // grouping: fields is indexed, but array length requires runtime field
       count_with_grouping: {
         filter: { exists: { field: `${RULE_SAVED_OBJECT_TYPE}.grouping.fields` } },
       },
       avg_grouping_fields_count: {
         avg: { field: 'rule_grouping_fields_count' },
       },
-      // no_data: use runtime fields (enabled:false in mappings)
       count_with_no_data: {
         filter: { exists: { field: 'rule_no_data_behavior' } },
       },

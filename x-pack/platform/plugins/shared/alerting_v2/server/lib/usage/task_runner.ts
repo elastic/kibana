@@ -8,9 +8,9 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RunContext, IntervalSchedule } from '@kbn/task-manager-plugin/server';
 import { emptyState, type LatestTaskStateSchema } from './task_state';
-import { getRuleStats } from './get_rule_stats';
-import { getNotificationPolicyStats } from './get_notification_policy_stats';
-import { getAlertStats } from './get_alert_stats';
+import { getRuleStats } from './lib/get_rule_stats';
+import { getNotificationPolicyStats } from './lib/get_notification_policy_stats';
+import { getAlertStats } from './lib/get_alert_stats';
 
 export function telemetryTaskRunner(
   logger: Logger,

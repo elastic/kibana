@@ -1,0 +1,216 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { getRuleStats } from './get_rule_stats';
+
+const elasticsearch = elasticsearchServiceMock.createStart();
+const esClient = elasticsearch.client.asInternalUser;
+let logger: MockedLogger;
+
+beforeEach(() => {
+  jest.resetAllMocks();
+  logger = loggerMock.create();
+});
+
+function mockRuleSearchResponse({
+  total = 20,
+  countEnabled = 15,
+  kindBuckets = [
+    { key: 'metric', doc_count: 12 },
+    { key: 'log', doc_count: 8 },
+  ],
+  scheduleBuckets = [
+    { key: '1m', doc_count: 10 },
+    { key: '5m', doc_count: 10 },
+  ],
+  lookbackBuckets = [{ key: '5m', doc_count: 20 }],
+  countWithQueryCondition = 5,
+  countWithRecoveryPolicy = 3,
+  recoveryPolicyTypeBuckets = [{ key: 'auto', doc_count: 3 }],
+  countWithRecoveryQueryCondition = 1,
+  pendingTimeframeBuckets = [{ key: '5m', doc_count: 8 }],
+  recoveringTimeframeBuckets = [{ key: '10m', doc_count: 6 }],
+  countWithGrouping = 4,
+  avgGroupingFieldsCount = 2.0,
+  countWithNoData = 7,
+  noDataBehaviorBuckets = [
+    { key: 'alert', doc_count: 5 },
+    { key: 'skip', doc_count: 2 },
+  ],
+  noDataTimeframeBuckets = [{ key: '10m', doc_count: 7 }],
+  minCreatedAt = '2026-01-15T12:00:00.000Z',
+}: {
+  total?: number;
+  countEnabled?: number;
+  kindBuckets?: Array<{ key: string; doc_count: number }>;
+  scheduleBuckets?: Array<{ key: string; doc_count: number }>;
+  lookbackBuckets?: Array<{ key: string; doc_count: number }>;
+  countWithQueryCondition?: number;
+  countWithRecoveryPolicy?: number;
+  recoveryPolicyTypeBuckets?: Array<{ key: string; doc_count: number }>;
+  countWithRecoveryQueryCondition?: number;
+  pendingTimeframeBuckets?: Array<{ key: string; doc_count: number }>;
+  recoveringTimeframeBuckets?: Array<{ key: string; doc_count: number }>;
+  countWithGrouping?: number;
+  avgGroupingFieldsCount?: number | null;
+  countWithNoData?: number;
+  noDataBehaviorBuckets?: Array<{ key: string; doc_count: number }>;
+  noDataTimeframeBuckets?: Array<{ key: string; doc_count: number }>;
+  minCreatedAt?: string | null;
+} = {}) {
+  esClient.search.mockResponseOnce({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: { total: { value: total, relation: 'eq' }, max_score: null, hits: [] },
+    aggregations: {
+      count_enabled: { doc_count: countEnabled },
+      count_by_kind: { buckets: kindBuckets },
+      count_by_schedule: { buckets: scheduleBuckets },
+      count_by_lookback: { buckets: lookbackBuckets },
+      count_with_query_condition: { doc_count: countWithQueryCondition },
+      count_with_recovery_policy: { doc_count: countWithRecoveryPolicy },
+      count_by_recovery_policy_type: { buckets: recoveryPolicyTypeBuckets },
+      count_with_recovery_query_condition: { doc_count: countWithRecoveryQueryCondition },
+      count_by_pending_timeframe: { buckets: pendingTimeframeBuckets },
+      count_by_recovering_timeframe: { buckets: recoveringTimeframeBuckets },
+      count_with_grouping: { doc_count: countWithGrouping },
+      avg_grouping_fields_count: { value: avgGroupingFieldsCount },
+      count_with_no_data: { doc_count: countWithNoData },
+      count_by_no_data_behavior: { buckets: noDataBehaviorBuckets },
+      count_by_no_data_timeframe: { buckets: noDataTimeframeBuckets },
+      min_created_at: {
+        value: minCreatedAt ? Date.parse(minCreatedAt) : null,
+        value_as_string: minCreatedAt ?? undefined,
+      },
+    },
+  } as any);
+}
+
+function mockNotificationPolicyCountResponse(count: number) {
+  esClient.count.mockResponseOnce({ count } as any);
+}
+
+describe('getRuleStats', () => {
+  it('returns stats from aggregations and notification policy count', async () => {
+    mockRuleSearchResponse({});
+    mockNotificationPolicyCountResponse(8);
+
+    const result = await getRuleStats(esClient, logger);
+
+    expect(result).toEqual({
+      count_total: 20,
+      count_enabled: 15,
+      count_by_kind: { metric: 12, log: 8 },
+      count_by_schedule: { '1m': 10, '5m': 10 },
+      count_by_lookback: { '5m': 20 },
+      count_with_query_condition: 5,
+      count_with_recovery_policy: 3,
+      count_by_recovery_policy_type: { auto: 3 },
+      count_with_recovery_query_condition: 1,
+      count_by_pending_timeframe: { '5m': 8 },
+      count_by_recovering_timeframe: { '10m': 6 },
+      count_with_grouping: 4,
+      avg_grouping_fields_count: 2.0,
+      count_with_no_data: 7,
+      count_by_no_data_behavior: { alert: 5, skip: 2 },
+      count_by_no_data_timeframe: { '10m': 7 },
+      count_notification_policies: 8,
+      min_created_at: '2026-01-15T12:00:00.000Z',
+    });
+  });
+
+  it('runs rule search and notification policy count in parallel', async () => {
+    mockRuleSearchResponse({});
+    mockNotificationPolicyCountResponse(0);
+
+    await getRuleStats(esClient, logger);
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(esClient.count).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns empty results when no rules exist', async () => {
+    mockRuleSearchResponse({
+      total: 0,
+      countEnabled: 0,
+      kindBuckets: [],
+      scheduleBuckets: [],
+      lookbackBuckets: [],
+      countWithQueryCondition: 0,
+      countWithRecoveryPolicy: 0,
+      recoveryPolicyTypeBuckets: [],
+      countWithRecoveryQueryCondition: 0,
+      pendingTimeframeBuckets: [],
+      recoveringTimeframeBuckets: [],
+      countWithGrouping: 0,
+      avgGroupingFieldsCount: null,
+      countWithNoData: 0,
+      noDataBehaviorBuckets: [],
+      noDataTimeframeBuckets: [],
+      minCreatedAt: null,
+    });
+    mockNotificationPolicyCountResponse(0);
+
+    const result = await getRuleStats(esClient, logger);
+
+    expect(result).toEqual({
+      count_total: 0,
+      count_enabled: 0,
+      count_by_kind: {},
+      count_by_schedule: {},
+      count_by_lookback: {},
+      count_with_query_condition: 0,
+      count_with_recovery_policy: 0,
+      count_by_recovery_policy_type: {},
+      count_with_recovery_query_condition: 0,
+      count_by_pending_timeframe: {},
+      count_by_recovering_timeframe: {},
+      count_with_grouping: 0,
+      avg_grouping_fields_count: null,
+      count_with_no_data: 0,
+      count_by_no_data_behavior: {},
+      count_by_no_data_timeframe: {},
+      count_notification_policies: 0,
+      min_created_at: null,
+    });
+  });
+
+  it('handles numeric hits.total format', async () => {
+    esClient.search.mockResponseOnce({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: 3, max_score: null, hits: [] },
+      aggregations: {
+        count_enabled: { doc_count: 2 },
+        count_by_kind: { buckets: [] },
+        count_by_schedule: { buckets: [] },
+        count_by_lookback: { buckets: [] },
+        count_with_query_condition: { doc_count: 0 },
+        count_with_recovery_policy: { doc_count: 0 },
+        count_by_recovery_policy_type: { buckets: [] },
+        count_with_recovery_query_condition: { doc_count: 0 },
+        count_by_pending_timeframe: { buckets: [] },
+        count_by_recovering_timeframe: { buckets: [] },
+        count_with_grouping: { doc_count: 0 },
+        avg_grouping_fields_count: { value: null },
+        count_with_no_data: { doc_count: 0 },
+        count_by_no_data_behavior: { buckets: [] },
+        count_by_no_data_timeframe: { buckets: [] },
+        min_created_at: { value: null },
+      },
+    } as any);
+    mockNotificationPolicyCountResponse(0);
+
+    const result = await getRuleStats(esClient, logger);
+
+    expect(result.count_total).toBe(3);
+  });
+});

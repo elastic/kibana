@@ -6,32 +6,14 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
-
-const TERMS_SIZE = 100;
-
-interface AlertStatsAggregations {
-  count_by_kind: { buckets: Array<{ key: string; doc_count: number }> };
-  count_by_source: { buckets: Array<{ key: string; doc_count: number }> };
-  count_by_type: { buckets: Array<{ key: string; doc_count: number }> };
-  episode_count: { value: number };
-  min_timestamp: { value: number | null; value_as_string?: string };
-}
-
-export interface AlertStats {
-  alerts_count: number;
-  alerts_count_by_kind: Record<string, number>;
-  alerts_count_by_source: Record<string, number>;
-  alerts_count_by_type: Record<string, number>;
-  alerts_episode_count: number;
-  alerts_min_timestamp: string | null;
-  alerts_index_size_bytes: number | null;
-}
+import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
+import { TERMS_SIZE, bucketsToRecord } from './constants';
+import type { AlertStatsAggregations, AlertStatsResults } from './types';
 
 export async function getAlertStats(
   esClient: ElasticsearchClient,
   logger: Logger
-): Promise<AlertStats> {
+): Promise<AlertStatsResults> {
   const [searchResponse, statsResponse] = await Promise.all([
     esClient.search({
       index: ALERT_EVENTS_DATA_STREAM,
@@ -71,27 +53,9 @@ export async function getAlertStats(
 
   return {
     alerts_count: total,
-    alerts_count_by_kind: aggs.count_by_kind.buckets.reduce<Record<string, number>>(
-      (acc, { key, doc_count: count }) => {
-        acc[key] = count;
-        return acc;
-      },
-      {}
-    ),
-    alerts_count_by_source: aggs.count_by_source.buckets.reduce<Record<string, number>>(
-      (acc, { key, doc_count: count }) => {
-        acc[key] = count;
-        return acc;
-      },
-      {}
-    ),
-    alerts_count_by_type: aggs.count_by_type.buckets.reduce<Record<string, number>>(
-      (acc, { key, doc_count: count }) => {
-        acc[key] = count;
-        return acc;
-      },
-      {}
-    ),
+    alerts_count_by_kind: bucketsToRecord(aggs.count_by_kind.buckets),
+    alerts_count_by_source: bucketsToRecord(aggs.count_by_source.buckets),
+    alerts_count_by_type: bucketsToRecord(aggs.count_by_type.buckets),
     alerts_episode_count: aggs.episode_count.value,
     alerts_min_timestamp: aggs.min_timestamp.value_as_string ?? null,
     alerts_index_size_bytes: sizeBytes,
