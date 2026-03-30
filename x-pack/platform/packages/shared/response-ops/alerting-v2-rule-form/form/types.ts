@@ -16,7 +16,7 @@ export interface RuleMetadata {
   enabled: boolean;
   description?: string;
   owner?: string;
-  labels?: string[];
+  tags?: string[];
 }
 
 export interface RuleSchedule {

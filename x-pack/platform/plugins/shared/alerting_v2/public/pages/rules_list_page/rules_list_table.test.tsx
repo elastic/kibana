@@ -15,7 +15,7 @@ const mockRules = [
     id: 'rule-1',
     kind: 'alert',
     enabled: true,
-    metadata: { name: 'Rule One', labels: ['prod'] },
+    metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
   },
@@ -23,7 +23,7 @@ const mockRules = [
     id: 'rule-2',
     kind: 'signal',
     enabled: false,
-    metadata: { name: 'Rule Two', labels: [] },
+    metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
     evaluation: { query: { base: 'FROM metrics-*' } },
   },
@@ -123,7 +123,7 @@ describe('RulesListTable', () => {
       expect(screen.getByText('Detect only')).toBeInTheDocument();
     });
 
-    it('renders label badges for rules with labels', () => {
+    it('renders tag badges for rules with tags', () => {
       renderTable();
 
       expect(screen.getByText('prod')).toBeInTheDocument();

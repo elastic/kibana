@@ -40,7 +40,7 @@ describe('useCreateRule', () => {
     metadata: {
       name: 'Test Rule',
       enabled: true,
-      labels: ['tag1', 'tag2'],
+      tags: ['tag1', 'tag2'],
     },
     timeField: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
@@ -60,7 +60,7 @@ describe('useCreateRule', () => {
     kind: 'signal',
     metadata: {
       name: 'Test Rule',
-      labels: ['tag1', 'tag2'],
+      tags: ['tag1', 'tag2'],
     },
     time_field: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
@@ -336,7 +336,7 @@ describe('useCreateRule', () => {
         name: 'Complex Rule',
         enabled: false,
         description: 'A complex rule',
-        labels: ['production', 'critical'],
+        tags: ['production', 'critical'],
       },
       timeField: 'event.timestamp',
       schedule: { every: '1m', lookback: '1m' },
@@ -356,7 +356,7 @@ describe('useCreateRule', () => {
       metadata: {
         name: 'Complex Rule',
         description: 'A complex rule',
-        labels: ['production', 'critical'],
+        tags: ['production', 'critical'],
       },
       time_field: 'event.timestamp',
       schedule: { every: '1m', lookback: '1m' },

@@ -220,7 +220,7 @@ describe('RuleFormPage', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'My Alert Rule', labels: ['prod'], owner: 'team-a' },
+          metadata: { name: 'My Alert Rule', tags: ['prod'], owner: 'team-a' },
           time_field: '@timestamp',
           schedule: { every: '10m', lookback: '2m' },
           evaluation: {
@@ -246,7 +246,7 @@ describe('RuleFormPage', () => {
       // Metadata
       const metadata = initialValues.metadata as Record<string, unknown>;
       expect(metadata.name).toBe('My Alert Rule');
-      expect(metadata.labels).toEqual(['prod']);
+      expect(metadata.tags).toEqual(['prod']);
       expect(metadata.owner).toBe('team-a');
       expect(metadata.enabled).toBe(true);
 
@@ -372,7 +372,7 @@ describe('RuleFormPage', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'My Alert Rule', labels: ['prod'], owner: 'team-a' },
+          metadata: { name: 'My Alert Rule', tags: ['prod'], owner: 'team-a' },
           time_field: '@timestamp',
           schedule: { every: '10m', lookback: '2m' },
           evaluation: {
@@ -405,7 +405,7 @@ describe('RuleFormPage', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'My Alert Rule', labels: ['prod'], owner: 'team-a' },
+          metadata: { name: 'My Alert Rule', tags: ['prod'], owner: 'team-a' },
           time_field: '@timestamp',
           schedule: { every: '10m', lookback: '2m' },
           evaluation: {
@@ -427,9 +427,9 @@ describe('RuleFormPage', () => {
 
       const initialValues = capturedStandaloneProps.initialValues as Record<string, unknown>;
 
-      // Metadata (labels, owner preserved)
+      // Metadata (tags, owner preserved)
       const metadata = initialValues.metadata as Record<string, unknown>;
-      expect(metadata.labels).toEqual(['prod']);
+      expect(metadata.tags).toEqual(['prod']);
       expect(metadata.owner).toBe('team-a');
 
       // Schedule

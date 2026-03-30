@@ -52,7 +52,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       name: data.metadata.name,
       description: data.metadata.description,
       owner: data.metadata.owner,
-      labels: data.metadata.labels,
+      tags: data.metadata.tags,
     },
     time_field: data.time_field,
     schedule: {
@@ -129,7 +129,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
       name: attrs.metadata.name,
       description: attrs.metadata.description,
       owner: attrs.metadata.owner,
-      labels: attrs.metadata.labels,
+      tags: attrs.metadata.tags,
     },
     time_field: attrs.time_field,
     schedule: {

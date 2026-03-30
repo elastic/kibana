@@ -16,7 +16,7 @@ export const TagsField = () => {
 
   return (
     <Controller
-      name="metadata.labels"
+      name="metadata.tags"
       control={control}
       render={({ field, fieldState: { error } }) => {
         const selectedOptions = (field.value ?? []).map((val) => ({ label: val }));

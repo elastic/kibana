@@ -282,21 +282,21 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       {
         field: 'metadata',
         name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.labels" defaultMessage="Labels" />
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.tags" defaultMessage="Tags" />
         ),
         width: '12%',
         render: (_metadata: RuleApiResponse['metadata']) => {
-          const labels = _metadata?.labels;
-          if (!labels || labels.length === 0) {
+          const tags = _metadata?.tags;
+          if (!tags || tags.length === 0) {
             return (
               <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
             );
           }
           return (
             <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {labels.map((label) => (
-                <EuiFlexItem key={label} grow={false}>
-                  <EuiBadge color="hollow">{label}</EuiBadge>
+              {tags.map((tag) => (
+                <EuiFlexItem key={tag} grow={false}>
+                  <EuiBadge color="hollow">{tag}</EuiBadge>
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
