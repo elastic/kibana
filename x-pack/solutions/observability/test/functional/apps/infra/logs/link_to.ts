@@ -46,10 +46,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         return await retry.tryForTime(5000, async () => {
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
+          const decodedHash = decodeURIComponent(parsedUrl.hash);
 
           expect(parsedUrl.pathname).toEqual('/app/discover');
-          expect(parsedUrl.hash).toMatch(`query:(language:kuery,query:%27trace.id:${traceId}%27))`);
-          expect(parsedUrl.hash).toMatch(`time:(from:%27${startDate}%27,to:%27${endDate}%27)`);
+          expect(decodedHash).toMatch(`query:(language:kuery,query:'trace.id:${traceId}'))`);
+          expect(decodedHash).toMatch(`time:(from:'${startDate}',to:'${endDate}')`);
         });
       });
     });
@@ -74,12 +75,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.tryForTime(5000, async () => {
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
+          const decodedHash = decodeURIComponent(parsedUrl.hash);
 
           expect(parsedUrl.pathname).toEqual('/app/discover');
-          expect(parsedUrl.hash).toMatch(
-            `query:(language:kuery,query:%27(kubernetes.pod.uid:%20${nodeId})%20and%20(trace.id:${traceId})%27))`
+          expect(decodedHash).toMatch(
+            `query:(language:kuery,query:'(kubernetes.pod.uid: ${nodeId}) and (trace.id:${traceId})'))`
           );
-          expect(parsedUrl.hash).toMatch(`time:(from:%27${startDate}%27,to:%27${endDate}%27)`);
+          expect(decodedHash).toMatch(`time:(from:'${startDate}',to:'${endDate}')`);
         });
       });
     });
