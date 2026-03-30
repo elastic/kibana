@@ -389,7 +389,20 @@ export class DashboardPageObject extends FtrService {
   public async clickDiscardChanges(accept = true) {
     await this.retry.try(async () => {
       if (!(await this.testSubjects.exists('dashboardDiscardChangesMenuItem'))) {
-        await this.openSaveSplitMenu();
+        /**
+         * In view mode, the "Reset changes" action can be moved into the top nav overflow menu
+         * (especially as more actions are added to the app menu).
+         */
+        if (await this.testSubjects.exists('app-menu-overflow-button')) {
+          await this.testSubjects.click('app-menu-overflow-button');
+        }
+
+        if (
+          !(await this.testSubjects.exists('dashboardDiscardChangesMenuItem')) &&
+          (await this.testSubjects.exists('dashboardQuickSaveMenuItem-secondary-button'))
+        ) {
+          await this.openSaveSplitMenu();
+        }
       }
       await this.expectDiscardChangesButtonEnabled();
       this.log.debug('clickDiscardChanges');
@@ -693,6 +706,12 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async openSaveSplitMenu() {
+    if (
+      !(await this.testSubjects.exists('dashboardQuickSaveMenuItem-secondary-button')) &&
+      (await this.testSubjects.exists('app-menu-overflow-button'))
+    ) {
+      await this.testSubjects.click('app-menu-overflow-button');
+    }
     await this.testSubjects.click('dashboardQuickSaveMenuItem-secondary-button');
   }
 
