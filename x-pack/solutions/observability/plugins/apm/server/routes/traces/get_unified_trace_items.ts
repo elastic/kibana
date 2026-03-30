@@ -239,7 +239,7 @@ const resolveOtelResult = (
     : undefined;
 };
 
-export type EventStatus =
+type EventStatus =
   | { fieldName: 'event.outcome'; value: EventOutcome }
   | { fieldName: 'status.code'; value: StatusCode }
   | undefined;
