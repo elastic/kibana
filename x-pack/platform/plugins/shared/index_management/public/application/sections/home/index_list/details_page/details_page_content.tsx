@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -172,6 +172,26 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       <EuiPageHeader
         data-test-subj="indexDetailsHeader"
         pageTitle={pageTitle}
+        breadcrumbs={[
+          {
+            ['data-test-subj']: 'indexDetailsBackToIndicesButton',
+            text: (
+              <>
+                <EuiIcon size="s" aria-hidden={true} type="chevronSingleLeft" />
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
+                  defaultMessage="Back to indices"
+                />
+              </>
+            ),
+            color: 'primary',
+            'aria-current': false,
+            onClick: (e) => {
+              e.preventDefault();
+              navigateToIndicesList();
+            },
+          },
+        ]}
         bottomBorder
         tabs={headerTabs}
         rightSideItems={[

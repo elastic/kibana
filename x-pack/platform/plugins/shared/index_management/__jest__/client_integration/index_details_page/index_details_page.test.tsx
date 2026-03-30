@@ -1687,4 +1687,33 @@ describe('<IndexDetailsPage />', () => {
       });
     });
   });
+
+  describe('navigates back to the indices list', () => {
+    it('without indices list params', async () => {
+      const { history } = await renderPage();
+      fireEvent.click(screen.getByTestId('indexDetailsBackToIndicesButton'));
+
+      await waitFor(() => {
+        expect(history.location.pathname).toBe('/indices');
+        expect(history.location.search).toBe('');
+      });
+    });
+
+    it('with indices list params', async () => {
+      const filter = 'isFollower:true';
+      const { history } = await renderPage(
+        `/indices/index_details?indexName=${testIndexName}&filter=${encodeURIComponent(
+          filter
+        )}&includeHiddenIndices=true`
+      );
+      fireEvent.click(screen.getByTestId('indexDetailsBackToIndicesButton'));
+
+      await waitFor(() => {
+        expect(history.location.pathname).toBe('/indices');
+        expect(history.location.search).toBe(
+          `?filter=${encodeURIComponent(filter)}&includeHiddenIndices=true`
+        );
+      });
+    });
+  });
 });

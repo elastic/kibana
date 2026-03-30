@@ -126,6 +126,7 @@ export class IndexManagement extends AbstractPageObject {
     expectIndexDetailsPageIsLoaded: async () => {
       await expect(this.page.testSubj.locator('indexDetailsTab-overview')).toBeVisible();
       await expect(this.page.testSubj.locator('indexDetailsContent')).toBeVisible();
+      await expect(this.page.testSubj.locator('indexDetailsBackToIndicesButton')).toBeVisible();
     },
   };
 

@@ -106,6 +106,11 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
     }
   };
 
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onSave();
+  };
+
   const onNameChange = (name: string) => {
     setIndexName(name);
     if (!isValidIndexName(name)) {
@@ -160,7 +165,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
             <EuiSpacer />
           </>
         )}
-        <EuiForm id="createIndexModalForm" component="form">
+        <EuiForm id="createIndexModalForm" component="form" onSubmit={handleFormSubmit}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
@@ -276,7 +281,6 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
                 disabled={indexNameError !== undefined}
                 isLoading={isSaving}
                 type="submit"
-                onClick={onSave}
                 form="createIndexModalForm"
                 data-test-subj="createIndexSaveButton"
                 data-telemetry-id="idxMgmt-indexList-createIndex-saveButton"
