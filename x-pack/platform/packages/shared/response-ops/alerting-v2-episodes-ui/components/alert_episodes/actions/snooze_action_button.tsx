@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeSnoozeForm } from './alert_episode_snooze_form';
 import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
 
@@ -18,13 +19,9 @@ export interface SnoozeActionButtonProps {
   http: HttpStart;
 }
 
-export function SnoozeActionButton({
-  lastSnoozeAction,
-  groupHash,
-  http,
-}: SnoozeActionButtonProps) {
+export function SnoozeActionButton({ lastSnoozeAction, groupHash, http }: SnoozeActionButtonProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const isSnoozed = lastSnoozeAction === 'snooze';
+  const isSnoozed = lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE;
   const togglePopover = () => setIsPopoverOpen((prev) => !prev);
   const closePopover = () => setIsPopoverOpen(false);
   const createAlertActionMutation = useCreateAlertAction(http);
@@ -71,7 +68,7 @@ export function SnoozeActionButton({
           }
           createAlertActionMutation.mutate({
             groupHash,
-            actionType: 'snooze',
+            actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
             body: { expiry },
           });
           closePopover();
@@ -82,7 +79,7 @@ export function SnoozeActionButton({
           }
           createAlertActionMutation.mutate({
             groupHash,
-            actionType: 'unsnooze',
+            actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
             body: {},
           });
           closePopover();

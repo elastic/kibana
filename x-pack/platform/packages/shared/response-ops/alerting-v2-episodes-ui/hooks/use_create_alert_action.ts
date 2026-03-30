@@ -7,22 +7,14 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { AlertEpisodeActionType } from '@kbn/alerting-v2-schemas';
 import { queryKeys } from '../query_keys';
 
 const INTERNAL_ALERTING_V2_ALERT_API_PATH = '/internal/alerting/v2/alerts';
 
-type AlertActionRouteType =
-  | 'ack'
-  | 'unack'
-  | 'tag'
-  | 'snooze'
-  | 'unsnooze'
-  | 'activate'
-  | 'deactivate';
-
 interface CreateAlertActionParams {
   groupHash: string;
-  actionType: AlertActionRouteType;
+  actionType: AlertEpisodeActionType;
   body?: Record<string, unknown>;
 }
 
@@ -31,12 +23,9 @@ export const useCreateAlertAction = (http: HttpStart) => {
 
   return useMutation({
     mutationFn: async ({ groupHash, actionType, body = {} }: CreateAlertActionParams) => {
-      await http.post(
-        `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/${groupHash}/action/_${actionType}`,
-        {
-          body: JSON.stringify(body),
-        }
-      );
+      await http.post(`${INTERNAL_ALERTING_V2_ALERT_API_PATH}/${groupHash}/action/_${actionType}`, {
+        body: JSON.stringify(body),
+      });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.all });

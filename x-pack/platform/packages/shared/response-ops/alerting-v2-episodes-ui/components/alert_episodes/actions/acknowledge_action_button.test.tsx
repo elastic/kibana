@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { AcknowledgeActionButton } from './acknowledge_action_button';
 import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
 
@@ -39,7 +40,12 @@ describe('AcknowledgeActionButton', () => {
   });
 
   it('renders Unacknowledge when lastAckAction is ack', () => {
-    render(<AcknowledgeActionButton lastAckAction="ack" http={mockServices.http} />);
+    render(
+      <AcknowledgeActionButton
+        lastAckAction={ALERT_EPISODE_ACTION_TYPE.ACK}
+        http={mockServices.http}
+      />
+    );
     expect(screen.getByTestId('alertEpisodeAcknowledgeActionButton')).toHaveTextContent(
       'Unacknowledge'
     );
@@ -51,7 +57,12 @@ describe('AcknowledgeActionButton', () => {
   });
 
   it('renders Acknowledge when lastAckAction is unack', () => {
-    render(<AcknowledgeActionButton lastAckAction="unack" http={mockServices.http} />);
+    render(
+      <AcknowledgeActionButton
+        lastAckAction={ALERT_EPISODE_ACTION_TYPE.UNACK}
+        http={mockServices.http}
+      />
+    );
     expect(screen.getByTestId('alertEpisodeAcknowledgeActionButton')).toHaveTextContent(
       'Acknowledge'
     );
@@ -66,7 +77,7 @@ describe('AcknowledgeActionButton', () => {
     const user = userEvent.setup();
     render(
       <AcknowledgeActionButton
-        lastAckAction="unack"
+        lastAckAction={ALERT_EPISODE_ACTION_TYPE.UNACK}
         episodeId="ep-1"
         groupHash="gh-1"
         http={mockServices.http}
@@ -77,7 +88,7 @@ describe('AcknowledgeActionButton', () => {
 
     expect(mutate).toHaveBeenCalledWith({
       groupHash: 'gh-1',
-      actionType: 'ack',
+      actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
       body: { episode_id: 'ep-1' },
     });
   });

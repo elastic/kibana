@@ -7,37 +7,54 @@
 
 import { z } from '@kbn/zod/v4';
 
+export const ALERT_EPISODE_ACTION_TYPE = {
+  ACK: 'ack',
+  UNACK: 'unack',
+  TAG: 'tag',
+  SNOOZE: 'snooze',
+  UNSNOOZE: 'unsnooze',
+  ACTIVATE: 'activate',
+  DEACTIVATE: 'deactivate',
+} as const;
+
+export type AlertEpisodeActionType =
+  (typeof ALERT_EPISODE_ACTION_TYPE)[keyof typeof ALERT_EPISODE_ACTION_TYPE];
+
 const ackActionSchema = z.object({
-  action_type: z.literal('ack').describe('Acknowledges an alert.'),
+  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACK).describe('Acknowledges an alert.'),
   episode_id: z.string().describe('The episode identifier for the alert to acknowledge.'),
 });
 
 const unackActionSchema = z.object({
-  action_type: z.literal('unack').describe('Removes acknowledgement from an alert.'),
+  action_type: z
+    .literal(ALERT_EPISODE_ACTION_TYPE.UNACK)
+    .describe('Removes acknowledgement from an alert.'),
   episode_id: z.string().describe('The episode identifier for the alert to unacknowledge.'),
 });
 
 const tagActionSchema = z.object({
-  action_type: z.literal('tag').describe('Adds tags to an alert.'),
+  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.TAG).describe('Adds tags to an alert.'),
   tags: z.array(z.string()).describe('List of tags to add to the alert.'),
 });
 
 const snoozeActionSchema = z.object({
-  action_type: z.literal('snooze').describe('Snoozes an alert.'),
+  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.SNOOZE).describe('Snoozes an alert.'),
   expiry: z.string().optional().describe('ISO datetime when snooze should expire.'),
 });
 
 const unsnoozeActionSchema = z.object({
-  action_type: z.literal('unsnooze').describe('Removes snooze from an alert.'),
+  action_type: z
+    .literal(ALERT_EPISODE_ACTION_TYPE.UNSNOOZE)
+    .describe('Removes snooze from an alert.'),
 });
 
 const activateActionSchema = z.object({
-  action_type: z.literal('activate').describe('Activates an alert.'),
+  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACTIVATE).describe('Activates an alert.'),
   reason: z.string().describe('Reason for activating the alert.'),
 });
 
 const deactivateActionSchema = z.object({
-  action_type: z.literal('deactivate').describe('Deactivates an alert.'),
+  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.DEACTIVATE).describe('Deactivates an alert.'),
   reason: z.string().describe('Reason for deactivating the alert.'),
 });
 

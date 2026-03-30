@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { ResolveActionButton } from './deactivate_action_button';
 import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
 
@@ -34,7 +35,12 @@ describe('ResolveActionButton', () => {
   });
 
   it('renders Activate when deactivated', () => {
-    render(<ResolveActionButton lastDeactivateAction="deactivate" http={mockServices.http} />);
+    render(
+      <ResolveActionButton
+        lastDeactivateAction={ALERT_EPISODE_ACTION_TYPE.DEACTIVATE}
+        http={mockServices.http}
+      />
+    );
     expect(screen.getByTestId('alertingEpisodeActionsResolveActionButton')).toHaveTextContent(
       'Resolve'
     );
@@ -42,13 +48,15 @@ describe('ResolveActionButton', () => {
 
   it('calls deactivate route mutation on click', async () => {
     const user = userEvent.setup();
-    render(<ResolveActionButton lastDeactivateAction={null} groupHash="gh-1" http={mockServices.http} />);
+    render(
+      <ResolveActionButton lastDeactivateAction={null} groupHash="gh-1" http={mockServices.http} />
+    );
 
     await user.click(screen.getByTestId('alertingEpisodeActionsResolveActionButton'));
 
     expect(mutate).toHaveBeenCalledWith({
       groupHash: 'gh-1',
-      actionType: 'deactivate',
+      actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
       body: { reason: 'Updated from episodes actions UI' },
     });
   });

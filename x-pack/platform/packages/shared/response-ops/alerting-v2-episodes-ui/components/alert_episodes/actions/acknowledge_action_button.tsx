@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
 
 export interface AcknowledgeActionButtonProps {
@@ -24,8 +25,10 @@ export function AcknowledgeActionButton({
   groupHash,
   http,
 }: AcknowledgeActionButtonProps) {
-  const isAcknowledged = lastAckAction === 'ack';
-  const actionType = isAcknowledged ? 'unack' : 'ack';
+  const isAcknowledged = lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
+  const actionType = isAcknowledged
+    ? ALERT_EPISODE_ACTION_TYPE.UNACK
+    : ALERT_EPISODE_ACTION_TYPE.ACK;
   const createAlertActionMutation = useCreateAlertAction(http);
 
   const label = isAcknowledged

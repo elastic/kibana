@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeActionsCell } from './alert_episode_actions_cell';
 import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
 
@@ -63,7 +64,7 @@ describe('AlertEpisodeActionsCell', () => {
           ruleId: 'r1',
           groupHash: 'g1',
           lastAckAction: null,
-          lastDeactivateAction: 'deactivate',
+          lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
           lastSnoozeAction: null,
           tags: [],
         }}

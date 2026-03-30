@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
 
 export interface ResolveActionButtonProps {
@@ -22,8 +23,10 @@ export function ResolveActionButton({
   groupHash,
   http,
 }: ResolveActionButtonProps) {
-  const isDeactivated = lastDeactivateAction === 'deactivate';
-  const actionType = isDeactivated ? 'activate' : 'deactivate';
+  const isDeactivated = lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
+  const actionType = isDeactivated
+    ? ALERT_EPISODE_ACTION_TYPE.ACTIVATE
+    : ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const createAlertActionMutation = useCreateAlertAction(http);
 
   const label = isDeactivated
