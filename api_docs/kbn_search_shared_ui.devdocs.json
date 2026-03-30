@@ -79,78 +79,33 @@
       },
       {
         "parentPluginId": "@kbn/search-shared-ui",
-        "id": "def-public.iconPlayground",
+        "id": "def-public.KibanaVersionBadge",
         "type": "Function",
         "tags": [],
-        "label": "iconPlayground",
+        "label": "KibanaVersionBadge",
         "description": [],
         "signature": [
-          "({ size, ...rest }: Omit<",
-          "EuiIconProps",
-          ", \"type\">) => React.JSX.Element"
+          "({ kibanaVersion, docLink, }: KibanaVersionBadgeProps) => React.JSX.Element"
         ],
-        "path": "x-pack/solutions/search/packages/shared-ui/src/v2_icons/playground.tsx",
-        "lineNumber": 32,
+        "path": "x-pack/solutions/search/packages/shared-ui/src/kibana_version/kibana_version_badge.tsx",
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/search-shared-ui",
-            "id": "def-public.iconPlayground.$1",
+            "id": "def-public.KibanaVersionBadge.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ size = 'm', ...rest }",
+            "label": "{\n  kibanaVersion,\n  docLink,\n}",
             "description": [],
             "signature": [
-              "Omit<",
-              "EuiIconProps",
-              ", \"type\">"
+              "KibanaVersionBadgeProps"
             ],
-            "path": "x-pack/solutions/search/packages/shared-ui/src/v2_icons/playground.tsx",
-            "lineNumber": 32,
-            "columnNumber": 32,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-shared-ui",
-        "id": "def-public.iconRobot",
-        "type": "Function",
-        "tags": [],
-        "label": "iconRobot",
-        "description": [],
-        "signature": [
-          "({ size, ...rest }: Omit<",
-          "EuiIconProps",
-          ", \"type\">) => React.JSX.Element"
-        ],
-        "path": "x-pack/solutions/search/packages/shared-ui/src/v2_icons/robot.tsx",
-        "lineNumber": 26,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-shared-ui",
-            "id": "def-public.iconRobot.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ size = 'm', ...rest }",
-            "description": [],
-            "signature": [
-              "Omit<",
-              "EuiIconProps",
-              ", \"type\">"
-            ],
-            "path": "x-pack/solutions/search/packages/shared-ui/src/v2_icons/robot.tsx",
-            "lineNumber": 26,
-            "columnNumber": 27,
+            "path": "x-pack/solutions/search/packages/shared-ui/src/kibana_version/kibana_version_badge.tsx",
+            "lineNumber": 15,
+            "columnNumber": 71,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -293,7 +248,7 @@
         "label": "WorkflowId",
         "description": [],
         "signature": [
-          "\"default\" | \"vector\" | \"semantic\""
+          "\"semantic\" | \"default\" | \"vector\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/types.ts",
         "lineNumber": 8,

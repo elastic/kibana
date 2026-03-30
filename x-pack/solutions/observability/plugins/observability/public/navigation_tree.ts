@@ -45,10 +45,12 @@ function createNavTree({
   streamsAvailable,
   showAiAssistant,
   isCloudEnabled,
+  showAlertingV2,
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
+  showAlertingV2?: boolean;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -75,10 +77,27 @@ function createNavTree({
       {
         link: 'workflows',
       },
-      {
-        link: 'observability-overview:alerts',
-        icon: 'warning',
-      },
+      showAlertingV2
+        ? {
+            id: 'alerting',
+            renderAs: 'panelOpener',
+            title: i18n.translate('xpack.observability.obltNav.alerts', {
+              defaultMessage: 'Alerts',
+            }),
+            icon: 'warning',
+            children: [
+              {
+                link: 'observability-overview:alerts',
+              },
+              {
+                link: 'observability-overview:alerts_v2',
+              },
+            ],
+          }
+        : {
+            link: 'observability-overview:alerts',
+            icon: 'warning',
+          },
       {
         link: 'observability-overview:cases',
         children: [
@@ -567,6 +586,7 @@ function createNavTree({
             }),
             children: [
               { link: 'management:genAiSettings' },
+              { link: 'management:evals' },
               { link: 'management:aiAssistantManagementSelection' },
             ],
           },
@@ -651,7 +671,6 @@ export const createDefinition = (
   id: 'oblt',
   title,
   icon: 'logoObservability',
-  homePage: 'observabilityOnboarding',
   navigationTree$: combineLatest([
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
@@ -661,8 +680,8 @@ export const createDefinition = (
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
+        showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
       })
     )
   ),
-  dataTestSubj: 'observabilitySideNav',
 });

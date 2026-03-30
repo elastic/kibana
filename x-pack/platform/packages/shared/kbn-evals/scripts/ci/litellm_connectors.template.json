@@ -1,0 +1,39 @@
+{
+  "litellm-gpt-4o": {
+    "name": "LiteLLM GPT-4o",
+    "actionTypeId": ".gen-ai",
+    "config": {
+      "apiProvider": "Other",
+      "apiUrl": "https://example.invalid/v1/chat/completions",
+      "defaultModel": "gpt-4o"
+    },
+    "secrets": {
+      "apiKey": "REDACTED"
+    }
+  },
+  "litellm-gpt-4.1": {
+    "name": "LiteLLM GPT-4.1",
+    "actionTypeId": ".gen-ai",
+    "config": {
+      "apiProvider": "Other",
+      "apiUrl": "https://example.invalid/v1/chat/completions",
+      "defaultModel": "gpt-4.1"
+    },
+    "secrets": {
+      "apiKey": "REDACTED"
+    }
+  },
+  "litellm-gemini-2.5-pro": {
+    "name": "LiteLLM Gemini 2.5 Pro",
+    "actionTypeId": ".gen-ai",
+    "config": {
+      "apiProvider": "Other",
+      "apiUrl": "https://example.invalid/v1/chat/completions",
+      "defaultModel": "gemini-2.5-pro"
+    },
+    "secrets": {
+      "apiKey": "REDACTED"
+    }
+  }
+}
+

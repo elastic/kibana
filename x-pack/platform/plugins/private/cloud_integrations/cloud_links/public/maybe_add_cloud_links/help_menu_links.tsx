@@ -44,12 +44,6 @@ export const createHelpMenuLinks = ({
       href: helpSupportUrl,
     },
     {
-      title: i18n.translate('xpack.cloudLinks.helpMenuLinks.giveFeedback', {
-        defaultMessage: 'Give feedback',
-      }),
-      href: docLinks.links.kibana.feedback,
-    },
-    {
       title: i18n.translate('xpack.cloudLinks.helpMenuLinks.connectionDetails', {
         defaultMessage: 'Connection details',
       }),

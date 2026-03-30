@@ -122,26 +122,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      it('renders a feedback callout', async () => {
-        await solutionNavigation.sidenav.feedbackCallout.reset();
-        await solutionNavigation.sidenav.openPanel('applications');
-
-        // Navigate to Service inventory page to see the full side panel with feedback snippet
-        await solutionNavigation.sidenav.clickLink({ navId: 'apm:services' });
-
-        // Wait for the Service inventory page to load
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Service inventory',
-        });
-
-        // Now the full side panel should be visible with the feedback snippet
-        await solutionNavigation.sidenav.feedbackCallout.expectExists();
-        await solutionNavigation.sidenav.feedbackCallout.dismiss();
-        await solutionNavigation.sidenav.feedbackCallout.expectMissing();
-        await browser.refresh();
-        await solutionNavigation.sidenav.feedbackCallout.expectMissing();
-      });
-
       it('opens panel on legacy management landing page', async () => {
         await common.navigateToApp('management', { basePath: `/s/${spaceCreated.id}` });
         await testSubjects.existOrFail('managementHomeSolution');

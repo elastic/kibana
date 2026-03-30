@@ -26,7 +26,7 @@ import {
 } from './policy_template';
 
 type PackagePolicyStream = RegistryStream & {
-  data_stream: { type: string; dataset: string };
+  data_stream: { type?: string; dataset: string };
 };
 
 export const getStreamsForInputType = (
@@ -138,8 +138,10 @@ export const packageToPackagePolicyInputs = (
       packageInput.data_streams
     ).map((packageStream) => {
       const stream: NewPackagePolicyInputStream = {
-        enabled: packageStream.enabled === false ? false : true,
+        // disable deprecated streams on new installations
+        enabled: packageStream.deprecated ? false : packageStream.enabled !== false,
         data_stream: packageStream.data_stream,
+        ...(packageStream.migrate_from ? { migrate_from: packageStream.migrate_from } : {}),
       };
       if (packageStream.vars && packageStream.vars.length) {
         stream.vars = packageStream.vars.reduce(varsReducer, {});
@@ -159,6 +161,10 @@ export const packageToPackagePolicyInputs = (
       ? !!streamsForInput.find((stream) => stream.enabled)
       : true;
 
+    // Disable deprecated inputs on new installations
+    if (enableInput && packageInput.deprecated) {
+      enableInput = false;
+    }
     // If we are wanting to enabling this input, check if we only want
     // to enable specific integrations (aka `policy_template`s)
     if (
@@ -175,10 +181,15 @@ export const packageToPackagePolicyInputs = (
       policy_template: packageInput.policy_template,
       enabled: enableInput,
       streams: streamsForInput,
+      ...(packageInput.migrate_from ? { migrate_from: packageInput.migrate_from } : {}),
     };
 
     if (Object.keys(varsForInput).length) {
       input.vars = varsForInput;
+    }
+
+    if (packageInput.deprecated) {
+      input.deprecated = packageInput.deprecated;
     }
 
     inputs.push(input);

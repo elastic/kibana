@@ -15,7 +15,7 @@
       "label": "WorkflowsPublicPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-      "lineNumber": 27,
+      "lineNumber": 35,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -31,7 +31,7 @@
       "label": "WorkflowsPublicPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-      "lineNumber": 34,
+      "lineNumber": 74,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -55,7 +55,7 @@
       "label": "WorkflowsServerPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 37,
+      "lineNumber": 43,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -71,7 +71,7 @@
             "WorkflowsManagementApi"
           ],
           "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-          "lineNumber": 38,
+          "lineNumber": 44,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -91,7 +91,7 @@
         "{ [x: string]: never; }"
       ],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 41,
+      "lineNumber": 47,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -134,6 +134,23 @@
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
         "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsManagement",
+        "id": "def-common.WORKFLOWS_DOCUMENTATION_URL",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOWS_DOCUMENTATION_URL",
+        "description": [],
+        "signature": [
+          "\"https://ela.st/workflows-docs\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

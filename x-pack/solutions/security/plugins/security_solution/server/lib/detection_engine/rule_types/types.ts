@@ -70,6 +70,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   warning: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
+  totalEventsFound?: number;
   loggedRequests?: RulePreviewLoggedRequest[];
 }
 
@@ -342,6 +343,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   userError?: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
+  totalEventsFound?: number;
   loggedRequests?: RulePreviewLoggedRequest[];
 }
 

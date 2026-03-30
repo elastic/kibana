@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString } from './primitive.gen';
 
@@ -63,7 +63,7 @@ export const DataStream = z.object({
   /**
    * The input types of the data stream
    */
-  inputTypes: z.array(InputType),
+  inputTypes: z.array(InputType).max(100),
 });
 
 /**
@@ -79,7 +79,7 @@ export const Integration = z
     /**
      * The data streams of the integration
      */
-    dataStreams: z.array(DataStream).optional(),
+    dataStreams: z.array(DataStream).max(50).optional(),
     /**
      * The logo of the integration
      */
@@ -129,6 +129,7 @@ export const TaskStatus = z.enum([
   'approved',
   'failed',
   'cancelled',
+  'deleting',
 ]);
 export type TaskStatusEnum = typeof TaskStatus.enum;
 export const TaskStatusEnum = TaskStatus.enum;
@@ -153,7 +154,7 @@ export const DataStreamResponse = z.object({
   /**
    * The input types of the data stream
    */
-  inputTypes: z.array(InputType),
+  inputTypes: z.array(InputType).max(100),
   /**
    * The status of the data stream
    */
@@ -182,6 +183,18 @@ export const IntegrationResponse = z.object({
    */
   description: NonEmptyString,
   /**
+   * The version of the integration
+   */
+  version: z.string().optional(),
+  /**
+   * The username of the user who created the integration
+   */
+  createdBy: z.string().optional(),
+  /**
+   * The profile UID of the user who created the integration
+   */
+  createdByProfileUid: z.string().optional(),
+  /**
    * The data streams of the integration
    */
   dataStreams: z.array(DataStreamResponse),
@@ -205,6 +218,10 @@ export const AllIntegrationsResponseIntegration = z.object({
    */
   title: NonEmptyString,
   /**
+   * The logo of the integration (base64 encoded SVG)
+   */
+  logo: z.string().optional(),
+  /**
    * The number of data streams of the integration
    */
   totalDataStreamCount: z.number().int(),
@@ -212,6 +229,18 @@ export const AllIntegrationsResponseIntegration = z.object({
    * The number of successful data streams of the integration
    */
   successfulDataStreamCount: z.number().int(),
+  /**
+   * The version of the integration
+   */
+  version: z.string().optional(),
+  /**
+   * The username of the user who created the integration
+   */
+  createdBy: NonEmptyString,
+  /**
+   * The profile UID of the user who created the integration
+   */
+  createdByProfileUid: z.string().optional(),
   /**
    * The status of the integration
    */

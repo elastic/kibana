@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/inference-endpoint-plugin",
-  "owner": "@elastic/ml-ui",
+  "owner": "@elastic/search-kibana",
   "group": "platform",
   "visibility": "shared",
   "plugin": {

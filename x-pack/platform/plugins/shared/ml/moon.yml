@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ml-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ml-plugin'
+  title: '@kbn/ml-plugin'
   description: Moon project for @kbn/ml-plugin
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/ml
+  sourceRoot: x-pack/platform/plugins/shared/ml
 dependsOn:
   - '@kbn/core'
   - '@kbn/actions-plugin'
@@ -95,7 +94,6 @@ dependsOn:
   - '@kbn/ml-validators'
   - '@kbn/monaco'
   - '@kbn/observability-ai-assistant-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-util-plugin'
   - '@kbn/react-kibana-context-render'
@@ -146,6 +144,9 @@ dependsOn:
   - '@kbn/file-upload'
   - '@kbn/file-upload-common'
   - '@kbn/kql'
+  - '@kbn/as-code-filters-transforms'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod
@@ -163,16 +164,6 @@ fileGroups:
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UrlParts } from '@kbn/test';
+import type { UrlParts } from './url_parts';
 
 export interface ScoutServerConfig {
   serverless?: boolean;
   servers: {
     kibana: UrlParts;
     elasticsearch: UrlParts;
+    linkedElasticsearch?: UrlParts;
     fleet?: UrlParts;
   };
   dockerServers: any;
@@ -23,8 +24,9 @@ export interface ScoutServerConfig {
     files: string[];
     serverArgs: string[];
     ssl: boolean;
+    secureFiles?: string[];
   };
-  esServerlessOptions?: { uiam: boolean };
+  esServerlessOptions?: { uiam: boolean; cps?: boolean };
   kbnTestServer: {
     env: any;
     buildArgs: string[];

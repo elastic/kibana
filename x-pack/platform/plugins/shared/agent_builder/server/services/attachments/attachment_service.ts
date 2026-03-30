@@ -42,6 +42,9 @@ export class AttachmentServiceImpl implements AttachmentService {
       getTypeDefinition: (attachment) => {
         return this.attachmentTypeRegistry.get(attachment);
       },
+      getRegisteredTypeIds: () => {
+        return this.attachmentTypeRegistry.list().map((def) => def.id);
+      },
     };
   }
 }

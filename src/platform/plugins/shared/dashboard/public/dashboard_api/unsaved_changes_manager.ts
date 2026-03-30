@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, map, type Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map } from 'rxjs';
 
-import type { HasLastSavedChildState } from '@kbn/presentation-containers';
+import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
 import type {
   PublishesSavedObjectId,
   PublishingSubject,
@@ -18,10 +18,8 @@ import type {
 
 import { of } from 'rxjs';
 import type { DashboardState } from '../../common';
-import {
-  getDashboardBackupService,
-  type DashboardBackupState,
-} from '../services/dashboard_backup_service';
+import { type DashboardBackupState } from '../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
@@ -38,7 +36,7 @@ export function initializeUnsavedChangesManager({
   storeUnsavedChanges,
   unifiedSearchManager,
   projectRoutingManager,
-  forcePublishOnReset$,
+  setState,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -48,7 +46,7 @@ export function initializeUnsavedChangesManager({
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
-  forcePublishOnReset$: Subject<void>;
+  setState: (state: DashboardState) => void;
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -101,16 +99,7 @@ export function initializeUnsavedChangesManager({
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        const savedState = lastSavedState$.value;
-        layoutManager.internalApi.reset();
-        unifiedSearchManager.internalApi.reset(savedState);
-        projectRoutingManager?.internalApi.reset(savedState);
-        settingsManager.internalApi.reset(savedState);
-
-        // when auto-apply is `false`, wait for children to update their filters + time slice + variables, then publish
-        if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
-          forcePublishOnReset$.next();
-        }
+        setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>

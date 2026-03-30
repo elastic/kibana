@@ -9,19 +9,20 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   type EuiTabbedContentTab,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   EuiButton,
   EuiFlyoutFooter,
 } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
-import { ALERT_RULE_CATEGORY, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { ALERT_RULE_CATEGORY, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
@@ -29,7 +30,7 @@ import {
   getAlertFlyoutAriaLabel,
   ALERT_FLYOUT_DEFAULT_TITLE,
 } from '@kbn/response-ops-alerts-table/translations';
-import { getAlertTitle } from '../../utils/format_alert_title';
+import { getAlertSubtitle } from '../../utils/format_alert_subtitle';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { paths } from '../../../common/locators/paths';
 import { AlertOverview } from '../alert_overview/alert_overview';
@@ -133,24 +134,48 @@ export function AlertsFlyout({
         <EuiSpacer size="s" />
         <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
           <h2>
-            {alert
-              ? getAlertTitle(alert[ALERT_RULE_CATEGORY]?.[0] as string)
-              : i18n.translate('xpack.observability.alertFlyout.defaultTitle', {
-                  defaultMessage: 'Alert detail',
-                })}
+            {alert?.[ALERT_RULE_NAME] ? (
+              <EuiToolTip content={alert[ALERT_RULE_NAME]?.[0] as string}>
+                <span
+                  css={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {alert[ALERT_RULE_NAME]?.[0] as string}
+                </span>
+              </EuiToolTip>
+            ) : (
+              i18n.translate('xpack.observability.alertFlyout.defaultTitle', {
+                defaultMessage: 'Alert detail',
+              })
+            )}
           </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {alert?.[ALERT_RULE_NAME] && (
-          <EuiFlexGroup gutterSize="none" alignItems="center">
+        {alert?.[ALERT_RULE_CATEGORY] && (
+          <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.observability.alertFlyout.title.ruleName"
-                defaultMessage="Rule"
-              />
-              :&nbsp;
+              {getAlertSubtitle(alert[ALERT_RULE_CATEGORY]?.[0] as string)}
             </EuiText>
-            <EuiText size="s">{alert[ALERT_RULE_NAME]?.[0] as string}</EuiText>
+            {alert?.[ALERT_RULE_UUID] && (
+              <EuiText size="s">
+                <EuiLink
+                  data-test-subj="o11yAlertFlyoutRuleLink"
+                  href={prepend(
+                    paths.observability.ruleDetails(alert[ALERT_RULE_UUID]?.[0] as string)
+                  )}
+                >
+                  {i18n.translate('xpack.observability.alertFlyout.viewRule', {
+                    defaultMessage: 'View rule',
+                  })}
+                </EuiLink>
+              </EuiText>
+            )}
           </EuiFlexGroup>
         )}
         {headerAppend}

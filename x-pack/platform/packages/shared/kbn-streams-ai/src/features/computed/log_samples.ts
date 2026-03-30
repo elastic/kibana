@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { compact } from 'lodash';
 import { getSampleDocuments } from '@kbn/ai-tools';
 import { LOG_SAMPLES_FEATURE_TYPE } from '@kbn/streams-schema';
 import type { ComputedFeatureGenerator } from './types';
+import { formatRawDocument } from '../utils/format_raw_document';
 
 const SAMPLE_SIZE = 5;
 
@@ -29,10 +31,8 @@ This is useful for understanding the format of logs, identifying patterns, and s
       size: SAMPLE_SIZE,
     });
 
-    const samples = hits.map((hit) => hit.fields ?? {});
-
     return {
-      samples,
+      samples: compact(hits.map((hit) => formatRawDocument({ hit })?.fields)),
     };
   },
 };

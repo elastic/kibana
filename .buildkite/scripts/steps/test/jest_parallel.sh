@@ -12,18 +12,16 @@ configs=""
 # Parallel execution tuning (can be overridden via env)
 #   JEST_MAX_PARALLEL: number of concurrent Jest config processes
 #   JEST_MAX_OLD_SPACE_MB: per-process max old space size (MB)
-# NOTE: JEST_MAX_PARALLEL default now depends on TEST_TYPE (unit=3, integration=1).
-# It can still be overridden by exporting JEST_MAX_PARALLEL.
-JEST_MAX_PARALLEL="${JEST_MAX_PARALLEL:-3}"
-JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-8192}"
-
+# NOTE: defaults depend on TEST_TYPE — unit tests run 3 parallel processes
+# with a lower heap limit, while integration tests run 1 process with more memory.
 if [[ "$1" == 'jest.config.js' ]]; then
-  # unit tests
   TEST_TYPE="unit"
-  JEST_MAX_PARALLEL=3 # unit tests run in parallel by default. When adjusting Buildkite resources, dont forget to update this value.
+  JEST_MAX_PARALLEL=3
+  JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-4096}"
 else
   TEST_TYPE="integration"
-  JEST_MAX_PARALLEL=1 # integration tests should not run in parallel by default.
+  JEST_MAX_PARALLEL=1
+  JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-6144}"
 fi
 
 export TEST_TYPE
@@ -56,7 +54,7 @@ echo "--- Running combined jest_all for configs ($TEST_TYPE)"
 echo "$configs"
 echo "JEST_MAX_PARALLEL is set to: $JEST_MAX_PARALLEL"
 
-node_opts="--max-old-space-size=${JEST_MAX_OLD_SPACE_MB} --trace-warnings --no-experimental-require-module"
+node_opts="--max-old-space-size=${JEST_MAX_OLD_SPACE_MB} --trace-warnings"
 if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-3" ]] ; then
   node_opts="$node_opts --enable-fips --openssl-config=$HOME/nodejs.cnf"
 fi
@@ -77,6 +75,6 @@ if [ $code -ne 0 ]; then
 fi
 
 # Scout reporter
-source .buildkite/scripts/steps/test/scout_upload_report_events.sh
+source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 
 exit $exitCode

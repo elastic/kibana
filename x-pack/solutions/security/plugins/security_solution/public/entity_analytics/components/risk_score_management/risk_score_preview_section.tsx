@@ -31,8 +31,6 @@ import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../../translations';
 import { useRiskScorePreview } from '../../api/hooks/use_preview_risk_scores';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
-import { userHasRiskEngineReadPermissions } from '../../common';
 import { EntityIconByType } from '../entity_store/helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
@@ -53,15 +51,25 @@ const getRiskiestScores = (scores: EntityRiskScoreRecord[] = [], field: string) 
     ?.sort((a, b) => b?.calculated_score_norm - a?.calculated_score_norm)
     ?.slice(0, 5) || [];
 
-export const RiskScorePreviewSection: React.FC<{
-  privileges: RiskEngineMissingPrivilegesResponse;
+interface RiskScorePreviewSectionProps {
+  hasReadPermissions: boolean;
+  isPrivilegesLoading: boolean;
   includeClosedAlerts: boolean;
   from: string;
   to: string;
   alertFilters?: Array<AlertFilter>;
-}> = ({ privileges, includeClosedAlerts, from, to, alertFilters }) => {
+}
+
+export const RiskScorePreviewSection: React.FC<RiskScorePreviewSectionProps> = ({
+  hasReadPermissions,
+  isPrivilegesLoading,
+  includeClosedAlerts,
+  from,
+  to,
+  alertFilters,
+}) => {
   const sectionBody = useMemo(() => {
-    if (privileges.isLoading) {
+    if (isPrivilegesLoading) {
       return (
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
@@ -70,7 +78,7 @@ export const RiskScorePreviewSection: React.FC<{
         </EuiFlexGroup>
       );
     }
-    if (userHasRiskEngineReadPermissions(privileges)) {
+    if (hasReadPermissions) {
       return (
         <RiskEnginePreview
           includeClosedAlerts={includeClosedAlerts}
@@ -82,7 +90,7 @@ export const RiskScorePreviewSection: React.FC<{
     }
 
     return <MissingPermissionsCallout />;
-  }, [privileges, includeClosedAlerts, from, to, alertFilters]);
+  }, [hasReadPermissions, isPrivilegesLoading, includeClosedAlerts, from, to, alertFilters]);
 
   return (
     <>
@@ -138,7 +146,7 @@ const RiskScorePreviewPanel = ({
         buttonContent={trigger === 'closed' ? showMessage : hideMessage}
         forceState={trigger}
         onToggle={onToggle}
-        extraAction={<EuiIcon type={EntityIconByType[type]} />}
+        extraAction={<EuiIcon type={EntityIconByType[type]} aria-hidden={true} />}
       >
         <>
           <EuiSpacer size={'m'} />

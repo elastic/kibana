@@ -65,7 +65,10 @@ description: This is a new workflow
 triggers:
   - type: manual
 
-inputs:
+consts:
+  loop_items: [{"@timestamp": "now"}, {"@timestamp": "yesterday"}, {"@timestamp": "tomorrow"}, {"@timestamp": "next week"}]
+
+  inputs:
   - name: message
     type: string
     default: "hello world"
@@ -78,12 +81,12 @@ steps:
 
   - name: loop
     type: foreach
-    foreach: '[1,2,3,4]'
+    foreach: '{{consts.loop_items}}'
     steps:
-      - name: hello_world_step
+      - name: test_console_step
         type: console
         with:
-          message: "Test run: {{ execution.isTestRun }}"
+          message: "Test run: {{ execution.isTestRun }}, timestamp: {{foreach.item['@timestamp']}}"
 `;
 
 /**
@@ -119,7 +122,9 @@ steps:
 `;
 
 /**
- * Workflow with 50 foreach iterations for scroll/virtualization tests.
+ * Workflow with 50 foreach iterations and post-foreach steps.
+ * Used for scroll tests and verifying that steps after a large foreach
+ * remain correctly ordered after collapsing and re-expanding the loop.
  */
 export const getManyIterationsWorkflowYaml = (name: string) => `
 name: ${name}
@@ -128,11 +133,18 @@ description: This is a new workflow
 triggers:
   - type: manual
 steps:
-  - name: hello_world_step
-    type: console
+  - name: foreach_loop
+    type: foreach
     foreach: '[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50]'
+    steps:
+      - name: hello_world_step
+        type: console
+        with:
+          message: "Hello world"
+  - name: after_foreach_step
+    type: console
     with:
-      message: "Hello world"
+      message: "After foreach"
 `;
 
 /**
@@ -181,3 +193,123 @@ triggers:
 steps:
   - name: hello_world_step
     type:`;
+
+/**
+ * Manual-only workflow with an event variable reference.
+ * Used to verify that event.* autocomplete only shows spaceId (no alert properties).
+ */
+export const getManualTriggerEventAutocompleteYaml = (name: string) => `
+name: ${name}
+description: Manual trigger - event should only have spaceId
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: log_step
+    type: console
+    with:
+      message: "{{ event. }}"`;
+
+/**
+ * Alert trigger workflow with an event variable reference.
+ * Used to verify that event.* autocomplete shows alerts, rule, params, and spaceId.
+ */
+export const getAlertTriggerEventAutocompleteYaml = (name: string) => `
+name: ${name}
+description: Alert trigger - event should have alerts, rule, params, spaceId
+enabled: true
+triggers:
+  - type: alert
+steps:
+  - name: log_step
+    type: console
+    with:
+      message: "{{ event. }}"`;
+
+/**
+ * Multi-step workflow with enough vertical content to require scrolling in the editor.
+ * Used for testing that clicking a step in the execution flyout scrolls the YAML editor
+ * to the corresponding step definition.
+ */
+export const getScrollTestWorkflowYaml = (name: string) => `
+name: ${name}
+enabled: false
+description: Multi-step workflow for scroll testing
+triggers:
+  - type: manual
+
+inputs:
+  - name: param_a
+    type: string
+    default: "value_a"
+  - name: param_b
+    type: string
+    default: "value_b"
+  - name: param_c
+    type: string
+    default: "value_c"
+
+steps:
+  - name: step_alpha
+    type: console
+    with:
+      message: "Alpha executing with param_a={{ inputs.param_a }}"
+
+  - name: step_bravo
+    type: console
+    with:
+      message: "Bravo executing with param_b={{ inputs.param_b }}"
+
+  - name: step_charlie
+    type: console
+    with:
+      message: "Charlie executing with param_c={{ inputs.param_c }}"
+
+  - name: step_delta
+    type: console
+    with:
+      message: "Delta executing after charlie"
+
+  - name: step_echo
+    type: console
+    with:
+      message: "Echo executing after delta"
+
+  - name: step_foxtrot
+    type: console
+    with:
+      message: "Foxtrot executing after echo"
+
+  - name: step_golf
+    type: console
+    with:
+      message: "Golf executing after foxtrot"
+
+  - name: step_hotel
+    type: console
+    with:
+      message: "Hotel executing last"
+`;
+
+/**
+ * Valid workflow that includes YAML comment lines with liquid variable syntax.
+ * Used to verify that commented-out liquid expressions do not produce false
+ * validation errors.
+ */
+export const getWorkflowWithCommentedVariablesYaml = (name: string) => `
+name: ${name}
+description: Workflow with commented liquid variables
+enabled: true
+# This comment references {{ steps.foo.output }}
+triggers:
+  - type: manual
+inputs:
+  - name: message
+    type: string
+    default: "hello"
+steps:
+  # {{ some_old_variable | json }}
+  - name: hello_world_step
+    type: console  # previously used {{ steps.old.output }}
+    with:
+      message: "{{ inputs.message }}"`;

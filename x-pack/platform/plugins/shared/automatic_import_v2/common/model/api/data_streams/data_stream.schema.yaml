@@ -4,6 +4,80 @@ info:
   version: "1"
 paths:
   /internal/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}:
+    patch:
+      summary: Updates ingest pipeline for a data stream.
+      operationId: UpdateDataStreamPipeline
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Updates the ingest pipeline for an existing data stream, simulates it using stored samples, and returns refreshed results.
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        - name: data_stream_id
+          in: path
+          required: true
+          description: The data stream identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - ingest_pipeline
+              properties:
+                ingest_pipeline:
+                  description: >-
+                    JSON string (max 10MiB) or pipeline object. When an object, `processors` is capped at 10000 entries.
+                  oneOf:
+                    - type: string
+                      maxLength: 10485760
+                    - type: object
+                      additionalProperties: true
+                      properties:
+                        processors:
+                          type: array
+                          maxItems: 10000
+                          items:
+                            type: object
+                            additionalProperties: true
+      responses:
+        200:
+          description: The updated data stream results are returned successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - ingest_pipeline
+                  - results
+                properties:
+                  ingest_pipeline:
+                    type: object
+                    additionalProperties: true
+                  results:
+                    type: array
+                    maxItems: 10000
+                    items:
+                      type: object
+                      additionalProperties: true
+        400:
+          description: The pipeline is invalid or samples are missing.
+        404:
+          description: Indicates the data stream id was not found.
+        500:
+          description: An internal server error occurred.
     delete:
       summary: Deletes a data stream by its id.
       operationId: DeleteDataStream
@@ -58,23 +132,27 @@ paths:
             $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
       requestBody:
         required: true
-        additionalProperties: false
         content:
           application/json:
             schema:
               type: object
+              additionalProperties: false
               required:
-                - samples
                 - originalSource
               properties:
                 samples:
                   type: array
+                  maxItems: 1000
+                  description: >-
+                    Log lines to upload when the source is a file (omit when using sourceIndex).
                   items:
-                    minItems: 1
                     type: string
-                  description: The samples to upload
+                sourceIndex:
+                  type: string
+                  minLength: 1
+                  description: Index name to pick samples from.
                 originalSource:
-                  description: The original source of the samples
+                  description: The original source of the samples (file name or index name)
                   $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/OriginalSource"
                 langSmithOptions:
                   description: The LangSmith tracing options
@@ -164,6 +242,7 @@ paths:
                   results:
                     description: Results array as JSON objects.
                     type: array
+                    maxItems: 10000
                     items:
                       type: object
                       additionalProperties: true
@@ -171,5 +250,62 @@ paths:
           description: The data stream has not completed successfully.
         404:
           description: Indicates the data stream id was not found.
+        500:
+          description: An internal server error occurred.
+  /internal/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}/reanalyze:
+    put:
+      summary: Re-runs the analysis workflow for an existing data stream.
+      operationId: ReanalyzeDataStream
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Re-runs the analysis workflow for an existing data stream. Old result are removed. This resets the data stream status to pending and schedules a new analysis task.
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        - name: data_stream_id
+          in: path
+          required: true
+          description: The data stream identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      requestBody:
+        required: true
+        additionalProperties: false
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - connectorId
+              properties:
+                connectorId:
+                  description: The inference connector ID to use for the reanalysis task.
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                langSmithOptions:
+                  description: The LangSmith tracing options
+                  $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
+      responses:
+        200:
+          description: The data stream reanalysis has been scheduled successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates if the reanalysis was scheduled successfully.
+        400:
+          description: The request is invalid.
+        404:
+          description: The data stream is not found.
         500:
           description: An internal server error occurred.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type LogsSourceOption = 'upload' | 'index';
+export type LogsSourceOption = 'file' | 'index';
 
 export interface IntegrationFields {
   title: string;

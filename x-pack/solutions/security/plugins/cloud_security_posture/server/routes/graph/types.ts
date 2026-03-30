@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
 
 export type EsQuery = GraphRequest['query']['esQuery'];
@@ -14,18 +15,54 @@ export interface OriginEventId {
   isAlert: boolean;
 }
 
+/**
+ * Common services interface for document details context.
+ * Used by graph_entities and graph_events routes.
+ */
+export interface DocumentDetailsContextServices {
+  logger: Logger;
+  esClient: IScopedClusterClient;
+}
+
 // Constants for non-enriched entity types
 export const NON_ENRICHED_ENTITY_TYPE_PLURAL = 'Entities';
 export const NON_ENRICHED_ENTITY_TYPE_SINGULAR = 'Entity';
 
+/**
+ * Base interface for graph edges with shared actor/target fields.
+ * Extended by EventEdge and RelationshipEdge.
+ */
 export interface GraphEdge {
-  // event/alert attributes
+  badge: number;
+  // Actor attributes (shared)
+  actorNodeId: string;
+  actorIdsCount: number;
+  actorEntityType?: string | null;
+  actorEntitySubType?: string | null;
+  actorEntityName?: string | string[] | null;
+  actorHostIps?: string[] | string;
+  actorsDocData?: Array<string | null> | string;
+  // Target attributes (shared)
+  targetNodeId: string | null;
+  targetIdsCount: number;
+  targetEntityType?: string | null;
+  targetEntitySubType?: string | null;
+  targetEntityName?: string | string[] | null;
+  targetHostIps?: string[] | string;
+  targetsDocData?: Array<string | null> | string;
+}
+
+/**
+ * Represents an event/alert edge from logs and alerts indices.
+ * Contains event-specific fields like action, docs, isAlert, etc.
+ */
+export interface EventEdge extends GraphEdge {
+  // Event/alert attributes
   action: string;
   docs: string[] | string;
   isAlert: boolean;
   isOrigin: boolean;
   isOriginAlert: boolean;
-  badge: number;
   uniqueEventsCount: number;
   uniqueAlertsCount: number;
   sourceIps?: string[] | string;
@@ -37,20 +74,25 @@ export interface GraphEdge {
    * they should share the same label node because they originate from the same document(s).
    */
   labelNodeId: string;
-  // actor attributes
-  actorNodeId: string;
-  actorIdsCount: number;
-  actorsDocData?: Array<string | null> | string;
-  actorEntityType?: string | null;
-  actorEntitySubType?: string | null;
-  actorEntityName?: string | string[] | null;
-  actorHostIps?: string[] | string;
-  // target attributes
-  targetNodeId: string | null;
-  targetIdsCount: number;
-  targetsDocData?: Array<string | null> | string;
-  targetEntityType?: string | null;
-  targetEntitySubType?: string | null;
-  targetEntityName?: string | string[] | null;
-  targetHostIps?: string[] | string;
+  pinned?: string | null;
 }
+
+/**
+ * Represents a relationship edge from the entity store.
+ * Used for static/configuration-based relationships between entities.
+ * Actor and target entities are grouped by type/subtype similar to event actors/targets.
+ */
+export interface RelationshipEdge extends GraphEdge {
+  relationship: string; // "Owns", "Supervises", "Depends_on", etc.
+  relationshipNodeId: string; // Unique ID for deduplication (actorId-relationship)
+  // Actor entity grouping (relationship-specific)
+  actorIds: string[]; // All actor entity IDs in this group
+  // Target entity grouping (relationship-specific)
+  targetNodeId: string; // Override to make non-nullable for relationships
+  targetIds: string[]; // All target entity IDs in this group
+}
+
+/**
+ * Entity ID with type for relationship queries.
+ */
+export type EntityId = NonNullable<GraphRequest['query']['entityIds']>[number];

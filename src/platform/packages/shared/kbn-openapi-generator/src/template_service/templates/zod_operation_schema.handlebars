@@ -7,9 +7,10 @@
 
  {{> disclaimer}}
 
-import type { ZodTypeDef } from '@kbn/zod';
-import { z } from '@kbn/zod';
-import { requiredOptional, isValidDateMath, isNonEmptyString, ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+{{#if useZodHelpers}}
+import { isValidDateMath, isNonEmptyString, ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
+{{/if}}
 
 {{#each imports}}
 import {
@@ -29,7 +30,7 @@ import {
 {{#if (isCircularSchema @key)}}
 export type {{transformSchemaName @key}} = {{> ts_type}};
 export type {{transformSchemaName @key}}Input = {{> ts_input_type }};
-export const {{transformSchemaName @key}}: z.ZodType<{{transformSchemaName @key}}, ZodTypeDef, {{transformSchemaName @key}}Input> = {{> zod_schema_item }};
+export const {{transformSchemaName @key}}: z.ZodType<{{transformSchemaName @key}}, {{transformSchemaName @key}}Input> = {{> zod_schema_item }};
 {{else}}
 {{#if (shouldCastExplicitly this)}}
 {{!-- We need this temporary type to infer from it below, but in the end we want to export as a casted {{transformSchemaName @key}} type --}}

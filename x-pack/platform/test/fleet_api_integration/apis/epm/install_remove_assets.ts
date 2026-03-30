@@ -696,6 +696,10 @@ const expectAssetsInstalled = ({
           ? {
               installed_kibana: [
                 {
+                  id: 'fleet-all_assets-inactivity-monitoring',
+                  type: 'alerting_rule_template',
+                },
+                {
                   id: 'sample_alerting_rule_template',
                   type: 'alerting_rule_template',
                 },
@@ -1007,6 +1011,10 @@ const expectAssetsInstalled = ({
             }
           : {
               installed_kibana: [
+                {
+                  id: 'fleet-all_assets-inactivity-monitoring',
+                  type: 'alerting_rule_template',
+                },
                 {
                   id: 'sample_alerting_rule_template',
                   type: 'alerting_rule_template',
@@ -1322,10 +1330,13 @@ const expectAssetsInstalled = ({
             )
           ).to.not.be(undefined);
         });
+      const installedAsDependency = sortedRes.installed_as_dependency;
+      delete sortedRes.installed_as_dependency;
       expect({ ...sortedRes, installed_es: [] }).eql({
         ...expectedSavedObject,
         installed_es: [],
       });
+      expect(Boolean(installedAsDependency)).eql(false);
     }
 
     await verifySO();

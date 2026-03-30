@@ -16,7 +16,11 @@ import { processGapsBatch } from '../../../application/gaps/methods/bulk_fill_ga
 import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
 import type { RulesClientApi } from '../../../types';
-import { gapStatus, GAP_AUTO_FILL_STATUS } from '../../../../common/constants';
+import {
+  gapStatus,
+  GAP_AUTO_FILL_STATUS,
+  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
+} from '../../../../common/constants';
 import type { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import {
   GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
@@ -248,12 +252,15 @@ export async function processGapsForRules({
     if (filteredGaps.length) {
       const sortedGaps = filteredGaps.sort((a, b) => a.range.gte.getTime() - b.range.gte.getTime());
 
-      const { results: chunkResults } = await processGapsBatch(rulesClientContext, {
-        gapsBatch: sortedGaps,
-        range: { start: startISO, end: endISO },
-        initiator: backfillInitiator.SYSTEM,
-        initiatorId: taskInstanceId,
-      });
+      const { results: chunkResults, truncatedRuleIds } = await processGapsBatch(
+        rulesClientContext,
+        {
+          gapsBatch: sortedGaps,
+          range: { start: startISO, end: endISO },
+          initiator: backfillInitiator.SYSTEM,
+          initiatorId: taskInstanceId,
+        }
+      );
 
       aggregated = addChunkResultsToAggregation(aggregated, chunkResults);
 
@@ -271,6 +278,20 @@ export async function processGapsForRules({
             remainingBackfills,
             state: SchedulerLoopState.CAPACITY_EXHAUSTED,
           };
+        }
+      }
+
+      const completedRuleIds = new Set(truncatedRuleIds);
+      for (const result of chunkResults) {
+        if (result.status === GapFillSchedulePerRuleStatus.SUCCESS) {
+          completedRuleIds.add(result.ruleId);
+        }
+      }
+
+      if (completedRuleIds.size > 0) {
+        toProcessRuleIds = toProcessRuleIds.filter((id) => !completedRuleIds.has(id));
+        if (toProcessRuleIds.length === 0) {
+          break;
         }
       }
     }
@@ -396,10 +417,20 @@ export function registerGapAutoFillSchedulerTask({
 
             try {
               const now = new Date();
-              const startDate: Date | undefined = dateMath.parse(config.gapFillRange)?.toDate();
-              if (!startDate) {
+              const parsedStart: Date | undefined = dateMath.parse(config.gapFillRange)?.toDate();
+              if (!parsedStart) {
                 throw new Error(`Invalid gapFillRange: ${config.gapFillRange}`);
               }
+
+              const BACKFILL_LOOKBACK_SAFETY_MARGIN_MS = 5 * 60 * 1000; // 5 minutes
+              const minAllowedStart = new Date(
+                now.getTime() -
+                  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS +
+                  BACKFILL_LOOKBACK_SAFETY_MARGIN_MS
+              );
+              const startDate = new Date(
+                Math.max(parsedStart.getTime(), minAllowedStart.getTime())
+              );
               const startISO = startDate.toISOString();
               const endISO = now.toISOString();
 

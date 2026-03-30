@@ -1,7 +1,8 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "useUnknownInCatchVariables": true
   },
   "include": [
     "common/**/*",
@@ -41,8 +42,6 @@
     "@kbn/shared-ux-utility",
     "@kbn/unsaved-changes-prompt",
     "@kbn/grok-ui",
-    "@kbn/grok-heuristics",
-    "@kbn/dissect-heuristics",
     "@kbn/streams-plugin",
     "@kbn/search-types",
     "@kbn/xstate-utils",
@@ -72,6 +71,7 @@
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/config-schema",
     "@kbn/scout",
+    "@kbn/scout-synthtrace",
     "@kbn/unified-doc-viewer",
     "@kbn/monaco",
     "@kbn/unified-doc-viewer-plugin",
@@ -83,7 +83,6 @@
     "@kbn/core-notifications-browser",
     "@kbn/io-ts-utils",
     "@kbn/otel-semantic-conventions",
-    "@kbn/storage-adapter",
     "@kbn/cloud-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/deeplinks-security",
@@ -108,5 +107,6 @@
     "@kbn/esql",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/stack-connectors-plugin",
+    "@kbn/std",
   ]
 }

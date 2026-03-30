@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod, BooleanFromString } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { buildRouteValidationWithZod, BooleanFromString } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { ENTITY_STORE_ROUTES } from '../../../common';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import type { EntityStoreStatus, GetStatusResult } from '../../domain/types';
-import type { LogExtractionState } from '../../domain/definitions/saved_objects';
+import type { EntityStoreStatus, GetStatusSuccessResult } from '../../domain/types';
+import type { LogExtractionConfig } from '../../domain/saved_objects';
+import { ENTITY_STORE_STATUS } from '../../domain/constants';
 
 /**
  * Legacy engine descriptor from V1. will be removed in a future version.
  */
 type LogExtractionStateForV1 = Omit<
-  LogExtractionState,
-  'additionalIndexPattern' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
+  LogExtractionConfig,
+  'additionalIndexPatterns' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
 >;
 interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {
   docsPerSecond: -1;
@@ -28,9 +29,13 @@ interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {
   enrichPolicyExecutionInterval: null;
   timestampField: '@timestamp';
   maxPageSearchSize: 10000;
+  lastExecutionTimestamp: string | undefined;
 }
 
-type StatusEngine = Omit<GetStatusResult['engines'][number], 'versionState'> &
+type StatusEngine = Omit<
+  GetStatusSuccessResult['engines'][number],
+  'versionState' | 'logExtractionState'
+> &
   LegacyEngineDescriptorV1;
 
 interface EntityStoreStatusResponseBody {
@@ -43,10 +48,14 @@ const querySchema = z.object({
 });
 export type StatusRequestQuery = z.infer<typeof querySchema>;
 
-function toPublicEngine(engine: GetStatusResult['engines'][number]): StatusEngine {
-  const { versionState, ...rest } = engine;
+function toPublicEngine(
+  engine: GetStatusSuccessResult['engines'][number],
+  logsExtractionConfig: LogExtractionConfig
+): StatusEngine {
+  const { versionState, logExtractionState, ...rest } = engine;
   const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter } =
-    rest.logExtractionState;
+    logsExtractionConfig;
+
   return {
     ...rest,
     // TODO: Remove the legacy fields once we stop supporting V1.
@@ -61,6 +70,7 @@ function toPublicEngine(engine: GetStatusResult['engines'][number]): StatusEngin
     enrichPolicyExecutionInterval: null,
     timestampField: '@timestamp',
     maxPageSearchSize: 10000,
+    lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp,
   };
 }
 
@@ -86,15 +96,23 @@ export function registerStatus(router: EntityStorePluginRouter) {
       wrapMiddlewares(
         async (ctx, req, res): Promise<IKibanaResponse<EntityStoreStatusResponseBody>> => {
           const entityStoreCtx = await ctx.entityStore;
-          const { logger, assetManager } = entityStoreCtx;
+          const { logger, assetManagerClient: assetManager } = entityStoreCtx;
           logger.debug('Status API invoked');
           const withComponents = req.query.include_components;
-          const { status, engines } = await assetManager.getStatus(withComponents);
+          const { status, engines, ...rest } = await assetManager.getStatus(withComponents);
+
+          if (status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
+            return res.ok({
+              body: { status, engines: [] },
+            });
+          }
+
+          const { logsExtractionConfig } = rest as GetStatusSuccessResult;
 
           return res.ok({
             body: {
               status,
-              engines: engines.map(toPublicEngine),
+              engines: engines.map((engine) => toPublicEngine(engine, logsExtractionConfig)),
             },
           });
         }

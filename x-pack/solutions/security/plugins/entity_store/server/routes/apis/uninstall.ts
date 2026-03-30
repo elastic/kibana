@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
-import { ENTITY_STORE_ROUTES } from '../../../common';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
 import { wrapMiddlewares } from '../middleware';
@@ -37,16 +37,22 @@ export function registerUninstall(router: EntityStorePluginRouter) {
         },
       },
       wrapMiddlewares(async (ctx, req, res) => {
-        const { logger, assetManager } = await ctx.entityStore;
-        logger.debug(`uninstalling entities: [${req.body.entityTypes.join(', ')}]`);
+        const {
+          logger,
+          assetManagerClient: assetManager,
+          entityMaintainersClient,
+        } = await ctx.entityStore;
+        const { entityTypes } = req.body;
+        logger.debug(`uninstalling entities: [${entityTypes.join(', ')}]`);
 
-        await Promise.all(req.body.entityTypes.map((type) => assetManager.uninstall(type)));
+        const { engines } = await assetManager.getStatus();
+        const installedTypes = new Set(engines.map((e) => e.type));
+        const toUninstall = entityTypes.filter((type) => installedTypes.has(type));
 
-        return res.ok({
-          body: {
-            ok: true,
-          },
-        });
+        await entityMaintainersClient.removeAll();
+        await Promise.all(toUninstall.map((type) => assetManager.uninstall(type)));
+
+        return res.ok({ body: { ok: true } });
       })
     );
 }

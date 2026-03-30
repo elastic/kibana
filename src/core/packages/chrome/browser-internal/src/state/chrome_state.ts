@@ -33,9 +33,9 @@ import {
 import { createBreadcrumbsState } from './breadcrumbs_state';
 import { createVisibilityState, type VisibilityState } from './visibility_state';
 import { createChromeStyleState, type ChromeStyleState } from './chrome_style_state';
-import { createFeedbackState, type FeedbackState, type FeedbackStateDeps } from './feedback_state';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
+const INITIAL_SIDENAV_WIDTH = 0;
 
 export interface ChromeState {
   /** Visibility management */
@@ -47,21 +47,19 @@ export interface ChromeState {
   /** Side navigation state */
   sideNav: {
     collapsed: State<boolean>;
+    width: State<number>;
   };
 
-  /** Feedback state */
-  feedback: FeedbackState;
-
-  /** Breadcrumbs state */
+  /** Breadcrumbs state (includes legacy badge from setBadge()) */
   breadcrumbs: {
     classic: ArrayState<ChromeBreadcrumb>;
     appendExtensions: ArrayState<ChromeBreadcrumbsAppendExtension>;
     badges: ArrayState<ChromeBreadcrumbsBadge>;
+    legacyBadge: State<ChromeBadge | undefined>;
     appendExtensionsWithBadges$: Observable<ChromeBreadcrumbsAppendExtension[]>;
   };
 
   /** UI elements */
-  badge: State<ChromeBadge | undefined>;
   headerBanner: State<ChromeUserBanner | undefined>;
   globalFooter: State<ReactNode>;
   customNavLink: State<ChromeNavLink | undefined>;
@@ -78,15 +76,10 @@ export interface ChromeState {
 export interface ChromeStateDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
-  feedbackDeps: Pick<FeedbackStateDeps, 'isEnabled$' | 'urlParams$'>;
 }
 
 /** Creates all chrome state in one place */
-export function createChromeState({
-  application,
-  docLinks,
-  feedbackDeps,
-}: ChromeStateDeps): ChromeState {
+export function createChromeState({ application, docLinks }: ChromeStateDeps): ChromeState {
   // Create headerBanner first (needed by body classes)
   const headerBanner = createState<ChromeUserBanner | undefined>(undefined);
 
@@ -98,23 +91,18 @@ export function createChromeState({
 
   // Side Nav
   const sideNavCollapsed = createPersistedState(IS_SIDENAV_COLLAPSED_KEY, false);
+  const sideNavWidth = createState<number>(INITIAL_SIDENAV_WIDTH);
 
-  // Feedback
-  const feedback = createFeedbackState({
-    ...feedbackDeps,
-    isSideNavCollapsed$: sideNavCollapsed.$,
-  });
-
-  // Breadcrumbs
+  // Breadcrumbs (legacyBadge powers setBadge() -> breadcrumbs badge pipeline)
   const {
     breadcrumbs,
     breadcrumbsAppendExtensions,
     breadcrumbsBadges,
+    legacyBadge,
     breadcrumbsAppendExtensionsWithBadges$,
   } = createBreadcrumbsState();
 
   // UI Elements (per-app reset handled in setupAppChangeHandler)
-  const badge = createState<ChromeBadge | undefined>(undefined);
   const appMenu = createState<AppMenuConfig | undefined>(undefined);
 
   // UI Elements (not reset on app change)
@@ -131,15 +119,15 @@ export function createChromeState({
     style,
     sideNav: {
       collapsed: sideNavCollapsed,
+      width: sideNavWidth,
     },
-    feedback,
     breadcrumbs: {
       classic: breadcrumbs,
       appendExtensions: breadcrumbsAppendExtensions,
       badges: breadcrumbsBadges,
+      legacyBadge,
       appendExtensionsWithBadges$: breadcrumbsAppendExtensionsWithBadges$,
     },
-    badge,
     headerBanner,
     globalFooter,
     customNavLink,

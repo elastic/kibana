@@ -65,12 +65,16 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import { css, injectGlobal } from '@emotion/css';
-import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import {
+  VisualizeConstants,
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VISUALIZE_SAVED_OBJECT_TYPE,
+} from '@kbn/visualizations-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import type { VisEditorsRegistry } from './vis_editors_registry';
@@ -178,7 +182,6 @@ export interface VisualizationsStartDeps {
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
 
 const styles = {
@@ -478,11 +481,11 @@ export class VisualizationsPlugin
     expressions.registerFunction(xyDimensionExpressionFunction);
     embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
       const {
-        plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
+        plugins: { embeddable: embeddableStart },
       } = start();
 
       const { getVisualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
-      return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
+      return getVisualizeEmbeddableFactory({ embeddableStart });
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {
@@ -498,7 +501,7 @@ export class VisualizationsPlugin
           }
         );
       },
-      savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
+      savedObjectType: VISUALIZE_SAVED_OBJECT_TYPE,
       savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
         defaultMessage: 'Visualization',
       }),
@@ -547,6 +550,7 @@ export class VisualizationsPlugin
       dataViews,
       inspector,
       serverless,
+      cps,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -592,6 +596,10 @@ export class VisualizationsPlugin
     }
 
     registerActions(uiActions, data, types);
+
+    cps?.cpsManager?.registerAppAccess('visualize', (location: string) =>
+      location.includes('type:vega') ? ProjectRoutingAccess.EDITABLE : ProjectRoutingAccess.DISABLED
+    );
 
     return {
       ...types,

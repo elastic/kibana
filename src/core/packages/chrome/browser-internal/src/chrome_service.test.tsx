@@ -9,6 +9,7 @@
 
 import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { toArray, firstValueFrom } from 'rxjs';
@@ -28,6 +29,14 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
+
+import {
+  ChromeComponentsProvider,
+  ChromelessHeader,
+  ClassicHeader,
+} from '@kbn/core-chrome-browser-components';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
 
 import { ChromeService } from './chrome_service';
 import { NavLinksService } from './services/nav_links';
@@ -232,22 +241,40 @@ describe('start', () => {
     });
   });
 
-  describe('getHeaderComponent', () => {
-    it('returns a renderable React component', async () => {
-      const { chrome } = await start();
-
-      // Have to do some fanagling to get the type system and enzyme to accept this.
-      // Don't capture the snapshot because it's 600+ lines long.
-      // Render and assert that no error is thrown
-      render(React.createElement(() => chrome.getClassicHeaderComponent()));
+  describe('render smoke tests', () => {
+    const buildComponentDeps = (startDeps: ReturnType<typeof defaultStartDeps>) => ({
+      application: startDeps.application,
+      http: startDeps.http,
+      docLinks: startDeps.docLinks,
+      customBranding: startDeps.customBranding,
     });
 
-    it('renders chromeless header', async () => {
-      const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
+    it('ClassicHeader renders within ChromeComponentsProvider', async () => {
+      const startDeps = defaultStartDeps();
+      const { chrome } = await start({ startDeps });
 
       render(
         <KibanaRenderContextProvider {...startDeps}>
-          {chrome.getChromelessHeader()}
+          <CoreEnvContextProvider value={coreContextMock.create().env}>
+            <ChromeServiceProvider value={{ chrome }}>
+              <ChromeComponentsProvider value={buildComponentDeps(startDeps)}>
+                <ClassicHeader />
+              </ChromeComponentsProvider>
+            </ChromeServiceProvider>
+          </CoreEnvContextProvider>
+        </KibanaRenderContextProvider>
+      );
+    });
+
+    it('ChromelessHeader renders within ChromeComponentsProvider', async () => {
+      const startDeps = defaultStartDeps();
+      await start({ startDeps });
+
+      render(
+        <KibanaRenderContextProvider {...startDeps}>
+          <ChromeComponentsProvider value={buildComponentDeps(startDeps)}>
+            <ChromelessHeader />
+          </ChromeComponentsProvider>
         </KibanaRenderContextProvider>
       );
 
@@ -423,6 +450,9 @@ describe('start', () => {
     it('allows the project breadcrumb to also be set', async () => {
       const { chrome } = await start();
 
+      chrome.setChromeStyle('project');
+      chrome.project.initNavigation('es', Rx.of({ body: [] }));
+
       chrome.project.setCloudUrls({
         deploymentUrl: 'my-deployment-url.com',
       });
@@ -461,15 +491,15 @@ describe('start', () => {
       );
 
       const ext1 = chrome.setBreadcrumbsAppendExtension({
-        content: () => () => {},
+        content: null,
       });
       chrome.setBreadcrumbsAppendExtension({
         order: 0,
-        content: () => () => {},
+        content: null,
       });
       const ext3 = chrome.setBreadcrumbsAppendExtension({
         order: 100,
-        content: () => () => {},
+        content: null,
       });
       ext3();
       ext1();
@@ -480,43 +510,43 @@ describe('start', () => {
           Array [],
           Array [
             Object {
-              "content": [Function],
+              "content": null,
             },
           ],
           Array [
             Object {
-              "content": [Function],
+              "content": null,
               "order": 0,
             },
             Object {
-              "content": [Function],
+              "content": null,
             },
           ],
           Array [
             Object {
-              "content": [Function],
+              "content": null,
               "order": 0,
             },
             Object {
-              "content": [Function],
+              "content": null,
             },
             Object {
-              "content": [Function],
+              "content": null,
               "order": 100,
             },
           ],
           Array [
             Object {
-              "content": [Function],
+              "content": null,
               "order": 0,
             },
             Object {
-              "content": [Function],
+              "content": null,
             },
           ],
           Array [
             Object {
-              "content": [Function],
+              "content": null,
               "order": 0,
             },
           ],
@@ -551,7 +581,7 @@ describe('start', () => {
       const { chrome, service } = await start();
       const promise = firstValueFrom(chrome.getHelpExtension$().pipe(Rx.take(3), toArray()));
 
-      chrome.setHelpExtension({ appName: 'App name', content: () => () => undefined });
+      chrome.setHelpExtension({ appName: 'App name', content: () => null });
       chrome.setHelpExtension(undefined);
       service.stop();
 
@@ -573,7 +603,7 @@ describe('start', () => {
       const { chrome, service } = await start();
       const promise = firstValueFrom(chrome.hasHeaderBanner$().pipe(Rx.take(3), toArray()));
 
-      chrome.setHeaderBanner({ content: () => () => undefined });
+      chrome.setHeaderBanner({ content: <></> });
       chrome.setHeaderBanner(undefined);
       service.stop();
 
@@ -670,38 +700,28 @@ describe('start', () => {
       });
     });
 
-    describe('getIsFeedbackBtnVisible$', () => {
-      it('should return false by default', async () => {
+    describe('width', () => {
+      it('should return 0 by default', async () => {
         const { chrome, service } = await start();
-        const isCollapsed = await firstValueFrom(chrome.sideNav.getIsFeedbackBtnVisible$());
+
+        expect(chrome.sideNav.getWidth()).toBe(0);
+        expect(await firstValueFrom(chrome.sideNav.getWidth$())).toBe(0);
+
         service.stop();
-        expect(isCollapsed).toBe(false);
       });
 
-      it('should return "false" when the sidenav is collapsed', async () => {
+      it('should update the width observable', async () => {
         const { chrome, service } = await start();
+        const widths: number[] = [];
+        const subscription = chrome.sideNav.getWidth$().subscribe((width) => widths.push(width));
 
-        const isFeedbackBtnVisible$ = chrome.sideNav.getIsFeedbackBtnVisible$();
-        chrome.sideNav.setIsFeedbackBtnVisible(true); // Mark it as visible
-        chrome.sideNav.setIsCollapsed(true); // But the sidenav is collapsed
+        chrome.sideNav.setWidth(120);
 
-        const isFeedbackBtnVisible = await firstValueFrom(isFeedbackBtnVisible$);
+        expect(chrome.sideNav.getWidth()).toBe(120);
+        expect(widths).toEqual([0, 120]);
+
+        subscription.unsubscribe();
         service.stop();
-        expect(isFeedbackBtnVisible).toBe(false);
-      });
-    });
-
-    describe('setIsFeedbackBtnVisible', () => {
-      it('should update the isFeedbackBtnVisible$ observable', async () => {
-        const { chrome, service } = await start();
-        const isFeedbackBtnVisible$ = chrome.sideNav.getIsFeedbackBtnVisible$();
-        const isFeedbackBtnVisible = await firstValueFrom(isFeedbackBtnVisible$);
-
-        chrome.sideNav.setIsFeedbackBtnVisible(!isFeedbackBtnVisible);
-
-        const updatedIsFeedbackBtnVisible = await firstValueFrom(isFeedbackBtnVisible$);
-        service.stop();
-        expect(updatedIsFeedbackBtnVisible).toBe(!isFeedbackBtnVisible);
       });
     });
   });

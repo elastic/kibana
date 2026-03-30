@@ -7,36 +7,59 @@
 
 import React from 'react';
 import { CoreProviders } from '../../../apps/common_providers';
-import type { IntegratedNodeMetricsTableProps, UseNodeMetricsTableOptions } from '../shared';
+import type { IntegratedNodeMetricsTableProps } from '../shared';
 import { ContainerMetricsTable } from './container_metrics_table';
 import { useContainerMetricsTable } from './use_container_metrics_table';
+type ContainerIntegratedProps = IntegratedNodeMetricsTableProps & {
+  isK8sContainer?: boolean;
+};
+
+type HookedContainerMetricsTableProps = Pick<
+  ContainerIntegratedProps,
+  'timerange' | 'kuery' | 'isOtel' | 'isK8sContainer' | 'metricsClient'
+>;
 
 function HookedContainerMetricsTable({
   timerange,
   kuery,
+  isOtel,
+  isK8sContainer,
   metricsClient,
-}: UseNodeMetricsTableOptions) {
+}: HookedContainerMetricsTableProps) {
   const containerMetricsTableProps = useContainerMetricsTable({
     timerange,
     kuery,
+    isOtel,
+    isK8sContainer,
     metricsClient,
   });
-  return <ContainerMetricsTable {...containerMetricsTableProps} />;
+  return (
+    <ContainerMetricsTable
+      {...containerMetricsTableProps}
+      isOtel={isOtel}
+      metricsIndices={containerMetricsTableProps.metricIndices}
+      isK8sContainer={isK8sContainer}
+    />
+  );
 }
 
 function ContainerMetricsTableWithProviders({
   timerange,
   kuery,
   sourceId,
+  isOtel,
+  isK8sContainer,
   metricsClient,
   ...coreProvidersProps
-}: IntegratedNodeMetricsTableProps) {
+}: ContainerIntegratedProps) {
   return (
     <CoreProviders {...coreProvidersProps}>
       <HookedContainerMetricsTable
         timerange={timerange}
         kuery={kuery}
+        isOtel={isOtel}
         metricsClient={metricsClient}
+        isK8sContainer={isK8sContainer}
       />
     </CoreProviders>
   );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString, UUID } from './primitive.gen';
 
@@ -31,7 +31,7 @@ describe('primitive schemas', () => {
     it('rejects empty string', () => {
       const result = NonEmptyString.safeParse('');
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('String must contain at least 1 character');
+      expect(stringifyZodError(result.error)).toContain('Too small');
     });
 
     it('rejects whitespace-only string', () => {
@@ -84,8 +84,8 @@ describe('primitive schemas', () => {
         '123e4567-e89b-12d3-a456-426614174000',
         '550e8400-e29b-41d4-a716-446655440000',
         'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-        '00000000-0000-0000-0000-000000000000',
-        'ffffffff-ffff-ffff-ffff-ffffffffffff',
+        '00000000-0000-4000-8000-000000000000',
+        'ffffffff-ffff-4fff-bfff-ffffffffffff',
       ];
 
       validUUIDs.forEach((uuid) => {
@@ -109,7 +109,7 @@ describe('primitive schemas', () => {
       invalidUUIDs.forEach((uuid) => {
         const result = UUID.safeParse(uuid);
         expectParseError(result);
-        expect(stringifyZodError(result.error)).toContain('Invalid uuid');
+        expect(stringifyZodError(result.error)).toContain('Invalid UUID');
       });
     });
 
@@ -149,13 +149,13 @@ describe('primitive schemas', () => {
     it('rejects empty string', () => {
       const result = UUID.safeParse('');
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('Invalid uuid');
+      expect(stringifyZodError(result.error)).toContain('Invalid UUID');
     });
 
     it('rejects whitespace', () => {
       const result = UUID.safeParse('   ');
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('Invalid uuid');
+      expect(stringifyZodError(result.error)).toContain('Invalid UUID');
     });
   });
 });

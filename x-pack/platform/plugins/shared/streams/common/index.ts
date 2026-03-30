@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export type { Query } from './queries';
+export { QUERY_STATUSES } from './queries';
+export type { Query, QueryStatus } from './queries';
 export type {
   ProcessorSuggestion,
   ProcessorPropertySuggestion,
@@ -28,3 +29,9 @@ export {
   isKqlQueryValid,
   buildEsqlFilter,
 } from './query_helpers';
+
+export {
+  PRIORITIZED_CONTENT_FIELDS,
+  getDefaultTextField,
+  extractMessagesFromField,
+} from './pattern_extraction_helpers';

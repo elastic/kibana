@@ -43,15 +43,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Create a wired stream
       // Get the root logs stream and update it with routing rules
       const rootStream = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
-        params: { path: { name: 'logs' } },
+        params: { path: { name: 'logs.otel' } },
       });
 
       const { updated_at: _processingUpdatedAt, ...processingWithoutMeta } =
         (rootStream.body as any)?.stream?.ingest?.processing ?? {};
 
-      await putStream(apiClient, 'logs', {
+      await putStream(apiClient, 'logs.otel', {
         ...emptyAssets,
         stream: {
+          type: 'wired',
           description: '',
           ingest: {
             ...(rootStream.body as any).stream.ingest,
@@ -60,12 +61,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...(rootStream.body as any).stream.ingest.wired,
               routing: [
                 {
-                  destination: 'logs.test-stream-1',
+                  destination: 'logs.otel.test-stream-1',
                   where: { field: 'attributes.log.logger', eq: 'test-stream-1' },
                   status: 'enabled',
                 },
                 {
-                  destination: 'logs.test-stream-2',
+                  destination: 'logs.otel.test-stream-2',
                   where: { field: 'attributes.log.logger', eq: 'test-stream-2' },
                   status: 'enabled',
                 },
@@ -75,9 +76,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      await putStream(apiClient, 'logs.test-stream-1', {
+      await putStream(apiClient, 'logs.otel.test-stream-1', {
         ...emptyAssets,
         stream: {
+          type: 'wired',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -97,9 +99,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      await putStream(apiClient, 'logs.test-stream-2', {
+      await putStream(apiClient, 'logs.otel.test-stream-2', {
         ...emptyAssets,
         stream: {
+          type: 'wired',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -114,12 +117,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      // Index documents to parent 'logs' stream and let routing handle it
+      // Index documents to parent 'logs.otel' stream and let routing handle it
       const now = Date.now();
       const timestamp = new Date(now).toISOString();
 
       await esClient.index({
-        index: 'logs',
+        index: 'logs.otel',
         document: {
           '@timestamp': timestamp,
           message: JSON.stringify({
@@ -133,7 +136,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       await esClient.index({
-        index: 'logs',
+        index: 'logs.otel',
         document: {
           '@timestamp': timestamp,
           message: JSON.stringify({
@@ -147,7 +150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       await esClient.index({
-        index: 'logs',
+        index: 'logs.otel',
         document: {
           '@timestamp': timestamp,
           message: JSON.stringify({
@@ -176,14 +179,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
       try {
         await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
-          params: { path: { name: 'logs.test-stream-1' } },
+          params: { path: { name: 'logs.otel.test-stream-1' } },
         });
       } catch (e) {
         // Ignore errors if stream doesn't exist
       }
       try {
         await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
-          params: { path: { name: 'logs.test-stream-2' } },
+          params: { path: { name: 'logs.otel.test-stream-2' } },
         });
       } catch (e) {
         // Ignore errors if stream doesn't exist
@@ -201,10 +204,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (stat: any) => stat.stream === TEST_CLASSIC_STREAM_NAME
         );
         const stream1Count = response.body.find(
-          (stat: any) => stat.stream === 'logs.test-stream-1'
+          (stat: any) => stat.stream === 'logs.otel.test-stream-1'
         );
         const stream2Count = response.body.find(
-          (stat: any) => stat.stream === 'logs.test-stream-2'
+          (stat: any) => stat.stream === 'logs.otel.test-stream-2'
         );
 
         expect(classicStreamCount).to.not.be(undefined);
@@ -219,7 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/total', {
           params: {
             query: {
-              stream: 'logs.test-stream-1',
+              stream: 'logs.otel.test-stream-1',
             },
           },
         });
@@ -228,7 +231,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body).to.be.an('array');
         expect(response.body.length).to.be.greaterThan(0);
 
-        const entry = response.body.find((stat: any) => stat.stream === 'logs.test-stream-1');
+        const entry = response.body.find((stat: any) => stat.stream === 'logs.otel.test-stream-1');
 
         expect(entry).to.not.be(undefined);
         expect(entry?.count).to.be.greaterThan(0);
@@ -250,7 +253,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Index a document that will have _ignored field (value exceeds ignore_above limit)
         await esClient.index({
-          index: 'logs',
+          index: 'logs.otel',
           document: {
             '@timestamp': timestamp,
             message: JSON.stringify({
@@ -269,7 +272,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.eql(200);
         expect(response.body).to.be.an('array');
         expect(response.body).to.have.length(1);
-        expect(response.body[0].stream).to.eql('logs.test-stream-1');
+        expect(response.body[0].stream).to.eql('logs.otel.test-stream-1');
         expect(response.body[0].count).to.eql(1);
       });
 
@@ -277,7 +280,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await viewerApiClient.fetch('GET /internal/streams/doc_counts/degraded', {
           params: {
             query: {
-              stream: 'logs.test-stream-1',
+              stream: 'logs.otel.test-stream-1',
             },
           },
         });
@@ -285,7 +288,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.eql(200);
         expect(response.body).to.be.an('array');
         expect(response.body.length).to.be.greaterThan(0);
-        expect(response.body[0].stream).to.eql('logs.test-stream-1');
+        expect(response.body[0].stream).to.eql('logs.otel.test-stream-1');
         expect(response.body[0].count).to.eql(1);
       });
     });
@@ -331,6 +334,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const putResponse = await putStream(apiClient, 'logs-failing-stream', {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },

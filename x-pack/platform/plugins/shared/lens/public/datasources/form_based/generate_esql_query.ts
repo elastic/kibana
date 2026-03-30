@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { esql } from '@kbn/esql-language';
+import { esql } from '@elastic/esql';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { getCalculateAutoTimeExpression, getUserTimeZone } from '@kbn/data-plugin/common';
-import { convertIntervalToEsInterval } from '@kbn/data-plugin/public';
+import { UI_SETTINGS, convertIntervalToEsInterval } from '@kbn/data-plugin/public';
+import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
 import moment from 'moment';
 import { partition } from 'lodash';
 import type {
@@ -20,6 +19,7 @@ import type {
   GenericIndexPatternColumn,
   StaticValueIndexPatternColumn,
 } from '@kbn/lens-common';
+import { calculateAuto } from '@kbn/calculate-auto';
 import { isColumnOfType, isColumnFormatted } from './operations/definitions/helpers';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { OriginalColumn } from '../../../common/types';
@@ -28,6 +28,12 @@ import { resolveTimeShift } from './time_shift_utils';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
 import { defaultValue as defaultStaticValue } from './operations/definitions/static_value';
+import {
+  AUTO_INTERVAL,
+  AUTO_TARGET_NUMBER_OF_BUCKETS,
+  getTimeZoneAndInterval,
+  hasDateRange,
+} from './date_histogram_esql';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -93,6 +99,16 @@ export interface ColumnRoles {
   [columnId: string]: string;
 }
 
+const SINGLE_CHAR_INTERVAL: Record<string, string> = {
+  d: '1d',
+  h: '1h',
+  m: '1m',
+  s: '1s',
+  ms: '1ms',
+} as const;
+
+const DEFAULT_DATE_HISTOGRAM_INTERVAL_MS = moment.duration(1, 'h').as('ms');
+
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
   layer: FormBasedLayer,
@@ -104,12 +120,6 @@ export function generateEsqlQuery(
 ): EsqlQueryResult {
   // esql mode variables
   const partialRows = true;
-
-  const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
-  const utcOffset = moment.tz(timeZone).utcOffset() / 60;
-  if (utcOffset !== 0) {
-    return getEsqlQueryFailedResult('non_utc_timezone');
-  }
 
   // Check for unsupported column features in layer.columns
   for (const col of Object.values(layer.columns)) {
@@ -125,24 +135,21 @@ export function generateEsqlQuery(
   }
 
   // indexPattern.title is the actual ES pattern
-  // Build query parts as strings, then combine with esql() for proper parameterization
-  // ES|QL composer docs: src/platform/packages/shared/kbn-esql-language/src/composer/README.md
-  const queryParts: string[] = [`FROM ${indexPattern.title}`];
-  const queryParams: Record<string, string | number> = {};
+  // ES|QL Composer API docs: https://github.com/elastic/esql-js/blob/main/src/composer/README.md
+  const queryParts: string[] = [`FROM ${esql.src(indexPattern.title)}`];
 
   if (indexPattern.timeFieldName) {
-    // This way we later replace timeFieldName but keep _tstart and _tend as parameters
-    queryParts.push(`WHERE ??timeFieldName >= ?_tstart AND ??timeFieldName <= ?_tend`);
-    queryParams.timeFieldName = indexPattern.timeFieldName;
+    const [ESQL_TIME_RANGE_START, ESQL_TIME_RANGE_END] = TIME_SYSTEM_PARAMS;
+    const timeField = `${esql.col(indexPattern.timeFieldName)}`;
+    queryParts.push(
+      `WHERE ${timeField} >= ${ESQL_TIME_RANGE_START} AND ${timeField} <= ${ESQL_TIME_RANGE_END}`
+    );
   }
 
   const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
   const absDateRange = convertToAbsoluteDateRange(dateRange, nowInstant);
 
-  const firstDateHistogramColumn = esAggEntries.find(
-    ([, col]) => col.operationType === 'date_histogram'
-  );
-  const hasDateHistogram = Boolean(firstDateHistogramColumn);
+  const hasDateHistogram = esAggEntries.some(([, col]) => col.operationType === 'date_histogram');
 
   const esAggsIdMap: Record<string, OriginalColumn[]> = {};
 
@@ -161,7 +168,7 @@ export function generateEsqlQuery(
   const staticValueEvals: string[] = [];
   staticValueEntries.forEach(([colId, col], index) => {
     const staticCol = col as StaticValueIndexPatternColumn;
-    const value = staticCol.params?.value ?? defaultStaticValue;
+    const value = staticCol.params?.value ?? `${defaultStaticValue}`;
 
     // Generate a column name for the static value
     // Priority: 1) semantic role name from visualization, 2) 'static_value' for single, 3) 'static_value_N' for multiple
@@ -188,15 +195,12 @@ export function generateEsqlQuery(
       dateRange,
     });
 
-    // Generate EVAL statement for the static value
-    staticValueEvals.push(`${esAggsId} = ${value}`);
+    // Generate EVAL statement using composer literal helpers
+    staticValueEvals.push(`${esAggsId} = ${esql.num(Number(value))}`);
   });
 
-  // Collect all params from metrics and buckets
-  const allParamObjects: Array<Record<string, string | number>> = [];
-
   // Process metrics (excluding static_value which is handled above)
-  const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col], index) => {
+  const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col]) => {
     const def = operationDefinitionMap[col.operationType];
 
     // Check for specific unsupported operations before general toESQL check
@@ -208,7 +212,6 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    const aggId = String(index);
     const wrapInFilter = Boolean(def.filterable && col.filter?.query);
     const wrapInTimeFilter =
       def.canReduceTimeRange &&
@@ -219,8 +222,6 @@ export function generateEsqlQuery(
     if (wrapInTimeFilter) {
       return getEsqlQueryFailedResult('reduced_time_range_not_supported');
     }
-
-    const esAggsId = `bucket_${index}_${aggId}`;
 
     const format =
       // 1. User-configured format in Lens (highest priority)
@@ -239,16 +240,6 @@ export function generateEsqlQuery(
           ? { id: 'number' }
           : undefined
         : undefined);
-
-    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
-      col,
-      colId,
-      format,
-      layer,
-      indexPattern,
-      uiSettings,
-      dateRange,
-    });
 
     const rawResult = def.toESQL(
       {
@@ -271,21 +262,29 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    if (rawResult.params) {
-      allParamObjects.push(rawResult.params);
-    }
-
-    let metricESQL = `${esAggsId} = ${rawResult.template}`;
-
-    if (wrapInFilter) {
-      if (col.filter?.language === 'kuery') {
-        metricESQL += ` WHERE KQL("""${col.filter.query.replace(/"""/g, '')}""")`;
-      } else if (col.filter?.language === 'lucene') {
-        metricESQL += ` WHERE QSTR("""${col.filter.query.replace(/"""/g, '')}""")`;
-      } else {
+    let filterClause = '';
+    if (wrapInFilter && col.filter) {
+      const { query, language } = col.filter;
+      if ((language !== 'kuery' && language !== 'lucene') || typeof query !== 'string') {
         return getEsqlQueryFailedResult('function_not_supported', col.operationType);
       }
+      const cmd = language === 'kuery' ? 'KQL' : 'QSTR';
+      const filteredQueryString = query.replace(/"""/g, '').trim();
+      filterClause = ` WHERE ${cmd}(${esql.str(filteredQueryString)})`;
     }
+
+    // metricESQL is the full expression (template + optional filter); same value is used as map key and in STATS
+    const metricESQL = rawResult.template + filterClause;
+
+    esAggsIdMap[metricESQL] = createEsAggsIdMapEntry({
+      col,
+      colId,
+      format,
+      layer,
+      indexPattern,
+      uiSettings,
+      dateRange,
+    });
 
     return { esql: metricESQL } satisfies EsqlConversionResult;
   });
@@ -303,6 +302,7 @@ export function generateEsqlQuery(
   }
 
   // Process buckets
+  const resolvedBucketExprs = new Map<number, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
@@ -315,7 +315,6 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    const aggId = String(index);
     const wrapInFilter = Boolean(def.filterable && col.filter?.query);
     const wrapInTimeFilter =
       def.canReduceTimeRange &&
@@ -323,63 +322,27 @@ export function generateEsqlQuery(
       col.reducedTimeRange &&
       indexPattern.timeFieldName;
 
-    let esAggsId = `col_${index}_${aggId}`;
-
-    let interval: number | undefined;
+    let intervalInMs: number | undefined;
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
-      const dateHistogramColumn = col as DateHistogramIndexPatternColumn;
-      const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+      const { interval } = getTimeZoneAndInterval(col, indexPattern);
 
-      const cleanInterval = (i: string) => {
-        switch (i) {
-          case 'd':
-            return '1d';
-          case 'h':
-            return '1h';
-          case 'm':
-            return '1m';
-          case 's':
-            return '1s';
-          case 'ms':
-            return '1ms';
-          default:
-            return i;
+      if (interval === AUTO_INTERVAL) {
+        if (hasDateRange(dateRange)) {
+          const { toDate, fromDate } = absDateRange;
+          const absDate = new Date(toDate).getTime() - new Date(fromDate).getTime();
+          const rangeDuration = moment.duration(absDate, 'ms');
+          const intervalDuration = calculateAuto.near(AUTO_TARGET_NUMBER_OF_BUCKETS, rangeDuration);
+          intervalInMs = intervalDuration?.as('ms') ?? DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
+        } else {
+          // Fall back to default 1h when date range is missing
+          intervalInMs = DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
         }
-      };
-      esAggsId = dateHistogramColumn.sourceField;
-      const kibanaInterval =
-        dateHistogramColumn.params?.interval === 'auto'
-          ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-          : dateHistogramColumn.params?.interval || '1h';
-      const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
-      interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
+      } else {
+        const cleanInterval = (i: string) => SINGLE_CHAR_INTERVAL[i] ?? i;
+        const esInterval = convertIntervalToEsInterval(cleanInterval(interval));
+        intervalInMs = moment.duration(esInterval.value, esInterval.unit).as('ms');
+      }
     }
-
-    const format =
-      // 1. User-configured format in Lens (highest priority)
-      (isColumnFormatted(col) ? col.params?.format : undefined) ??
-      // 2. Operation-specific format
-      operationDefinitionMap[col.operationType].getSerializedFormat?.(
-        col,
-        col,
-        indexPattern,
-        uiSettings,
-        dateRange
-      ) ??
-      // 3. Field's default format from data view (buckets don't need fallback)
-      undefined;
-
-    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
-      col,
-      colId,
-      format,
-      interval,
-      layer,
-      indexPattern,
-      uiSettings,
-      dateRange,
-      includeSourceField: true,
-    });
 
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
       const column = col;
@@ -418,11 +381,36 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    if (rawResult.params) {
-      allParamObjects.push(rawResult.params);
-    }
+    const esAggsId = rawResult.template;
+    resolvedBucketExprs.set(index, esAggsId);
 
-    return { esql: `${esAggsId} = ${rawResult.template}` };
+    const format =
+      // 1. User-configured format in Lens (highest priority)
+      (isColumnFormatted(col) ? col.params?.format : undefined) ??
+      // 2. Operation-specific format
+      operationDefinitionMap[col.operationType].getSerializedFormat?.(
+        col,
+        col,
+        indexPattern,
+        uiSettings,
+        dateRange
+      ) ??
+      // 3. Field's default format from data view (buckets don't need fallback)
+      undefined;
+
+    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
+      col,
+      colId,
+      format,
+      interval: intervalInMs,
+      layer,
+      indexPattern,
+      uiSettings,
+      dateRange,
+      includeSourceField: true,
+    });
+
+    return { esql: rawResult.template };
   });
 
   // Check for bucket conversion errors with type guard
@@ -441,9 +429,6 @@ export function generateEsqlQuery(
   const validMetrics = metricsResult.map((m) => m.esql);
   const validBuckets = bucketsResult.map((b) => b.esql);
 
-  // Merge all params from metrics and buckets
-  const allParams = Object.assign({}, queryParams, ...allParamObjects);
-
   if (validBuckets.length > 0) {
     if (validMetrics.length > 0) {
       const statsBody = `${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`;
@@ -455,10 +440,8 @@ export function generateEsqlQuery(
     // the correct esAggsId in the final string.
     const sortFields = bucketEsAggsEntries
       .map(([, col], index) => ({ col, index }))
-      .filter(({ col }) => col.dataType !== 'date')
-      // Applying the index twice to match the correct esAggsId
-      // TODO: revisit this once we want to improve column names
-      .map(({ index }) => `col_${index}_${index} ASC`);
+      .filter(({ col, index }) => col.dataType !== 'date' && resolvedBucketExprs.has(index))
+      .map(({ index }) => `\`${resolvedBucketExprs.get(index)}\` ASC`);
 
     // Only add SORT clause if there are non-date fields to sort by
     if (sortFields.length > 0) {
@@ -476,17 +459,12 @@ export function generateEsqlQuery(
     queryParts.push(`EVAL ${staticValueEvals.join(', ')}`);
   }
 
+  const queryString = queryParts.join(' | ');
   try {
-    const queryString = queryParts.join(' | ');
-    const query =
-      Object.keys(allParams).length > 0 ? esql(queryString, allParams) : esql(queryString);
-
-    // Inline parameters to produce final query string with resolved values
-    query.inlineParams();
-
+    const query = esql(queryString);
     return {
       success: true,
-      esql: query.print(),
+      esql: query.print('basic'),
       partialRows,
       esAggsIdMap,
     };

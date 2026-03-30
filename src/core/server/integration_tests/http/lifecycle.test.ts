@@ -12,6 +12,7 @@ import { parse as parseCookie } from 'tough-cookie';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
@@ -30,6 +31,7 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+  userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
@@ -820,8 +822,18 @@ describe('Auth', () => {
       {
         path: '/',
         validate: false,
-        security: { authz: { enabled: false, reason: '' } },
-        options: { authRequired: false },
+        security: {
+          authc: {
+            enabled: false,
+            reason:
+              'This route is part of an HTTP integration test and does not require authentication.',
+          },
+          authz: {
+            enabled: false,
+            reason:
+              'This route is part of an HTTP integration test and does not require authorization.',
+          },
+        },
       },
       (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
     );
@@ -844,7 +856,6 @@ describe('Auth', () => {
         path: '/',
         validate: false,
         security: { authz: { enabled: false, reason: '' } },
-        options: { authRequired: true },
       },
       (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
     );
@@ -1673,7 +1684,7 @@ describe('runs with default preResponse handlers', () => {
 
 describe('runs with default preResponse deprecation handlers', () => {
   const deprecationMessage = 'This is a deprecated endpoint for testing reasons';
-  const warningString = `299 Kibana-${kibanaVersion} "${deprecationMessage}"`;
+  const warningString = `299 Kibana-${kibanaVersion} "${encodeURIComponent(deprecationMessage)}"`;
 
   it('should handle a deprecated route and include deprecation warning headers', async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);

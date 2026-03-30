@@ -13,6 +13,13 @@ import {
   getTriggerTypeSuggestions,
 } from './get_trigger_type_suggestions';
 
+jest.mock('../../../../../../trigger_schemas', () => ({
+  triggerSchemas: {
+    getTriggerDefinitions: () => [],
+    getTriggerDefinition: () => undefined,
+  },
+}));
+
 // Mock the generate_trigger_snippet module
 jest.mock('../../../snippets/generate_trigger_snippet', () => ({
   generateTriggerSnippet: jest.fn(),
@@ -100,11 +107,17 @@ describe('get_trigger_type_suggestions', () => {
       it('should generate snippets for each trigger type', () => {
         getTriggerTypeSuggestions('', mockRange);
 
-        // Check that generateTriggerSnippet was called for each trigger type
+        // Check that generateTriggerSnippet was called for each trigger type (with defaultCondition from trigger def)
         expect(generateTriggerSnippet).toHaveBeenCalledTimes(3);
-        expect(generateTriggerSnippet).toHaveBeenCalledWith('alert');
-        expect(generateTriggerSnippet).toHaveBeenCalledWith('scheduled');
-        expect(generateTriggerSnippet).toHaveBeenCalledWith('manual');
+        expect(generateTriggerSnippet).toHaveBeenCalledWith('alert', {
+          defaultCondition: undefined,
+        });
+        expect(generateTriggerSnippet).toHaveBeenCalledWith('scheduled', {
+          defaultCondition: undefined,
+        });
+        expect(generateTriggerSnippet).toHaveBeenCalledWith('manual', {
+          defaultCondition: undefined,
+        });
       });
 
       it('should include generated snippets as insertText', () => {
@@ -168,10 +181,14 @@ describe('get_trigger_type_suggestions', () => {
         });
       });
 
-      it('should set sortText with priority prefix', () => {
+      it('should set sortText so built-in triggers sort before event-driven, each group alphabetical', () => {
         const result = getTriggerTypeSuggestions('', mockRange);
+        const builtIn = ['alert', 'manual', 'scheduled'];
         result.forEach((suggestion) => {
-          expect(suggestion.sortText).toBe(`!${suggestion.label}`);
+          const label =
+            typeof suggestion.label === 'string' ? suggestion.label : suggestion.label.label;
+          const prefix = builtIn.includes(label) ? '0_' : '1_';
+          expect(suggestion.sortText).toBe(`!${prefix}${label}`);
         });
       });
 

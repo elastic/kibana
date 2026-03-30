@@ -30,6 +30,7 @@
       "_capabilities"
     ],
     "documentation": "https://github.com/elastic/elasticsearch/blob/main/rest-api-spec/src/yamlRestTest/resources/rest-api-spec/test/README.asciidoc#require-or-skip-api-capabilities",
+    "documentation_serverless": "https://github.com/elastic/elasticsearch/blob/main/rest-api-spec/src/yamlRestTest/resources/rest-api-spec/test/README.asciidoc#require-or-skip-api-capabilities",
     "availability": {
       "stack": false,
       "serverless": false

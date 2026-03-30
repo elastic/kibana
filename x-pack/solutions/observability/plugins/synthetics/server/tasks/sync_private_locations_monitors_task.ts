@@ -24,13 +24,14 @@ import {
 import { DeployPrivateLocationMonitors } from './deploy_private_location_monitors';
 import { cleanUpDuplicatedPackagePolicies } from './clean_up_duplicate_policies';
 import type { HeartbeatConfig } from '../../common/runtime_types';
+import { MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL } from '../../common/constants';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import type { SyntheticsServerSetup } from '../types';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-const TASK_SCHEDULE = '60m';
+export const DEFAULT_TASK_SCHEDULE = `${MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL}m`;
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
@@ -59,9 +60,9 @@ export class SyncPrivateLocationMonitorsTask {
   registerTaskDefinition(taskManager: TaskManagerSetupContract) {
     taskManager.registerTaskDefinitions({
       [TASK_TYPE]: {
-        title: 'Synthetics Sync Global Params Task',
+        title: 'Synthetics Sync Private Location Monitors Task',
         description:
-          'This task is executed so that we can sync private location monitors for example when global params are updated',
+          'This task syncs private location monitor package policies, handling maintenance window changes and cleaning up duplicate policies',
         timeout: '10m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }) => {
@@ -99,6 +100,9 @@ export class SyncPrivateLocationMonitorsTask {
     }
     const taskState = this.getNewTaskState({ taskInstance });
 
+    const interval =
+      (taskInstance.schedule as IntervalSchedule | undefined)?.interval ?? DEFAULT_TASK_SCHEDULE;
+
     try {
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
@@ -124,9 +128,7 @@ export class SyncPrivateLocationMonitorsTask {
 
       const defaultState = {
         state: taskState,
-        schedule: {
-          interval: TASK_SCHEDULE,
-        },
+        schedule: { interval },
       };
 
       const { performCleanupSync } = await this.cleanUpDuplicatedPackagePolicies(
@@ -136,12 +138,7 @@ export class SyncPrivateLocationMonitorsTask {
 
       if (allPrivateLocations.length === 0) {
         this.debugLog(`No private locations found, skipping sync of private location monitors`);
-        return {
-          state: taskState,
-          schedule: {
-            interval: TASK_SCHEDULE,
-          },
-        };
+        return { state: taskState, schedule: { interval } };
       }
       if (performCleanupSync) {
         this.debugLog(`Syncing private location monitors because cleanup performed a change`);
@@ -210,21 +207,10 @@ export class SyncPrivateLocationMonitorsTask {
       }
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
-      return {
-        error,
-        state: taskState,
-        schedule: {
-          interval: TASK_SCHEDULE,
-        },
-      };
+      return { error, state: taskState, schedule: { interval } };
     }
 
-    return {
-      state: taskState,
-      schedule: {
-        interval: TASK_SCHEDULE,
-      },
-    };
+    return { state: taskState, schedule: { interval } };
   }
 
   getNewTaskState({ taskInstance }: { taskInstance: CustomTaskInstance }): SyncTaskState {
@@ -243,12 +229,23 @@ export class SyncPrivateLocationMonitorsTask {
       pluginsStart: { taskManager },
     } = this.serverSetup;
     this.debugLog(`Scheduling private location task`);
+
+    // Read the existing task schedule so ensureScheduled doesn't reset a user-configured interval
+    // on every Kibana restart. Falls back to DEFAULT_TASK_SCHEDULE only on first creation.
+    let schedule: IntervalSchedule = { interval: DEFAULT_TASK_SCHEDULE };
+    try {
+      const existingTask = await taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
+      if (existingTask.schedule) {
+        schedule = existingTask.schedule as IntervalSchedule;
+      }
+    } catch (_err) {
+      // task doesn't exist yet — default schedule will be used on creation
+    }
+
     await taskManager.ensureScheduled({
       id: PRIVATE_LOCATIONS_SYNC_TASK_ID,
       state: {},
-      schedule: {
-        interval: TASK_SCHEDULE,
-      },
+      schedule,
       taskType: TASK_TYPE,
       params: {},
     });

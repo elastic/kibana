@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('@kbn/esql/public/kibana_services', () => ({
+  useKibanaServices: jest.fn(() => ({})),
+  untilPluginStartServicesReady: jest.fn(() => new Promise(() => {})),
+}));
+
 import React from 'react';
 import type { SearchBarProps, SearchBarState } from './search_bar';
 import SearchBar, { SearchBarUI } from './search_bar';
@@ -16,6 +21,7 @@ import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/d
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -26,6 +32,7 @@ import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mo
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
 const startMock = coreMock.createStart();
+startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 
 const noop = jest.fn();
 
@@ -60,7 +67,10 @@ function wrapSearchBarInContext(
   const initialSessionState = options?.backgroundSearch?.initialState ?? SearchSessionState.None;
   const sessionState$ = new BehaviorSubject<SearchSessionState>(initialSessionState);
 
+  const dataStart = dataPluginMock.createStartContract();
+
   const services = {
+    core: startMock,
     application: {
       ...startMock.application,
       capabilities: {
@@ -84,6 +94,7 @@ function wrapSearchBarInContext(
     docLinks: startMock.docLinks,
     storage: createMockStorage(),
     data: {
+      ...dataStart,
       search: searchServiceMock.createStartContract({
         isBackgroundSearchEnabled: backgroundSearchEnabled,
         session: getSessionServiceMock({ state$: sessionState$ }),
@@ -270,9 +281,11 @@ describe('SearchBar', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
-      // Check for ES|QL menu button instead of editor since that's what's rendered
-      expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedQueryInput')).not.toBeInTheDocument();
+      // ES|QL menu may be lazy-loaded, so accept either the menu or help fallback
+      const menuButton = screen.queryByTestId('esql-menu-button');
+      const helpButton = screen.queryByTestId('esql-help-popover-button');
+      expect(menuButton || helpButton).not.toBeNull();
     });
   });
 

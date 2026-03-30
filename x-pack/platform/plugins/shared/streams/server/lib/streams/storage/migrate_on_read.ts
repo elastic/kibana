@@ -56,9 +56,13 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     isObject(migratedDefinition.ingest) &&
     'wired' in migratedDefinition.ingest &&
     (migratedDefinition.ingest as { wired?: unknown }).wired &&
-    typeof (migratedDefinition.ingest as { wired?: any }).wired === 'object' &&
-    Array.isArray((migratedDefinition.ingest as { wired?: any }).wired.routing) &&
-    (migratedDefinition.ingest as { wired?: any }).wired.routing.some((route: any) => 'if' in route)
+    typeof (migratedDefinition.ingest as { wired?: unknown }).wired === 'object' &&
+    Array.isArray(
+      (migratedDefinition.ingest as { wired?: { routing?: unknown[] } }).wired?.routing
+    ) &&
+    (
+      migratedDefinition.ingest as { wired?: { routing?: Array<Record<string, unknown>> } }
+    ).wired!.routing!.some((route) => 'if' in route)
   ) {
     migratedDefinition = migrateRoutingIfConditionToStreamlang(migratedDefinition);
     hasBeenMigrated = true;
@@ -79,10 +83,12 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     isObject(migratedDefinition.ingest) &&
     'wired' in migratedDefinition.ingest &&
     isObject(migratedDefinition.ingest.wired) &&
-    Array.isArray((migratedDefinition.ingest as { wired?: any }).wired.routing) &&
-    (migratedDefinition.ingest as { wired?: any }).wired.routing.some(
-      (route: any) => !('status' in route)
-    )
+    Array.isArray(
+      (migratedDefinition.ingest as { wired?: { routing?: unknown[] } }).wired?.routing
+    ) &&
+    (
+      migratedDefinition.ingest as { wired?: { routing?: Array<Record<string, unknown>> } }
+    ).wired!.routing!.some((route) => !('status' in route))
   ) {
     const routings = get(migratedDefinition, 'ingest.wired.routing', []) as Array<
       Record<string, unknown>
@@ -133,10 +139,13 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
   // Migrate where blocks to use 'condition' property instead of 'where'
   if (
     isObject(migratedDefinition.ingest) &&
-    isObject((migratedDefinition.ingest as any).processing) &&
-    Array.isArray((migratedDefinition.ingest as any).processing.steps)
+    isObject((migratedDefinition.ingest as { processing?: unknown }).processing) &&
+    Array.isArray(
+      (migratedDefinition.ingest as { processing?: { steps?: unknown[] } }).processing?.steps
+    )
   ) {
-    const steps = (migratedDefinition.ingest as any).processing.steps;
+    const steps = (migratedDefinition.ingest as { processing: { steps: unknown[] } }).processing
+      .steps;
     const migratedSteps = migrateWhereBlocksToCondition(steps);
 
     if (migratedSteps.migrated) {
@@ -180,6 +189,24 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
       ...migratedDefinition,
       query_streams: [],
     };
+    hasBeenMigrated = true;
+  }
+
+  // Add required type discriminator field based on stream structure
+  if (!('type' in migratedDefinition)) {
+    let streamType: 'wired' | 'classic' | 'query';
+    if (isObject(migratedDefinition.ingest) && 'wired' in migratedDefinition.ingest) {
+      streamType = 'wired';
+    } else if (isObject(migratedDefinition.ingest) && 'classic' in migratedDefinition.ingest) {
+      streamType = 'classic';
+    } else if (!('ingest' in migratedDefinition)) {
+      streamType = 'query';
+    } else {
+      throw new Error(
+        `Cannot determine stream type: document has an 'ingest' key but it does not contain 'wired' or 'classic'. This may indicate a corrupted stream definition.`
+      );
+    }
+    migratedDefinition = { ...migratedDefinition, type: streamType };
     hasBeenMigrated = true;
   }
 

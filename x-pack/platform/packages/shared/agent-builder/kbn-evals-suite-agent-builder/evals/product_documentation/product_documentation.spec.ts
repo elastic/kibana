@@ -30,12 +30,12 @@ const AGENTS_API_BASE_PATH = '/api/agent_builder/agents';
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
-    ({ chatClient, evaluators, phoenixClient, traceEsClient, log }, use) => {
+    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
       use(
         createEvaluateDataset({
           chatClient,
           evaluators,
-          phoenixClient,
+          executorClient,
           traceEsClient,
           log,
         })

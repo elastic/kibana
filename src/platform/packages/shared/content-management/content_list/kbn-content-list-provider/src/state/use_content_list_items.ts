@@ -13,12 +13,12 @@ import { useContentListState } from './use_content_list_state';
  * Hook to access the current list of items and loading state.
  *
  * @throws Error if used outside `ContentListProvider`.
- * @returns Object containing items, totalItems, isLoading, error, and refetch.
+ * @returns Object containing items, totalItems, isLoading, isFetching, error, and refetch.
  *
  * @example
  * ```tsx
  * function MyList() {
- *   const { items, isLoading, error, refetch } = useContentListItems();
+ *   const { items, isLoading, isFetching, error, refetch } = useContentListItems();
  *
  *   if (isLoading) return <EuiLoadingSpinner />;
  *   if (error) return <EuiCallOut color="danger">{error.message}</EuiCallOut>;
@@ -39,7 +39,9 @@ export const useContentListItems = () => {
   return {
     items: state.items,
     totalItems: state.totalItems,
+    counts: state.counts,
     isLoading: state.isLoading,
+    isFetching: state.isFetching,
     error: state.error,
     refetch,
   };

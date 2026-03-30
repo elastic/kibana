@@ -15,6 +15,7 @@ import { detectCategory } from './utils/category_rules';
 
 const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
   [SuggestionCategory.CUSTOM_ACTION]: 0,
+  [SuggestionCategory.PROMQL_METRIC_QUALIFIER]: 50,
   [SuggestionCategory.LANGUAGE_KEYWORD]: 50, // BY, WHERE, ON, WITH
 
   [SuggestionCategory.TIME_PARAM]: 100,
@@ -52,6 +53,9 @@ const CONTEXT_BOOSTS: Partial<Record<Location, Partial<Record<SuggestionCategory
     [SuggestionCategory.FUNCTION_TIME_SERIES_AGG]: -151, // From 500 to 349 (before fields at 350)
   },
   [Location.STATS_BY]: {
+    [SuggestionCategory.USER_DEFINED_COLUMN]: -300, // From 300 to 0
+  },
+  [Location.LIMIT_BY]: {
     [SuggestionCategory.USER_DEFINED_COLUMN]: -300, // From 300 to 0
   },
   [Location.PROMQL]: {

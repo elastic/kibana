@@ -13,6 +13,7 @@ import type { Table, CellContext, Row } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
 import type { CascadeVirtualizerProps, useCascadeVirtualizer } from '../../lib/core/virtualizer';
+import type { DataCascadeImplRef } from '../../lib/core/api';
 import type { SelectionDropdownProps } from './data_cascade_header/group_selection_combobox/selection_dropdown';
 
 /**
@@ -100,6 +101,7 @@ type OnCascadeGroupNodeExpandedArgs<G extends GroupNode> = CascadeGroupNodeUIInt
 type OnCascadeGroupNodeCollapsedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
 
 export interface CascadeRowActionProps {
+  isMobile: boolean;
   maxActionCount?: number;
   headerRowActions: Array<
     Pick<EuiButtonIconProps, 'iconType' | 'aria-label' | 'data-test-subj'> & {
@@ -117,6 +119,10 @@ export interface CascadeRowActionProps {
 }
 
 export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends LeafNode> {
+  /**
+   * Denotes if the device viewport matches the mobile screen media query.
+   */
+  isMobile: boolean;
   /**
    * Whether to enable row selection. Default is false.
    */
@@ -176,6 +182,10 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    * Ref that provides a reference to the DOM element that will be used to portal the active sticky header.
    */
   activeStickyRenderSlotRef: React.RefObject<HTMLDivElement | null>;
+  /**
+   * Denotes if the device viewport matches the mobile screen media query.
+   */
+  isMobile: boolean;
   /**
    * Denotes if the row is sticky.
    */
@@ -237,10 +247,6 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
   extends Pick<CascadeVirtualizerProps<G>, 'overscan'>,
     Pick<CascadeRowPrimitiveProps<G, L>, 'enableRowSelection'> {
   /**
-   * The data to be displayed in the cascade. It should be an array of group nodes.
-   */
-  data: G[];
-  /**
    * Callback function that is called when the group by selection changes. Only required if component is not used in a controlled manner
    */
   onCascadeGroupingChange?: SelectionDropdownProps['onSelectionChange'];
@@ -256,7 +262,16 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
    * Whether to allow multiple group rows to be expanded at the same time, default is false.
    */
   allowMultipleRowToggle?: boolean;
+  /**
+   * Initial vertical scroll position in pixels. When set, the list and scroll container start at this offset.
+   */
+  initialScrollOffset?: number;
+  /**
+   * Initial scroll rectangle dimensions. When set, the list and scroll container start at this size.
+   */
+  initialRect?: { width: number; height: number };
   children: React.ReactElement<DataCascadeRowProps<G, L>>;
+  cascadeRef: React.ForwardedRef<DataCascadeImplRef<G, L>>;
 }
 
 export type DataCascadeImplProps<

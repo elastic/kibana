@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { isHooksExecutionError, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  AgentBuilderErrorCode,
+  isHooksExecutionError,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
+import { createWorkflowExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createHooksRunner } from './hooks_runner';
 import type { CreateHooksRunnerDeps } from './hooks_runner';
@@ -17,6 +22,7 @@ import type {
   HookContext,
   HookRegistration,
 } from '@kbn/agent-builder-server';
+import { createToolHandlerContextMock } from '../../test_utils/runner';
 
 const baseContext: BeforeAgentHookContext = {
   nextInput: { message: 'hello', attachments: [] },
@@ -36,6 +42,7 @@ const createAfterToolCallContext = (
 ): AfterToolCallHookContext => ({
   ...baseToolCallContext,
   toolReturn: { results: [] },
+  toolHandlerContext: createToolHandlerContextMock(),
   ...overrides,
 });
 
@@ -139,12 +146,32 @@ describe('createHooksRunner', () => {
     }).run;
 
     await expect(run(HookLifecycle.beforeAgent, baseContext)).rejects.toMatchObject({
+      code: AgentBuilderErrorCode.hookExecutionError,
       message: expect.stringContaining('timed out after 50ms'),
       meta: expect.objectContaining({
         hookId: 'slow-hook',
         hookLifecycle: HookLifecycle.beforeAgent,
       }),
     });
+  });
+
+  it('rethrows workflow execution errors without wrapping them', async () => {
+    const workflowError = createWorkflowExecutionError('workflow failed', {
+      workflow: 'my-workflow',
+    });
+    const run = createRunner({
+      getHooksForLifecycle: (): HookRegistration<HookLifecycle>[] => [
+        {
+          id: 'workflow-hook',
+          mode: HookExecutionMode.blocking,
+          handler: async () => {
+            throw workflowError;
+          },
+        } as HookRegistration<HookLifecycle>,
+      ],
+    }).run;
+
+    await expect(run(HookLifecycle.beforeAgent, baseContext)).rejects.toBe(workflowError);
   });
 
   it('throws request aborted when abortSignal is aborted before a hook runs', async () => {

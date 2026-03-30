@@ -16,7 +16,8 @@ interface StatusProps {
 }
 
 export const Status = ({ status, isDeleting = false }: StatusProps) => {
-  const isSpinnerShown = isDeleting || status === 'pending' || status === 'processing';
+  const isSpinnerShown =
+    isDeleting || status === 'pending' || status === 'processing' || status === 'deleting';
   const displayText = isDeleting ? i18n.STATUS_LABELS.deleting : STATUS_TEXT_MAP[status];
 
   return (
@@ -25,7 +26,11 @@ export const Status = ({ status, isDeleting = false }: StatusProps) => {
         {isSpinnerShown ? (
           <EuiLoadingSpinner size="s" />
         ) : (
-          <EuiIcon type={STATUS_ICON_MAP[status]} color={STATUS_COLOR_MAP[status]} />
+          <EuiIcon
+            type={STATUS_ICON_MAP[status]}
+            color={STATUS_COLOR_MAP[status]}
+            aria-hidden={true}
+          />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

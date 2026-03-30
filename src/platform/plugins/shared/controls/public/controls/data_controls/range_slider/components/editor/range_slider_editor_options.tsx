@@ -10,6 +10,7 @@
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
+import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
 import { RangeSliderStrings } from '../../range_slider_strings';
 import type { CustomOptionsComponentProps } from '../../../types';
 import { CustomOptionsAdditionalSettings } from '../../../components';
@@ -19,7 +20,7 @@ export const RangeSliderEditorOptions = ({
   updateState,
   setControlEditorValid,
 }: CustomOptionsComponentProps<RangeSliderControlState>) => {
-  const [step, setStep] = useState(initialState.step ?? 1);
+  const [step, setStep] = useState(initialState.step ?? DEFAULT_RANGE_SLIDER_STATE.step);
 
   return (
     <>

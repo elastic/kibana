@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinition } from '../../types/processors';
 import { validateMathExpression } from '../transpilers/shared/math';
+import { validateJsonPath, JsonPathParseError } from '../transpilers/shared/json_path_parser';
 import type { StreamlangValidationError } from './types';
 
 /**
@@ -65,9 +66,41 @@ export function validateProcessorValues(
     case 'trim':
     case 'join':
     case 'concat':
+    case 'split':
+    case 'sort':
+    case 'network_direction':
+    case 'enrich':
     case 'manual_ingest_pipeline':
-      // No value validation implemented for these processors yet
       break;
+    case 'json_extract': {
+      for (let i = 0; i < step.extractions.length; i++) {
+        const extraction = step.extractions[i];
+        try {
+          validateJsonPath(extraction.selector);
+        } catch (e) {
+          if (e instanceof JsonPathParseError) {
+            errors.push({
+              type: 'invalid_value',
+              message: i18n.translate('xpack.streamlang.validation.invalidJsonPathSelector', {
+                defaultMessage:
+                  'Processor #{processorNumber} ({processorAction}) has an invalid selector in extraction #{extractionNumber}: {error}',
+                values: {
+                  processorNumber,
+                  processorAction: step.action,
+                  extractionNumber: i + 1,
+                  error: e.reason,
+                },
+              }),
+              processorId,
+              field: `extractions[${i}].selector`,
+            });
+          } else {
+            throw e;
+          }
+        }
+      }
+      break;
+    }
     default: {
       const _exhaustiveCheck: never = step;
       return _exhaustiveCheck;

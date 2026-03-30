@@ -73,6 +73,25 @@ describe('interpolateEsqlQuery', () => {
     expect(interpolateEsqlQuery(template, params)).toBe(expected);
   });
 
+  describe('null parameters', () => {
+    it('should leave placeholders for null parameters', () => {
+      const template =
+        'FROM kibana_sample_data_ecommerce | EVAL input_start_date = ?start_date | LIMIT 10';
+      const params = { start_date: null };
+      const expected = `FROM kibana_sample_data_ecommerce
+| EVAL input_start_date = ?start_date
+| LIMIT 10`;
+      expect(interpolateEsqlQuery(template, params)).toBe(expected);
+    });
+
+    it('should inline non-null params and leave null params as placeholders', () => {
+      const template = 'FROM users | WHERE status == ?status AND name == ?name';
+      const params = { status: 'active', name: null };
+      const expected = 'FROM users | WHERE status == "active" AND name == ?name';
+      expect(interpolateEsqlQuery(template, params)).toBe(expected);
+    });
+  });
+
   describe('array parameters', () => {
     it('should correctly interpolate array of integers', () => {
       const template = 'FROM logs | WHERE MV_CONTAINS(?ids, id)';

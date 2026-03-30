@@ -558,7 +558,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 6 more'
+        'action: Invalid input: expected "delete", action: Invalid input: expected "disable", action: Invalid input: expected "enable", action: Invalid input: expected "export", action: Invalid input: expected "duplicate", and 6 more'
       );
     });
 
@@ -570,7 +570,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 6 more'
+        'action: Invalid input: expected "delete", action: Invalid input: expected "disable", action: Invalid input: expected "enable", action: Invalid input: expected "export", action: Invalid input: expected "duplicate", and 6 more'
       );
     });
 
@@ -604,7 +604,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 13 more'
+        'ids: Invalid input: expected array, received string, action: Invalid input: expected "delete", ids: Invalid input: expected array, received string, ids: Invalid input: expected array, received string, action: Invalid input: expected "enable", and 13 more'
       );
     });
 
@@ -652,7 +652,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'ids: Array must contain at least 1 element(s)'
+        expect.stringContaining('ids: Too small: expected array to have >=1 items')
       );
     });
 
@@ -663,9 +663,7 @@ describe('Perform bulk action route', () => {
         body: { ...getPerformBulkActionEditSchemaMock(), edit: [] },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith(
-        expect.stringContaining('edit: Array must contain at least 1 element(s)')
-      );
+      expect(result.badRequest).toHaveBeenCalledWith(expect.stringContaining('Invalid input'));
     });
 
     it('rejects payloads if search query dry_run is invalid', async () => {
@@ -678,7 +676,7 @@ describe('Perform bulk action route', () => {
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
         expect.stringContaining(
-          "dry_run: Invalid enum value. Expected 'true' | 'false', received 'invalid', dry_run: Expected boolean, received string"
+          'Invalid option: expected one of "true"|"false", Invalid input: expected boolean, received string'
         )
       );
     });

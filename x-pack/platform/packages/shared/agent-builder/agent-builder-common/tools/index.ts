@@ -9,10 +9,16 @@ export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './
 export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
   platformCoreTools,
+  platformStreamsSigEventsTools,
+  attachmentTools,
   filestoreTools,
   activeToolsCountWarningThreshold,
   defaultAgentToolIds,
   editableToolTypes,
+  isInternalTool,
+  isExcludedFromFilestore,
+  isAttachmentTool,
+  isFilestoreTool,
 } from './constants';
 export {
   type ByIdsToolSelection,

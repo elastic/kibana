@@ -22,7 +22,6 @@ import { getTitle } from '@kbn/presentation-publishing';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { txtValue } from './i18n';
 import { deleteUndefinedKeys } from './util';
-import type { ActionFactoryContext } from '../url_drilldown';
 
 /**
  * Part of context scope extracted from an api
@@ -215,7 +214,7 @@ const getPanelVariableList = (values: PanelValues): UrlTemplateEditorVariable[] 
 };
 
 export const getContextVariableList = (
-  context: ActionFactoryContext
+  context: Partial<EmbeddableApiContext>
 ): UrlTemplateEditorVariable[] => {
   const values = getContextScopeValues(context);
   const variables: UrlTemplateEditorVariable[] = getPanelVariableList(values.panel);

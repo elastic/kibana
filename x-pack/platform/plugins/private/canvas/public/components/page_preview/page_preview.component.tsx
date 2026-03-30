@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { DomPreview } from '../dom_preview';
 import { PageControls } from './page_controls';
 import type { CanvasPage } from '../../../types';
@@ -28,16 +27,3 @@ export const PagePreview: FC<Props> = ({ isWriteable, page, height, onDuplicate,
     {isWriteable && <PageControls pageId={page.id} onDuplicate={onDuplicate} onRemove={onRemove} />}
   </div>
 );
-
-PagePreview.propTypes = {
-  isWriteable: PropTypes.bool.isRequired,
-  page: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    style: PropTypes.shape({
-      background: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
-  height: PropTypes.number.isRequired,
-  onDuplicate: PropTypes.func.isRequired,
-  onRemove: PropTypes.func.isRequired,
-};

@@ -7,13 +7,13 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { getConversationAttachmentsSystemMessages } from '../../utils/attachment_presentation';
+import { getConversationAttachmentsSection } from '../../utils/attachment_presentation';
 import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './utils/actions';
 import { renderVisualizationPrompt } from './utils/visualizations';
-import { attachmentTypeInstructions } from './utils/attachments';
+import { attachmentTypeInstructions, renderAttachmentPrompt } from './utils/attachments';
 import type { PromptFactoryParams, AnswerAgentPromptRuntimeParams } from './types';
 
 type AnswerAgentPromptParams = PromptFactoryParams & AnswerAgentPromptRuntimeParams;
@@ -23,17 +23,16 @@ export const getAnswerAgentPrompt = async (
 ): Promise<BaseMessageLike[]> => {
   const { actions, answerActions, processedConversation, resultTransformer } = params;
 
-  // Generate messages from the conversation's rounds
+  // Generate messages from the conversation's rounds, with optional compaction summary
+  // sourced from processedConversation.compactionSummary (set during compaction phase).
   const previousRoundsAsMessages = await convertPreviousRounds({
     conversation: processedConversation,
     resultTransformer,
+    compactionSummary: processedConversation.compactionSummary,
   });
 
   return [
     ['system', getAnswerSystemMessage(params)],
-    ...getConversationAttachmentsSystemMessages(
-      params.processedConversation.versionedAttachmentPresentation
-    ),
     ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
     ...formatAnswerActionHistory({ actions: answerActions }),
@@ -46,7 +45,7 @@ export const getAnswerSystemMessage = ({
   },
   conversationTimestamp,
   capabilities,
-  processedConversation: { attachmentTypes },
+  processedConversation: { attachmentTypes, versionedAttachmentPresentation },
 }: AnswerAgentPromptParams): string => {
   const visEnabled = capabilities.visualizations;
 
@@ -72,6 +71,8 @@ ${customInstructionsBlock(customInstructions)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
 
+${getConversationAttachmentsSection(versionedAttachmentPresentation)}
+
 ## OUTPUT STYLE
 - Clear, direct, and scoped. No extraneous commentary.
 - Use custom rendering when appropriate.
@@ -80,6 +81,8 @@ ${attachmentTypeInstructions(attachmentTypes)}
 ## CUSTOM RENDERING
 
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
+
+${renderAttachmentPrompt()}
 
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}
@@ -108,13 +111,15 @@ export const getStructuredAnswerPrompt = async (
     processedConversation,
     resultTransformer,
   } = params;
-  const { attachmentTypes } = processedConversation;
+  const { attachmentTypes, versionedAttachmentPresentation } = processedConversation;
   const visEnabled = capabilities.visualizations;
 
-  // Generate messages from the conversation's rounds
+  // Generate messages from the conversation's rounds, with optional compaction summary
+  // sourced from processedConversation.compactionSummary (set during compaction phase).
   const previousRoundsAsMessages = await convertPreviousRounds({
     conversation: processedConversation,
     resultTransformer,
+    compactionSummary: processedConversation.compactionSummary,
   });
 
   return [
@@ -142,6 +147,8 @@ ${customInstructionsBlock(customInstructions)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
 
+${getConversationAttachmentsSection(versionedAttachmentPresentation)}
+
 ## OUTPUT STYLE
 - Clear, direct, and scoped. No extraneous commentary.
 - Use custom rendering when appropriate.
@@ -162,9 +169,6 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] I answered every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
 - [ ] No internal tool process or names revealed (unless user asked).`),
     ],
-    ...getConversationAttachmentsSystemMessages(
-      processedConversation.versionedAttachmentPresentation
-    ),
     ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
     ...formatAnswerActionHistory({ actions: answerActions }),

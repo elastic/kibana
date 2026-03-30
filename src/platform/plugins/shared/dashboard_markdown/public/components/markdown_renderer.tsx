@@ -14,6 +14,10 @@ import { EuiMarkdownFormat } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 const markdownRendererStyles = {
+  reducedTopPadding: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingTop: `${euiTheme.size.s}`,
+    }),
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.base,
@@ -28,17 +32,20 @@ const markdownRendererStyles = {
 export const MarkdownRenderer = ({
   content,
   processingPluginList,
+  title,
 }: {
   content: string;
   processingPluginList: EuiMarkdownFormatProps['processingPluginList'];
+  title?: string;
 }) => {
   const styles = useMemoCss(markdownRendererStyles);
+
   return (
     <EuiMarkdownFormat
       className="eui-yScroll"
       data-test-subj="markdownRenderer"
       processingPluginList={processingPluginList}
-      css={styles.container}
+      css={[styles.container, title?.length && styles.reducedTopPadding]}
     >
       {content}
     </EuiMarkdownFormat>

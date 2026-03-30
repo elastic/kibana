@@ -117,6 +117,13 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     [columnId, layerId, state.layers, updateLayer]
   );
 
+  const activeTable = props.activeData?.[layerId];
+  const activeColumnMeta = activeTable?.columns.find((col) => col.id === columnId)?.meta;
+  const isNumericColumn =
+    activeColumnMeta != null
+      ? activeColumnMeta?.type === 'number'
+      : selectedField?.meta?.type === 'number';
+
   return (
     <>
       <EuiFormRow
@@ -139,6 +146,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
               meta: column?.meta,
               variable: column?.variable,
               label: choice.field,
+              ...(props.isMetricDimension && { inMetricDimension: true }),
             };
             return props.setState(
               !selectedField
@@ -158,16 +166,30 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                       ...props.state.layers,
                       [props.layerId]: {
                         ...props.state.layers[props.layerId],
-                        columns: props.state.layers[props.layerId].columns.map((col) =>
-                          col.columnId !== props.columnId
-                            ? col
-                            : {
-                                ...col,
-                                fieldName: choice.field,
-                                meta: column?.meta,
-                                variable: column?.variable,
-                              }
-                        ),
+                        columns: props.state.layers[props.layerId].columns.map((col) => {
+                          if (col.columnId !== props.columnId) {
+                            return col;
+                          }
+
+                          const isNewColumnNumeric = column?.meta?.type === 'number';
+                          const shouldKeepCustomLabel = Boolean(col.customLabel);
+
+                          return {
+                            ...col,
+                            fieldName: choice.field,
+                            meta: column?.meta,
+                            variable: column?.variable,
+                            // If the new column is not numeric, remove the format selector params
+                            ...(!isNewColumnNumeric && col.params ? { params: undefined } : {}),
+                            // If the previous column has a custom label, keep it
+                            ...(shouldKeepCustomLabel
+                              ? {}
+                              : {
+                                  label: choice.field,
+                                  customLabel: false,
+                                }),
+                          };
+                        }),
                       },
                     },
                   }
@@ -201,8 +223,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           </EuiText>
 
           <NameInput
-            value={selectedField.label || ''}
-            defaultValue={''}
+            value={selectedField.customLabel ? selectedField.label ?? '' : ''}
+            defaultValue={selectedField.fieldName}
             onChange={(value) => {
               updateLayer(
                 updateColumnLabel({
@@ -214,7 +236,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             }}
           />
 
-          {selectedField.meta?.type === 'number' ? (
+          {isNumericColumn ? (
             <FormatSelector
               selectedColumn={selectedField}
               onChange={onFormatChange}

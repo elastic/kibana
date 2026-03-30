@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-09T18:40:24.680Z",
-  "sha1": "a9a52816a7abff7332d8573055a61fea68f97904",
+  "sha1": "67cb60f6ced34a9fc9b44ee0153f30c7938cc04c",
   "tests": [
     {
       "id": "bd77233fbb28a70-b95459eaf733782",
@@ -10,9 +9,7 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
@@ -34,7 +31,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 91,
+        "line": 87,
         "column": 7
       }
     },
@@ -52,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 107,
+        "line": 103,
         "column": 7
       }
     },
@@ -70,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 125,
+        "line": 121,
         "column": 7
       }
     },
@@ -88,7 +85,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 145,
+        "line": 141,
         "column": 7
       }
     },
@@ -102,8 +99,200 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 184,
+        "line": 180,
         "column": 7
+      }
+    },
+    {
+      "id": "9082eebebe78920-33093de5f8fcb9a",
+      "title": "Wired Streams - Auto-detect Flow shows ingestion selector with correct options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_auto_detect.spec.ts",
+        "line": 28,
+        "column": 9
+      }
+    },
+    {
+      "id": "9082eebebe78920-f0326d4f97245d4",
+      "title": "Wired Streams - Auto-detect Flow can switch to Wired Streams mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_auto_detect.spec.ts",
+        "line": 49,
+        "column": 9
+      }
+    },
+    {
+      "id": "9082eebebe78920-ee9bd3ab8308158",
+      "title": "Wired Streams - Auto-detect Flow command includes wired streams flag when Wired Streams mode is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_auto_detect.spec.ts",
+        "line": 61,
+        "column": 9
+      }
+    },
+    {
+      "id": "e1ab92206d8acec-0e80c07f0161c16",
+      "title": "Wired Streams - Elastic Agent Kubernetes Flow shows ingestion selector with correct options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_elastic_agent_kubernetes.spec.ts",
+        "line": 28,
+        "column": 9
+      }
+    },
+    {
+      "id": "e1ab92206d8acec-99b05466d3c6123",
+      "title": "Wired Streams - Elastic Agent Kubernetes Flow command includes wired streams config when Wired Streams mode is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_elastic_agent_kubernetes.spec.ts",
+        "line": 51,
+        "column": 9
+      }
+    },
+    {
+      "id": "6e7ab256b5ad810-445ce2ae56d207b",
+      "title": "Wired Streams - Enable Modal Confirmation Flow shows confirmation modal when selecting Wired Streams for the first time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_enable_modal.spec.ts",
+        "line": 37,
+        "column": 9
+      }
+    },
+    {
+      "id": "6e7ab256b5ad810-db55e0180f71bb9",
+      "title": "Wired Streams - Enable Modal Confirmation Flow canceling the modal keeps Classic ingestion selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_enable_modal.spec.ts",
+        "line": 60,
+        "column": 9
+      }
+    },
+    {
+      "id": "6e7ab256b5ad810-e473bf221733fdd",
+      "title": "Wired Streams - Enable Modal Confirmation Flow confirming the modal enables Wired Streams and switches ingestion mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_enable_modal.spec.ts",
+        "line": 83,
+        "column": 9
+      }
+    },
+    {
+      "id": "6e7ab256b5ad810-da6770c1a8091b1",
+      "title": "Wired Streams - Enable Modal Confirmation Flow modal does not appear if Wired Streams is already enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_enable_modal.spec.ts",
+        "line": 113,
+        "column": 9
+      }
+    },
+    {
+      "id": "2576eba90687dc8-f26b12b1dd62949",
+      "title": "Wired Streams - OTel Host Flow shows ingestion selector with correct options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_otel_host.spec.ts",
+        "line": 28,
+        "column": 9
+      }
+    },
+    {
+      "id": "2576eba90687dc8-b578a9b97adb569",
+      "title": "Wired Streams - OTel Host Flow can switch between ingestion modes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_otel_host.spec.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "13fea49ba796590-306b56360167eea",
+      "title": "Wired Streams - OTel Kubernetes Flow shows ingestion selector with correct options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_otel_kubernetes.spec.ts",
+        "line": 28,
+        "column": 9
       }
     }
   ]

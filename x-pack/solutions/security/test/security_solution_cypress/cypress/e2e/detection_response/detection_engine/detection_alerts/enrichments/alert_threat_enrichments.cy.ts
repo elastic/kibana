@@ -65,7 +65,7 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
         threat_indicator_path: 'threat.indicator',
         enabled: true,
       })
-    ).then((response) => visitRuleDetailsPage(response.body.id));
+    ).then((response) => visitRuleDetailsPage(response.body.id, { tab: 'alerts' }));
   });
 
   after(() => {

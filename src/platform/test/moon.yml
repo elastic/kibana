@@ -4,17 +4,16 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-suites-src'
-type: unknown
+layer: unknown
 owners: {}
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-src'
+  title: '@kbn/test-suites-src'
   description: Moon project for @kbn/test-suites-src
   channel: ''
-  metadata:
-    sourceRoot: src/platform/test
+  sourceRoot: src/platform/test
 dependsOn:
   - '@kbn/core'
   - '@kbn/dashboard-plugin'
@@ -73,6 +72,7 @@ dependsOn:
   - '@kbn/visualizations-common'
   - '@kbn/unified-data-table'
   - '@kbn/session-notifications-plugin'
+  - '@kbn/ui-actions-plugin'
 tags:
   - test-helper
   - package

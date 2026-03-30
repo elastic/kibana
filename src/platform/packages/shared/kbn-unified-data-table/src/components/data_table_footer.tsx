@@ -144,7 +144,6 @@ const UnifiedDataTableFooterContainer: React.FC<
         padding: ${hasButton
           ? `0 ${euiTheme.size.base}`
           : `${euiTheme.size.s} ${euiTheme.size.base}`};
-        margin-top: ${euiTheme.size.xs};
         text-align: center;
       `}
     >

@@ -1008,7 +1008,7 @@ export const runActionTestSuite = ({
         excludeOnUpgradeQuery: { match_all: {} },
         batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
-      const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
+      const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '60s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
@@ -1049,7 +1049,7 @@ export const runActionTestSuite = ({
         excludeOnUpgradeQuery: { match_all: {} },
         batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
-      const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
+      const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '60s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {

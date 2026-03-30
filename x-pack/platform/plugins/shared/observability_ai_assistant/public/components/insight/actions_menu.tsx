@@ -42,7 +42,11 @@ export function ActionsMenu({
                 defaultMessage: 'Connector',
               })}{' '}
               <strong>
-                {connectors.connectors?.find(({ id }) => id === connectors.selectedConnector)?.name}
+                {
+                  connectors.connectors?.find(
+                    ({ connectorId }) => connectorId === connectors.selectedConnector
+                  )?.name
+                }
               </strong>
             </div>
           ),
@@ -53,7 +57,7 @@ export function ActionsMenu({
           name: i18n.translate('xpack.observabilityAiAssistant.insight.actions.editPrompt', {
             defaultMessage: 'Edit prompt',
           }),
-          icon: 'documentEdit',
+          icon: 'pencil',
           onClick: () => {
             onEditPrompt();
             closePopover();
@@ -92,7 +96,7 @@ export function ActionsMenu({
         defaultMessage: 'Open insight actions',
       })}
       data-test-subj="observabilityAiAssistantInsightActionsButtonIcon"
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       onClick={onButtonClick}
     />
   );

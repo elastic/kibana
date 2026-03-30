@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstHeaderCommand, ESQLAstSetHeaderCommand } from '../../../types';
-import {
-  isBinaryExpression,
-  isIdentifier,
-  isMap,
-  isStringLiteral,
-  withAutoSuggest,
-} from '../../../..';
+import type { ESQLAstHeaderCommand, ESQLAstSetHeaderCommand } from '@elastic/esql/types';
+import { isBinaryExpression, isIdentifier, isMap, isStringLiteral } from '@elastic/esql';
+import { withAutoSuggest } from '../../../..';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../../registry/types';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { EsqlSettingNames, settings } from '../generated/settings';

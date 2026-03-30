@@ -23,38 +23,36 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
   mergeAllMetricsWithChartDimensionSchemaWithStaticOps,
+  xScaleSchema,
 } from './shared';
-import { esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { filterSchema } from '../filter';
 import { builderEnums } from '../enums';
+import { cornerPositionSchema, positionSchema } from '../alignments';
 
 /**
  * Statistical functions that can be displayed in chart legend for data series
  */
 export const statisticsSchema = schema.oneOf(
   [
-    schema.oneOf([
-      schema.literal('min'),
-      schema.literal('max'),
-      schema.literal('avg'),
-      schema.literal('median'),
-      schema.literal('range'),
-      schema.literal('last_value'),
-      schema.literal('last_non_null_value'),
-      schema.literal('first_value'),
-      schema.literal('first_non_null_value'),
-    ]),
-    schema.oneOf([
-      schema.literal('difference'),
-      schema.literal('difference_percentage'),
-      schema.literal('count'),
-      schema.literal('total'),
-      schema.literal('standard_deviation'),
-      schema.literal('variance'),
-      schema.literal('distinct_count'),
-      schema.literal('current_and_last_value'),
-    ]),
+    schema.literal('min'),
+    schema.literal('max'),
+    schema.literal('avg'),
+    schema.literal('median'),
+    schema.literal('range'),
+    schema.literal('last_value'),
+    schema.literal('last_non_null_value'),
+    schema.literal('first_value'),
+    schema.literal('first_non_null_value'),
+    schema.literal('difference'),
+    schema.literal('difference_percentage'),
+    schema.literal('count'),
+    schema.literal('total'),
+    schema.literal('standard_deviation'),
+    schema.literal('variance'),
+    schema.literal('distinct_count'),
+    schema.literal('current_and_last_value'),
   ],
   {
     meta: {
@@ -117,15 +115,38 @@ const sharedAxisSchema = {
     schema.object(axisTitleSchemaProps, { meta: { description: 'Axis title configuration' } })
   ),
   ticks: schema.maybe(
-    schema.boolean({ meta: { description: 'Whether to show tick marks on the axis' } })
+    schema.object(
+      {
+        visible: schema.boolean({ meta: { description: 'Show tick marks on the axis' } }),
+      },
+      { meta: { description: 'Axis tick marks configuration' } }
+    )
   ),
   grid: schema.maybe(
-    schema.boolean({ meta: { description: 'Whether to show grid lines for this axis' } })
+    schema.object(
+      {
+        visible: schema.boolean({ meta: { description: 'Show grid lines for this axis' } }),
+      },
+      { meta: { description: 'Axis grid lines configuration' } }
+    )
   ),
-  label_orientation: schema.maybe(
-    builderEnums.orientation({
-      meta: { description: 'Orientation of the axis labels' },
-    })
+  labels: schema.maybe(
+    schema.object(
+      {
+        /**
+         * Orientation of the axis labels. Possible values:
+         * - 'horizontal': Labels aligned horizontally
+         * - 'vertical': Labels aligned vertically
+         * - 'angled': Labels at an angle
+         */
+        orientation: builderEnums.orientation({
+          meta: {
+            description: 'Orientation of the axis labels',
+          },
+        }),
+      },
+      { meta: { description: 'Label configuration' } }
+    )
   ),
 };
 
@@ -168,7 +189,7 @@ const xyDataLayerSharedSchema = {
 const sharedLegendSchema = {
   visibility: schema.oneOf(
     [schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')],
-    { meta: { description: 'Whether to show the legend' } }
+    { meta: { description: 'Show the legend' } }
   ),
   statistics: schema.maybe(
     schema.arrayOf(statisticsSchema, {
@@ -189,14 +210,24 @@ export type XYApiLineInterpolation = typeof XY_API_LINE_INTERPOLATION;
 
 const decorationsSchema = schema.object(
   {
-    show_end_zones: schema.maybe(
-      schema.boolean({ meta: { description: 'Show end zones for partial buckets' } })
+    end_zones: schema.maybe(
+      schema.object(
+        {
+          visible: schema.boolean({ meta: { description: 'Show end zones' } }),
+        },
+        { meta: { description: 'End zones (partial buckets) configuration' } }
+      )
     ),
-    show_current_time_marker: schema.maybe(
-      schema.boolean({ meta: { description: 'Show current time marker line' } })
+    current_time_marker: schema.maybe(
+      schema.object(
+        {
+          visible: schema.boolean({ meta: { description: 'Show current time marker line' } }),
+        },
+        { meta: { description: 'Current time marker configuration' } }
+      )
     ),
     point_visibility: schema.maybe(
-      schema.oneOf([schema.literal('auto'), schema.literal('always'), schema.literal('never')], {
+      schema.oneOf([schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')], {
         meta: { description: 'Show data points on lines' },
       })
     ),
@@ -210,8 +241,13 @@ const decorationsSchema = schema.object(
     minimum_bar_height: schema.maybe(
       schema.number({ min: 0, meta: { description: 'Minimum bar height in pixels' } })
     ),
-    show_value_labels: schema.maybe(
-      schema.boolean({ meta: { description: 'Display value labels on data points' } })
+    values: schema.maybe(
+      schema.object(
+        {
+          visible: schema.boolean({ meta: { description: 'Display value labels on data points' } }),
+        },
+        { meta: { description: 'Value label configuration' } }
+      )
     ),
     fill_opacity: schema.maybe(
       schema.number({
@@ -239,15 +275,9 @@ const xySharedSettings = {
         schema.object(
           {
             ...sharedLegendSchema,
-            inside: schema.maybe(schema.literal(false)),
-            position: schema.maybe(
-              schema.oneOf([
-                schema.literal('top'),
-                schema.literal('bottom'),
-                schema.literal('left'),
-                schema.literal('right'),
-              ])
-            ),
+            placement: schema.maybe(schema.literal('outside')),
+            layout: schema.maybe(schema.literal('list')),
+            position: schema.maybe(positionSchema()),
             size: schema.maybe(
               schema.oneOf([
                 schema.literal('small'),
@@ -267,20 +297,14 @@ const xySharedSettings = {
         schema.object(
           {
             ...sharedLegendSchema,
-            inside: schema.literal(true),
+            placement: schema.literal('inside'),
             columns: schema.maybe(
               schema.number({ min: 1, max: 5, meta: { description: 'Number of legend columns' } })
             ),
-            alignment: schema.maybe(
-              schema.oneOf(
-                [
-                  schema.literal('top_right'),
-                  schema.literal('bottom_right'),
-                  schema.literal('top_left'),
-                  schema.literal('bottom_left'),
-                ],
-                { meta: { description: 'Legend alignment inside the chart' } }
-              )
+            position: schema.maybe(
+              cornerPositionSchema({
+                meta: { description: 'Legend position inside the chart' },
+              })
             ),
           },
           {
@@ -291,7 +315,13 @@ const xySharedSettings = {
           }
         ),
       ],
-      { meta: { id: 'xyLegend', description: 'Legend configuration for XY chart' } }
+      {
+        meta: {
+          id: 'xyLegend',
+          title: 'Legend',
+          description: 'Legend configuration for XY chart',
+        },
+      }
     )
   ),
 
@@ -333,6 +363,7 @@ const xySharedSettings = {
           schema.object(
             {
               ...sharedAxisSchema,
+              scale: xScaleSchema,
               extent: schema.maybe(
                 schema.oneOf([
                   schema.object(
@@ -360,7 +391,13 @@ const xySharedSettings = {
         left: schema.maybe(yAxisSchema),
         right: schema.maybe(yAxisSchema),
       },
-      { meta: { id: 'xyAxis', description: 'Axis configuration for X, left Y, and right Y axes' } }
+      {
+        meta: {
+          id: 'xyAxis',
+          title: 'Axis',
+          description: 'Axis configuration for X, left Y, and right Y axes',
+        },
+      }
     )
   ),
   decorations: schema.maybe(decorationsSchema),
@@ -397,6 +434,7 @@ const xyDataLayerSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'xyLayerNoESQL',
+      title: 'Layer (DSL)',
       description: 'Data layer for standard queries with metrics and buckets',
     },
   }
@@ -411,7 +449,7 @@ const xyDataLayerSchemaESQL = schema.object(
     ...datasetEsqlTableSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(
-      esqlColumnSchema.extends(
+      esqlColumnWithFormatSchema.extends(
         {
           color: schema.maybe(colorMappingSchema),
           collapse_by: schema.maybe(collapseBySchema),
@@ -420,7 +458,7 @@ const xyDataLayerSchemaESQL = schema.object(
       )
     ),
     y: schema.arrayOf(
-      esqlColumnSchema.extends(
+      esqlColumnWithFormatSchema.extends(
         {
           axis: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
           color: schema.maybe(staticColorSchema),
@@ -429,35 +467,35 @@ const xyDataLayerSchemaESQL = schema.object(
       ),
       { meta: { description: 'Array of ES|QL columns for Y-axis metrics' }, maxSize: 100 }
     ),
-    x: schema.maybe(esqlColumnSchema),
+    x: schema.maybe(esqlColumnWithFormatSchema),
   },
   {
-    meta: { id: 'xyLayerESQL', description: 'Data layer for ES|QL queries with column references' },
+    meta: {
+      id: 'xyLayerESQL',
+      title: 'Layer (ES|QL)',
+      description: 'Data layer for ES|QL queries with column references',
+    },
   }
 );
 
 const getListOfAvailableIcons = (description: string) =>
   schema.oneOf(
     [
-      schema.oneOf([
-        schema.literal('asterisk'),
-        schema.literal('alert'),
-        schema.literal('bell'),
-        schema.literal('bolt'),
-        schema.literal('bug'),
-        schema.literal('circle'),
-        schema.literal('editorComment'),
-        schema.literal('flag'),
-        schema.literal('heart'),
-      ]),
-      schema.oneOf([
-        schema.literal('mapMarker'),
-        schema.literal('pinFilled'),
-        schema.literal('starEmpty'),
-        schema.literal('starFilled'),
-        schema.literal('tag'),
-        schema.literal('triangle'),
-      ]),
+      schema.literal('asterisk'),
+      schema.literal('alert'),
+      schema.literal('bell'),
+      schema.literal('bolt'),
+      schema.literal('bug'),
+      schema.literal('circle'),
+      schema.literal('editorComment'),
+      schema.literal('flag'),
+      schema.literal('heart'),
+      schema.literal('mapMarker'),
+      schema.literal('pinFilled'),
+      schema.literal('starEmpty'),
+      schema.literal('starFilled'),
+      schema.literal('tag'),
+      schema.literal('triangle'),
     ],
     { meta: { description } }
   );
@@ -475,9 +513,12 @@ const referenceLineLayerShared = {
     })
   ),
   text: schema.maybe(
-    schema.oneOf([schema.literal('none'), schema.literal('label')], {
-      meta: { description: 'Text display option for the reference line' },
-    })
+    schema.object(
+      {
+        visible: schema.boolean({ meta: { description: 'Show text label on the reference line' } }),
+      },
+      { meta: { description: 'Reference line text label configuration' } }
+    )
   ),
   icon: schema.maybe(getListOfAvailableIcons('Icon to display on the reference line')),
   stroke_width: schema.maybe(
@@ -493,6 +534,11 @@ const referenceLineLayerShared = {
     })
   ),
   color: schema.maybe(staticColorSchema),
+  position: schema.maybe(
+    schema.oneOf([schema.literal('auto'), schema.literal('left'), schema.literal('right')], {
+      meta: { description: 'Position of the icon and label relative to the reference line' },
+    })
+  ),
   axis: schema.maybe(
     schema.oneOf([schema.literal('bottom'), schema.literal('left'), schema.literal('right')], {
       defaultValue: 'left',
@@ -517,6 +563,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'xyReferenceLineLayerNoESQL',
+      title: 'Reference Line Layer (DSL)',
       description: 'Reference line layer for standard queries',
     },
   }
@@ -530,14 +577,18 @@ const referenceLineLayerSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     type: schema.literal('referenceLines'),
-    thresholds: schema.arrayOf(esqlColumnSchema.extends(referenceLineLayerShared), {
+    thresholds: schema.arrayOf(esqlColumnWithFormatSchema.extends(referenceLineLayerShared), {
       meta: { description: 'Array of ES|QL-based reference line thresholds' },
       minSize: 1,
       maxSize: 100,
     }),
   },
   {
-    meta: { id: 'xyReferenceLineLayerESQL', description: 'Reference line layer for ES|QL queries' },
+    meta: {
+      id: 'xyReferenceLineLayerESQL',
+      title: 'Reference Line Layer (ES|QL)',
+      description: 'Reference line layer for ES|QL queries',
+    },
   }
 );
 
@@ -546,7 +597,7 @@ const referenceLineLayerSchemaESQL = schema.object(
  */
 const annotationEventShared = {
   color: schema.maybe(staticColorSchema),
-  hidden: schema.maybe(schema.boolean({ meta: { description: 'Whether to hide the annotation' } })),
+  visible: schema.maybe(schema.boolean({ meta: { description: 'Show the annotation' } })),
 };
 
 /**
@@ -592,21 +643,16 @@ const annotationQuery = schema.object(
     time_field: schema.string({ meta: { description: 'Field containing the timestamp' } }),
     label: schema.maybe(schema.string({ meta: { description: 'Label text for the annotation' } })),
     text: schema.maybe(
-      schema.oneOf(
-        [
-          schema.literal('none'),
-          schema.literal('label'),
-          schema.object(
-            {
-              type: schema.literal('field'),
-              field: schema.string({ meta: { description: 'Field name containing label text' } }),
-            },
-            { meta: { description: 'Text from document field' } }
-          ),
-        ],
+      schema.object(
         {
-          meta: { description: 'Text display option for the annotation' },
-        }
+          visible: schema.boolean({ meta: { description: 'Show text label on the annotation' } }),
+          field: schema.maybe(
+            schema.string({
+              meta: { description: 'Field name for text label source' },
+            })
+          ),
+        },
+        { meta: { description: 'Annotation text label configuration' } }
       )
     ),
     extra_fields: schema.maybe(
@@ -634,9 +680,12 @@ const annotationManualEvent = schema.object(
     timestamp: annotationTimestampSchema,
     label: schema.maybe(schema.string({ meta: { description: 'Label text for the annotation' } })),
     text: schema.maybe(
-      schema.oneOf([schema.literal('none'), schema.literal('label')], {
-        meta: { description: 'Text display option for the annotation' },
-      })
+      schema.object(
+        {
+          visible: schema.boolean({ meta: { description: 'Show text label on the annotation' } }),
+        },
+        { meta: { description: 'Annotation text label visibility' } }
+      )
     ),
   },
   {
@@ -678,9 +727,9 @@ const annotationManualRange = schema.object(
 );
 
 /**
- * Annotation layer containing query-based, point, and range annotations
+ * Annotation layer containing query-based, point, and range annotations (by-value)
  */
-const annotationLayerSchema = schema.object(
+const annotationLayerByValueSchema = schema.object(
   {
     ...ignoringGlobalFiltersSchemaRaw,
     ...datasetSchema,
@@ -693,7 +742,36 @@ const annotationLayerSchema = schema.object(
   {
     meta: {
       id: 'xyAnnotationLayerNoESQL',
+      title: 'Annotation Layer (DSL)',
       description: 'Layer containing annotations (query-based, points, and ranges)',
+    },
+  }
+);
+
+/**
+ * By-reference annotation layer that links to a library annotation group
+ */
+const annotationByRefLayerSchema = schema.object(
+  {
+    type: schema.literal('annotation_group'),
+    group_id: schema.string({
+      meta: { description: 'ID of the linked annotation group from the library' },
+    }),
+  },
+  {
+    meta: {
+      id: 'xyAnnotationByRefLayer',
+      description: 'Reference to a library annotation group',
+    },
+  }
+);
+
+const annotationLayerSchema = schema.oneOf(
+  [annotationLayerByValueSchema, annotationByRefLayerSchema],
+  {
+    meta: {
+      id: 'xyAnnotationLayer',
+      description: 'Annotation layer which can be defined by-value or by-reference',
     },
   }
 );
@@ -725,10 +803,31 @@ export const xyStateSchema = schema.object(
       }
     ),
   },
-  { meta: { id: 'xyChartSchema', description: 'Complete XY chart configuration' } }
+  { meta: { id: 'xyChart', title: 'XY Chart', description: 'Complete XY chart configuration' } }
+);
+
+// TODO: temporary ESQL schema for XY chart to not feed agent with heavy schema for DSL that is not used in agent
+export const xyStateSchemaESQL = schema.object(
+  {
+    type: schema.literal('xy'),
+    ...sharedPanelInfoSchema,
+    ...xySharedSettings,
+    layers: schema.arrayOf(xyDataLayerSchemaESQL, {
+      minSize: 1,
+      maxSize: 1,
+      meta: { description: 'Only single layer ESQL charts are supported ' },
+    }),
+  },
+  {
+    meta: {
+      id: 'xyChartESQL',
+      title: 'XY Chart (ES|QL)',
+    },
+  }
 );
 
 export type XYState = TypeOf<typeof xyStateSchema>;
+export type XYStateESQL = TypeOf<typeof xyStateSchemaESQL>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;
 export type DataLayerTypeNoESQL = TypeOf<typeof xyDataLayerSchemaNoESQL>;
 export type DataLayerType = DataLayerTypeNoESQL | DataLayerTypeESQL;
@@ -736,6 +835,8 @@ export type ReferenceLineLayerTypeESQL = TypeOf<typeof referenceLineLayerSchemaE
 export type ReferenceLineLayerTypeNoESQL = TypeOf<typeof referenceLineLayerSchemaNoESQL>;
 export type ReferenceLineLayerType = ReferenceLineLayerTypeNoESQL | ReferenceLineLayerTypeESQL;
 export type AnnotationLayerType = TypeOf<typeof annotationLayerSchema>;
+export type AnnotationLayerByRefType = TypeOf<typeof annotationByRefLayerSchema>;
+export type AnnotationLayerByValueType = TypeOf<typeof annotationLayerByValueSchema>;
 export type LayerTypeESQL = DataLayerTypeESQL | ReferenceLineLayerTypeESQL;
 export type LayerTypeNoESQL =
   | DataLayerTypeNoESQL

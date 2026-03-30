@@ -12,24 +12,18 @@ import type {
   InspectorSession,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
-import type { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import {
   internalStateActions,
   useInternalStateSelector,
   useCurrentTabAction,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
+  useCurrentTabRuntimeState,
 } from '../state_management/redux';
 import { useActiveContexts } from '../../../context_awareness/hooks';
 
-export function useInspector({
-  inspector,
-  stateContainer,
-}: {
-  inspector: InspectorPublicPluginStart;
-  stateContainer: DiscoverStateContainer;
-}) {
+export function useInspector({ inspector }: { inspector: InspectorPublicPluginStart }) {
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -39,8 +33,14 @@ export function useInspector({
 
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
+  const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
+    (runtimeState) => runtimeState.cascadedDocumentsFetcher$
+  );
+
+  const dataStateContainer = useCurrentTabDataStateContainer();
+
   const getContextsAdapter = useActiveContexts({
-    dataDocuments$: stateContainer.dataState.data$.documents$,
+    dataDocuments$: dataStateContainer.data$.documents$,
   });
 
   const onOpenInspector = useCallback(
@@ -48,13 +48,13 @@ export function useInspector({
       // prevent overlapping
       dispatch(setExpandedDoc({ expandedDoc: undefined }));
 
-      const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
+      const inspectorAdapters = dataStateContainer.inspectorAdapters;
 
       const requestAdapters = [
         inspectorAdapters.requests,
         inspectorAdapters.lensRequests,
-        inspectorAdapters.cascadeRequests,
-      ].filter(Boolean) as RequestAdapter[];
+        cascadedDocumentsFetcher.getRequestAdapter(),
+      ].filter((adapter) => !!adapter);
 
       const session = inspector.open(
         {
@@ -80,7 +80,8 @@ export function useInspector({
     [
       dispatch,
       setExpandedDoc,
-      stateContainer.dataState.inspectorAdapters,
+      cascadedDocumentsFetcher,
+      dataStateContainer.inspectorAdapters,
       inspector,
       getContextsAdapter,
       persistedDiscoverSession?.title,

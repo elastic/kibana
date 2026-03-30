@@ -13,10 +13,18 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * This feature flag hides all 9.4 UI changes:
    *   - Enables the copy/duplicate functionality for packs and saved queries,
-   *   and the kebab row-action menus in list tables.
-   *   - others...
+   *     and the kebab row-action menus in list tables.
+   *   - Renames "Live queries" tab to "History" and "Saved queries" to "Queries"
+   *   - Introduces /history and /new routes, redirects legacy /live_queries paths
+   *   - Introduces search input and users filter
+   *   - Introduces scheduled responses support
    */
   queryHistoryRework: false,
+  /**
+   * Replaces the legacy EuiDataGrid results table with UnifiedDataTable,
+   * adding KQL search, document flyout, per-row actions, and column curation.
+   */
+  unifiedDataTable: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

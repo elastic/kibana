@@ -16,7 +16,7 @@ export const JUMP_TO_PROCESS_TEST_ID = 'sessionView:detailPanelAlertActionJumpTo
 
 interface DetailPanelAlertActionsDeps {
   event: ProcessEvent;
-  onShowAlertDetails: (alertId: string) => void;
+  onShowAlertDetails: (alertId: string, alertIndex: string) => void;
   onJumpToEvent: (event: ProcessEvent) => void;
 }
 
@@ -44,8 +44,11 @@ export const DetailPanelAlertActions = ({
   }, [event, onJumpToEvent]);
 
   const onShowDetails = useCallback(() => {
-    if (event.kibana?.alert?.uuid) {
-      onShowAlertDetails(event.kibana.alert.uuid);
+    const alertUuid = event.kibana?.alert?.uuid;
+    const alertIndex = event.kibana?.alert?.index;
+
+    if (alertUuid && alertIndex) {
+      onShowAlertDetails(alertUuid, alertIndex);
       setPopover(false);
     }
   }, [event, onShowAlertDetails]);
@@ -82,7 +85,7 @@ export const DetailPanelAlertActions = ({
         <EuiButtonIcon
           display="empty"
           size="s"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           aria-label={i18n.translate('xpack.sessionView.detailPanelAlertListItem.moreButton', {
             defaultMessage: 'More',
           })}

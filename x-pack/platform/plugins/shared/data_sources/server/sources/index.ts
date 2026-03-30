@@ -5,16 +5,7 @@
  * 2.0.
  */
 import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
-import { notionDataSource } from './notion';
-import { githubDataSource } from './github';
-import { googleDriveDataSource } from './google_drive';
-import { sharepointOnlineDataSource } from './sharepoint_online';
-import { jiraDataSource } from './jira-cloud';
 
-export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
-  dataCatalog.register(notionDataSource);
-  dataCatalog.register(githubDataSource);
-  dataCatalog.register(googleDriveDataSource);
-  dataCatalog.register(sharepointOnlineDataSource);
-  dataCatalog.register(jiraDataSource);
-}
+// All data sources have been migrated to connector specs in @kbn/connector-specs.
+// This function is now a no-op and will be removed along with the data_sources plugin.
+export function registerDataSources(_dataCatalog: DataCatalogPluginSetup) {}

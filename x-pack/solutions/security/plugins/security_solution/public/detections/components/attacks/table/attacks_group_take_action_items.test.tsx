@@ -10,31 +10,72 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { getMockAttackDiscoveryAlerts } from '../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
-import { useAttacksPrivileges } from '../../../hooks/attacks/bulk_actions/use_attacks_privileges';
+import { useAttackViewInAiAssistantContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items';
+import { useAttackWorkflowStatusContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items';
+import { useAttackAssigneesContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
+import { useAttackTagsContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items';
+import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items';
+import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
+import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 
-jest.mock('../../../hooks/attacks/bulk_actions/use_attacks_privileges');
-jest.mock('../../../../common/components/user_privileges', () => ({
-  useUserPrivileges: () => ({
-    timelinePrivileges: { read: true },
-    detectionEnginePrivileges: { loading: false },
-    rulesPrivileges: { rules: { read: true, edit: true } },
-  }),
-}));
-jest.mock('../../../../common/hooks/use_license', () => ({
-  useLicense: () => ({
-    isPlatinumPlus: () => true,
-  }),
-}));
-const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
-  typeof useAttacksPrivileges
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items'
+);
+const mockUseAttackViewInAiAssistantContextMenuItems =
+  useAttackViewInAiAssistantContextMenuItems as jest.MockedFunction<
+    typeof useAttackViewInAiAssistantContextMenuItems
+  >;
+const mockUseAttackWorkflowStatusContextMenuItems =
+  useAttackWorkflowStatusContextMenuItems as jest.MockedFunction<
+    typeof useAttackWorkflowStatusContextMenuItems
+  >;
+const mockUseAttackAssigneesContextMenuItems =
+  useAttackAssigneesContextMenuItems as jest.MockedFunction<
+    typeof useAttackAssigneesContextMenuItems
+  >;
+const mockUseAttackTagsContextMenuItems = useAttackTagsContextMenuItems as jest.MockedFunction<
+  typeof useAttackTagsContextMenuItems
 >;
+const mockUseAttackInvestigateInTimelineContextMenuItems =
+  useAttackInvestigateInTimelineContextMenuItems as jest.MockedFunction<
+    typeof useAttackInvestigateInTimelineContextMenuItems
+  >;
+const mockUseAttackCaseContextMenuItems = useAttackCaseContextMenuItems as jest.MockedFunction<
+  typeof useAttackCaseContextMenuItems
+>;
+
+const mockUseAttackRunWorkflowContextMenuItems =
+  useAttackRunWorkflowContextMenuItems as jest.MockedFunction<
+    typeof useAttackRunWorkflowContextMenuItems
+  >;
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
 
 function renderAttack(attack: AttackDiscoveryAlert) {
   return render(
     <TestProviders>
-      <AttacksGroupTakeActionItems attack={attack} />
+      <AttacksGroupTakeActionItems
+        attack={attack}
+        telemetrySource="attacks_page_group_take_action"
+      />
     </TestProviders>
   );
 }
@@ -42,10 +83,80 @@ function renderAttack(attack: AttackDiscoveryAlert) {
 describe('AttacksGroupTakeActionItems', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAttacksPrivileges.mockReturnValue({
-      hasIndexWrite: true,
-      hasAttackIndexWrite: true,
-      loading: false,
+
+    // Default mock returns for context menu hooks
+    mockUseAttackViewInAiAssistantContextMenuItems.mockReturnValue({
+      items: [
+        {
+          name: 'View in AI Assistant',
+          key: 'viewInAiAssistant',
+          'data-test-subj': 'viewInAiAssistant',
+        },
+      ],
+    });
+    mockUseAttackWorkflowStatusContextMenuItems.mockReturnValue({
+      items: [
+        { name: 'Mark as acknowledged', key: 'markAsAcknowledged' },
+        { name: 'Mark as closed', key: 'markAsClosed' },
+        { name: 'Mark as open', key: 'markAsOpen' },
+      ],
+      panels: [],
+    });
+    mockUseAttackAssigneesContextMenuItems.mockReturnValue({
+      items: [
+        { name: 'Assign alert', key: 'assignAlert' },
+        { name: 'Unassign alert', key: 'unassignAlert' },
+      ],
+      panels: [],
+    });
+    mockUseAttackTagsContextMenuItems.mockReturnValue({
+      items: [{ name: 'Apply alert tags', key: 'applyAlertTags' }],
+      panels: [],
+    });
+    mockUseAttackInvestigateInTimelineContextMenuItems.mockReturnValue({
+      items: [{ name: 'Investigate in timeline', key: 'investigateInTimeline' }],
+      panels: [],
+    });
+    mockUseAttackCaseContextMenuItems.mockReturnValue({
+      items: [],
+      panels: [],
+    });
+    mockUseAttackRunWorkflowContextMenuItems.mockReturnValue({
+      items: [
+        {
+          name: 'Run workflow',
+          key: 'run-attack-workflow-action',
+          panel: 'BULK_RUN_WORKFLOW_PANEL_ID',
+          'data-test-subj': 'run-attack-workflow-action',
+        },
+      ],
+      panels: [],
+    });
+  });
+
+  describe('telemetry', () => {
+    it('passes telemetrySource to all hooks', () => {
+      renderAttack(mockAttack);
+      const expectedTelemetrySource = 'attacks_page_group_take_action';
+
+      expect(mockUseAttackViewInAiAssistantContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetrySource: expectedTelemetrySource })
+      );
+      expect(mockUseAttackWorkflowStatusContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetrySource: expectedTelemetrySource })
+      );
+      expect(mockUseAttackAssigneesContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetrySource: expectedTelemetrySource })
+      );
+      expect(mockUseAttackTagsContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetrySource: expectedTelemetrySource })
+      );
+      expect(mockUseAttackInvestigateInTimelineContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetrySource: expectedTelemetrySource })
+      );
+      expect(mockUseAttackCaseContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetrySource: expectedTelemetrySource })
+      );
     });
   });
 
@@ -62,6 +173,13 @@ describe('AttacksGroupTakeActionItems', () => {
         expect(await findByText('Mark as closed')).toBeInTheDocument();
       });
       it('should NOT render the `open` action item', async () => {
+        mockUseAttackWorkflowStatusContextMenuItems.mockReturnValue({
+          items: [
+            { name: 'Mark as acknowledged', key: 'markAsAcknowledged' },
+            { name: 'Mark as closed', key: 'markAsClosed' },
+          ],
+          panels: [],
+        });
         const { queryByText } = renderAttack(openAttack);
         expect(queryByText('Mark as open')).not.toBeInTheDocument();
       });
@@ -74,6 +192,13 @@ describe('AttacksGroupTakeActionItems', () => {
         expect(await findByText('Mark as acknowledged')).toBeInTheDocument();
       });
       it('should NOT render the `close` action item', async () => {
+        mockUseAttackWorkflowStatusContextMenuItems.mockReturnValue({
+          items: [
+            { name: 'Mark as acknowledged', key: 'markAsAcknowledged' },
+            { name: 'Mark as open', key: 'markAsOpen' },
+          ],
+          panels: [],
+        });
         const { queryByText } = renderAttack(openAttack);
         expect(queryByText('Mark as closed')).not.toBeInTheDocument();
       });
@@ -86,6 +211,13 @@ describe('AttacksGroupTakeActionItems', () => {
       const openAttack = { ...mockAttack, alertWorkflowStatus: 'acknowledged' };
 
       it('should NOT render the `acknowledged` action item', async () => {
+        mockUseAttackWorkflowStatusContextMenuItems.mockReturnValue({
+          items: [
+            { name: 'Mark as closed', key: 'markAsClosed' },
+            { name: 'Mark as open', key: 'markAsOpen' },
+          ],
+          panels: [],
+        });
         const { queryByText } = renderAttack(openAttack);
         expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
       });
@@ -119,9 +251,40 @@ describe('AttacksGroupTakeActionItems', () => {
   });
 
   describe('investigate in timeline', () => {
-    it('should render the `Investigate in timeline` action item', async () => {
+    it('renders the `Investigate in timeline` action item when user has timeline read privileges', async () => {
       const { findByText } = renderAttack(mockAttack);
+
       expect(await findByText('Investigate in timeline')).toBeInTheDocument();
+    });
+  });
+
+  describe('run workflow', () => {
+    it('should render the `Run workflow` action item', async () => {
+      const { findByText } = renderAttack(mockAttack);
+      expect(await findByText('Run workflow')).toBeInTheDocument();
+    });
+
+    it('should not render the `Run workflow` action item when hook returns no items', () => {
+      mockUseAttackRunWorkflowContextMenuItems.mockReturnValue({ items: [], panels: [] });
+
+      const { queryByText } = renderAttack(mockAttack);
+      expect(queryByText('Run workflow')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('view in ai assistant', () => {
+    it('should render the `View in AI Assistant` action item', async () => {
+      const { findByText } = renderAttack(mockAttack);
+      expect(await findByText('View in AI Assistant')).toBeInTheDocument();
+    });
+
+    it('should not render the action item when hook returns no items', async () => {
+      mockUseAttackViewInAiAssistantContextMenuItems.mockReturnValue({
+        items: [],
+      });
+
+      const { queryByText } = renderAttack(mockAttack);
+      expect(queryByText('View in AI Assistant')).not.toBeInTheDocument();
     });
   });
 });

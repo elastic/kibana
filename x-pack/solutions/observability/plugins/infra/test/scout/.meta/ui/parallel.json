@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-06T14:35:27.904Z",
-  "sha1": "c60f77790accb19b65ed3714d3bf3dbc694f5f1f",
+  "sha1": "8f1fc6e4e9ab527bbfd5cc6b76edaec492c96866",
   "tests": [
     {
       "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
@@ -16,6 +15,102 @@
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
         "line": 36,
         "column": 16
+      }
+    },
+    {
+      "id": "dabc65f5da31ebe-fb23c5e0de6c6c5",
+      "title": "Hosts Page - Metadata Filter Add and remove metadata filter from host flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_metadata_filter.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    },
+    {
+      "id": "dabc65f5da31ebe-a99c866d6ac97cd",
+      "title": "Hosts Page - Metadata Filter Adding a metadata filter hides other hosts from the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_metadata_filter.spec.ts",
+        "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "e0dfab470c8cdf4-3df745974a5aa43",
+      "title": "Hosts Page - Search Search using the Hosts page search bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
+        "line": 44,
+        "column": 9
+      }
+    },
+    {
+      "id": "e0dfab470c8cdf4-fbaa70a0ae45105",
+      "title": "Hosts Page - Search Search using the flyout search bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
+        "line": 55,
+        "column": 9
+      }
+    },
+    {
+      "id": "e0dfab470c8cdf4-e9c2121846875ba",
+      "title": "Hosts Page - Search Filter hosts using the Cloud Provider control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
+        "line": 76,
+        "column": 9
+      }
+    },
+    {
+      "id": "e0dfab470c8cdf4-1bc13daa71111e7",
+      "title": "Hosts Page - Search Filter hosts using the Operating System control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
+        "line": 96,
+        "column": 9
       }
     },
     {
@@ -92,7 +187,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 183,
+        "line": 184,
         "column": 9
       }
     },
@@ -108,7 +203,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 224,
+        "line": 227,
         "column": 9
       }
     },
@@ -124,7 +219,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 231,
+        "line": 237,
         "column": 9
       }
     },
@@ -140,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 280,
+        "line": 287,
         "column": 9
       }
     },
@@ -156,7 +251,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 332,
+        "line": 350,
         "column": 9
       }
     },
@@ -172,7 +267,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 366,
+        "line": 386,
         "column": 9
       }
     },
@@ -268,7 +363,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 344,
+        "line": 348,
         "column": 9
       }
     },
@@ -284,7 +379,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 378,
+        "line": 382,
         "column": 9
       }
     },

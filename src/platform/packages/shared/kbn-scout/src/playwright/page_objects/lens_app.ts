@@ -124,7 +124,8 @@ export class LensApp {
     await expect(input).toHaveValue(`${value}`);
   }
 
-  async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
+  async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
+    await this.page.testSubj.click('lnsDatatable_dynamicColoring_groups');
     await this.page.testSubj.click(`lnsDatatable_dynamicColoring_groups_${coloringType}`);
   }
 
@@ -188,6 +189,13 @@ export class LensApp {
     await expect(this.chartSwitchList).toBeVisible();
   }
 
+  async dragFieldToWorkspace(field: string) {
+    const fieldLocator = this.page.testSubj.locator(`lnsFieldListPanelField-___${field}___`);
+    const dropTarget = this.page.testSubj.locator('workspace-drag-drop-prompt');
+    await fieldLocator.dragTo(dropTarget);
+    await this.page.locator('.echCanvasRenderer').waitFor({ state: 'visible' });
+  }
+
   getConvertToEsqlButton() {
     return this.page.getByRole('button', { name: 'Convert to ES|QL' });
   }
@@ -198,5 +206,25 @@ export class LensApp {
 
   getConvertToEsqModalConfirmButton() {
     return this.page.getByTestId('confirmModalConfirmButton');
+  }
+
+  getApplyFlyoutButton() {
+    return this.page.getByTestId('applyFlyoutButton');
+  }
+
+  getSecondaryFlyoutBackButton() {
+    return this.page.getByTestId('lns-indexPattern-dimensionContainerClose');
+  }
+
+  getInlineEditor() {
+    return this.page.getByTestId('customizeLens');
+  }
+
+  getCancelFlyoutButton() {
+    return this.page.getByTestId('cancelFlyoutButton');
+  }
+
+  getEditInLensButton() {
+    return this.page.getByTestId('navigateToLensEditorLink');
   }
 }

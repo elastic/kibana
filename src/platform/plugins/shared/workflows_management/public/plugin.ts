@@ -19,9 +19,14 @@ import {
   type Plugin,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOWS_AI_AGENT_SETTING_ID,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
+import { triggerSchemas } from './trigger_schemas';
 import type {
+  AgentBuilderPluginStartContract,
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
   WorkflowsPublicPluginStart,
@@ -45,6 +50,7 @@ export class WorkflowsPlugin
 {
   private appUpdater$: Subject<AppUpdater>;
   private telemetryService: TelemetryService;
+  private agentBuilderPromise: Promise<AgentBuilderPluginStartContract | undefined> | undefined;
 
   constructor() {
     this.appUpdater$ = new Subject<AppUpdater>();
@@ -77,6 +83,8 @@ export class WorkflowsPlugin
 
     registerConnectorType();
 
+    this.setupAiIntegration(core);
+
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -90,6 +98,7 @@ export class WorkflowsPlugin
         // Load application bundle
         const { renderApp } = await import('./application');
         const services = await this.createWorkflowsStartServices(core);
+
         return renderApp(services, params);
       },
     });
@@ -101,8 +110,9 @@ export class WorkflowsPlugin
     _core: CoreStart,
     plugins: WorkflowsPublicPluginStartDependencies
   ): WorkflowsPublicPluginStart {
-    // Initialize StepSchemas singleton with workflowExtensions
+    // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
+    triggerSchemas.initialize(plugins.workflowsExtensions);
 
     // License check to set app status
     plugins.licensing.license$.subscribe((license) => {
@@ -118,6 +128,39 @@ export class WorkflowsPlugin
 
   public stop() {}
 
+  /**
+   * Sets up AI authoring features: resolves the Agent Builder contract and
+   * registers workflow attachment renderers. Eagerly kicks off the dynamic
+   * import so the chunk downloads in parallel with onStart resolution,
+   * minimising the window where renderers are not yet registered.
+   */
+  private setupAiIntegration(
+    core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
+  ): void {
+    const isAiAgentEnabled = core.uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID, false);
+    if (!isAiAgentEnabled) {
+      return;
+    }
+
+    const aiIntegrationModule = import('./features/ai_integration');
+
+    this.agentBuilderPromise = core.plugins
+      .onStart<{ agentBuilder: AgentBuilderPluginStartContract }>('agentBuilder')
+      .then(async ({ agentBuilder }) => {
+        if (agentBuilder.found) {
+          const [coreStart] = await core.getStartServices();
+          const { registerWorkflowAttachmentRenderers } = await aiIntegrationModule;
+          registerWorkflowAttachmentRenderers(agentBuilder.contract.attachments, {
+            core: coreStart,
+            telemetry: this.telemetryService.getClient(),
+          });
+          return agentBuilder.contract;
+        }
+        return undefined;
+      })
+      .catch(() => undefined);
+  }
+
   /** Creates the start services to be used in the Kibana services context of the workflows application */
   private async createWorkflowsStartServices(
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
@@ -125,10 +168,18 @@ export class WorkflowsPlugin
     // Get start services as specified in kibana.jsonc
     const [coreStart, depsStart] = await core.getStartServices();
 
+    const agentBuilder = await this.agentBuilderPromise;
+
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
-      workflowsManagement: { telemetry: this.telemetryService.getClient() },
+      workflowsManagement: {
+        telemetry: this.telemetryService.getClient(),
+        agentBuilder,
+      },
     };
+
+    // Make sure the workflows extensions registries are ready before using the services
+    await depsStart.workflowsExtensions.isReady();
 
     return {
       ...coreStart,

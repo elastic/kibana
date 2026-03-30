@@ -20,12 +20,19 @@ interface Options {
   esArchiver: ProvidedType<typeof EsArchiverProvider>;
   kibanaServer: ProvidedType<typeof KibanaServerProvider>;
   retry: RetryService;
-  defaults: Record<string, any>;
+  defaults?: Record<string, any>;
+  globalDefaults?: Record<string, any>;
 }
 
-export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }: Options) {
+export function extendEsArchiver({
+  esArchiver,
+  kibanaServer,
+  retry,
+  defaults,
+  globalDefaults,
+}: Options) {
   // only extend the esArchiver if there are default uiSettings to restore
-  if (!defaults) {
+  if (!defaults && !globalDefaults) {
     return;
   }
 
@@ -39,15 +46,22 @@ export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }: 
       const statsKeys = Object.keys(stats);
       const kibanaKeys = statsKeys.filter(
         // this also matches stats keys like '.kibana_1' and '.kibana_2,.kibana_1'
-        (key) => key.includes(MAIN_SAVED_OBJECT_INDEX) && stats[key].created
+        (key) => key.includes(MAIN_SAVED_OBJECT_INDEX) && (stats[key].created || stats[key].deleted)
       );
 
-      // if the kibana index was created by the esArchiver then update the uiSettings
+      // if the kibana index was created or deleted by the esArchiver then update the uiSettings
       // with the defaults to make sure that they are always in place initially
       if (kibanaKeys.length > 0) {
-        await retry.try(async () => {
-          await kibanaServer.uiSettings.update(defaults);
-        });
+        if (defaults) {
+          await retry.try(async () => {
+            await kibanaServer.uiSettings.update(defaults);
+          });
+        }
+        if (globalDefaults) {
+          await retry.try(async () => {
+            await kibanaServer.uiSettings.updateGlobal(globalDefaults);
+          });
+        }
       }
 
       return stats;

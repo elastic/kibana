@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 
@@ -24,12 +23,16 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
 import type { LayoutService } from '@kbn/core-chrome-layout';
-import { getLayoutDebugFlag } from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
 import type { CoreEnv } from '@kbn/core-base-browser-internal';
+import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -46,6 +49,9 @@ export interface RenderingServiceRenderCoreDeps {
   chrome: InternalChromeStart;
   overlays: OverlayStart;
   featureFlags: FeatureFlagsStart;
+  http: InternalHttpStart;
+  docLinks: DocLinksStart;
+  customBranding: CustomBrandingStart;
 }
 
 export interface RenderingServiceInternalStart extends IRenderingService {
@@ -86,22 +92,24 @@ export class RenderingService implements IRenderingService {
     renderCoreDeps: RenderingServiceRenderCoreDeps,
     targetDomElement: HTMLDivElement
   ) {
-    const { featureFlags } = renderCoreDeps;
-    const debugLayout = getLayoutDebugFlag(featureFlags);
-
     const startServices = this.contextDeps.getValue()!;
 
-    const layout: LayoutService = new GridLayout(renderCoreDeps, { debug: debugLayout });
+    const layout: LayoutService = new GridLayout(renderCoreDeps);
 
     const Layout = layout.getComponent();
 
-    ReactDOM.render(
+    const element = (
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
         <Layout />
-      </KibanaRootContextProvider>,
-      targetDomElement
+      </KibanaRootContextProvider>
     );
+
+    if (startServices.coreEnv.isCoreRenderingInReactConcurrentMode) {
+      createRoot(targetDomElement).render(element);
+    } else {
+      ReactDOM.render(element, targetDomElement);
+    }
   }
 
   // Memoized context wrapper component to prevent recreation on each addContext call

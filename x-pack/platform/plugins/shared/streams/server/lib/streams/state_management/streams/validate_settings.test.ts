@@ -83,7 +83,7 @@ describe('validateSettingsWithDryRun', () => {
 
     await expect(
       validateSettingsWithDryRun({
-        scopedClusterClient: mockScopedClusterClient,
+        esClient: mockScopedClusterClient.asCurrentUser,
         streamName: 'logs-test-default',
         settings: { 'index.refresh_interval': { value: '5s' } },
         isServerless: true,
@@ -116,7 +116,7 @@ describe('validateSettingsWithDryRun', () => {
 
     await expect(
       validateSettingsWithDryRun({
-        scopedClusterClient: mockScopedClusterClient,
+        esClient: mockScopedClusterClient.asCurrentUser,
         streamName: 'logs-test-default',
         settings: { 'index.refresh_interval': { value: '1s' } },
         isServerless: true,
@@ -127,7 +127,7 @@ describe('validateSettingsWithDryRun', () => {
   it('does not call ES when there are no settings to validate', async () => {
     await expect(
       validateSettingsWithDryRun({
-        scopedClusterClient: mockScopedClusterClient,
+        esClient: mockScopedClusterClient.asCurrentUser,
         streamName: 'logs-test-default',
         settings: {},
         isServerless: true,
@@ -142,7 +142,7 @@ describe('validateSettingsWithDryRun', () => {
   it('does not call ES when all settings are null', async () => {
     await expect(
       validateSettingsWithDryRun({
-        scopedClusterClient: mockScopedClusterClient,
+        esClient: mockScopedClusterClient.asCurrentUser,
         streamName: 'logs-test-default',
         settings: { 'index.refresh_interval': { value: null as unknown as string } },
         isServerless: true,
@@ -162,7 +162,7 @@ describe('validateSettingsWithDryRun', () => {
       });
 
     await validateSettingsWithDryRun({
-      scopedClusterClient: mockScopedClusterClient,
+      esClient: mockScopedClusterClient.asCurrentUser,
       streamName: 'logs-test-default',
       settings: {
         'index.refresh_interval': { value: '5s' },

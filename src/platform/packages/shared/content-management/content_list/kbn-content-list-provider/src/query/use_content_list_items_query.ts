@@ -28,7 +28,7 @@ const DEFAULT_PAGE = { index: 0, size: 20 };
  * Note: Items are expected to already be in `ContentListItem` format.
  * Transformation should happen in the `findItems` implementation.
  *
- * @param clientState - Client-controlled state (filters, sort).
+ * @param clientState - Client-controlled state (search, filters, sort).
  * @returns Query data and refetch function.
  */
 export const useContentListItemsQuery = (
@@ -50,8 +50,8 @@ export const useContentListItemsQuery = (
   );
 
   // React Query for data fetching.
-  // `keepPreviousData` keeps the previous page visible while the next page loads,
-  // preventing the table from collapsing to zero rows and causing a scroll-to-top.
+  // `keepPreviousData` retains the previous results while a new query loads,
+  // preventing the table from flashing empty when page, filters, or search text change.
   const query = useQuery({
     queryKey: contentListKeys.items(queryKeyScope, queryParams),
     keepPreviousData: true,
@@ -87,7 +87,9 @@ export const useContentListItemsQuery = (
   return {
     items: query.data?.items ?? [],
     totalItems: query.data?.total ?? 0,
-    isLoading: query.isLoading || query.isFetching,
+    counts: query.data?.counts,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
     error,
     refetch: query.refetch,
   };

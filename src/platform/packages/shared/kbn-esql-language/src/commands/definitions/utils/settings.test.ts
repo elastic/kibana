@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { synth } from '../../../composer';
+import { synth } from '@elastic/esql';
 import { UnmappedFieldsStrategy } from '../../registry/types';
 import { getUnmappedFieldsStrategy } from './settings';
 

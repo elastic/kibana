@@ -22,12 +22,14 @@ import { DEFAULT_DATA_STREAM_VALUES, DEFAULT_INTEGRATION_VALUES } from './consta
 export interface IntegrationFormProviderProps {
   children?: React.ReactNode;
   initialValue?: Partial<IntegrationFormData>;
+  existingDataStreamTitles?: Set<string>;
   onSubmit: (data: IntegrationFormData) => Promise<void>;
 }
 
 export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = ({
   children,
   initialValue,
+  existingDataStreamTitles,
   onSubmit,
 }) => {
   const { http, notifications } = useKibana().services;
@@ -61,8 +63,8 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
   // avoid validation errors.
   const currentIntegrationTitle = !initialValue?.integrationId ? undefined : initialValue?.title;
   const schema = useMemo(
-    () => createFormSchema(packageNames, currentIntegrationTitle),
-    [packageNames, currentIntegrationTitle]
+    () => createFormSchema(packageNames, currentIntegrationTitle, existingDataStreamTitles),
+    [packageNames, currentIntegrationTitle, existingDataStreamTitles]
   );
 
   const defaultValue = useMemo((): IntegrationFormData => {
@@ -130,7 +132,7 @@ export const useIntegrationForm = () => {
     // Additional conditional validation for log source having a sample or an index selected
     const logsSourceOption = formData.logsSourceOption;
     const logSourceValid =
-      (logsSourceOption === 'upload' && !!formData.logSample) ||
+      (logsSourceOption === 'file' && !!formData.logSample) ||
       (logsSourceOption === 'index' && formData.selectedIndex && formData.selectedIndex.trim());
 
     return baseFieldsValid && logSourceValid;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,6 +19,7 @@ import {
   packageInfoHasOtelInputs,
 } from '../../../../../../../../common/services/otelcol_helpers';
 import { ExperimentalFeaturesService } from '../../../../../services';
+import { wrapTitleWithDeprecated } from '../../../components/utils';
 
 export const PrereleaseCallout: React.FC<{
   packageInfo: PackageInfo;
@@ -61,6 +62,7 @@ export const PrereleaseCallout: React.FC<{
           </p>
         )}
       </EuiCallOut>
+      <EuiSpacer size="m" />
     </>
   );
 };
@@ -69,7 +71,7 @@ export const OtelPackageCallout: React.FC<{
   packageInfo: PackageInfo;
 }> = ({ packageInfo }) => {
   const { docLinks } = useStartServices();
-  const packageTitle = packageInfo.title;
+  const packageTitle = wrapTitleWithDeprecated({ packageInfo });
 
   return (
     <>
@@ -124,6 +126,7 @@ export const OtelPackageCallout: React.FC<{
           />
         </p>
       </EuiCallOut>
+      <EuiSpacer size="m" />
     </>
   );
 };

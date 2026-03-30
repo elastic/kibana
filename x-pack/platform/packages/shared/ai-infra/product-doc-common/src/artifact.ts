@@ -9,7 +9,10 @@ import { isImpliedDefaultElserInferenceId } from './is_default_inference_endpoin
 import { type ProductName, DocumentationProduct } from './product';
 import { type ResourceType, ResourceTypes } from './resource_type';
 
-const allowedProductNames: ProductName[] = Object.values(DocumentationProduct);
+const allowedProductNames: (ProductName | 'openapi')[] = [
+  ...Object.values(DocumentationProduct),
+  'openapi',
+];
 
 export const DEFAULT_ELSER = '.elser-2-elasticsearch';
 
@@ -48,7 +51,7 @@ export const parseArtifactName = (artifactName: string) => {
   }
 
   // match the main pattern kb-product-doc-<product>-<version>
-  const match = name.match(/^kb-product-doc-([a-z]+)-([0-9]+\.[0-9]+)$/);
+  const match = name.match(/^kb-product-doc-([a-z]+)-([0-9]+\.[0-9]+|latest)$/);
   if (!match) return;
 
   const productName = match[1].toLowerCase() as ProductName;

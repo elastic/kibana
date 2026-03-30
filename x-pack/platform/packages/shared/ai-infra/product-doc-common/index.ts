@@ -24,5 +24,8 @@ export {
   securityLabsIndexPrefix,
   securityLabsIndexPattern,
   getSecurityLabsIndexName,
+  openApiSpecIndexPrefix,
+  openApiSpecIndexPattern,
+  getOpenApiSpecIndexName,
 } from './src/indices';
 export type { ProductDocumentationAttributes } from './src/documents';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 
 import {
   InputType,
@@ -51,7 +51,7 @@ describe('common attributes schemas', () => {
       const result = InputType.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('Invalid enum value');
+      expect(stringifyZodError(result.error)).toContain('Invalid option');
     });
 
     it('requires name field', () => {
@@ -59,7 +59,7 @@ describe('common attributes schemas', () => {
       const result = InputType.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('name: Required');
+      expect(stringifyZodError(result.error)).toContain('Invalid option');
     });
 
     it('rejects empty name', () => {
@@ -107,7 +107,7 @@ describe('common attributes schemas', () => {
 
       const result = DataStream.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('dataStreamId: Required');
+      expect(stringifyZodError(result.error)).toContain('dataStreamId: Invalid input');
     });
 
     it('requires title', () => {
@@ -116,7 +116,7 @@ describe('common attributes schemas', () => {
 
       const result = DataStream.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('title: Required');
+      expect(stringifyZodError(result.error)).toContain('title: Invalid input');
     });
 
     it('requires description', () => {
@@ -125,7 +125,7 @@ describe('common attributes schemas', () => {
 
       const result = DataStream.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('description: Required');
+      expect(stringifyZodError(result.error)).toContain('description: Invalid input');
     });
 
     it('requires inputTypes', () => {
@@ -134,7 +134,7 @@ describe('common attributes schemas', () => {
 
       const result = DataStream.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('inputTypes: Required');
+      expect(stringifyZodError(result.error)).toContain('inputTypes: Invalid input');
     });
 
     it('accepts empty inputTypes array', () => {
@@ -219,7 +219,7 @@ describe('common attributes schemas', () => {
 
       const result = Integration.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('integrationId: Required');
+      expect(stringifyZodError(result.error)).toContain('integrationId: Invalid input');
     });
 
     it('requires title', () => {
@@ -228,7 +228,7 @@ describe('common attributes schemas', () => {
 
       const result = Integration.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('title: Required');
+      expect(stringifyZodError(result.error)).toContain('title: Invalid input');
     });
 
     it('requires description', () => {
@@ -237,7 +237,7 @@ describe('common attributes schemas', () => {
 
       const result = Integration.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('description: Required');
+      expect(stringifyZodError(result.error)).toContain('description: Invalid input');
     });
 
     it('rejects unknown properties due to strict mode', () => {
@@ -303,7 +303,7 @@ describe('common attributes schemas', () => {
 
       const result = OriginalSource.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('Invalid enum value');
+      expect(stringifyZodError(result.error)).toContain('Invalid option');
     });
 
     it('requires sourceType', () => {
@@ -313,7 +313,7 @@ describe('common attributes schemas', () => {
 
       const result = OriginalSource.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('sourceType: Required');
+      expect(stringifyZodError(result.error)).toContain('Invalid option');
     });
 
     it('requires sourceValue', () => {
@@ -323,7 +323,7 @@ describe('common attributes schemas', () => {
 
       const result = OriginalSource.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('sourceValue: Required');
+      expect(stringifyZodError(result.error)).toContain('sourceValue: Invalid input');
     });
 
     it('rejects empty sourceValue', () => {
@@ -355,7 +355,15 @@ describe('common attributes schemas', () => {
 
   describe('TaskStatus', () => {
     it('accepts all valid task status values', () => {
-      const validStatuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'];
+      const validStatuses = [
+        'pending',
+        'processing',
+        'completed',
+        'failed',
+        'cancelled',
+        'approved',
+        'deleting',
+      ];
 
       validStatuses.forEach((status) => {
         const result = TaskStatus.safeParse(status);
@@ -370,7 +378,7 @@ describe('common attributes schemas', () => {
       invalidStatuses.forEach((status) => {
         const result = TaskStatus.safeParse(status);
         expectParseError(result);
-        expect(stringifyZodError(result.error)).toContain('Invalid enum value');
+        expect(stringifyZodError(result.error)).toContain('Invalid option');
       });
     });
 
@@ -380,6 +388,8 @@ describe('common attributes schemas', () => {
       expect(TaskStatusEnum.completed).toBe('completed');
       expect(TaskStatusEnum.failed).toBe('failed');
       expect(TaskStatusEnum.cancelled).toBe('cancelled');
+      expect(TaskStatusEnum.approved).toBe('approved');
+      expect(TaskStatusEnum.deleting).toBe('deleting');
     });
 
     it('rejects non-string values', () => {
@@ -428,7 +438,15 @@ describe('common attributes schemas', () => {
     });
 
     it('accepts all task statuses', () => {
-      const statuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'] as const;
+      const statuses = [
+        'pending',
+        'processing',
+        'completed',
+        'failed',
+        'cancelled',
+        'approved',
+        'deleting',
+      ] as const;
 
       statuses.forEach((status) => {
         const payload = { ...validDataStreamResponse, status };
@@ -447,7 +465,7 @@ describe('common attributes schemas', () => {
 
         const result = DataStreamResponse.safeParse(payload);
         expectParseError(result);
-        expect(stringifyZodError(result.error)).toContain(`${field}: Required`);
+        expect(stringifyZodError(result.error)).toContain(field);
       });
     });
 
@@ -556,12 +574,20 @@ describe('common attributes schemas', () => {
 
         const result = IntegrationResponse.safeParse(payload);
         expectParseError(result);
-        expect(stringifyZodError(result.error)).toContain(`${field}: Required`);
+        expect(stringifyZodError(result.error)).toContain(field);
       });
     });
 
     it('accepts all task statuses', () => {
-      const statuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'] as const;
+      const statuses = [
+        'pending',
+        'processing',
+        'completed',
+        'failed',
+        'cancelled',
+        'approved',
+        'deleting',
+      ] as const;
 
       statuses.forEach((status) => {
         const payload = { ...validIntegrationResponse, status };
@@ -585,6 +611,7 @@ describe('common attributes schemas', () => {
       title: 'Test Integration',
       totalDataStreamCount: 5,
       successfulDataStreamCount: 3,
+      createdBy: 'test-user',
       status: 'processing' as const,
     };
 
@@ -624,6 +651,7 @@ describe('common attributes schemas', () => {
         'title',
         'totalDataStreamCount',
         'successfulDataStreamCount',
+        'createdBy',
         'status',
       ];
 
@@ -633,7 +661,7 @@ describe('common attributes schemas', () => {
 
         const result = AllIntegrationsResponseIntegration.safeParse(payload);
         expectParseError(result);
-        expect(stringifyZodError(result.error)).toContain(`${field}: Required`);
+        expect(stringifyZodError(result.error)).toContain(field);
       });
     });
 
@@ -645,7 +673,7 @@ describe('common attributes schemas', () => {
 
       const result = AllIntegrationsResponseIntegration.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('Expected integer');
+      expect(stringifyZodError(result.error)).toContain('expected int');
     });
 
     it('accepts negative counts (schema does not enforce non-negative)', () => {
@@ -667,11 +695,19 @@ describe('common attributes schemas', () => {
 
       const result = AllIntegrationsResponseIntegration.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('Expected number');
+      expect(stringifyZodError(result.error)).toContain('expected number');
     });
 
     it('accepts all valid task statuses', () => {
-      const statuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'] as const;
+      const statuses = [
+        'pending',
+        'processing',
+        'completed',
+        'failed',
+        'cancelled',
+        'approved',
+        'deleting',
+      ] as const;
 
       statuses.forEach((status) => {
         const payload = { ...validIntegration, status };

@@ -119,6 +119,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'assets',
   'data_streams',
   'license',
+  'requires',
   'type',
   'categories',
   'conditions',
@@ -133,6 +134,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'format_version',
   'discovery',
   'var_groups',
+  'deprecated',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);
@@ -492,6 +494,7 @@ export function parseAndVerifyStreams(
         title: streamTitle,
         vars: manifestVars,
         template_path: templatePath,
+        template_paths: templatePaths,
         ...restOfProps
       } = manifestStream;
       if (!(input && streamTitle)) {
@@ -505,7 +508,9 @@ export function parseAndVerifyStreams(
       const streamObject: RegistryStream = {
         input,
         title: streamTitle,
-        template_path: templatePath || 'stream.yml.hbs',
+        ...(templatePaths?.length
+          ? { template_paths: templatePaths }
+          : { template_path: templatePath || 'stream.yml.hbs' }),
       };
 
       if (vars.length) {
@@ -588,25 +593,46 @@ export function parseAndVerifyPolicyTemplates(
       let parsedMultiple = true;
       if (typeof multiple === 'boolean' && multiple === false) parsedMultiple = false;
 
-      policyTemplates.push(
-        Object.entries(restOfProps).reduce(
-          (validatedPolicyTemplate, [key, value]) => {
-            if (registryPolicyTemplateProps.includes(key as RegistryPolicyTemplateKeys)) {
-              // @ts-expect-error
-              validatedPolicyTemplate[key] = value;
-            }
-            return validatedPolicyTemplate;
-          },
-          {
-            name,
-            title: policyTemplateTitle,
-            description,
-            multiple: parsedMultiple,
-            // template can only have one of input or inputs
-            ...(!input ? { inputs: parsedInputs } : { input }),
-          } as RegistryPolicyTemplate
-        )
-      );
+      const validatedTemplate = Object.entries(restOfProps).reduce(
+        (validatedPolicyTemplate, [key, value]) => {
+          if (registryPolicyTemplateProps.includes(key as RegistryPolicyTemplateKeys)) {
+            // @ts-expect-error
+            validatedPolicyTemplate[key] = value;
+          }
+          return validatedPolicyTemplate;
+        },
+        {
+          name,
+          title: policyTemplateTitle,
+          description,
+          multiple: parsedMultiple,
+          // template can only have one of input or inputs
+          ...(!input ? { inputs: parsedInputs } : { input }),
+        } as RegistryPolicyTemplate
+      ) as RegistryPolicyTemplate & {
+        input?: string;
+        type?: string;
+        dynamic_signal_types?: boolean;
+      };
+
+      // For input-only packages: either type is required, or dynamic_signal_types must be true (package-spec)
+      if (validatedTemplate.input !== undefined) {
+        const hasType = validatedTemplate.type !== undefined && validatedTemplate.type !== '';
+        const hasDynamicSignalTypes = validatedTemplate.dynamic_signal_types === true;
+        if (!hasType && !hasDynamicSignalTypes) {
+          throw new PackageInvalidArchiveError(
+            `Invalid policy template: for input packages, either 'type' is required or 'dynamic_signal_types' must be true. Template: ${JSON.stringify(
+              {
+                name: validatedTemplate.name,
+                type: validatedTemplate.type,
+                dynamic_signal_types: validatedTemplate.dynamic_signal_types,
+              }
+            )}`
+          );
+        }
+      }
+
+      policyTemplates.push(validatedTemplate);
     });
   }
   return policyTemplates;

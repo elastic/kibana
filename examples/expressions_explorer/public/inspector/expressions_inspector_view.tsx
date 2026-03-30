@@ -8,7 +8,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import type { InspectorViewProps, Adapters } from '@kbn/inspector-plugin/public';
@@ -23,11 +22,6 @@ class ExpressionsInspectorViewComponent extends Component<
   InspectorViewProps,
   ExpressionsInspectorViewComponentState
 > {
-  static propTypes = {
-    adapters: PropTypes.object.isRequired,
-    title: PropTypes.string.isRequired,
-  };
-
   state = {} as ExpressionsInspectorViewComponentState;
 
   static getDerivedStateFromProps(

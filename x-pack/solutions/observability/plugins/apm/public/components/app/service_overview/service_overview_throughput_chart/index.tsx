@@ -196,6 +196,7 @@ export function ServiceOverviewThroughputChart({
               environment,
               transactionName,
               transactionType,
+              sortDirection: 'DESC',
             }}
           />
         </EuiFlexItem>

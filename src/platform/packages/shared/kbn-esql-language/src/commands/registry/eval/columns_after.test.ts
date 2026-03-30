@@ -8,7 +8,7 @@
  */
 
 import { additionalFieldsMock } from '../../../__tests__/language/helpers';
-import { Parser, synth } from '../../../..';
+import { Parser, synth } from '@elastic/esql';
 import { UnmappedFieldsStrategy, type ESQLColumnData } from '../types';
 import { columnsAfter } from './columns_after';
 

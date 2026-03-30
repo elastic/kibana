@@ -12,7 +12,7 @@ import { getFindFilter } from './get_find_filter';
 import { getApiKeyIdsToInvalidate } from './get_api_key_ids_to_invalidate';
 import { PAGE_SIZE } from './constants';
 import { invalidateApiKeysAndDeletePendingApiKeySavedObject } from './invalidate_api_keys_and_delete_so';
-import type { ApiKeyInvalidationFn } from '../invalidate_api_keys_task';
+import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
 
 export interface SavedObjectTypesToQuery {
   type: string;
@@ -22,6 +22,7 @@ export interface SavedObjectTypesToQuery {
 interface RunInvalidateOpts {
   encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
   invalidateApiKeyFn?: ApiKeyInvalidationFn;
+  invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   logger: Logger;
   removalDelay: string;
   savedObjectsClient: SavedObjectsClientContract;
@@ -33,6 +34,7 @@ export async function runInvalidate(opts: RunInvalidateOpts) {
   const {
     encryptedSavedObjectsClient,
     invalidateApiKeyFn,
+    invalidateUiamApiKeyFn,
     logger,
     removalDelay,
     savedObjectsClient,
@@ -61,17 +63,21 @@ export async function runInvalidate(opts: RunInvalidateOpts) {
     });
 
     if (apiKeysToInvalidate.total > 0) {
-      const { apiKeyIdsToExclude, apiKeyIdsToInvalidate } = await getApiKeyIdsToInvalidate({
-        apiKeySOsPendingInvalidation: apiKeysToInvalidate,
-        encryptedSavedObjectsClient,
-        savedObjectsClient,
-        savedObjectType,
-        savedObjectTypesToQuery: opts.savedObjectTypesToQuery,
-      });
+      const { apiKeyIdsToExclude, apiKeyIdsToInvalidate, uiamApiKeysToInvalidate } =
+        await getApiKeyIdsToInvalidate({
+          apiKeySOsPendingInvalidation: apiKeysToInvalidate,
+          encryptedSavedObjectsClient,
+          savedObjectsClient,
+          savedObjectType,
+          savedObjectTypesToQuery: opts.savedObjectTypesToQuery,
+        });
       apiKeyIdsToExclude.forEach(({ id }) => excludedSOIds.add(id));
+
       totalInvalidated += await invalidateApiKeysAndDeletePendingApiKeySavedObject({
         apiKeyIdsToInvalidate,
+        uiamApiKeysToInvalidate,
         invalidateApiKeyFn,
+        invalidateUiamApiKeyFn,
         logger,
         savedObjectsClient,
         savedObjectType,

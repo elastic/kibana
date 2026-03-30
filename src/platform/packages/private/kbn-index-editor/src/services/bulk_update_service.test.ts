@@ -61,14 +61,14 @@ describe('Bulk update', () => {
     expect(operations.length).toBe(4);
 
     // Validate presence of delete operations for non-placeholder ids only
-    const deletes = operations.filter((op) => op.delete);
-    const deleteIds = deletes.map((d) => d.delete?._id).sort();
+    const deletes = operations.filter((op) => op!.delete);
+    const deleteIds = deletes.map((d) => d!.delete!._id).sort();
     expect(deleteIds).toEqual(['abc123', 'to-del']);
 
     // Validate there is an index operation and that the document merges values
-    const indexIdx = operations.findIndex((op) => op.index);
+    const indexIdx = operations.findIndex((op) => op!.index);
     expect(indexIdx).toBeGreaterThanOrEqual(0);
-    const doc = operations[indexIdx + 1];
+    const doc = operations[indexIdx + 1]!;
     expect(doc).toEqual({ b: 2, c: 3 });
   });
 

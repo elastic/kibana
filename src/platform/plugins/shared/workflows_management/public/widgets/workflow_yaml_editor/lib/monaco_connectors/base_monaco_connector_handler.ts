@@ -8,6 +8,8 @@
  */
 
 import type { monaco } from '@kbn/monaco';
+import type { StepStabilityLevel } from '@kbn/workflows';
+import { getStabilityNote as getStabilityNoteFromShared } from '../get_stability_note';
 import type {
   ConnectorExamples,
   HoverContext,
@@ -137,6 +139,14 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
     }
 
     return lines.join('\n');
+  }
+
+  /**
+   * Returns a markdown blockquote stability note for non-GA steps.
+   */
+  protected getStabilityNote(stability: StepStabilityLevel | undefined): string {
+    const note = getStabilityNoteFromShared(stability);
+    return note ? `\n\n${note}` : '';
   }
 
   /**

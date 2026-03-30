@@ -10,21 +10,64 @@
 import type { ContentListItem } from '../item';
 
 /**
+ * Include/exclude filter shape used by tag, type, lastResponse, and other filter dimensions.
+ */
+export interface IncludeExcludeFilter {
+  /** Values that items must match (include filter). */
+  include?: string[];
+  /** Values that items must not match (exclude filter). */
+  exclude?: string[];
+}
+
+/** Filter dimension key for tag-based filtering. Matches the `fieldName` used in tag filter popovers. */
+export const TAG_FILTER_ID = 'tag';
+
+/**
  * Active filters applied to the content list.
+ *
+ * Filter dimensions (e.g. `tag`, `type`, `lastResponse`) are keyed by their
+ * `fieldName` and hold an {@link IncludeExcludeFilter}. The index signature is
+ * required to allow arbitrary filter dimensions, but note:
+ *
+ * - The `search` key is always `string | undefined` — access it directly.
+ * - All other keys return `IncludeExcludeFilter | string | undefined`; use
+ *   {@link getIncludeExcludeFilter} to safely narrow them to `IncludeExcludeFilter`.
  */
 export interface ActiveFilters {
   /** Search text extracted from the search bar, without filter syntax. */
   search?: string;
+  /** When `true`, restrict results to starred items only. */
+  starredOnly?: boolean;
+  [filterId: string]: IncludeExcludeFilter | string | boolean | undefined;
 }
+
+/**
+ * Returns the filter value as `IncludeExcludeFilter` if it is an object; otherwise `undefined`.
+ * Use when accessing `include`/`exclude` on a filter dimension, since the index signature
+ * allows `string`, `boolean`, and `IncludeExcludeFilter`.
+ */
+export const getIncludeExcludeFilter = (
+  value: IncludeExcludeFilter | string | boolean | undefined
+): IncludeExcludeFilter | undefined => (value && typeof value === 'object' ? value : undefined);
+
+/**
+ * Per-value counts for a single filter dimension.
+ */
+export type FilterCounts = Record<string, number>;
 
 /**
  * Parameters for the `findItems` function.
  */
 export interface FindItemsParams {
-  /** Search query text with filter syntax already extracted. */
+  /**
+   * Search query text with filter syntax already extracted.
+   *
+   * This is a convenience alias for `filters.search ?? ''`. When building
+   * queries, prefer this over accessing `filters.search` directly.
+   */
   searchQuery: string;
 
-  /** Active filters. */
+  /** Active filters (includes the raw `search` text and any structured filters). */
   filters: ActiveFilters;
 
   /**
@@ -61,6 +104,19 @@ export interface FindItemsResult {
 
   /** Total matching items for pagination. */
   total: number;
+
+  /**
+   * Optional per-filter counts, indexed by filter identifier.
+   *
+   * Each key (e.g. `tag`, `type`, `lastResponse`) maps to a `Record<string, number>` of
+   * value → count for the full result set (not just the current page). When present for a
+   * filter, the corresponding filter popover displays counts next to each option.
+   *
+   * Client-side data sources that iterate the full item set before paginating can compute
+   * this cheaply. Server-side data sources should omit entries unless they can retrieve
+   * counts via an aggregation query.
+   */
+  counts?: Record<string, FilterCounts>;
 }
 
 /**

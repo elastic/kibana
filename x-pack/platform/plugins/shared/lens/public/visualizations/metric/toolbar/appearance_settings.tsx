@@ -20,20 +20,22 @@ import type {
   IconPosition,
   Alignment,
   PrimaryMetricPosition,
-} from '../types';
+  MetricLayoutWithDefault,
+} from '@kbn/lens-common';
 import {
-  METRIC_LAYOUT_BY_POSITION,
-  legacyMetricStateDefaults,
-  metricStateDefaults,
-  type MetricLayoutWithDefault,
-} from '../constants';
+  LENS_METRIC_LAYOUT_BY_POSITION,
+  LENS_LEGACY_METRIC_STATE_DEFAULTS,
+  LENS_METRIC_STATE_DEFAULTS,
+} from '@kbn/lens-common';
+
+type TitleFontWeightString = Extract<TitleFontWeight, string>;
 
 /** Get default layout config based on primary metric position */
 const getDefaultLayoutConfig = (
   primaryMetricPosition: PrimaryMetricPosition,
   { hasMetricIcon, hasSecondaryMetric }: { hasMetricIcon: boolean; hasSecondaryMetric: boolean }
 ): MetricLayoutWithDefault => {
-  let config = { ...METRIC_LAYOUT_BY_POSITION[primaryMetricPosition] };
+  let config = { ...LENS_METRIC_LAYOUT_BY_POSITION[primaryMetricPosition] };
 
   if (!hasMetricIcon) {
     const { iconAlign, ...rest } = config;
@@ -61,6 +63,10 @@ export function MetricAppearanceSettings({
 }) {
   const hasSecondaryMetric = !!state.secondaryMetricAccessor;
   const hasMetricIcon = hasIcon(state.icon);
+  const titleWeightValue: TitleFontWeightString =
+    state.titleWeight === 'normal' || state.titleWeight === 'bold'
+      ? state.titleWeight
+      : (LENS_METRIC_STATE_DEFAULTS.titleWeight as TitleFontWeightString);
 
   const disabledStates = {
     subtitle: !!state.breakdownByAccessor,
@@ -79,7 +85,7 @@ export function MetricAppearanceSettings({
           label={i18n.translate('xpack.lens.metric.appearancePopover.position', {
             defaultMessage: 'Position',
           })}
-          value={state.primaryPosition ?? metricStateDefaults.primaryPosition}
+          value={state.primaryPosition ?? LENS_METRIC_STATE_DEFAULTS.primaryPosition}
           options={primaryMetricPositionOptions}
           onChange={(id) => {
             setState({
@@ -94,7 +100,7 @@ export function MetricAppearanceSettings({
           label={i18n.translate('xpack.lens.metric.appearancePopover.alignment', {
             defaultMessage: 'Alignment',
           })}
-          value={state.primaryAlign ?? metricStateDefaults.primaryAlign}
+          value={state.primaryAlign ?? LENS_METRIC_STATE_DEFAULTS.primaryAlign}
           options={alignmentOptions}
           onChange={(id) => {
             setState({
@@ -109,7 +115,7 @@ export function MetricAppearanceSettings({
           label={i18n.translate('xpack.lens.metric.appearancePopover.fontSize', {
             defaultMessage: 'Font size',
           })}
-          value={state.valueFontMode ?? metricStateDefaults.valueFontMode}
+          value={state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode}
           options={fontSizeOptions}
           onChange={(id) => {
             setState({
@@ -140,7 +146,7 @@ export function MetricAppearanceSettings({
           label={i18n.translate('xpack.lens.metric.appearancePopover.alignment', {
             defaultMessage: 'Alignment',
           })}
-          value={state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign}
+          value={state.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign}
           options={alignmentOptions}
           onChange={(id) => {
             setState({
@@ -155,7 +161,7 @@ export function MetricAppearanceSettings({
           label={i18n.translate('xpack.lens.metric.appearancePopover.fontWeight', {
             defaultMessage: 'Font weight',
           })}
-          value={state.titleWeight ?? metricStateDefaults.titleWeight}
+          value={titleWeightValue}
           options={fontWeightOptions}
           onChange={(id) => {
             setState({
@@ -176,7 +182,7 @@ export function MetricAppearanceSettings({
           label={i18n.translate('xpack.lens.metric.appearancePopover.alignment', {
             defaultMessage: 'Alignment',
           })}
-          value={state.secondaryAlign ?? metricStateDefaults.secondaryAlign}
+          value={state.secondaryAlign ?? LENS_METRIC_STATE_DEFAULTS.secondaryAlign}
           options={alignmentOptions}
           onChange={(id) => {
             setState({
@@ -199,7 +205,7 @@ export function MetricAppearanceSettings({
           label={i18n.translate('xpack.lens.metric.appearancePopover.iconPosition', {
             defaultMessage: 'Icon position',
           })}
-          value={state.iconAlign ?? legacyMetricStateDefaults.iconAlign}
+          value={state.iconAlign ?? LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign}
           options={iconPositionOptions}
           onChange={(id) => {
             setState({
@@ -340,7 +346,7 @@ const iconPositionOptions: Array<EuiButtonGroupOptionProps & { id: IconPosition 
   },
 ];
 
-const fontWeightOptions: Array<EuiButtonGroupOptionProps & { id: TitleFontWeight }> = [
+const fontWeightOptions: Array<EuiButtonGroupOptionProps & { id: TitleFontWeightString }> = [
   {
     id: 'normal',
     label: i18n.translate('xpack.lens.metric.appearancePopover.regular', {

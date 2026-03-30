@@ -333,7 +333,8 @@ describe('AlertsTable', () => {
   });
 
   describe('Columns', () => {
-    describe('with no saved configuration', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/253350
+    describe.skip('with no saved configuration', () => {
       it('should show the default columns if the columns prop is not set', async () => {
         render(<AlertsTable {...tableProps} columns={undefined} />);
 

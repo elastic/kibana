@@ -33,8 +33,16 @@
               ">; application: jest.Mocked<",
               "ApplicationSetup",
               ">; chrome: ",
-              "InternalChromeSetup",
-              "; customBranding: { customBranding$: ",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
+              },
+              "<",
+              "ChromeSetup",
+              ">; customBranding: { customBranding$: ",
               "Observable",
               "<",
               "CustomBranding",

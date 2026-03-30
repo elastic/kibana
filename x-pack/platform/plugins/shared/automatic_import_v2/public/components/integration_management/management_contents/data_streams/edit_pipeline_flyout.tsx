@@ -23,14 +23,18 @@ import {
   EuiToolTip,
   EuiLoadingSpinner,
   EuiCallOut,
+  EuiButtonEmpty,
+  EuiConfirmModal,
 } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
-import React, { useState, useMemo } from 'react';
+import { XJsonLang } from '@kbn/monaco';
 import type { DataStreamResponse } from '../../../../../common';
-import { useGetDataStreamResults } from '../../../../common';
+import { useGetDataStreamResults, useUpdateDataStreamPipeline } from '../../../../common';
 import { useUIState } from '../../contexts';
+import { useTelemetry } from '../../../telemetry_context';
 import * as i18n from './translations';
-import { getIconFromType, flattenPipelineObject } from './utils';
+import { getIconFromType, flattenPipelineObject, diffPipelineLines } from './utils';
 
 interface EditPipelineFlyoutProps {
   integrationId: string;
@@ -50,12 +54,19 @@ export const EditPipelineFlyout = ({
   onClose,
 }: EditPipelineFlyoutProps) => {
   const [activeDocument, setActiveDocument] = useState(0);
+  const [pipelineText, setPipelineText] = useState('');
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
   const { selectedPipelineTab, selectPipelineTab } = useUIState();
+  const { reportCodeEditorCopyClicked, reportEditPipelineTabOpened, reportPipelineEdited } =
+    useTelemetry();
+  const editorContainerRef = useRef<HTMLDivElement>(null);
 
-  const { data, isLoading, isError } = useGetDataStreamResults(
+  const { data, isLoading, isError, error } = useGetDataStreamResults(
     integrationId,
     dataStream.dataStreamId
   );
+  const { updateDataStreamPipelineMutation } = useUpdateDataStreamPipeline();
 
   const tableData = useMemo<TableRow[]>(() => {
     if (!data?.results || data.results.length === 0) return [];
@@ -63,6 +74,10 @@ export const EditPipelineFlyout = ({
     if (!currentDoc) return [];
     return flattenPipelineObject(currentDoc as Record<string, unknown>);
   }, [data?.results, activeDocument]);
+
+  const handlePageClick = (doc: number) => {
+    setActiveDocument(doc);
+  };
 
   const stringifiedPipeline = useMemo(() => {
     if (!data?.ingest_pipeline) return '';
@@ -73,9 +88,53 @@ export const EditPipelineFlyout = ({
     }
   }, [data?.ingest_pipeline]);
 
-  const handlePageClick = (doc: number) => {
-    setActiveDocument(doc);
-  };
+  useEffect(() => {
+    setPipelineText(stringifiedPipeline);
+  }, [stringifiedPipeline]);
+
+  useEffect(() => {
+    const docsLength = data?.results?.length ?? 0;
+    if (activeDocument >= docsLength && docsLength > 0) {
+      setActiveDocument(docsLength - 1);
+    }
+  }, [activeDocument, data?.results?.length]);
+
+  const handleSave = useCallback(async () => {
+    setSaveError(null);
+    try {
+      JSON.parse(pipelineText);
+    } catch (e) {
+      setSaveError(i18n.EDIT_PIPELINE_FLYOUT.invalidJsonError((e as Error).message));
+      return;
+    }
+    try {
+      await updateDataStreamPipelineMutation.mutateAsync({
+        integrationId,
+        dataStreamId: dataStream.dataStreamId,
+        ingestPipeline: pipelineText,
+      });
+
+      const { linesAdded, linesRemoved, netLineChange } = diffPipelineLines(
+        stringifiedPipeline,
+        pipelineText
+      );
+
+      reportPipelineEdited({
+        linesAdded,
+        linesRemoved,
+        netLineChange,
+      });
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : i18n.EDIT_PIPELINE_FLYOUT.saveErrorMessage);
+    }
+  }, [
+    updateDataStreamPipelineMutation,
+    integrationId,
+    dataStream.dataStreamId,
+    pipelineText,
+    stringifiedPipeline,
+    reportPipelineEdited,
+  ]);
 
   const columns = [
     {
@@ -122,13 +181,40 @@ export const EditPipelineFlyout = ({
   };
 
   const pageCount = data?.results?.length ?? 0;
+  const hasUnsavedChanges = pipelineText !== stringifiedPipeline;
 
   const isTableVisible = !isLoading && !isError && selectedPipelineTab === 'table';
   const isEditorVisible =
     !isLoading && !isError && selectedPipelineTab === 'pipeline' && pageCount > 0;
 
+  const handleFlyoutClose = useCallback(() => {
+    if (hasUnsavedChanges) {
+      setIsCloseConfirmVisible(true);
+      return;
+    }
+    onClose();
+  }, [hasUnsavedChanges, onClose]);
+
+  const handleDiscardAndClose = useCallback(() => {
+    setIsCloseConfirmVisible(false);
+    onClose();
+  }, [onClose]);
+
+  const handleEditorContainerClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      const target = event.target as HTMLElement;
+      if (
+        target.closest('.euiCodeBlock__copyButton') ||
+        target.getAttribute('aria-label')?.toLowerCase().includes('copy')
+      ) {
+        reportCodeEditorCopyClicked();
+      }
+    },
+    [reportCodeEditorCopyClicked]
+  );
+
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="editPipelineFlyoutTitle">
+    <EuiFlyout onClose={handleFlyoutClose} aria-labelledby="editPipelineFlyoutTitle">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id="editPipelineFlyoutTitle">{dataStream.title}</h2>
@@ -136,18 +222,38 @@ export const EditPipelineFlyout = ({
 
         <EuiSpacer size="s" />
 
-        <EuiFlexItem grow={false} css={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <EuiText>{i18n.EDIT_PIPELINE_FLYOUT.documents}</EuiText>
-          {pageCount > 0 && (
-            <EuiPagination
-              aria-label={i18n.EDIT_PIPELINE_FLYOUT.paginationAriaLabel}
-              onPageClick={handlePageClick}
-              activePage={activeDocument}
-              pageCount={pageCount}
-              compressed
-            />
-          )}
-        </EuiFlexItem>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText>{i18n.EDIT_PIPELINE_FLYOUT.documents}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {pageCount > 0 && (
+                  <EuiPagination
+                    aria-label={i18n.EDIT_PIPELINE_FLYOUT.paginationAriaLabel}
+                    onPageClick={handlePageClick}
+                    activePage={activeDocument}
+                    pageCount={pageCount}
+                    compressed
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="save"
+              onClick={handleSave}
+              isLoading={updateDataStreamPipelineMutation.isLoading}
+              isDisabled={selectedPipelineTab !== 'pipeline' || !pipelineText.trim()}
+              data-test-subj="editPipelineFlyoutSaveButton"
+            >
+              {i18n.EDIT_PIPELINE_FLYOUT.saveButton}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiTabs>
           <EuiTab
             isSelected={selectedPipelineTab === 'table'}
@@ -157,7 +263,10 @@ export const EditPipelineFlyout = ({
           </EuiTab>
           <EuiTab
             isSelected={selectedPipelineTab === 'pipeline'}
-            onClick={() => selectPipelineTab('pipeline')}
+            onClick={() => {
+              reportEditPipelineTabOpened();
+              selectPipelineTab('pipeline');
+            }}
           >
             {i18n.EDIT_PIPELINE_FLYOUT.pipelineTab}
           </EuiTab>
@@ -165,6 +274,21 @@ export const EditPipelineFlyout = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {isCloseConfirmVisible && (
+          <EuiConfirmModal
+            title={i18n.EDIT_PIPELINE_FLYOUT.closeConfirmTitle}
+            aria-label={i18n.EDIT_PIPELINE_FLYOUT.closeConfirmTitle}
+            onCancel={() => setIsCloseConfirmVisible(false)}
+            onConfirm={handleDiscardAndClose}
+            cancelButtonText={i18n.EDIT_PIPELINE_FLYOUT.closeConfirmCancel}
+            confirmButtonText={i18n.EDIT_PIPELINE_FLYOUT.closeConfirmDiscard}
+            defaultFocusedButton="confirm"
+            buttonColor="danger"
+          >
+            <p>{i18n.EDIT_PIPELINE_FLYOUT.closeConfirmBody}</p>
+          </EuiConfirmModal>
+        )}
+
         {isLoading && (
           <EuiFlexGroup justifyContent="center" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -180,7 +304,18 @@ export const EditPipelineFlyout = ({
             color="danger"
             iconType="error"
           >
-            <p>{i18n.EDIT_PIPELINE_FLYOUT.errorMessage}</p>
+            <p>{error?.message ?? i18n.EDIT_PIPELINE_FLYOUT.errorMessage}</p>
+          </EuiCallOut>
+        )}
+
+        {saveError && (
+          <EuiCallOut
+            announceOnMount
+            title={i18n.EDIT_PIPELINE_FLYOUT.saveErrorTitle}
+            color="danger"
+            iconType="error"
+          >
+            <p>{saveError}</p>
           </EuiCallOut>
         )}
 
@@ -197,19 +332,33 @@ export const EditPipelineFlyout = ({
         )}
 
         {isEditorVisible && (
-          <CodeEditor
-            isCopyable
-            enableFindAction
-            languageId="json"
-            height="calc(100vh - 280px)"
-            width="100%"
-            options={{
-              readOnly: true,
-              tabSize: 2,
-              wordWrap: 'on',
+          <div
+            role="presentation"
+            ref={editorContainerRef}
+            onClick={handleEditorContainerClick}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                // Prevent parent form handlers from intercepting Enter while editing JSON.
+                event.stopPropagation();
+              }
             }}
-            value={stringifiedPipeline}
-          />
+          >
+            <CodeEditor
+              isCopyable
+              enableFindAction
+              languageId={XJsonLang.ID}
+              height="calc(100vh - 280px)"
+              width="100%"
+              options={{
+                readOnly: false,
+                automaticLayout: true,
+                tabSize: 2,
+                wordWrap: 'on',
+              }}
+              value={pipelineText}
+              onChange={setPipelineText}
+            />
+          </div>
         )}
       </EuiFlyoutBody>
     </EuiFlyout>

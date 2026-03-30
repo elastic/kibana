@@ -16,15 +16,28 @@ import type {
 } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { AttachmentType } from '../../../common';
-import type { AttachmentAttributes, AttachmentPatchAttributes } from '../../../common/types/domain';
+import type {
+  AttachmentMode,
+  AttachmentAttributesV2,
+  AttachmentPatchAttributesV2,
+} from '../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments_v1';
+import type { UnifiedAttachmentAttributes } from '../../common/types/attachments_v2';
 import type { PartialField } from '../../types';
 import type { IndexRefresh } from '../types';
+import type { ConfigType } from '../../config';
+
+export type MixSavedObjectResponse =
+  | SavedObject<AttachmentPersistedAttributes>
+  | SavedObject<UnifiedAttachmentAttributes>
+  | { id: string; error: unknown };
 
 export interface ServiceContext {
   log: Logger;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  config: ConfigType;
 }
 
 export interface AttachedToCaseArgs {
@@ -34,7 +47,8 @@ export interface AttachedToCaseArgs {
 }
 
 export interface GetAttachmentArgs {
-  attachmentId: string;
+  savedObjectId: string;
+  mode: AttachmentMode;
 }
 
 export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
@@ -74,31 +88,32 @@ export interface CountActionsAttachedToCaseArgs extends AttachedToCaseArgs {
 }
 
 export interface DeleteAttachmentArgs extends IndexRefresh {
-  attachmentIds: string[];
+  savedObjectIds: string[];
 }
 
 export interface CreateAttachmentArgs extends IndexRefresh {
-  attributes: AttachmentAttributes;
+  attributes: AttachmentAttributesV2;
   references: SavedObjectReference[];
   id: string;
 }
 
 export interface BulkCreateAttachments extends IndexRefresh {
   attachments: Array<{
-    attributes: AttachmentAttributes;
+    attributes: AttachmentAttributesV2;
     references: SavedObjectReference[];
     id: string;
   }>;
 }
 
 export interface UpdateArgs {
-  attachmentId: string;
-  updatedAttributes: AttachmentPatchAttributes;
-  options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributes>, 'upsert'>;
+  savedObjectId: string;
+  updatedAttributes: AttachmentPatchAttributesV2;
+  options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributesV2>, 'upsert'>;
 }
 
 export type UpdateAttachmentArgs = UpdateArgs;
 
 export interface BulkUpdateAttachmentArgs extends IndexRefresh {
   comments: UpdateArgs[];
+  requestWithoutType?: boolean;
 }

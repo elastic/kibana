@@ -30,10 +30,13 @@ export const ConnectorCard: React.FC<ConnectorCardProps> = ({
   return (
     <EuiPanel
       css={({ euiTheme }) => ({
-        height: 122,
+        height: 110,
+        padding: euiTheme.size.l,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         opacity: isDisabled ? 0.5 : 1,
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
         border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        borderRadius: euiTheme.border.radius.medium,
         transition: `all ${euiTheme.animation.fast} ease`,
         '&:hover': !isDisabled
           ? {
@@ -46,7 +49,7 @@ export const ConnectorCard: React.FC<ConnectorCardProps> = ({
             }
           : {},
       })}
-      paddingSize="l"
+      paddingSize="none"
       hasShadow={false}
       hasBorder={false}
       onClick={() => !isDisabled && onClick?.(connector)}
@@ -54,7 +57,7 @@ export const ConnectorCard: React.FC<ConnectorCardProps> = ({
     >
       <EuiFlexGroup
         direction="column"
-        alignItems="center"
+        alignItems="flexStart"
         justifyContent="center"
         gutterSize="m"
         css={css({ height: '100%' })}
@@ -64,7 +67,6 @@ export const ConnectorCard: React.FC<ConnectorCardProps> = ({
           <EuiText
             css={({ euiTheme }) => ({
               fontWeight: euiTheme.font.weight.semiBold,
-              textAlign: 'center',
             })}
             size="s"
           >

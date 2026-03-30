@@ -71,7 +71,7 @@ test.describe(
       // Verify navigation to alerts tab
       const url = page.url();
       expect(url).toContain('tabId=alerts');
-      expect(url).toContain('selectedOptions:!(active)');
+      expect(url).toContain('selected_options:!(active)');
     });
 
     test('should navigate to alerts tab when clicking total alerts', async ({
@@ -87,7 +87,7 @@ test.describe(
       // Verify navigation to alerts tab
       const url = page.url();
       expect(url).toContain('tabId=alerts');
-      expect(url).toContain('selectedOptions:!()');
+      expect(url).toContain('selected_options:!()');
     });
 
     test('should not show actions button for viewer user', async ({ pageObjects }) => {

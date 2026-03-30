@@ -12,11 +12,14 @@
     "requiredPlugins": [
       "spaces",
       "taskManager",
-      "dataViews"
+      "dataViews",
+      "security"
     ],
     "optionalPlugins": [
-      "security",
       "encryptedSavedObjects"
+    ],
+    "extraPublicDirs": [
+      "common"
     ]
   }
 }

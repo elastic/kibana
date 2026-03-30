@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { ExperimentalDataStreamFeaturesSchema } from '../models/package_policy';
+import {
+  DeprecationInfoSchema,
+  ExperimentalDataStreamFeaturesSchema,
+} from '../models/package_policy';
+import { OtelCollectorConfigSchema } from '../models';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
@@ -154,6 +158,7 @@ export const PackageInfoSchema = schema
     description: schema.maybe(schema.string()),
     title: schema.string(),
     icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 10 })),
+    deprecated: schema.maybe(DeprecationInfoSchema),
     conditions: schema.maybe(
       schema.object({
         kibana: schema.maybe(schema.object({ version: schema.maybe(schema.string()) })),
@@ -163,6 +168,7 @@ export const PackageInfoSchema = schema
             capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
           })
         ),
+        deprecated: schema.maybe(DeprecationInfoSchema),
       })
     ),
     release: schema.maybe(
@@ -333,6 +339,7 @@ export const GetInputsResponseSchema = schema.oneOf([
       }),
       { maxSize: 10000 }
     ),
+    ...OtelCollectorConfigSchema,
   }),
 ]);
 
@@ -600,6 +607,26 @@ export const UpdatePackageRequestSchema = {
   }),
 };
 
+export const ReviewUpgradeRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string({
+      meta: { description: 'Package name to review upgrade for' },
+    }),
+  }),
+  body: schema.object({
+    action: schema.oneOf([
+      schema.literal('accept'),
+      schema.literal('decline'),
+      schema.literal('pending'),
+    ]),
+    target_version: schema.string(),
+  }),
+};
+
+export const ReviewUpgradeResponseSchema = schema.object({
+  success: schema.boolean(),
+});
+
 export const GetStatsRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
@@ -615,6 +642,12 @@ export const InstallPackageFromRegistryRequestSchema = {
     prerelease: schema.maybe(schema.boolean()),
     ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
     skipDataStreamRollover: schema.boolean({ defaultValue: false }),
+    skipDependencyCheck: schema.boolean({
+      defaultValue: false,
+      meta: {
+        description: 'Skip dependency validation when installing a package with dependencies',
+      },
+    }),
   }),
   body: schema.nullable(
     schema.object({

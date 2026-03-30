@@ -7,12 +7,19 @@
 
 import { useMemo } from 'react';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS as ENTITY_STORE_API_VERSIONS,
+  ENTITY_STORE_ROUTES,
+} from '@kbn/entity-store/common';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
   AssetCriticalityRecord,
+  ConfigureRiskEngineSavedObjectRequestBodyInput,
   CreateEntitySourceResponse,
   CreatePrivilegesImportIndexResponse,
+  CreateWatchlistRequestBodyInput,
+  CreateWatchlistResponse,
   DisableRiskEngineResponse,
   EnableRiskEngineResponse,
   EntityAnalyticsPrivileges,
@@ -22,9 +29,9 @@ import type {
   ListEntitiesRequestQuery,
   ListEntitiesResponse,
   ListEntitySourcesResponse,
-  PrivmonBulkUploadUsersCSVResponse,
   PrivMonHealthResponse,
   PrivMonPrivilegesResponse,
+  PrivmonBulkUploadUsersCSVResponse,
   ReadRiskEngineSettingsResponse,
   RiskEngineScheduleNowResponse,
   RiskEngineStatusResponse,
@@ -35,8 +42,13 @@ import type {
   SearchPrivilegesIndicesResponse,
   UpdateEntitySourceResponse,
   UploadAssetCriticalityRecordsResponse,
-  ConfigureRiskEngineSavedObjectRequestBodyInput,
 } from '../../../common/api/entity_analytics';
+import type { ListWatchlistsResponse } from '../../../common/api/entity_analytics/watchlists/management/list.gen';
+import type { GetWatchlistResponse } from '../../../common/api/entity_analytics/watchlists/management/get.gen';
+import type {
+  UpdateWatchlistRequestBodyInput,
+  UpdateWatchlistResponse,
+} from '../../../common/api/entity_analytics/watchlists/management/update.gen';
 import {
   API_VERSIONS,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
@@ -65,6 +77,7 @@ import {
   RISK_SCORE_ENTITY_CALCULATION_URL,
   RISK_SCORE_PREVIEW_URL,
 } from '../../../common/constants';
+import { WATCHLISTS_URL } from '../../../common/entity_analytics/watchlists/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
@@ -111,6 +124,30 @@ export const useEntityAnalyticsRoutes = () => {
     }) =>
       http.fetch<ListEntitiesResponse>(LIST_ENTITIES_URL, {
         version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          entity_types: params.entityTypes,
+          sort_field: params.sortField,
+          sort_order: params.sortOrder,
+          page: params.page,
+          per_page: params.perPage,
+          filterQuery: params.filterQuery,
+        },
+        signal,
+      });
+
+    /**
+     * Fetches entities from the Entity Store v2 unified latest index (internal entity_store plugin route).
+     */
+    const fetchEntitiesListV2 = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params: FetchEntitiesListParams;
+    }) =>
+      http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.CRUD_GET, {
+        version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
         query: {
           entity_types: params.entityTypes,
@@ -204,6 +241,15 @@ export const useEntityAnalyticsRoutes = () => {
     const fetchEntityStorePrivileges = () =>
       http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_INTERNAL_PRIVILEGES_URL, {
         version: '1',
+        method: 'GET',
+      });
+
+    /**
+     * Get Entity Store v2 privileges
+     */
+    const fetchEntityStoreV2Privileges = () =>
+      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
+        version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
       });
 
@@ -421,6 +467,14 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
+    // TODO: switch to WATCHLISTS privileges API when backend route lands; https://github.com/elastic/security-team/issues/16102
+    // Keeping this separate from privmon to allow safe removal of privmon later.
+    const fetchWatchlistPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
+      http.fetch<PrivMonPrivilegesResponse>(PRIVMON_PRIVILEGE_CHECK_API, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+      });
+
     /**
      * Fetches risk engine settings
      */
@@ -467,6 +521,42 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
+    /**
+     * List all watchlists
+     */
+    const fetchWatchlists = async ({ signal }: { signal?: AbortSignal } = {}) =>
+      http.fetch<ListWatchlistsResponse>(`${WATCHLISTS_URL}/list`, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        signal,
+      });
+
+    const getWatchlist = async (params: { id: string; signal?: AbortSignal }) =>
+      http.fetch<GetWatchlistResponse>(`${WATCHLISTS_URL}/${params.id}`, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        signal: params.signal,
+      });
+
+    const createWatchlist = async (params: CreateWatchlistRequestBodyInput) =>
+      http.fetch<CreateWatchlistResponse>(WATCHLISTS_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+
+    const updateWatchlist = async (params: { id: string; body: UpdateWatchlistRequestBodyInput }) =>
+      http.fetch<UpdateWatchlistResponse>(`${WATCHLISTS_URL}/${params.id}`, {
+        version: API_VERSIONS.public.v1,
+        method: 'PUT',
+        body: JSON.stringify(params.body),
+      });
+    const deleteWatchlist = async (params: { id: string }) =>
+      http.fetch<{ deleted: true }>(`${WATCHLISTS_URL}/${params.id}`, {
+        version: API_VERSIONS.public.v1,
+        method: 'DELETE',
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -477,6 +567,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       fetchEntityStorePrivileges,
+      fetchEntityStoreV2Privileges,
       searchPrivMonIndices,
       createPrivMonImportIndex,
       createAssetCriticality,
@@ -490,13 +581,20 @@ export const useEntityAnalyticsRoutes = () => {
       updatePrivMonMonitoredIndices,
       fetchPrivilegeMonitoringEngineStatus,
       fetchPrivilegeMonitoringPrivileges,
+      fetchWatchlistPrivileges,
+      createWatchlist,
+      getWatchlist,
+      updateWatchlist,
+      deleteWatchlist,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,
       fetchEntitiesList,
+      fetchEntitiesListV2,
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
+      fetchWatchlists,
     };
   }, [http]);
 };

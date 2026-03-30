@@ -18,7 +18,7 @@ import { searchNavigationMock } from '@kbn/search-navigation/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
-import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 import { mockHistory } from '../react_router/state.mock';
 
@@ -75,7 +75,7 @@ export const mockKibanaValues = {
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
   share: sharePluginMock.createStartContract(),
-  uiActions: uiActionsEnhancedPluginMock.createStartContract(),
+  uiActions: uiActionsPluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   updateSideNavDefinition: jest.fn(),
   user: null,

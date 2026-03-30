@@ -26,6 +26,20 @@ interface TimingPercentiles {
   total_samples: number;
 }
 
+interface ConversationMetrics {
+  total: number;
+  total_rounds: number;
+  avg_rounds_per_conversation: number;
+  rounds_distribution: Array<{
+    bucket: string;
+    count: number;
+  }>;
+  tokens_used: number;
+  tokens_input: number;
+  tokens_output: number;
+  average_tokens_per_conversation: number;
+}
+
 /**
  * Telemetry payload schema for Agent Builder
  */
@@ -40,17 +54,8 @@ export interface AgentBuilderTelemetry {
   custom_agents: {
     total: number;
   };
-  conversations: {
-    total: number;
-    total_rounds: number;
-    avg_rounds_per_conversation: number;
-    rounds_distribution: Array<{
-      bucket: string;
-      count: number;
-    }>;
-    tokens_used: number;
-    average_tokens_per_conversation: number;
-  };
+  conversations: ConversationMetrics;
+  daily: ConversationMetrics;
   query_to_result_time: {
     p50: number;
     p75: number;
@@ -177,50 +182,87 @@ export function registerTelemetryCollector(
         conversations: {
           total: {
             type: 'long',
-            _meta: {
-              description: 'Total number of conversations',
-            },
+            _meta: { description: 'Total number of conversations (all-time)' },
           },
           total_rounds: {
             type: 'long',
-            _meta: {
-              description: 'Total conversation rounds across all conversations',
-            },
+            _meta: { description: 'Total conversation rounds across all conversations (all-time)' },
           },
           avg_rounds_per_conversation: {
             type: 'float',
-            _meta: {
-              description: 'Average rounds per conversation',
-            },
+            _meta: { description: 'Average rounds per conversation (all-time)' },
           },
           rounds_distribution: {
             type: 'array',
             items: {
               bucket: {
                 type: 'keyword',
-                _meta: {
-                  description: 'Round count bucket (1-5, 6-10, 11-20, 21-50, 51+)',
-                },
+                _meta: { description: 'Round count bucket (1-5, 6-10, 11-20, 21-50, 51+)' },
               },
               count: {
                 type: 'long',
-                _meta: {
-                  description: 'Number of conversations in this bucket',
-                },
+                _meta: { description: 'Number of conversations in this bucket' },
               },
             },
           },
           tokens_used: {
             type: 'long',
-            _meta: {
-              description: 'Total tokens used across all conversations (input + output)',
-            },
+            _meta: { description: 'Total tokens used (input + output) (all-time)' },
+          },
+          tokens_input: {
+            type: 'long',
+            _meta: { description: 'Total input tokens across all conversations (all-time)' },
+          },
+          tokens_output: {
+            type: 'long',
+            _meta: { description: 'Total output tokens across all conversations (all-time)' },
           },
           average_tokens_per_conversation: {
             type: 'float',
-            _meta: {
-              description: 'Average tokens per conversation',
+            _meta: { description: 'Average tokens per conversation (all-time)' },
+          },
+        },
+        daily: {
+          total: {
+            type: 'long',
+            _meta: { description: 'Total number of conversations (daily, last 24h)' },
+          },
+          total_rounds: {
+            type: 'long',
+            _meta: { description: 'Total conversation rounds (daily, last 24h)' },
+          },
+          avg_rounds_per_conversation: {
+            type: 'float',
+            _meta: { description: 'Average rounds per conversation (daily, last 24h)' },
+          },
+          rounds_distribution: {
+            type: 'array',
+            items: {
+              bucket: {
+                type: 'keyword',
+                _meta: { description: 'Round count bucket (1-5, 6-10, 11-20, 21-50, 51+)' },
+              },
+              count: {
+                type: 'long',
+                _meta: { description: 'Number of conversations in this bucket' },
+              },
             },
+          },
+          tokens_used: {
+            type: 'long',
+            _meta: { description: 'Total tokens used (input + output) (daily, last 24h)' },
+          },
+          tokens_input: {
+            type: 'long',
+            _meta: { description: 'Total input tokens (daily, last 24h)' },
+          },
+          tokens_output: {
+            type: 'long',
+            _meta: { description: 'Total output tokens (daily, last 24h)' },
+          },
+          average_tokens_per_conversation: {
+            type: 'float',
+            _meta: { description: 'Average tokens per conversation (daily, last 24h)' },
           },
         },
         query_to_result_time: {
@@ -519,6 +561,11 @@ export function registerTelemetryCollector(
 
           const conversations = await queryUtils.getConversationMetrics();
 
+          const dailyDateFilter = {
+            gte: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          };
+          const daily = await queryUtils.getConversationMetrics(dailyDateFilter);
+
           // Fetch TTFT/TTLT metrics from conversation data
           const timeToFirstToken = await queryUtils.getTTFTMetrics();
           const timeToLastToken = await queryUtils.getTTLTMetrics();
@@ -614,6 +661,7 @@ export function registerTelemetryCollector(
             custom_tools: customTools,
             custom_agents: { total: customAgents },
             conversations,
+            daily,
             query_to_result_time: queryToResultTime,
             time_to_first_token: timeToFirstToken,
             tokens_by_model: tokensByModel,
@@ -640,17 +688,21 @@ export function registerTelemetryCollector(
         } catch (error) {
           logger.error(`Failed to collect telemetry: ${error.message}`);
           // Return empty/default values on error
+          const emptyConversationMetrics: ConversationMetrics = {
+            total: 0,
+            total_rounds: 0,
+            avg_rounds_per_conversation: 0,
+            rounds_distribution: [],
+            tokens_used: 0,
+            tokens_input: 0,
+            tokens_output: 0,
+            average_tokens_per_conversation: 0,
+          };
           return {
             custom_tools: { total: 0, by_type: [] },
             custom_agents: { total: 0 },
-            conversations: {
-              total: 0,
-              total_rounds: 0,
-              avg_rounds_per_conversation: 0,
-              rounds_distribution: [],
-              tokens_used: 0,
-              average_tokens_per_conversation: 0,
-            },
+            conversations: emptyConversationMetrics,
+            daily: emptyConversationMetrics,
             query_to_result_time: {
               p50: 0,
               p75: 0,

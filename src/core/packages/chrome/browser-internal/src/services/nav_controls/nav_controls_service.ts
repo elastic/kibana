@@ -24,8 +24,15 @@ export class NavControlsService {
     const navControlsLeft$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsRight$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsCenter$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
-    const navControlsExtension$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const helpMenuLinks$ = new BehaviorSubject<ChromeHelpMenuLink[]>([]);
+
+    const toSorted = (controls: ReadonlySet<ChromeNavControl>) =>
+      sortBy([...controls.values()], 'order');
+
+    const left$ = navControlsLeft$.pipe(map(toSorted), takeUntil(this.stop$));
+    const right$ = navControlsRight$.pipe(map(toSorted), takeUntil(this.stop$));
+    const center$ = navControlsCenter$.pipe(map(toSorted), takeUntil(this.stop$));
+    const helpLinks$ = helpMenuLinks$.pipe(takeUntil(this.stop$));
 
     return {
       // In the future, registration should be moved to the setup phase. This
@@ -39,9 +46,6 @@ export class NavControlsService {
       registerCenter: (navControl: ChromeNavControl) =>
         navControlsCenter$.next(new Set([...navControlsCenter$.value.values(), navControl])),
 
-      registerExtension: (navControl: ChromeNavControl) =>
-        navControlsExtension$.next(new Set([...navControlsExtension$.value.values(), navControl])),
-
       setHelpMenuLinks: (links: ChromeHelpMenuLink[]) => {
         // This extension point is only intended to be used once by the cloud integration > cloud_links plugin
         if (helpMenuLinks$.value.length > 0) {
@@ -50,27 +54,10 @@ export class NavControlsService {
         helpMenuLinks$.next(links);
       },
 
-      getLeft$: () =>
-        navControlsLeft$.pipe(
-          map((controls) => sortBy([...controls.values()], 'order')),
-          takeUntil(this.stop$)
-        ),
-      getRight$: () =>
-        navControlsRight$.pipe(
-          map((controls) => sortBy([...controls.values()], 'order')),
-          takeUntil(this.stop$)
-        ),
-      getCenter$: () =>
-        navControlsCenter$.pipe(
-          map((controls) => sortBy([...controls.values()], 'order')),
-          takeUntil(this.stop$)
-        ),
-      getExtension$: () =>
-        navControlsExtension$.pipe(
-          map((controls) => sortBy([...controls.values()], 'order')),
-          takeUntil(this.stop$)
-        ),
-      getHelpMenuLinks$: () => helpMenuLinks$.pipe(takeUntil(this.stop$)),
+      getLeft$: () => left$,
+      getRight$: () => right$,
+      getCenter$: () => center$,
+      getHelpMenuLinks$: () => helpLinks$,
     };
   }
 

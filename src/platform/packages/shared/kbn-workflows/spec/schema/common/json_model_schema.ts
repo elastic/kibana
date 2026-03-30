@@ -8,14 +8,14 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import { JsonModelShapeSchema } from './json_model_shape_schema';
+import { JsonModelRootShapeSchema } from './json_model_shape_schema';
 import { isValidJsonSchema } from '../../lib/validate_json_schema';
 
-// JSON Schema model structure
-// This represents a JSON Schema object with properties, required, additionalProperties, and definitions.
-// While currently used for workflow inputs, this schema is general-purpose and can be reused for other
-// structured data models.
-export const JsonModelSchema = JsonModelShapeSchema.refine(
+// Root-level JSON Schema model for workflow inputs.
+// Uses the narrower JsonModelRootShapeSchema so that only object-level keywords
+// (properties, required, definitions, etc.) are suggested at the inputs level,
+// while individual property definitions still allow the full set of JSON Schema keywords.
+export const JsonModelSchema = JsonModelRootShapeSchema.refine(
   (data) => {
     // Validate that properties is a valid JSON Schema object
     if (data.properties) {

@@ -12,12 +12,16 @@ import { schema } from '@kbn/config-schema';
 const HORIZONTAL_ALIGN = ['left', 'center', 'right'] as const;
 const VERTICAL_ALIGN = ['top', 'bottom'] as const;
 const LR_ALIGN = ['left', 'right'] as const;
+const BEFORE_AFTER_ALIGN = ['before', 'after'] as const;
+const POSITION = [...VERTICAL_ALIGN, ...LR_ALIGN] as const;
+const CORNER_POSITION = ['top_left', 'top_right', 'bottom_left', 'bottom_right'] as const;
 
-type Position = 'top' | 'bottom' | 'left' | 'right';
-
+type Position = (typeof POSITION)[number];
+type CornerPosition = (typeof CORNER_POSITION)[number];
 type HorizontalAlignment = (typeof HORIZONTAL_ALIGN)[number];
 type VerticalAlignment = (typeof VERTICAL_ALIGN)[number];
 type LeftRightAlignment = (typeof LR_ALIGN)[number];
+type BeforeAfterAlignment = (typeof BEFORE_AFTER_ALIGN)[number];
 
 interface Options<T extends string> {
   defaultValue?: T;
@@ -43,3 +47,17 @@ export const positionSchema = (opts?: Options<Position>) =>
     ],
     opts
   );
+
+export const cornerPositionSchema = (opts?: Options<CornerPosition>) =>
+  schema.oneOf(
+    [
+      schema.literal('top_left'),
+      schema.literal('top_right'),
+      schema.literal('bottom_left'),
+      schema.literal('bottom_right'),
+    ],
+    opts
+  );
+
+export const placementSchema = (opts?: Options<BeforeAfterAlignment>) =>
+  schema.oneOf([schema.literal('before'), schema.literal('after')], opts);

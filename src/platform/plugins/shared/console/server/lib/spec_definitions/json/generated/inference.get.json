@@ -22,9 +22,11 @@
     "patterns": [
       "_inference",
       "_inference/{inference_id}",
-      "_inference/{task_type}/{inference_id}"
+      "_inference/{task_type}/{inference_id}",
+      "_inference/{task_type}/_all"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-get",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-inference-get",
     "availability": {
       "stack": true,
       "serverless": true
