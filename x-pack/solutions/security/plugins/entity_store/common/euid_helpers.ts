@@ -42,12 +42,6 @@ export const euid = {
   getEuidSourceFields: euidModule.getEuidSourceFields,
 
   /**
-   * Returns the list of target-namespace EUID source fields for the given entity type.
-   * Input: entity type. Output: array of target-namespace field names (e.g. `user.target.id`).
-   */
-  getTargetEuidSourceFields: euidModule.getTargetEuidSourceFields,
-
-  /**
    * Painless-backed EUID helpers for runtime fields and scripts (same semantics as `getEuidFromObject`).
    */
   painless: {
@@ -81,23 +75,10 @@ export const euid = {
     getEuidEvaluation: euidModule.getEuidEsqlEvaluation,
 
     /**
-     * ESQL predicate that locates documents matching one sample document's identity (mirrors per-doc DSL).
+     * ESQL predicate that locates documents matching one sample document’s identity (mirrors per-doc DSL).
      * Input: entity type and sample document; output: parenthesized boolean expression or `undefined` if not buildable.
      */
     getEuidFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
-
-    /**
-     * Returns ESQL EVAL fragments for field evaluations (e.g. `entity.namespace` from `event.module`).
-     * Input: entity type. Output: ESQL string or undefined when no evaluations are needed.
-     */
-    getFieldEvaluationsEsql: euidModule.getFieldEvaluationsEsql,
-
-    /**
-     * ESQL evaluation for a target entity EUID.
-     * Reads from target-namespace fields (e.g., `user.target.email` instead of `user.email`).
-     * Input: entity type. Output: ESQL expression string.
-     */
-    getTargetEuidEvaluation: euidModule.getTargetEuidEsqlEvaluationFromDefinition,
   },
 
   /**

@@ -13,10 +13,8 @@ export { getEuidDslFilterBasedOnDocument, getEuidDslDocumentsContainsIdFilter } 
 export {
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlEvaluation,
-  getEuidEsqlEvaluationFromDefinition,
   getEuidEsqlFilterBasedOnDocument,
   getFieldEvaluationsEsql,
 } from './esql';
 export { applyFieldEvaluations } from './field_evaluations';
 export { getEuidSourceFields, type IdentitySourceFields } from './identity_fields';
-export { getTargetEuidEsqlEvaluationFromDefinition, getTargetEuidSourceFields } from './target';

@@ -20,8 +20,12 @@ import {
   GRAPH_TARGET_EUID_SOURCE_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import {
+  getEuidEsqlEvaluation,
+  getFieldEvaluationsEsql,
+} from '@kbn/entity-store/common/domain/euid';
 import { formatJsonProperty, buildEntityEnrichment, checkIfEntitiesIndexLookupMode } from './utils';
+import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEdge } from './types';
 
@@ -187,7 +191,7 @@ const buildV2ActorResolution = (): string => {
 
   // Combine field evaluations (entity.namespace) and user EUID into a single EVAL
   // to prevent the ES|QL optimizer from pruning the intermediate entity.namespace column.
-  const userFieldEvaluationsEsql = euid.esql.getFieldEvaluationsEsql('user');
+  const userFieldEvaluationsEsql = getFieldEvaluationsEsql('user');
 
   // Compute EUIDs for typed entity types (excludes generic — falls back to entity.id)
   const typedEntityTypes = ALL_ENTITY_TYPES.filter((t) => t !== 'generic');
@@ -197,7 +201,7 @@ const buildV2ActorResolution = (): string => {
     evalParts.push(userFieldEvaluationsEsql);
   }
   typedEntityTypes.forEach((type) => {
-    evalParts.push(`_actor_${type}_euid = ${euid.esql.getEuidEvaluation(type)}`);
+    evalParts.push(`_actor_${type}_euid = ${getEuidEsqlEvaluation(type)}`);
   });
 
   // Use raw entity.id directly (not saved variable) since buildSaveSourceFieldsEsql
@@ -232,7 +236,7 @@ const buildV2TargetResolution = (): string => {
     .join('\n');
 
   const targetEvalParts = ALL_ENTITY_TYPES.map((type) => {
-    const targetEuidEval = euid.esql.getTargetEuidEvaluation(type);
+    const targetEuidEval = getTargetEuidEsqlEvaluation(type);
     return `_target_${type}_euid = ${targetEuidEval}`;
   });
 
