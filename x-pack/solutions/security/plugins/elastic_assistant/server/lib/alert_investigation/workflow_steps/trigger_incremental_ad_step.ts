@@ -10,11 +10,22 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { parseArrayInput } from './workflow_schema_helpers';
 
+interface DiscoveryResult {
+  id: string;
+  title: string;
+  summaryMarkdown: string;
+  mitreTactics: string[];
+}
+
+interface PollResult {
+  ids: string[];
+  discoveries: DiscoveryResult[];
+}
+
 /**
  * Poll the AD _find API until discoveries with the matching generation_uuid appear.
- * Each _generate call produces a unique execution_uuid that maps to generation_uuid
- * on the resulting discovery documents — this ensures we only link to THIS case's AD,
- * not discoveries from other concurrent forEach iterations.
+ * Returns discovery IDs (for deep linking) and details (title, summary, tactics)
+ * so the caller can update case title/description with actual AD findings.
  */
 const pollForDiscoveries = async ({
   kibanaUrl,
@@ -30,7 +41,9 @@ const pollForDiscoveries = async ({
   maxAttempts: number;
   intervalMs: number;
   logger: { info: (msg: string) => void; warn: (msg: string) => void };
-}): Promise<string[]> => {
+}): Promise<PollResult> => {
+  const empty: PollResult = { ids: [], discoveries: [] };
+
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
 
@@ -50,11 +63,24 @@ const pollForDiscoveries = async ({
         );
 
         if (matched.length > 0) {
-          const ids = matched.map((d: { id?: string }) => d.id).filter(Boolean) as string[];
+          const discoveries: DiscoveryResult[] = matched.map(
+            (d: {
+              id?: string;
+              title?: string;
+              summary_markdown?: string;
+              mitre_attack_tactics?: string[];
+            }) => ({
+              id: d.id ?? '',
+              title: d.title ?? '',
+              summaryMarkdown: d.summary_markdown ?? '',
+              mitreTactics: d.mitre_attack_tactics ?? [],
+            })
+          );
+          const ids = discoveries.map((d) => d.id).filter(Boolean);
           logger.info(
             `Found ${ids.length} AD discoveries for generation ${executionUuid} after ${attempt} poll(s)`
           );
-          return ids;
+          return { ids, discoveries };
         }
       }
     } catch {
@@ -71,7 +97,7 @@ const pollForDiscoveries = async ({
   logger.warn(
     `AD discoveries for generation ${executionUuid} not found after ${maxAttempts} polls`
   );
-  return [];
+  return empty;
 };
 
 export const TriggerIncrementalAdStepId = 'security.triggerIncrementalAd';
@@ -89,6 +115,8 @@ const TriggerAdOutputSchema = z.object({
   triggered: z.boolean(),
   alert_count: z.number(),
   summary: z.string(),
+  ad_title: z.string().optional(),
+  ad_description: z.string().optional(),
   reason: z.string().optional(),
 });
 
@@ -116,12 +144,17 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
     const caseId = String(context.input.case_id);
     const alertIds = parseArrayInput(context.input.alert_ids);
 
+    const fallbackTitle = `Investigation — ${alertIds.length} alert(s)`;
+    const fallbackDescription = `Alert Investigation Pipeline case for ${alertIds.length} alert(s).`;
+
     if (alertIds.length < min_new_alerts) {
       return {
         output: {
           case_id: caseId,
           triggered: false,
           alert_count: alertIds.length,
+          ad_title: fallbackTitle,
+          ad_description: fallbackDescription,
           summary: `*Not enough data to generate Attack Discovery — only ${alertIds.length} alert(s), minimum ${min_new_alerts} required.*`,
           reason: `Only ${alertIds.length} alerts, need at least ${min_new_alerts}`,
         },
@@ -197,7 +230,7 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
             );
 
             // Poll for completed discoveries matching this generation's UUID
-            const discoveryIds = await pollForDiscoveries({
+            const pollResult = await pollForDiscoveries({
               kibanaUrl,
               authHeaders,
               executionUuid,
@@ -207,26 +240,44 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
             });
 
             const adLink =
-              discoveryIds.length > 0
-                ? `/app/security/attack_discovery?id=${discoveryIds.join(',')}`
+              pollResult.ids.length > 0
+                ? `/app/security/attack_discovery?id=${pollResult.ids.join(',')}`
                 : `/app/security/attack_discovery`;
 
             const discoveryLinks =
-              discoveryIds.length > 0
+              pollResult.ids.length > 0
                 ? `[View Attack Discovery Results](${adLink})`
                 : `[View Attack Discovery](/app/security/attack_discovery) *(generation in progress)*`;
+
+            // Build case title/description from AD findings
+            const adTitle = pollResult.discoveries
+              .map((d) => d.title)
+              .filter(Boolean)
+              .join(' | ');
+
+            const tactics = [...new Set(pollResult.discoveries.flatMap((d) => d.mitreTactics))];
+
+            const adDescription = pollResult.discoveries
+              .map((d) => d.summaryMarkdown)
+              .filter(Boolean)
+              .join('\n\n---\n\n');
 
             return {
               output: {
                 case_id: caseId,
                 triggered: true,
                 alert_count: alertIds.length,
+                ad_title: adTitle || `Investigation — ${alertIds.length} alerts`,
+                ad_description:
+                  adDescription ||
+                  `Attack Discovery analysis of ${alertIds.length} alert(s) for case ${caseId}.`,
                 summary:
                   `## Attack Discovery\n\n` +
                   `Attack Discovery analysis completed for **${alertIds.length} alert(s)**.\n\n` +
-                  `${discoveryLinks}\n\n` +
-                  `| Detail | Value |\n|--------|-------|\n` +
-                  `| Discoveries | ${discoveryIds.length} |\n` +
+                  `${discoveryLinks}\n\n${
+                    tactics.length > 0 ? `**MITRE ATT&CK:** ${tactics.join(', ')}\n\n` : ''
+                  }| Detail | Value |\n|--------|-------|\n` +
+                  `| Discoveries | ${pollResult.ids.length} |\n` +
                   `| Connector | \`${connectorId}\` |\n` +
                   `| Alerts analyzed | ${alertIds.length} |\n\n` +
                   `---\n*Generated by Alert Investigation Pipeline*`,
@@ -235,17 +286,30 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
           }
 
           // Synchronous response with discoveries
-          const discoveries = adResult.attackDiscoveries ?? adResult.data ?? [];
-          const discoveryIds = discoveries.map((d: { id?: string }) => d.id).filter(Boolean);
+          const syncDiscoveries = adResult.attackDiscoveries ?? adResult.data ?? [];
+          const syncIds = syncDiscoveries.map((d: { id?: string }) => d.id).filter(Boolean);
 
           const adLink =
-            discoveryIds.length > 0
-              ? `/app/security/attack_discovery?id=${discoveryIds.join(',')}`
+            syncIds.length > 0
+              ? `/app/security/attack_discovery?id=${syncIds.join(',')}`
               : `/app/security/attack_discovery`;
 
+          const syncTitle = syncDiscoveries
+            .map((d: { title?: string }) => d.title)
+            .filter(Boolean)
+            .join(' | ');
+
+          const syncDescription = syncDiscoveries
+            .map(
+              (d: { summaryMarkdown?: string; summary_markdown?: string }) =>
+                d.summaryMarkdown ?? d.summary_markdown ?? ''
+            )
+            .filter(Boolean)
+            .join('\n\n---\n\n');
+
           const summary =
-            discoveries.length > 0
-              ? discoveries
+            syncDiscoveries.length > 0
+              ? syncDiscoveries
                   .map(
                     (d: { title: string; summaryMarkdown: string }) =>
                       `### ${d.title}\n${d.summaryMarkdown}`
@@ -258,6 +322,10 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
               case_id: caseId,
               triggered: true,
               alert_count: alertIds.length,
+              ad_title: syncTitle || `Investigation — ${alertIds.length} alerts`,
+              ad_description:
+                syncDescription ||
+                `Attack Discovery analysis of ${alertIds.length} alert(s) for case ${caseId}.`,
               summary:
                 `## Attack Discovery\n\n${summary}\n\n` +
                 `[View on Attack Discovery page](${adLink})`,
@@ -273,6 +341,8 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
             case_id: caseId,
             triggered: false,
             alert_count: alertIds.length,
+            ad_title: fallbackTitle,
+            ad_description: fallbackDescription,
             summary:
               `## Attack Discovery Failed\n\n` +
               `AD generation returned HTTP ${adResponse.status} for **${alertIds.length} alert(s)**.\n\n` +
@@ -290,6 +360,8 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
             case_id: caseId,
             triggered: false,
             alert_count: alertIds.length,
+            ad_title: fallbackTitle,
+            ad_description: fallbackDescription,
             summary:
               `## Attack Discovery Failed\n\n` +
               `AD generation failed: ${errMsg}\n\n` +
@@ -307,6 +379,8 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
         case_id: caseId,
         triggered: false,
         alert_count: alertIds.length,
+        ad_title: fallbackTitle,
+        ad_description: fallbackDescription,
         summary:
           `## Attack Discovery Skipped\n\n` +
           `No connector configured. Set \`connector_id\` in the workflow to enable AD generation.\n\n` +

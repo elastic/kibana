@@ -94,6 +94,13 @@ steps:
         with:
           case_id: "{{steps.create_case.output.case.id}}"
           comment: "{{steps.trigger_ad_new.output.summary}}"
+      - name: update_case_from_ad_new
+        type: cases.updateCase
+        with:
+          case_id: "{{steps.create_case.output.case.id}}"
+          updates:
+            title: "{{steps.trigger_ad_new.output.ad_title}}"
+            description: "{{steps.trigger_ad_new.output.ad_description}}"
 
   - name: handle_existing_groups
     type: foreach
@@ -117,6 +124,12 @@ steps:
         with:
           case_id: "{{foreach.item.existing_case_id}}"
           comment: "{{steps.trigger_ad_existing.output.summary}}"
+      - name: update_case_from_ad_existing
+        type: cases.updateCase
+        with:
+          case_id: "{{foreach.item.existing_case_id}}"
+          updates:
+            description: "{{steps.trigger_ad_existing.output.ad_description}}"
 
   - name: tag_processed
     type: security.tagProcessedAlerts
