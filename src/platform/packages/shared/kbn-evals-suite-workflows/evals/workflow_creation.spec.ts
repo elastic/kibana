@@ -17,6 +17,9 @@ import {
   createValidationPassEvaluator,
   createNoErrorsEvaluator,
   createCriteriaEvaluator,
+  createStructuralCorrectnessEvaluator,
+  extractResultYaml,
+  extractYamlFromAttachments,
 } from '../src/evaluators';
 
 const evaluate = base.extend<
@@ -38,10 +41,23 @@ const evaluate = base.extend<
                 messages: [{ message: input.instruction }],
               });
 
-              return {
+              const taskOutput = {
                 messages: response.messages,
                 steps: response.steps,
                 errors: response.errors,
+              };
+
+              let resultYaml = extractResultYaml(taskOutput);
+              if (!resultYaml && response.conversationId) {
+                const attachments = await chatClient.getConversationAttachments(
+                  response.conversationId
+                );
+                resultYaml = extractYamlFromAttachments(attachments);
+              }
+
+              return {
+                ...taskOutput,
+                resultYaml,
               };
             },
           },
@@ -49,6 +65,7 @@ const evaluate = base.extend<
             createNoErrorsEvaluator(),
             createEditSuccessEvaluator(),
             createValidationPassEvaluator(),
+            createStructuralCorrectnessEvaluator(),
             createCriteriaEvaluator({ evaluators }),
           ])
         );
@@ -79,6 +96,8 @@ evaluate.describe(
                   'The workflow has a scheduled trigger set to every 5 minutes.',
                   'The workflow contains a step that makes an HTTP GET request to https://api.example.com/health.',
                 ],
+                expectedStepCount: { min: 1, max: 2 },
+                expectedStepTypes: ['http'],
               },
               metadata: { category: 'simple-creation' },
             },
@@ -93,6 +112,8 @@ evaluate.describe(
                   'The workflow has a manual trigger.',
                   'The workflow contains a console step that logs "Alert received".',
                 ],
+                expectedStepCount: 1,
+                expectedStepTypes: ['console'],
               },
               metadata: { category: 'simple-creation' },
             },
@@ -120,6 +141,8 @@ evaluate.describe(
                   'There is a conditional (if) step that branches based on a health/status check.',
                   'One branch logs a success message and the other logs a degraded/failure message.',
                 ],
+                expectedStepTypes: ['http', 'console'],
+                expectedStepCount: { min: 4, max: 5 },
               },
               metadata: { category: 'conditional-creation' },
             },
@@ -147,6 +170,8 @@ evaluate.describe(
                   'There is a foreach step that iterates over the items.',
                   'Inside the loop, each item is logged to the console.',
                 ],
+                expectedStepTypes: ['data.set', 'console'],
+                expectedStepCount: { min: 3, max: 4 },
               },
               metadata: { category: 'loop-creation' },
             },
@@ -174,6 +199,8 @@ evaluate.describe(
                   'The retry delay is set to 5 seconds.',
                   'There is a fallback step that logs a failure message.',
                 ],
+                expectedStepTypes: ['http'],
+                expectedStepCount: { min: 1, max: 3 },
               },
               metadata: { category: 'error-handling-creation' },
             },
@@ -203,6 +230,8 @@ evaluate.describe(
                   'There is a final console step that logs the count of processed users.',
                   'The steps are in a logical order.',
                 ],
+                expectedStepTypes: ['console', 'http', 'data.set'],
+                expectedStepCount: 4,
               },
               metadata: { category: 'multi-step-creation' },
             },
@@ -236,6 +265,8 @@ evaluate.describe(
                   'The search uses a term query filtering on level "error".',
                   'There is a console step that logs the number of hits.',
                 ],
+                expectedStepTypes: ['elasticsearch.search', 'console'],
+                expectedStepCount: 2,
               },
               metadata: { category: 'es-search-creation' },
             },
@@ -265,6 +296,12 @@ evaluate.describe(
                   'The elasticsearch.indices.create step defines mappings for name, timestamp, and status.',
                   'There is an elasticsearch.bulk step that indexes multiple documents.',
                 ],
+                expectedStepTypes: [
+                  'elasticsearch.indices.exists',
+                  'elasticsearch.indices.create',
+                  'elasticsearch.bulk',
+                ],
+                expectedStepCount: { min: 4, max: 6 },
               },
               metadata: { category: 'es-index-management-creation' },
             },
@@ -293,6 +330,8 @@ evaluate.describe(
                   'The query aggregates CPU usage by host and sorts/limits the results.',
                   'There is a console step that logs the results.',
                 ],
+                expectedStepTypes: ['elasticsearch.esql.query', 'console'],
+                expectedStepCount: 2,
               },
               metadata: { category: 'esql-creation' },
             },
@@ -328,6 +367,8 @@ evaluate.describe(
                   'The addComment step references the case ID from the createCase step output.',
                   'There is a cases.getCase step with include_comments set to true.',
                 ],
+                expectedStepTypes: ['cases.createCase', 'cases.addComment', 'cases.getCase'],
+                expectedStepCount: 3,
               },
               metadata: { category: 'cases-creation' },
             },
@@ -360,6 +401,8 @@ evaluate.describe(
                     'Inside the loop, a cases.createCase step creates a case for each alert.',
                     'The case title is derived from the alert data.',
                   ],
+                  expectedStepTypes: ['elasticsearch.search', 'cases.createCase'],
+                  expectedStepCount: { min: 3, max: 5 },
                 },
                 metadata: { category: 'es-and-cases-creation' },
               },
@@ -394,6 +437,8 @@ evaluate.describe(
                   'There is a slack step that sends a message.',
                   'The Slack message references data from the HTTP step output.',
                 ],
+                expectedStepTypes: ['http', 'slack'],
+                expectedStepCount: 2,
               },
               metadata: { category: 'slack-creation' },
             },
@@ -422,6 +467,8 @@ evaluate.describe(
                   'There is an email step that sends to "oncall@example.com".',
                   'The email has a subject related to alerts.',
                 ],
+                expectedStepTypes: ['console', 'slack', 'email'],
+                expectedStepCount: 3,
               },
               metadata: { category: 'multi-channel-creation' },
             },

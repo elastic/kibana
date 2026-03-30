@@ -30,8 +30,23 @@ interface ConverseResponse {
   conversationId?: string;
   messages: Array<{ message: string }>;
   errors: unknown[];
-  steps?: Array<{ type?: string; tool_id?: string; results?: unknown[] }>;
+  steps?: Array<{
+    type?: string;
+    tool_id?: string;
+    params?: Record<string, unknown>;
+    results?: unknown[];
+  }>;
   traceId?: string;
+}
+
+interface VersionedAttachmentData {
+  id: string;
+  type: string;
+  current_version: number;
+  versions: Array<{
+    version: number;
+    data: Record<string, unknown>;
+  }>;
 }
 
 export class WorkflowsEvalsChatClient {
@@ -40,6 +55,23 @@ export class WorkflowsEvalsChatClient {
     private readonly log: ToolingLog,
     private readonly connectorId: string
   ) {}
+
+  getConversationAttachments = async (
+    conversationId: string
+  ): Promise<VersionedAttachmentData[]> => {
+    try {
+      const response = await this.fetch(`/api/agent_builder/conversations/${conversationId}`, {
+        method: 'GET',
+        version: '2023-10-31',
+      });
+
+      const conversation = response as { attachments?: VersionedAttachmentData[] };
+      return conversation.attachments ?? [];
+    } catch (error) {
+      this.log.warning(`Failed to fetch conversation attachments: ${error}`);
+      return [];
+    }
+  };
 
   converse = async ({
     messages,
@@ -65,7 +97,12 @@ export class WorkflowsEvalsChatClient {
       const chatResponse = response as {
         conversation_id: string;
         trace_id?: string;
-        steps: Array<{ type?: string; tool_id?: string; results?: unknown[] }>;
+        steps: Array<{
+          type?: string;
+          tool_id?: string;
+          params?: Record<string, unknown>;
+          results?: unknown[];
+        }>;
         response: { message: string };
       };
 

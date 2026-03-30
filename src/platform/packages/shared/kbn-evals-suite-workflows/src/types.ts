@@ -9,6 +9,12 @@
 
 import type { Example, TaskOutput } from '@kbn/evals';
 
+export interface StructuralExpectations {
+  expectedStepCount?: number | { min: number; max: number };
+  expectedStepTypes?: string[];
+  expectedStepNames?: string[];
+}
+
 export interface WorkflowEditExample extends Example {
   input: {
     instruction: string;
@@ -17,7 +23,8 @@ export interface WorkflowEditExample extends Example {
   output: {
     criteria: string[];
     expectedToolIds?: string[];
-  };
+    preservedStepNames?: string[];
+  } & StructuralExpectations;
   metadata?: {
     category?: string;
   };
@@ -29,15 +36,20 @@ export interface WorkflowCreateExample extends Example {
   };
   output: {
     criteria: string[];
-  };
+  } & StructuralExpectations;
   metadata?: {
     category?: string;
   };
 }
 
-export interface WorkflowTaskOutput extends TaskOutput {
+export type WorkflowTaskOutput = TaskOutput & {
   messages: Array<{ message: string }>;
-  steps?: Array<{ type?: string; tool_id?: string; results?: unknown[] }>;
+  steps?: Array<{
+    type?: string;
+    tool_id?: string;
+    params?: Record<string, unknown>;
+    results?: unknown[];
+  }>;
   errors: unknown[];
   resultYaml?: string;
-}
+};
