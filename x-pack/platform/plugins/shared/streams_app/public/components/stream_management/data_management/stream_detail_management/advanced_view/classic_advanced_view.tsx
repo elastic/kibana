@@ -29,14 +29,14 @@ export function ClassicAdvancedView({
 
   return (
     <>
+      <StreamDescription
+        definition={definition}
+        refreshDefinition={refreshDefinition}
+        aiFeatures={aiFeatures}
+      />
+      <EuiSpacer />
       {significantEvents?.enabled && significantEvents?.available ? (
         <>
-          <StreamDescription
-            definition={definition}
-            refreshDefinition={refreshDefinition}
-            aiFeatures={aiFeatures}
-          />
-          <EuiSpacer />
           <StreamDiscoveryConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
           <EuiSpacer />
         </>

@@ -205,12 +205,12 @@ describe('WiredAdvancedView', () => {
     });
   });
 
-  describe('Significant Events Feature (Stream Description & Feature Configuration)', () => {
-    it('should render Stream description panel when significantEvents feature is enabled and available', () => {
+  describe('Stream Description', () => {
+    it('should always render Stream description panel regardless of significantEvents feature flag', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           contentPacks: { enabled: false },
-          significantEvents: { enabled: true, available: true },
+          significantEvents: { enabled: false, available: false },
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
@@ -222,10 +222,30 @@ describe('WiredAdvancedView', () => {
         />
       );
 
-      // Check the Stream description panel title is rendered
       expect(screen.getByText('Stream description')).toBeInTheDocument();
     });
 
+    it('should render Stream description panel when significantEvents is undefined', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          contentPacks: { enabled: false },
+          significantEvents: undefined,
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      renderWithProviders(
+        <WiredAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.getByText('Stream description')).toBeInTheDocument();
+    });
+  });
+
+  describe('Significant Events Feature (Stream Discovery)', () => {
     it('should render Stream discovery panel when significantEvents feature is enabled and available', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
@@ -242,11 +262,10 @@ describe('WiredAdvancedView', () => {
         />
       );
 
-      // Check the Stream discovery panel title is rendered
       expect(screen.getByText('Stream discovery')).toBeInTheDocument();
     });
 
-    it('should NOT render Stream description or Stream discovery when significantEvents is disabled', () => {
+    it('should NOT render Stream discovery when significantEvents is disabled', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           contentPacks: { enabled: false },
@@ -262,11 +281,10 @@ describe('WiredAdvancedView', () => {
         />
       );
 
-      expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
       expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
     });
 
-    it('should NOT render Stream description or Stream discovery when significantEvents is enabled but not available (basic license)', () => {
+    it('should NOT render Stream discovery when significantEvents is enabled but not available (basic license)', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           contentPacks: { enabled: false },
@@ -282,12 +300,10 @@ describe('WiredAdvancedView', () => {
         />
       );
 
-      // These components require enterprise license and should NOT render with basic license
-      expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
       expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
     });
 
-    it('should NOT render Stream description or Stream discovery when significantEvents available is undefined', () => {
+    it('should NOT render Stream discovery when significantEvents available is undefined', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           contentPacks: { enabled: false },
@@ -303,7 +319,6 @@ describe('WiredAdvancedView', () => {
         />
       );
 
-      expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
       expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
     });
   });

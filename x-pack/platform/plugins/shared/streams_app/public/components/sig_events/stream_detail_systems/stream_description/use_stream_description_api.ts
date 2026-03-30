@@ -21,10 +21,12 @@ export const useStreamDescriptionApi = ({
   definition,
   refreshDefinition,
   silent = false,
+  enableGeneration = true,
 }: {
   definition: Streams.all.GetResponse;
   refreshDefinition: () => void;
   silent?: boolean;
+  enableGeneration?: boolean;
 }) => {
   const { signal } = useAbortController();
 
@@ -116,6 +118,9 @@ export const useStreamDescriptionApi = ({
   }, [setIsEditing]);
 
   const getDescriptionGenerationStatus = useCallback(async () => {
+    if (!enableGeneration) {
+      return { status: 'not_started' as const };
+    }
     return await streams.streamsRepositoryClient.fetch(
       'GET /internal/streams/{name}/_description_generation/_status',
       {
@@ -125,7 +130,7 @@ export const useStreamDescriptionApi = ({
         },
       }
     );
-  }, [definition.stream.name, signal, streams.streamsRepositoryClient]);
+  }, [definition.stream.name, enableGeneration, signal, streams.streamsRepositoryClient]);
 
   const scheduleDescriptionGenerationTask = useCallback(
     async (connectorId: string) => {
@@ -169,6 +174,9 @@ export const useStreamDescriptionApi = ({
   }, [definition.stream.name, signal, streams.streamsRepositoryClient]);
 
   const acknowledgeDescriptionGenerationTask = useCallback(async () => {
+    if (!enableGeneration) {
+      return;
+    }
     try {
       await streams.streamsRepositoryClient.fetch(
         'POST /internal/streams/{name}/_description_generation/_task',
@@ -187,7 +195,7 @@ export const useStreamDescriptionApi = ({
         throw error;
       }
     }
-  }, [definition.stream.name, signal, streams.streamsRepositoryClient]);
+  }, [definition.stream.name, enableGeneration, signal, streams.streamsRepositoryClient]);
 
   const [{ loading: isTaskLoading, value: task, error: taskError }, refreshTask] = useAsyncFn(
     getDescriptionGenerationStatus

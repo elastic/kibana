@@ -38,8 +38,15 @@ const STREAM_DESCRIPTION_PANEL_TITLE = i18n.translate(
 const STREAM_DESCRIPTION_HELP = i18n.translate(
   'xpack.streams.streamDetailView.streamDescription.helpText',
   {
+    defaultMessage: 'A natural language description of the data in this stream.',
+  }
+);
+
+const STREAM_DESCRIPTION_AI_HELP = i18n.translate(
+  'xpack.streams.streamDetailView.streamDescription.aiHelpText',
+  {
     defaultMessage:
-      'This is a natural language description of your data. This will be used in AI workflows like feature identification and significant event generation. Generation uses the last 24 hours of data.',
+      'This will be used in AI workflows like feature identification and significant event generation. Generation uses the last 24 hours of data.',
   }
 );
 
@@ -83,6 +90,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
   refreshDefinition,
   aiFeatures,
 }) => {
+  const hasAiFeatures = aiFeatures !== null;
   const {
     description,
     isUpdating,
@@ -99,7 +107,11 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
     scheduleDescriptionGenerationTask,
     cancelDescriptionGenerationTask,
     areButtonsDisabled,
-  } = useStreamDescriptionApi({ definition, refreshDefinition });
+  } = useStreamDescriptionApi({ definition, refreshDefinition, enableGeneration: hasAiFeatures });
+
+  const helpText = hasAiFeatures
+    ? `${STREAM_DESCRIPTION_HELP} ${STREAM_DESCRIPTION_AI_HELP}`
+    : STREAM_DESCRIPTION_HELP;
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
@@ -112,7 +124,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
         {definition.stream.description || description || isEditing ? (
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiText size="s" color="subdued">
-              {STREAM_DESCRIPTION_HELP}
+              {helpText}
             </EuiText>
             <EuiMarkdownEditor
               value={description}
@@ -166,18 +178,20 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                         {isEditing ? SAVE_DESCRIPTION_BUTTON_LABEL : EDIT_DESCRIPTION_BUTTON_LABEL}
                       </EuiButton>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <DescriptionGenerationControl
-                        isTaskLoading={isTaskLoading}
-                        task={task}
-                        taskError={taskError}
-                        refreshTask={refreshTask}
-                        getDescriptionGenerationStatus={getDescriptionGenerationStatus}
-                        scheduleDescriptionGenerationTask={scheduleDescriptionGenerationTask}
-                        cancelDescriptionGenerationTask={cancelDescriptionGenerationTask}
-                        aiFeatures={aiFeatures}
-                      />
-                    </EuiFlexItem>
+                    {hasAiFeatures && (
+                      <EuiFlexItem grow={false}>
+                        <DescriptionGenerationControl
+                          isTaskLoading={isTaskLoading}
+                          task={task}
+                          taskError={taskError}
+                          refreshTask={refreshTask}
+                          getDescriptionGenerationStatus={getDescriptionGenerationStatus}
+                          scheduleDescriptionGenerationTask={scheduleDescriptionGenerationTask}
+                          cancelDescriptionGenerationTask={cancelDescriptionGenerationTask}
+                          aiFeatures={aiFeatures}
+                        />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 ),
               }}
@@ -188,7 +202,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
             left={
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
-                  {STREAM_DESCRIPTION_HELP}
+                  {helpText}
                 </EuiText>
               </EuiFlexItem>
             }
@@ -204,18 +218,20 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                     {MANUAL_ENTRY_BUTTON_LABEL}
                   </EuiButton>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <DescriptionGenerationControl
-                    isTaskLoading={isTaskLoading}
-                    task={task}
-                    taskError={taskError}
-                    refreshTask={refreshTask}
-                    getDescriptionGenerationStatus={getDescriptionGenerationStatus}
-                    scheduleDescriptionGenerationTask={scheduleDescriptionGenerationTask}
-                    cancelDescriptionGenerationTask={cancelDescriptionGenerationTask}
-                    aiFeatures={aiFeatures}
-                  />
-                </EuiFlexItem>
+                {hasAiFeatures && (
+                  <EuiFlexItem grow={false}>
+                    <DescriptionGenerationControl
+                      isTaskLoading={isTaskLoading}
+                      task={task}
+                      taskError={taskError}
+                      refreshTask={refreshTask}
+                      getDescriptionGenerationStatus={getDescriptionGenerationStatus}
+                      scheduleDescriptionGenerationTask={scheduleDescriptionGenerationTask}
+                      cancelDescriptionGenerationTask={cancelDescriptionGenerationTask}
+                      aiFeatures={aiFeatures}
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             }
           />
