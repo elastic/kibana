@@ -55,11 +55,6 @@ export function useKnowledgeIndicatorsBulkDelete({
       await Promise.all(requests);
     },
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: ['features', definition.name] }),
-      ]);
-
       onSuccess?.();
 
       toasts.addSuccess({
@@ -70,6 +65,12 @@ export function useKnowledgeIndicatorsBulkDelete({
       toasts.addError(error, {
         title: BULK_DELETE_ERROR_TOAST_TITLE,
       });
+    },
+    onSettled: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: ['features', definition.name] }),
+      ]);
     },
   });
 

@@ -241,7 +241,12 @@ export function RulesTable({
           onCancel={() => setRulesToDelete([])}
           onConfirm={() => {
             void deleteRulesInBulk(
-              rulesToDelete.filter((item) => item.kind === 'query').map((item) => item.query.id)
+              rulesToDelete
+                .filter(
+                  (item): item is Extract<KnowledgeIndicator, { kind: 'query' }> =>
+                    item.kind === 'query'
+                )
+                .map((item) => item.query.id)
             );
           }}
           isLoading={isDeleting}
