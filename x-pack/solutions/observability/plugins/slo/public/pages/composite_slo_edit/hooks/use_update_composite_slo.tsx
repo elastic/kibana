@@ -12,7 +12,6 @@ import { ALL_VALUE, type UpdateCompositeSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '../../../hooks/use_kibana';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { sloKeys } from '../../../hooks/query_key_factory';
 import type { CreateCompositeSLOForm } from '../types';
 
@@ -22,9 +21,9 @@ export function useUpdateCompositeSlo() {
   const {
     i18n: i18nStart,
     theme,
+    http,
     notifications: { toasts },
   } = useKibana().services;
-  const { sloClient } = usePluginContext();
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -34,12 +33,10 @@ export function useUpdateCompositeSlo() {
   >(
     ['updateCompositeSlo'],
     ({ compositeSloId, compositeSlo }) => {
-      return sloClient.fetch('PUT /api/observability/slo_composites/{id} 2023-10-31', {
-        params: {
-          path: { id: compositeSloId },
-          body: toApiPayload(compositeSlo),
-        },
-      });
+      return http.put<UpdateCompositeSLOResponse>(
+        `/api/observability/slo_composites/${encodeURIComponent(compositeSloId)}`,
+        { body: JSON.stringify(toApiPayload(compositeSlo)) }
+      );
     },
     {
       onSuccess: (_data, { compositeSlo }) => {
@@ -77,9 +74,9 @@ function toApiPayload(form: CreateCompositeSLOForm) {
       ...(instanceId && instanceId !== ALL_VALUE ? { instanceId } : {}),
       weight,
     })),
-    compositeMethod: 'weightedAverage' as const,
+    compositeMethod: 'weightedAverage',
     timeWindow: form.timeWindow,
-    budgetingMethod: 'occurrences' as const,
+    budgetingMethod: 'occurrences',
     objective: { target: form.objective.target / 100 },
     tags: form.tags,
   };

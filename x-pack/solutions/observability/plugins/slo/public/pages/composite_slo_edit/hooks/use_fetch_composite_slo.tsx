@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { ALL_VALUE, type GetCompositeSLOResponse } from '@kbn/slo-schema';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useKibana } from '../../../hooks/use_kibana';
 import type { CreateCompositeSLOForm } from '../types';
 
 interface Response {
@@ -17,14 +17,14 @@ interface Response {
 }
 
 export function useFetchCompositeSlo(compositeSloId: string | undefined): Response {
-  const { sloClient } = usePluginContext();
+  const { http } = useKibana().services;
 
   const { isLoading, isError, data } = useQuery({
     queryKey: ['fetchCompositeSlo', compositeSloId],
     queryFn: async ({ signal }) => {
-      const response = await sloClient.fetch(
-        'GET /api/observability/slo_composites/{id} 2023-10-31',
-        { params: { path: { id: compositeSloId! } }, signal }
+      const response = await http.get<GetCompositeSLOResponse>(
+        `/api/observability/slo_composites/${encodeURIComponent(compositeSloId!)}`,
+        { signal }
       );
       return toFormValues(response);
     },
