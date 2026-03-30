@@ -15,7 +15,6 @@ import {
   type GetEntityMaintainersResponse,
 } from '@kbn/entity-store/common';
 import { compact } from 'lodash';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
@@ -760,7 +759,12 @@ export const useEntityAnalyticsRoutes = () => {
       fetchEntityDetailsHighlights,
       fetchWatchlists,
     };
-  }, [http, isEntityStoreV2UiSettingEnabled, isEntityAnalyticsEntityStoreV2Enabled, isMaintainerRiskScoreV2Enabled]);
+  }, [
+    http,
+    isEntityStoreV2UiSettingEnabled,
+    isEntityAnalyticsEntityStoreV2Enabled,
+    isMaintainerRiskScoreV2Enabled,
+  ]);
 };
 
 export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;
