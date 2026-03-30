@@ -180,6 +180,13 @@ EOF
       export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
     fi
 
+    # Optional: Remote Kibana for managed dataset operations (golden cluster)
+    EVALUATIONS_KBN_URL="$(jq -r '.evaluationsKbn.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    if [[ -n "$EVALUATIONS_KBN_URL" ]]; then
+      export EVALUATIONS_KBN_URL
+      export EVALUATIONS_KBN_API_KEY="$(jq -r '.evaluationsKbn.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    fi
+
     # Optional: GCS service account credentials for snapshot restoration (e.g. AI Insights)
     export GCS_CREDENTIALS="$(jq -c '.gcsDatasetAccessCredentials // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
   fi
@@ -256,7 +263,6 @@ if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
   MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
   export MOON_REMOTE_CACHE_TOKEN
 fi
-export MOON_CACHE=off
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then
