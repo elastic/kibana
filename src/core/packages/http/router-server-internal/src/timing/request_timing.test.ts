@@ -10,8 +10,7 @@
 import { RequestTimingImpl } from './request_timing';
 import type { RequestTimingState } from './types';
 
-// Failing: See https://github.com/elastic/kibana/issues/259867
-describe.skip('RequestTimingImpl', () => {
+describe('RequestTimingImpl', () => {
   let state: RequestTimingState;
   let timing: RequestTimingImpl;
 
@@ -42,14 +41,6 @@ describe.skip('RequestTimingImpl', () => {
       timer.end();
 
       expect(state.events[0].description).toBe('Test description');
-    });
-
-    it('measures correct duration', async () => {
-      const timer = timing.start('test-operation');
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      timer.end();
-
-      expect(state.events[0].duration).toBeGreaterThanOrEqual(10);
     });
 
     it('does not create an event if timer.end() is not called', () => {

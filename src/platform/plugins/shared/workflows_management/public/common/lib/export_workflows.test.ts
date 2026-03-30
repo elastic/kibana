@@ -38,11 +38,26 @@ const createWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowL
   ...overrides,
 });
 
+const mockGenerateWorkflowsZip = jest
+  .fn()
+  .mockResolvedValue(new Blob(['zip'], { type: 'application/zip' }));
+jest.mock('./export/generate_zip_archive', () => ({
+  generateWorkflowsZip: (...args: unknown[]) => mockGenerateWorkflowsZip(...args),
+}));
+
 const createMockWorkflowApi = (): jest.Mocked<WorkflowApi> =>
   ({
-    exportWorkflows: jest
-      .fn()
-      .mockResolvedValue(new Blob(['zip-data'], { type: 'application/zip' })),
+    exportWorkflows: jest.fn().mockResolvedValue({
+      entries: [
+        { id: 'w-1', yaml: 'name: First\nsteps: []' },
+        { id: 'w-2', yaml: 'name: Second\nsteps: []' },
+      ],
+      manifest: {
+        exportedCount: 2,
+        exportedAt: '2026-01-01T00:00:00.000Z',
+        version: '1',
+      },
+    }),
   } as unknown as jest.Mocked<WorkflowApi>);
 
 describe('export_workflows', () => {
@@ -109,7 +124,7 @@ describe('export_workflows', () => {
       expect(api.exportWorkflows).not.toHaveBeenCalled();
     });
 
-    it('should export multiple workflows as ZIP via WorkflowApi', async () => {
+    it('should fetch entries from API and build ZIP client-side for multiple workflows', async () => {
       const api = createMockWorkflowApi();
       const workflows = [
         createWorkflow({ id: 'w-1', name: 'First' }),
@@ -119,6 +134,17 @@ describe('export_workflows', () => {
 
       expect(result).toBe(2);
       expect(api.exportWorkflows).toHaveBeenCalledWith({ ids: ['w-1', 'w-2'] });
+      expect(mockGenerateWorkflowsZip).toHaveBeenCalledWith(
+        [
+          { id: 'w-1', yaml: 'name: First\nsteps: []' },
+          { id: 'w-2', yaml: 'name: Second\nsteps: []' },
+        ],
+        {
+          exportedCount: 2,
+          exportedAt: '2026-01-01T00:00:00.000Z',
+          version: '1',
+        }
+      );
       expect(mockDownloadFileAs).toHaveBeenCalledTimes(1);
       const [filename, payload] = mockDownloadFileAs.mock.calls[0];
       expect(filename).toMatch(/^workflows_export_.*\.zip$/);

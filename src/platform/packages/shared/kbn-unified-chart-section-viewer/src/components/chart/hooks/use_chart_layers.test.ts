@@ -24,7 +24,7 @@ describe('useChartLayers', () => {
     dataStream: 'metrics-*',
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     metricTypes: ['gauge'],
-    units: ['percent'],
+    units: ['percent', null],
     dimensionFields: [],
   };
 
