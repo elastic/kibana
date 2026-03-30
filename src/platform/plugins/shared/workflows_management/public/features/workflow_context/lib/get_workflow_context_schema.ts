@@ -132,7 +132,7 @@ export function getWorkflowContextSchema(
     event: eventSchema,
   }).omit({ inputs: true }) as typeof DynamicWorkflowContextSchema;
 
-  // Ensures that inputs are only available when manual trigger is explicitly defined with inputs
+  // Ensures that "inputs" are only available when manual trigger is explicitly defined with inputs
   if (inputsSchema) {
     workflowContext = workflowContext.extend({
       inputs: inputsSchema,
