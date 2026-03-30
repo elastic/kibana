@@ -7,7 +7,7 @@
 
 import { initGetActiveSpaceApi } from './get_active_space';
 import { initGetSpaceContentSummaryApi } from './get_content_summary';
-import { initGetFeatureVisibilityApi } from './get_feature_visibility';
+import { initGetPersistedFeatureVisibilityApi } from './get_persisted_feature_visibility';
 import { initSetSolutionSpaceApi } from './set_solution_space';
 import type { SpacesServiceStart } from '../../../spaces_service/spaces_service';
 import type { SpacesRouter } from '../../../types';
@@ -21,5 +21,5 @@ export function initInternalSpacesApi(deps: InternalRouteDeps) {
   initGetActiveSpaceApi(deps);
   initGetSpaceContentSummaryApi(deps);
   initSetSolutionSpaceApi(deps);
-  initGetFeatureVisibilityApi(deps);
+  initGetPersistedFeatureVisibilityApi(deps);
 }

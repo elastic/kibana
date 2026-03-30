@@ -7,21 +7,14 @@
 
 import * as Rx from 'rxjs';
 
-import type { SavedObject } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import {
-  coreMock,
-  httpServerMock,
-  httpServiceMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
-import { initGetFeatureVisibilityApi } from './get_feature_visibility';
+import { initGetPersistedFeatureVisibilityApi } from './get_persisted_feature_visibility';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
-import type { SpaceSavedObjectAttributes } from '../../../types';
 import {
   createMockSavedObjectsRepository,
   createSpaces,
@@ -29,7 +22,7 @@ import {
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
 
-describe('GET /internal/spaces/space/{id}/feature_visibility', () => {
+describe('GET /internal/spaces/space/{id}/persisted_feature_visibility', () => {
   const setup = async (options?: { spacesSavedObjects?: any[] }) => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
@@ -61,31 +54,17 @@ describe('GET /internal/spaces/space/{id}/feature_visibility', () => {
       spacesClientService: clientServiceStart,
     });
 
-    initGetFeatureVisibilityApi({
+    initGetPersistedFeatureVisibilityApi({
       router,
       getSpacesService: () => spacesServiceStart,
     });
 
     const [routeDefinition, routeHandler] = router.get.mock.calls[0];
 
-    const savedObjectsClient = savedObjectsClientMock.create();
-    const getClient = jest.fn().mockReturnValue(savedObjectsClient);
-
-    const routeContext = {
-      ...mockRouteContext,
-      core: {
-        savedObjects: {
-          getClient,
-        },
-      },
-    };
-
     return {
       routeDefinition,
       routeHandler,
-      routeContext,
-      getClient,
-      savedObjectsClient,
+      routeContext: mockRouteContext,
     };
   };
 
@@ -109,27 +88,18 @@ describe('GET /internal/spaces/space/{id}/feature_visibility', () => {
     });
   });
 
-  it('returns http/200 with stored disabledFeatures', async () => {
-    const { routeHandler, routeContext, savedObjectsClient, getClient } = await setup({
+  it('returns http/200 with stored disabledFeatures for classic solution', async () => {
+    const { routeHandler, routeContext } = await setup({
       spacesSavedObjects: [
         {
           id: 'mySpace',
           attributes: {
             name: 'mySpace',
-            disabledFeatures: [],
+            disabledFeatures: ['feature_1', 'feature_2'],
           },
         },
       ],
     });
-
-    const spaceSavedObject: SavedObject<SpaceSavedObjectAttributes> = {
-      id: 'mySpace',
-      type: 'space',
-      references: [],
-      attributes: { disabledFeatures: ['feature_1', 'feature_2'] },
-    };
-
-    savedObjectsClient.get.mockResolvedValue(spaceSavedObject);
 
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
@@ -139,28 +109,15 @@ describe('GET /internal/spaces/space/{id}/feature_visibility', () => {
     const response = await routeHandler(routeContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
-    expect(getClient).toHaveBeenCalledWith({ includedHiddenTypes: ['space'] });
-    expect(savedObjectsClient.get).toHaveBeenCalledWith('space', 'mySpace');
     expect(response.payload).toEqual({
       featureVisibility: { disabledFeatures: ['feature_1', 'feature_2'] },
     });
   });
 
   it('returns http/200 with empty disabledFeatures when missing from attributes', async () => {
-    const { routeHandler, routeContext, savedObjectsClient } = await setup({
-      spacesSavedObjects: [
-        { id: 'mySpace', attributes: { name: 'mySpace', disabledFeatures: [] } },
-      ],
+    const { routeHandler, routeContext } = await setup({
+      spacesSavedObjects: [{ id: 'mySpace', attributes: { name: 'mySpace' } }],
     });
-
-    const spaceSavedObject: SavedObject<SpaceSavedObjectAttributes> = {
-      id: 'mySpace',
-      type: 'space',
-      references: [],
-      attributes: {},
-    };
-
-    savedObjectsClient.get.mockResolvedValue(spaceSavedObject);
 
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
@@ -176,7 +133,7 @@ describe('GET /internal/spaces/space/{id}/feature_visibility', () => {
   });
 
   it('returns http/404 when retrieving a non-existent space', async () => {
-    const { routeHandler, routeContext, savedObjectsClient } = await setup();
+    const { routeHandler, routeContext } = await setup();
 
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
@@ -186,6 +143,5 @@ describe('GET /internal/spaces/space/{id}/feature_visibility', () => {
     const response = await routeHandler(routeContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(404);
-    expect(savedObjectsClient.get).not.toHaveBeenCalled();
   });
 });

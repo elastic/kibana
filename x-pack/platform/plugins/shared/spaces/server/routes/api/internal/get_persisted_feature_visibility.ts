@@ -12,16 +12,16 @@ import type { InternalRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
-interface FeatureVisibilityResponseBody {
+interface PersistedFeatureVisibilityResponseBody {
   featureVisibility: { disabledFeatures: string[] };
 }
 
-export function initGetFeatureVisibilityApi(deps: InternalRouteDeps) {
+export function initGetPersistedFeatureVisibilityApi(deps: InternalRouteDeps) {
   const { router, getSpacesService } = deps;
 
   router.get(
     {
-      path: '/internal/spaces/space/{id}/feature_visibility',
+      path: '/internal/spaces/space/{id}/persisted_feature_visibility',
       security: {
         authz: {
           enabled: false,
@@ -35,27 +35,15 @@ export function initGetFeatureVisibilityApi(deps: InternalRouteDeps) {
         }),
       },
     },
-    createLicensedRouteHandler(async (context, request, response) => {
+    createLicensedRouteHandler(async (_context, request, response) => {
       const spaceId = request.params.id;
 
       try {
-        // Authorization + existence check
         const spacesClient = getSpacesService().createSpacesClient(request);
-        await spacesClient.get(spaceId);
+        const disabledFeatures = await spacesClient.getPersistedFeatureVisibility(spaceId);
 
-        // Fetch stored classic feature visibility directly from the space saved object
-        const { getClient } = (await context.core).savedObjects;
-        const client = getClient({ includedHiddenTypes: ['space'] });
-
-        const spaceSavedObject = await client.get<{ disabledFeatures?: string[] }>(
-          'space',
-          spaceId
-        );
-
-        const body: FeatureVisibilityResponseBody = {
-          featureVisibility: {
-            disabledFeatures: spaceSavedObject.attributes.disabledFeatures ?? [],
-          },
+        const body: PersistedFeatureVisibilityResponseBody = {
+          featureVisibility: { disabledFeatures },
         };
 
         return response.ok({ body });

@@ -425,6 +425,84 @@ describe('#get', () => {
   });
 });
 
+describe('#getPersistedFeatureVisibility', () => {
+  test('returns stored disabledFeatures for a space', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'foo',
+      type: 'space',
+      references: [],
+      attributes: { name: 'foo', disabledFeatures: ['feature_1', 'feature_2'] },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    const result = await client.getPersistedFeatureVisibility('foo');
+
+    expect(result).toEqual(['feature_1', 'feature_2']);
+    expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', 'foo');
+  });
+
+  test('returns empty array when disabledFeatures is not stored', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'foo',
+      type: 'space',
+      references: [],
+      attributes: { name: 'foo' },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    const result = await client.getPersistedFeatureVisibility('foo');
+
+    expect(result).toEqual([]);
+  });
+
+  test('throws error when space is not found', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockRejectedValue(
+      new Error('Saved object [space/not-found] not found')
+    );
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await expect(client.getPersistedFeatureVisibility('not-found')).rejects.toThrow(
+      'Saved object [space/not-found] not found'
+    );
+  });
+});
+
 describe('#create', () => {
   const id = 'foo';
   const attributes = {

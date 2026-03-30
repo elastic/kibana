@@ -102,13 +102,13 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     }
     (async () => {
       try {
-        const res = await spacesManager.getFeatureVisibility(space.id);
+        const res = await spacesManager.getPersistedFeatureVisibility(space.id);
         const disabledFeatures = res.featureVisibility.disabledFeatures ?? [];
         if (!unmounted) {
           storedFeatureVisibilityRef.current = disabledFeatures;
         }
       } catch (error) {
-        logger.debug(`Failed to load feature visibility for space "${space.id}"`, error);
+        logger.debug(`Failed to load persisted feature visibility for space "${space.id}"`, error);
       }
     })();
     return () => {

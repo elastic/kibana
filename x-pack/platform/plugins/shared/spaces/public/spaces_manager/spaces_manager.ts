@@ -213,9 +213,11 @@ export class SpacesManager {
     return this.http.get(`/internal/security/roles/${id}`);
   }
 
-  public async getFeatureVisibility(
+  public async getPersistedFeatureVisibility(
     id: string
   ): Promise<{ featureVisibility: { disabledFeatures: string[] } }> {
-    return this.http.get(`/internal/spaces/space/${encodeURIComponent(id)}/feature_visibility`);
+    return this.http.get(
+      `/internal/spaces/space/${encodeURIComponent(id)}/persisted_feature_visibility`
+    );
   }
 }

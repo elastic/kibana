@@ -53,6 +53,12 @@ export interface ISpacesClient {
   get(id: string): Promise<v1.Space>;
 
   /**
+   * Retrieve the persisted disabled features for a space.
+   * @param id the space id.
+   */
+  getPersistedFeatureVisibility(id: string): Promise<string[]>;
+
+  /**
    * Creates a space.
    * @param space the space to create.
    */
@@ -142,6 +148,12 @@ export class SpacesClient implements ISpacesClient {
     }
 
     return space;
+  }
+
+  public async getPersistedFeatureVisibility(id: string) {
+    const spaceObject = await this.repository.get<{ disabledFeatures?: string[] }>('space', id);
+
+    return spaceObject.attributes.disabledFeatures ?? [];
   }
 
   public async create(space: v1.Space) {
