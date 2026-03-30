@@ -26,6 +26,8 @@ import type {
   ListChatMessagesInput,
   SearchMessagesInput,
 } from './types';
+import listWorkflow from './workflows/list.yaml';
+import searchWorkflow from './workflows/search.yaml';
 
 /**
  * Returns the base path for user-scoped Microsoft Graph API endpoints.
@@ -47,7 +49,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       defaultMessage: 'Search Microsoft Teams channels, chats, and teams',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -303,4 +305,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [listWorkflow, searchWorkflow],
 };

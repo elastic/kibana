@@ -63,10 +63,10 @@
         "label": "DataSourceBrowser",
         "description": [],
         "signature": [
-          "({ isOpen, isLoading, allSources, selectedSources, onClose, onSelect, position, }: DataSourceBrowserProps) => React.JSX.Element"
+          "({ isOpen, isTimeseries, preloadedSources, selectedSources, onClose, onSelect, position, }: DataSourceBrowserProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/data_source_browser/data_source_browser.tsx",
-        "lineNumber": 44,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -76,13 +76,13 @@
             "id": "def-public.DataSourceBrowser.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isOpen,\n  isLoading,\n  allSources,\n  selectedSources = [],\n  onClose,\n  onSelect,\n  position,\n}",
+            "label": "{\n  isOpen,\n  isTimeseries,\n  preloadedSources,\n  selectedSources = [],\n  onClose,\n  onSelect,\n  position,\n}",
             "description": [],
             "signature": [
               "DataSourceBrowserProps"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/data_source_browser/data_source_browser.tsx",
-            "lineNumber": 44,
+            "lineNumber": 58,
             "columnNumber": 69,
             "deprecated": false,
             "trackAdoption": false,
@@ -100,10 +100,10 @@
         "label": "FieldsBrowser",
         "description": [],
         "signature": [
-          "({ isOpen, isLoading, onClose, onSelect, allFields, recommendedFields, position, }: FieldsBrowserProps) => React.JSX.Element"
+          "({ isOpen, onClose, onSelect, preloadedFields, indexPattern, fullQuery, activeSolutionId, position, }: FieldsBrowserProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/fields_browser/fields_browser.tsx",
-        "lineNumber": 33,
+        "lineNumber": 49,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -113,13 +113,13 @@
             "id": "def-public.FieldsBrowser.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isOpen,\n  isLoading,\n  onClose,\n  onSelect,\n  allFields,\n  recommendedFields,\n  position,\n}",
+            "label": "{\n  isOpen,\n  onClose,\n  onSelect,\n  preloadedFields,\n  indexPattern,\n  fullQuery,\n  activeSolutionId,\n  position,\n}",
             "description": [],
             "signature": [
               "FieldsBrowserProps"
             ],
             "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/fields_browser/fields_browser.tsx",
-            "lineNumber": 33,
+            "lineNumber": 49,
             "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,

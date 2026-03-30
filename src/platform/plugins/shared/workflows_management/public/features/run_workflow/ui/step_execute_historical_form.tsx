@@ -42,6 +42,8 @@ const SCHEMA_URI = `inmemory://schemas/test-step-json-historical-editor-schema`;
 export interface StepExecuteHistoricalFormProps {
   value: string;
   setValue: (value: string) => void;
+  /** Callback to set the execution context when an execution is selected */
+  setExecutionContext: (executionContext: Record<string, unknown> | undefined) => void;
   warnings: string | null;
   errors: string | null;
   setErrors: (errors: string | null) => void;
@@ -61,6 +63,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
   ({
     value,
     setValue,
+    setExecutionContext,
     errors,
     setErrors,
     warnings,
@@ -104,6 +107,9 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         includeOutput: true,
       }
     );
+    useEffect(() => {
+      setExecutionContext(workflowExecution?.context);
+    }, [setExecutionContext, workflowExecution?.context]);
 
     const executionOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
       const results = stepExecutionsList?.results ?? [];
@@ -169,12 +175,6 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         };
       });
     }, [stepExecutionsList?.results, getFormattedDateTime, euiTheme]);
-
-    useEffect(() => {
-      if (initialStepExecutionId != null) {
-        setSelectedStepExecutionId(initialStepExecutionId);
-      }
-    }, [initialStepExecutionId]);
 
     useEffect(() => {
       if (!selectedStepExecutionId || isLoadingStepExecution || isLoadingWorkflowExecution) {

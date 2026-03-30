@@ -312,7 +312,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       let rule: any;
 
       before(async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
 
         const connectorName = generateUniqueKey();
         const createdConnector = await createSlackConnector({ name: connectorName, getService });
