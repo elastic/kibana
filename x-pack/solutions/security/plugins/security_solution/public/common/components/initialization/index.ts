@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './steps';
+export { InitializationProvider } from './initialization_context';
+export { useSecuritySolutionInitialization } from './use_security_solution_initialization';
+export type { InitializationFlowState } from './types';
