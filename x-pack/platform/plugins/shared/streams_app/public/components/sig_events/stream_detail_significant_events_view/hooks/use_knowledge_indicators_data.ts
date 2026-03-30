@@ -7,7 +7,7 @@
 
 import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useFetchDiscoveryQueries } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
 import { useStreamFeatures } from '../../../../hooks/sig_events/use_stream_features';
 
@@ -15,16 +15,25 @@ interface UseKnowledgeIndicatorsDataParams {
   definition: Streams.all.GetResponse;
 }
 
-export function useFetchKnowledgeIndicators({ definition }: UseKnowledgeIndicatorsDataParams) {
-  const queriesFetchState = useFetchDiscoveryQueries({
-    name: definition.stream.name,
-    query: '',
-    page: 1,
-    perPage: 1000,
-    status: ['active', 'draft'],
-  });
+export function useFetchKnowledgeIndicators(
+  { definition }: UseKnowledgeIndicatorsDataParams,
+  deps: unknown[] = []
+) {
+  const queriesFetchState = useFetchDiscoveryQueries(
+    {
+      name: definition.stream.name,
+      query: '',
+      page: 1,
+      perPage: 1000,
+      status: ['active', 'draft'],
+    },
+    deps
+  );
 
-  const { features, excludedFeatures, featuresLoading } = useStreamFeatures(definition.stream);
+  const { features, excludedFeatures, featuresLoading, refreshFeatures } = useStreamFeatures(
+    definition.stream,
+    deps
+  );
 
   const knowledgeIndicators = useMemo<KnowledgeIndicator[]>(() => {
     const queryKnowledgeIndicators = (queriesFetchState.data?.queries ?? []).map((queryRow) => ({
@@ -64,10 +73,16 @@ export function useFetchKnowledgeIndicators({ definition }: UseKnowledgeIndicato
     [queriesFetchState.data?.queries]
   );
 
+  const refetch = useCallback(() => {
+    queriesFetchState.refetch();
+    refreshFeatures();
+  }, [queriesFetchState, refreshFeatures]);
+
   return {
     knowledgeIndicators,
     occurrencesByQueryId,
     isLoading,
     isEmpty,
+    refetch,
   };
 }

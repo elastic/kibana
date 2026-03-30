@@ -54,7 +54,8 @@ export function getOnboardingTaskId(streamName: string, saveQueries: boolean = t
   return saveQueries ? base : `${base}_no_save_queries`;
 }
 
-const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
+const FEATURES_IDENTIFICATION_RECENCY_MS = 1000; // 12 hours
+// const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
 async function areFeaturesUpToDate({
   taskClient,
   featuresTaskId,

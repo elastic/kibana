@@ -26,6 +26,7 @@ import {
 } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/sig_events/use_fetch_discovery_queries';
 import { useKibana } from '../../../hooks/use_kibana';
 import { EmptyState } from './empty_state';
@@ -78,6 +79,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     occurrencesByQueryId,
     isLoading: isKnowledgeIndicatorsLoading,
     isEmpty,
+    refetch,
   } = useFetchKnowledgeIndicators({ definition });
   const onKnowledgeIndicatorsTaskComplete = useCallback(
     (
@@ -128,6 +130,11 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     onComplete: onKnowledgeIndicatorsTaskComplete,
     onError: onKnowledgeIndicatorsTaskError,
   });
+
+  useInterval(
+    refetch,
+    knowledgeIndicatorsTaskState?.status === TaskStatus.InProgress ? 5000 : null
+  );
 
   const ruleKnowledgeIndicators = useMemo(
     () =>
