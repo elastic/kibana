@@ -162,7 +162,7 @@ async function validateAst(
 
     const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
       ? unmappedFieldsStrategyFromHeader
-      : UnmappedFieldsStrategy.FAIL;
+      : UnmappedFieldsStrategy.DEFAULT;
 
     const commandMessages = validateCommand(
       currentCommand,
