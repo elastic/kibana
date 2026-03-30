@@ -171,6 +171,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   // NOTE: The 'navigation' event type string is an EUI internal, it is not part
   // of EUI's public API and may change without notice. If this breaks after an EUI
   // upgrade, check `flyout_managed.tsx` for the current synthetic event type.
+  // See https://github.com/elastic/eui/issues/9539 for an ER to make this less brittle.
   //
   // When we receive a 'navigation' event, we defer the state clearing to a
   // `useEffect`. When switching tabs, the component is unmounting, so React
