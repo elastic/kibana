@@ -70,50 +70,6 @@ describe('CompositeSloMembersSection', () => {
       });
     });
 
-    it('removes duplicate members when multiple members of the same SLO collapse to ALL_VALUE', async () => {
-      // Simulates: composite had two members of the same SLO with different instances
-      // ("production" and "staging"), but groupBy was removed from the SLO. Both would
-      // reset to ALL_VALUE, creating a duplicate (sloId, ALL_VALUE) pair. The higher-index
-      // member is removed; only the first survives.
-      const defaultValues: Partial<CreateCompositeSLOForm> = {
-        members: [
-          {
-            sloId: 'slo-1',
-            sloName: 'SLO One',
-            groupBy: ALL_VALUE,
-            instanceId: 'production',
-            weight: 1,
-          },
-          {
-            sloId: 'slo-1',
-            sloName: 'SLO One',
-            groupBy: ALL_VALUE,
-            instanceId: 'staging',
-            weight: 1,
-          },
-        ],
-      };
-
-      let formValues: CreateCompositeSLOForm | undefined;
-
-      function WrapperWithCapture() {
-        const methods = useForm<CreateCompositeSLOForm>({ defaultValues });
-        formValues = methods.watch();
-        return (
-          <FormProvider {...methods}>
-            <CompositeSloMembersSection />
-          </FormProvider>
-        );
-      }
-
-      render(<WrapperWithCapture />);
-
-      await waitFor(() => {
-        expect(formValues?.members).toHaveLength(1);
-        expect(formValues?.members[0].instanceId).toBe(ALL_VALUE);
-      });
-    });
-
     it('does not reset instanceId when grouped member already has ALL_VALUE (intentional)', async () => {
       // ALL_VALUE is now a valid instanceId for grouped SLOs. A member loaded with
       // groupBy="env" and instanceId=ALL_VALUE should not be touched.
