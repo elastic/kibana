@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 
 import { lensCMCreateOptionsSchema } from '../../../../content_management';
 import { pickFromObjectSchema } from '../../../../utils';
@@ -14,7 +15,7 @@ import { lensResponseItemSchema } from './common';
 
 export const lensCreateRequestParamsSchema = schema.object(
   {
-    id: schema.maybe(schema.string()),
+    id: asCodeIdSchema,
   },
   { unknowns: 'forbid' }
 );
