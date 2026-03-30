@@ -164,9 +164,7 @@ export const EmbedContent = ({
     const appHashSearchParams = new URLSearchParams();
     const globalState = parsedAppUrl.searchParams.get('_g');
 
-    if (globalState !== null) {
-      appHashSearchParams.set('_g', globalState);
-    }
+    appHashSearchParams.set('_g', globalState ?? '');
 
     parsedUrl.hash = `${parsedAppUrl.pathname}${
       appHashSearchParams.size > 0 ? `?${appHashSearchParams.toString()}` : ''

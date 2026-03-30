@@ -105,7 +105,7 @@ describe('Share modal embed content tab', () => {
 
       await waitFor(() => {
         expect(copyButton.getAttribute('data-share-url')).toBe(
-          '<iframe src="http://localhost:5601/app/dashboards#/create?embed=true&_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A60000)%2Ctime%3A(from%3Anow-15m%2Cto%3Anow))" height="600" width="800"></iframe>'
+          '<iframe src="http://localhost:5601/app/dashboards#/create?embed=true&_g=%28refreshInterval%3A%28pause%3A%21t%2Cvalue%3A60000%29%2Ctime%3A%28from%3Anow-15m%2Cto%3Anow%29%29" height="600" width="800"></iframe>'
         );
       });
     });
