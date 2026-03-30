@@ -11,7 +11,7 @@ import moment from 'moment';
 export const getErrorFromBulkResponse = (resp: BulkResponse): ErrorCause[] =>
   resp.errors
     ? resp.items
-        .map((item) => item.index?.error ?? item.update?.error)
+        .map((item) => item.index?.error ?? item.update?.error ?? item.delete?.error)
         .filter((e): e is ErrorCause => e !== undefined)
     : [];
 
