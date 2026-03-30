@@ -12,6 +12,7 @@
 import { merge } from 'lodash';
 import type {
   EsWorkflowStepExecution,
+  LegacyWorkflowInput,
   StepContext,
   WorkflowExecutionDto,
   WorkflowStepExecutionDto,
@@ -23,6 +24,10 @@ import {
   parseJsPropertyAccess,
 } from '@kbn/workflows/common/utils';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import {
+  applyInputDefaults,
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
 import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
@@ -34,7 +39,14 @@ export interface ContextOverrideData {
   rawJsonSchema?: JsonModelSchemaType;
 }
 
-export type StaticContextData = Pick<StepContext, 'consts' | 'workflow'>;
+export interface StaticContextData extends Pick<StepContext, 'consts' | 'workflow'> {
+  /**
+   * Workflow inputs definition with their default values.
+   * Used to pre-populate input fields in the test step modal.
+   * Can be either legacy array format (LegacyWorkflowInput[]) or JSON Schema format.
+   */
+  inputsDefinition?: LegacyWorkflowInput[] | JsonModelSchemaType;
+}
 
 const StepContextSchemaPropertyPaths = extractSchemaPropertyPaths(StepContextSchema);
 
@@ -70,6 +82,33 @@ function readPropertyRecursive(
   return object;
 }
 
+/**
+ * Build inputs object from workflow input definitions with their default values.
+ * This allows the test step modal to pre-populate input fields with defined defaults.
+ * Supports both legacy array format and new JSON Schema format.
+ * Uses the same logic as the exec modal to ensure consistency.
+ */
+function buildInputsFromDefinition(
+  inputsDefinition: LegacyWorkflowInput[] | JsonModelSchemaType | undefined
+): Record<string, unknown> | undefined {
+  if (!inputsDefinition) {
+    return undefined;
+  }
+
+  // Normalize inputs to JSON Schema format (handles both legacy array and JSON Schema formats)
+  const normalizedInputs = normalizeFieldsToJsonSchema(inputsDefinition);
+
+  if (!normalizedInputs) {
+    return undefined;
+  }
+
+  // Use applyInputDefaults to get defaults with $ref resolution and nested object support
+  // This ensures the same behavior as the exec modal and handles all JSON Schema features
+  const defaults = applyInputDefaults(undefined, normalizedInputs);
+
+  return defaults;
+}
+
 export function buildContextOverride(
   workflowGraph: WorkflowGraph,
   staticData: StaticContextData
@@ -87,6 +126,7 @@ export function buildContextOverride(
   // Build the static data with inputs defaults for lookup
   const staticDataWithInputs = {
     ...staticData,
+    inputs: buildInputsFromDefinition(staticData.inputsDefinition),
   };
 
   inputsParsed.forEach((pathParts) => {

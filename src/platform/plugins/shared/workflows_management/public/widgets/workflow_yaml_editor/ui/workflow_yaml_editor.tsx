@@ -33,14 +33,12 @@ import {
   useConnectorTypeDecorations,
   useFocusedStepDecoration,
   useLineDifferencesDecorations,
-  useMigrationHintDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
   useWorkflowIdDecorations,
 } from './decorations';
 import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
-import { MigrationHintPanel } from './migration_hint_panel';
 import { StepActions } from './step_actions';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
@@ -494,17 +492,6 @@ export const WorkflowYAMLEditor = ({
     readOnly: isExecutionYaml,
   });
 
-  const {
-    activeHint: activeMigrationHint,
-    activeHintTop: migrationHintTop,
-    onPanelMouseEnter: onMigrationPanelMouseEnter,
-    onPanelMouseLeave: onMigrationPanelMouseLeave,
-  } = useMigrationHintDecorations({
-    editor: editorRef.current,
-    isEditorMounted,
-    validationErrors: interceptorValidationErrors,
-  });
-
   useWorkflowIdDecorations({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,
@@ -669,21 +656,6 @@ export const WorkflowYAMLEditor = ({
       >
         <StepActions onStepRun={onStepRun} />
       </div>
-      {activeMigrationHint && migrationHintTop != null && (
-        <div
-          css={styles.migrationHintPanelContainer}
-          style={{ top: `${migrationHintTop}px` }}
-          data-test-subj="migrationHintPanelContainer"
-        >
-          <MigrationHintPanel
-            hint={activeMigrationHint.hint}
-            isAiMigrationEnabled={isAgentBuilderAvailable}
-            onMigrateWithAi={openAgentChat}
-            onMouseEnter={onMigrationPanelMouseEnter}
-            onMouseLeave={onMigrationPanelMouseLeave}
-          />
-        </div>
-      )}
       {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml && (
         <div
           css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}

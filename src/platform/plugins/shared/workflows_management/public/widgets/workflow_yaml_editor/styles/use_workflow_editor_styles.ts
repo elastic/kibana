@@ -108,20 +108,6 @@ export const useWorkflowEditorStyles = () => {
           backgroundColor: euiTheme.colors.backgroundLightWarning,
         },
 
-        // Migration hint glyph (warning triangle in glyph margin)
-        '.migration-hint-glyph': {
-          '&:before': {
-            content: '"⚠"',
-            display: 'block',
-            width: '14px',
-            height: '14px',
-            fontSize: '14px',
-            lineHeight: '14px',
-            color: euiTheme.colors.warning,
-            textAlign: 'center',
-          },
-        },
-
         // Error highlighting
         '.duplicate-step-name-error': {
           backgroundColor: euiTheme.colors.backgroundLightDanger,
@@ -213,12 +199,6 @@ export const useWorkflowEditorStyles = () => {
       transform: `translateY(${FOCUSED_STEP_DECORATION_INSET_PX}px) translateX(-${
         EDITOR_SCROLLBAR_WIDTH_PX + 2 * FOCUSED_STEP_DECORATION_INSET_PX
       }px)`, // scrollbar + twice decoration inset (outside and inside)
-    }),
-
-    migrationHintPanelContainer: css({
-      position: 'absolute',
-      left: 0,
-      zIndex: 1002,
     }),
 
     downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>
