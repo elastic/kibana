@@ -46,6 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
+  const retry = getService('retry');
   const entityStoreUtils = EntityStoreUtils(getService);
 
   const uploadCsv = (csvContent: string) =>
@@ -86,6 +87,18 @@ export default ({ getService }: FtrProviderContext) => {
     await es.bulk({ operations, refresh: true });
   };
 
+  const waitForEntities = async () => {
+    const index = getLatestEntitiesIndexName('default');
+    await retry.waitForWithTimeout('seeded entities to be searchable', 30_000, async () => {
+      const { count } = await es.count({
+        index,
+        query: { prefix: { 'entity.id': TEST_PREFIX } },
+      });
+      log.debug(`Waiting for ${testEntities.length} entities, found ${count}`);
+      return count >= testEntities.length;
+    });
+  };
+
   const cleanEntities = async () => {
     const index = getLatestEntitiesIndexName('default');
     try {
@@ -105,12 +118,14 @@ export default ({ getService }: FtrProviderContext) => {
       await entityStoreUtils.installEntityStoreV2();
       await cleanEntities();
       await seedEntities();
+      await waitForEntities();
     });
 
     afterEach(async () => {
       // Re-seed fresh entities for each test to avoid state leakage
       await cleanEntities();
       await seedEntities();
+      await waitForEntities();
     });
 
     after(async () => {
