@@ -28,6 +28,7 @@ import { SecurityPageName } from '../../../app/types';
 import { mockGetAppUrl, mockNavigateTo } from '@kbn/security-solution-navigation/mocks/navigation';
 import { APP_UI_ID } from '../../../../common';
 import { TestProviders } from '../../mock';
+import { getHostDetailsUrl } from '../link_to';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation');
 jest.mock('../navigation/use_url_state_query_params');
@@ -61,6 +62,10 @@ describe('Custom Links', () => {
   const ipv6Encoded = encodeIpv6(ipv6);
 
   describe('HostDetailsLink', () => {
+    const expectedHostDetailsHref = getHostDetailsUrl(hostName, undefined, undefined, {
+      'host.name': hostName,
+    });
+
     test('should render valid link to Host Details with hostName as the display text', () => {
       render(
         <TestProviders>
@@ -68,7 +73,7 @@ describe('Custom Links', () => {
         </TestProviders>
       );
       const link = screen.getByTestId('host-details-button');
-      expect(link).toHaveAttribute('href', `/name/${encodeURIComponent(hostName)}`);
+      expect(link).toHaveAttribute('href', expectedHostDetailsHref);
       expect(link).toHaveTextContent(hostName);
     });
 
@@ -79,7 +84,7 @@ describe('Custom Links', () => {
         </TestProviders>
       );
       const link = screen.getByTestId('host-details-button');
-      expect(link).toHaveAttribute('href', `/name/${encodeURIComponent(hostName)}`);
+      expect(link).toHaveAttribute('href', expectedHostDetailsHref);
       expect(link).toHaveTextContent(hostName);
     });
   });
