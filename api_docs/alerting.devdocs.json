@@ -1699,7 +1699,7 @@
         "label": "AlertingApiRequestHandlerContext",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 84,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1716,7 +1716,7 @@
               "AlertDeletionClient"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 88,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1742,7 +1742,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 89,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1761,7 +1761,7 @@
               "RulesSettingsClient"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1777,7 +1777,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-                "lineNumber": 90,
+                "lineNumber": 91,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1799,7 +1799,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1825,7 +1825,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 92,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1843,7 +1843,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 93,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1861,7 +1861,7 @@
         "label": "AlertingPlugin",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 423,
+        "lineNumber": 424,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1883,7 +1883,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 424,
+            "lineNumber": 425,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1905,7 +1905,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 425,
+            "lineNumber": 426,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1921,7 +1921,7 @@
         "label": "AlertingServerSetup",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-        "lineNumber": 138,
+        "lineNumber": 139,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1953,7 +1953,7 @@
               "<RuleActionParams, ConnectorParams>) => void"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 139,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1976,7 +1976,7 @@
                   "<RuleActionParams, ConnectorParams>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 143,
+                "lineNumber": 144,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2060,7 +2060,7 @@
               "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId, AlertData>) => void"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 145,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2083,7 +2083,7 @@
                   "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId, AlertData>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 155,
+                "lineNumber": 156,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2105,7 +2105,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 167,
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2130,7 +2130,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 168,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2149,7 +2149,7 @@
               " & { enabled: () => boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 169,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2172,7 +2172,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 170,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2190,7 +2190,7 @@
         "label": "AlertingServerStart",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-        "lineNumber": 173,
+        "lineNumber": 174,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2208,7 +2208,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 174,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2226,7 +2226,7 @@
               "() => string[]"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 175,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2310,7 +2310,7 @@
               "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId, AlertData>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 176,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2342,7 +2342,7 @@
               "(rulesTypes: string[], spaceId?: string | undefined) => string[]"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 177,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2397,7 +2397,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 178,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2414,7 +2414,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 178,
+                "lineNumber": 179,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2440,7 +2440,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 179,
+            "lineNumber": 180,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2457,7 +2457,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 184,
+                "lineNumber": 185,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2474,7 +2474,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 185,
+                "lineNumber": 186,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2512,7 +2512,7 @@
               ">>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 187,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2529,7 +2529,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 188,
+                "lineNumber": 189,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2557,7 +2557,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 190,
+            "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3020,7 +3020,7 @@
           "<Params>"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 226,
+        "lineNumber": 227,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3052,7 +3052,7 @@
               "<Params>>, \"viewInAppRelativeUrl\">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 227,
+            "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3068,7 +3068,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 230,
+            "lineNumber": 231,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3084,7 +3084,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 231,
+            "lineNumber": 232,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3110,7 +3110,7 @@
           "<AlertData>"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 253,
+        "lineNumber": 254,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3125,7 +3125,7 @@
               "\nSpecifies the target alerts-as-data resource\nfor this rule type. All alerts created with the same\ncontext are written to the same alerts-as-data index.\n\nAll custom mappings defined for a context must be the same!"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 254,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3143,7 +3143,7 @@
               "ComponentTemplateSpec"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 263,
+            "lineNumber": 264,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3161,7 +3161,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 270,
+            "lineNumber": 271,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3179,7 +3179,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 279,
+            "lineNumber": 280,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3197,7 +3197,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 284,
+            "lineNumber": 285,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3215,7 +3215,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 291,
+            "lineNumber": 292,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3233,7 +3233,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 298,
+            "lineNumber": 299,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3251,7 +3251,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 304,
+            "lineNumber": 305,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3270,7 +3270,7 @@
               "<AlertData> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 309,
+            "lineNumber": 310,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3668,7 +3668,7 @@
             "label": "monitoring",
             "description": [],
             "signature": [
-              "Readonly<{} & { run: Readonly<{} & { history: Readonly<{ outcome?: \"warning\" | \"succeeded\" | \"failed\" | undefined; duration?: number | undefined; } & { timestamp: number; success: boolean; }>[]; calculated_metrics: Readonly<{ p50?: number | undefined; p95?: number | undefined; p99?: number | undefined; } & { success_ratio: number; }>; last_run: Readonly<{} & { timestamp: string; metrics: Readonly<{ duration?: number | undefined; total_search_duration_ms?: number | null | undefined; total_indexing_duration_ms?: number | null | undefined; total_alerts_detected?: number | null | undefined; total_alerts_created?: number | null | undefined; gap_duration_s?: number | null | undefined; gap_range?: Readonly<{} & { gte: string; lte: string; }> | null | undefined; } & {}>; }>; }>; }> | undefined"
+              "Readonly<{} & { run: Readonly<{} & { history: Readonly<{ outcome?: \"warning\" | \"succeeded\" | \"failed\" | undefined; duration?: number | undefined; } & { timestamp: number; success: boolean; }>[]; calculated_metrics: Readonly<{ p50?: number | undefined; p95?: number | undefined; p99?: number | undefined; } & { success_ratio: number; }>; last_run: Readonly<{} & { timestamp: string; metrics: Readonly<{ duration?: number | undefined; total_search_duration_ms?: number | null | undefined; total_indexing_duration_ms?: number | null | undefined; total_alerts_detected?: number | null | undefined; total_alerts_created?: number | null | undefined; gap_duration_s?: number | null | undefined; gap_range?: Readonly<{} & { gte: string; lte: string; }> | null | undefined; gap_reason?: Readonly<{} & { type: string; }> | null | undefined; } & {}>; }>; }>; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/application/rule/types/rule.ts",
             "lineNumber": 76,
@@ -3902,7 +3902,7 @@
           "<Params, State, InstanceState, InstanceContext, ActionGroupIds, AlertData>"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 154,
+        "lineNumber": 155,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3915,7 +3915,7 @@
             "label": "executionId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 162,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3937,7 +3937,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 163,
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3953,7 +3953,7 @@
               "Params"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 164,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3969,7 +3969,7 @@
               "Date | null"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 165,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3993,7 +3993,7 @@
               "<never>, \"id\" | \"consumer\" | \"name\" | \"enabled\" | \"tags\" | \"actions\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\" | \"revision\" | \"alertDelay\" | \"lastEnabledAt\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 166,
+            "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4016,7 +4016,7 @@
               "<InstanceState, InstanceContext, ActionGroupIds, AlertData>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 167,
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4029,7 +4029,7 @@
             "label": "spaceId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 168,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4045,7 +4045,7 @@
               "Date"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 169,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4058,7 +4058,7 @@
             "label": "startedAtOverridden",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 170,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4074,7 +4074,7 @@
               "State"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 171,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4090,7 +4090,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 172,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4112,7 +4112,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 173,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4129,7 +4129,7 @@
               "GetTimeRangeResult"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 174,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4145,7 +4145,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-                "lineNumber": 174,
+                "lineNumber": 175,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4162,7 +4162,7 @@
             "label": "isServerless",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 175,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4178,7 +4178,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 176,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4204,7 +4204,7 @@
           "<State, Context, ActionGroupIds, AlertData>"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 108,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4223,7 +4223,7 @@
               "<AlertData, State, Context, ActionGroupIds> | null"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 114,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4245,7 +4245,7 @@
               "<State, Context, ActionGroupIds>, \"create\" | \"done\"> & { alertLimit: Pick<{ getValue: () => number; setLimitReached: (reached: boolean) => void; checkLimitUsage: () => void; }, \"getValue\" | \"setLimitReached\">; }"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 119,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -4336,7 +4336,7 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 125,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4360,7 +4360,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 129,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4378,7 +4378,7 @@
               "() => Promise<string[]>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 130,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4396,7 +4396,7 @@
               "() => Promise<string[]>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 131,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4422,7 +4422,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 132,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4441,7 +4441,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 133,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4458,7 +4458,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 134,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4474,7 +4474,7 @@
               "SavedObjectsClientContract"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 135,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4490,7 +4490,7 @@
               "IScopedClusterClient"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 136,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4512,7 +4512,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 137,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4528,7 +4528,7 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 138,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4546,7 +4546,7 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 139,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4564,7 +4564,7 @@
               "IUiSettingsClient"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 140,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4586,7 +4586,7 @@
               "<T>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 141,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4602,7 +4602,7 @@
                   "AsyncSearchStrategies"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-                "lineNumber": 142,
+                "lineNumber": 143,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4632,7 +4632,7 @@
           "<Params>"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 179,
+        "lineNumber": 180,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4649,7 +4649,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 180,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4665,7 +4665,7 @@
               "Params"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 181,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4691,7 +4691,7 @@
           "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId, AlertData>"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 315,
+        "lineNumber": 316,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4704,7 +4704,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 325,
+            "lineNumber": 326,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4717,7 +4717,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 326,
+            "lineNumber": 327,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4735,7 +4735,7 @@
               "<Params>; }"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 327,
+            "lineNumber": 328,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4759,7 +4759,7 @@
               "<any>; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 330,
+            "lineNumber": 331,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4782,7 +4782,7 @@
               "<ActionGroupIds>[]"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 341,
+            "lineNumber": 342,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4798,7 +4798,7 @@
               "ActionGroupIds"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 342,
+            "lineNumber": 343,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4821,7 +4821,7 @@
               "<RecoveryActionGroupId> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 343,
+            "lineNumber": 344,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4853,7 +4853,7 @@
               "<ActionGroupIds, RecoveryActionGroupId>, AlertData>) => Promise<{ state: State; }>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 344,
+            "lineNumber": 345,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4877,7 +4877,7 @@
                   "<Params, State, InstanceState, InstanceContext, ActionGroupIds, AlertData>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-                "lineNumber": 192,
+                "lineNumber": 193,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4892,7 +4892,7 @@
             "label": "category",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 356,
+            "lineNumber": 357,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4905,7 +4905,7 @@
             "label": "producer",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 357,
+            "lineNumber": 358,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4921,7 +4921,7 @@
               "\"stack\" | \"security\" | \"observability\""
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 358,
+            "lineNumber": 359,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4961,7 +4961,7 @@
               "[] | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 359,
+            "lineNumber": 360,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4977,7 +4977,7 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 364,
+            "lineNumber": 365,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5003,7 +5003,7 @@
               "[]) => Params; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 365,
+            "lineNumber": 366,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5016,7 +5016,7 @@
             "label": "isExportable",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 369,
+            "lineNumber": 370,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5032,7 +5032,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 370,
+            "lineNumber": 371,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5048,7 +5048,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 371,
+            "lineNumber": 372,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5064,7 +5064,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 372,
+            "lineNumber": 373,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5080,7 +5080,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 373,
+            "lineNumber": 374,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5103,7 +5103,7 @@
               "<AlertData> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 374,
+            "lineNumber": 375,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5121,7 +5121,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 375,
+            "lineNumber": 376,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5138,7 +5138,7 @@
               "<Params> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 380,
+            "lineNumber": 381,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5171,7 +5171,7 @@
               ".Normal | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 381,
+            "lineNumber": 382,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5189,7 +5189,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 386,
+            "lineNumber": 387,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5205,7 +5205,7 @@
         "label": "SummarizedAlertsChunk",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 211,
+        "lineNumber": 212,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5218,7 +5218,7 @@
             "label": "count",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 212,
+            "lineNumber": 213,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5235,7 +5235,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 213,
+            "lineNumber": 214,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5495,7 +5495,7 @@
           "<Params, State, InstanceState, InstanceContext, ActionGroupIds, AlertData>) => Promise<{ state: State; }>"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 184,
+        "lineNumber": 185,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5519,7 +5519,7 @@
               "<Params, State, InstanceState, InstanceContext, ActionGroupIds, AlertData>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 192,
+            "lineNumber": 193,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5571,7 +5571,7 @@
           "<Params>, \"id\">>"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 405,
+        "lineNumber": 406,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6011,7 +6011,7 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-        "lineNumber": 60,
+        "lineNumber": 59,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6028,7 +6028,7 @@
           "{ [x: string]: string[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 216,
+        "lineNumber": 217,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6078,7 +6078,7 @@
         "label": "DEFAULT_AAD_CONFIG",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-        "lineNumber": 247,
+        "lineNumber": 248,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6091,7 +6091,7 @@
             "label": "context",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 248,
+            "lineNumber": 249,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6104,7 +6104,7 @@
             "label": "mappings",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 249,
+            "lineNumber": 250,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6117,7 +6117,7 @@
                 "label": "fieldMap",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-                "lineNumber": 249,
+                "lineNumber": 250,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6136,7 +6136,7 @@
               "true"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "lineNumber": 250,
+            "lineNumber": 251,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8220,6 +8220,38 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.GapReason",
+        "type": "Interface",
+        "tags": [],
+        "label": "GapReason",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/constants/gap_reason.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.GapReason.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"rule_disabled\" | \"rule_did_not_run\""
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/common/constants/gap_reason.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.IExecutionErrors",
         "type": "Interface",
         "tags": [],
@@ -10215,7 +10247,7 @@
           "SavedObjectAttributes"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-        "lineNumber": 108,
+        "lineNumber": 107,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10231,7 +10263,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-            "lineNumber": 109,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10247,7 +10279,7 @@
               "number | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-            "lineNumber": 110,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10263,7 +10295,7 @@
               "number | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-            "lineNumber": 111,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10279,7 +10311,7 @@
               "number | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-            "lineNumber": 112,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10295,7 +10327,7 @@
               "number | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-            "lineNumber": 113,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10311,7 +10343,7 @@
               "number | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-            "lineNumber": 114,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10327,7 +10359,23 @@
               "{ lte: string; gte: string; } | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-            "lineNumber": 115,
+            "lineNumber": 114,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleMonitoringLastRunMetrics.gap_reason",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "gap_reason",
+            "description": [],
+            "signature": [
+              "{ type: string; } | null | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11856,6 +11904,23 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.GapReasonType",
+        "type": "Type",
+        "tags": [],
+        "label": "GapReasonType",
+        "description": [],
+        "signature": [
+          "\"rule_disabled\" | \"rule_did_not_run\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/constants/gap_reason.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.GapStatus",
         "type": "Type",
         "tags": [],
@@ -12620,7 +12685,7 @@
           "[]; dsl?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-        "lineNumber": 74,
+        "lineNumber": 73,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12644,7 +12709,7 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-        "lineNumber": 79,
+        "lineNumber": 78,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12698,7 +12763,7 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-        "lineNumber": 64,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12715,7 +12780,7 @@
           "\"unknown\" | \"success\" | \"warning\" | \"failure\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-        "lineNumber": 72,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12962,7 +13027,7 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-        "lineNumber": 80,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13017,7 +13082,7 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-        "lineNumber": 61,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13051,7 +13116,7 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-        "lineNumber": 60,
+        "lineNumber": 59,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13142,7 +13207,7 @@
           "<never>, \"id\" | \"consumer\" | \"name\" | \"enabled\" | \"tags\" | \"actions\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\" | \"revision\" | \"alertDelay\" | \"lastEnabledAt\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-        "lineNumber": 82,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -16196,6 +16261,25 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.gapReasonType",
+        "type": "Object",
+        "tags": [],
+        "label": "gapReasonType",
+        "description": [
+          "\nDescribes the detected reason for a rule execution gap.\n- rule_disabled: the gap was caused by a disable/enable cycle\n- rule_did_not_run: the gap cause is unknown or the rule failed to run for other reasons"
+        ],
+        "signature": [
+          "{ readonly RULE_DISABLED: \"rule_disabled\"; readonly RULE_DID_NOT_RUN: \"rule_did_not_run\"; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/constants/gap_reason.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.gapStatus",
         "type": "Object",
         "tags": [],
@@ -16280,7 +16364,7 @@
         "label": "RuleLastRunOutcomeOrderMap",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-        "lineNumber": 66,
+        "lineNumber": 65,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -16293,7 +16377,7 @@
             "label": "succeeded",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-            "lineNumber": 67,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -16306,7 +16390,7 @@
             "label": "warning",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-            "lineNumber": 68,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -16319,7 +16403,7 @@
             "label": "failed",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
-            "lineNumber": 69,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
