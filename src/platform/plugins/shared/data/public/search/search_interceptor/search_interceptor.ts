@@ -524,6 +524,7 @@ export class SearchInterceptor {
     const paramsToUse = request.id
       ? {
           wait_for_completion_timeout:
+            // don't set or override user-configured pollLength, it will be applied server-side
             !this.deps.searchConfig.asyncSearch.pollLength && this.protocolSupportsMultiplexing
               ? `${DEFAULT_MULTIPLEXING_POLL_LENGTH}ms`
               : undefined,

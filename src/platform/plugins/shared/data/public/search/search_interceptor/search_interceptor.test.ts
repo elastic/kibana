@@ -2638,5 +2638,74 @@ describe('SearchInterceptor', () => {
       // Should not have wait_for_completion_timeout
       expect(pollBody.params.wait_for_completion_timeout).toBeUndefined();
     });
+
+    test('should not set wait_for_completion_timeout when pollLength is set even if protocol supports multiplexing', async () => {
+      const interceptor = new SearchInterceptor({
+        toasts: mockCoreSetup.notifications.toasts,
+        startServices: new Promise((resolve) => {
+          resolve([
+            mockCoreStart,
+            { inspector: inspectorServiceMock } as unknown as SearchServiceStartDependencies,
+            {},
+          ]);
+        }),
+        uiSettings: mockCoreSetup.uiSettings,
+        http: mockCoreSetup.http,
+        executionContext: mockCoreSetup.executionContext,
+        session: sessionService,
+        searchConfig: {
+          asyncSearch: {
+            waitForCompletion: moment.duration(100, 'ms'),
+            keepAlive: moment.duration(1, 'm'),
+            batchedReduceSize: 64,
+            pollLength: moment.duration(1, 'm'), // Explicitly set
+          },
+          sessions: {
+            enabled: true,
+            defaultExpiration: moment.duration(7, 'd'),
+          },
+        } as any,
+      });
+      (interceptor as any).protocolSupportsMultiplexing = true;
+
+      const responses = [
+        {
+          time: 10,
+          value: getMockSearchResponse({
+            isPartial: true,
+            isRunning: true,
+            id: '1',
+            rawResponse: {},
+          }),
+        },
+        {
+          time: 20,
+          value: getMockSearchResponse({
+            isPartial: false,
+            isRunning: false,
+            id: '1',
+            rawResponse: {},
+          }),
+        },
+      ];
+
+      mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+
+      const response = interceptor.search({ params: {} }, { pollInterval: 0 });
+      response.subscribe({ next, error, complete });
+
+      await timeTravel(10);
+      await timeTravel(20);
+
+      expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+
+      const pollRequest = (
+        mockCoreSetup.http.post.mock.calls[1] as unknown as [string, HttpFetchOptions]
+      )[1];
+      const pollBody = JSON.parse(pollRequest?.body as string);
+
+      // Should not have wait_for_completion_timeout
+      expect(pollBody.params.wait_for_completion_timeout).toBeUndefined();
+    });
   });
 });
