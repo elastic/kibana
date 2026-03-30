@@ -39,7 +39,7 @@ const buildFilterQuery = (excludeEntityIds: string[], searchQuery: string): stri
   const must: object[] = [];
   if (searchQuery) {
     must.push({
-      query_string: {
+      simple_query_string: {
         query: `*${searchQuery}*`,
         fields: ['entity.name', 'entity.id'],
         default_operator: 'AND',
