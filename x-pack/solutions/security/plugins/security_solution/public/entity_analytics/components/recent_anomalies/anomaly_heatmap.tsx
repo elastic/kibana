@@ -14,12 +14,7 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingChart,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useIntervalForHeatmap } from './anomaly_heatmap_interval';
@@ -123,12 +118,9 @@ export const AnomalyHeatmap: React.FC<AnomalyHeatmapProps> = ({
       {isError && (
         <EuiCallOut
           announceOnMount
-          title={i18n.translate(
-            'xpack.securitySolution.entityAnalytics.anomalyHeatmap.dataError',
-            {
-              defaultMessage: 'There was an error retrieving anomaly data.',
-            }
-          )}
+          title={i18n.translate('xpack.securitySolution.entityAnalytics.anomalyHeatmap.dataError', {
+            defaultMessage: 'There was an error retrieving anomaly data.',
+          })}
           color="danger"
           iconType="error"
         />
