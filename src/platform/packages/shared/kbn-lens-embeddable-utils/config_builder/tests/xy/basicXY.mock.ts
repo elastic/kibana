@@ -1071,8 +1071,8 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
   type: 'xy',
   legend: {
     visibility: 'visible',
-    inside: true,
-    alignment: 'top_right',
+    placement: 'inside',
+    position: 'top_right',
   },
   fitting: {
     type: 'linear',
@@ -1084,7 +1084,9 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       },
       ticks: { visible: true },
       grid: { visible: true },
-      label_orientation: 'horizontal',
+      labels: {
+        orientation: 'horizontal',
+      },
     },
     left: {
       title: {
@@ -1092,7 +1094,9 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       },
       ticks: { visible: true },
       grid: { visible: true },
-      label_orientation: 'horizontal',
+      labels: {
+        orientation: 'horizontal',
+      },
     },
     right: {
       title: {
@@ -1100,7 +1104,9 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       },
       ticks: { visible: true },
       grid: { visible: true },
-      label_orientation: 'horizontal',
+      labels: {
+        orientation: 'horizontal',
+      },
     },
   },
   decorations: {
@@ -1156,7 +1162,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
   type: 'xy',
   legend: {
     visibility: 'visible',
-    inside: false,
+    placement: 'outside',
     position: 'bottom',
   },
   fitting: {
@@ -1169,7 +1175,9 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       },
       ticks: { visible: true },
       grid: { visible: true },
-      label_orientation: 'horizontal',
+      labels: {
+        orientation: 'horizontal',
+      },
     },
     left: {
       title: {
@@ -1177,7 +1185,9 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       },
       ticks: { visible: true },
       grid: { visible: true },
-      label_orientation: 'horizontal',
+      labels: {
+        orientation: 'horizontal',
+      },
     },
     right: {
       title: {
@@ -1185,7 +1195,9 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       },
       ticks: { visible: true },
       grid: { visible: true },
-      label_orientation: 'horizontal',
+      labels: {
+        orientation: 'horizontal',
+      },
     },
   },
   decorations: {

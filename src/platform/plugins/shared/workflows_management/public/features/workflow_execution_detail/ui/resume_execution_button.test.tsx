@@ -178,7 +178,7 @@ describe('ResumeExecutionButton', () => {
   });
 
   describe('submit', () => {
-    it('calls POST /api/workflowExecutions/{id}/resume with the submitted input', async () => {
+    it('calls POST /api/workflows/executions/{id}/resume with the submitted input', async () => {
       renderComponent();
       fireEvent.click(screen.getByTestId('provideActionButton'));
       await waitFor(() => expect(capturedOnSubmit).toBeDefined());
@@ -186,8 +186,9 @@ describe('ResumeExecutionButton', () => {
         capturedOnSubmit!({ stepInputs: { approved: true } });
       });
       await waitFor(() => {
-        expect(mockHttpPost).toHaveBeenCalledWith('/api/workflowExecutions/exec-123/resume', {
+        expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
           body: JSON.stringify({ input: { approved: true } }),
+          version: '2023-10-31',
         });
       });
     });

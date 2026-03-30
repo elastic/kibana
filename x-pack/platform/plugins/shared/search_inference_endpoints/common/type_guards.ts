@@ -12,6 +12,26 @@ import type {
   InferenceEndpointWithDisplayCreatorMetadata,
 } from './types';
 
+const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
+const KIBANA_CONNECTOR_HEURISTIC = 'kibana-connector';
+
+/**
+ * True when the endpoint is a chat-completion inference entry managed as a Kibana dynamic
+ * connector (see `filterPreconfiguredEndpoints` in server utils).
+ */
+export function isInferenceEndpointWithKibanaConnectorHeuristic(
+  endpoint: InferenceInferenceEndpointInfo
+): boolean {
+  if (endpoint.task_type !== CHAT_COMPLETION_TASK_TYPE) {
+    return false;
+  }
+  if (!isInferenceEndpointWithMetadata(endpoint)) {
+    return false;
+  }
+  const properties = endpoint.metadata?.heuristics?.properties;
+  return Array.isArray(properties) && properties.includes(KIBANA_CONNECTOR_HEURISTIC);
+}
+
 export function isInferenceEndpointWithMetadata(
   endpoint: InferenceInferenceEndpointInfo
 ): endpoint is InferenceEndpointWithMetadata {
