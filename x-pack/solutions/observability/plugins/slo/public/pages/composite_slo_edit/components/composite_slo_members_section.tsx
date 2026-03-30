@@ -192,7 +192,10 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
 
   const instanceOptions: EuiComboBoxOptionOption[] = [
     allInstancesOption,
-    ...(instances?.results ?? []).map((inst) => ({ label: inst.instanceId, value: inst.instanceId })),
+    ...(instances?.results ?? []).map((inst) => ({
+      label: inst.instanceId,
+      value: inst.instanceId,
+    })),
   ];
 
   return (
