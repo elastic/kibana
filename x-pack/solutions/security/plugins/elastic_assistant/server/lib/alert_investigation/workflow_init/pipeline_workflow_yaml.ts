@@ -23,6 +23,8 @@ description: >
   updates investigation cases, attaches alerts, triggers Attack Discovery,
   and tags alerts as processed.
 enabled: true
+consts:
+  connector_id: "31495789-7770-4e8e-bdfa-210c3763bc51"
 triggers:
   - type: manual
   - type: scheduled
@@ -83,6 +85,7 @@ steps:
           case_id: "{{steps.create_case.output.case.id}}"
           alert_ids: "{{foreach.item.alert_ids | json}}"
           index_pattern: .alerts-security.alerts-default
+          connector_id: "{{consts.connector_id}}"
           min_new_alerts: 1
       - name: add_ad_comment_new
         type: cases.addComment
@@ -105,6 +108,7 @@ steps:
           case_id: "{{foreach.item.existing_case_id}}"
           alert_ids: "{{foreach.item.alert_ids | json}}"
           index_pattern: .alerts-security.alerts-default
+          connector_id: "{{consts.connector_id}}"
           min_new_alerts: 1
       - name: add_ad_comment_existing
         type: cases.addComment

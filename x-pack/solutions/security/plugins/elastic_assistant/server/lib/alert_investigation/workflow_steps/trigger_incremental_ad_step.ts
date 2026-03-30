@@ -8,9 +8,66 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { extractEntitiesFromAlerts } from '../entity_extraction';
-import { fetchAlertsByIds, adaptWorkflowLogger } from '../utils';
 import { parseArrayInput } from './workflow_schema_helpers';
+
+/**
+ * Poll the AD _find API until discoveries appear for the given alert IDs.
+ * Returns an array of discovery document IDs for deep linking via ?id=.
+ */
+const pollForDiscoveries = async ({
+  kibanaUrl,
+  authHeaders,
+  alertIds,
+  maxAttempts,
+  intervalMs,
+  logger,
+}: {
+  kibanaUrl: string;
+  authHeaders: Record<string, string>;
+  alertIds: string[];
+  maxAttempts: number;
+  intervalMs: number;
+  logger: { info: (msg: string) => void; warn: (msg: string) => void };
+}): Promise<string[]> => {
+  const alertIdsParam = alertIds.slice(0, 20).join(',');
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+
+    try {
+      const findResponse = await fetch(
+        `${kibanaUrl}/api/attack_discovery/_find?alert_ids=${encodeURIComponent(
+          alertIdsParam
+        )}&per_page=10&sort_order=desc`,
+        { headers: authHeaders }
+      );
+
+      if (findResponse.ok) {
+        const findResult = await findResponse.json();
+        const discoveries = findResult.data ?? [];
+
+        if (discoveries.length > 0) {
+          const ids = discoveries.map((d: { id?: string }) => d.id).filter(Boolean) as string[];
+          logger.info(
+            `Found ${ids.length} AD discoveries after ${attempt} poll(s) for case alerts`
+          );
+          return ids;
+        }
+      }
+    } catch {
+      // Non-critical — continue polling
+    }
+
+    if (attempt % 3 === 0) {
+      logger.info(`Polling for AD results... attempt ${attempt}/${maxAttempts}`);
+    }
+  }
+
+  logger.warn(
+    `AD discoveries not found after ${maxAttempts} polls — generation may still be running`
+  );
+  return [];
+};
 
 export const TriggerIncrementalAdStepId = 'security.triggerIncrementalAd';
 
@@ -46,8 +103,11 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
   inputSchema: TriggerAdInputSchema,
   outputSchema: TriggerAdOutputSchema,
   handler: async (context) => {
-    const { min_new_alerts, index_pattern: indexPattern, connector_id: connectorId } =
-      context.input;
+    const {
+      min_new_alerts,
+      index_pattern: indexPattern,
+      connector_id: connectorId,
+    } = context.input;
     const caseId = String(context.input.case_id);
     const alertIds = parseArrayInput(context.input.alert_ids);
 
@@ -67,8 +127,7 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
     if (connectorId) {
       try {
         const request = context.contextManager.getFakeRequest();
-        const kibanaUrl =
-          context.contextManager.getContext()?.kibanaUrl ?? 'http://localhost:5601';
+        const kibanaUrl = context.contextManager.getContext()?.kibanaUrl ?? 'http://localhost:5601';
 
         context.logger.info(
           `Calling AD generation API for case ${caseId} with connector ${connectorId} and ${alertIds.length} alerts`
@@ -125,12 +184,32 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
 
         if (adResponse.ok) {
           const adResult = await adResponse.json();
+          const executionUuid = adResult.execution_uuid ?? adResult.executionUuid;
 
-          if (adResult.execution_uuid) {
-            // AD generation is async — it returns an execution UUID
+          if (executionUuid) {
             context.logger.info(
-              `AD generation triggered for case ${caseId}, execution: ${adResult.execution_uuid}`
+              `AD generation triggered for case ${caseId}, execution: ${executionUuid}`
             );
+
+            // Poll for completed discoveries to get document IDs for deep linking
+            const discoveryIds = await pollForDiscoveries({
+              kibanaUrl,
+              authHeaders,
+              alertIds,
+              maxAttempts: 18,
+              intervalMs: 10_000,
+              logger: context.logger,
+            });
+
+            const adLink =
+              discoveryIds.length > 0
+                ? `/app/security/attack_discovery?id=${discoveryIds.join(',')}`
+                : `/app/security/attack_discovery`;
+
+            const discoveryLinks =
+              discoveryIds.length > 0
+                ? `[View Attack Discovery Results](${adLink})`
+                : `[View Attack Discovery](/app/security/attack_discovery) *(generation in progress)*`;
 
             return {
               output: {
@@ -138,197 +217,96 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
                 triggered: true,
                 alert_count: alertIds.length,
                 summary:
-                  `## Attack Discovery Triggered\n\n` +
-                  `Attack Discovery generation has been initiated for this case with **${alertIds.length} alert(s)**.\n\n` +
-                  `View results: [Attack Discovery](/app/security/attack_discovery)\n\n` +
+                  `## Attack Discovery\n\n` +
+                  `Attack Discovery analysis completed for **${alertIds.length} alert(s)**.\n\n` +
+                  `${discoveryLinks}\n\n` +
                   `| Detail | Value |\n|--------|-------|\n` +
-                  `| Execution | \`${adResult.execution_uuid}\` |\n` +
+                  `| Discoveries | ${discoveryIds.length} |\n` +
                   `| Connector | \`${connectorId}\` |\n` +
-                  `| Alerts | ${alertIds.length} |\n` +
-                  `| Case | \`${caseId}\` |\n\n` +
+                  `| Alerts analyzed | ${alertIds.length} |\n\n` +
                   `---\n*Generated by Alert Investigation Pipeline*`,
               },
             };
           }
 
           // Synchronous response with discoveries
-          const discoveries = adResult.attackDiscoveries ?? [];
-          const summary = discoveries.length > 0
-            ? discoveries.map((d: { title: string; summaryMarkdown: string }) =>
-                `### ${d.title}\n${d.summaryMarkdown}`
-              ).join('\n\n')
-            : '*No attack discoveries generated from the provided alerts.*';
+          const discoveries = adResult.attackDiscoveries ?? adResult.data ?? [];
+          const discoveryIds = discoveries.map((d: { id?: string }) => d.id).filter(Boolean);
+
+          const adLink =
+            discoveryIds.length > 0
+              ? `/app/security/attack_discovery?id=${discoveryIds.join(',')}`
+              : `/app/security/attack_discovery`;
+
+          const summary =
+            discoveries.length > 0
+              ? discoveries
+                  .map(
+                    (d: { title: string; summaryMarkdown: string }) =>
+                      `### ${d.title}\n${d.summaryMarkdown}`
+                  )
+                  .join('\n\n')
+              : '*No attack discoveries generated from the provided alerts.*';
 
           return {
             output: {
               case_id: caseId,
               triggered: true,
               alert_count: alertIds.length,
-              summary: `## Attack Discovery\n\n${summary}`,
+              summary:
+                `## Attack Discovery\n\n${summary}\n\n` +
+                `[View on Attack Discovery page](${adLink})`,
             },
           };
         }
 
-        context.logger.warn(
-          `AD generation API returned ${adResponse.status}: ${await adResponse.text().catch(() => 'unknown')}, falling back to metadata summary`
-        );
+        const statusText = await adResponse.text().catch(() => 'unknown');
+        context.logger.warn(`AD generation API returned ${adResponse.status}: ${statusText}`);
+
+        return {
+          output: {
+            case_id: caseId,
+            triggered: false,
+            alert_count: alertIds.length,
+            summary:
+              `## Attack Discovery Failed\n\n` +
+              `AD generation returned HTTP ${adResponse.status} for **${alertIds.length} alert(s)**.\n\n` +
+              `[Open Attack Discovery](/app/security/attack_discovery)\n\n` +
+              `---\n*Generated by Alert Investigation Pipeline*`,
+            reason: `AD API returned ${adResponse.status}`,
+          },
+        };
       } catch (err) {
-        context.logger.warn(
-          `AD generation API call failed: ${err instanceof Error ? err.message : err}. Falling back to metadata summary`
-        );
+        const errMsg = err instanceof Error ? err.message : String(err);
+        context.logger.warn(`AD generation API call failed: ${errMsg}`);
+
+        return {
+          output: {
+            case_id: caseId,
+            triggered: false,
+            alert_count: alertIds.length,
+            summary:
+              `## Attack Discovery Failed\n\n` +
+              `AD generation failed: ${errMsg}\n\n` +
+              `[Open Attack Discovery](/app/security/attack_discovery)\n\n` +
+              `---\n*Generated by Alert Investigation Pipeline*`,
+            reason: errMsg,
+          },
+        };
       }
     }
 
-    // Fallback: generate summary from alert metadata
-    const esClient = context.contextManager.getScopedEsClient();
-    const logger = adaptWorkflowLogger(context.logger);
-    const alerts = await fetchAlertsByIds({ esClient, indexPattern, alertIds, logger });
-    const extraction = extractEntitiesFromAlerts({ alerts, logger });
-
-    // Fetch previous AD comments from the case for incremental context
-    let previousAdSummaries: string[] = [];
-    try {
-      const fakeRequest = context.contextManager.getFakeRequest();
-      const kibanaUrl = context.contextManager.getContext()?.kibanaUrl ?? 'http://localhost:5601';
-      const headers: Record<string, string> = { 'kbn-xsrf': 'true' };
-      if (fakeRequest.headers.authorization) {
-        headers.Authorization = fakeRequest.headers.authorization as string;
-      }
-
-      const commentsResponse = await fetch(
-        `${kibanaUrl}/api/cases/${caseId}/comments/_find?perPage=20&sortOrder=desc`,
-        { headers }
-      );
-
-      if (commentsResponse.ok) {
-        const commentsData = await commentsResponse.json();
-        previousAdSummaries = (commentsData.comments ?? [])
-          .filter(
-            (c: { type: string; comment?: string }) =>
-              c.type === 'user' &&
-              c.comment?.includes('Attack Discovery')
-          )
-          .map((c: { comment: string }) => c.comment);
-
-        if (previousAdSummaries.length > 0) {
-          context.logger.info(
-            `Found ${previousAdSummaries.length} previous AD summaries for case ${caseId}`
-          );
-        }
-      }
-    } catch {
-      // Non-critical — proceed without previous context
-    }
-
-    const ruleNames = new Map<string, number>();
-    for (const alert of alerts) {
-      const ruleName =
-        (alert._source['kibana.alert.rule.name'] as string) ?? 'Unknown Rule';
-      ruleNames.set(ruleName, (ruleNames.get(ruleName) ?? 0) + 1);
-    }
-
-    const entityByType = new Map<string, Set<string>>();
-    for (const entity of extraction.entities) {
-      if (!entityByType.has(entity.typeKey)) {
-        entityByType.set(entity.typeKey, new Set());
-      }
-      entityByType.get(entity.typeKey)!.add(entity.value);
-    }
-
-    const isIncremental = previousAdSummaries.length > 0;
-
-    const lines: string[] = [
-      isIncremental
-        ? `## Incremental Attack Discovery Update`
-        : `## Attack Discovery Summary`,
-      ``,
-      `**${alertIds.length} new alert(s)** analyzed for case \`${caseId}\`.`,
-      ``,
-    ];
-
-    if (isIncremental) {
-      lines.push(
-        `> **This is an incremental update.** ${previousAdSummaries.length} previous AD analysis(es) exist for this case. ` +
-        `The attack is evolving — compare new findings below with prior analysis.`,
-        ``
-      );
-    }
-
-    lines.push(
-      `### New Detection Rules`,
-      ...Array.from(ruleNames.entries()).map(
-        ([name, count]) => `- **${name}** (${count} alert${count > 1 ? 's' : ''})`
-      ),
-      ``,
-      `### New Entities Observed`,
-      ...Array.from(entityByType.entries()).map(
-        ([type, values]) =>
-          `- **${type}**: ${Array.from(values).slice(0, 5).join(', ')}${values.size > 5 ? ` (+${values.size - 5} more)` : ''}`
-      ),
-      ``
-    );
-
-    if (isIncremental) {
-      // Extract rule names from previous summaries for comparison
-      const prevRules = new Set<string>();
-      for (const prev of previousAdSummaries) {
-        const matches = prev.matchAll(/\*\*([^*]+)\*\* \(\d+ alert/g);
-        for (const m of matches) {
-          prevRules.add(m[1]);
-        }
-      }
-
-      const newRules = Array.from(ruleNames.keys()).filter((r) => !prevRules.has(r));
-      const continuingRules = Array.from(ruleNames.keys()).filter((r) => prevRules.has(r));
-
-      if (newRules.length > 0) {
-        lines.push(
-          `### ⚠️ New Attack Techniques (not seen in previous analysis)`,
-          ...newRules.map((r) => `- **${r}**`),
-          ``
-        );
-      }
-
-      if (continuingRules.length > 0) {
-        lines.push(
-          `### Continuing Attack Patterns`,
-          ...continuingRules.map((r) => `- ${r} (seen in previous analysis)`),
-          ``
-        );
-      }
-
-      lines.push(
-        `### Attack Timeline`,
-        `- **Previous**: ${previousAdSummaries.length} analysis run(s) completed`,
-        `- **Current**: ${alertIds.length} new alert(s) detected`,
-        `- **Assessment**: Attack is ${newRules.length > 0 ? '**escalating** — new techniques observed' : 'continuing with known patterns'}`,
-        ``
-      );
-    }
-
-    lines.push(
-      `### Recommended Actions`,
-      `1. Review the ${ruleNames.size} detection rule${ruleNames.size > 1 ? 's' : ''} that triggered`,
-      `2. Investigate the ${entityByType.get('hostname')?.size ?? 0} affected host(s)`,
-      `3. Check threat intelligence for extracted IOCs`,
-      ...(isIncremental ? [`4. Compare with previous AD analysis in this case timeline`] : []),
-      ``,
-      `---`,
-      `*Generated by Alert Investigation Pipeline${isIncremental ? ' (incremental update)' : ''}*`,
-    );
-
-    const summary = lines.join('\n');
-
-    context.logger.info(
-      `Generated metadata-based AD for case ${caseId}: ${alertIds.length} alerts, ${ruleNames.size} rules`
-    );
-
+    // No connector_id — cannot generate AD
     return {
       output: {
         case_id: caseId,
-        triggered: true,
+        triggered: false,
         alert_count: alertIds.length,
-        summary,
+        summary:
+          `## Attack Discovery Skipped\n\n` +
+          `No connector configured. Set \`connector_id\` in the workflow to enable AD generation.\n\n` +
+          `---\n*Generated by Alert Investigation Pipeline*`,
+        reason: 'No connector_id configured',
       },
     };
   },

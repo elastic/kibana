@@ -239,6 +239,9 @@ def generate_alerts(count: int, seed: int = 42) -> list:
             "url.full": f"https://{dest_domain}/path/{file_hash[:8]}",
             "event.action": action,
             "event.category": scenario["categories"],
+            # Fields required by Cases plugin updateAlertsStatus
+            "signal.status": "open",
+            "kibana.alert.workflow_status_updated_at": ts.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
         }
 
         alerts.append({"_id": f"demo-{i:04d}", "_source": alert})
@@ -331,6 +334,9 @@ def ensure_index():
                 "url.full": {"type": "keyword"},
                 "event.action": {"type": "keyword"},
                 "event.category": {"type": "keyword"},
+                "signal.status": {"type": "keyword"},
+                "kibana.alert.workflow_status_updated_at": {"type": "date"},
+                "kibana.alert.workflow_reason": {"type": "keyword"},
             }
         },
     }

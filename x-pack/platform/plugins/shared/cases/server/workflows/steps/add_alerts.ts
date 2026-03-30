@@ -12,6 +12,7 @@ import {
   type AddAlertsStepInput,
 } from '../../../common/workflows/steps/add_alerts';
 import { AttachmentType } from '../../../common';
+import { MAX_BULK_CREATE_ATTACHMENTS } from '../../../common/constants';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
 
@@ -55,19 +56,25 @@ export const addAlertsStepDefinition = (
       const alerts = parseAlertsInput(input.alerts);
 
       return withCaseOwner(client, input.case_id, async (owner) => {
-        const updatedCase = await client.attachments.bulkCreate({
-          caseId: input.case_id,
-          attachments: alerts.map((alert) => ({
-            type: AttachmentType.alert,
-            alertId: alert.alertId,
-            index: alert.index,
-            owner,
-            rule: {
-              id: alert.rule?.id ?? null,
-              name: alert.rule?.name ?? null,
-            },
-          })),
-        });
+        const attachments = alerts.map((alert) => ({
+          type: AttachmentType.alert as const,
+          alertId: alert.alertId,
+          index: alert.index,
+          owner,
+          rule: {
+            id: alert.rule?.id ?? null,
+            name: alert.rule?.name ?? null,
+          },
+        }));
+
+        // Chunk to respect MAX_BULK_CREATE_ATTACHMENTS limit
+        let updatedCase;
+        for (let i = 0; i < attachments.length; i += MAX_BULK_CREATE_ATTACHMENTS) {
+          updatedCase = await client.attachments.bulkCreate({
+            caseId: input.case_id,
+            attachments: attachments.slice(i, i + MAX_BULK_CREATE_ATTACHMENTS),
+          });
+        }
 
         return safeParseCaseForWorkflowOutput(
           addAlertsStepCommonDefinition.outputSchema.shape.case,
