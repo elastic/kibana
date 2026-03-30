@@ -9,7 +9,14 @@ import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { useLocation } from 'react-router-dom';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
@@ -390,8 +397,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           </div>
         ) : (
           <>
-          {description}
-          <EuiSpacer size="m" />
+            {description}
+            <EuiSpacer size="m" />
             <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
               <EuiFlexItem grow={true}>
                 <SearchExceptions
