@@ -26,7 +26,7 @@ describe('fetchAlertingEpisodes', () => {
     jest.clearAllMocks();
   });
 
-  it('should call executeEsqlQuery with correct parameters for first page', () => {
+  it('should call executeEsqlQuery with correct parameters', () => {
     const pageSize = 10;
     const expectedQuery = buildEpisodesQuery({
       sortField: '@timestamp',
@@ -47,11 +47,6 @@ describe('fetchAlertingEpisodes', () => {
         type: 'kibana_context',
         esqlVariables: [
           {
-            key: 'lastEpisodeTimestamp',
-            value: null,
-            type: ESQLVariableType.VALUES,
-          },
-          {
             key: 'pageSize',
             value: pageSize,
             type: ESQLVariableType.VALUES,
@@ -62,9 +57,8 @@ describe('fetchAlertingEpisodes', () => {
     });
   });
 
-  it('should call executeEsqlQuery with correct parameters when beforeTimestamp is provided', () => {
+  it('should call executeEsqlQuery with different page size', () => {
     const pageSize = 20;
-    const beforeTimestamp = '2024-01-15T10:30:00.000Z';
     const expectedQuery = buildEpisodesQuery({
       sortField: '@timestamp',
       sortDirection: 'desc',
@@ -72,7 +66,6 @@ describe('fetchAlertingEpisodes', () => {
 
     fetchAlertingEpisodes({
       pageSize,
-      beforeTimestamp,
       services: { expressions: mockExpressions },
       dataView: mockDataView,
     });
@@ -84,11 +77,6 @@ describe('fetchAlertingEpisodes', () => {
       input: {
         type: 'kibana_context',
         esqlVariables: [
-          {
-            key: 'lastEpisodeTimestamp',
-            value: beforeTimestamp,
-            type: ESQLVariableType.VALUES,
-          },
           {
             key: 'pageSize',
             value: pageSize,
@@ -124,11 +112,6 @@ describe('fetchAlertingEpisodes', () => {
         type: 'kibana_context',
         esqlVariables: [
           {
-            key: 'lastEpisodeTimestamp',
-            value: null,
-            type: ESQLVariableType.VALUES,
-          },
-          {
             key: 'pageSize',
             value: pageSize,
             type: ESQLVariableType.VALUES,
@@ -139,20 +122,17 @@ describe('fetchAlertingEpisodes', () => {
     });
   });
 
-  it('should call executeEsqlQuery with all parameters provided', () => {
+  it('should call executeEsqlQuery with custom sort parameters', () => {
     const pageSize = 25;
-    const beforeTimestamp = '2024-02-20T15:45:30.000Z';
-    const abortController = new AbortController();
-    const abortSignal = abortController.signal;
-    const expectedQuery = buildEpisodesQuery({
-      sortField: '@timestamp',
-      sortDirection: 'desc',
-    }).print('basic');
+    const sortState = {
+      sortField: 'episode.status',
+      sortDirection: 'asc' as const,
+    };
+    const expectedQuery = buildEpisodesQuery(sortState).print('basic');
 
     fetchAlertingEpisodes({
       pageSize,
-      beforeTimestamp,
-      abortSignal,
+      sortState,
       services: { expressions: mockExpressions },
       dataView: mockDataView,
     });
@@ -165,18 +145,13 @@ describe('fetchAlertingEpisodes', () => {
         type: 'kibana_context',
         esqlVariables: [
           {
-            key: 'lastEpisodeTimestamp',
-            value: beforeTimestamp,
-            type: ESQLVariableType.VALUES,
-          },
-          {
             key: 'pageSize',
             value: pageSize,
             type: ESQLVariableType.VALUES,
           },
         ],
       },
-      abortSignal,
+      abortSignal: undefined,
     });
   });
 });

@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import {
-  buildEpisodesBaseQuery,
-  buildEpisodesQuery,
-  buildEpisodesCountQuery,
-} from './build_episodes_esql_query';
-import {
-  LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE,
-  PAGE_SIZE_ESQL_VARIABLE,
-  ALERT_EVENTS_DATA_STREAM,
-} from '../constants';
+import { buildEpisodesBaseQuery, buildEpisodesQuery } from './build_episodes_esql_query';
+import { PAGE_SIZE_ESQL_VARIABLE, ALERT_EVENTS_DATA_STREAM } from '../constants';
 
 describe('buildEpisodesBaseQuery', () => {
   it('should build query with correct structure', () => {
@@ -26,11 +18,6 @@ describe('buildEpisodesBaseQuery', () => {
 
     // Filters for alert type events
     expect(queryString).toContain('type == "alert"');
-
-    // Contains the correct timestamp-based cursor WHERE clause
-    expect(queryString).toContain(`?${LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE}`);
-    expect(queryString).toContain('IS NULL');
-    expect(queryString).toContain('@timestamp <');
 
     // Contains the correct INLINE STATS and grouping
     expect(queryString).toContain('INLINE STATS');
@@ -49,7 +36,7 @@ describe('buildEpisodesBaseQuery', () => {
   });
 });
 
-describe('buildEpisodesPaginatedQuery', () => {
+describe('buildEpisodesQuery', () => {
   it('should build query with default sort', () => {
     const query = buildEpisodesQuery();
     const queryString = query.print('basic');
@@ -99,27 +86,5 @@ describe('buildEpisodesPaginatedQuery', () => {
 
       expect(queryString).toMatch(new RegExp(`SORT \`?${field.replace('.', '\\.')}\`? ASC`));
     });
-  });
-});
-
-describe('buildEpisodesCountQuery', () => {
-  it('should build count query with correct structure', () => {
-    const query = buildEpisodesCountQuery();
-    const queryString = query.print('basic');
-
-    // Starts from the correct base query (alert events, not episodes base)
-    expect(queryString).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM}`);
-    expect(queryString).toContain('type == "alert"');
-
-    // Should NOT contain pagination structures
-    expect(queryString).not.toContain('LIMIT');
-    expect(queryString).not.toContain(PAGE_SIZE_ESQL_VARIABLE);
-
-    // Should NOT contain the episodes aggregation logic
-    expect(queryString).not.toContain('INLINE STATS');
-    expect(queryString).not.toContain('duration');
-
-    // Calculates the total count of episodes
-    expect(queryString).toContain('STATS total = COUNT_DISTINCT(episode.id)');
   });
 });
