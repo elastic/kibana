@@ -8194,6 +8194,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/plugin-di@link:src/core/packages/di/plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/plugin-generator@link:packages/kbn-plugin-generator":
   version "0.0.0"
   uid ""
