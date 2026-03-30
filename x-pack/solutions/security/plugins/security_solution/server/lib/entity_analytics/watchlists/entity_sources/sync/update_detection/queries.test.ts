@@ -11,7 +11,7 @@ describe('Watchlist sync queries', () => {
   describe('buildIndexSourceSearchBody', () => {
     it('constructs search body with terms filter on identifier field', () => {
       const searchBody = buildIndexSourceSearchBody('user.name', ['jdoe', 'admin']);
-      expect(searchBody.size).toBe(1000);
+      expect(searchBody.size).toBe(0);
       expect(searchBody.query?.bool?.must).toContainEqual({
         terms: { 'user.name': ['jdoe', 'admin'] },
       });
@@ -57,7 +57,7 @@ describe('Watchlist sync queries', () => {
   describe('buildEntitiesSearchBody', () => {
     it('constructs the correct search body with default page size', () => {
       const searchBody = buildEntitiesSearchBody('user');
-      expect(searchBody.size).toBe(1000);
+      expect(searchBody.size).toBe(0);
       expect(searchBody.aggs?.entities?.composite?.size).toBe(100);
       expect(searchBody.aggs?.entities?.composite?.sources).toEqual([
         { euid: { terms: { field: 'euid' } } },
