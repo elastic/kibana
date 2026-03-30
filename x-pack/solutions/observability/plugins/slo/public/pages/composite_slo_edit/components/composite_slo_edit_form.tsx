@@ -7,7 +7,6 @@
 
 import { EuiCallOut, EuiFlexGroup, EuiSpacer, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { COMPOSITE_SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
@@ -36,12 +35,7 @@ export function CompositeSloEditForm({ initialValues, compositeSloId, isEditMode
 
   const isMembersSectionValid =
     members.length > 0 &&
-    members.every((m) => {
-      const isGrouped = [m.groupBy].flat().some((g) => g !== ALL_VALUE);
-      return (
-        Number.isInteger(m.weight) && m.weight >= 1 && (!isGrouped || m.instanceId !== ALL_VALUE)
-      );
-    });
+    members.every((m) => Number.isInteger(m.weight) && m.weight >= 1);
   const isObjectiveSectionValid =
     formState.isValid ||
     (!formState.errors.timeWindow && !formState.errors.objective && isMembersSectionValid);

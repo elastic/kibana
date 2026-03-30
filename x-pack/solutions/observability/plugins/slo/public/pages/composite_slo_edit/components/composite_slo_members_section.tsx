@@ -179,13 +179,26 @@ function MemberRow({ index, members, onRemove }: MemberRowProps) {
 
   const isGrouped = [groupBy].flat().some((g) => g !== ALL_VALUE);
 
-  // If the member SLO's groupBy was removed after the composite was created, reset
-  // the stale instanceId so it is not silently sent to the API.
+  // If the member SLO's groupBy was removed after the composite was created, the
+  // stored instanceId must not be silently sent to the API. When multiple members
+  // share the same sloId (they were added with different instances), collapsing them
+  // to ALL_VALUE would create duplicates the backend rejects — so only the first
+  // occurrence survives; higher-index duplicates are removed instead.
+  // If the member SLO's groupBy was removed after the composite was created, the
+  // stored instanceId must not be silently sent to the API. When multiple members
+  // share the same sloId (they were added with different instances), collapsing them
+  // to ALL_VALUE would create duplicates the backend rejects — so only the first
+  // occurrence survives; higher-index duplicates are removed instead.
   useEffect(() => {
-    if (!isGrouped) {
-      setValue(`members.${index}.instanceId`, ALL_VALUE);
+    if (!isGrouped && members[index]?.instanceId !== ALL_VALUE) {
+      const firstMatchIndex = members.findIndex((m, i) => i !== index && m.sloId === sloId);
+      if (firstMatchIndex !== -1 && firstMatchIndex < index) {
+        onRemove();
+      } else {
+        setValue(`members.${index}.instanceId`, ALL_VALUE);
+      }
     }
-  }, [isGrouped, index, setValue]);
+  }, [isGrouped, index, members, sloId, setValue, onRemove]);
 
   const { data: instances, isLoading: isLoadingInstances } = useFetchSloInstances({
     sloId,
@@ -219,33 +232,24 @@ function MemberRow({ index, members, onRemove }: MemberRowProps) {
           <Controller
             name={`members.${index}.instanceId`}
             control={control}
-            rules={{ validate: (v) => v !== ALL_VALUE }}
-            render={({ field: { value, onChange }, fieldState }) => {
+            render={({ field: { value, onChange } }) => {
               const selected = instanceOptions.filter((opt) => opt.value === value);
               return (
-                <EuiFormRow
-                  isInvalid={fieldState.invalid}
-                  error={
-                    fieldState.invalid
-                      ? i18n.translate('xpack.slo.compositeSloEdit.members.instanceId.required', {
-                          defaultMessage: 'Select a specific instance.',
-                        })
-                      : undefined
-                  }
-                >
-                  <EuiComboBox
-                    fullWidth
-                    singleSelection={{ asPlainText: true }}
-                    isLoading={isLoadingInstances}
-                    isInvalid={fieldState.invalid}
-                    options={availableInstanceOptions}
-                    selectedOptions={selected}
-                    onChange={(opts) => onChange(opts[0]?.value ?? ALL_VALUE)}
-                    isClearable={false}
-                    compressed
-                    data-test-subj={`compositeSloMemberInstanceComboBox-${index}`}
-                  />
-                </EuiFormRow>
+                <EuiComboBox
+                  fullWidth
+                  singleSelection={{ asPlainText: true }}
+                  isLoading={isLoadingInstances}
+                  options={availableInstanceOptions}
+                  selectedOptions={selected}
+                  onChange={(opts) => onChange(opts[0]?.value ?? ALL_VALUE)}
+                  isClearable={true}
+                  compressed
+                  placeholder={i18n.translate(
+                    'xpack.slo.compositeSloEdit.members.instanceId.allInstances',
+                    { defaultMessage: 'All instances' }
+                  )}
+                  data-test-subj={`compositeSloMemberInstanceComboBox-${index}`}
+                />
               );
             }}
           />
