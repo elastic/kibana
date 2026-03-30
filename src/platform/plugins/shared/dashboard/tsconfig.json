@@ -118,6 +118,7 @@
     "@kbn/code-editor-mock",
     "@kbn/monaco",
     "@kbn/code-editor",
+    "@kbn/as-code-shared-schemas",
   ],
   "exclude": ["target/**/*"]
 }

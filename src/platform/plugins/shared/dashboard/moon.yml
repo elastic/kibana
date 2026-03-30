@@ -120,6 +120,7 @@ dependsOn:
   - '@kbn/code-editor-mock'
   - '@kbn/monaco'
   - '@kbn/code-editor'
+  - '@kbn/as-code-shared-schemas'
 tags:
   - plugin
   - prod
@@ -138,26 +139,6 @@ fileGroups:
     - test/scout_oas_schema/**/*.json
     - test/scout_anonymous_authc/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}
