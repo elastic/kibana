@@ -45,10 +45,7 @@ export { apiServicesFixture } from './fixtures/scope/worker/apis';
 export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
 
 // Other worker types
-export type {
-  SamlAuth,
-  RequestAuthFixture,
-} from './fixtures/scope/worker';
+export type { SamlAuth, RequestAuthFixture } from './fixtures/scope/worker';
 
 // Tagging utility
 export { tags } from './tags';
