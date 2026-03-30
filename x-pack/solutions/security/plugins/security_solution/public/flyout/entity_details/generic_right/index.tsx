@@ -76,6 +76,10 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
   // of the union type constraints and infers them as potentially undefined
   const { getGenericEntity } = useGetGenericEntity(params);
   const genericInsightsValue = getGenericEntity.data?._source?.entity.id;
+  const identityFields = useMemo(
+    () => ({ 'related.entity': genericInsightsValue || '' }),
+    [genericInsightsValue]
+  );
   const { getAssetCriticality } = useGenericEntityCriticality({
     enabled: !!genericInsightsValue,
     idField: EntityIdentifierFields.generic,
@@ -84,8 +88,7 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
   });
 
   const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
-    insightsField: 'related.entity',
-    insightsValue: genericInsightsValue || '',
+    identityFields,
     ...params,
   });
 
@@ -214,8 +217,7 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
       <GenericEntityFlyoutContent
         source={source}
         openGenericEntityDetailsPanelByPath={openGenericEntityDetailsPanelByPath}
-        insightsField={'related.entity'}
-        insightsValue={source.entity.id}
+        identityFields={identityFields}
         onAssetCriticalityChange={calculateEntityRiskScore}
       />
       <GenericEntityFlyoutFooter

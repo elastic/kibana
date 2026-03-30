@@ -1922,10 +1922,10 @@
         "label": "paletteIds",
         "description": [],
         "signature": [
-          "string[]"
+          "SystemPaletteId[]"
         ],
         "path": "src/platform/plugins/shared/charts/common/constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2830,10 +2830,10 @@
         "label": "paletteIds",
         "description": [],
         "signature": [
-          "string[]"
+          "SystemPaletteId[]"
         ],
         "path": "src/platform/plugins/shared/charts/common/constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3816,7 +3816,7 @@
           "string[]"
         ],
         "path": "src/platform/plugins/shared/charts/common/constants.ts",
-        "lineNumber": 28,
+        "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3847,10 +3847,10 @@
         "label": "paletteIds",
         "description": [],
         "signature": [
-          "string[]"
+          "SystemPaletteId[]"
         ],
         "path": "src/platform/plugins/shared/charts/common/constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
