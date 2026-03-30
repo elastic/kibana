@@ -25,6 +25,7 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
   const isServerless = config.get('serverless');
+  const username = isServerless ? 'elastic_admin' : 'elastic';
   const superuserRole = isServerless ? 'admin' : 'elastic';
 
   const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
@@ -79,7 +80,7 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
           });
 
           describe('functionality', () => {
-            it('should store the opt-in status in reference data', async () => {
+            it('should store the opt-in status, reason, user, and timestamp in reference data', async () => {
               const initialOptInStatusSO = await findEndpointExceptionsPerPolicyOptInSO(
                 kibanaServer
               );
@@ -92,6 +93,14 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
 
               const optInStatusSO = await findEndpointExceptionsPerPolicyOptInSO(kibanaServer);
               expect(optInStatusSO?.attributes.metadata.status).to.be(true);
+              expect(optInStatusSO?.attributes.metadata.reason).to.be('userOptedIn');
+              expect(optInStatusSO?.attributes.metadata.user).to.be(username);
+              expect(optInStatusSO?.attributes.metadata.timestamp).to.be.a('string');
+
+              const nowVsOptInTimestamp =
+                new Date().getTime() -
+                new Date(optInStatusSO?.attributes.metadata.timestamp ?? '').getTime();
+              expect(Math.abs(nowVsOptInTimestamp)).to.be.lessThan(10_000);
             });
 
             it('should have an idempotent behavior', async () => {

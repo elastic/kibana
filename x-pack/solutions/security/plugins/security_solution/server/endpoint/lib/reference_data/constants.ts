@@ -118,7 +118,12 @@ export const REF_DATA_KEY_INITIAL_VALUE: Readonly<
         id: REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus,
         owner: 'EDR',
         type: 'OPT-IN-STATUS',
-        metadata: { status: true, reason: 'newDeployment' },
+        metadata: {
+          status: true,
+          reason: 'newDeployment',
+          user: 'automatic-opt-in',
+          timestamp: new Date().toISOString(),
+        },
       };
     } else {
       return {

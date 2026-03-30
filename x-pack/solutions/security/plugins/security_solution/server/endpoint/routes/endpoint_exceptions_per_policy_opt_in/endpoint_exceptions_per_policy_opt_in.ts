@@ -26,13 +26,20 @@ export const getOptInToPerPolicyEndpointExceptionsPOSTHandler = (
 
   return async (context, req, res) => {
     try {
+      const coreContext = await context.core;
+      const user = coreContext.security.authc.getCurrentUser();
       const referenceDataClient = endpointAppServices.getReferenceDataClient();
 
       const currentOptInStatus = await referenceDataClient.get<OptInStatusMetadata>(
         REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
       );
 
-      currentOptInStatus.metadata = { status: true, reason: 'userOptedIn' };
+      currentOptInStatus.metadata = {
+        status: true,
+        reason: 'userOptedIn',
+        user: user?.username ?? 'unknown',
+        timestamp: new Date().toISOString(),
+      };
 
       await referenceDataClient.update<OptInStatusMetadata>(
         REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus,
@@ -61,7 +68,10 @@ export const getOptInToPerPolicyEndpointExceptionsGETHandler = (
         REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
       );
 
-      const body: GetEndpointExceptionsPerPolicyOptInResponse = { ...currentOptInStatus.metadata };
+      const body: GetEndpointExceptionsPerPolicyOptInResponse = {
+        status: currentOptInStatus.metadata.status,
+        reason: currentOptInStatus.metadata.reason,
+      };
 
       return res.ok({ body });
     } catch (err) {
