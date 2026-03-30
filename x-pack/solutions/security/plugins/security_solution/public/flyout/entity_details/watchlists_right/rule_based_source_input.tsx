@@ -80,7 +80,7 @@ const buildIndexEntitySource = (
     name: sourceName,
     indexPattern: indexPatternValue || undefined,
     identifierField: field || undefined,
-    filter: query.query ? { kuery: query.query as string } : undefined,
+    queryRule: (query.query as string) || undefined,
   };
 };
 
@@ -144,30 +144,43 @@ export interface RuleBasedSourceInputProps {
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
+  initialEntitySource?: CreateWatchlistRequestBodyInput['entitySource'];
 }
 
 export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
   watchlistName,
   onFieldChange,
+  initialEntitySource,
 }) => {
   const {
     services: { data },
   } = useKibana();
   const { sourcererDataView } = useSourcererDataView(PageScope.default);
 
-  const [ruleFilter, setRuleFilter] = useState<string>('entityStore');
+  // Derive initial values from the stored entity source (for edit mode)
+  const initialRuleFilter = initialEntitySource?.type === 'index' ? 'indexPattern' : 'entityStore';
+  const initialQuery: Query = {
+    query: initialEntitySource?.queryRule ?? initialEntitySource?.filter?.kuery ?? '',
+    language: 'kuery',
+  };
+  const initialIndexPatterns: Array<EuiComboBoxOptionOption<string>> =
+    initialEntitySource?.indexPattern
+      ? initialEntitySource.indexPattern.split(',').map((p) => ({ label: p.trim() }))
+      : [];
+  const initialEntityField = initialEntitySource?.identifierField ?? '';
+
+  const [ruleFilter, setRuleFilter] = useState<string>(initialRuleFilter);
   const [dataView, setDataView] = useState<DataView>();
-  const [filterQuery, setFilterQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const [filterQuery, setFilterQuery] = useState<Query>(initialQuery);
   const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
   const [filters, setFilters] = useState<Filter[]>([]);
-  const [entityField, setEntityField] = useState<string>('');
+  const [entityField, setEntityField] = useState<string>(initialEntityField);
   const filterManager = data.query.filterManager;
 
   // Index pattern search state
   const [indexSearchQuery, setIndexSearchQuery] = useState<string | undefined>(undefined);
-  const [selectedIndexPatterns, setSelectedIndexPatterns] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
+  const [selectedIndexPatterns, setSelectedIndexPatterns] =
+    useState<Array<EuiComboBoxOptionOption<string>>>(initialIndexPatterns);
   const {
     data: indices,
     isFetching: isLoadingIndices,
@@ -176,6 +189,25 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
   const debouncedSetIndexSearchQuery = useDebounceFn(setIndexSearchQuery, DEBOUNCE_OPTIONS);
 
   const indexOptions = useMemo(() => indices?.map((index) => ({ label: index })) ?? [], [indices]);
+
+  // Sync internal state when initialEntitySource arrives asynchronously (edit mode)
+  const [hasInitialized, setHasInitialized] = useState(Boolean(initialEntitySource));
+  useEffect(() => {
+    if (initialEntitySource && !hasInitialized) {
+      setRuleFilter(initialEntitySource.type === 'index' ? 'indexPattern' : 'entityStore');
+      setFilterQuery({
+        query: initialEntitySource.queryRule ?? initialEntitySource.filter?.kuery ?? '',
+        language: 'kuery',
+      });
+      setEntityField(initialEntitySource.identifierField ?? '');
+      if (initialEntitySource.indexPattern) {
+        setSelectedIndexPatterns(
+          initialEntitySource.indexPattern.split(',').map((p) => ({ label: p.trim() }))
+        );
+      }
+      setHasInitialized(true);
+    }
+  }, [initialEntitySource, hasInitialized]);
 
   useEffect(() => {
     setFilters(filterManager.getFilters());
@@ -208,7 +240,7 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
     (query: Query) => ({
       type: 'store' as const,
       name: watchlistName ? `${watchlistName}-store` : 'entity-store-filter',
-      filter: query.query ? { kuery: query.query as string } : undefined,
+      queryRule: (query.query as string) || undefined,
     }),
     [watchlistName]
   );

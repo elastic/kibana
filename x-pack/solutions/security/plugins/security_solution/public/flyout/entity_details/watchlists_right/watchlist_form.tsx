@@ -114,7 +114,11 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <RuleBasedSourceInput watchlistName={watchlist.name} onFieldChange={onFieldChange} />
+      <RuleBasedSourceInput
+        watchlistName={watchlist.name}
+        onFieldChange={onFieldChange}
+        initialEntitySource={watchlist.entitySource}
+      />
     </EuiForm>
   );
 };

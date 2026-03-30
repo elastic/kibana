@@ -8,11 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
+import type { UpdateWatchlistEntitySourceRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/data_source/update.gen';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
 
 export interface UseUpdateWatchlistOptions {
   watchlistId?: string;
+  entitySourceId?: string;
   watchlist: CreateWatchlistRequestBodyInput;
   spaceId?: string;
   onSuccess?: () => void;
@@ -20,6 +22,7 @@ export interface UseUpdateWatchlistOptions {
 
 export const useUpdateWatchlist = ({
   watchlistId,
+  entitySourceId,
   watchlist,
   spaceId,
   onSuccess,
@@ -28,14 +31,35 @@ export const useUpdateWatchlist = ({
   const {
     notifications: { toasts },
   } = useKibana().services;
-  const { updateWatchlist } = useEntityAnalyticsRoutes();
+  const { updateWatchlist, updateWatchlistEntitySource } = useEntityAnalyticsRoutes();
 
   return useMutation({
     mutationFn: async () => {
       if (!watchlistId) {
         throw new Error('Missing watchlist id');
       }
-      return updateWatchlist({ id: watchlistId, body: watchlist });
+
+      // Update the watchlist itself (name, description, riskModifier)
+      const updatedWatchlist = await updateWatchlist({ id: watchlistId, body: watchlist });
+
+      // If we have an entity source to update, send the update
+      if (entitySourceId && watchlist.entitySource) {
+        const entitySourceBody: UpdateWatchlistEntitySourceRequestBodyInput = {
+          name: watchlist.entitySource.name,
+          indexPattern: watchlist.entitySource.indexPattern,
+          identifierField: watchlist.entitySource.identifierField,
+          queryRule: watchlist.entitySource.queryRule,
+          enabled: watchlist.entitySource.enabled,
+        };
+
+        await updateWatchlistEntitySource({
+          watchlistId,
+          entitySourceId,
+          body: entitySourceBody,
+        });
+      }
+
+      return updatedWatchlist;
     },
     onSuccess: async () => {
       toasts.addSuccess(
@@ -50,6 +74,10 @@ export const useUpdateWatchlist = ({
       } else {
         await queryClient.invalidateQueries({ queryKey: ['watchlists-management-table'] });
       }
+      // Also invalidate the entity sources cache so re-opening the edit flyout shows fresh data
+      await queryClient.invalidateQueries({
+        queryKey: ['watchlist-entity-sources', watchlistId],
+      });
       onSuccess?.();
     },
     onError: (error: Error) => {
