@@ -23,38 +23,36 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
   mergeAllMetricsWithChartDimensionSchemaWithStaticOps,
+  xScaleSchema,
 } from './shared';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { filterSchema } from '../filter';
 import { builderEnums } from '../enums';
+import { cornerPositionSchema, positionSchema } from '../alignments';
 
 /**
  * Statistical functions that can be displayed in chart legend for data series
  */
 export const statisticsSchema = schema.oneOf(
   [
-    schema.oneOf([
-      schema.literal('min'),
-      schema.literal('max'),
-      schema.literal('avg'),
-      schema.literal('median'),
-      schema.literal('range'),
-      schema.literal('last_value'),
-      schema.literal('last_non_null_value'),
-      schema.literal('first_value'),
-      schema.literal('first_non_null_value'),
-    ]),
-    schema.oneOf([
-      schema.literal('difference'),
-      schema.literal('difference_percentage'),
-      schema.literal('count'),
-      schema.literal('total'),
-      schema.literal('standard_deviation'),
-      schema.literal('variance'),
-      schema.literal('distinct_count'),
-      schema.literal('current_and_last_value'),
-    ]),
+    schema.literal('min'),
+    schema.literal('max'),
+    schema.literal('avg'),
+    schema.literal('median'),
+    schema.literal('range'),
+    schema.literal('last_value'),
+    schema.literal('last_non_null_value'),
+    schema.literal('first_value'),
+    schema.literal('first_non_null_value'),
+    schema.literal('difference'),
+    schema.literal('difference_percentage'),
+    schema.literal('count'),
+    schema.literal('total'),
+    schema.literal('standard_deviation'),
+    schema.literal('variance'),
+    schema.literal('distinct_count'),
+    schema.literal('current_and_last_value'),
   ],
   {
     meta: {
@@ -132,10 +130,23 @@ const sharedAxisSchema = {
       { meta: { description: 'Axis grid lines configuration' } }
     )
   ),
-  label_orientation: schema.maybe(
-    builderEnums.orientation({
-      meta: { description: 'Orientation of the axis labels' },
-    })
+  labels: schema.maybe(
+    schema.object(
+      {
+        /**
+         * Orientation of the axis labels. Possible values:
+         * - 'horizontal': Labels aligned horizontally
+         * - 'vertical': Labels aligned vertically
+         * - 'angled': Labels at an angle
+         */
+        orientation: builderEnums.orientation({
+          meta: {
+            description: 'Orientation of the axis labels',
+          },
+        }),
+      },
+      { meta: { description: 'Label configuration' } }
+    )
   ),
 };
 
@@ -254,16 +265,6 @@ const decorationsSchema = schema.object(
   }
 );
 
-const xScaleSchema = schema.maybe(
-  schema.oneOf([schema.literal('ordinal'), schema.literal('temporal'), schema.literal('linear')], {
-    meta: {
-      // IMPORTANT: This description guides LLM agents - modify with caution and test agent behavior after changes
-      description:
-        "X-axis scale type for ES|QL charts. Use 'temporal' for timestamp/date fields (e.g., @timestamp, DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
-    },
-  })
-);
-
 /**
  * Shared settings that apply to the entire XY chart visualization
  */
@@ -274,16 +275,9 @@ const xySharedSettings = {
         schema.object(
           {
             ...sharedLegendSchema,
-            inside: schema.maybe(schema.literal(false)),
+            placement: schema.maybe(schema.literal('outside')),
             layout: schema.maybe(schema.literal('list')),
-            position: schema.maybe(
-              schema.oneOf([
-                schema.literal('top'),
-                schema.literal('bottom'),
-                schema.literal('left'),
-                schema.literal('right'),
-              ])
-            ),
+            position: schema.maybe(positionSchema()),
             size: schema.maybe(
               schema.oneOf([
                 schema.literal('small'),
@@ -303,20 +297,14 @@ const xySharedSettings = {
         schema.object(
           {
             ...sharedLegendSchema,
-            inside: schema.literal(true),
+            placement: schema.literal('inside'),
             columns: schema.maybe(
               schema.number({ min: 1, max: 5, meta: { description: 'Number of legend columns' } })
             ),
-            alignment: schema.maybe(
-              schema.oneOf(
-                [
-                  schema.literal('top_right'),
-                  schema.literal('bottom_right'),
-                  schema.literal('top_left'),
-                  schema.literal('bottom_left'),
-                ],
-                { meta: { description: 'Legend alignment inside the chart' } }
-              )
+            position: schema.maybe(
+              cornerPositionSchema({
+                meta: { description: 'Legend position inside the chart' },
+              })
             ),
           },
           {
@@ -493,25 +481,21 @@ const xyDataLayerSchemaESQL = schema.object(
 const getListOfAvailableIcons = (description: string) =>
   schema.oneOf(
     [
-      schema.oneOf([
-        schema.literal('asterisk'),
-        schema.literal('alert'),
-        schema.literal('bell'),
-        schema.literal('bolt'),
-        schema.literal('bug'),
-        schema.literal('circle'),
-        schema.literal('editorComment'),
-        schema.literal('flag'),
-        schema.literal('heart'),
-      ]),
-      schema.oneOf([
-        schema.literal('mapMarker'),
-        schema.literal('pinFilled'),
-        schema.literal('starEmpty'),
-        schema.literal('starFilled'),
-        schema.literal('tag'),
-        schema.literal('triangle'),
-      ]),
+      schema.literal('asterisk'),
+      schema.literal('alert'),
+      schema.literal('bell'),
+      schema.literal('bolt'),
+      schema.literal('bug'),
+      schema.literal('circle'),
+      schema.literal('editorComment'),
+      schema.literal('flag'),
+      schema.literal('heart'),
+      schema.literal('mapMarker'),
+      schema.literal('pinFilled'),
+      schema.literal('starEmpty'),
+      schema.literal('starFilled'),
+      schema.literal('tag'),
+      schema.literal('triangle'),
     ],
     { meta: { description } }
   );
@@ -550,7 +534,7 @@ const referenceLineLayerShared = {
     })
   ),
   color: schema.maybe(staticColorSchema),
-  decoration_position: schema.maybe(
+  position: schema.maybe(
     schema.oneOf([schema.literal('auto'), schema.literal('left'), schema.literal('right')], {
       meta: { description: 'Position of the icon and label relative to the reference line' },
     })
@@ -842,7 +826,6 @@ export const xyStateSchemaESQL = schema.object(
   }
 );
 
-export type XScaleSchemaType = TypeOf<typeof xScaleSchema>;
 export type XYState = TypeOf<typeof xyStateSchema>;
 export type XYStateESQL = TypeOf<typeof xyStateSchemaESQL>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;

@@ -10,7 +10,12 @@
 import { SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
-import { createGetAppMenu, getDefaultAdHocDataViews, getDocViewer } from './accessors';
+import {
+  createGetAppMenu,
+  getDefaultAdHocDataViews,
+  getDefaultEsqlQuery,
+  getDocViewer,
+} from './accessors';
 import type { ObservabilityRootProfileProvider } from './types';
 
 export const createObservabilityRootProfileProvider = (
@@ -20,6 +25,7 @@ export const createObservabilityRootProfileProvider = (
   profile: {
     getAppMenu: createGetAppMenu(services),
     getDefaultAdHocDataViews,
+    getDefaultEsqlQuery,
     getDocViewer,
   },
   resolve: (params) => {
