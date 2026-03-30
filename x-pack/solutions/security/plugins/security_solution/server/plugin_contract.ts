@@ -46,8 +46,12 @@ import type { PluginSetup as KqlServerPluginSetup } from '@kbn/kql/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { AnonymizationPluginStart } from '@kbn/anonymization-plugin/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import type { EntityStoreSetupContract } from '@kbn/entity-store/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -73,6 +77,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   kql: KqlServerPluginSetup;
   share?: SharePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
+  entityStore?: EntityStoreSetupContract;
 }
 
 export interface SecuritySolutionPluginStartDependencies {
@@ -96,6 +101,7 @@ export interface SecuritySolutionPluginStartDependencies {
   inference: InferenceServerStart;
   anonymization: AnonymizationPluginStart;
   llmTasks?: LlmTasksPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface SecuritySolutionPluginSetup {

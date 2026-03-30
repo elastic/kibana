@@ -7,13 +7,14 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
 import { DocumentSeverity } from './severity';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FLYOUT_EVENT_HEADER_TITLE_TEST_ID } from './test_ids';
-import { getEventTitle, getField } from '../../shared/utils';
+import { getEventTitle } from '../../../../flyout_v2/document/utils/get_header_title';
+import { getField } from '../../shared/utils';
 
 /**
  * Event details flyout right section header
@@ -26,7 +27,12 @@ export const EventHeaderTitle = memo(() => {
   const eventCategory = getField(getFieldsData('event.category'));
 
   const title = useMemo(
-    () => getEventTitle({ eventKind, eventCategory, getFieldsData }),
+    () =>
+      getEventTitle(
+        eventKind,
+        eventCategory,
+        (field) => getField(getFieldsData(field)) ?? undefined
+      ),
     [eventKind, eventCategory, getFieldsData]
   );
 

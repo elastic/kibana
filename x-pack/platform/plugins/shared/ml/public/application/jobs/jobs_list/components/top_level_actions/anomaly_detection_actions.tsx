@@ -19,7 +19,7 @@ export const SuppliedConfigurationsButton = () => {
   return (
     <EuiButtonEmpty
       size="m"
-      iconType="listAdd"
+      iconType="plusCircle"
       onClick={redirectToSuppliedConfigurationsPage}
       flush="left"
       data-test-subj="mlSuppliedConfigurationsButton"

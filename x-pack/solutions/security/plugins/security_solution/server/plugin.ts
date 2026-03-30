@@ -127,6 +127,7 @@ import {
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
+import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
 import {
   registerEntityStoreFieldRetentionEnrichTask,
   registerEntityStoreSnapshotTask,
@@ -158,6 +159,7 @@ import {
 } from './lib/trial_companion/services/trial_companion_milestone_service';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
+import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
@@ -307,16 +309,27 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
-    registerRiskScoringTask({
-      getStartServices: core.getStartServices,
-      kibanaVersion: pluginContext.env.packageInfo.version,
-      logger: this.logger,
-      auditLogger: plugins.security?.audit.withoutRequest,
-      taskManager: plugins.taskManager,
-      telemetry: core.analytics,
-      entityAnalyticsConfig: config.entityAnalytics,
-      experimentalFeatures,
-    });
+    if (experimentalFeatures.entityAnalyticsEntityStoreV2) {
+      registerRiskScoreMaintainer({
+        entityStore: plugins.entityStore,
+        getStartServices: core.getStartServices,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        logger: this.logger,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        productFeaturesService,
+      });
+    } else {
+      registerRiskScoringTask({
+        getStartServices: core.getStartServices,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        logger: this.logger,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        taskManager: plugins.taskManager,
+        telemetry: core.analytics,
+        entityAnalyticsConfig: config.entityAnalytics,
+        experimentalFeatures,
+      });
+    }
 
     scheduleEntityAnalyticsMigration({
       getStartServices: core.getStartServices,
@@ -693,6 +706,15 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.registerAgentBuilderAttachmentsAndTools(plugins, core, this.logger);
 
+    setupAlertsCapabilitiesSwitcher({
+      core,
+      logger: this.logger,
+      getSecurityStart: async () => {
+        const [, startPlugins] = await core.getStartServices();
+        return startPlugins.security;
+      },
+    });
+
     return {
       setProductFeaturesConfigurator:
         productFeaturesService.setProductFeaturesConfigurator.bind(productFeaturesService),
@@ -784,6 +806,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       savedObjectsServiceStart: core.savedObjects,
       connectorActions: plugins.actions,
       spacesService: plugins.spaces?.spacesService,
+      agentBuilder: plugins.agentBuilder,
     });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {

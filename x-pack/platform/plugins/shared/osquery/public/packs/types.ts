@@ -16,8 +16,11 @@ export interface PackSavedObject {
   enabled: boolean | undefined;
   created_at: string;
   created_by: string | undefined;
+  created_by_profile_uid?: string;
   updated_at: string;
   updated_by: string | undefined;
+  updated_by_profile_uid?: string;
+  policy_ids: string[];
   references: Array<{ name: string; id: string; type: string }>;
 }
 

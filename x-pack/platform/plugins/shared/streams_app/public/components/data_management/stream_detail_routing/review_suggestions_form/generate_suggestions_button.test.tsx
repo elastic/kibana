@@ -14,7 +14,8 @@ import {
 } from './generate_suggestions_button';
 import { AdditionalChargesCallout } from '../../shared/additional_charges_callout';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
-import type { UseGenAIConnectorsResult, Connector } from '../../../../hooks/use_genai_connectors';
+import type { UseGenAIConnectorsResult } from '../../../../hooks/use_genai_connectors';
+import { InferenceConnectorType } from '@kbn/inference-common';
 
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -36,10 +37,14 @@ jest.mock('../../../../hooks/use_kibana', () => ({
   }),
 }));
 
-const createMockConnector = (id: string, name: string): Connector => ({
-  id,
+const createMockConnector = (connectorId: string, name: string) => ({
+  connectorId,
   name,
-  actionTypeId: '.gen-ai',
+  type: InferenceConnectorType.OpenAI,
+  config: {},
+  capabilities: {},
+  isPreconfigured: false,
+  isInferenceEndpoint: false,
 });
 
 const createMockGenAiConnectors = (

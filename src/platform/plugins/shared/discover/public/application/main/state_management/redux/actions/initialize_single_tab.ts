@@ -16,7 +16,7 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { type DiscoverAppState } from '..';
-import type { DiscoverStateContainer } from '../../discover_state';
+import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
 import { appendAdHocDataViews } from './data_views';
 import { setDataView } from './tab_state_data_view';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
@@ -38,8 +38,8 @@ import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
 
 export interface InitializeSingleTabsParams {
-  stateContainer: DiscoverStateContainer;
   customizationService: ConnectedCustomizationService;
+  dataStateContainer: DiscoverDataStateContainer;
   dataViewSpec: DataViewSpec | undefined;
   esqlControls: ControlPanelsState<OptionsListESQLControlState> | undefined;
   defaultUrlState: DiscoverAppState | undefined;
@@ -51,8 +51,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     {
       tabId,
       initializeSingleTabParams: {
-        stateContainer,
         customizationService,
+        dataStateContainer,
         dataViewSpec,
         esqlControls,
         defaultUrlState,
@@ -67,7 +67,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
-    const { currentDataView$, stateContainer$, customizationService$, scopedEbtManager$ } =
+    const { currentDataView$, dataStateContainer$, customizationService$, scopedEbtManager$ } =
       selectTabRuntimeState(runtimeStateManager, tabId);
 
     /**
@@ -189,7 +189,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         currentDataView: persistedTabDataView,
         isEsqlMode,
         services,
-        internalState: stateContainer.internalState,
+        savedDataViews: getState().savedDataViews,
         runtimeStateManager,
       });
 
@@ -292,8 +292,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     dispatch(internalStateSlice.actions.resetAppState({ tabId, appState: initialAppState }));
 
     // Set runtime state
-    stateContainer$.next(stateContainer);
     customizationService$.next(customizationService);
+    dataStateContainer$.next(dataStateContainer);
 
     // Begin syncing the state and trigger the initial fetch
     // if this is still the current tab, otherwise mark the

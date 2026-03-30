@@ -22,7 +22,6 @@ import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { handleTaskAction } from '../../../utils/task_helpers';
-import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -88,12 +87,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
     body: taskActionSchema({
       from: dateFromString.describe('Start of the time range'),
       to: dateFromString.describe('End of the time range'),
-      connectorId: z
-        .string()
-        .optional()
-        .describe(
-          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-        ),
     }),
   }),
   options: {
@@ -112,7 +105,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    logger,
   }): Promise<SignificantEventsQueriesGenerationTaskResult> => {
     const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
@@ -132,19 +124,11 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
             scheduleConfig: {
               taskType: SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
               taskId,
-              params: await (async (): Promise<SignificantEventsQueriesGenerationTaskParams> => {
-                const connectorId = await resolveConnectorId({
-                  connectorId: body.connectorId,
-                  uiSettingsClient,
-                  logger,
-                });
-                return {
-                  connectorId,
-                  start: body.from.getTime(),
-                  end: body.to.getTime(),
-                  streamName: name,
-                };
-              })(),
+              params: {
+                start: body.from.getTime(),
+                end: body.to.getTime(),
+                streamName: name,
+              },
               request,
             },
           } as const)

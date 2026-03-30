@@ -356,6 +356,23 @@
       },
       {
         "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-public.OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"observability.synthetics_monitor\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
         "id": "def-public.OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID",
         "type": "string",
         "tags": [],
@@ -1233,6 +1250,23 @@
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
         "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-common.OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"observability.synthetics_monitor\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

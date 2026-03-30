@@ -28,6 +28,7 @@ import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { GRAPH_ID, GraphVisualization } from '../components/graph_visualization';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { METRIC_TYPE } from '../../../../common/lib/telemetry';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
@@ -105,15 +106,19 @@ export const VisualizeTab = memo(() => {
   );
 
   // Decide whether to show the graph preview or not
-  const { shouldShowGraph } = useGraphPreview({
+  const { shouldShowGraph, hasGraphData } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
   });
 
+  // Show upsell when event has graph data but license is insufficient (ESS only)
+  const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
+  const showGraphButton = shouldShowGraph || (hasGraphData && !!GraphVisualizationUpsell);
+
   const options = [...visualizeButtons];
 
-  if (shouldShowGraph) {
+  if (showGraphButton) {
     options.push(graphVisualizationButton);
   }
 
@@ -122,7 +127,7 @@ export const VisualizeTab = memo(() => {
       const newId = panels.left.path.subTab;
 
       // Check if we need to select a different tab when graph is not available
-      if (newId === GRAPH_ID && !shouldShowGraph) {
+      if (newId === GRAPH_ID && !showGraphButton) {
         setActiveVisualizationId(SESSION_VIEW_ID);
       } else {
         setActiveVisualizationId(newId);
@@ -132,7 +137,7 @@ export const VisualizeTab = memo(() => {
         }
       }
     }
-  }, [panels.left?.path?.subTab, shouldShowGraph]);
+  }, [panels.left?.path?.subTab, showGraphButton]);
 
   return (
     <>
@@ -155,7 +160,12 @@ export const VisualizeTab = memo(() => {
       <EuiSpacer size="m" />
       {activeVisualizationId === SESSION_VIEW_ID && <SessionView />}
       {activeVisualizationId === ANALYZE_GRAPH_ID && <AnalyzeGraph />}
-      {activeVisualizationId === GRAPH_ID && <GraphVisualization />}
+      {activeVisualizationId === GRAPH_ID &&
+        (shouldShowGraph ? (
+          <GraphVisualization />
+        ) : (
+          hasGraphData && !!GraphVisualizationUpsell && <GraphVisualizationUpsell />
+        ))}
     </>
   );
 });

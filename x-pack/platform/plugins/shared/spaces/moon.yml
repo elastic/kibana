@@ -74,6 +74,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/cps-common'
   - '@kbn/cps-utils'
+  - '@kbn/tour-queue'
 tags:
   - plugin
   - prod

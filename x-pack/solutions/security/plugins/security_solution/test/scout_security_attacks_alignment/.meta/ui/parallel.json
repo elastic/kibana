@@ -1,0 +1,32 @@
+{
+  "sha1": "96edc75402b224c5da10b87e0a5edc8dc247278c",
+  "tests": [
+    {
+      "id": "343791488d016cc-1054e603e578b92",
+      "title": "Ingest archives to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/global.setup.ts",
+        "line": 11,
+        "column": 16
+      }
+    },
+    {
+      "id": "cf8d4b3ea94cc93-6838d4ba4b2f1e3",
+      "title": "Attacks navigation updates side nav based on attacks alignment advanced setting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/navigation.spec.ts",
+        "line": 26,
+        "column": 14
+      }
+    }
+  ]
+}

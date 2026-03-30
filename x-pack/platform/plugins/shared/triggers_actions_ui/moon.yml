@@ -95,6 +95,7 @@ dependsOn:
   - '@kbn/router-utils'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/actions-types'
+  - '@kbn/response-ops-oauth-hooks'
   - '@kbn/kql'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/deeplinks-observability'

@@ -7,7 +7,7 @@
 
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
-import { createEsClientForTesting } from '@kbn/test';
+import { createEsClientForTesting } from '@kbn/test-es-server';
 import { EvaluationScoreRepository } from '../../utils/score_repository';
 import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
 import { computePairedTTestResults, pairScores } from '../../utils/statistical_analysis';

@@ -94,7 +94,7 @@ export const AnalyzerPreviewContainer = memo(
       <EuiToolTip
         content={
           <FormattedMessage
-            id="xpack.securitySolution.flyoutV2.right.visualizations.analyzerPreview.coldAndFrozenTiers.excludedTooltip"
+            id="xpack.securitySolution.flyoutV2.document.visualizations.analyzerPreview.coldAndFrozenTiers.excludedTooltip"
             defaultMessage="{state}, go to Advanced Settings or contact your administrator."
             values={{
               state: isColdAndFrozenTiersExcluded
@@ -112,7 +112,7 @@ export const AnalyzerPreviewContainer = memo(
           data-test-subj={ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID}
         >
           <FormattedMessage
-            id="xpack.securitySolution.flyoutV2.right.visualizations.analyzerPreview.coldAndFrozenTiers.excludedLabel"
+            id="xpack.securitySolution.flyoutV2.document.visualizations.analyzerPreview.coldAndFrozenTiers.excludedLabel"
             defaultMessage="Cold/Frozen tiers {state}"
             values={{ state: isColdAndFrozenTiersExcluded ? 'off' : 'on' }}
           />
@@ -125,7 +125,7 @@ export const AnalyzerPreviewContainer = memo(
         header={{
           title: (
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTitle"
+              id="xpack.securitySolution.flyout.document.visualizations.analyzerPreview.analyzerPreviewTitle"
               defaultMessage="Analyzer preview"
             />
           ),
@@ -135,7 +135,7 @@ export const AnalyzerPreviewContainer = memo(
               callback: onShowAnalyzer,
               tooltip: (
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewOpenAnalyzerTooltip"
+                  id="xpack.securitySolution.flyout.document.visualizations.analyzerPreview.analyzerPreviewOpenAnalyzerTooltip"
                   defaultMessage="Open analyzer graph"
                 />
               ),
@@ -151,7 +151,7 @@ export const AnalyzerPreviewContainer = memo(
               <EuiSkeletonText
                 data-test-subj={ANALYZER_PREVIEW_LOADING_TEST_ID}
                 contentAriaLabel={i18n.translate(
-                  'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.loadingAriaLabel',
+                  'xpack.securitySolution.flyout.document.visualizations.analyzerPreview.loadingAriaLabel',
                   {
                     defaultMessage: 'analyzer preview',
                   }
@@ -159,7 +159,7 @@ export const AnalyzerPreviewContainer = memo(
               />
             ) : dataViewError ? (
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.dataViewErrorDescription"
+                id="xpack.securitySolution.flyout.document.visualizations.analyzerPreview.dataViewErrorDescription"
                 defaultMessage="Unable to retrieve the data view for analyzer."
               />
             ) : (

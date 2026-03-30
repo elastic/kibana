@@ -53,6 +53,7 @@ describe('DataSetStepImpl', () => {
       stepExecutionId: 'test-step-exec-id',
       abortController: stepContextAbortController,
       flushEventLogs: jest.fn().mockResolvedValue(undefined),
+      node: {},
     } as any;
 
     mockWorkflowRuntime = {

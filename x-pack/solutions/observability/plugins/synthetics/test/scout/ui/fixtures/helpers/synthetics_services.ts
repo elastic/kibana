@@ -94,7 +94,7 @@ const defaultBrowserMonitorData = {
   'service.name': '',
   config_id: '',
   tags: [],
-  timeout: '16',
+  timeout: '30',
   name: 'Monitor 2',
   namespace: 'default',
   origin: 'ui',

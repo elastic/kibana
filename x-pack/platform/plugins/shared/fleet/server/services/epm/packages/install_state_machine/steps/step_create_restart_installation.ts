@@ -15,6 +15,7 @@ import { restartInstallation, createInstallation } from '../../install';
 
 import type { InstallContext } from '../_state_machine_package_install';
 import { withPackageSpan } from '../../utils';
+import { getPackageDependencies } from '../../dependencies';
 
 export async function stepCreateRestartInstallation(context: InstallContext) {
   const {
@@ -26,9 +27,11 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
     force,
     verificationResult,
     installedPkg,
+    installedAsDependencyOf,
   } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, version: pkgVersion } = packageInfo;
+  const dependencies = getPackageDependencies(packageInfo);
 
   // if some installation already exists
   if (installedPkg) {
@@ -60,6 +63,9 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
             installSource,
             verificationResult,
             previousVersion,
+            installedAsDependencyOf,
+            existingIsDependencyOf: installedPkg.attributes.is_dependency_of ?? [],
+            dependencies,
           })
         );
       } else {
@@ -83,6 +89,9 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
           installSource,
           verificationResult,
           previousVersion,
+          installedAsDependencyOf,
+          existingIsDependencyOf: installedPkg.attributes.is_dependency_of ?? [],
+          dependencies,
         })
       );
     }
@@ -96,6 +105,8 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
         installSource,
         spaceId,
         verificationResult,
+        installedAsDependencyOf,
+        dependencies,
       })
     );
   }

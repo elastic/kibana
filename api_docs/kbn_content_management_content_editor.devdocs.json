@@ -108,7 +108,7 @@
           ") => () => void"
         ],
         "path": "src/platform/packages/shared/content-management/content_editor/src/open_content_editor.tsx",
-        "lineNumber": 30,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -191,7 +191,7 @@
           " | undefined; appendRows?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_editor/src/open_content_editor.tsx",
-        "lineNumber": 19,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

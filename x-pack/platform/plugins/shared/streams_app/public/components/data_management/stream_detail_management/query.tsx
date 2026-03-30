@@ -7,10 +7,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import type { ManagementTabs } from './wrapper';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { DiscoverBadgeButton, QueryStreamBadge } from '../../stream_badges';
@@ -20,6 +22,7 @@ import { RedirectTo } from '../../redirect_to';
 import { QueryStreamSchemaEditor } from '../../query_streams/query_stream_schema_editor';
 import { QueryStreamsAdvancedView } from '../../query_streams/query_streams_advanced_view';
 import { FeedbackButton } from '../../feedback_button';
+import { StreamOverview } from '../../stream_detail_overview';
 
 const queryStreamManagementSubTabs = [
   'overview',
@@ -31,7 +34,13 @@ const queryStreamManagementSubTabs = [
 
 type QueryStreamManagementSubTab = (typeof queryStreamManagementSubTabs)[number];
 
-function isValidManagementSubTab(value: string): value is QueryStreamManagementSubTab {
+function isValidManagementSubTab(
+  value: string,
+  overviewPageEnabled: boolean
+): value is QueryStreamManagementSubTab {
+  if (value === 'overview' && !overviewPageEnabled) {
+    return false;
+  }
   return queryStreamManagementSubTabs.includes(value as QueryStreamManagementSubTab);
 }
 
@@ -46,28 +55,29 @@ export function QueryStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+  const { rangeFrom, rangeTo } = useTimeRange();
 
   const {
-    features: { attachments },
+    features: { attachments, overviewPage },
   } = useStreamsPrivileges();
 
-  const { isLoading, significantEvents } = useStreamsDetailManagementTabs({
+  const { euiTheme } = useEuiTheme();
+
+  const { significantEvents } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
   });
 
-  if (isLoading) {
-    return null;
-  }
-
   const tabs: ManagementTabs = {};
 
-  tabs.overview = {
-    content: <div />, // TODO: Implement overview tab
-    label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
-      defaultMessage: 'Overview',
-    }),
-  };
+  if (overviewPage.enabled) {
+    tabs.overview = {
+      content: <StreamOverview />,
+      label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
+        defaultMessage: 'Overview',
+      }),
+    };
+  }
 
   tabs.schema = {
     content: (
@@ -110,17 +120,22 @@ export function QueryStreamDetailManagement({
     ),
   };
 
-  if (!isValidManagementSubTab(tab) || !tabs[tab]?.content) {
+  const defaultTab = overviewPage.enabled ? 'overview' : 'schema';
+
+  if (!isValidManagementSubTab(tab, overviewPage.enabled) || !tabs[tab]?.content) {
     return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: defaultTab } }} />
     );
   }
 
   return (
     <>
-      <StreamsAppPageTemplate.Header
+      <EuiPageHeader
         paddingSize="l"
         bottomBorder="extended"
+        css={css`
+          background: ${euiTheme.colors.backgroundBasePlain};
+        `}
         pageTitle={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {key}
@@ -136,6 +151,7 @@ export function QueryStreamDetailManagement({
           label,
           href: router.link('/{key}/management/{tab}', {
             path: { key, tab: tabKey },
+            query: { rangeFrom, rangeTo },
           }),
           isSelected: tab === tabKey,
           'data-test-subj': `queryStreamDetails-${tabKey}-tab`,

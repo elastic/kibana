@@ -30,6 +30,15 @@ export function registerEmitEventRoute(router: IRouter<ExampleRequestHandlerCont
           message: schema.string(),
           source: schema.maybe(schema.string()),
           category: schema.maybe(schema.string()),
+          labels: schema.maybe(schema.arrayOf(schema.string())),
+          foo: schema.maybe(
+            schema.object({
+              bar: schema.object({
+                baz: schema.string(),
+              }),
+            })
+          ),
+          another: schema.maybe(schema.string()),
         }),
       },
     },
@@ -41,6 +50,9 @@ export function registerEmitEventRoute(router: IRouter<ExampleRequestHandlerCont
           message: request.body.message,
           ...(request.body.source !== undefined && { source: request.body.source }),
           ...(request.body.category !== undefined && { category: request.body.category }),
+          ...(request.body.labels !== undefined && { labels: request.body.labels }),
+          ...(request.body.foo !== undefined && { foo: request.body.foo }),
+          ...(request.body.another !== undefined && { another: request.body.another }),
         });
         return response.ok({
           body: { ok: true, triggerId: CUSTOM_TRIGGER_ID },

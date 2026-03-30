@@ -37,6 +37,16 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           200: {
             body: () => updateResponseBodySchema,
+            description: 'Indicates that the markdown panel is updated successfully.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates that the markdown panel with the given ID is not found.',
           },
         },
       },
@@ -54,9 +64,9 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
           });
         }
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: { message: e.message } });
         }
-        return res.badRequest({ body: e.output.payload });
+        return res.badRequest({ body: { message: e.message } });
       }
     }
   );

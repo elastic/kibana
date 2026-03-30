@@ -232,7 +232,7 @@ describe('buildCellActions', () => {
 
       render(<>{cellActions[0](createMockCellActionProps(0, 'field'))}</>);
 
-      expect(screen.getByRole('button').getAttribute('data-icon')).toBe('plusInCircle');
+      expect(screen.getByRole('button').getAttribute('data-icon')).toBe('plusCircle');
     });
 
     it('uses minusInCircle icon for - button', () => {
@@ -241,7 +241,7 @@ describe('buildCellActions', () => {
 
       render(<>{cellActions[1](createMockCellActionProps(0, 'field'))}</>);
 
-      expect(screen.getByRole('button').getAttribute('data-icon')).toBe('minusInCircle');
+      expect(screen.getByRole('button').getAttribute('data-icon')).toBe('minusCircle');
     });
   });
 

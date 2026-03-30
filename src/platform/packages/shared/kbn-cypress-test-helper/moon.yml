@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/security-plugin'
   - '@kbn/tooling-log'
   - '@kbn/repo-info'
+  - '@kbn/kbn-client'
   - '@kbn/test'
   - '@kbn/dev-cli-runner'
   - '@kbn/core-status-common'

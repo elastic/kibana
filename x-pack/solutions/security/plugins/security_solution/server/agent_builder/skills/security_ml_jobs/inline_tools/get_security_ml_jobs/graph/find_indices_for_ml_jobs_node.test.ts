@@ -68,7 +68,7 @@ describe('findIndicesForMlJobsNode', () => {
         aggregations: {
           ml_indices: {
             buckets: [
-              { key: '.ml-anomalies-custom-auth_rare_hour_for_a_user-000001', doc_count: 3 },
+              { key: '.ml-anomalies-custom-auth_rare_hour_for_a_user_ea-000001', doc_count: 3 },
               { key: '.ml-anomalies-security_auth', doc_count: 2 },
             ],
           },
@@ -83,7 +83,7 @@ describe('findIndicesForMlJobsNode', () => {
 
       expect(result).toEqual({
         indices: [
-          '.ml-anomalies-custom-auth_rare_hour_for_a_user-000001',
+          '.ml-anomalies-custom-auth_rare_hour_for_a_user_ea-000001',
           '.ml-anomalies-security_auth',
         ],
       });
@@ -218,9 +218,9 @@ describe('findIndicesForMlJobsNode', () => {
         aggregations: {
           ml_indices: {
             buckets: [
-              { key: '.ml-anomalies-custom-auth_rare_user-000001', doc_count: 1 },
-              { key: '.ml-anomalies-custom-auth_rare_user-000003', doc_count: 1 },
-              { key: '.ml-anomalies-custom-auth_rare_user-000002', doc_count: 1 },
+              { key: '.ml-anomalies-custom-auth_rare_user_ea-000001', doc_count: 1 },
+              { key: '.ml-anomalies-custom-auth_rare_user_ea-000003', doc_count: 1 },
+              { key: '.ml-anomalies-custom-auth_rare_user_ea-000002', doc_count: 1 },
             ],
           },
         },
@@ -233,7 +233,7 @@ describe('findIndicesForMlJobsNode', () => {
       });
 
       expect(result).toEqual({
-        indices: ['.ml-anomalies-custom-auth_rare_user-000003'],
+        indices: ['.ml-anomalies-custom-auth_rare_user_ea-000003'],
       });
     });
 
@@ -246,8 +246,8 @@ describe('findIndicesForMlJobsNode', () => {
         aggregations: {
           ml_indices: {
             buckets: [
-              { key: '.ml-anomalies-custom-auth_rare_user', doc_count: 1 },
-              { key: '.ml-anomalies-custom-auth_rare_user-000001', doc_count: 1 },
+              { key: '.ml-anomalies-custom-auth_rare_user_ea', doc_count: 1 },
+              { key: '.ml-anomalies-custom-auth_rare_user_ea-000001', doc_count: 1 },
             ],
           },
         },
@@ -260,7 +260,7 @@ describe('findIndicesForMlJobsNode', () => {
       });
 
       expect(result).toEqual({
-        indices: ['.ml-anomalies-custom-auth_rare_user-000001'],
+        indices: ['.ml-anomalies-custom-auth_rare_user_ea-000001'],
       });
     });
 
@@ -273,10 +273,10 @@ describe('findIndicesForMlJobsNode', () => {
         aggregations: {
           ml_indices: {
             buckets: [
-              { key: '.ml-anomalies-custom-auth_rare_user', doc_count: 1 },
-              { key: '.ml-anomalies-custom-auth_rare_user-000001', doc_count: 1 },
-              { key: '.ml-anomalies-custom-auth_rare_user-000003', doc_count: 1 },
-              { key: '.ml-anomalies-custom-auth_rare_user-000002', doc_count: 1 },
+              { key: '.ml-anomalies-custom-auth_rare_user_ea', doc_count: 1 },
+              { key: '.ml-anomalies-custom-auth_rare_user_ea-000001', doc_count: 1 },
+              { key: '.ml-anomalies-custom-auth_rare_user_ea-000003', doc_count: 1 },
+              { key: '.ml-anomalies-custom-auth_rare_user_ea-000002', doc_count: 1 },
               { key: '.ml-anomalies-security_auth', doc_count: 2 },
               { key: '.ml-anomalies-custom-network_spike-000001', doc_count: 3 },
             ],
@@ -292,7 +292,7 @@ describe('findIndicesForMlJobsNode', () => {
 
       expect(result).toEqual({
         indices: [
-          '.ml-anomalies-custom-auth_rare_user-000003',
+          '.ml-anomalies-custom-auth_rare_user_ea-000003',
           '.ml-anomalies-security_auth',
           '.ml-anomalies-custom-network_spike-000001',
         ],

@@ -22,6 +22,7 @@ import type { LogMeta } from '@kbn/logging';
 import type { StreamsTaskType, TaskContext } from '.';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
+import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
@@ -39,7 +40,6 @@ import {
 } from './significant_events_queries_generation';
 
 export interface OnboardingTaskParams {
-  connectorId: string;
   streamName: string;
   from: number;
   to: number;
@@ -54,6 +54,30 @@ export function getOnboardingTaskId(streamName: string, saveQueries: boolean = t
   return saveQueries ? base : `${base}_no_save_queries`;
 }
 
+const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
+async function areFeaturesUpToDate({
+  taskClient,
+  featuresTaskId,
+}: {
+  taskClient: TaskClient<StreamsTaskType>;
+  featuresTaskId: string;
+}) {
+  const featuresTask = await taskClient.get<
+    FeaturesIdentificationTaskParams,
+    IdentifyFeaturesResult
+  >(featuresTaskId);
+
+  if (featuresTask.status !== TaskStatus.Completed) {
+    return false;
+  }
+
+  return (
+    featuresTask.last_completed_at &&
+    Date.now() - new Date(featuresTask.last_completed_at).getTime() <
+      FEATURES_IDENTIFICATION_RECENCY_MS
+  );
+}
+
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
   return {
     [STREAMS_ONBOARDING_TASK_TYPE]: {
@@ -66,13 +90,19 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, streamName, from, to, steps, saveQueries, _task } = runContext
-                .taskInstance.params as TaskParams<OnboardingTaskParams>;
+              const { streamName, from, to, steps, saveQueries, _task } = runContext.taskInstance
+                .params as TaskParams<OnboardingTaskParams>;
 
-              const { taskClient, inferenceClient, queryClient, streamsClient } =
-                await taskContext.getScopedClients({
-                  request: runContext.fakeRequest,
-                });
+              const {
+                taskClient,
+                inferenceClient,
+                queryClient,
+                streamsClient,
+                modelSettingsClient,
+                uiSettingsClient,
+              } = await taskContext.getScopedClients({
+                request: runContext.fakeRequest,
+              });
 
               try {
                 let featuresTaskResult: TaskResult<IdentifyFeaturesResult> | undefined;
@@ -82,32 +112,45 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 for (const step of steps) {
                   switch (step) {
-                    case OnboardingStep.FeaturesIdentification:
-                      const featuresTaskId = await scheduleFeaturesIdentificationTask(
-                        {
-                          connectorId,
-                          start: from,
-                          end: to,
-                          streamName,
-                        },
-                        taskClient,
-                        runContext.fakeRequest
-                      );
+                    case OnboardingStep.FeaturesIdentification: {
+                      const featuresTaskId = getFeaturesIdentificationTaskId(streamName);
 
-                      featuresTaskResult = await waitForSubtask<
-                        FeaturesIdentificationTaskParams,
-                        IdentifyFeaturesResult
-                      >(featuresTaskId, runContext.taskInstance.id, taskClient);
+                      if (
+                        await areFeaturesUpToDate({
+                          taskClient,
+                          featuresTaskId,
+                        })
+                      ) {
+                        featuresTaskResult = await taskClient.getStatus<
+                          FeaturesIdentificationTaskParams,
+                          IdentifyFeaturesResult
+                        >(featuresTaskId);
+                      } else {
+                        await scheduleFeaturesIdentificationTask(
+                          {
+                            start: from,
+                            end: to,
+                            streamName,
+                          },
+                          taskClient,
+                          runContext.fakeRequest
+                        );
+
+                        featuresTaskResult = await waitForSubtask<
+                          FeaturesIdentificationTaskParams,
+                          IdentifyFeaturesResult
+                        >(featuresTaskId, runContext.taskInstance.id, taskClient);
+                      }
 
                       if (featuresTaskResult.status !== TaskStatus.Completed) {
                         return;
                       }
                       break;
+                    }
 
                     case OnboardingStep.QueriesGeneration:
                       const queriesTaskId = await scheduleQueriesGenerationTask(
                         {
-                          connectorId,
                           start: from,
                           end: to,
                           streamName,
@@ -140,16 +183,30 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 await taskClient.complete<OnboardingTaskParams, OnboardingResult>(
                   _task,
-                  { connectorId, streamName, from, to, steps, saveQueries },
+                  { streamName, from, to, steps, saveQueries },
                   { featuresTaskResult, queriesTaskResult }
                 );
               } catch (error) {
-                // Get connector info for error enrichment
-                const connector = await inferenceClient.getConnectorById(connectorId);
-
-                const errorMessage = isInferenceProviderError(error)
-                  ? formatInferenceProviderError(error, connector)
-                  : getErrorMessage(error);
+                // Get connector info for error enrichment (use rule generation connector; fallback to default)
+                let errorMessage = getErrorMessage(error);
+                try {
+                  const onboardingLogger = taskContext.logger.get('onboarding');
+                  const settings = await modelSettingsClient.getSettings();
+                  const connectorIdForError = await resolveConnectorId({
+                    connectorId: settings.connectorIdRuleGeneration,
+                    uiSettingsClient,
+                    logger: onboardingLogger,
+                  });
+                  onboardingLogger.debug(
+                    `Using connector ${connectorIdForError} for rule generation (error enrichment)`
+                  );
+                  const connector = await inferenceClient.getConnectorById(connectorIdForError);
+                  if (isInferenceProviderError(error)) {
+                    errorMessage = formatInferenceProviderError(error, connector);
+                  }
+                } catch {
+                  // Use generic error message if we cannot resolve the connector
+                }
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
@@ -166,7 +223,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 await taskClient.fail<OnboardingTaskParams>(
                   _task,
                   {
-                    connectorId,
                     streamName,
                     from,
                     to,
@@ -280,6 +336,7 @@ export async function persistQueries(
         id: v4(),
         esql: query.esql,
         title: query.title,
+        description: query.description,
         severity_score: query.severity_score,
         evidence: query.evidence,
       },

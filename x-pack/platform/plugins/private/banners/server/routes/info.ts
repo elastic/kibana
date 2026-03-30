@@ -16,15 +16,17 @@ export const registerInfoRoute = (router: BannersRouter, config: BannersConfigTy
     {
       path: '/api/banners/info',
       security: {
+        authc: {
+          enabled: 'optional',
+          reason:
+            'Banner info must be accessible on the login page before the user is authenticated',
+        },
         authz: {
           enabled: false,
           reason: 'This route is opted out from authorization',
         },
       },
       validate: false,
-      options: {
-        authRequired: 'optional',
-      },
     },
     async (ctx, req, res) => {
       const allowed = isValidLicense((await ctx.licensing).license);

@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/licensing-plugin'
+  - '@kbn/licensing-types'
   - '@kbn/actions-plugin'
   - '@kbn/inference-plugin'
   - '@kbn/spaces-plugin'
@@ -46,18 +47,21 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/ai-assistant-connector-selector-action'
+  - '@kbn/inference-connectors'
   - '@kbn/management-settings-ids'
   - '@kbn/langchain'
   - '@kbn/core-lifecycle-browser-mocks'
+  - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/shared-ux-router'
   - '@kbn/react-query'
   - '@kbn/elastic-assistant'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/ingest-pipelines-plugin'
-  - '@kbn/utility-types'
   - '@kbn/code-editor'
   - '@kbn/monaco'
+  - '@kbn/scout'
+  - '@kbn/core-analytics-browser'
 tags:
   - plugin
   - prod
@@ -70,6 +74,7 @@ fileGroups:
     - public/**/*
     - server/**/*.ts
     - common/**/*.ts
+    - test/scout_automatic_import_v2/**/*
     - '!target/**/*'
 tasks:
   jest:

@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchServiceStart,
+  Logger,
+  SavedObjectsServiceStart,
+  UiSettingsServiceStart,
+} from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
+import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
 import { createSkillRegistry } from './skill_registry';
@@ -41,14 +48,6 @@ export interface SkillServiceStart {
    * existed at creation time.
    */
   registerSkill(skill: SkillDefinition): Promise<void>;
-
-  /**
-   * Unregister a previously registered skill by ID.
-   *
-   * Returns `true` if the skill was found and removed, `false` otherwise.
-   * Serialized with `registerSkill` to avoid races.
-   */
-  unregisterSkill(skillId: string): Promise<boolean>;
 }
 
 export interface SkillService {
@@ -61,6 +60,8 @@ export interface SkillServiceStartDeps {
   spaces?: SpacesPluginStart;
   logger: Logger;
   getToolRegistry: (opts: { request: KibanaRequest }) => Promise<ToolRegistry>;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
 
 export const createSkillService = (): SkillService => {
@@ -80,6 +81,12 @@ class SkillServiceImpl implements SkillService {
   setup(): SkillServiceSetup {
     return {
       registerSkill: (skill) => {
+        if (!isAllowedBuiltinSkill(skill.id)) {
+          throw new Error(
+            `Built-in skill with id "${skill.id}" is not in the list of allowed built-in skills.
+             Please add it to the list of allowed built-in skills in the "@kbn/agent-builder-server/allow_lists.ts" file.`
+          );
+        }
         if (this.skills.has(skill.id)) {
           throw new Error(`Skill type with id ${skill.id} already registered`);
         }
@@ -101,6 +108,8 @@ class SkillServiceImpl implements SkillService {
     spaces,
     logger,
     getToolRegistry,
+    uiSettings,
+    savedObjects,
   }: SkillServiceStartDeps): SkillServiceStart {
     const validated = Promise.all(
       [...this.skills.values()].map((skill) => validateSkillDefinition(skill))
@@ -118,11 +127,16 @@ class SkillServiceImpl implements SkillService {
           logger,
         });
         const toolRegistry = await getToolRegistry({ request });
+        const soClient = savedObjects.getScopedClient(request);
+        const experimentalFeaturesEnabled = await uiSettings
+          .asScopedToClient(soClient)
+          .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
 
         return createSkillRegistry({
           builtinProvider,
           persistedProvider,
           toolRegistry,
+          experimentalFeaturesEnabled,
         });
       },
       registerSkill: (skill) => {
@@ -141,21 +155,6 @@ class SkillServiceImpl implements SkillService {
           }
           this.skillFullPaths.add(fullPath);
           this.skills.set(skill.id, skill);
-        });
-        this.mutationQueue = op.catch(() => {});
-        return op;
-      },
-      unregisterSkill: (skillId) => {
-        const op = this.mutationQueue.then(async () => {
-          const skill = this.skills.get(skillId);
-          if (!skill) {
-            return false;
-          }
-
-          const fullPath = getSkillEntryPath({ skill });
-          this.skillFullPaths.delete(fullPath);
-          this.skills.delete(skillId);
-          return true;
         });
         this.mutationQueue = op.catch(() => {});
         return op;

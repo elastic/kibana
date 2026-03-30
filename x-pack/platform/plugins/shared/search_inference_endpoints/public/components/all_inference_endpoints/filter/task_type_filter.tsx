@@ -38,6 +38,7 @@ export const TaskTypeFilter: React.FC<Props> = ({ optionKeys, onChange, uniqueTa
   return (
     <MultiSelectFilter
       buttonLabel={i18n.TASK_TYPE}
+      ariaLabel={i18n.TASK_TYPE_ARIA_LABEL}
       onChange={onSystemFilterChange}
       options={filteredOptions}
       renderOption={(option) => option.label}

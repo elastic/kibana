@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { SCRIPT_TAGS } from '../service/scripts_library/constants';
+import type { SCRIPT_TAGS } from '../service/script_library/constants';
 import type { SupportedHostOsType } from '../constants';
 
-export interface EndpointScript<TFileType extends 'script' | 'archive' = 'script' | 'archive'> {
+export interface EndpointScript<
+  TFileType extends 'script' | 'archive' | undefined = 'script' | 'archive'
+> {
   id: string;
   name: string;
   platform: Array<SupportedHostOsType>;

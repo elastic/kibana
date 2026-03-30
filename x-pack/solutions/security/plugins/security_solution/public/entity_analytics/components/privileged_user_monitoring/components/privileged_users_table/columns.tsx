@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isArray } from 'lodash/fp';
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn, EuiThemeComputed } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiLink,
   EuiFlexItem,
@@ -20,7 +20,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import { encode } from '@kbn/rison';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
@@ -30,8 +29,8 @@ import { getRowItemsWithActions } from '../../../../../common/components/tables/
 import { UserName } from '../../../user_name';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import type { TableItemType } from './types';
-import { formatRiskScoreWholeNumber } from '../../../../common/utils';
 import { AssetCriticalityBadge } from '../../../asset_criticality';
+import { RiskScoreCell } from '../../../home/entities_table/risk_score_cell';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import {
   getAlertsByStatusQuery,
@@ -99,67 +98,14 @@ const getActionsColumn = (openUserFlyout: (userName: string) => void) => ({
   width: COLUMN_WIDTHS.actions,
 });
 
-const getRiskScoreColumn = (euiTheme: EuiThemeComputed) => ({
+const getRiskScoreColumn = () => ({
   name: (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.riskScore"
       defaultMessage="Risk score"
     />
   ),
-  render: (record: TableItemType) => {
-    const colors: { background: string; text: string } = (() => {
-      switch (record.risk_level) {
-        case 'Unknown':
-          return {
-            background: euiTheme.colors.backgroundBaseSubdued,
-            text: euiTheme.colors.textSubdued,
-          };
-        case 'Low':
-          return {
-            background: euiTheme.colors.backgroundBaseNeutral,
-            text: euiTheme.colors.textNeutral,
-          };
-        case 'Moderate':
-          return {
-            background: euiTheme.colors.backgroundLightWarning,
-            text: euiTheme.colors.textWarning,
-          };
-        case 'High':
-          return {
-            background: euiTheme.colors.backgroundLightRisk,
-            text: euiTheme.colors.textRisk,
-          };
-        case 'Critical':
-          return {
-            background: euiTheme.colors.backgroundLightDanger,
-            text: euiTheme.colors.textDanger,
-          };
-        default:
-          return {
-            background: euiTheme.colors.backgroundBaseSubdued,
-            text: euiTheme.colors.textSubdued,
-          };
-      }
-    })();
-    return (
-      <EuiBadge color={colors.background}>
-        <EuiText
-          css={css`
-            font-weight: ${euiTheme.font.weight.semiBold};
-          `}
-          size={'s'}
-          color={colors.text}
-        >
-          {record.risk_score
-            ? formatRiskScoreWholeNumber(record.risk_score)
-            : i18n.translate(
-                'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.riskScore.na',
-                { defaultMessage: 'N/A' }
-              )}
-        </EuiText>
-      </EuiBadge>
-    );
-  },
+  render: (record: TableItemType) => <RiskScoreCell riskScore={record.risk_score} />,
 });
 
 const AssetCriticalityCell: React.FC<{
@@ -346,12 +292,11 @@ const getAlertDistributionColumn = () => ({
 });
 
 export const buildPrivilegedUsersTableColumns = (
-  openUserFlyout: (userName: string) => void,
-  euiTheme: EuiThemeComputed
+  openUserFlyout: (userName: string) => void
 ): Array<EuiBasicTableColumn<TableItemType>> => [
   getActionsColumn(openUserFlyout),
   getPrivilegedUserColumn(),
-  getRiskScoreColumn(euiTheme),
+  getRiskScoreColumn(),
   getAssetCriticalityColumn(),
   getLabelColumn(),
   getDataSourceColumn(),

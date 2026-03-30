@@ -37,7 +37,7 @@ export const ProcessorStatusIndicator = ({
       }
     );
     variant = {
-      type: 'minusInCircle',
+      type: 'minusCircle',
       color: euiTheme.colors.textDisabled,
       content: name,
       size: 'm',
@@ -116,7 +116,7 @@ export const ProcessorStatusIndicator = ({
         }
       );
       variant = {
-        type: 'crossInCircle',
+        type: 'crossCircle',
         color: 'danger',
         content: name,
         size: 'm',

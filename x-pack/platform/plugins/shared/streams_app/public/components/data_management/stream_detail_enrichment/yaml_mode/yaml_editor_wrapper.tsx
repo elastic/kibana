@@ -128,7 +128,7 @@ export const YamlEditorWrapper = () => {
               }
             )}
             color="warning"
-            iconType="alert"
+            iconType="warning"
             size="s"
           >
             <p>

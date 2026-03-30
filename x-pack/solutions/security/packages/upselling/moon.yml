@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/security-solution-navigation'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/ai-assistant-icon'
+  - '@kbn/i18n-react'
 tags:
   - shared-browser
   - package

@@ -12,6 +12,7 @@ import { monarch } from '@elastic/monaco-esql';
 import {
   getSignatureHelp,
   getHoverItem,
+  getDocumentHighlightItems,
   inlineSuggest,
   suggest,
   validateQuery,
@@ -22,7 +23,7 @@ import { PromQLLang } from '../promql';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
-import { wrapAsMonacoMessages } from './lib/converters/positions';
+import { offsetToRowColumn, wrapAsMonacoMessages } from './lib/converters/positions';
 import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
 import {
   getDecorationHoveredMessages,
@@ -272,6 +273,32 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
           },
           dispose: () => {},
         };
+      },
+    };
+  },
+  getDocumentHighlightProvider: (): monaco.languages.DocumentHighlightProvider => {
+    return {
+      provideDocumentHighlights(
+        model: monaco.editor.ITextModel,
+        position: monaco.Position
+      ): monaco.languages.DocumentHighlight[] {
+        const fullText = model.getValue();
+        const offset = monacoPositionToOffset(fullText, position);
+        const items = getDocumentHighlightItems(fullText, offset);
+
+        return items.map((item) => {
+          const startPosition = offsetToRowColumn(fullText, item.start);
+          const endPosition = offsetToRowColumn(fullText, item.end);
+          return {
+            range: new monaco.Range(
+              startPosition.lineNumber,
+              startPosition.column,
+              endPosition.lineNumber,
+              endPosition.column + 1
+            ),
+            kind: monaco.languages.DocumentHighlightKind.Read,
+          };
+        });
       },
     };
   },
