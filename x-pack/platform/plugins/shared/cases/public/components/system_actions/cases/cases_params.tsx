@@ -88,10 +88,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   );
 
   const isAttackDiscoveryRuleType = ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID;
-  const configuredMaximumOpenCases = useMemo(
-    () => getMaximumOpenCases(uiSettings.get<number>(MAX_OPEN_CASES_ADVANCED_SETTING)),
-    [uiSettings]
-  );
+  const configuredMaximumOpenCases = useMemo(() => {
+    try {
+      return getMaximumOpenCases(uiSettings.get<number>(MAX_OPEN_CASES_ADVANCED_SETTING));
+    } catch {
+      return MAX_OPEN_CASES;
+    }
+  }, [uiSettings]);
 
   const { timeWindow, reopenClosedCases, groupingBy, templateId } = useMemo(
     () =>

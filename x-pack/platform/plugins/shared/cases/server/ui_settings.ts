@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,31 +14,22 @@ import {
   MAX_OPEN_CASES_ADVANCED_SETTING,
 } from '../common/constants';
 
-type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
-
-const orderSettings = (settings: SettingsConfig): SettingsConfig => {
-  return Object.fromEntries(
-    Object.entries(settings).map(([id, setting], index) => [id, { ...setting, order: index }])
-  );
-};
-
 export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
-  uiSettings.register(
-    orderSettings({
-      [MAX_OPEN_CASES_ADVANCED_SETTING]: {
-        name: i18n.translate('xpack.cases.uiSettings.maxOpenCasesPerRuleRunLabel', {
-          defaultMessage: 'Maximum cases created per rule run',
-        }),
-        value: MAX_OPEN_CASES,
-        type: 'number',
-        description: i18n.translate('xpack.cases.uiSettings.maxOpenCasesPerRuleRunDescription', {
-          defaultMessage:
-            'Sets the maximum number of cases that the Cases connector can open during a single rule run.',
-        }),
-        category: [APP_ID],
-        requiresPageReload: false,
-        schema: schema.number({ min: 1 }),
-      },
-    })
-  );
+  uiSettings.register({
+    [MAX_OPEN_CASES_ADVANCED_SETTING]: {
+      name: i18n.translate('xpack.cases.uiSettings.maxOpenCasesPerRuleRunLabel', {
+        defaultMessage: 'Maximum cases created per rule run',
+      }),
+      value: MAX_OPEN_CASES,
+      type: 'number',
+      description: i18n.translate('xpack.cases.uiSettings.maxOpenCasesPerRuleRunDescription', {
+        defaultMessage:
+          'Sets the maximum number of cases that the Cases connector can open during a single rule run.',
+      }),
+      category: [APP_ID],
+      requiresPageReload: false,
+      order: 0,
+      schema: schema.number({ min: 1, max: MAX_OPEN_CASES }),
+    },
+  });
 };

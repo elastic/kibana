@@ -202,7 +202,7 @@ describe('CasesConnector', () => {
   });
 
   it('overrides maximumCasesToOpen for internally managed alerts', async () => {
-    mockUiSettingsGet.mockResolvedValue(25);
+    mockUiSettingsGet.mockResolvedValue(15);
 
     await connector.run({
       alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
@@ -226,9 +226,31 @@ describe('CasesConnector', () => {
     expect(mockExecute).toBeCalledWith(
       expect.objectContaining({
         internallyManagedAlerts: true,
-        maximumCasesToOpen: 25,
+        maximumCasesToOpen: 15,
       })
     );
+  });
+
+  it('throws when maximumCasesToOpen exceeds a lowered configured maximum', async () => {
+    mockUiSettingsGet.mockResolvedValue(5);
+
+    await expect(() =>
+      connector.run({
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+        groupedAlerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        internallyManagedAlerts,
+        reopenClosedCases,
+        maximumCasesToOpen: 10,
+        templateId,
+        autoPushCase,
+      })
+    ).rejects.toMatchObject({
+      message: 'Maximum cases to open must be between 1 and 5.',
+    });
   });
 
   it('creates the cases client correctly', async () => {

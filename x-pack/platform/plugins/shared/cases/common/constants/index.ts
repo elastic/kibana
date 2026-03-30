@@ -25,7 +25,7 @@ export const getMaximumOpenCases = (maxOpenCases?: number | null): number => {
     return MAX_OPEN_CASES;
   }
 
-  return Math.max(1, Math.floor(maxOpenCases));
+  return Math.min(MAX_OPEN_CASES, Math.max(1, Math.floor(maxOpenCases)));
 };
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
