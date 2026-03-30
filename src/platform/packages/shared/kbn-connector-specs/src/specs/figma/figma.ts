@@ -39,7 +39,7 @@ export const FigmaConnector: ConnectorSpec = {
         defaults: {
           authorizationUrl: 'https://www.figma.com/oauth',
           tokenUrl: 'https://api.figma.com/v1/oauth/token',
-          scope: 'file_read',
+          scope: 'current_user:read file_content:read projects:read',
         },
       },
     ],
