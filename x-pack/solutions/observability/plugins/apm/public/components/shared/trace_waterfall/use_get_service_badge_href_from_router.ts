@@ -16,7 +16,7 @@ export function useGetServiceBadgeHrefFromRouter(): WaterfallGetServiceBadgeHref
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
     '/dependencies/operation',
-    '/traces/explorer/waterfall' // TODO remove this url when the trace explorer url and its ftrs tests are removed [ADD issue link]
+    '/traces/explorer/waterfall' // TODO remove this url when the trace explorer url and its ftrs tests are removed https://github.com/elastic/kibana/issues/254449
   );
 
   return useCallback(
