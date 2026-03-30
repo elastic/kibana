@@ -88,7 +88,6 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
         }
       } catch (e) {
         // Pre-flight failed — proceed anyway, the server will validate on link
-        console.debug('Resolution pre-flight check failed, continuing with link', e);
       }
 
       if (!hasGroup) {
@@ -97,14 +96,10 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
         setModalState({ isOpen: true, newEntity: entity });
       } else {
         // Group already exists — link directly to current target
-        if (targetEntityId) {
-          linkEntities.mutate(
-            { target_id: targetEntityId, entity_ids: [newEntityId] },
-            { onSettled: () => setAddingEntityId(undefined) }
-          );
-        } else {
-          setAddingEntityId(undefined);
-        }
+        linkEntities.mutate(
+          { target_id: targetEntityId || entityId, entity_ids: [newEntityId] },
+          { onSettled: () => setAddingEntityId(undefined) }
+        );
       }
     },
     [groupQueryReady, hasGroup, targetEntityId, linkEntities, http, addError]
