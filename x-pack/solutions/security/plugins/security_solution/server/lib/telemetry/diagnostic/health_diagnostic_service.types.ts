@@ -150,10 +150,16 @@ export type ExecutableQuery =
   | { kind: 'executable'; query: HealthDiagnosticQueryV1 }
   | { kind: 'executable'; query: HealthDiagnosticQueryV2; resolution: IntegrationResolution };
 
+export type SkipReason =
+  | 'datastreams_not_matched'
+  | 'integration_not_installed'
+  | 'unknown_version'
+  | 'fleet_unavailable';
+
 export interface SkippedQuery {
   kind: 'skipped';
   query: HealthDiagnosticQuery;
-  reason: 'datastreams_not_matched' | 'integration_not_installed' | 'unknown_version';
+  reason: SkipReason;
 }
 
 export type ResolvedQuery = ExecutableQuery | SkippedQuery;
@@ -181,7 +187,7 @@ export interface HealthDiagnosticQueryStats {
   // new fields
   descriptorVersion: number;
   status: 'success' | 'failed' | 'skipped';
-  skipReason?: 'datastreams_not_matched' | 'integration_not_installed' | 'unknown_version';
+  skipReason?: SkipReason;
   integration?: IntegrationResolution;
 }
 

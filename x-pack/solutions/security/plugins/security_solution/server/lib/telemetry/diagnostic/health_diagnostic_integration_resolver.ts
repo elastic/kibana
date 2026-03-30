@@ -26,12 +26,32 @@ export class IntegrationResolverImpl implements IntegrationResolver {
 
   async resolve(queries: HealthDiagnosticQuery[]): Promise<ResolvedQuery[]> {
     const hasV2 = queries.some((q) => 'version' in q && q.version === 2);
-    const installedPackages = hasV2 ? await this.fetchInstalledPackages() : [];
+    let installedPackages: InstalledPackage[] = [];
+    let fleetUnavailable = false;
+
+    if (hasV2) {
+      try {
+        installedPackages = await this.fetchInstalledPackages();
+      } catch (err) {
+        // just log as debug since it's not necessary to pollute logs with errors if fleet is unavailable - we'll just
+        // skip v2 queries and inform it accordingly in the stats
+        this.logger.debug(
+          'Failed to fetch installed packages from Fleet; v2 queries will be skipped',
+          {
+            error: err.message,
+          } as LogMeta
+        );
+        fleetUnavailable = true;
+      }
+    }
 
     return queries.flatMap((query) => {
       if ('version' in query && query.version === 1) {
         return [this.resolveV1(query)];
       } else if ('version' in query && query.version === 2) {
+        if (fleetUnavailable) {
+          return [{ kind: 'skipped', query, reason: 'fleet_unavailable' } as SkippedQuery];
+        }
         return this.resolveV2(query, installedPackages);
       } else {
         return [this.resolveUnknown(query)];

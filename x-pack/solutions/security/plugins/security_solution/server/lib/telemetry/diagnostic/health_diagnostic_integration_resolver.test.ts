@@ -230,6 +230,48 @@ describe('IntegrationResolverImpl', () => {
     });
   });
 
+  describe('Fleet unavailability', () => {
+    beforeEach(() => {
+      packageService.asInternalUser.getPackages.mockRejectedValue(new Error('Fleet is down'));
+    });
+
+    it('returns fleet_unavailable SkippedQuery for each v2 query when Fleet call fails', async () => {
+      const q1 = createMockQueryV2(QueryType.DSL, { id: 'q1', integrations: ['endpoint'] });
+      const q2 = createMockQueryV2(QueryType.DSL, { id: 'q2', integrations: ['fleet_server'] });
+      const results = await resolver.resolve([q1, q2]);
+
+      expect(results).toHaveLength(2);
+      expect(results.every((r) => r.kind === 'skipped')).toBe(true);
+      results.forEach((r) => {
+        if (r.kind !== 'skipped') throw new Error('type guard');
+        expect(r.reason).toBe('fleet_unavailable');
+      });
+    });
+
+    it('still runs v1 queries when Fleet call fails', async () => {
+      const v1 = createMockQueryV1(QueryType.DSL);
+      const v2 = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint'] });
+      const results = await resolver.resolve([v1, v2]);
+
+      expect(results).toHaveLength(2);
+      expect(results[0].kind).toBe('executable');
+      if (results[0].kind !== 'executable') throw new Error('type guard');
+      expect(results[0].query.version).toBe(1);
+
+      expect(results[1].kind).toBe('skipped');
+      if (results[1].kind !== 'skipped') throw new Error('type guard');
+      expect(results[1].reason).toBe('fleet_unavailable');
+    });
+
+    it('does not call Fleet when there are only v1 queries', async () => {
+      packageService.asInternalUser.getPackages.mockClear();
+      const v1 = createMockQueryV1(QueryType.DSL);
+      await resolver.resolve([v1]);
+
+      expect(packageService.asInternalUser.getPackages).not.toHaveBeenCalled();
+    });
+  });
+
   describe('unknown version queries', () => {
     it('returns SkippedQuery for UnknownVersionQuery', async () => {
       const unknown = { version: 99, id: 'future', name: 'future', _raw: {} };
