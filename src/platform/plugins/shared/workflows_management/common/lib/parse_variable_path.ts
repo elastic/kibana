@@ -7,10 +7,179 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ALLOWED_KEY_REGEX, DYNAMIC_BRACKET_ACCESS_REGEX, PROPERTY_PATH_REGEX } from './regex';
+export type PathSegment =
+  | { type: 'identifier'; value: string }
+  | { type: 'numeric_index'; value: number }
+  | { type: 'string_literal'; value: string; quote: '"' | "'" }
+  | { type: 'dynamic_access'; path: PathSegment[] };
 
-export function validateVariablePath(path: string) {
-  return ALLOWED_KEY_REGEX.test(path);
+interface ParsePathResult {
+  segments: PathSegment[];
+  pos: number;
+}
+
+export function parsePropertyPath(input: string): ParsePathResult | null {
+  let pos = 0;
+  const segments: PathSegment[] = [];
+
+  const firstSegment = parseIdentifier(input, pos);
+  if (!firstSegment) return null;
+  segments.push(firstSegment.segment);
+  pos = firstSegment.pos;
+
+  while (pos < input.length) {
+    if (input[pos] === '.') {
+      pos++;
+      const seg = parseIdentifier(input, pos);
+      if (!seg) return null;
+      segments.push(seg.segment);
+      pos = seg.pos;
+    } else if (input[pos] === '[') {
+      const bracket = parseBracketAccessor(input, pos);
+      if (!bracket) return null;
+      segments.push(bracket.segment);
+      pos = bracket.pos;
+    } else {
+      break;
+    }
+  }
+
+  return { segments, pos };
+}
+
+export function isValidPropertyPath(path: string): boolean {
+  const result = parsePropertyPath(path);
+  return result !== null && result.pos === path.length;
+}
+
+function parseIdentifier(input: string, pos: number): { segment: PathSegment; pos: number } | null {
+  if (pos >= input.length || !/[a-zA-Z_$]/.test(input[pos])) return null;
+
+  let end = pos + 1;
+  while (end < input.length && /[a-zA-Z0-9_$]/.test(input[end])) {
+    end++;
+  }
+
+  return { segment: { type: 'identifier', value: input.slice(pos, end) }, pos: end };
+}
+
+function parseBracketAccessor(
+  input: string,
+  startPos: number
+): { segment: PathSegment; pos: number } | null {
+  if (input[startPos] !== '[') return null;
+  let cursor = startPos + 1;
+
+  while (cursor < input.length && input[cursor] === ' ') cursor++;
+
+  if (cursor >= input.length) return null;
+
+  let result: { segment: PathSegment; pos: number } | null = null;
+
+  if (/\d/.test(input[cursor])) {
+    result = parseNumericIndex(input, cursor);
+  } else if (input[cursor] === '"' || input[cursor] === "'") {
+    result = parseStringLiteral(input, cursor);
+  } else if (/[a-zA-Z_$]/.test(input[cursor])) {
+    result = parseDynamicAccess(input, cursor);
+  }
+
+  if (!result) return null;
+  cursor = result.pos;
+
+  while (cursor < input.length && input[cursor] === ' ') cursor++;
+
+  if (cursor >= input.length || input[cursor] !== ']') return null;
+  cursor++;
+
+  return { segment: result.segment, pos: cursor };
+}
+
+function parseNumericIndex(
+  input: string,
+  pos: number
+): { segment: PathSegment; pos: number } | null {
+  let end = pos;
+  while (end < input.length && /\d/.test(input[end])) end++;
+  if (end === pos) return null;
+
+  return {
+    segment: { type: 'numeric_index', value: parseInt(input.slice(pos, end), 10) },
+    pos: end,
+  };
+}
+
+function parseStringLiteral(
+  input: string,
+  startPos: number
+): { segment: PathSegment; pos: number } | null {
+  const quote = input[startPos] as '"' | "'";
+  const contentStart = startPos + 1;
+  let end = contentStart;
+  while (end < input.length && input[end] !== quote) {
+    if (input[end] === '\\') end++;
+    end++;
+  }
+  if (end >= input.length) return null;
+
+  const value = input.slice(contentStart, end);
+  return { segment: { type: 'string_literal', value, quote }, pos: end + 1 };
+}
+
+function parseDynamicAccess(
+  input: string,
+  pos: number
+): { segment: PathSegment; pos: number } | null {
+  const innerResult = parsePropertyPath(input.slice(pos));
+  if (!innerResult || innerResult.segments.length === 0) return null;
+
+  return {
+    segment: { type: 'dynamic_access', path: innerResult.segments },
+    pos: pos + innerResult.pos,
+  };
+}
+
+export function segmentsToString(segments: PathSegment[]): string {
+  return segments
+    .map((seg, i) => {
+      switch (seg.type) {
+        case 'identifier':
+          return i === 0 ? seg.value : `.${seg.value}`;
+        case 'numeric_index':
+          return `[${seg.value}]`;
+        case 'string_literal':
+          return `[${seg.quote}${seg.value}${seg.quote}]`;
+        case 'dynamic_access':
+          return `[${segmentsToString(seg.path)}]`;
+        default:
+          return '';
+      }
+    })
+    .join('');
+}
+
+function containsDynamicAccess(segments: PathSegment[]): boolean {
+  return segments.some((seg) => seg.type === 'dynamic_access');
+}
+
+function extractFirstDynamicAccess(segments: PathSegment[]): DynamicBracketAccessInfo | undefined {
+  const dynamicIdx = segments.findIndex((s) => s.type === 'dynamic_access');
+  if (dynamicIdx === -1) return undefined;
+
+  const prefixSegments = segments.slice(0, dynamicIdx);
+  const suffixSegments = segments.slice(dynamicIdx + 1);
+  const dynamicSeg = segments[dynamicIdx] as { type: 'dynamic_access'; path: PathSegment[] };
+
+  return {
+    prefixPath: segmentsToString(prefixSegments),
+    dynamicKey: segmentsToString(dynamicSeg.path),
+    suffixPath: suffixSegments.length > 0 ? segmentsToString(suffixSegments) : null,
+  };
+}
+
+export function validateVariablePath(path: string): boolean {
+  const parsed = parseVariablePath(path);
+  return parsed !== null && !parsed.errors;
 }
 
 export interface DynamicBracketAccessInfo {
@@ -27,17 +196,10 @@ export interface ParsedVariablePath {
   dynamicAccess?: DynamicBracketAccessInfo;
 }
 
-// Receives a variable path e.g. 'items[0].name' or 'items[0].name | title' or 'items[0].name | title | uppercase'
-// Tries to parse the path into a property path and filters
-// Returns null if the path is invalid
-// Returns an object with the property path and filters if the path is valid
-// TODO: should be refactored to use liquidjs parser
 export function parseVariablePath(path: string): ParsedVariablePath | null {
   const errors: string[] = [];
-  // Trim whitespace
   const trimmedPath = path.trim();
 
-  // Split by pipe, but we need to be careful about pipes inside parentheses
   const parts = splitByPipeRespectingParentheses(trimmedPath);
 
   if (parts.length === 0) {
@@ -46,8 +208,8 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
 
   const propertyPath = parts[0].trim();
 
-  // Validate the property path part
-  if (!PROPERTY_PATH_REGEX.test(propertyPath)) {
+  const parsed = parsePropertyPath(propertyPath);
+  if (!parsed || parsed.pos !== propertyPath.length) {
     errors.push(`Invalid property path: ${propertyPath}`);
   }
 
@@ -56,16 +218,14 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
     .map((filter) => filter.trim())
     .filter((filter) => filter.length > 0);
 
-  // Validate each filter name (basic validation)
   for (const filter of filters) {
     const filterName = filter.split('(')[0].trim();
-    // Check if filter name follows JavaScript identifier rules (no numbers at start, no $ at start, no special chars except _)
     if (!/^[a-zA-Z_][a-zA-Z0-9_$]*$/.test(filterName)) {
       errors.push(`Invalid filter name: ${filterName}`);
     }
   }
 
-  if (errors.length > 0) {
+  if (errors.length > 0 || !parsed) {
     return {
       errors,
       propertyPath: null,
@@ -73,10 +233,9 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
     };
   }
 
-  const hasDynamicBracketAccess = DYNAMIC_BRACKET_ACCESS_REGEX.test(propertyPath);
-  const dynamicAccess = hasDynamicBracketAccess
-    ? extractDynamicBracketAccess(propertyPath)
-    : undefined;
+  const { segments } = parsed;
+  const hasDynamicBracketAccess = containsDynamicAccess(segments);
+  const dynamicAccess = hasDynamicBracketAccess ? extractFirstDynamicAccess(segments) : undefined;
 
   return {
     propertyPath,
@@ -84,19 +243,6 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
     hasDynamicBracketAccess,
     dynamicAccess,
   };
-}
-
-function extractDynamicBracketAccess(propertyPath: string): DynamicBracketAccessInfo | undefined {
-  const match = propertyPath.match(DYNAMIC_BRACKET_ACCESS_REGEX);
-  if (!match || match.index === undefined) return undefined;
-
-  const prefixPath = propertyPath.slice(0, match.index);
-  const bracketContent = match[0];
-  const dynamicKey = bracketContent.slice(1, -1).trim();
-  const afterBracket = propertyPath.slice(match.index + bracketContent.length);
-  const suffixPath = afterBracket.startsWith('.') ? afterBracket.slice(1) : afterBracket || null;
-
-  return { prefixPath, dynamicKey, suffixPath: suffixPath || null };
 }
 
 function splitByPipeRespectingParentheses(input: string): string[] {

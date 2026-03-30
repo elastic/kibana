@@ -377,6 +377,54 @@ describe('validateVariable', () => {
     });
   });
 
+  it('should validate nested dynamic bracket access', () => {
+    const variableItem = createVariableItem({
+      key: 'steps.load.output._source[steps.note[steps.comment.output]].id',
+    });
+    mockParseVariablePath
+      .mockReturnValueOnce({
+        propertyPath: 'steps.load.output._source[steps.note[steps.comment.output]].id',
+        filters: [],
+        hasDynamicBracketAccess: true,
+        dynamicAccess: {
+          prefixPath: 'steps.load.output._source',
+          dynamicKey: 'steps.note[steps.comment.output]',
+          suffixPath: 'id',
+        },
+      })
+      .mockReturnValueOnce({
+        propertyPath: 'steps.note[steps.comment.output]',
+        filters: [],
+        hasDynamicBracketAccess: true,
+        dynamicAccess: {
+          prefixPath: 'steps.note',
+          dynamicKey: 'steps.comment.output',
+          suffixPath: null,
+        },
+      })
+      .mockReturnValueOnce({
+        propertyPath: 'steps.comment.output',
+        filters: [],
+        hasDynamicBracketAccess: false,
+      });
+    mockGetSchemaAtPath
+      .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
+      .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
+      .mockReturnValueOnce({ schema: z.string(), scopedToPath: null });
+
+    const result = validateVariable(variableItem, mockContext);
+
+    expect(result).toMatchObject({
+      message: null,
+      severity: null,
+      owner: 'variable-validation',
+    });
+    expect(result.hoverMessage).toContain('Dynamic bracket access');
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'steps.load.output._source');
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'steps.note');
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'steps.comment.output');
+  });
+
   it('should handle array input with default value in foreach validation', () => {
     const variableItem = createVariableItem({
       key: 'inputs.days_to_plan',

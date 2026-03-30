@@ -38,6 +38,8 @@ function validateDynamicBracketAccess(
   if (!dynamicKeyParsed || dynamicKeyParsed.errors) {
     const detail = dynamicKeyParsed?.errors?.join(', ') ?? dynamicKey;
     errors.push(`Invalid dynamic key: ${detail}`);
+  } else if (dynamicKeyParsed.hasDynamicBracketAccess && dynamicKeyParsed.dynamicAccess) {
+    errors.push(...validateDynamicBracketAccess(dynamicKeyParsed.dynamicAccess, context));
   } else if (dynamicKeyParsed.propertyPath) {
     const { schema: keySchema } = getSchemaAtPath(context, dynamicKeyParsed.propertyPath);
     if (!keySchema) {

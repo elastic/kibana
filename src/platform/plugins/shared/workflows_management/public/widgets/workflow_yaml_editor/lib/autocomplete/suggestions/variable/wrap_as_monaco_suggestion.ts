@@ -9,7 +9,7 @@
 
 import type { Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { PROPERTY_PATH_REGEX } from '../../../../../../../common/lib/regex';
+import { isValidPropertyPath } from '../../../../../../../common/lib/parse_variable_path';
 
 export function wrapAsMonacoSuggestion(
   key: string,
@@ -23,7 +23,7 @@ export function wrapAsMonacoSuggestion(
 ): monaco.languages.CompletionItem {
   let keyToInsert = key;
   const isAt = triggerCharacter === '@';
-  const keyCouldAccessedByDot = PROPERTY_PATH_REGEX.test(key);
+  const keyCouldAccessedByDot = isValidPropertyPath(key);
   const removeDot = isAt || !keyCouldAccessedByDot;
 
   if (!keyCouldAccessedByDot) {

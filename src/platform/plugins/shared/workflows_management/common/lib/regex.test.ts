@@ -8,11 +8,8 @@
  */
 
 import {
-  ALLOWED_KEY_REGEX,
-  DYNAMIC_BRACKET_ACCESS_REGEX,
   isLiquidTagValue,
   LIQUID_FILTER_REGEX,
-  PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
   VARIABLE_REGEX_GLOBAL,
 } from './regex';
@@ -74,128 +71,6 @@ describe('regex patterns', () => {
       const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
 
       expect(matches).toHaveLength(0);
-    });
-  });
-
-  describe('ALLOWED_KEY_REGEX', () => {
-    it('should match valid property paths', () => {
-      const validPaths = [
-        'user',
-        'user.name',
-        'steps.step1.output',
-        'items[0]',
-        'users["john"]',
-        "data['key']",
-        'user.contacts[0].email',
-        'response.data["user-info"].name',
-      ];
-
-      validPaths.forEach((path) => {
-        expect(ALLOWED_KEY_REGEX.test(path)).toBe(true);
-      });
-    });
-
-    it('should match paths with liquid filters', () => {
-      const pathsWithFilters = [
-        'user.name | upcase',
-        'price | round: 2',
-        'items | map: "title" | join: ", "',
-      ];
-
-      pathsWithFilters.forEach((path) => {
-        expect(ALLOWED_KEY_REGEX.test(path)).toBe(true);
-      });
-    });
-
-    it('should match paths with dynamic bracket access', () => {
-      const dynamicPaths = [
-        'data._source[steps.other_step.output].id',
-        'obj[steps.a.output]',
-        'data[fieldName]',
-      ];
-
-      dynamicPaths.forEach((path) => {
-        expect(ALLOWED_KEY_REGEX.test(path)).toBe(true);
-      });
-    });
-
-    it('should not match invalid property paths', () => {
-      const invalidPaths = [
-        '123invalid', // starts with number
-        '.user', // starts with dot
-        'user..name', // double dots
-        'user]invalid[', // wrong bracket order
-      ];
-
-      invalidPaths.forEach((path) => {
-        expect(ALLOWED_KEY_REGEX.test(path)).toBe(false);
-      });
-    });
-  });
-
-  describe('PROPERTY_PATH_REGEX', () => {
-    it('should match valid property paths without filters', () => {
-      const validPaths = [
-        'user',
-        'user.name',
-        'steps.step1.output',
-        'items[0]',
-        'users["john"]',
-        "data['key']",
-        'user.contacts[0].email',
-        'response.data["user-info"].name',
-      ];
-
-      validPaths.forEach((path) => {
-        expect(PROPERTY_PATH_REGEX.test(path)).toBe(true);
-      });
-    });
-
-    it('should match paths with dynamic bracket access', () => {
-      const dynamicPaths = [
-        'data._source[steps.other_step.output].id',
-        'obj[steps.a.output]',
-        'data[fieldName]',
-      ];
-
-      dynamicPaths.forEach((path) => {
-        expect(PROPERTY_PATH_REGEX.test(path)).toBe(true);
-      });
-    });
-
-    it('should not match paths with liquid filters', () => {
-      const pathsWithFilters = ['user.name | upcase', 'price | round: 2', 'items | map: "title"'];
-
-      pathsWithFilters.forEach((path) => {
-        expect(PROPERTY_PATH_REGEX.test(path)).toBe(false);
-      });
-    });
-
-    it('should not match invalid property paths', () => {
-      const invalidPaths = [
-        '123invalid', // starts with number
-        '.user', // starts with dot
-        'user..name', // double dots
-      ];
-
-      invalidPaths.forEach((path) => {
-        expect(PROPERTY_PATH_REGEX.test(path)).toBe(false);
-      });
-    });
-  });
-
-  describe('DYNAMIC_BRACKET_ACCESS_REGEX', () => {
-    it('should match paths containing dynamic variable bracket access', () => {
-      expect(DYNAMIC_BRACKET_ACCESS_REGEX.test('data[fieldName]')).toBe(true);
-      expect(DYNAMIC_BRACKET_ACCESS_REGEX.test('_source[steps.other.output].id')).toBe(true);
-      expect(DYNAMIC_BRACKET_ACCESS_REGEX.test('obj[a.b.c]')).toBe(true);
-    });
-
-    it('should not match paths with only static bracket access', () => {
-      expect(DYNAMIC_BRACKET_ACCESS_REGEX.test('data[0]')).toBe(false);
-      expect(DYNAMIC_BRACKET_ACCESS_REGEX.test('data["key"]')).toBe(false);
-      expect(DYNAMIC_BRACKET_ACCESS_REGEX.test("data['key']")).toBe(false);
-      expect(DYNAMIC_BRACKET_ACCESS_REGEX.test('simple.path')).toBe(false);
     });
   });
 

@@ -7,7 +7,366 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseVariablePath, validateVariablePath } from './parse_variable_path';
+import {
+  isValidPropertyPath,
+  parsePropertyPath,
+  parseVariablePath,
+  segmentsToString,
+  validateVariablePath,
+} from './parse_variable_path';
+import type { PathSegment } from './parse_variable_path';
+
+describe('parsePropertyPath', () => {
+  it('should parse a simple identifier', () => {
+    const result = parsePropertyPath('user');
+    expect(result).toEqual({
+      segments: [{ type: 'identifier', value: 'user' }],
+      pos: 4,
+    });
+  });
+
+  it('should parse a dotted path', () => {
+    const result = parsePropertyPath('user.name');
+    expect(result).toEqual({
+      segments: [
+        { type: 'identifier', value: 'user' },
+        { type: 'identifier', value: 'name' },
+      ],
+      pos: 9,
+    });
+  });
+
+  it('should parse numeric bracket access', () => {
+    const result = parsePropertyPath('items[0]');
+    expect(result).toEqual({
+      segments: [
+        { type: 'identifier', value: 'items' },
+        { type: 'numeric_index', value: 0 },
+      ],
+      pos: 8,
+    });
+  });
+
+  it('should parse string bracket access with double quotes', () => {
+    const result = parsePropertyPath('data["user-info"]');
+    expect(result).toEqual({
+      segments: [
+        { type: 'identifier', value: 'data' },
+        { type: 'string_literal', value: 'user-info', quote: '"' },
+      ],
+      pos: 17,
+    });
+  });
+
+  it('should parse string bracket access with single quotes', () => {
+    const result = parsePropertyPath("data['key']");
+    expect(result).toEqual({
+      segments: [
+        { type: 'identifier', value: 'data' },
+        { type: 'string_literal', value: 'key', quote: "'" },
+      ],
+      pos: 11,
+    });
+  });
+
+  it('should parse dynamic bracket access', () => {
+    const result = parsePropertyPath('data[fieldName]');
+    expect(result).toEqual({
+      segments: [
+        { type: 'identifier', value: 'data' },
+        {
+          type: 'dynamic_access',
+          path: [{ type: 'identifier', value: 'fieldName' }],
+        },
+      ],
+      pos: 15,
+    });
+  });
+
+  it('should parse dynamic bracket access with dotted path', () => {
+    const result = parsePropertyPath('obj[steps.a.output]');
+    expect(result).toEqual({
+      segments: [
+        { type: 'identifier', value: 'obj' },
+        {
+          type: 'dynamic_access',
+          path: [
+            { type: 'identifier', value: 'steps' },
+            { type: 'identifier', value: 'a' },
+            { type: 'identifier', value: 'output' },
+          ],
+        },
+      ],
+      pos: 19,
+    });
+  });
+
+  it('should parse nested dynamic bracket access', () => {
+    const result = parsePropertyPath('a[b[c]]');
+    expect(result).toEqual({
+      segments: [
+        { type: 'identifier', value: 'a' },
+        {
+          type: 'dynamic_access',
+          path: [
+            { type: 'identifier', value: 'b' },
+            {
+              type: 'dynamic_access',
+              path: [{ type: 'identifier', value: 'c' }],
+            },
+          ],
+        },
+      ],
+      pos: 7,
+    });
+  });
+
+  it('should parse deeply nested dynamic bracket access', () => {
+    const result = parsePropertyPath('a[b[c[d]]]');
+    expect(result).toEqual({
+      segments: [
+        { type: 'identifier', value: 'a' },
+        {
+          type: 'dynamic_access',
+          path: [
+            { type: 'identifier', value: 'b' },
+            {
+              type: 'dynamic_access',
+              path: [
+                { type: 'identifier', value: 'c' },
+                {
+                  type: 'dynamic_access',
+                  path: [{ type: 'identifier', value: 'd' }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      pos: 10,
+    });
+  });
+
+  it('should parse a complex real-world path', () => {
+    const result = parsePropertyPath(
+      'steps.load_comment_sync_state.output._source[steps.note_sync_space_comment.output].id'
+    );
+    expect(result).not.toBeNull();
+    expect(result!.pos).toBe(85);
+    expect(result!.segments).toHaveLength(6);
+    expect(result!.segments[4]).toEqual({
+      type: 'dynamic_access',
+      path: [
+        { type: 'identifier', value: 'steps' },
+        { type: 'identifier', value: 'note_sync_space_comment' },
+        { type: 'identifier', value: 'output' },
+      ],
+    });
+  });
+
+  it('should parse nested dynamic access in a real-world path', () => {
+    const input =
+      'steps.load.output._source[steps.note[steps.note_sync_space_comment]].id';
+    const result = parsePropertyPath(input);
+    expect(result).not.toBeNull();
+    expect(result!.pos).toBe(input.length);
+  });
+
+  it('should parse mixed bracket types', () => {
+    const result = parsePropertyPath('data["key"][0][fieldName]');
+    expect(result).toEqual({
+      segments: [
+        { type: 'identifier', value: 'data' },
+        { type: 'string_literal', value: 'key', quote: '"' },
+        { type: 'numeric_index', value: 0 },
+        {
+          type: 'dynamic_access',
+          path: [{ type: 'identifier', value: 'fieldName' }],
+        },
+      ],
+      pos: 25,
+    });
+  });
+
+  it('should handle whitespace in brackets', () => {
+    const result = parsePropertyPath('data[ 0 ]');
+    expect(result).toEqual({
+      segments: [
+        { type: 'identifier', value: 'data' },
+        { type: 'numeric_index', value: 0 },
+      ],
+      pos: 9,
+    });
+  });
+
+  it('should handle identifiers starting with underscore or dollar', () => {
+    const result = parsePropertyPath('_source.$field');
+    expect(result).toEqual({
+      segments: [
+        { type: 'identifier', value: '_source' },
+        { type: 'identifier', value: '$field' },
+      ],
+      pos: 14,
+    });
+  });
+
+  it('should return null for input starting with a number', () => {
+    expect(parsePropertyPath('123invalid')).toBeNull();
+  });
+
+  it('should return null for input starting with a dot', () => {
+    expect(parsePropertyPath('.user')).toBeNull();
+  });
+
+  it('should return null for double dots', () => {
+    expect(parsePropertyPath('user..name')).toBeNull();
+  });
+
+  it('should return null for empty input', () => {
+    expect(parsePropertyPath('')).toBeNull();
+  });
+
+  it('should return null for unclosed string literal', () => {
+    expect(parsePropertyPath('data["key')).toBeNull();
+  });
+
+  it('should return null for unclosed bracket', () => {
+    const result = parsePropertyPath('data[0');
+    expect(result).toBeNull();
+  });
+
+  it('should stop before pipe character', () => {
+    const result = parsePropertyPath('user.name | upcase');
+    expect(result).not.toBeNull();
+    expect(result!.pos).toBe(9);
+  });
+});
+
+describe('segmentsToString', () => {
+  it('should reconstruct a simple identifier', () => {
+    const segments: PathSegment[] = [{ type: 'identifier', value: 'user' }];
+    expect(segmentsToString(segments)).toBe('user');
+  });
+
+  it('should reconstruct a dotted path', () => {
+    const segments: PathSegment[] = [
+      { type: 'identifier', value: 'user' },
+      { type: 'identifier', value: 'name' },
+    ];
+    expect(segmentsToString(segments)).toBe('user.name');
+  });
+
+  it('should reconstruct bracket accessors', () => {
+    const segments: PathSegment[] = [
+      { type: 'identifier', value: 'data' },
+      { type: 'string_literal', value: 'key', quote: '"' },
+      { type: 'numeric_index', value: 0 },
+    ];
+    expect(segmentsToString(segments)).toBe('data["key"][0]');
+  });
+
+  it('should reconstruct dynamic access', () => {
+    const segments: PathSegment[] = [
+      { type: 'identifier', value: 'obj' },
+      {
+        type: 'dynamic_access',
+        path: [
+          { type: 'identifier', value: 'steps' },
+          { type: 'identifier', value: 'a' },
+          { type: 'identifier', value: 'output' },
+        ],
+      },
+    ];
+    expect(segmentsToString(segments)).toBe('obj[steps.a.output]');
+  });
+
+  it('should reconstruct nested dynamic access', () => {
+    const segments: PathSegment[] = [
+      { type: 'identifier', value: 'a' },
+      {
+        type: 'dynamic_access',
+        path: [
+          { type: 'identifier', value: 'b' },
+          {
+            type: 'dynamic_access',
+            path: [{ type: 'identifier', value: 'c' }],
+          },
+        ],
+      },
+    ];
+    expect(segmentsToString(segments)).toBe('a[b[c]]');
+  });
+
+  it('should produce empty string for suffix segments starting with dot accessor', () => {
+    const segments: PathSegment[] = [{ type: 'identifier', value: 'id' }];
+    expect(segmentsToString(segments)).toBe('id');
+  });
+});
+
+describe('isValidPropertyPath', () => {
+  it('should match valid property paths', () => {
+    const validPaths = [
+      'user',
+      'user.name',
+      'steps.step1.output',
+      'items[0]',
+      'users["john"]',
+      "data['key']",
+      'user.contacts[0].email',
+      'response.data["user-info"].name',
+    ];
+
+    validPaths.forEach((path) => {
+      expect(isValidPropertyPath(path)).toBe(true);
+    });
+  });
+
+  it('should match paths with dynamic bracket access', () => {
+    const dynamicPaths = [
+      'data._source[steps.other_step.output].id',
+      'obj[steps.a.output]',
+      'data[fieldName]',
+    ];
+
+    dynamicPaths.forEach((path) => {
+      expect(isValidPropertyPath(path)).toBe(true);
+    });
+  });
+
+  it('should match paths with nested dynamic bracket access', () => {
+    const nestedPaths = [
+      'a[b[c]]',
+      'a[b[c[d]]]',
+      'data[steps.note[steps.other]]',
+      'steps.load.output._source[steps.note[steps.note_sync_space_comment]].id',
+    ];
+
+    nestedPaths.forEach((path) => {
+      expect(isValidPropertyPath(path)).toBe(true);
+    });
+  });
+
+  it('should not match paths with liquid filters', () => {
+    const pathsWithFilters = ['user.name | upcase', 'price | round: 2', 'items | map: "title"'];
+
+    pathsWithFilters.forEach((path) => {
+      expect(isValidPropertyPath(path)).toBe(false);
+    });
+  });
+
+  it('should not match invalid property paths', () => {
+    const invalidPaths = [
+      '123invalid',
+      '.user',
+      'user..name',
+      '',
+    ];
+
+    invalidPaths.forEach((path) => {
+      expect(isValidPropertyPath(path)).toBe(false);
+    });
+  });
+});
 
 describe('validateVariablePath', () => {
   it('should validate a simple path', () => {
@@ -73,6 +432,15 @@ describe('validateVariablePath', () => {
     ).toBe(true);
     expect(validateVariablePath('data[fieldName]')).toBe(true);
     expect(validateVariablePath('obj[steps.a.output] | json')).toBe(true);
+  });
+
+  it('should validate paths with nested dynamic bracket access', () => {
+    expect(
+      validateVariablePath(
+        'steps.load.output._source[steps.note[steps.note_sync_space_comment]].id'
+      )
+    ).toBe(true);
+    expect(validateVariablePath('a[b[c]] | json')).toBe(true);
   });
 });
 
@@ -216,6 +584,37 @@ describe('parseVariablePath', () => {
       dynamicAccess: {
         prefixPath: 'obj',
         dynamicKey: 'steps.a.output',
+        suffixPath: null,
+      },
+    });
+  });
+
+  it('should parse nested dynamic bracket access', () => {
+    const result = parseVariablePath(
+      'steps.load.output._source[steps.note[steps.note_sync_space_comment]].id'
+    );
+    expect(result).toEqual({
+      propertyPath:
+        'steps.load.output._source[steps.note[steps.note_sync_space_comment]].id',
+      filters: [],
+      hasDynamicBracketAccess: true,
+      dynamicAccess: {
+        prefixPath: 'steps.load.output._source',
+        dynamicKey: 'steps.note[steps.note_sync_space_comment]',
+        suffixPath: 'id',
+      },
+    });
+  });
+
+  it('should parse deeply nested dynamic bracket access', () => {
+    const result = parseVariablePath('a[b[c[d]]]');
+    expect(result).toEqual({
+      propertyPath: 'a[b[c[d]]]',
+      filters: [],
+      hasDynamicBracketAccess: true,
+      dynamicAccess: {
+        prefixPath: 'a',
+        dynamicKey: 'b[c[d]]',
         suffixPath: null,
       },
     });
