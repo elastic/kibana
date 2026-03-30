@@ -10,13 +10,9 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   persistLeads,
   formatLeadForResponse,
-  getEntityStoreLatestIndex,
-  fetchAllEntityStoreRecords,
-  entityRecordToLeadEntity,
-  ENTITY_PAGE_SIZE,
-  ENTITY_SOURCE_FIELDS,
-} from './generate_leads';
-import type { FormattedLead } from './generate_leads';
+  type FormattedLead,
+} from '../services/lead_generation_service';
+import { entityRecordToLeadEntity } from '../entity_conversion';
 import type { Lead } from '../types';
 
 const createMockLead = (overrides: Partial<Lead> = {}): Lead => ({
@@ -24,7 +20,7 @@ const createMockLead = (overrides: Partial<Lead> = {}): Lead => ({
   title: 'Test Lead',
   byline: 'A test byline',
   description: 'A test description',
-  entities: [{ record: {} as never, type: 'user', name: 'alice', id: 'euid-alice' }],
+  entities: [{ record: {} as never, type: 'user', name: 'alice' }],
   tags: ['risk'],
   priority: 7,
   chatRecommendations: ['Investigate user alice'],
@@ -72,7 +68,7 @@ const createMockFormattedLead = (overrides: Partial<FormattedLead> = {}): Format
   ...overrides,
 });
 
-describe('generate_leads helpers', () => {
+describe('lead generation helpers', () => {
   describe('formatLeadForResponse', () => {
     it('maps lead fields and attaches executionId', () => {
       const lead = createMockLead();
@@ -92,7 +88,6 @@ describe('generate_leads helpers', () => {
             record: { some: 'full-record' } as never,
             type: 'host',
             name: 'server-01',
-            id: 'euid-server-01',
           },
         ],
       });
@@ -219,58 +214,30 @@ describe('generate_leads helpers', () => {
     });
   });
 
-  describe('getEntityStoreLatestIndex', () => {
-    it('returns the V2 unified index for the default namespace', () => {
-      expect(getEntityStoreLatestIndex('default')).toBe('.entities.v2.latest.security_default');
-    });
-
-    it('returns the V2 unified index for a custom namespace', () => {
-      expect(getEntityStoreLatestIndex('my-space')).toBe('.entities.v2.latest.security_my-space');
-    });
-  });
-
   describe('entityRecordToLeadEntity', () => {
-    it('prefers EngineMetadata.Type over entity.type for the type field', () => {
+    it('prefers entity.type and uses entity.name', () => {
       const record = {
         entity: {
           id: 'euid-1',
           name: 'alice',
-          type: 'Identity',
-          EngineMetadata: { Type: 'user' },
+          type: 'user',
         },
       } as never;
       const result = entityRecordToLeadEntity(record);
 
       expect(result.type).toBe('user');
       expect(result.name).toBe('alice');
-      expect(result.id).toBe('euid-1');
       expect(result.record).toBe(record);
-    });
-
-    it('falls back to entity.type when EngineMetadata.Type is missing', () => {
-      const record = { entity: { id: 'euid-1', name: 'alice', type: 'user' } } as never;
-      const result = entityRecordToLeadEntity(record);
-
-      expect(result.type).toBe('user');
     });
 
     it('falls back to entity.id for name when entity.name is missing', () => {
       const record = {
-        entity: { id: 'euid-host-1', type: 'Host', EngineMetadata: { Type: 'host' } },
+        entity: { id: 'euid-host-1', type: 'host' },
       } as never;
       const result = entityRecordToLeadEntity(record);
 
       expect(result.name).toBe('euid-host-1');
-      expect(result.id).toBe('euid-host-1');
       expect(result.type).toBe('host');
-    });
-
-    it('falls back to entity.name for id when entity.id is missing', () => {
-      const record = { entity: { name: 'alice', type: 'user' } } as never;
-      const result = entityRecordToLeadEntity(record);
-
-      expect(result.name).toBe('alice');
-      expect(result.id).toBe('alice');
     });
 
     it('falls back to "unknown" for all fields when entity is minimal', () => {
@@ -279,96 +246,6 @@ describe('generate_leads helpers', () => {
 
       expect(result.type).toBe('unknown');
       expect(result.name).toBe('unknown');
-      expect(result.id).toBe('unknown');
-    });
-  });
-
-  describe('fetchAllEntityStoreRecords', () => {
-    const logger = loggingSystemMock.createLogger();
-    let esClient: ReturnType<
-      typeof elasticsearchClientMock.createScopedClusterClient
-    >['asCurrentUser'];
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    });
-
-    it('queries the V2 unified entity store index', async () => {
-      esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as never);
-
-      await fetchAllEntityStoreRecords(esClient, 'default', logger);
-
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: '.entities.v2.latest.security_default',
-        })
-      );
-    });
-
-    it('includes _source filtering and ignore_unavailable', async () => {
-      esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as never);
-
-      await fetchAllEntityStoreRecords(esClient, 'default', logger);
-
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          _source: ENTITY_SOURCE_FIELDS,
-          ignore_unavailable: true,
-          size: ENTITY_PAGE_SIZE,
-        })
-      );
-    });
-
-    it('accumulates entities across paginated responses', async () => {
-      const page1Hits = Array.from({ length: ENTITY_PAGE_SIZE }, (_, i) => ({
-        _source: { entity: { id: `e-${i}`, name: `entity-${i}`, type: 'user' } },
-        sort: [i, `id-${i}`],
-      }));
-      const page2Hits = [
-        {
-          _source: { entity: { id: 'e-last', name: 'entity-last', type: 'host' } },
-          sort: [ENTITY_PAGE_SIZE, 'id-last'],
-        },
-      ];
-
-      esClient.search
-        .mockResolvedValueOnce({ hits: { hits: page1Hits } } as never)
-        .mockResolvedValueOnce({ hits: { hits: page2Hits } } as never);
-
-      const results = await fetchAllEntityStoreRecords(esClient, 'default', logger);
-
-      expect(results).toHaveLength(ENTITY_PAGE_SIZE + 1);
-      expect(esClient.search).toHaveBeenCalledTimes(2);
-
-      const secondCall = esClient.search.mock.calls[1][0] as { search_after: unknown[] };
-      expect(secondCall.search_after).toEqual([ENTITY_PAGE_SIZE - 1, `id-${ENTITY_PAGE_SIZE - 1}`]);
-    });
-
-    it('returns empty array and logs a warning on search failure', async () => {
-      esClient.search.mockRejectedValueOnce(new Error('index_not_found'));
-
-      const results = await fetchAllEntityStoreRecords(esClient, 'default', logger);
-
-      expect(results).toEqual([]);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to fetch entity records')
-      );
-    });
-
-    it('skips hits without _source', async () => {
-      esClient.search.mockResolvedValueOnce({
-        hits: {
-          hits: [
-            { _source: { entity: { id: 'e1', name: 'alice', type: 'user' } }, sort: [1, 'a'] },
-            { _source: undefined, sort: [2, 'b'] },
-          ],
-        },
-      } as never);
-
-      const results = await fetchAllEntityStoreRecords(esClient, 'default', logger);
-
-      expect(results).toHaveLength(1);
     });
   });
 });
