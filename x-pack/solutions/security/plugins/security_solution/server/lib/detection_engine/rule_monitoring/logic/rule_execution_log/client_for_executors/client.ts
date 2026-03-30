@@ -272,6 +272,7 @@ export function createRuleExecutionLogClientForExecutors(
         frozen_indices_queried_count: metrics.frozen_indices_queried_count,
         execution_gap_duration_s: metrics.gap_duration_s,
         gap_range: metrics.gap_range,
+        gap_reason: metrics.gap_reason,
       },
       ruleInfo: {
         ruleId,

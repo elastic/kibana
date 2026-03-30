@@ -13,6 +13,30 @@ import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
 
+function redactHostnameSuffix(text: string, suffix: string): string {
+  const escaped = suffix.replace(/\./g, '\\.');
+  return text.replace(
+    new RegExp(
+      `(?:https?:\\/\\/)?[a-zA-Z0-9](?:[a-zA-Z0-9.-]*[a-zA-Z0-9])?\\.${escaped}(?:[^\\s]*)?`,
+      'g'
+    ),
+    () => `<redacted>.${suffix}`
+  );
+}
+
+const REDACT_HOST_SUFFIXES = ['found.no', 'elastic.co', 'qa.elastic.cloud'] as const;
+
+/**
+ * Redacts emails and sensitive hostnames (e.g. *.found.no, *.elastic.co, *.qa.elastic.cloud) from text posted to public GitHub issues.
+ */
+export function redactSensitiveGithubFailureText(text: string): string {
+  let out = text.replace(/\bconsole\.qa\.cld\.elstc\.co\b/g, '<redacted>');
+  for (const suffix of REDACT_HOST_SUFFIXES) {
+    out = redactHostnameSuffix(out, suffix);
+  }
+  return out.replace(/\S+@elastic\.co\b/g, '<redacted>@elastic.co');
+}
+
 function isScoutFailure(failure: TestFailure): failure is ScoutTestFailureExtended {
   return 'id' in failure && 'target' in failure && 'location' in failure;
 }
@@ -52,7 +76,7 @@ function createFTRBody(
   branch: string,
   pipeline: string
 ): string {
-  const failureBody = truncateFailureBody(failure.failure);
+  const failureBody = redactSensitiveGithubFailureText(truncateFailureBody(failure.failure));
 
   const bodyContent = [
     'A test failed on a tracked branch',
@@ -89,7 +113,7 @@ function createScoutBody(
   branch: string,
   pipeline: string
 ): string {
-  const failureBody = truncateFailureBody(failure.failure);
+  const failureBody = redactSensitiveGithubFailureText(truncateFailureBody(failure.failure));
 
   // Create table format for Scout test details
   const scoutDetailsTable = [
@@ -236,7 +260,9 @@ function createScoutComment(
    * ```
    */
 
-  return `${base}\n\nNew error message:\n\`\`\`\n${newErrorMessage}\n\`\`\``;
+  return `${base}\n\nNew error message:\n\`\`\`\n${redactSensitiveGithubFailureText(
+    newErrorMessage
+  )}\n\`\`\``;
 }
 
 async function updateFTRFailureIssue(
@@ -278,8 +304,13 @@ async function updateScoutFailureIssue(
   let newErrorMessage: string | undefined;
   if (failure.errorMessage && previousFailureBody) {
     const currentErrorMsg = truncateFailureBody(failure.errorMessage).trim();
-    if (!previousFailureBody.includes(currentErrorMsg)) {
-      newErrorMessage = currentErrorMsg;
+    // Current error.message from CI is raw. The issue's first code block is usually already
+    // redacted (we redact on create), but older issues may still hold raw text. Redacting
+    // previous again is idempotent.
+    const redactedPrevious = redactSensitiveGithubFailureText(previousFailureBody);
+    const redactedCurrent = redactSensitiveGithubFailureText(currentErrorMsg);
+    if (!redactedPrevious.includes(redactedCurrent)) {
+      newErrorMessage = redactedCurrent;
     }
   }
 

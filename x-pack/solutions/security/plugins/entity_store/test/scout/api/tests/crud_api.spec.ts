@@ -8,8 +8,7 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { Client } from '@elastic/elasticsearch';
-import { hashEuid } from '../../../../server/domain/crud/utils';
-import { getEuidFromObject } from '../../../../common/domain/euid';
+import { hashEuid, getEuidFromObject } from '../../../../common/domain/euid';
 import type { Entity, HostEntity } from '../../../../common/domain/definitions/entity.gen';
 import {
   COMMON_HEADERS,
@@ -18,6 +17,7 @@ import {
   LATEST_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 
 apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -43,13 +43,14 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(response.statusCode).toBe(201);
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest('Should create an entity', async ({ apiClient, esClient }) => {
@@ -121,7 +122,8 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       // The stored entity.id should be the generated EUID
       const source = byGenerated._source as HostEntity;
-      expect(source.host?.entity?.id).toBe(expectedEuid);
+      expect(source.host?.entity?.id).toBeUndefined();
+      expect(source.entity?.id).toBe(expectedEuid);
     }
   );
 
@@ -220,17 +222,14 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       index: LATEST_INDEX,
       query: {
         term: {
-          'host.entity.id': 'host:this-is-update',
+          'entity.id': 'host:this-is-update',
         },
       },
     });
     expect(entities.hits.hits).toHaveLength(1);
     const received = entities.hits.hits[0]._source as HostEntity;
-    expect(received.entity).toBeUndefined();
+    expect(received.entity?.id).toBe(entityObj.entity?.id);
     expect(received.host).toMatchObject({
-      entity: {
-        id: entityObj.entity?.id,
-      },
       name: 'this-is-update',
     });
   });
@@ -265,11 +264,11 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       const entities = await esClient.search({
         index: LATEST_INDEX,
-        query: { term: { 'host.entity.id': 'host:update-id-only' } },
+        query: { term: { 'entity.id': 'host:update-id-only' } },
       });
       expect(entities.hits.hits).toHaveLength(1);
       const received = entities.hits.hits[0]._source as HostEntity;
-      expect(received.host?.entity?.name).toBe('updated-name');
+      expect(received.entity?.name).toBe('updated-name');
     }
   );
 
@@ -305,11 +304,11 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       const entities = await esClient.search({
         index: LATEST_INDEX,
-        query: { term: { 'host.entity.id': 'host:update-identity-only' } },
+        query: { term: { 'entity.id': 'host:update-identity-only' } },
       });
       expect(entities.hits.hits).toHaveLength(1);
       const received = entities.hits.hits[0]._source as HostEntity;
-      expect(received.host?.entity?.name).toBe('updated-via-identity');
+      expect(received.entity?.name).toBe('updated-via-identity');
     }
   );
 
@@ -407,11 +406,11 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
     const entities = await esClient.search({
       index: LATEST_INDEX,
-      query: { term: { 'host.entity.id': 'host:flat-update' } },
+      query: { term: { 'entity.id': 'host:flat-update' } },
     });
     expect(entities.hits.hits).toHaveLength(1);
     const received = entities.hits.hits[0]._source as HostEntity;
-    expect(received.host?.entity?.name).toBe('flat-updated-name');
+    expect(received.entity?.name).toBe('flat-updated-name');
   });
 
   apiTest(
@@ -461,14 +460,14 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       const entities = await esClient.search({
         index: LATEST_INDEX,
-        query: { term: { 'host.entity.id': 'host:flat-double-update' } },
+        query: { term: { 'entity.id': 'host:flat-double-update' } },
       });
       expect(entities.hits.hits).toHaveLength(1);
       const received = entities.hits.hits[0]._source as HostEntity;
 
       // Values must be strings, not arrays. Confirms replace, not merge
-      expect(received.host?.entity?.name).toBe('second-name');
-      expect(typeof received.host?.entity?.name).toBe('string');
+      expect(received.entity?.name).toBe('second-name');
+      expect(typeof received.entity?.name).toBe('string');
       expect(received.host?.name).toBe('flat-double-update');
       expect(typeof received.host?.name).toBe('string');
     }
@@ -530,7 +529,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(apiNotFound.body.statusCode).toBe(404);
   });
 
-  apiTest.skip('Should list entities without params', async ({ apiClient, esClient }) => {
+  apiTest('Should list entities without params', async ({ apiClient, esClient }) => {
     const entityObj: Entity = {
       entity: {
         id: 'required-id-list',
@@ -561,7 +560,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     );
   });
 
-  apiTest.skip('Should list entities with a DSL filter', async ({ apiClient }) => {
+  apiTest('Should list entities with a DSL filter', async ({ apiClient }) => {
     const matchEntity: Entity = { entity: { id: 'list-filter-match' } };
     const noMatchEntity: Entity = { entity: { id: 'list-filter-nomatch' } };
 
@@ -574,9 +573,9 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(resp.statusCode).toBe(200);
     }
 
-    const filter = JSON.stringify({ term: { 'entity.id': matchEntity.entity!.id! } });
+    const kqlFilter = `entity.id: ${matchEntity.entity!.id!}`;
     const list = await apiClient.get(
-      ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent(filter)}`,
+      ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent(kqlFilter)}`,
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -594,7 +593,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(returnedIds).not.toContain(noMatchEntity.entity!.id!);
   });
 
-  apiTest.skip('Should list entities with size param', async ({ apiClient }) => {
+  apiTest('Should list entities with size param', async ({ apiClient }) => {
     for (let i = 0; i < 3; i++) {
       const resp = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
         headers: defaultHeaders,
@@ -613,7 +612,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(list.body.nextSearchAfter).toBeDefined();
   });
 
-  apiTest.skip('Should paginate with searchAfter', async ({ apiClient }) => {
+  apiTest('Should paginate with searchAfter', async ({ apiClient }) => {
     for (let i = 0; i < 2; i++) {
       const resp = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
         headers: defaultHeaders,
@@ -647,9 +646,9 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(firstId).not.toBe(secondId);
   });
 
-  apiTest.skip('Should return 400 for invalid filter JSON', async ({ apiClient }) => {
+  apiTest('Should return 400 for invalid kql', async ({ apiClient }) => {
     const list = await apiClient.get(
-      ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent('not-valid-json')}`,
+      ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent('entity.id:')}`,
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -659,7 +658,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(list.body.message).toContain('Invalid filter');
   });
 
-  apiTest.skip('Should return 400 for invalid searchAfter JSON', async ({ apiClient }) => {
+  apiTest('Should return 400 for invalid searchAfter JSON', async ({ apiClient }) => {
     const list = await apiClient.get(
       ENTITY_STORE_ROUTES.CRUD_GET + `?searchAfter=${encodeURIComponent('{bad')}`,
       {

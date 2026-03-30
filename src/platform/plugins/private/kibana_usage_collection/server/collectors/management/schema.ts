@@ -159,10 +159,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Allows users to enable/disable querying cold and frozen data tiers in alert prevalence.',
     },
   },
-  'securitySolution:enableVisualizationsInFlyout': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:enableAssetInventory': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
