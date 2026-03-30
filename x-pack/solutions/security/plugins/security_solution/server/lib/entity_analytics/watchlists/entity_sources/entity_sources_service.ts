@@ -71,10 +71,10 @@ export const createEntitySourcesService = ({
           const identity: IdentityProvider = {
             type: 'integration',
             name: source.integrationName as IntegrationType,
-          };         
-    
+          };
+
           const entityStoreEntityIdsByType = await watchlistEntitiesService.listEntityStoreEntities(
-            identity            
+            identity
           );
           return { sourceId: source.id, entityStoreEntityIdsByType };
         })
