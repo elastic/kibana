@@ -117,7 +117,10 @@ With PATH_TO_CONFIG and other options as follows.
 
    | Group                          | PATH_TO_CONFIG                                                                  |
    | ------------------------------ | ------------------------------------------------------------------------------- |
-   | anomaly detection jobs         | `src/platform/test/functional/apps/ml/anomaly_detection_jobs/config.ts`         |
+   | anomaly detection jobs group1  | `src/platform/test/functional/apps/ml/anomaly_detection_jobs/group1/config.ts`  |
+   | anomaly detection jobs group2  | `src/platform/test/functional/apps/ml/anomaly_detection_jobs/group2/config.ts`  |
+   | anomaly detection jobs group3  | `src/platform/test/functional/apps/ml/anomaly_detection_jobs/group3/config.ts`  |
+   | anomaly detection jobs group4  | `src/platform/test/functional/apps/ml/anomaly_detection_jobs/group4/config.ts`  |
    | anomaly detection result views | `src/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts` |
    | anomaly detection integrations | `src/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts` |
    | data frame analytics           | `src/platform/test/functional/apps/ml/data_frame_analytics/config.ts`           |

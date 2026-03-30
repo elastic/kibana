@@ -18,6 +18,10 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { ESQLControlsFlyout } from '.';
 import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
+import {
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+} from '@kbn/controls-constants';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
@@ -146,8 +150,8 @@ describe('IdentifierControlForm', () => {
 
     it('should default correctly if initial state is given', async () => {
       const initialState = {
-        grow: true,
-        width: 'small',
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         title: 'my control',
         available_options: ['column2'],
         selected_options: ['column2'],
@@ -177,8 +181,8 @@ describe('IdentifierControlForm', () => {
 
     it('should call the onEditControl callback, if initialState is given', async () => {
       const initialState = {
-        grow: true,
-        width: 'small',
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         title: 'my control',
         available_options: ['column2'],
         selected_options: ['column2'],

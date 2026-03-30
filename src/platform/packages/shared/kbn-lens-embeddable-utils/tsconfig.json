@@ -25,5 +25,6 @@
     "@kbn/utility-types",
     "@kbn/transpose-utils",
     "@kbn/palettes",
+    "@kbn/crypto-browser",
   ]
 }

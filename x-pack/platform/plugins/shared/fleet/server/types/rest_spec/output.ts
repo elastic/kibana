@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { OutputSchema, UpdateOutputSchema } from '../models';
+import { NewOutputSchema, OutputSchema, UpdateOutputSchema } from '../models';
 import { ListResponseSchema } from '../../routes/schema/utils';
 
 export const GetOneOutputRequestSchema = {
@@ -39,7 +39,7 @@ export const GetOutputsResponseSchema = ListResponseSchema(
 );
 
 export const PostOutputRequestSchema = {
-  body: OutputSchema,
+  body: NewOutputSchema,
 };
 
 export const PutOutputRequestSchema = {

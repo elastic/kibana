@@ -10,11 +10,15 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { Feature } from '@kbn/streams-schema';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
-import { FEATURE_EXTRACTION_POLL_INTERVAL_MS, FEATURE_EXTRACTION_TIMEOUT_MS } from './constants';
 import {
-  getSigeventsSnapshotKIsIndex,
+  KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS,
+  KI_FEATURE_EXTRACTION_TIMEOUT_MS,
+  DEFAULT_LOGS_INDEX,
+} from './constants';
+import {
+  getSigeventsSnapshotKIFeaturesIndex,
   SIGEVENTS_FEATURES_INDEX_PATTERN,
-} from '../../../src/data_generators/sigevents_kis_index';
+} from '../../../src/data_generators/sigevents_ki_features_index';
 
 export async function enableSignificantEvents(
   config: ConnectionConfig,
@@ -33,26 +37,54 @@ export async function enableSignificantEvents(
     return;
   }
 
+  // If the setting is overridden in kibana.yml, skip and return
+  const message = (data as Record<string, unknown>)?.message;
+  if (status === 400 && typeof message === 'string' && message.includes('overridden')) {
+    log.info('Significant events setting is overridden in kibana.yml — skipping');
+    return;
+  }
+
   throw new Error(`Failed to enable significant events: ${status} ${JSON.stringify(data)}`);
 }
 
-export async function triggerSigEventsFeatureExtraction(
+export async function configureModelSelectionSettings(
   config: ConnectionConfig,
   log: ToolingLog,
   connectorId: string
 ): Promise<void> {
-  log.info('Triggering feature extraction on stream "logs"...');
+  log.info(`Configuring model selection (connector: ${connectorId})...`);
+  const { status, data } = await kibanaRequest(
+    config,
+    'PUT',
+    '/internal/streams/_significant_events/settings',
+    { connectorIdKnowledgeIndicatorExtraction: connectorId }
+  );
+
+  if (status >= 200 && status < 300) {
+    log.info('Model selection settings configured');
+    return;
+  }
+
+  throw new Error(
+    `Failed to configure model selection settings: ${status} ${JSON.stringify(data)}`
+  );
+}
+export async function triggerSigEventsKIFeatureExtraction(
+  config: ConnectionConfig,
+  log: ToolingLog,
+  streamName: string = DEFAULT_LOGS_INDEX
+): Promise<void> {
+  log.info(`Triggering feature extraction on stream ${streamName}...`);
 
   const now = Date.now();
   const { status, data } = await kibanaRequest(
     config,
     'POST',
-    '/internal/streams/logs/features/_task',
+    `/internal/streams/${streamName}/features/_task`,
     {
       action: 'schedule',
       from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
       to: new Date(now).toISOString(),
-      connector_id: connectorId,
     }
   );
 
@@ -61,18 +93,23 @@ export async function triggerSigEventsFeatureExtraction(
     return;
   }
 
-  throw new Error(`Failed to trigger feature extraction: ${status} ${JSON.stringify(data)}`);
+  throw new Error(`Failed to trigger KI feature extraction: ${status} ${JSON.stringify(data)}`);
 }
 
-export async function waitForSigEventsFeatureExtraction(
+export async function waitForSigEventsKIFeatureExtraction(
   config: ConnectionConfig,
-  log: ToolingLog
+  log: ToolingLog,
+  streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
   log.info('Polling feature extraction status...');
-  const deadline = Date.now() + FEATURE_EXTRACTION_TIMEOUT_MS;
+  const deadline = Date.now() + KI_FEATURE_EXTRACTION_TIMEOUT_MS;
 
   while (Date.now() < deadline) {
-    const { data } = await kibanaRequest(config, 'GET', '/internal/streams/logs/features/_status');
+    const { data } = await kibanaRequest(
+      config,
+      'GET',
+      `/internal/streams/${streamName}/features/_status`
+    );
 
     const taskStatus = (data as Record<string, unknown>)?.status;
 
@@ -88,26 +125,27 @@ export async function waitForSigEventsFeatureExtraction(
     }
 
     log.debug(`  status: ${taskStatus}`);
-    await new Promise((resolve) => setTimeout(resolve, FEATURE_EXTRACTION_POLL_INTERVAL_MS));
+    await new Promise((resolve) => setTimeout(resolve, KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS));
   }
 
   throw new Error(
-    `Feature extraction did not complete within ${FEATURE_EXTRACTION_TIMEOUT_MS / 1000}s`
+    `KI feature extraction did not complete within ${KI_FEATURE_EXTRACTION_TIMEOUT_MS / 1000}s`
   );
 }
 
-export async function logSigEventsExtractedFeatures(
+export async function logSigEventsExtractedKIFeatures(
   config: ConnectionConfig,
-  log: ToolingLog
+  log: ToolingLog,
+  streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
-  const features = await fetchSigEventsExtractedFeatures(config, log, 'logs');
-  log.info(`Extracted ${features.length} features:`);
-  for (const f of features) {
+  const kis = await fetchSigEventsExtractedKIs(config, log, streamName);
+  log.info(`Extracted ${kis.length} KIs:`);
+  for (const f of kis) {
     log.info(`  - ${f.title || f.description} (${f.type})`);
   }
 }
 
-async function fetchSigEventsExtractedFeatures(
+async function fetchSigEventsExtractedKIs(
   config: ConnectionConfig,
   log: ToolingLog,
   streamName: string
@@ -120,15 +158,15 @@ async function fetchSigEventsExtractedFeatures(
   return features.filter(Boolean) as Feature[];
 }
 
-export async function persistSigEventsExtractedFeaturesForSnapshot(
+export async function persistSigEventsExtractedKIsForSnapshot(
   config: ConnectionConfig,
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
-  streamName: string = 'logs'
+  streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<{ index: string; count: number }> {
-  const features = await fetchSigEventsExtractedFeatures(config, log, streamName);
-  const index = getSigeventsSnapshotKIsIndex(snapshotName);
+  const kis = await fetchSigEventsExtractedKIs(config, log, streamName);
+  const index = getSigeventsSnapshotKIFeaturesIndex(snapshotName);
 
   await esClient.indices.delete({ index, ignore_unavailable: true });
   await esClient.indices.create({
@@ -155,11 +193,8 @@ export async function persistSigEventsExtractedFeaturesForSnapshot(
     },
   });
 
-  if (features.length > 0) {
-    const operations = features.flatMap((feature) => [
-      { index: { _index: index, _id: feature.uuid } },
-      feature,
-    ]);
+  if (kis.length > 0) {
+    const operations = kis.flatMap((ki) => [{ index: { _index: index, _id: ki.uuid } }, ki]);
 
     await esClient.bulk({ refresh: true, operations });
   } else {
@@ -174,11 +209,11 @@ export async function persistSigEventsExtractedFeaturesForSnapshot(
     }
   }
 
-  log.info(`Persisted ${features.length} features to "${index}" for snapshotting`);
-  return { index, count: features.length };
+  log.info(`Persisted ${kis.length} KIs to "${index}" for snapshotting`);
+  return { index, count: kis.length };
 }
 
-export async function cleanupSigEventsExtractedFeaturesData(
+export async function cleanupSigEventsExtractedKIsData(
   esClient: Client,
   log: ToolingLog
 ): Promise<void> {
@@ -205,5 +240,23 @@ export async function disableStreams(config: ConnectionConfig, log: ToolingLog):
 
   if (status < 200 || status >= 300) {
     log.warning(`Failed to disable streams (status ${status}), continuing...`);
+  }
+}
+
+export async function enableLogsNativeStream(
+  esClient: Client,
+  log: ToolingLog,
+  logsStream: string = DEFAULT_LOGS_INDEX
+): Promise<void> {
+  try {
+    await esClient.transport.request({ method: 'POST', path: `_streams/${logsStream}/_enable` });
+    log.info(`ES native "${logsStream}" stream enabled`);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (message.includes('already enabled') || message.includes('resource_already_exists')) {
+      log.info(`ES native "${logsStream}" stream already enabled`);
+      return;
+    }
+    throw err;
   }
 }

@@ -77,6 +77,7 @@ import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/servi
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
 import {
   ATTACK_DETAILS_LEFT_PANEL_ARIA_LABEL,
+  ATTACK_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_ALERT_REASON_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_ANALYZER_PANEL_ARIA_LABEL,
@@ -123,11 +124,12 @@ import {
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
 import {
   AttackDetailsLeftPanelKey,
+  AttackDetailsPreviewPanelKey,
   AttackDetailsRightPanelKey,
 } from './attack_details/constants/panel_keys';
 import type { AttackDetailsProps } from './attack_details/types';
 import { AttackDetailsProvider } from './attack_details/context';
-import { AttackDetailsPanel } from './attack_details';
+import { AttackDetailsPreviewPanel, AttackDetailsRightPanel } from './attack_details';
 import { AttackDetailsLeftPanel } from './attack_details/left';
 import type { IOCDetailsProps } from './ioc_details/types';
 import { IOCDetailsProvider } from './ioc_details/context';
@@ -326,10 +328,19 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
     key: AttackDetailsRightPanelKey,
     component: (props) => (
       <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
-        <AttackDetailsPanel path={props.path as AttackDetailsProps['path']} />
+        <AttackDetailsRightPanel path={props.path as AttackDetailsProps['path']} />
       </AttackDetailsProvider>
     ),
     'aria-label': ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL,
+  },
+  {
+    key: AttackDetailsPreviewPanelKey,
+    component: (props) => (
+      <AttackDetailsProvider {...(props as AttackDetailsProps).params} isPreviewMode={true}>
+        <AttackDetailsPreviewPanel path={props.path as AttackDetailsProps['path']} />
+      </AttackDetailsProvider>
+    ),
+    'aria-label': ATTACK_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   },
   {
     key: AttackDetailsLeftPanelKey,

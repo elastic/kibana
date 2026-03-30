@@ -293,6 +293,8 @@ function resolveAndCreatePipeline({
 }) {
   return from(endpointIdCache.has(connectorId)).pipe(
     switchMap((isInferenceEndpoint) => {
+      let resolvedAsInferenceEndpoint = isInferenceEndpoint;
+
       const resolve: () => Promise<ResolvedPipelineContext> = isInferenceEndpoint
         ? async () => {
             const endpointMeta = await resolveInferenceEndpoint({
@@ -328,6 +330,35 @@ function resolveAndCreatePipeline({
               logger,
             });
             const connector = executor.getConnector();
+
+            if (connector.isInferenceEndpoint) {
+              resolvedAsInferenceEndpoint = true;
+              const inferenceId = connector.connectorId;
+              const endpointMeta = await resolveInferenceEndpoint({
+                inferenceId,
+                esClient,
+              });
+              const endpointExecutor = createInferenceEndpointExecutor({
+                inferenceId,
+                esClient,
+              });
+
+              return {
+                callbackContext: {
+                  model: endpointMeta.modelId ? { id: endpointMeta.modelId } : undefined,
+                },
+                getSpanModel: (modelName) =>
+                  endpointMeta.provider
+                    ? ({
+                        id: modelName ?? endpointMeta.modelId,
+                        provider: endpointMeta.provider,
+                      } as SpanModel)
+                    : undefined,
+                chatComplete: (options) =>
+                  inferenceEndpointAdapter.chatComplete({ ...options, executor: endpointExecutor }),
+              };
+            }
+
             const connectorType = connector.type;
             const inferenceAdapter = getInferenceAdapter(connectorType);
 
@@ -369,7 +400,7 @@ function resolveAndCreatePipeline({
       }).pipe(
         catchError((error) => {
           if (error?.meta?.status === 404 || error?.statusCode === 404) {
-            if (isInferenceEndpoint) {
+            if (resolvedAsInferenceEndpoint) {
               endpointIdCache.invalidate();
               return throwError(() => error);
             }

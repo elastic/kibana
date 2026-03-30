@@ -49,6 +49,7 @@ export type ManagementId =
   | 'license_management'
   | 'index_lifecycle_management'
   | 'index_management'
+  | 'elastic_inference_service'
   | 'inference_endpoints'
   | 'model_settings'
   | 'ingest_pipelines'

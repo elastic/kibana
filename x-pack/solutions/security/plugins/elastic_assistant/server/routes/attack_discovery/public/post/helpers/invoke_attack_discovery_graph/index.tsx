@@ -100,7 +100,6 @@ export const invokeAttackDiscoveryGraph = async ({
   }
 
   const attackDiscoveryPrompts = await getAttackDiscoveryPrompts({
-    actionsClient,
     connectorId: apiConfig.connectorId,
     // if in future oss has different prompt, add it as model here
     model,

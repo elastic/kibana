@@ -137,6 +137,7 @@ const wiredStreamDefinition = {
 };
 
 const expectedStreamsResponse: Streams.ClassicStream.Definition = {
+  type: 'classic',
   name: TEST_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
@@ -157,6 +158,7 @@ const expectedStreamsResponse: Streams.ClassicStream.Definition = {
 };
 
 const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
+  type: 'wired',
   name: WIRED_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
@@ -279,7 +281,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           body: {
             title: 'Init Query',
-            esql: { query: 'FROM logs.otel METADATA _id, _source | LIMIT 1' },
+            esql: { query: 'FROM logs.otel, logs.otel.* METADATA _id, _source | LIMIT 1' },
           },
         },
       });

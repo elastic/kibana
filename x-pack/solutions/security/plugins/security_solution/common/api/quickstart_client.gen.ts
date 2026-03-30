@@ -81,6 +81,11 @@ import type {
   GetRuleExecutionResultsResponse,
 } from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import type {
+  ReadRuleExecutionResultsRequestParamsInput,
+  ReadRuleExecutionResultsRequestBodyInput,
+  ReadRuleExecutionResultsResponse,
+} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.gen';
+import type {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
   RulePreviewResponse,
@@ -202,6 +207,10 @@ import type {
   GetEndpointSuggestionsResponse,
 } from './endpoint/suggestions/get_suggestions.gen';
 import type {
+  CreateWorkflowInsightRequestBodyInput,
+  CreateWorkflowInsightResponse,
+  GetPendingWorkflowInsightsRequestQueryInput,
+  GetPendingWorkflowInsightsResponse,
   GetWorkflowInsightsRequestQueryInput,
   GetWorkflowInsightsResponse,
   UpdateWorkflowInsightRequestParamsInput,
@@ -398,6 +407,14 @@ import type {
   UpdateWatchlistRequestBodyInput,
   UpdateWatchlistResponse,
 } from './entity_analytics/watchlists/management/update.gen';
+import type {
+  SyncWatchlistRequestParamsInput,
+  SyncWatchlistResponse,
+} from './entity_analytics/watchlists/sync/sync.gen';
+import type {
+  InitializeSecuritySolutionRequestBodyInput,
+  InitializeSecuritySolutionResponse,
+} from './initialization/initialization.gen';
 import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
@@ -1029,6 +1046,19 @@ For detailed information on Kibana actions and alerting, and additional API call
         ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async createWorkflowInsight(props: CreateWorkflowInsightProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateWorkflowInsight`);
+    return this.kbnClient
+      .request<CreateWorkflowInsightResponse>({
+        path: '/internal/api/endpoint/workflow_insights',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -1924,6 +1954,20 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getPendingWorkflowInsights(props: GetPendingWorkflowInsightsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetPendingWorkflowInsights`);
+    return this.kbnClient
+      .request<GetPendingWorkflowInsightsResponse>({
+        path: '/internal/api/endpoint/workflow_insights/pending',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async getPolicyResponse(props: GetPolicyResponseProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetPolicyResponse`);
     return this.kbnClient
@@ -2324,6 +2368,19 @@ finalize it.
     return this.kbnClient
       .request<InitEntityStoreResponse>({
         path: '/api/entity_store/enable',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async initializeSecuritySolution(props: InitializeSecuritySolutionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InitializeSecuritySolution`);
+    return this.kbnClient
+      .request<InitializeSecuritySolutionResponse>({
+        path: '/api/security_solution/initialize',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -2820,6 +2877,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async readRuleExecutionResults(props: ReadRuleExecutionResultsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReadRuleExecutionResults`);
+    return this.kbnClient
+      .request<ReadRuleExecutionResultsResponse>({
+        path: replaceParams(
+          '/internal/detection_engine/rules/{ruleId}/execution/results',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * List all unique tags from all detection rules.
    */
@@ -3212,6 +3285,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async syncWatchlist(props: SyncWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SyncWatchlist`);
+    return this.kbnClient
+      .request<SyncWatchlistResponse>({
+        path: replaceParams('/api/entity_analytics/watchlists/{watchlist_id}/sync', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
    */
@@ -3548,6 +3633,9 @@ export interface CreateWatchlistEntitySourceProps {
   params: CreateWatchlistEntitySourceRequestParamsInput;
   body: CreateWatchlistEntitySourceRequestBodyInput;
 }
+export interface CreateWorkflowInsightProps {
+  body: CreateWorkflowInsightRequestBodyInput;
+}
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
@@ -3696,6 +3784,9 @@ export interface GetEntityStoreStatusProps {
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
 }
+export interface GetPendingWorkflowInsightsProps {
+  query: GetPendingWorkflowInsightsRequestQueryInput;
+}
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
 }
@@ -3762,6 +3853,9 @@ export interface InitEntityEngineProps {
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
 }
+export interface InitializeSecuritySolutionProps {
+  body: InitializeSecuritySolutionRequestBodyInput;
+}
 export interface InstallMigrationDashboardsProps {
   params: InstallMigrationDashboardsRequestParamsInput;
   body: InstallMigrationDashboardsRequestBodyInput;
@@ -3819,6 +3913,10 @@ export interface ReadAlertsMigrationStatusProps {
 }
 export interface ReadRuleProps {
   query: ReadRuleRequestQueryInput;
+}
+export interface ReadRuleExecutionResultsProps {
+  params: ReadRuleExecutionResultsRequestParamsInput;
+  body: ReadRuleExecutionResultsRequestBodyInput;
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
@@ -3883,6 +3981,9 @@ export interface StopRuleMigrationProps {
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
+}
+export interface SyncWatchlistProps {
+  params: SyncWatchlistRequestParamsInput;
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;

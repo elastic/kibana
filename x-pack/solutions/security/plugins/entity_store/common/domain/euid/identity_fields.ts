@@ -11,7 +11,7 @@ import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField } from './commons';
 
 export interface IdentitySourceFields {
-  /** Fields that participate in identity (EUID composition). Derived from euidFields.
+  /** Fields that participate in identity (EUID composition). Derived from euidRanking.
    * At least one is typically required for a valid identity; the exact rule is in documentsFilter.
    */
   requiresOneOf: string[];
@@ -26,7 +26,7 @@ export interface IdentitySourceFields {
  * Field evaluation destinations (e.g. entity.namespace) are excluded, since they are computed and not stored.
  *
  * @param entityType - The entity type (e.g. 'host', 'user', 'service')
- * @returns requiresOneOf (same as identitySourceFields) and identitySourceFields from euidFields
+ * @returns requiresOneOf (same as identitySourceFields) and identitySourceFields from euidRanking
  */
 export function getEuidSourceFields(entityType: EntityType): IdentitySourceFields {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
@@ -39,11 +39,15 @@ export function getEuidSourceFields(entityType: EntityType): IdentitySourceField
     };
   }
 
-  const { euidFields, fieldEvaluations } = identityField;
+  const { euidRanking, fieldEvaluations } = identityField;
   const evaluationDestinations = new Set((fieldEvaluations ?? []).map((e) => e.destination));
   const allFields = Array.from(
     new Set(
-      euidFields.flatMap((composition) => composition.filter(isEuidField).map((attr) => attr.field))
+      euidRanking.branches.flatMap((branch) =>
+        branch.ranking.flatMap((composition) =>
+          composition.filter(isEuidField).map((attr) => attr.field)
+        )
+      )
     )
   );
   const identitySourceFields = allFields.filter((field) => !evaluationDestinations.has(field));

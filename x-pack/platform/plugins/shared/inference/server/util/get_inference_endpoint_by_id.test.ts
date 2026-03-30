@@ -38,6 +38,7 @@ describe('getInferenceEndpointById', () => {
       taskType: 'chat_completion',
       service: 'openai',
       serviceSettings: { model_id: 'gpt-4o' },
+      metadata: {},
     });
 
     expect(mockInferenceGet).toHaveBeenCalledWith(

@@ -14,7 +14,7 @@ import { aggregateQuerySchema, querySchema, timeRangeSchema } from '@kbn/es-quer
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
-import { runtimeFieldsSchema } from './schema_runtime_fields';
+import { runtimeFieldSchema } from '@kbn/as-code-data-views-schema';
 
 const columnSchema = schema.object({
   name: schema.string({
@@ -96,7 +96,7 @@ export const dataViewSpecSchema = schema.object(
      * Optional array of runtime fields to define on the index. Each runtime field describes a computed field available at query time.
      * If not provided, no runtime fields are used.
      */
-    runtime_fields: schema.maybe(schema.arrayOf(runtimeFieldsSchema, { maxSize: 100 })),
+    runtime_fields: schema.maybe(schema.arrayOf(runtimeFieldSchema, { maxSize: 100 })),
   },
   { meta: { id: 'indexDatasetTypeSchema' } }
 );

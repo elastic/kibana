@@ -50,6 +50,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Wired streams update', () => {
       const STREAM_NAME = 'logs.otel.queries-test';
       const stream: Streams.WiredStream.UpsertRequest['stream'] = {
+        type: 'wired',
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
@@ -215,6 +216,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Classic streams update', () => {
       const classicPutBody: Streams.ClassicStream.UpsertRequest = {
         stream: {
+          type: 'classic',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
