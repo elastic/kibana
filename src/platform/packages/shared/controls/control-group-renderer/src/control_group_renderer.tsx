@@ -180,9 +180,9 @@ export const ControlGroupRenderer = ({
             ...control,
           };
         });
-        // TODO: we might be able to delete this 
+        // TODO: we might be able to delete this
         // after this is merged: https://github.com/elastic/kibana/pull/260082 - testing needed to confirm
-        lastSavedState$Ref.current.next(newState); 
+        lastSavedState$Ref.current.next(newState);
         asyncForEach(Object.entries(parentApi.children$.getValue()), async ([id, child]) => {
           if (apiHasSerializableState(child)) child.applySerializedState(newState[id]);
         });
