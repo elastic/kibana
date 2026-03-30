@@ -15530,6 +15530,10 @@
                 "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_index_form.tsx"
               },
               {
+                "plugin": "@kbn/discover-utils",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_esql_data_view.test.ts"
+              },
+              {
                 "plugin": "inputControlVis",
                 "path": "src/platform/plugins/private/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
               },

@@ -18,6 +18,7 @@ import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
 import { getIdForLayer, isLensStateDataLayer } from './helpers';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
+import { getScaleTypeFromColumnType } from '../utils';
 import {
   buildAPIAnnotationsLayer,
   buildAPIDataLayer,
@@ -285,13 +286,7 @@ function convertAxisSettingsToAPIFormat(
   const dataSourceLayer = layers[firstLayer.layerId];
   if (isTextBasedLayer(dataSourceLayer) && isLensStateDataLayer(firstLayer)) {
     const xColumn = dataSourceLayer.columns.find((c) => c.columnId === firstLayer.xAccessor);
-    if (xColumn?.meta?.type === 'date') {
-      xAxisScale = 'temporal';
-    } else if (xColumn?.meta?.type === 'number') {
-      xAxisScale = 'linear';
-    } else {
-      xAxisScale = 'ordinal';
-    }
+    xAxisScale = getScaleTypeFromColumnType(xColumn?.meta?.type);
   }
 
   const xAxis: XAxisType = stripUndefined({
