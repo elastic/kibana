@@ -304,6 +304,34 @@ describe(
         });
     });
 
+    it('should open case selector modal from row kebab menu and keep it visible', () => {
+      cy.getBySel(UNIFIED_HISTORY_TABLE).within(() => {
+        cy.get('tbody tr')
+          .first()
+          .within(() => {
+            cy.get('[aria-label="Details"]').click();
+          });
+      });
+      cy.contains('Query results');
+
+      cy.get('[data-test-subj^="packQueriesTableKebab-"]').first().click();
+
+      cy.contains('Add to Case').click();
+
+      // Kebab popover should close after clicking "Add to Case"
+      cy.get('.euiContextMenuPanel').should('not.exist');
+
+      // Cases modal must survive the popover unmount (CasesContext lives above the popover)
+      cy.getBySel('all-cases-modal', { timeout: 10000 }).should('be.visible');
+
+      cy.getBySel('all-cases-modal').within(() => {
+        cy.contains('Select case').should('be.visible');
+      });
+
+      cy.getBySel('all-cases-modal-cancel-button').click();
+      cy.getBySel('all-cases-modal').should('not.exist');
+    });
+
     it('should navigate to details and run a new query visible in history', () => {
       // Click details button navigates to detail view
       cy.getBySel(UNIFIED_HISTORY_TABLE).within(() => {

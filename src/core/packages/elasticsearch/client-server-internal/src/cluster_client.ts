@@ -42,10 +42,13 @@ import {
 import { createTransport, type OnRequestHandler } from './create_transport';
 import type { AgentFactoryProvider } from './agent_manager';
 
+export type { OnRequestHandler };
+
 const noop = () => undefined;
 
 interface CommonFactoryRoutingOpts {
   logger: Logger;
+  request?: ScopeableUrlRequest;
 }
 
 interface SpaceFactoryRoutingOpts extends CommonFactoryRoutingOpts {
@@ -140,7 +143,7 @@ export class ClusterClient implements ICustomClusterClient {
       const scopedHeaders = this.getScopedHeaders(request);
       const factoryOpts: FactoryRoutingOpts = opts
         ? { ...opts, logger: this.logger, request }
-        : { logger: this.logger };
+        : { logger: this.logger, request };
       const transportClass = createTransport({
         scoped: true,
         getExecutionContext: this.getExecutionContext,

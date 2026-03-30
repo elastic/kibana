@@ -32,7 +32,7 @@ describe('bulkGet', () => {
       await expect(
         bulkGet(
           {
-            attachmentIDs: Array(MAX_BULK_GET_ATTACHMENTS + 1).fill('foobar'),
+            savedObjectIds: Array(MAX_BULK_GET_ATTACHMENTS + 1).fill('foobar'),
             caseID: '123',
             mode: 'legacy',
           },
@@ -46,7 +46,7 @@ describe('bulkGet', () => {
 
     it('throws when trying to fetch zero attachments', async () => {
       await expect(
-        bulkGet({ attachmentIDs: [], caseID: '123', mode: 'legacy' }, clientArgs, casesClient)
+        bulkGet({ savedObjectIds: [], caseID: '123', mode: 'legacy' }, clientArgs, casesClient)
       ).rejects.toThrow(
         'Error: The length of the field ids is too short. Array must be of length >= 1.'
       );
@@ -70,7 +70,7 @@ describe('bulkGet', () => {
       });
 
       const res = await bulkGet(
-        { attachmentIDs: ['my-case-1'], caseID: 'mock-id-1', mode: 'legacy' },
+        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1', mode: 'legacy' },
         clientArgs,
         casesClient
       );
@@ -79,7 +79,7 @@ describe('bulkGet', () => {
       expect(res.errors.length).toBe(1);
 
       expect(res.errors[0]).toEqual({
-        attachmentId: '1',
+        savedObjectId: '1',
         error: 'My error',
         message: 'not found',
         status: 404,
@@ -105,7 +105,7 @@ describe('bulkGet', () => {
       });
 
       const res = await bulkGet(
-        { attachmentIDs: ['my-case-1'], caseID: 'mock-id-1', mode: 'legacy' },
+        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1', mode: 'legacy' },
         clientArgs,
         casesClient
       );
@@ -114,7 +114,7 @@ describe('bulkGet', () => {
       expect(res.errors.length).toBe(1);
 
       expect(res.errors[0]).toEqual({
-        attachmentId: '1',
+        savedObjectId: '1',
         error: 'Not Found',
         message: 'SO not found: My error',
         status: 404,
@@ -139,7 +139,7 @@ describe('bulkGet', () => {
 
     it('uses unified mode and returns attachments', async () => {
       const res = await bulkGet(
-        { attachmentIDs: ['my-case-1'], caseID: 'mock-id-1', mode: 'unified' },
+        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1', mode: 'unified' },
         clientArgs,
         casesClient
       );

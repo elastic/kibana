@@ -17,7 +17,7 @@ import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('OpenLensButton', () => {
   const props = {
-    attachmentId: 'test',
+    savedObjectId: 'test',
     ...lensVisualization,
   };
 
@@ -58,7 +58,7 @@ describe('OpenLensButton', () => {
 
     expect(navigateToPrefilledEditor).toBeCalledWith(
       {
-        id: props.attachmentId,
+        id: props.savedObjectId,
         ...rest,
         time_range: timeRange,
       },
@@ -80,7 +80,7 @@ describe('OpenLensButton', () => {
 
   it('does not show the button if the query is an ESQL', () => {
     const esqlProps = {
-      attachmentId: 'test',
+      savedObjectId: 'test',
       ...lensVisualization,
     };
 

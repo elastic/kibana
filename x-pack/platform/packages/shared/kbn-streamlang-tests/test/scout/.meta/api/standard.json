@@ -1,5 +1,5 @@
 {
-  "sha1": "4aa7b96aa78ed2a8a5c806c96f319c9c2951b967",
+  "sha1": "99d993665ee764b1c399bee9756550a3779cf791",
   "tests": [
     {
       "id": "7a50a1b508e10f4-3be34281d1d9c2c",
@@ -570,6 +570,86 @@
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/drop_document.spec.ts",
         "line": 71,
+        "column": 12
+      }
+    },
+    {
+      "id": "a266e89714316e8-e8d5316e5b547d1",
+      "title": "Cross-compatibility - Enrich Processor should add matching location fields from policy for each document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/enrich.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "a266e89714316e8-28c2fb8f3d5bb7e",
+      "title": "Cross-compatibility - Enrich Processor should override existing location fields when override is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/enrich.spec.ts",
+        "line": 87,
+        "column": 12
+      }
+    },
+    {
+      "id": "a266e89714316e8-ca76641b3b62f99",
+      "title": "Cross-compatibility - Enrich Processor should preserve existing location fields when override is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/enrich.spec.ts",
+        "line": 129,
+        "column": 12
+      }
+    },
+    {
+      "id": "a266e89714316e8-ee07bac03af6632",
+      "title": "Cross-compatibility - Enrich Processor with ignore_missing true, should enrich when ip is present and skip enrichment when ip is absent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/enrich.spec.ts",
+        "line": 171,
+        "column": 12
+      }
+    },
+    {
+      "id": "a266e89714316e8-e1bdde64e74d440",
+      "title": "Cross-compatibility - Enrich Processor with ignore_missing false, should drop documents with missing match field in both ingest outcomes and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/enrich.spec.ts",
+        "line": 222,
         "column": 12
       }
     },
@@ -3607,6 +3687,86 @@
       }
     },
     {
+      "id": "07da9a53b3ea83f-19826d7591e9df9",
+      "title": "Streamlang to ES|QL - Enrich Processor should enrich a document with location data based on ip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/enrich.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "07da9a53b3ea83f-425a5609742d793",
+      "title": "Streamlang to ES|QL - Enrich Processor should leave the document unchanged if match field is not present and ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/enrich.spec.ts",
+        "line": 71,
+        "column": 12
+      }
+    },
+    {
+      "id": "07da9a53b3ea83f-e572158789127dc",
+      "title": "Streamlang to ES|QL - Enrich Processor should filter out documents where match field is missing when ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/enrich.spec.ts",
+        "line": 105,
+        "column": 12
+      }
+    },
+    {
+      "id": "07da9a53b3ea83f-f08240a75bd764f",
+      "title": "Streamlang to ES|QL - Enrich Processor should override the existing value if override is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/enrich.spec.ts",
+        "line": 134,
+        "column": 12
+      }
+    },
+    {
+      "id": "07da9a53b3ea83f-854c0bddc54eaa4",
+      "title": "Streamlang to ES|QL - Enrich Processor should preserve the existing value if override is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/enrich.spec.ts",
+        "line": 161,
+        "column": 12
+      }
+    },
+    {
       "id": "525ab2d1aa4c0d7-efb87aa60cf0d0e",
       "title": "Streamlang to ES|QL - Grok Processor should correctly parse a log line with the grok processor",
       "expectedStatus": "passed",
@@ -5888,6 +6048,102 @@
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/drop_document.spec.ts",
         "line": 18,
+        "column": 12
+      }
+    },
+    {
+      "id": "42c8b1eed5b4b64-a61bf942a4ec73a",
+      "title": "Streamlang to Ingest Pipeline - Enrich Processor should enrich a document with location data based on ip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/enrich.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "42c8b1eed5b4b64-f2852338a7f2898",
+      "title": "Streamlang to Ingest Pipeline - Enrich Processor should leave the document unchanged if match field is not present and ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/enrich.spec.ts",
+        "line": 68,
+        "column": 12
+      }
+    },
+    {
+      "id": "42c8b1eed5b4b64-4272daad5609273",
+      "title": "Streamlang to Ingest Pipeline - Enrich Processor should fail if match field is not present and ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/enrich.spec.ts",
+        "line": 100,
+        "column": 12
+      }
+    },
+    {
+      "id": "42c8b1eed5b4b64-07cc372a6f886de",
+      "title": "Streamlang to Ingest Pipeline - Enrich Processor should override the existing value if override is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/enrich.spec.ts",
+        "line": 127,
+        "column": 12
+      }
+    },
+    {
+      "id": "42c8b1eed5b4b64-9153f072bb7ec16",
+      "title": "Streamlang to Ingest Pipeline - Enrich Processor should preserve existing values if override is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/enrich.spec.ts",
+        "line": 154,
+        "column": 12
+      }
+    },
+    {
+      "id": "42c8b1eed5b4b64-b027c8e44b9b1b3",
+      "title": "Streamlang to Ingest Pipeline - Enrich Processor should fail if policy name is not present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/enrich.spec.ts",
+        "line": 181,
         "column": 12
       }
     },
