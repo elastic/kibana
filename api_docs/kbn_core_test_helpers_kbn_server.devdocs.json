@@ -472,9 +472,9 @@
         "signature": [
           "({\n  adjustTimeout,\n  settings = {},\n}: { adjustTimeout: (timeout: number) => void; settings?: { es?: Partial<",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-es-server",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestEsServerPluginApi",
             "section": "def-common.CreateTestEsClusterOptions",
             "text": "CreateTestEsClusterOptions"
           },
@@ -546,9 +546,9 @@
                 "signature": [
                   "{ es?: Partial<",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-es-server",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestEsServerPluginApi",
                     "section": "def-common.CreateTestEsClusterOptions",
                     "text": "CreateTestEsClusterOptions"
                   },
