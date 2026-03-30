@@ -104,7 +104,6 @@ describe('DeletionDetectionService', () => {
           total: { value: 2, relation: 'eq' },
         },
       } as unknown as ReturnType<typeof esClient.search>);
-      });
 
       const service = createService();
       await service.deletionDetection(indexSource, ['euid-1']);
@@ -175,14 +174,14 @@ describe('DeletionDetectionService', () => {
         hits: {
           hits: [{ _id: 'marker-1', _source: { '@timestamp': '2024-03-01T00:00:00Z' } }],
         },
-      });
+      } as unknown as ReturnType<typeof esClient.search>);
       // Second call: stale entity query returns one stale entity
       esClient.search.mockResolvedValueOnce({
         hits: {
           hits: [{ _id: 'doc-stale', _source: {}, sort: ['s'] }],
           total: { value: 1, relation: 'eq' },
         },
-      });
+      } as unknown as ReturnType<typeof esClient.search>);
 
       const service = createService();
       await service.deletionDetection(integrationSource, ['euid-1']);
@@ -206,7 +205,7 @@ describe('DeletionDetectionService', () => {
         hits: {
           hits: [{ _id: 'marker-1', _source: { '@timestamp': '2024-03-01T00:00:00Z' } }],
         },
-      });
+      } as unknown as ReturnType<typeof esClient.search>);
 
       const service = createService();
       await service.deletionDetection(integrationSource, ['euid-1']);
