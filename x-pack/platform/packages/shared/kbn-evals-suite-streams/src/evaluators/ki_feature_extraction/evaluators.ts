@@ -93,8 +93,8 @@ const typeValidationEvaluator = {
       explanation:
         invalidFeatures.length > 0
           ? `Invalid types: ${invalidFeatures
-            .map((feature) => `"${feature.id}" has type "${feature.type}"`)
-            .join('; ')} (expected one of: ${VALID_KI_FEATURE_TYPES.join(', ')})`
+              .map((feature) => `"${feature.id}" has type "${feature.type}"`)
+              .join('; ')} (expected one of: ${VALID_KI_FEATURE_TYPES.join(', ')})`
           : 'All KI features have a valid type',
       details: {
         total: features.length,
@@ -207,8 +207,8 @@ const evidenceGroundingEvaluator = {
     const docIdScore =
       totalDocIds > 0
         ? (validDocIds / totalDocIds +
-          (totalRefEvidence > 0 ? groundedRefEvidence / totalRefEvidence : 1)) /
-        2
+            (totalRefEvidence > 0 ? groundedRefEvidence / totalRefEvidence : 1)) /
+          2
         : 1;
     const score = totalDocIds > 0 ? (groundingScore + docIdScore) / 2 : groundingScore;
 
@@ -219,7 +219,7 @@ const evidenceGroundingEvaluator = {
         allIssues.length > 0
           ? `${allIssues.slice(0, 5).join('; ')}`
           : `All ${totalEvidence} evidence strings are grounded` +
-          (totalDocIds > 0 ? ` and all ${totalDocIds} doc IDs are valid` : ''),
+            (totalDocIds > 0 ? ` and all ${totalDocIds} doc IDs are valid` : ''),
       details: {
         totalEvidence,
         groundedEvidence,
@@ -291,10 +291,11 @@ const confidenceBoundsEvaluator = {
       score: violations.length === 0 ? 1 : 1 - violations.length / features.length,
       explanation:
         violations.length > 0
-          ? `${violations.length}/${features.length
-          } KI features exceed max confidence ${max_confidence}: ${violations
-            .map((feature) => `"${feature.id}" (${feature.confidence})`)
-            .join(', ')}`
+          ? `${violations.length}/${
+              features.length
+            } KI features exceed max confidence ${max_confidence}: ${violations
+              .map((feature) => `"${feature.id}" (${feature.confidence})`)
+              .join(', ')}`
           : `All KI features have confidence ≤ ${max_confidence}`,
       details: {
         max_confidence,
@@ -393,8 +394,8 @@ const filterPresenceEvaluator = {
       explanation:
         missing.length > 0
           ? `${missing.length}/${entities.length} entity feature(s) missing filter: ${missing.join(
-            ', '
-          )}`
+              ', '
+            )}`
           : 'All entity features have a filter',
       details: { totalEntities: entities.length, withFilter: withFilter.length, missing },
     };
