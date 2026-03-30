@@ -64,6 +64,7 @@ export function registerCreateRoute(
     },
     async (ctx, req, res) => {
       const { dashboardApi } = await ctx.resolve(['dashboardApi']);
+      const telemetry = dashboardApi.getTelemetryClient();
       try {
         const result = await create(
           ctx,
@@ -73,7 +74,7 @@ export function registerCreateRoute(
           isDashboardAppRequest
         );
         const response = res.created({ body: result });
-        dashboardApi.telemetry.incrementCounter(response);
+        telemetry?.incrementCounter(response);
         return response;
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {
@@ -82,18 +83,18 @@ export function registerCreateRoute(
               message: `A dashboard with ID ${req?.params?.id} already exists.`,
             },
           });
-          dashboardApi.telemetry.incrementCounter(response);
+          telemetry?.incrementCounter(response);
           return response;
         }
 
         if (e.isBoom && e.output.statusCode === 403) {
           const response = res.forbidden({ body: { message: e.message } });
-          dashboardApi.telemetry.incrementCounter(response);
+          telemetry?.incrementCounter(response);
           return response;
         }
 
         const response = res.badRequest({ body: { message: e.message } });
-        dashboardApi.telemetry.incrementCounter(response);
+        telemetry?.incrementCounter(response);
         return response;
       }
     }

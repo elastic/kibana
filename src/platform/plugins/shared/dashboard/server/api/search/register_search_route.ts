@@ -42,22 +42,23 @@ export function registerSearchRoute(router: VersionedRouter<DashboardApiRequestH
     async (ctx, req, res) => {
       let result;
       const { dashboardApi } = await ctx.resolve(['dashboardApi']);
+      const telemetry = dashboardApi.getTelemetryClient();
       try {
         result = await search(ctx, req.query);
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
           const response = res.forbidden({ body: { message: e.message } });
-          dashboardApi.telemetry.incrementCounter(response);
+          telemetry?.incrementCounter(response);
           return response;
         }
 
         const response = res.badRequest({ body: { message: e.message } });
-        dashboardApi.telemetry.incrementCounter(response);
+        telemetry?.incrementCounter(response);
         return response;
       }
 
       const response = res.ok({ body: result });
-      dashboardApi.telemetry.incrementCounter(response);
+      telemetry?.incrementCounter(response);
       return response;
     }
   );

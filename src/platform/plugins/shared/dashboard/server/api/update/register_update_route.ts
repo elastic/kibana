@@ -67,6 +67,7 @@ export function registerUpdateRoute(
     },
     async (ctx, req, res) => {
       const { dashboardApi } = await ctx.resolve(['dashboardApi']);
+      const telemetry = dashboardApi.getTelemetryClient();
       try {
         const result = await update(
           ctx,
@@ -76,7 +77,7 @@ export function registerUpdateRoute(
           isDashboardAppRequest
         );
         const response = res.ok({ body: result });
-        dashboardApi.telemetry.incrementCounter(response);
+        telemetry?.incrementCounter(response);
         return response;
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
@@ -85,16 +86,16 @@ export function registerUpdateRoute(
               message: `A dashboard with ID [${req.params.id}] was not found.`,
             },
           });
-          dashboardApi.telemetry.incrementCounter(response);
+          telemetry?.incrementCounter(response);
           return response;
         }
         if (e.isBoom && e.output.statusCode === 403) {
           const response = res.forbidden({ body: { message: e.message } });
-          dashboardApi.telemetry.incrementCounter(response);
+          telemetry?.incrementCounter(response);
           return response;
         }
         const response = res.badRequest({ body: { message: e.message } });
-        dashboardApi.telemetry.incrementCounter(response);
+        telemetry?.incrementCounter(response);
         return response;
       }
     }

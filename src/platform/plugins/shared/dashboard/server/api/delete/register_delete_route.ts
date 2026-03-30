@@ -49,6 +49,7 @@ export function registerDeleteRoute(router: VersionedRouter<DashboardApiRequestH
     },
     async (ctx, req, res) => {
       const { dashboardApi } = await ctx.resolve(['dashboardApi']);
+      const telemetry = dashboardApi.getTelemetryClient();
       try {
         await deleteDashboard(ctx, req.params.id);
       } catch (e) {
@@ -58,21 +59,21 @@ export function registerDeleteRoute(router: VersionedRouter<DashboardApiRequestH
               message: `A dashboard with ID [${req.params.id}] was not found.`,
             },
           });
-          dashboardApi.telemetry.incrementCounter(response);
+          telemetry?.incrementCounter(response);
           return response;
         }
         if (e.isBoom && e.output.statusCode === 403) {
           const response = res.forbidden({ body: { message: e.message } });
-          dashboardApi.telemetry.incrementCounter(response);
+          telemetry?.incrementCounter(response);
           return response;
         }
         const response = res.badRequest({ body: { message: e.message } });
-        dashboardApi.telemetry.incrementCounter(response);
+        telemetry?.incrementCounter(response);
         return response;
       }
 
       const response = res.noContent();
-      dashboardApi.telemetry.incrementCounter(response);
+      telemetry?.incrementCounter(response);
       return response;
     }
   );
