@@ -28,15 +28,15 @@ const MANAGEMENT_URLS: Record<string, (id: string) => string> = {
   component_template: (id) =>
     `/app/management/data/index_management/component_templates/${encodeURIComponent(id)}`,
   index: (id) =>
-    `/app/management/data/index_management/indices/index_details?indexName=${encodeURIComponent(id)}&includeHiddenIndices=true`,
+    `/app/management/data/index_management/indices/index_details?indexName=${encodeURIComponent(
+      id
+    )}&includeHiddenIndices=true`,
   ilm_policy: (id) =>
     `/app/management/data/index_lifecycle_management/policies/edit/${encodeURIComponent(id)}`,
 };
 
 const installedBadge = (installed: boolean) => (
-  <EuiBadge color={installed ? 'success' : 'default'}>
-    {installed ? 'Yes' : 'No'}
-  </EuiBadge>
+  <EuiBadge color={installed ? 'success' : 'default'}>{installed ? 'Yes' : 'No'}</EuiBadge>
 );
 
 const renderName = (id: string, item: EngineComponentStatus) => {

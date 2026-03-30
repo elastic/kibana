@@ -31,10 +31,7 @@ import {
   validateIndexPatterns,
 } from '../../common/log_extraction_params';
 import type { EngineDescriptor, LogExtractionUpdateParams } from '../types';
-import {
-  useUpdateEntityStoreConfig,
-  useForceHistorySnapshot,
-} from '../hooks/use_entity_store_api';
+import { useUpdateEntityStoreConfig, useForceHistorySnapshot } from '../hooks/use_entity_store_api';
 import { useAppServices } from '../services_context';
 
 const UNIT_OPTIONS = [

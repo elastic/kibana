@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import type { EntityType } from '../../common';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../common';
@@ -100,13 +100,10 @@ export const useUpdateEntityStoreConfig = () =>
 
 export const useForceLogExtraction = () =>
   useEntityStoreMutation<EntityType>((http, entityType) =>
-    http.fetch(
-      ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION.replace('{entityType}', entityType),
-      {
-        method: 'POST',
-        query: apiVersionQuery,
-      }
-    )
+    http.fetch(ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION.replace('{entityType}', entityType), {
+      method: 'POST',
+      query: apiVersionQuery,
+    })
   );
 
 export const useForceHistorySnapshot = () =>

@@ -14,10 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
-import {
-  useInstallEntityStore,
-  useCheckPrivileges,
-} from '../hooks/use_entity_store_api';
+import { useInstallEntityStore, useCheckPrivileges } from '../hooks/use_entity_store_api';
 
 export const EntityStoreEmptyState = () => {
   const installMutation = useInstallEntityStore();
@@ -52,22 +49,18 @@ export const EntityStoreEmptyState = () => {
         <>
           <EuiText>
             <p>
-              The Entity Store extracts and maintains entity records from your security logs.
-              It creates enriched entity profiles for users, hosts, and services that power
-              risk scoring, anomaly detection, and entity analytics.
+              The Entity Store extracts and maintains entity records from your security logs. It
+              creates enriched entity profiles for users, hosts, and services that power risk
+              scoring, anomaly detection, and entity analytics.
             </p>
           </EuiText>
           {!hasPrivileges && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut
-                title="Insufficient privileges"
-                color="warning"
-                iconType="warning"
-              >
+              <EuiCallOut title="Insufficient privileges" color="warning" iconType="warning">
                 <p>
-                  You do not have the required privileges to enable the Entity Store.
-                  Contact your administrator.
+                  You do not have the required privileges to enable the Entity Store. Contact your
+                  administrator.
                 </p>
               </EuiCallOut>
             </>

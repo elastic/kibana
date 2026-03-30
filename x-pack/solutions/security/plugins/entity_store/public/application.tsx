@@ -14,9 +14,7 @@ export const renderApp = (coreStart: CoreStart, { element }: AppMountParameters)
   const { http, notifications, rendering } = coreStart;
 
   ReactDOM.render(
-    rendering.addContext(
-      <EntityStoreApp http={http} notifications={notifications} />
-    ),
+    rendering.addContext(<EntityStoreApp http={http} notifications={notifications} />),
     element
   );
 
