@@ -610,7 +610,7 @@ describe('saved_object', () => {
         (_type: string, id: string) =>
           new Promise((resolve) => {
             startedDeleteCalls.push(id);
-            pendingDeletes.push(resolve);
+            pendingDeletes.push(() => resolve(undefined));
           })
       );
       const timelineIds = Array.from({ length: 11 }, (_, index) => `timeline-${index}`);
