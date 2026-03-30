@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type {
   BoundOptions,
   BoundInferenceClient,
@@ -16,6 +16,8 @@ import type {
   InferenceCallbacks,
 } from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClientProvider } from '../types';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
@@ -25,7 +27,7 @@ import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cac
 interface CreateClientOptions {
   request: KibanaRequest;
   namespace?: string;
-  actions: ActionsPluginStart;
+  actions: ActionsClientProvider;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
@@ -77,3 +79,44 @@ export function createClient(
     return client;
   }
 }
+
+interface CreateClientWithoutRequestOptions {
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  logger: Logger;
+  regexWorker: RegexWorkerService;
+  esClient: ElasticsearchClient;
+  endpointIdCache: InferenceEndpointIdCache;
+}
+
+/**
+ * Creates an inference client using pre-scoped services instead of a KibanaRequest.
+ * Useful for background tasks (e.g. alerting rule executors) that have scoped clients
+ * but no HTTP request context.
+ *
+ * Internally wraps the actionsClient in an actions-like object so that the underlying
+ * createInferenceClient can resolve connectors. Anonymization is not available.
+ */
+export const createClientWithoutRequest = ({
+  actionsClient,
+  logger,
+  regexWorker,
+  esClient,
+  endpointIdCache,
+}: CreateClientWithoutRequestOptions): InferenceClient => {
+  // Wrap the pre-scoped actionsClient so that any internal code calling
+  // actions.getActionsClientWithRequest() receives this client directly.
+  const actions: ActionsClientProvider = {
+    getActionsClientWithRequest: () => Promise.resolve(actionsClient),
+  };
+
+  return createInferenceClient({
+    request: {} as KibanaRequest,
+    namespace: 'default',
+    actions,
+    logger: logger.get('client'),
+    anonymizationRulesPromise: Promise.resolve([]),
+    regexWorker,
+    esClient,
+    endpointIdCache,
+  });
+};
