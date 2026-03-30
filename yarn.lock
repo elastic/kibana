@@ -8482,6 +8482,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-docker-servers@link:src/platform/packages/shared/kbn-test-docker-servers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-es-server@link:src/platform/packages/shared/kbn-test-es-server":
   version "0.0.0"
   uid ""
