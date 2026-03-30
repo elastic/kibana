@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
+  EuiIcon,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -276,11 +277,18 @@ function QuestionsCallout({ questions }: { questions: MemoryQuestion[] }) {
     <>
       <EuiAccordion
         id="memory-questions"
-        buttonContent={i18n.translate('xpack.streams.memory.questions.title', {
-          defaultMessage: '{count} open {count, plural, one {question} other {questions}}',
-          values: { count: questions.length },
-        })}
-        initialIsOpen
+        buttonContent={
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.streams.memory.questions.title', {
+                defaultMessage: 'Open questions',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{questions.length}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         data-test-subj="streamsMemoryQuestionsAccordion"
       >
         <EuiSpacer size="s" />
@@ -290,9 +298,11 @@ function QuestionsCallout({ questions }: { questions: MemoryQuestion[] }) {
               <EuiCallOut
                 size="s"
                 color={q.category === 'quality' ? 'warning' : 'primary'}
-                iconType="questionInCircle"
                 title={
                   <EuiFlexGroup gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="help" />
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiBadge color={q.category === 'quality' ? 'warning' : 'primary'}>
                         {q.category}

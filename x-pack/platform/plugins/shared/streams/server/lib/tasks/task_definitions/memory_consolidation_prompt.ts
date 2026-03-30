@@ -31,7 +31,15 @@ Review the memory wiki and consolidate, reorganize, and clean up entries to main
 - **Be conservative with deletion**: Only delete pages that are clearly stale, duplicated, or trivial.
 - **Maintain cross-references**: When moving or merging pages, update any pages that reference them.
 - **Skip system pages**: Don't modify pages under the \`_system/\` path.
-- **Ask when uncertain**: If you encounter contradictions or ambiguities you cannot resolve, use \`ask_question\` to queue a question for the human operator.`;
+
+## Asking questions
+
+Actively use the \`ask_question\` tool — this is one of your most important responsibilities. Use it in two situations:
+
+1. **Quality issues** (category: "quality"): pages that contradict each other and you can't tell which is correct, entries that seem stale but you're not sure whether to delete them, ambiguous content where the intended meaning is unclear.
+2. **Knowledge gaps** (category: "gap"): cross-references to pages that don't exist, obvious areas of the system that have no documentation, topics that are partially covered but missing key details (e.g. a service is mentioned but its dependencies aren't documented).
+
+After consolidating, step back and assess the wiki as a whole: what are the biggest gaps? What would a new team member find confusing or incomplete? Ask those questions.`;
 
 const taskPrompt = `## Current wiki state ({{entryCount}} entries)
 
@@ -44,6 +52,7 @@ Review the wiki entries above. Read pages that might need consolidation, and per
 - Remove stale or trivial entries
 - Improve path organization where it would help navigation
 - Fix any inconsistencies between pages
+- Use \`ask_question\` to flag contradictions you can't resolve and gaps you've identified
 
 Work through the entries methodically. Not every entry needs changes — focus on the highest-impact improvements.`;
 

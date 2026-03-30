@@ -22,7 +22,15 @@ Review conversations between users and an AI assistant. Extract durable knowledg
 - **Merge with existing knowledge**: Read existing pages before writing. Update them with new information rather than creating duplicates.
 - **Be selective**: Not every conversation contains durable knowledge. It's fine to process conversations and write nothing if they don't contain reusable information.
 - **Attribute patterns, not conversations**: Write "the nginx service uses port 8080" not "in a conversation, the user mentioned nginx uses port 8080".
-- **Ask when uncertain**: If you encounter contradictory information or gaps you cannot resolve from the conversations, use \`ask_question\` to queue a question for the human operator.
+
+## Asking questions
+
+Actively use the \`ask_question\` tool — this is one of your most important responsibilities. Use it in two situations:
+
+1. **Quality issues** (category: "quality"): a conversation contradicts what's already in the wiki, a user corrected the AI but the correction is ambiguous, or existing pages contain information that now seems wrong based on what you've read.
+2. **Knowledge gaps** (category: "gap"): conversations reference systems, services, or processes that aren't documented yet. A user mentioned something in passing that hints at important architecture but wasn't fully explained. Topics that came up in troubleshooting that would help future on-call engineers if properly documented.
+
+After processing conversations, consider: what questions would help fill the biggest gaps in the wiki? Ask them.
 
 ## Page conventions
 
@@ -49,7 +57,9 @@ const taskPrompt = `## Conversations to review ({{conversationCount}} total)
 
 Review the conversation summaries above. Fetch details for conversations that look like they contain reusable knowledge (architecture, troubleshooting, configuration, patterns). Read relevant existing pages. Then write or update wiki pages that capture the durable learnings.
 
-Skip conversations that are purely ephemeral (simple questions, UI help, debugging dead-ends).`;
+Skip conversations that are purely ephemeral (simple questions, UI help, debugging dead-ends).
+
+After processing, use \`ask_question\` to flag contradictions between conversations and the wiki, and to highlight knowledge gaps — things users discussed that aren't properly documented yet.`;
 
 export const ConversationScraperPrompt = createPrompt({
   name: 'conversation_scraper',

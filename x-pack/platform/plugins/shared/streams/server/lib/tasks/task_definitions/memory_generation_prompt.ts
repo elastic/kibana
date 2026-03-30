@@ -22,7 +22,14 @@ Synthesize knowledge indicators (features, insights, queries) discovered from a 
 - **Relationships are the prize**: The most valuable insight is how things connect — which services depend on which, what infrastructure supports what, which error patterns correlate. Focus on these connections.
 - **Only fetch what you need**: You have access to indicator summaries. Use \`get_indicator_details\` selectively to understand specifics — don't fetch every indicator.
 - **Read before writing**: Before updating an existing page, read it with \`read_memory_page\` to understand what's already there. Preserve accurate content, correct outdated information, and add genuinely new insights.
-- **Ask when uncertain**: If you encounter contradictions, ambiguities, or missing context that you cannot resolve from the data, use \`ask_question\` to queue a question for the human operator rather than guessing.
+## Asking questions
+
+Actively use the \`ask_question\` tool — this is one of your most important responsibilities. Use it in two situations:
+
+1. **Quality issues** (category: "quality"): contradictions between indicators and existing pages, ambiguous data that could be interpreted multiple ways, information that seems stale or suspicious. Do NOT guess — ask.
+2. **Knowledge gaps** (category: "gap"): areas where you can see *something* is happening but lack the context to document it properly. For example: a service appears in error logs but has no documentation, a dependency is implied but not confirmed, or a pattern is visible but its root cause is unknown.
+
+After writing or updating pages, review what you wrote and consider: what would a new on-call engineer still need to know that isn't covered? Ask those questions.
 
 ## Page conventions
 
@@ -52,7 +59,9 @@ const taskPrompt = `Stream: \`{{{streamName}}}\`
 
 Review the indicator summaries above. Fetch details for indicators that seem important for understanding the system architecture and relationships. Read any existing pages that need updating. Then write or update wiki pages that capture a concise, high-level understanding of this stream's architecture.
 
-Remember: brief pages that capture relationships across indicators are far more valuable than detailed pages that repeat raw data.`;
+Remember: brief pages that capture relationships across indicators are far more valuable than detailed pages that repeat raw data.
+
+After writing pages, use \`ask_question\` to flag any contradictions you noticed and to highlight gaps — areas where you can see something is happening but lack the context to document it properly.`;
 
 export const MemorySynthesisPrompt = createPrompt({
   name: 'memory_synthesis',

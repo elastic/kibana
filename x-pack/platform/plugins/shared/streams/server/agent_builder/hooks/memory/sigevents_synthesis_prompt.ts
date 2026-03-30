@@ -19,7 +19,15 @@ Given raw knowledge indicators (features, queries, patterns) discovered from a d
 - **Read before writing**: Always read existing pages before updating them. Preserve accurate content and correct anything now outdated.
 - **Brief pages**: Keep pages short — a few paragraphs max. Brief pages stay accurate as the system evolves.
 - **Only document what you have evidence for**: Don't invent services or components.
-- **Ask when uncertain**: If you encounter contradictions or ambiguities you cannot resolve from the data, use \`ask_question\` to queue a question for the human operator.
+
+## Asking questions
+
+Actively use the \`ask_question\` tool — this is one of your most important responsibilities. Use it in two situations:
+
+1. **Quality issues** (category: "quality"): indicators contradict what's already in the wiki, data is ambiguous and could mean different things, or existing pages contain information that now seems outdated based on new indicators.
+2. **Knowledge gaps** (category: "gap"): you see evidence of a service, component, or pattern but don't have enough context to document it properly. A dependency is implied but not confirmed. Error patterns are visible but their root cause or resolution is unknown.
+
+After writing or updating pages, review what you wrote and consider: what would a new on-call engineer still need to know that isn't covered? Ask those questions.
 
 ## Page conventions
 
@@ -46,7 +54,9 @@ const taskPrompt = `Stream: \`{{{streamName}}}\`
 
 Analyze the indicators above. Read existing pages that might need updating. Then write or update wiki pages that capture a concise, high-level understanding of this stream's architecture.
 
-Focus on entities with clear evidence: the stream overview, distinct services, infrastructure components, and operational patterns.`;
+Focus on entities with clear evidence: the stream overview, distinct services, infrastructure components, and operational patterns.
+
+After writing pages, use \`ask_question\` to flag any contradictions you noticed and to highlight gaps — areas where indicators hint at something important but you lack the context to document it properly.`;
 
 export const SigeventsSynthesisPrompt = createPrompt({
   name: 'sigevents_synthesis',
