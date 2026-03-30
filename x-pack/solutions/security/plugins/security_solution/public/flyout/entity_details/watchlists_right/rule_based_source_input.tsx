@@ -38,9 +38,12 @@ import {
 } from './translations';
 
 const getRuleToggleButtons = (
+  isEditMode: boolean,
   initialEntitySource?: RuleBasedSourceInputProps['initialEntitySource']
 ) => {
-  const isEditMode = Boolean(initialEntitySource);
+  // Only lock the toggle in edit mode so users can't switch source type on an existing entity source.
+  // In create mode both buttons stay enabled even though onFieldChange sets initialEntitySource,
+  // because isEditMode is explicitly false from the parent.
   const lockedType = initialEntitySource?.type === 'index' ? 'indexPattern' : 'entityStore';
 
   return [
@@ -149,6 +152,7 @@ const FilterQueryRow: FC<FilterQueryRowProps> = ({
 
 export interface RuleBasedSourceInputProps {
   watchlistName: string;
+  isEditMode: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
@@ -158,6 +162,7 @@ export interface RuleBasedSourceInputProps {
 
 export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
   watchlistName,
+  isEditMode,
   onFieldChange,
   initialEntitySource,
 }) => {
@@ -337,8 +342,8 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
 
   const isEntityStore = ruleFilter === 'entityStore';
   const ruleToggleButtons = useMemo(
-    () => getRuleToggleButtons(initialEntitySource),
-    [initialEntitySource]
+    () => getRuleToggleButtons(isEditMode, initialEntitySource),
+    [isEditMode, initialEntitySource]
   );
 
   return (

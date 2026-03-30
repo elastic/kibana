@@ -28,6 +28,7 @@ import { RuleBasedSourceInput } from './rule_based_source_input';
 
 export interface WatchlistFormProps {
   watchlist: CreateWatchlistRequestBodyInput;
+  isEditMode: boolean;
   isNameInvalid: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
@@ -35,7 +36,12 @@ export interface WatchlistFormProps {
   ) => void;
 }
 
-export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: WatchlistFormProps) => {
+export const WatchlistForm = ({
+  watchlist,
+  isEditMode,
+  isNameInvalid,
+  onFieldChange,
+}: WatchlistFormProps) => {
   return (
     <EuiForm component="form" fullWidth>
       <EuiFormRow
@@ -116,6 +122,7 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
       <EuiSpacer size="m" />
       <RuleBasedSourceInput
         watchlistName={watchlist.name}
+        isEditMode={isEditMode}
         onFieldChange={onFieldChange}
         initialEntitySource={watchlist.entitySource}
       />

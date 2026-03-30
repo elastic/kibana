@@ -39,7 +39,7 @@ export const createEntitySourcesService = ({
     const sourceIds = await watchlistClient.getEntitySourceIds(watchlistId);
     const targetIndex = getIndexForWatchlist(watchlist.name, namespace);
 
-    const { sources } = await descriptorClient.list({});
+    const { sources } = await descriptorClient.list({ per_page: 10000 });
     const entitiesBySource = await Promise.all(
       sources
         .filter((s) => sourceIds.includes(s.id))
