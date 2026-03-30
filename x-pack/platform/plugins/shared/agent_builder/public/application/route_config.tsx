@@ -77,7 +77,6 @@ export const agentRoutes: RouteDefinition[] = [
   {
     path: '/agents/:agentId/overview',
     sidebarView: 'conversation',
-    navIcon: 'info',
     navLabel: navLabels.overview,
     element: <AgentBuilderAgentOverviewPage />,
   },
@@ -86,7 +85,6 @@ export const agentRoutes: RouteDefinition[] = [
     sidebarView: 'conversation',
     isExperimental: true,
     navLabel: navLabels.skills,
-    navIcon: 'bolt',
     element: <AgentBuilderAgentSkillsPage />,
   },
   {
@@ -94,14 +92,12 @@ export const agentRoutes: RouteDefinition[] = [
     sidebarView: 'conversation',
     isExperimental: true,
     navLabel: navLabels.plugins,
-    navIcon: 'package',
     element: <AgentBuilderAgentPluginsPage />,
   },
   {
     path: '/agents/:agentId/connectors',
     sidebarView: 'conversation',
     navLabel: navLabels.connectors,
-    navIcon: 'plugs',
     isConnectors: true,
     element: <RouteDisplay />,
   },
@@ -109,7 +105,6 @@ export const agentRoutes: RouteDefinition[] = [
     path: '/agents/:agentId/tools',
     sidebarView: 'conversation',
     navLabel: navLabels.tools,
-    navIcon: 'wrench',
     element: <AgentBuilderAgentToolsPage />,
   },
   // Catch-all for agent root - must be last
@@ -125,7 +120,6 @@ export const manageRoutes: RouteDefinition[] = [
     path: '/manage/agents',
     sidebarView: 'manage',
     navLabel: navLabels.agents,
-    navIcon: 'productAgent',
     element: <AgentBuilderAgentsPage />,
   },
   {
@@ -142,7 +136,6 @@ export const manageRoutes: RouteDefinition[] = [
     path: '/manage/skills',
     sidebarView: 'manage',
     navLabel: navLabels.skills,
-    navIcon: 'bolt',
     isExperimental: true,
     element: <AgentBuilderSkillsPage />,
   },
@@ -163,7 +156,6 @@ export const manageRoutes: RouteDefinition[] = [
     sidebarView: 'manage',
     isExperimental: true,
     navLabel: navLabels.plugins,
-    navIcon: 'package',
     element: <AgentBuilderPluginsPage />,
   },
   {
@@ -176,7 +168,6 @@ export const manageRoutes: RouteDefinition[] = [
     path: '/manage/connectors',
     sidebarView: 'manage',
     navLabel: navLabels.connectors,
-    navIcon: 'plugs',
     isConnectors: true,
     element: <AgentBuilderConnectorsPage />,
   },
@@ -184,7 +175,6 @@ export const manageRoutes: RouteDefinition[] = [
     path: '/manage/tools',
     sidebarView: 'manage',
     navLabel: navLabels.tools,
-    navIcon: 'wrench',
     element: <AgentBuilderToolsPage />,
   },
   {

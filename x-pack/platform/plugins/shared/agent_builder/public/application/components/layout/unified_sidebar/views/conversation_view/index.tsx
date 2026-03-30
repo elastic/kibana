@@ -81,6 +81,8 @@ const chatsAccordionStyles = css`
 
   .euiAccordion__children {
     height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 `;
 
@@ -149,7 +151,7 @@ export const ConversationSidebarView: React.FC = () => {
   ]);
 
   const accordionButtonStyles = css`
-    padding: ${euiTheme.size.base};
+    padding: ${euiTheme.size.s} ${euiTheme.size.base};
 
     .euiAccordion__triggerWrapper {
       padding: 0;
@@ -174,6 +176,7 @@ export const ConversationSidebarView: React.FC = () => {
   return (
     <div css={containerStyles} data-test-subj="agentBuilderSidebar-conversation">
       <EuiHorizontalRule margin="none" />
+      <EuiSpacer size="s" />
 
       {/* Customize accordion - with agent settings nav items */}
       <EuiAccordion
@@ -201,8 +204,6 @@ export const ConversationSidebarView: React.FC = () => {
           />
         </div>
       </EuiAccordion>
-
-      <EuiHorizontalRule margin="none" />
 
       {/* Chats accordion - with conversation list */}
       <EuiAccordion
