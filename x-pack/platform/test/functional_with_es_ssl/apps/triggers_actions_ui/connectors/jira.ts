@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const createJiraConnector = (name: string) => {
     return actions.api.createConnector({
       name,
-      config: { apiUrl: 'https//test.com', projectKey: 'apiKey' },
+      config: { apiUrl: 'https://elastic.co', projectKey: 'apiKey' },
       secrets: { email: 'test@elastic.co', apiToken: 'changeme' },
       connectorTypeId: '.jira',
     });

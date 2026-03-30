@@ -381,7 +381,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const createOpsgenieConnector = async (name: string) => {
       return actions.api.createConnector({
         name,
-        config: { apiUrl: 'https//test.com' },
+        config: { apiUrl: 'https://elastic.co' },
         secrets: { apiKey: '1234' },
         connectorTypeId: '.opsgenie',
       });
