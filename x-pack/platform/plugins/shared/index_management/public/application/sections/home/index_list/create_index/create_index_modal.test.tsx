@@ -139,6 +139,25 @@ describe('CreateIndexModal', () => {
     });
   });
 
+  it('creates the index when pressing Enter in the index name input', async () => {
+    const closeModal = jest.fn();
+    const loadIndices = jest.fn();
+    mockCreateIndex.mockResolvedValue({ error: undefined });
+
+    renderModal({ closeModal, loadIndices });
+    fireEvent.submit(screen.getByTestId('createIndexModalForm'));
+
+    await waitFor(() => {
+      expect(mockCreateIndex).toHaveBeenCalledWith('search-abcd', 'standard');
+    });
+
+    await waitFor(() => {
+      expect(mockShowSuccessToast).toHaveBeenCalled();
+      expect(closeModal).toHaveBeenCalled();
+      expect(loadIndices).toHaveBeenCalled();
+    });
+  });
+
   it('displays an error callout when index creation fails', async () => {
     mockCreateIndex.mockResolvedValue({ error: { message: 'Index already exists' } });
 

@@ -208,7 +208,9 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
               openWiredConnectionDetails({
                 props: { options: { defaultTabId: 'apiKeys' } },
               }).catch((error) => {
-                notificationService.showDangerToast(error.body.message);
+                notificationService.showDangerToast(
+                  error?.body?.message ?? error?.message ?? 'An unexpected error occurred'
+                );
               })
             }
             iconType="plugs"

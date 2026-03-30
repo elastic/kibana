@@ -165,7 +165,12 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
             <EuiSpacer />
           </>
         )}
-        <EuiForm id="createIndexModalForm" component="form" onSubmit={handleFormSubmit}>
+        <EuiForm
+          id="createIndexModalForm"
+          component="form"
+          onSubmit={handleFormSubmit}
+          data-test-subj="createIndexModalForm"
+        >
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
