@@ -108,7 +108,7 @@ export const REF_DATA_KEY_INITIAL_VALUE: Readonly<
       } catch (error) {
         throw wrapErrorIfNeeded(
           error,
-          'Failed to retreive Endpoint exceptions list while determining default per-policy opt-in status.'
+          'Failed to retrieve Endpoint exceptions list while determining default per-policy opt-in status.'
         );
       }
     }
