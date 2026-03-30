@@ -47,6 +47,11 @@
     "@kbn/core-deprecations-common",
     "@kbn/core-deprecations-server",
     "@kbn/upgrade-assistant",
+    "@kbn/upgrade-assistant-pkg-public",
+    "@kbn/upgrade-assistant-pkg-server",
+    "@kbn/upgrade-assistant-pkg-common",
+    "@kbn/reindex-service-plugin",
+    "@kbn/core-doc-links-browser-mocks"
   ],
   "exclude": [
     "target/**/*",

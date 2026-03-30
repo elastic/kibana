@@ -15,17 +15,15 @@ import {
   EuiPageBody,
   EuiPageSection,
   EuiText,
-  EuiToolTip,
-  EuiIcon,
+  EuiLoadingSpinner,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { LATEST_VERSION, MIN_VERSION_TO_UPGRADE_TO_LATEST } from '../../../../common/constants';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
 import { getBackupStep } from './backup_step';
@@ -33,17 +31,18 @@ import { getFixIssuesStep } from './fix_issues_step';
 import { getUpgradeStep } from './upgrade_step';
 import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 import { getLogsStep } from './logs_step';
+import { useCloudStackVersionInfo } from './use_cloud_stack_version_info';
 import { MachineLearningDisabledCallout } from './ml_callout/ml_callout';
 
 type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 
-export const Overview = withRouter(({ history }: RouteComponentProps) => {
+export const Overview = () => {
   const {
     featureSet: { migrateSystemIndices },
     services: {
+      api,
       breadcrumbs,
       core: { docLinks },
-      api,
     },
     plugins: { cloud },
     kibanaVersionInfo: { currentMajor, currentMinor, currentPatch },
@@ -58,6 +57,8 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
   }, [api]);
 
   const currentVersion = `${currentMajor}.${currentMinor}.${currentPatch}`;
+
+  const cloudStackVersion = useCloudStackVersionInfo(api, currentVersion);
 
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_OVERVIEW_PAGE_LOAD);
@@ -76,35 +77,61 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
 
   const isStepComplete = (step: OverviewStep) => completedStepsMap[step];
   const setCompletedStep = (step: OverviewStep, isCompleted: boolean) => {
-    setCompletedStepsMap({
-      ...completedStepsMap,
+    setCompletedStepsMap((prevStepsMap) => ({
+      ...prevStepsMap,
       [step]: isCompleted,
-    });
+    }));
   };
 
-  const versionTooltipContent = () => {
-    if (currentVersion >= MIN_VERSION_TO_UPGRADE_TO_LATEST) {
-      return null;
-    }
+  const latestVersionNode =
+    cloudStackVersion.status === 'loaded' ? (
+      <strong>{cloudStackVersion.latestAvailableVersion}</strong>
+    ) : cloudStackVersion.status === 'error' ? (
+      <strong>
+        {i18n.translate('xpack.upgradeAssistant.overview.latestAvailableVersionUnavailable', {
+          defaultMessage: 'Unavailable',
+        })}
+      </strong>
+    ) : (
+      <EuiLoadingSpinner
+        size="s"
+        aria-label={i18n.translate(
+          'xpack.upgradeAssistant.overview.latestAvailableVersionLoading',
+          {
+            defaultMessage: 'Loading latest available version',
+          }
+        )}
+      />
+    );
 
-    return (
-      <EuiToolTip
+  const directUpgradeableVersionRange =
+    cloudStackVersion.status === 'loaded' ? cloudStackVersion.directUpgradeableVersionRange : null;
+
+  const versionTooltipContent =
+    cloudStackVersion.status === 'loaded' && cloudStackVersion.minVersionToUpgradeToLatest ? (
+      <EuiIconTip
         position="right"
         content={
           <FormattedMessage
             id="xpack.upgradeAssistant.overview.latestMinVersionTooltip"
             defaultMessage="Upgrading to v{latestVersion} requires v{minVersionToUpgradeToLatest}."
             values={{
-              latestVersion: LATEST_VERSION,
-              minVersionToUpgradeToLatest: MIN_VERSION_TO_UPGRADE_TO_LATEST,
+              latestVersion: cloudStackVersion.latestAvailableVersion,
+              minVersionToUpgradeToLatest: cloudStackVersion.minVersionToUpgradeToLatest,
             }}
           />
         }
-      >
-        <EuiIcon type="info" size="s" />
-      </EuiToolTip>
-    );
-  };
+        type="info"
+        size="s"
+      />
+    ) : null;
+
+  const canUpgradeDirectlyToLatest =
+    cloudStackVersion.status === 'loaded' && cloudStackVersion.minVersionToUpgradeToLatest === null;
+  const shouldShowDirectUpgradeRangeLine =
+    cloudStackVersion.status === 'loaded' &&
+    !canUpgradeDirectlyToLatest &&
+    directUpgradeableVersionRange !== null;
 
   return (
     <EuiPageBody restrictWidth={true} data-test-subj="overview">
@@ -116,15 +143,41 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             defaultMessage: 'Upgrade Assistant',
           })}
           description={
-            <FormattedMessage
-              id="xpack.upgradeAssistant.overview.versionInfo"
-              defaultMessage="Current version: {currentVersion} | Latest available version: {latestVersion} {versionTooltip}"
-              values={{
-                currentVersion: <strong>{currentVersion}</strong>,
-                latestVersion: <strong>{LATEST_VERSION}</strong>,
-                versionTooltip: versionTooltipContent(),
-              }}
-            />
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.overview.versionInfo"
+                  defaultMessage="Current version: {currentVersion} | Latest available version: {latestVersion} {versionTooltip}"
+                  values={{
+                    currentVersion: <strong>{currentVersion}</strong>,
+                    latestVersion: latestVersionNode,
+                    versionTooltip: versionTooltipContent,
+                  }}
+                />
+              </p>
+              {shouldShowDirectUpgradeRangeLine && directUpgradeableVersionRange && (
+                <em>
+                  {directUpgradeableVersionRange.min === directUpgradeableVersionRange.max ? (
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.overview.directUpgradeSingle"
+                      defaultMessage="From your current version, you can upgrade to version {version}."
+                      values={{
+                        version: directUpgradeableVersionRange.min,
+                      }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.overview.directUpgradeRange"
+                      defaultMessage="From your current version, you can upgrade to versions {minVersion} - {maxVersion}."
+                      values={{
+                        minVersion: directUpgradeableVersionRange.min,
+                        maxVersion: directUpgradeableVersionRange.max,
+                      }}
+                    />
+                  )}
+                </em>
+              )}
+            </EuiText>
           }
         >
           <EuiText>
@@ -139,11 +192,8 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
                     target="_blank"
                   >
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.overview.minorOfLatestMajorReleaseNotes"
-                      defaultMessage="What's new in version v{latestVersion}"
-                      values={{
-                        latestVersion: LATEST_VERSION,
-                      }}
+                      id="xpack.upgradeAssistant.overview.releaseHighlightsLinkText"
+                      defaultMessage="Elastic release notes"
                     />
                   </EuiLink>
                 ),
@@ -182,4 +232,4 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
       </EuiPageSection>
     </EuiPageBody>
   );
-});
+};

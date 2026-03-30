@@ -59,6 +59,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly kibanaVersion: string;
   private readonly initialFeatureSet: FeatureSet;
   private readonly initialDataSourceExclusions: DataSourceExclusions;
+  private readonly cloudStackVersionsApiBaseUrl: string;
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
@@ -73,9 +74,10 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.credentialStore = credentialStoreFactory(this.logger);
     this.kibanaVersion = env.packageInfo.version;
 
-    const { featureSet, dataSourceExclusions } = config.get();
+    const { featureSet, dataSourceExclusions, cloudStackVersionsApiBaseUrl } = config.get();
     this.initialFeatureSet = featureSet;
     this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
+    this.cloudStackVersionsApiBaseUrl = cloudStackVersionsApiBaseUrl;
   }
 
   private getWorker() {
@@ -144,6 +146,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       config: {
         featureSet: this.initialFeatureSet,
         dataSourceExclusions: this.initialDataSourceExclusions,
+        cloudStackVersionsApiBaseUrl: this.cloudStackVersionsApiBaseUrl,
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },
       current: versionService.getCurrentVersion(),
