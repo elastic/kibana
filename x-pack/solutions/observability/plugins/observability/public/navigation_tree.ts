@@ -14,6 +14,7 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
+
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
   {
@@ -44,11 +45,13 @@ function createNavTree({
   streamsAvailable,
   showAiAssistant,
   isCloudEnabled,
+  showAlertingV2,
   ingestHubAvailable,
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
+  showAlertingV2?: boolean;
   ingestHubAvailable?: boolean;
 }) {
   const navTree: NavigationTreeDefinition = {
@@ -76,10 +79,27 @@ function createNavTree({
       {
         link: 'workflows',
       },
-      {
-        link: 'observability-overview:alerts',
-        icon: 'warning',
-      },
+      showAlertingV2
+        ? {
+            id: 'alerting',
+            renderAs: 'panelOpener',
+            title: i18n.translate('xpack.observability.obltNav.alerts', {
+              defaultMessage: 'Alerts',
+            }),
+            icon: 'warning',
+            children: [
+              {
+                link: 'observability-overview:alerts',
+              },
+              {
+                link: 'observability-overview:alerts_v2',
+              },
+            ],
+          }
+        : {
+            link: 'observability-overview:alerts',
+            icon: 'warning',
+          },
       {
         link: 'observability-overview:cases',
         children: [
@@ -686,6 +706,7 @@ export const createDefinition = (
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
+        showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
         ingestHubAvailable,
       })
     )
