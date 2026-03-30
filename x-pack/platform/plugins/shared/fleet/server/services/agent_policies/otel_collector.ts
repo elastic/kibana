@@ -24,8 +24,10 @@ import {
 import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 import { pkgToPkgKey } from '../epm/registry';
-import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
-import { hasDynamicSignalTypes } from '../../../common/services/otelcol_helpers';
+import {
+  hasDynamicSignalTypes,
+  packagePolicyInputAllowsUndefinedDataStreamType,
+} from '../../../common/services';
 
 // Generate OTel Collector policy
 export function generateOtelcolConfig(
@@ -103,12 +105,7 @@ export function generateOtelcolConfig(
                       'pipelines',
                       suffix,
                       addSuffixToOtelcolPipelinesComponents(
-                        adjustPipelineSignalType(
-                          stream,
-                          packageInfo,
-                          input.type,
-                          policyTemplateName
-                        ),
+                        adjustPipelineSignalType(stream, packageInfo),
                         suffix
                       )
                     ).pipelines ?? {},
@@ -320,15 +317,13 @@ function conditionallyAddApmToPipelines(
 
 function adjustPipelineSignalType(
   stream: FullAgentPolicyInputStream,
-  packageInfo: PackageInfo | undefined,
-  inputType: string,
-  inputPolicyTemplate?: string
+  packageInfo: PackageInfo | undefined
 ): Record<OTelCollectorPipelineID, any> {
   const pipelines = stream.service?.pipelines ?? {};
   const dataStreamType = stream.data_stream.type;
   if (
     !dataStreamType ||
-    hasDynamicSignalTypes(packageInfo, inputType, inputPolicyTemplate) ||
+    hasDynamicSignalTypes(packageInfo) ||
     Object.keys(pipelines).length !== 1
   ) {
     return pipelines;

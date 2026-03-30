@@ -127,3 +127,10 @@ export {
 
 // Cloud Connector accessor module
 export * from './cloud_connectors';
+
+export {
+  hasDynamicSignalTypes,
+  packageInfoHasOtelInputs,
+  packagePolicyHasOtelInputs,
+  OTEL_INPUTS_MINIMUM_VERSION,
+} from './otelcol_helpers';

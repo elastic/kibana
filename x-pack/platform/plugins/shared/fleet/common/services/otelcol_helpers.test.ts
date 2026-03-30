@@ -84,7 +84,7 @@ describe('hasDynamicSignalTypes', () => {
         },
       ],
     } as any as PackageInfo;
-    expect(hasDynamicSignalTypes(pkg, 'otelcol')).toBe(true);
+    expect(hasDynamicSignalTypes(pkg)).toBe(true);
   });
 
   it('should return false when OTel input has dynamic_signal_types: false', () => {
@@ -100,7 +100,7 @@ describe('hasDynamicSignalTypes', () => {
         },
       ],
     } as any as PackageInfo;
-    expect(hasDynamicSignalTypes(pkg, 'otelcol')).toBe(false);
+    expect(hasDynamicSignalTypes(pkg)).toBe(false);
   });
 
   it('should return false when OTel input has no dynamic_signal_types property', () => {
@@ -109,27 +109,119 @@ describe('hasDynamicSignalTypes', () => {
         { name: 't', title: 't', input: 'otelcol', type: 'logs', template_path: 'input.yml.hbs' },
       ],
     } as any as PackageInfo;
-    expect(hasDynamicSignalTypes(pkg, 'otelcol')).toBe(false);
+    expect(hasDynamicSignalTypes(pkg)).toBe(false);
   });
 
-  it('should return false when inputType does not match the template input type', () => {
+  it('should return false when policyTemplateName does not match any template', () => {
     const pkg = {
       policy_templates: [
         {
-          name: 't',
+          name: 'otel_template',
           title: 't',
-          input: 'logfile',
+          input: 'otelcol',
           type: 'logs',
           template_path: 'input.yml.hbs',
           dynamic_signal_types: true,
         },
       ],
     } as any as PackageInfo;
-    expect(hasDynamicSignalTypes(pkg, 'otelcol')).toBe(false);
+    expect(hasDynamicSignalTypes(pkg, { policyTemplateName: 'other_template' })).toBe(false);
+  });
+
+  it('should return true when scoped to the matching policyTemplateName', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 'otel_template',
+          title: 't',
+          input: 'otelcol',
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: true,
+        },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg, { policyTemplateName: 'otel_template' })).toBe(true);
   });
 
   it('should return false when packageInfo is undefined', () => {
-    expect(hasDynamicSignalTypes(undefined, 'otelcol')).toBe(false);
+    expect(hasDynamicSignalTypes(undefined)).toBe(false);
+  });
+
+  it('should return true for a composable template where any input has dynamic_signal_types', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 'my_template',
+          title: 't',
+          inputs: [
+            { type: 'otelcol', title: 't', dynamic_signal_types: true },
+            { type: 'logfile', title: 't' },
+          ],
+        },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg)).toBe(true);
+  });
+
+  it('should return true for a composable template scoped by inputType to the dynamic input', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 'my_template',
+          title: 't',
+          inputs: [
+            { type: 'otelcol', title: 't', dynamic_signal_types: true },
+            { type: 'logfile', title: 't' },
+          ],
+        },
+      ],
+    } as any as PackageInfo;
+    expect(
+      hasDynamicSignalTypes(pkg, { policyTemplateName: 'my_template', inputType: 'otelcol' })
+    ).toBe(true);
+  });
+
+  it('should return false for a composable template scoped by inputType to a non-dynamic input', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 'my_template',
+          title: 't',
+          inputs: [
+            { type: 'otelcol', title: 't', dynamic_signal_types: true },
+            { type: 'logfile', title: 't' },
+          ],
+        },
+      ],
+    } as any as PackageInfo;
+    expect(
+      hasDynamicSignalTypes(pkg, { policyTemplateName: 'my_template', inputType: 'logfile' })
+    ).toBe(false);
+  });
+
+  it('should scope to the correct template in a multi-template package', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 'otel_template',
+          title: 't',
+          input: 'otelcol',
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: true,
+        },
+        {
+          name: 'logfile_template',
+          title: 't',
+          input: 'logfile',
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+        },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg, { policyTemplateName: 'otel_template' })).toBe(true);
+    expect(hasDynamicSignalTypes(pkg, { policyTemplateName: 'logfile_template' })).toBe(false);
   });
 });
 

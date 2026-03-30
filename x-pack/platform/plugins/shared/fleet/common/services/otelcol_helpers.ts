@@ -7,12 +7,7 @@
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 import type { PackageInfo, PackagePolicyInput } from '../types';
 
-import {
-  getNormalizedInputs,
-  isInputOnlyPolicyTemplate,
-  getPolicyTemplateInputDefinition,
-  registryInputAllowsDynamicSignalTypes,
-} from './policy_template';
+import { getNormalizedInputs, registryInputAllowsDynamicSignalTypes } from './policy_template';
 
 export const OTEL_INPUTS_MINIMUM_VERSION = '9.2.0';
 
@@ -27,22 +22,17 @@ export const packageInfoHasOtelInputs = (packageInfo: PackageInfo | undefined) =
 
 export const hasDynamicSignalTypes = (
   packageInfo: PackageInfo | undefined,
-  inputType: string,
-  inputPolicyTemplate?: string
+  scope?: { policyTemplateName?: string; inputType?: string }
 ): boolean =>
   (packageInfo?.policy_templates ?? []).some((template) => {
-    if (isInputOnlyPolicyTemplate(template) && template.input !== inputType) {
+    if (scope?.policyTemplateName && template.name !== scope.policyTemplateName) {
       return false;
     }
-    if (
-      !isInputOnlyPolicyTemplate(template) &&
-      inputPolicyTemplate &&
-      template.name !== inputPolicyTemplate
-    ) {
-      return false;
-    }
-    const inputDef = getPolicyTemplateInputDefinition(template, inputType);
-    return inputDef ? registryInputAllowsDynamicSignalTypes(inputDef) : false;
+    const inputs = getNormalizedInputs(template);
+    const relevantInputs = scope?.inputType
+      ? inputs.filter((input) => input.type === scope.inputType)
+      : inputs;
+    return relevantInputs.some(registryInputAllowsDynamicSignalTypes);
   });
 
 export const packagePolicyHasOtelInputs = (packagePolicyInputs: PackagePolicyInput[] | undefined) =>

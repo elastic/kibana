@@ -136,8 +136,12 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     // Works for both input-only packages and composable integration packages
     // (integration templates with nested OTel inputs).
     const dynamicSignalTypes = useMemo(
-      () => hasDynamicSignalTypes(packageInfo, packageInputStream.input, inputPolicyTemplate),
-      [packageInfo, packageInputStream.input, inputPolicyTemplate]
+      () =>
+        hasDynamicSignalTypes(packageInfo, {
+          policyTemplateName: inputPolicyTemplate,
+          inputType: packageInputStream.input,
+        }),
+      [packageInfo, inputPolicyTemplate, packageInputStream.input]
     );
 
     const customDataStreamTypeVarValue =

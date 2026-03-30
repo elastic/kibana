@@ -253,12 +253,10 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
 
     const dynamicSignalTypes = useMemo(
       () =>
-        hasDynamicSignalTypes(
-          packageInfo,
-          packagePolicyInput.type,
-          packagePolicyInput.policy_template
-        ),
-      [packageInfo, packagePolicyInput.type, packagePolicyInput.policy_template]
+        hasDynamicSignalTypes(packageInfo, {
+          policyTemplateName: packagePolicyInput.policy_template,
+        }),
+      [packageInfo, packagePolicyInput.policy_template]
     );
 
     // When isSingleInputAndStreams, check if all stream vars are advanced so we can
