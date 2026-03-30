@@ -56,6 +56,7 @@ export const getCasesBaseKibanaFeature = ({
           createComment: [APP_ID],
           reopenCase: [APP_ID],
           assign: [APP_ID],
+          manageTemplates: [APP_ID],
         },
         savedObject: {
           all: [...savedObjects.files],
@@ -66,13 +67,20 @@ export const getCasesBaseKibanaFeature = ({
           ...uiCapabilities.default.createComment,
           ...uiCapabilities.default.reopenCase,
           ...uiCapabilities.default.assignCase,
+          ...uiCapabilities.default.manageTemplates,
         ],
         replacedBy: {
           default: [{ feature: CASES_FEATURE_ID_V3, privileges: ['all'] }],
           minimal: [
             {
               feature: CASES_FEATURE_ID_V3,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
+              privileges: [
+                'minimal_all',
+                'create_comment',
+                'case_reopen',
+                'cases_assign',
+                'cases_manage_templates',
+              ],
             },
           ],
         },
