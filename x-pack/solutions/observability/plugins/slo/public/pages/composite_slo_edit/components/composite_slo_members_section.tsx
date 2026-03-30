@@ -51,12 +51,15 @@ export function CompositeSloMembersSection() {
       if (!selected.length) return;
       const { label, value } = selected[0];
       const sloId = String(value);
-      const hasUnresolvedInstance = members.some(
-        (m) => m.sloId === sloId && m.instanceId === ALL_VALUE
-      );
-      if (!hasUnresolvedInstance && members.length < MAX_COMPOSITE_MEMBERS) {
-        const sloDefinition = sloDefinitions?.results.find((slo) => slo.id === sloId);
-        const groupBy = sloDefinition?.groupBy ?? ALL_VALUE;
+      const sloDefinition = sloDefinitions?.results.find((slo) => slo.id === sloId);
+      const groupBy = sloDefinition?.groupBy ?? ALL_VALUE;
+      const isGrouped = [groupBy].flat().some((g) => g !== ALL_VALUE);
+      // For non-grouped SLOs there is no instance selector, so a second ALL_VALUE entry
+      // would be an unresolvable duplicate. For grouped SLOs the selector lets the user
+      // pick a specific instance after adding, so re-adding is allowed.
+      const wouldDuplicate =
+        !isGrouped && members.some((m) => m.sloId === sloId && m.instanceId === ALL_VALUE);
+      if (!wouldDuplicate && members.length < MAX_COMPOSITE_MEMBERS) {
         append({ sloId, sloName: label, groupBy, instanceId: ALL_VALUE, weight: 1 });
       }
       setSloSearch('');
@@ -100,10 +103,16 @@ export function CompositeSloMembersSection() {
             fullWidth
             isDisabled={atMax}
             isLoading={isLoadingSlos}
-            options={sloOptions.filter(
-              (opt) =>
-                !members.some((m) => m.sloId === String(opt.value) && m.instanceId === ALL_VALUE)
-            )}
+            options={sloOptions.filter((opt) => {
+              const sloId = String(opt.value);
+              const sloDefinition = sloDefinitions?.results.find((slo) => slo.id === sloId);
+              const groupBy = sloDefinition?.groupBy ?? ALL_VALUE;
+              const isGrouped = [groupBy].flat().some((g) => g !== ALL_VALUE);
+              return (
+                isGrouped ||
+                !members.some((m) => m.sloId === sloId && m.instanceId === ALL_VALUE)
+              );
+            })}
             selectedOptions={[]}
             onSearchChange={setSloSearch}
             onChange={handleAddMember}
