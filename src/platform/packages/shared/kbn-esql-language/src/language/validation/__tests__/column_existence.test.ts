@@ -26,7 +26,7 @@ describe('column existence checks', () => {
   it('makes STATS generated columns available after inline WHERE filters', async () => {
     const { expectErrors } = await setup();
     await expectErrors(
-      'FROM index | STATS COUNT() WHERE integerField > 0 | EVAL result = `COUNT()` + 1',
+      'FROM index | STATS COUNT() WHERE integerField > 0 | EVAL result = `COUNT() WHERE integerField > 0` + 1',
       []
     );
   });

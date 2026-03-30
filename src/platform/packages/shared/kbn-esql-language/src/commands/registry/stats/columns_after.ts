@@ -40,7 +40,6 @@ const getUserDefinedColumns = (
     }
 
     if (isFunctionExpression(expression) && expression.name === 'where') {
-      // STATS agg(...) WHERE ... keeps the same output column as agg(...)
       const outputExpression = expression.args[0];
 
       if (!outputExpression || Array.isArray(outputExpression)) {
@@ -60,23 +59,11 @@ const getUserDefinedColumns = (
         continue;
       }
 
-      if (isColumn(outputExpression)) {
-        const name = outputExpression.parts.join('.');
-        const newColumn: ESQLUserDefinedColumn = {
-          name,
-          type: typeOf(outputExpression),
-          location: outputExpression.location,
-          userDefined: true,
-        };
-        columns.push(newColumn);
-        continue;
-      }
-
       if (!isOptionNode(outputExpression)) {
         const newColumn: ESQLUserDefinedColumn = {
-          name: query.substring(outputExpression.location.min, outputExpression.location.max + 1),
+          name: query.substring(expression.location.min, expression.location.max + 1),
           type: typeOf(outputExpression),
-          location: outputExpression.location,
+          location: expression.location,
           userDefined: true,
         };
         columns.push(newColumn);

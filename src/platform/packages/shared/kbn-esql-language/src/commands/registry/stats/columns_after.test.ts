@@ -85,7 +85,12 @@ describe('STATS', () => {
     );
 
     expect(result).toEqual([
-      { name: 'COUNT()', type: 'long', userDefined: true, location: { min: 19, max: 25 } },
+      {
+        name: 'COUNT() WHERE field2 > 0',
+        type: 'long',
+        userDefined: true,
+        location: { min: 19, max: 42 },
+      },
     ]);
   });
 

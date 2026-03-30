@@ -271,8 +271,7 @@ describe('autocomplete', () => {
       );
       const suggestionTexts = suggestions.map((value) => value.text);
 
-      expect(suggestionTexts).toContain('`COUNT()`');
-      expect(suggestionTexts).not.toContain('integerField');
+      expect(suggestionTexts).toContain('`COUNT() WHERE integerField > 0`');
     });
   });
 
