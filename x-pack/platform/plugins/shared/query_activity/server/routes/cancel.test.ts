@@ -83,6 +83,6 @@ describe(`POST ${API_BASE_PATH}/cancel`, () => {
     const response = await handler(context, request, kibanaResponseFactory);
 
     expect(response.status).toBe(403);
-    expect(response.payload).toEqual({ message: 'Insufficient privileges to stop query' });
+    expect(response.payload).toEqual({ message: 'Insufficient privileges to cancel query' });
   });
 });

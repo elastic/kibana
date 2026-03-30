@@ -256,14 +256,14 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
               >
                 {query.cancelled
                   ? i18n.translate('xpack.queryActivity.flyout.queryStoppedText', {
-                      defaultMessage: 'Query was stopped',
+                      defaultMessage: 'Query cancelled',
                     })
                   : isStopRequested
                   ? i18n.translate('xpack.queryActivity.flyout.stoppingQueryText', {
-                      defaultMessage: 'Stopping the query…',
+                      defaultMessage: 'Cancelling the query…',
                     })
                   : i18n.translate('xpack.queryActivity.flyout.stopQueryButton', {
-                      defaultMessage: 'Stop query',
+                      defaultMessage: 'Cancel query',
                     })}
               </EuiButton>
             )}

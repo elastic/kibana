@@ -98,7 +98,7 @@ const QueryActivityAppWithData: React.FC = () => {
         if (cancelError) {
           notifications.toasts.addDanger(
             i18n.translate('xpack.queryActivity.stopQueryErrorToast', {
-              defaultMessage: 'Failed to stop query {taskId}',
+              defaultMessage: 'Failed to cancel query {taskId}',
               values: { taskId },
             })
           );
@@ -107,7 +107,7 @@ const QueryActivityAppWithData: React.FC = () => {
 
         notifications.toasts.addSuccess(
           i18n.translate('xpack.queryActivity.stopQueryToast', {
-            defaultMessage: 'Stop requested for query {taskId}',
+            defaultMessage: 'Cancel requested for query {taskId}',
             values: { taskId },
           })
         );
@@ -119,7 +119,7 @@ const QueryActivityAppWithData: React.FC = () => {
       } catch {
         notifications.toasts.addDanger(
           i18n.translate('xpack.queryActivity.stopQueryErrorToast', {
-            defaultMessage: 'Failed to stop query {taskId}',
+            defaultMessage: 'Failed to cancel query {taskId}',
             values: { taskId },
           })
         );
@@ -138,7 +138,7 @@ const QueryActivityAppWithData: React.FC = () => {
         description={
           <FormattedMessage
             id="xpack.queryActivity.subtitle"
-            defaultMessage="Real-time insights and control over query performance within your cluster. {learnMore}"
+            defaultMessage="Real-time visibility and control over queries currently running in your cluster. {learnMore}"
             values={{
               learnMore: (
                 <EuiLink

@@ -270,7 +270,7 @@ describe('QueryActivityApp - cancellation polling', () => {
     mockUseQueryActivityAppContext.mockReturnValue(context);
     renderWithKibanaRenderContext(<QueryActivityApp />);
 
-    await user.click(await screen.findByLabelText('Stop query'));
+    await user.click(await screen.findByLabelText('Cancel query'));
     await user.click(await screen.findByRole('button', { name: 'Confirm' }));
 
     await waitFor(() => {

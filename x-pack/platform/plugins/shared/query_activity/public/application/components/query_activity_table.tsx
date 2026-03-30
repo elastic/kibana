@@ -211,7 +211,7 @@ export const QueryActivityTable: React.FC<QueryActivityTableProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiText size="s" color="subdued">
                     {i18n.translate('xpack.queryActivity.table.stoppingQueryText', {
-                      defaultMessage: 'Stopping the query…',
+                      defaultMessage: 'Cancelling the query…',
                     })}
                   </EuiText>
                 </EuiFlexItem>
@@ -230,7 +230,7 @@ export const QueryActivityTable: React.FC<QueryActivityTableProps> = ({
           return (
             <EuiButtonIcon
               aria-label={i18n.translate('xpack.queryActivity.table.stopQueryAriaLabel', {
-                defaultMessage: 'Stop query',
+                defaultMessage: 'Cancel query',
               })}
               iconType="crossCircle"
               color="danger"

@@ -35,13 +35,13 @@ export const StopQueryConfirmationModal: React.FC<StopQueryConfirmationModalProp
       <EuiModal
         onClose={onCancel}
         aria-label={i18n.translate('xpack.queryActivity.stopQueryConfirmationModal.ariaLabel', {
-          defaultMessage: 'Stop query confirmation',
+          defaultMessage: 'Cancel query confirmation',
         })}
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             {i18n.translate('xpack.queryActivity.stopQueryConfirmationModal.title', {
-              defaultMessage: 'Are you sure you want to stop this query?',
+              defaultMessage: 'Are you sure you want to cancel this query?',
             })}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -51,7 +51,13 @@ export const StopQueryConfirmationModal: React.FC<StopQueryConfirmationModalProp
             <p>
               {i18n.translate('xpack.queryActivity.stopQueryConfirmationModal.body', {
                 defaultMessage:
-                  'Stopping this query is an irreversible action. Are you sure you want to proceed?',
+                  'Canceling this query is an irreversible action, which may take a few moments to execute after the cancelation request is sent.',
+              })}
+            </p>
+            <p>
+              {i18n.translate('xpack.queryActivity.stopQueryConfirmationModal.bodyFooter', {
+                defaultMessage:
+                  'Are you sure you want to proceed?',
               })}
             </p>
           </EuiText>

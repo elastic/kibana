@@ -105,19 +105,19 @@ describe('QueryActivityTable', () => {
     const query = createQuery({ cancellable: true, cancelled: false });
 
     await renderTable({ queries: [query], canCancelTasks: true });
-    expect(await screen.findByLabelText('Stop query')).toBeInTheDocument();
+    expect(await screen.findByLabelText('Cancel query')).toBeInTheDocument();
 
     cleanup();
     await renderTable({ queries: [query], canCancelTasks: false });
-    expect(screen.queryByLabelText('Stop query')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Cancel query')).not.toBeInTheDocument();
 
     cleanup();
     await renderTable({ queries: [createQuery({ cancellable: false })], canCancelTasks: true });
-    expect(screen.queryByLabelText('Stop query')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Cancel query')).not.toBeInTheDocument();
 
     cleanup();
     await renderTable({ queries: [createQuery({ cancelled: true })], canCancelTasks: true });
-    expect(screen.queryByLabelText('Stop query')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Cancel query')).not.toBeInTheDocument();
   });
 
   it('opens the query detail flyout when clicking the task id', async () => {
@@ -129,14 +129,14 @@ describe('QueryActivityTable', () => {
     expect(await screen.findByText('Indices')).toBeInTheDocument();
   });
 
-  it('stops a query after confirmation and shows the "Stopping the query…" state', async () => {
+  it('cancels a query after confirmation and shows the "Cancelling the query…" state', async () => {
     const query = createQuery({ taskId: 'node1:stop' });
     const onCancelQuery = jest.fn().mockResolvedValue(true);
     const { user } = await renderTable({ queries: [query], onCancelQuery });
 
-    await user.click(await screen.findByLabelText('Stop query'));
+    await user.click(await screen.findByLabelText('Cancel query'));
     expect(
-      await screen.findByText('Are you sure you want to stop this query?')
+      await screen.findByText('Are you sure you want to cancel this query?')
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Confirm' }));
@@ -145,10 +145,10 @@ describe('QueryActivityTable', () => {
       expect(onCancelQuery).toHaveBeenCalledWith(query.taskId);
     });
 
-    expect(await screen.findByText(/Stopping the query/)).toBeInTheDocument();
+    expect(await screen.findByText(/Cancel(l)?ing the query/)).toBeInTheDocument();
   });
 
-  it('renders the "Stopping the query…" state when localStorage is pre-seeded', async () => {
+  it('renders the "Cancelling the query…" state when localStorage is pre-seeded', async () => {
     const query = createQuery({ taskId: 'node1:seeded' });
     window.localStorage.setItem(
       STOP_REQUESTED_STORAGE_KEY,
@@ -157,7 +157,7 @@ describe('QueryActivityTable', () => {
 
     await renderTable({ queries: [query], canCancelTasks: true });
 
-    expect(await screen.findByText(/Stopping the query/)).toBeInTheDocument();
-    expect(screen.queryByLabelText('Stop query')).not.toBeInTheDocument();
+    expect(await screen.findByText(/Cancel(l)?ing the query/)).toBeInTheDocument();
+    expect(screen.queryByLabelText('Cancel query')).not.toBeInTheDocument();
   });
 });
