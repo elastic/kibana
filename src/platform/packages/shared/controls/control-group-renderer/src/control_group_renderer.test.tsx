@@ -44,13 +44,13 @@ const getTestEmbeddableFactory = () =>
         serializeState: () => ({
           selection: initialState.selection,
         }),
+        applySerializedState: jest.fn(),
       });
       return {
         Component: () => <div data-test-subj="testControl">{initialState.selection}</div>,
         api: {
           ...api,
           hasUnsavedChanges$: new BehaviorSubject(false),
-          applySerializedState: jest.fn(),
         },
       };
     },

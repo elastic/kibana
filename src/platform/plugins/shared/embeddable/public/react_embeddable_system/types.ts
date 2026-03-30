@@ -38,7 +38,7 @@ export type EmbeddableApiRegistration<
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 > = Omit<
   Api,
-  'uuid' | 'parent' | 'type' | 'phase$' | 'applySerializedState' | keyof CanLockHoverActions
+  'uuid' | 'parent' | 'type' | 'phase$' | keyof CanLockHoverActions
 >;
 
 export interface BuildEmbeddableProps<

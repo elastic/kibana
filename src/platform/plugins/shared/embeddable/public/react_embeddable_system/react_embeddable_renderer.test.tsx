@@ -26,6 +26,7 @@ const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> =
         name: initialState.name,
         bork: initialState.bork,
       }),
+      applySerializedState: jest.fn(),
     });
     return {
       Component: () => (
@@ -332,6 +333,7 @@ describe('reactEmbeddable phase events', () => {
             name: initialState.name,
             bork: initialState.bork,
           }),
+          applySerializedState: jest.fn(),
           dataLoading$,
         });
         return {

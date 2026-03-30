@@ -180,7 +180,6 @@ export const ControlGroupRenderer = ({
             ...control,
           };
         });
-        lastSavedState$Ref.current.next(newState);
         asyncForEach(Object.entries(parentApi.children$.getValue()), async ([id, child]) => {
           if (apiHasSerializableState(child)) child.applySerializedState(newState[id]);
         });

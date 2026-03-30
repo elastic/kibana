@@ -82,7 +82,6 @@ export const EmbeddableRenderer = <
             return {
               // Spread default panel capabilities first, allow apiRegistration to override them
               ...panelCapabilitiesDefaults,
-              applySerializedState: () => undefined,
               ...apiRegistration,
               uuid,
               phase$: phaseTracker.current.getPhase$(),
