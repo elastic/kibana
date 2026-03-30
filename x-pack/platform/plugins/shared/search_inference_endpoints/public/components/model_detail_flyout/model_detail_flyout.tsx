@@ -27,6 +27,10 @@ import { i18n } from '@kbn/i18n';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { docLinks } from '../../../common/doc_links';
+import {
+  isInferenceEndpointWithDisplayNameMetadata,
+  isInferenceEndpointWithDisplayCreatorMetadata,
+} from '../../../common/type_guards';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
 import { TASK_TYPE_TOOLTIPS } from '../all_inference_endpoints/render_table_columns/render_endpoint/translations';
 import { getModelId } from '../../utils/get_model_id';
@@ -40,23 +44,6 @@ export interface ModelDetailFlyoutProps {
   onSaveEndpoint: () => void;
   onDeleteEndpoint: (endpoint: InferenceAPIConfigResponse) => void;
   onCopyEndpointId: (id: string) => void;
-}
-
-function getServiceDisplayName(service: string): string {
-  const serviceNames: Record<string, string> = {
-    elastic: 'Elastic',
-    anthropic: 'Anthropic',
-    openai: 'OpenAI',
-    google_vertex_ai: 'Google',
-    azureaistudio: 'Azure AI Studio',
-    azureopenai: 'Azure OpenAI',
-    cohere: 'Cohere',
-    hugging_face: 'Hugging Face',
-    mistral: 'Mistral',
-    amazon_bedrock: 'Amazon Bedrock',
-    watsonx_ai: 'IBM watsonx',
-  };
-  return serviceNames[service] ?? service;
 }
 
 export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
@@ -77,7 +64,18 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   );
 
   const firstEndpoint = endpoints[0];
-  const serviceDisplayName = firstEndpoint ? getServiceDisplayName(firstEndpoint.service) : '';
+
+  const displayName =
+    firstEndpoint && isInferenceEndpointWithDisplayNameMetadata(firstEndpoint)
+      ? firstEndpoint.metadata.display.name
+      : modelId;
+
+  const modelAuthor =
+    firstEndpoint && isInferenceEndpointWithDisplayCreatorMetadata(firstEndpoint)
+      ? firstEndpoint.metadata.display.model_creator
+      : i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.unknownAuthor', {
+          defaultMessage: 'Unknown',
+        });
 
   const { taskTypeOptions, uniqueTaskTypes } = useMemo(() => {
     const taskTypes = [...new Set(endpoints.map((e) => e.task_type))];
@@ -111,7 +109,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelAuthorLabel', {
         defaultMessage: 'Model author',
       }),
-      description: serviceDisplayName,
+      description: modelAuthor,
     },
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
@@ -137,7 +135,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>{modelId}</h2>
+          <h2 id={flyoutTitleId}>{displayName}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
         {uniqueTaskTypes.map((taskType) => (

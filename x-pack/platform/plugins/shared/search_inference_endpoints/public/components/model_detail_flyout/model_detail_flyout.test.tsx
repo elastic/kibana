@@ -46,9 +46,24 @@ describe('ModelDetailFlyout', () => {
       />
     );
 
-  it('renders flyout with model name in header', () => {
+  it('renders flyout with model_id as header when no display metadata', () => {
     renderFlyout();
     expect(screen.getByText(MODEL_ID)).toBeInTheDocument();
+  });
+
+  it('renders display name from metadata when available', () => {
+    const endpoint = createEndpoint({
+      metadata: { display: { name: 'Anthropic Claude Opus 4.5', model_creator: 'Anthropic' } },
+    });
+    renderFlyout(MODEL_ID, [endpoint]);
+
+    expect(screen.getByText('Anthropic Claude Opus 4.5')).toBeInTheDocument();
+    expect(screen.getByText('Anthropic')).toBeInTheDocument();
+  });
+
+  it('falls back to Unknown for model author when no creator metadata', () => {
+    renderFlyout();
+    expect(screen.getByText('Unknown')).toBeInTheDocument();
   });
 
   it('renders task type badges in header', () => {
