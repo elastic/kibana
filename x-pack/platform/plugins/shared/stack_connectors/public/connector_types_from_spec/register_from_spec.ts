@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
+import { lazy, useMemo } from 'react';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
+import type { ActionConnectorFieldsProps, ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { type ConnectorSpec } from '@kbn/connector-specs';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -58,6 +58,26 @@ export function registerConnectorTypesFromSpecs({
   });
 }
 
+const createConnectorFields = (
+  spec: ConnectorSpec,
+  generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
+  generateSchema: typeof import('./generate_schema').generateSchema
+) => {
+  const ConnectorFields = (props: ActionConnectorFieldsProps) => {
+    const schema = useMemo(
+      () => generateSchema(spec, { authMode: props.authMode }),
+      [props.authMode]
+    );
+
+    return generateFormFields({
+      schema,
+      formConfig: { disabled: props.readOnly, isEdit: props.isEdit },
+    });
+  };
+
+  return ConnectorFields;
+};
+
 const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   ref: { uiSettings?: IUiSettingsClient },
@@ -86,12 +106,7 @@ const createConnectorTypeFromSpec = (
     },
     actionConnectorFields: lazy(() =>
       Promise.resolve({
-        default: (props) => {
-          return generateFormFields({
-            schema,
-            formConfig: { disabled: props.readOnly, isEdit: props.isEdit },
-          });
-        },
+        default: createConnectorFields(spec, generateFormFields, generateSchema),
       })
     ),
     actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),

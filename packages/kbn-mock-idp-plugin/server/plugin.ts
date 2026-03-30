@@ -92,8 +92,14 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         {
           path: MOCK_IDP_LOGIN_PATH,
           validate: false,
-          options: { authRequired: false },
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route simulates a mock identity provider and does not require authentication.',
+            },
+            authz: { enabled: false, reason: '' },
+          },
         },
         async (context, request, response) => {
           return response.renderAnonymousCoreApp();
@@ -107,8 +113,14 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         {
           path: '/mock_idp/supported_roles',
           validate: false,
-          options: { authRequired: false },
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route simulates a mock identity provider and does not require authentication.',
+            },
+            authz: { enabled: false, reason: '' },
+          },
         },
         (context, request, response) => {
           try {
@@ -138,8 +150,14 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           validate: {
             body: createSAMLResponseSchema,
           },
-          options: { authRequired: false },
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route simulates a mock identity provider and does not require authentication.',
+            },
+            authz: { enabled: false, reason: '' },
+          },
         },
         async (context, request, response) => {
           const { protocol, hostname, port } = core.http.getServerInfo();
@@ -185,8 +203,14 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         {
           path: MOCK_IDP_LOGOUT_PATH,
           validate: false,
-          options: { authRequired: false },
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route simulates a mock identity provider and does not require authentication.',
+            },
+            authz: { enabled: false, reason: '' },
+          },
         },
         async (context, request, response) => {
           return response.redirected({ headers: { location: '/' } });
