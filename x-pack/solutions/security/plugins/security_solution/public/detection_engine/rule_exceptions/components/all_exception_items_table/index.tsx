@@ -513,7 +513,10 @@ const ExceptionsViewerComponent = ({
       return null;
     }
 
-    if (isEndpointSecurityRule && endpointPerPolicyOptIn?.reason !== 'newDeployment') {
+    if (
+      isEndpointSecurityRule &&
+      (endpointPerPolicyOptIn?.status === false || endpointPerPolicyOptIn?.reason === 'userOptedIn')
+    ) {
       return (
         <EndpointExceptionsMovedCallout
           id="exceptionsViewer-EndpointSecurityRule"
