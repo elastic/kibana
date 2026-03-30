@@ -29,21 +29,23 @@ export const isIncludeAll = (value: ContentPackIncludedObjects): value is Conten
   return includeAllSchema.safeParse(value).success;
 };
 
-export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z.lazy(() =>
-  z.union([
-    includeAllSchema,
-    z.object({
-      objects: z.object({
-        mappings: z.boolean(),
-        queries: z.array(z.object({ id: z.string() })),
-        routing: z.array(
-          contentPackIncludedObjectsSchema.and(
-            z.object({
-              destination: z.string(),
-            })
-          )
-        ),
+export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z
+  .lazy(() =>
+    z.union([
+      includeAllSchema,
+      z.object({
+        objects: z.object({
+          mappings: z.boolean(),
+          queries: z.array(z.object({ id: z.string() })),
+          routing: z.array(
+            contentPackIncludedObjectsSchema.and(
+              z.object({
+                destination: z.string(),
+              })
+            )
+          ),
+        }),
       }),
-    }),
-  ])
-);
+    ])
+  )
+  .meta({ id: 'ContentPackIncludedObjects' });

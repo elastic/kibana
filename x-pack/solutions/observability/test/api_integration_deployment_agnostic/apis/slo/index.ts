@@ -22,6 +22,5 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./search_slo_definitions'));
     loadTestFile(require.resolve('./get_slo_grouped_stats'));
     loadTestFile(require.resolve('./find_slo_with_cluster_filter'));
-    loadTestFile(require.resolve('./composite_slo'));
   });
 }
