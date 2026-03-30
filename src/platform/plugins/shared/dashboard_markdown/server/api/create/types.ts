@@ -10,10 +10,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   createRequestBodySchema,
-  createRequestParamsSchema,
   createResponseBodySchema,
 } from './schemas';
 
-export type MarkdownCreateRequestParams = TypeOf<typeof createRequestParamsSchema>;
 export type MarkdownCreateRequestBody = TypeOf<typeof createRequestBodySchema>;
 export type MarkdownCreateResponseBody = TypeOf<typeof createResponseBodySchema>;

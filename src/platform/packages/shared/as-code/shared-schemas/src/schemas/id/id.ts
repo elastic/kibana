@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isValidId } from './is_valid_id';
 
