@@ -18,16 +18,6 @@ jest.mock('../../../common/utils', () => ({
   createTimeBucketAggregation: jest.fn(() => 'time_bucket_agg'),
 }));
 
-jest.mock('../../../common/utils/metric_unit/normalize_unit', () => ({
-  normalizeUnit: jest.fn((params: { fieldName: string; unit: string | undefined }) => {
-    const { unit } = params;
-    // Normalize some common mappings
-    if (unit === 'byte') return 'bytes';
-    if (unit === '%') return 'percent';
-    if (unit === '1') return 'count';
-    return unit;
-  }),
-}));
 
 describe('useChartLayers', () => {
   const mockMetric: ParsedMetricItem = {
