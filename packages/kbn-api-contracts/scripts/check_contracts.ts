@@ -10,8 +10,8 @@
 import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { resolve } from 'path';
-import type { TerraformImpactResult } from '../src/terraform/check_terraform_impact';
 import { run } from '@kbn/dev-cli-runner';
+import type { TerraformImpactResult } from '../src/terraform/check_terraform_impact';
 import { runOasdiff, parseOasdiff, applyAllowlist } from '../src/diff';
 import { formatFailure } from '../src/report/format_failure';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
@@ -33,10 +33,7 @@ interface CheckContractsOptions {
   reportPath?: string;
 }
 
-const writeImpactReport = (
-  reportPath: string,
-  terraformImpact: TerraformImpactResult
-): void => {
+const writeImpactReport = (reportPath: string, terraformImpact: TerraformImpactResult): void => {
   const report = {
     impactedChanges: terraformImpact.impactedChanges.map((impact) => ({
       path: impact.change.path,

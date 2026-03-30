@@ -24,10 +24,8 @@ interface ImpactReport {
 
 const COMMENT_CONTEXT = 'api-contracts-tf-breaking';
 
-const ALLOWLIST_PATH =
-  'packages/kbn-api-contracts/allowlist.json';
-const README_PATH =
-  'packages/kbn-api-contracts/README.md';
+const ALLOWLIST_PATH = 'packages/kbn-api-contracts/allowlist.json';
+const README_PATH = 'packages/kbn-api-contracts/README.md';
 
 const buildCommentBody = (entries: ImpactEntry[]): string => {
   const allOwners = [...new Set(entries.flatMap((e) => e.owners))];
@@ -38,7 +36,9 @@ const buildCommentBody = (entries: ImpactEntry[]): string => {
   const rows = entries
     .map((e) => {
       const method = e.method ? ` \`${e.method.toUpperCase()}\`` : '';
-      return `| \`${e.path}\`${method} | ${escapeCell(e.terraformResource)} | ${escapeCell(e.reason)} | ${(e.owners || []).join(', ')} |`;
+      return `| \`${e.path}\`${method} | ${escapeCell(e.terraformResource)} | ${escapeCell(
+        e.reason
+      )} | ${(e.owners || []).join(', ')} |`;
     })
     .join('\n');
 
