@@ -108,7 +108,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
             <EuiBadge
               color="hollow"
               data-test-subj="apmBarDetailsServiceNameBadge"
-              href={getServiceBadgeHref?.(item.serviceName!) as any}
+              href={getServiceBadgeHref ? getServiceBadgeHref(item.serviceName) : undefined}
               {...(getServiceBadgeHref
                 ? ({
                     onClick(e: React.SyntheticEvent) {
