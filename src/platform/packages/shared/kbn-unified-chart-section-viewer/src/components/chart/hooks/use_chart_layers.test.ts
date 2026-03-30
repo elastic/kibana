@@ -94,7 +94,7 @@ describe('useChartLayers', () => {
   it('should normalize denormalized units like "byte" to "bytes"', () => {
     const metricWithDenormalizedUnit: ParsedMetricItem = {
       ...mockMetric,
-      units: ['byte'] as NullableMetricUnit[],
+      units: ['byte'] as unknown as NullableMetricUnit[],
     };
     const { result } = renderHook(() =>
       useChartLayers({
@@ -110,7 +110,7 @@ describe('useChartLayers', () => {
   it('should select the first non-null normalized unit when multiple units exist', () => {
     const metricWithMultipleUnits: ParsedMetricItem = {
       ...mockMetric,
-      units: [null, 'byte', 'bytes'] as NullableMetricUnit[],
+      units: [null, 'byte', 'bytes'] as unknown as NullableMetricUnit[],
     };
     const { result } = renderHook(() =>
       useChartLayers({
