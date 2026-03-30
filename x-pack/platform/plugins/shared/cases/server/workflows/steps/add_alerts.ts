@@ -9,11 +9,17 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   addAlertsStepCommonDefinition,
+  AlertArraySchema,
   type AddAlertsStepInput,
 } from '../../../common/workflows/steps/add_alerts';
 import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
-import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
+import {
+  createCasesStepHandler,
+  ensureArrayShape,
+  safeParseCaseForWorkflowOutput,
+  withCaseOwner,
+} from './utils';
 
 export const addAlertsStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -21,10 +27,11 @@ export const addAlertsStepDefinition = (
   createServerStepDefinition({
     ...addAlertsStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: AddAlertsStepInput) => {
+      const inputAlerts = ensureArrayShape(input.alerts, AlertArraySchema);
       return withCaseOwner(client, input.case_id, async (owner) => {
         const updatedCase = await client.attachments.bulkCreate({
           caseId: input.case_id,
-          attachments: input.alerts.map((alert) => ({
+          attachments: inputAlerts.map((alert) => ({
             type: AttachmentType.alert,
             alertId: alert.alertId,
             index: alert.index,

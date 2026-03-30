@@ -127,3 +127,9 @@ export function createCasesStepHandler<
     }
   };
 }
+
+export function ensureArrayShape<Out>(potentialArrayString: string | Out, schema: z.ZodType<Out>) {
+  return Array.isArray(potentialArrayString)
+    ? potentialArrayString
+    : schema.parse(potentialArrayString);
+}

@@ -19,14 +19,19 @@ import { MAX_BULK_CREATE_ATTACHMENTS } from '../../constants';
 
 export const AddAlertsStepTypeId = 'cases.addAlerts';
 
-const AlertInputSchema = z.object({
-  alertId: z.string().min(1, 'alertId is required'),
-  index: z.string().min(1, 'index is required'),
-  rule: Rule.optional(),
-});
+export const AlertArraySchema = z
+  .array(
+    z.object({
+      alertId: z.string().min(1, 'alertId is required'),
+      index: z.string().min(1, 'index is required'),
+      rule: Rule.optional(),
+    })
+  )
+  .min(1)
+  .max(MAX_BULK_CREATE_ATTACHMENTS);
 
 const InputSchema = CasesStepCaseIdSchema.extend({
-  alerts: z.array(AlertInputSchema).min(1).max(MAX_BULK_CREATE_ATTACHMENTS),
+  alerts: z.union([AlertArraySchema, z.string()]),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;

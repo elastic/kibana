@@ -18,13 +18,18 @@ import { MAX_BULK_CREATE_ATTACHMENTS } from '../../constants';
 
 export const AddEventsStepTypeId = 'cases.addEvents';
 
-const EventInputSchema = z.object({
-  eventId: z.string().min(1, 'eventId is required'),
-  index: z.string().min(1, 'index is required'),
-});
+export const EventArraySchema = z
+  .array(
+    z.object({
+      eventId: z.string().min(1, 'eventId is required'),
+      index: z.string().min(1, 'index is required'),
+    })
+  )
+  .min(1)
+  .max(MAX_BULK_CREATE_ATTACHMENTS);
 
 const InputSchema = CasesStepCaseIdSchema.extend({
-  events: z.array(EventInputSchema).min(1).max(MAX_BULK_CREATE_ATTACHMENTS),
+  events: z.union([EventArraySchema, z.string()]),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;

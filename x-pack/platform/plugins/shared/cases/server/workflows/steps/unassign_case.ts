@@ -13,21 +13,24 @@ import {
 } from '../../../common/workflows/steps/unassign_case';
 import type { CasesClient } from '../../client';
 import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
-import { createCasesStepHandler } from './utils';
+import { createCasesStepHandler, ensureArrayShape } from './utils';
 import { updateSingleCase } from './update_case_helpers';
+import { Assignees } from '../../../common/bundled-types.gen';
 
 const shouldUnassignAll = (assignees: UnassignCaseStepInput['assignees']) =>
   assignees == null || assignees.length === 0;
 
 const resolveUnassignUpdate = async (client: CasesClient, input: UnassignCaseStepInput) => {
-  if (shouldUnassignAll(input.assignees)) {
+  const inputAssignees = ensureArrayShape(input.assignees, Assignees);
+
+  if (shouldUnassignAll(inputAssignees)) {
     return {
       assignees: [],
       version: input.version,
     };
   }
 
-  const assigneesToRemove = input.assignees ?? [];
+  const assigneesToRemove = inputAssignees ?? [];
   const caseToUpdate = await client.cases.get({
     id: input.case_id,
     includeComments: false,

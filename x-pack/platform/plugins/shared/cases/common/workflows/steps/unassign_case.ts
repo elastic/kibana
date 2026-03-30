@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { Assignees } from '../../bundled-types.gen';
@@ -19,7 +19,7 @@ import {
 export const UnassignCaseStepTypeId = 'cases.unassignCase';
 
 const InputSchema = CasesStepCaseIdVersionSchema.extend({
-  assignees: Assignees,
+  assignees: z.union([Assignees, z.string()]),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;

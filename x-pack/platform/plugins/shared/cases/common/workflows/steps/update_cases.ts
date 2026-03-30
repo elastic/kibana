@@ -23,14 +23,19 @@ const UpdateFieldsSchema = UpdateCaseRequestSchema.shape.cases.element.omit({
   version: true,
 });
 
-const CaseUpdateSchema = CasesStepCaseIdVersionSchema.extend({
-  updates: UpdateFieldsSchema.refine((updates) => Object.keys(updates).length > 0, {
-    message: 'updates must include at least one field',
-  }),
-});
+export const CasesUpdateArraySchema = z
+  .array(
+    CasesStepCaseIdVersionSchema.extend({
+      updates: UpdateFieldsSchema.refine((updates) => Object.keys(updates).length > 0, {
+        message: 'updates must include at least one field',
+      }),
+    })
+  )
+  .min(1)
+  .max(MAX_CASES_TO_UPDATE);
 
 export const InputSchema = z.object({
-  cases: z.array(CaseUpdateSchema).min(1).max(MAX_CASES_TO_UPDATE),
+  cases: z.union([CasesUpdateArraySchema, z.string()]),
 });
 
 export const OutputSchema = z.object({

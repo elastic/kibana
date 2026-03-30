@@ -13,13 +13,13 @@ import { MAX_DELETE_IDS_LENGTH } from '../../constants';
 
 export const DeleteCasesStepTypeId = 'cases.deleteCases';
 
-const CaseIdsSchema = z
+export const CaseIdsSchema = z
   .array(z.string().min(1, 'case_ids values are required'))
   .min(1)
   .max(MAX_DELETE_IDS_LENGTH);
 
 const InputSchema = z.object({
-  case_ids: CaseIdsSchema,
+  case_ids: z.union([CaseIdsSchema, z.string()]),
 });
 
 const OutputSchema = z.object({

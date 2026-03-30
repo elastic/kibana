@@ -7,9 +7,17 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { updateCasesStepCommonDefinition } from '../../../common/workflows/steps/update_cases';
+import {
+  CasesUpdateArraySchema,
+  updateCasesStepCommonDefinition,
+} from '../../../common/workflows/steps/update_cases';
 import type { CasesClient } from '../../client';
-import { getCasesClientFromStepsContext, getErrorMessage, pushCase } from './utils';
+import {
+  ensureArrayShape,
+  getCasesClientFromStepsContext,
+  getErrorMessage,
+  pushCase,
+} from './utils';
 import { UPDATE_CASES_FAILED_MESSAGE } from './translations';
 import { prepareCasePatch } from './update_case_helpers';
 
@@ -31,13 +39,15 @@ export const updateCasesStepDefinition = (
     ...updateCasesStepCommonDefinition,
     handler: async (context) => {
       const input = updateCasesStepCommonDefinition.inputSchema.parse(context.input);
-      const caseIds = input.cases.map(({ case_id: caseId }) => caseId);
+      const inputCases = ensureArrayShape(input.cases, CasesUpdateArraySchema);
+
+      const caseIds = inputCases.map(({ case_id: caseId }) => caseId);
 
       try {
         const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
 
         const normalizedCasePatches = await Promise.all(
-          input.cases.map(async (caseInput) => {
+          inputCases.map(async (caseInput) => {
             try {
               return await prepareCasePatch(casesClient, {
                 caseId: caseInput.case_id,

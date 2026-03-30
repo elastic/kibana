@@ -18,14 +18,19 @@ import { MAX_OBSERVABLES_PER_CASE } from '../../constants';
 
 export const AddObservablesStepTypeId = 'cases.addObservables';
 
-const ObservableInputSchema = z.object({
-  typeKey: z.string().min(1, 'typeKey is required'),
-  value: z.string().min(1, 'value is required'),
-  description: z.string().nullable().optional(),
-});
+export const ObservablesArraySchema = z
+  .array(
+    z.object({
+      typeKey: z.string().min(1, 'typeKey is required'),
+      value: z.string().min(1, 'value is required'),
+      description: z.string().nullable().optional(),
+    })
+  )
+  .min(1)
+  .max(MAX_OBSERVABLES_PER_CASE);
 
 const InputSchema = CasesStepCaseIdSchema.extend({
-  observables: z.array(ObservableInputSchema).min(1).max(MAX_OBSERVABLES_PER_CASE),
+  observables: z.union([ObservablesArraySchema, z.string()]),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;
