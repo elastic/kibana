@@ -18,7 +18,6 @@ jest.mock('../../../common/utils', () => ({
   createTimeBucketAggregation: jest.fn(() => 'time_bucket_agg'),
 }));
 
-
 describe('useChartLayers', () => {
   const mockMetric: ParsedMetricItem = {
     metricName: 'system.cpu.total.norm.pct',
