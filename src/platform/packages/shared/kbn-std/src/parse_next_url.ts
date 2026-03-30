@@ -29,6 +29,10 @@ export function parseNextURL(
 
   const next = nextValues[0];
 
+  if (!next || !next.trim()) {
+    return `${basePath}/`;
+  }
+
   // validate that `next` is not attempting a redirect to somewhere
   // outside of this Kibana install.
   if (!isInternalURL(next, basePath)) {

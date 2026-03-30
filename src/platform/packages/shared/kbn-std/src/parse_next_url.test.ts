@@ -22,6 +22,12 @@ describe('parseNextURL', () => {
       expect(parseNextURL(href, basePath)).toEqual(`${basePath}/`);
     });
 
+    it('should return basePath with a trailing slash when next is empty', () => {
+      const basePath = '/iqf';
+      const href = `${basePath}/login?next=`;
+      expect(parseNextURL(href, basePath)).toEqual(`${basePath}/`);
+    });
+
     it('should properly handle next without hash', () => {
       const basePath = '/iqf';
       const next = `${basePath}/app/kibana`;
@@ -114,6 +120,11 @@ describe('parseNextURL', () => {
     // trailing slash is important since it must match the cookie path exactly
     it('should return / with a trailing slash when next is not specified', () => {
       const href = '/login';
+      expect(parseNextURL(href)).toEqual('/');
+    });
+
+    it('should return / with a trailing slash when next is empty', () => {
+      const href = '/login?next=';
       expect(parseNextURL(href)).toEqual('/');
     });
 
