@@ -110,6 +110,7 @@ dependsOn:
   - '@kbn/inference-connectors'
   - '@kbn/streams-ai'
   - '@kbn/cps'
+  - '@kbn/shared-ux-ai-components'
 tags:
   - plugin
   - prod
