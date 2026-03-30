@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers, type KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import {
   getTaskId,
   removeEntityMaintainer,
@@ -32,6 +33,7 @@ export interface EntityMaintainerListEntry {
   taskStatus: EntityMaintainerTaskStatus;
   interval: string;
   description?: string;
+  minLicense: LicenseType;
   taskSnapshot?: TaskSnapshot;
 }
 
@@ -162,7 +164,7 @@ export class EntityMaintainersClient {
 
     const results = await Promise.all(
       entries.map(async (entry): Promise<EntityMaintainerListEntry> => {
-        const { id, interval, description } = entry;
+        const { id, interval, description, minLicense } = entry;
         const taskId = getTaskId(id, this.namespace);
         let taskSnapshot: TaskSnapshot | undefined;
         let taskStatus: EntityMaintainerTaskStatus = EntityMaintainerTaskStatus.NEVER_STARTED;
@@ -195,6 +197,7 @@ export class EntityMaintainersClient {
           taskStatus,
           interval,
           description,
+          minLicense,
           taskSnapshot,
         };
       })
