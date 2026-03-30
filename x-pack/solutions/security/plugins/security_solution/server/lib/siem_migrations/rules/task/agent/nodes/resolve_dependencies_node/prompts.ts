@@ -101,7 +101,7 @@ It is extremely important to be clear and precise, and mention that string or pa
 
 Flow Type tests check whether a flow matches Standard, Superflow A, Superflow B, Superflow C, or Overflow. Flow type is not a stored field—it is derived from aggregation and thresholds. Describe it according to the definition below for each Flow type.
 
-**Important:** Flow type is not a stored field. Do not describe it as "check if flow.type equals Standard" or "filter by the flow type field." The downstream system must derive flow type from aggregation and thresholds.
+**Important:** Do not describe it as "check if flow.type equals Standard" or "filter by the flow type field."
 
 #### How to identify Flow Type dependencies:
 
