@@ -102,9 +102,7 @@ export function CompositeSloMembersSection() {
             isLoading={isLoadingSlos}
             options={sloOptions.filter(
               (opt) =>
-                !members.some(
-                  (m) => m.sloId === String(opt.value) && m.instanceId === ALL_VALUE
-                )
+                !members.some((m) => m.sloId === String(opt.value) && m.instanceId === ALL_VALUE)
             )}
             selectedOptions={[]}
             onSearchChange={setSloSearch}
@@ -153,7 +151,12 @@ export function CompositeSloMembersSection() {
             </EuiFlexGroup>
 
             {fields.map((field, index) => (
-              <MemberRow key={field.id} index={index} members={members} onRemove={() => remove(index)} />
+              <MemberRow
+                key={field.id}
+                index={index}
+                members={members}
+                onRemove={() => remove(index)}
+              />
             ))}
           </>
         )}
@@ -216,10 +219,9 @@ function MemberRow({ index, members, onRemove }: MemberRowProps) {
                   isInvalid={fieldState.invalid}
                   error={
                     fieldState.invalid
-                      ? i18n.translate(
-                          'xpack.slo.compositeSloEdit.members.instanceId.required',
-                          { defaultMessage: 'Select a specific instance.' }
-                        )
+                      ? i18n.translate('xpack.slo.compositeSloEdit.members.instanceId.required', {
+                          defaultMessage: 'Select a specific instance.',
+                        })
                       : undefined
                   }
                 >
