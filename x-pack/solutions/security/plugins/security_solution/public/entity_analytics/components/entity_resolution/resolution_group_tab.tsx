@@ -83,8 +83,9 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
           setAddingEntityId(undefined);
           return;
         }
-      } catch {
+      } catch (e) {
         // Pre-flight failed — proceed anyway, the server will validate on link
+        console.debug('Resolution pre-flight check failed, continuing with link', e);
       }
 
       if (!hasGroup) {
