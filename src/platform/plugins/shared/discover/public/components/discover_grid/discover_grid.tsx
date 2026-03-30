@@ -98,10 +98,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     });
 
     const isCascadedDocumentsAvailable =
-      props.isPlainRecord &&
-      !!cascadedDocumentsContext?.availableCascadeGroups.length &&
-      // the first group column should have at least one row with a value
-      props.rows?.some((row) => row.flattened[cascadedDocumentsContext.availableCascadeGroups[0]]);
+      props.isPlainRecord && !!cascadedDocumentsContext?.availableCascadeGroups.length;
 
     const externalAdditionalControls = useMemo(() => {
       const additionalControls: ReactNode[] = [];
