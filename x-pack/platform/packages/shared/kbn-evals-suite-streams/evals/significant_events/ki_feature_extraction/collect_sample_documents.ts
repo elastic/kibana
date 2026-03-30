@@ -88,7 +88,7 @@ export const collectSampleDocuments = async ({
   esClient: Client;
   scenario: KIFeatureExtractionScenario;
   log: ToolingLog;
-}): Promise<CollectSampleDocumentsResult> => {
+}): Promise<Array<SearchHit<Record<string, unknown>>>> => {
   const query = scenario.input.log_query_filter ?? [{ match_all: {} }];
 
   const docs: Array<SearchHit<Record<string, unknown>>> = [];
