@@ -30,7 +30,9 @@ The `xpack.productDocBase` settings configure how {{kib}} reaches [Elastic’s p
     Data type: `string` (URI)
 
 
-When Kibana can't use Elastic’s public artifact URL, which is common for deployments in air-gapped or restricted networks, you must deploy the knowledge base artifact repository manually. Refer to [Host a knowledge base artifact repo for AI assistants](docs-content://explore-analyze/ai-features/ai-chat-experiences/ai-assistant-host-doc-artifacts.md) to learn more.
+:::{note}
+When {{kib}} can't use Elastic’s public artifact URL, which is common for deployments in air-gapped or restricted networks, you must deploy the knowledge base artifact repository manually. Refer to [Host a knowledge base artifact repo for AI assistants](docs-content://explore-analyze/ai-features/ai-chat-experiences/ai-assistant-host-doc-artifacts.md) to learn more.
+:::
 
 
 $$$configuring-product-doc-for-airgap$$$
