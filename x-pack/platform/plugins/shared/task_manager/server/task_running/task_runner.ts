@@ -62,10 +62,11 @@ import type {
   RruleSchedule,
   SuccessfulRunResult,
   TaskDefinition,
+  TaskEventLogger,
 } from '../task';
 import { isFailedRunResult, TaskStatus } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
-import { isUnrecoverableError, isUserError } from './errors';
+import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
 import { TaskValidator } from '../task_validator';
@@ -73,6 +74,7 @@ import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
+import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -134,6 +136,7 @@ type Opts = {
   strategy: string;
   getPollInterval: () => number;
   apiKeyStrategy: ApiKeyStrategy;
+  eventLogger: TaskEventLogger;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -189,6 +192,8 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly claimStrategy: string;
   private getPollInterval: () => number;
   private apiKeyStrategy: ApiKeyStrategy;
+  private eventLogger: TaskEventLogger;
+  private isCancelled = false;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -217,6 +222,7 @@ export class TaskManagerRunner implements TaskRunner {
     strategy,
     getPollInterval,
     apiKeyStrategy,
+    eventLogger,
   }: Opts) {
     this.basePathService = basePathService;
     this.instance = asPending(sanitizeInstance(instance));
@@ -239,6 +245,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.claimStrategy = strategy;
     this.getPollInterval = getPollInterval;
     this.apiKeyStrategy = apiKeyStrategy;
+    this.eventLogger = eventLogger;
   }
 
   /**
@@ -434,6 +441,11 @@ export class TaskManagerRunner implements TaskRunner {
           });
 
           const originalTaskCancel = this.task.cancel;
+
+          const logCancelEvent = () => {
+            this.isCancelled = true;
+            this.logTaskCancelEvent(this.instance.task, stopTaskTimer());
+          };
           this.task.cancel = async function () {
             abortController.abort();
 
@@ -441,6 +453,9 @@ export class TaskManagerRunner implements TaskRunner {
             if (stopUpdatingLongRunningTasks) {
               stopUpdatingLongRunningTasks();
             }
+
+            logCancelEvent();
+
             if (originalTaskCancel) return originalTaskCancel.call(this);
           };
 
@@ -909,6 +924,13 @@ export class TaskManagerRunner implements TaskRunner {
                 taskTiming
               )
             );
+            this.logTaskRunEvent(
+              task,
+              taskTiming,
+              EventLogOutcomes.failure,
+              `Task ${this.taskType} "${this.id}" failed with a taskRunError.`,
+              taskRunError
+            );
           } else {
             this.onTaskEvent(
               asTaskRunEvent(
@@ -916,6 +938,12 @@ export class TaskManagerRunner implements TaskRunner {
                 asOk({ ...processedResult, isExpired: taskHasExpired }),
                 taskTiming
               )
+            );
+            this.logTaskRunEvent(
+              task,
+              taskTiming,
+              EventLogOutcomes.success,
+              `Task ${this.taskType} "${this.id}" completed successfully.`
             );
           }
         } catch (err) {
@@ -931,6 +959,13 @@ export class TaskManagerRunner implements TaskRunner {
               }),
               taskTiming
             )
+          );
+          this.logTaskRunEvent(
+            task,
+            taskTiming,
+            EventLogOutcomes.failure,
+            `Task ${this.taskType} "${this.id}" failed.`,
+            err as Error
           );
           throw err;
         }
@@ -949,6 +984,13 @@ export class TaskManagerRunner implements TaskRunner {
             }),
             taskTiming
           )
+        );
+        this.logTaskRunEvent(
+          task,
+          taskTiming,
+          EventLogOutcomes.failure,
+          `Task ${this.taskType} "${this.id}" failed.`,
+          error
         );
       }
     );
@@ -1043,6 +1085,66 @@ export class TaskManagerRunner implements TaskRunner {
       clearTimeout(timer);
     };
     return stop;
+  }
+
+  private logTaskRunEvent(
+    task: ConcreteTaskInstance,
+    taskTiming: TaskTiming,
+    outcome: EventLogOutcomes,
+    message: string,
+    error?: Error | DecoratedError
+  ): void {
+    const runDurationMs = taskTiming.stop - taskTiming.start;
+    const scheduleDelayMs =
+      task.startedAt && task.scheduledAt
+        ? task.startedAt.getTime() - task.scheduledAt.getTime()
+        : undefined;
+    const errorDetails = error
+      ? {
+          message: error.message,
+          ...(error.stack ? { stack_trace: error.stack } : {}),
+        }
+      : {};
+    this.eventLogger.logEvent({
+      event: {
+        action: EVENT_LOG_ACTIONS.taskRun,
+        outcome,
+        duration: runDurationMs,
+        start: new Date(taskTiming.start).toISOString(),
+        end: new Date(taskTiming.stop).toISOString(),
+        ...(error && this.isCancelled ? { reason: `Task "${this.id}" was cancelled.` } : {}),
+      },
+      kibana: {
+        task: {
+          id: this.id,
+          type: this.taskType,
+          scheduled: task.scheduledAt.toISOString(),
+          ...(scheduleDelayMs != null ? { schedule_delay: scheduleDelayMs } : {}),
+        },
+      },
+      message,
+      ...(error ? { error: errorDetails } : {}),
+    });
+  }
+
+  private logTaskCancelEvent(task: ConcreteTaskInstance, taskTiming: TaskTiming): void {
+    const runDurationMs = taskTiming.stop - taskTiming.start;
+    this.eventLogger.logEvent({
+      event: {
+        action: EVENT_LOG_ACTIONS.taskCancel,
+        duration: runDurationMs,
+        start: new Date(taskTiming.start).toISOString(),
+        end: new Date(taskTiming.stop).toISOString(),
+      },
+      kibana: {
+        task: {
+          id: this.id,
+          type: this.taskType,
+          scheduled: task.scheduledAt.toISOString(),
+        },
+      },
+      message: `Task ${this.taskType} "${this.id}" has been cancelled.`,
+    });
   }
 }
 

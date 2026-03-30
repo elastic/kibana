@@ -50,7 +50,7 @@ import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
-import type { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance, TaskEventLogger } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
@@ -89,6 +89,7 @@ export interface TaskManagerSetupContract {
    */
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
   registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
+  registerTaskEventLogger: (logger: TaskEventLogger) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -155,6 +156,7 @@ export class TaskManagerPlugin
   private canEncryptSavedObjects: boolean;
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
   private invalidateApiKeyFn?: ApiKeyInvalidationFn;
+  private taskEventLogger?: TaskEventLogger;
   private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
 
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -324,6 +326,9 @@ export class TaskManagerPlugin
       registerCanEncryptedSavedObjects: (canEncrypt: boolean) => {
         this.canEncryptSavedObjects = canEncrypt;
       },
+      registerTaskEventLogger: (logger: TaskEventLogger) => {
+        this.taskEventLogger = logger;
+      },
     };
   }
 
@@ -427,6 +432,7 @@ export class TaskManagerPlugin
         taskPartitioner,
         startingCapacity,
         apiKeyStrategy,
+        eventLogger: this.taskEventLogger!,
       });
     }
 
