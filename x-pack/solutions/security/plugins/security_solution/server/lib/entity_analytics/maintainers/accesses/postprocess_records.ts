@@ -28,11 +28,8 @@ export function postprocessEsqlResults(
       record[col.name] = row[idx];
     });
 
-    console.log(
-      record,
-      '################################################################################################################'
-    );
     return {
+      // update entity method is using `user:<user_euid>` format
       entityId: record.actorUserId != null ? `user:${record.actorUserId}` : null,
       accesses_frequently: toStringArray(record.accesses_frequently),
       accesses_infrequently: toStringArray(record.accesses_infrequently),

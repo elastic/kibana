@@ -90,19 +90,19 @@ export function buildBucketUserFilter(buckets: CompositeBucket[]): QueryDslQuery
 export function buildAccessEsqlQuery(indexPattern: string, whereClause: string): string {
   const userFieldEvals = getFieldEvaluationsEsql('user');
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
-  const userIdEval = euid.esql.getEuidEvaluation('user', { withTypeId: false });
+  const userEuidEval = euid.esql.getEuidEvaluation('user', { withTypeId: false });
   const userIdFilter = euid.esql.getEuidEsqlRawDocumentsFilter('user');
   const hostIdFilter = euid.esql.getEuidEsqlRawDocumentsFilter('host');
-  const hostIdEval = euid.esql.getEuidEvaluation('host', { withTypeId: false });
+  const hostEuidEval = euid.esql.getEuidEvaluation('host', { withTypeId: false });
 
   return `FROM ${indexPattern}
 | WHERE ${whereClause}
     AND event.outcome == "success"
     AND (${userIdFilter})
     AND (${hostIdFilter})
-${userFieldEvalsLine}| EVAL actorUserId = ${userIdEval}
+${userFieldEvalsLine}| EVAL actorUserId = ${userEuidEval}
 | WHERE actorUserId IS NOT NULL AND actorUserId != ""
-| EVAL targetEntityId = COALESCE(${hostIdEval}, TO_STRING(host.ip), TO_STRING(host.mac))
+| EVAL targetEntityId = COALESCE(${hostEuidEval}, TO_STRING(host.ip), TO_STRING(host.mac))
 | MV_EXPAND targetEntityId
 | WHERE targetEntityId IS NOT NULL AND targetEntityId != ""
 | STATS access_count = COUNT(*) BY actorUserId, targetEntityId
