@@ -13,15 +13,19 @@ import type { MemoryStorage } from './storage';
 import { createMemoryStorage } from './storage';
 import type { MemoryHistoryStorage } from './history_storage';
 import { createMemoryHistoryStorage } from './history_storage';
+import type { QuestionsStorage } from './questions_storage';
+import { createQuestionsStorage } from './questions_storage';
 import type {
   MemoryEntry,
   MemoryVersionRecord,
   MemoryChangeType,
   MemoryTreeNode,
   MemorySearchResult,
+  MemoryQuestion,
   CreateMemoryParams,
   UpdateMemoryParams,
   SearchMemoryParams,
+  CreateQuestionParams,
   MemoryService,
 } from './types';
 
@@ -40,12 +44,19 @@ const getParentPath = (path: string): string => {
   return parts.length > 1 ? parts.slice(0, -1).join('/') : '';
 };
 
+interface QuestionDocument {
+  _id: string;
+  _source: MemoryQuestion;
+}
+
 export class MemoryServiceImpl implements MemoryService {
   private readonly storage: MemoryStorage;
   private readonly historyStorage: MemoryHistoryStorage;
+  private readonly questionsStorage: QuestionsStorage;
   constructor({ logger, esClient }: { logger: Logger; esClient: ElasticsearchClient }) {
     this.storage = createMemoryStorage({ logger, esClient });
     this.historyStorage = createMemoryHistoryStorage({ logger, esClient });
+    this.questionsStorage = createQuestionsStorage({ logger, esClient });
   }
 
   async create(params: CreateMemoryParams): Promise<MemoryEntry> {
@@ -356,6 +367,87 @@ export class MemoryServiceImpl implements MemoryService {
     });
 
     return response.hits.hits.map((hit) => (hit as HistoryDocument)._source);
+  }
+
+  // ── Questions ──
+
+  async createQuestion(params: CreateQuestionParams): Promise<MemoryQuestion> {
+    const { question, category, relatedEntries, context, user } = params;
+    const now = new Date().toISOString();
+    const id = uuidV4();
+
+    const doc: MemoryQuestion = {
+      id,
+      question,
+      category,
+      related_entries: relatedEntries,
+      context,
+      status: 'open',
+      created_at: now,
+      created_by: user,
+    };
+
+    await this.questionsStorage.getClient().index({ document: doc });
+    return doc;
+  }
+
+  async getOpenQuestions({ size = 50 }: { size?: number } = {}): Promise<MemoryQuestion[]> {
+    const response = await this.questionsStorage.getClient().search({
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [{ term: { status: 'open' } }],
+        },
+      },
+      size,
+      sort: [{ created_at: { order: 'desc' } }],
+    });
+
+    return response.hits.hits.map((hit) => (hit as QuestionDocument)._source);
+  }
+
+  async answerQuestion({ id, answer }: { id: string; answer: string }): Promise<MemoryQuestion> {
+    const response = await this.questionsStorage.getClient().search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      query: { bool: { filter: [{ term: { id } }] } },
+    });
+
+    if (response.hits.hits.length === 0) {
+      throw notFound(`Question with id '${id}' not found`);
+    }
+
+    const hit = response.hits.hits[0] as QuestionDocument;
+    const updated: MemoryQuestion = {
+      ...hit._source,
+      status: 'answered',
+      answer,
+    };
+
+    await this.questionsStorage.getClient().index({ id: hit._id, document: updated });
+    return updated;
+  }
+
+  async dismissQuestion({ id }: { id: string }): Promise<void> {
+    const response = await this.questionsStorage.getClient().search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      query: { bool: { filter: [{ term: { id } }] } },
+    });
+
+    if (response.hits.hits.length === 0) {
+      throw notFound(`Question with id '${id}' not found`);
+    }
+
+    const hit = response.hits.hits[0] as QuestionDocument;
+    const updated: MemoryQuestion = {
+      ...hit._source,
+      status: 'dismissed',
+    };
+
+    await this.questionsStorage.getClient().index({ id: hit._id, document: updated });
   }
 
   // ── Private helpers ──

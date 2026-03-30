@@ -15,12 +15,20 @@ import type { TaskParams } from '../types';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import { MemoryServiceImpl } from '../../memory';
-import { MemorySynthesisPrompt } from './memory_generation_prompt';
+import { createAskQuestionCallback } from '../../memory/ask_question_tool';
+import { MemorySynthesisPrompt, QuestionAnswerPrompt } from './memory_generation_prompt';
+
+export interface QuestionContext {
+  question: string;
+  answer: string;
+  relatedEntryIds: string[];
+}
 
 export interface MemoryGenerationTaskParams {
   insights?: Insight[];
   features?: BaseFeature[];
   queries?: Array<{ streamName: string; query: GeneratedSignificantEventQuery }>;
+  questionContext?: QuestionContext;
 }
 
 export interface MemoryGenerationTaskResult {
@@ -40,8 +48,8 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { insights, features, queries, _task } = runContext.taskInstance
-                .params as TaskParams<MemoryGenerationTaskParams>;
+              const { insights, features, queries, questionContext, _task } = runContext
+                .taskInstance.params as TaskParams<MemoryGenerationTaskParams>;
 
               const { taskClient, inferenceClient, modelSettingsClient, uiSettingsClient } =
                 await taskContext.getScopedClients({
@@ -50,6 +58,121 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
 
               const taskLogger = taskContext.logger.get('memory_generation');
 
+              // ── Question-answer flow ──
+              // When questionContext is present, the task was triggered by a user
+              // answering a question. Run a reasoning agent that incorporates the
+              // answer into the relevant memory pages.
+              if (questionContext) {
+                taskLogger.info(
+                  `Processing answered question with ${questionContext.relatedEntryIds.length} related entries`
+                );
+
+                const settings = await modelSettingsClient.getSettings();
+                const connectorId = await resolveConnectorId({
+                  connectorId: settings.connectorIdDiscovery,
+                  uiSettingsClient,
+                  logger: taskLogger,
+                });
+
+                const memory = new MemoryServiceImpl({
+                  logger: taskLogger.get('memory'),
+                  esClient: taskContext.getInternalEsClient(),
+                });
+
+                const boundInferenceClient = inferenceClient.bindTo({ connectorId });
+
+                const allEntries = await memory.listAll();
+                const entryMap = new Map(allEntries.map((e) => [e.id, e]));
+
+                const entryIndex = allEntries
+                  .map((e) => `- [${e.id}] ${e.path} — "${e.title}" (tags: ${e.tags.join(', ')})`)
+                  .join('\n');
+
+                const relatedEntryIds = questionContext.relatedEntryIds.join(', ');
+
+                await executeAsReasoningAgent({
+                  inferenceClient: boundInferenceClient,
+                  prompt: QuestionAnswerPrompt,
+                  input: {
+                    question: questionContext.question,
+                    answer: questionContext.answer,
+                    entry_index: entryIndex,
+                    related_entry_ids: relatedEntryIds,
+                  },
+                  maxSteps: 8,
+                  toolCallbacks: {
+                    read_entry: async (toolCall) => {
+                      const { entry_id: entryId } = toolCall.function.arguments;
+                      const entry = entryMap.get(entryId);
+                      if (!entry) {
+                        return { response: { error: `Entry ${entryId} not found` } };
+                      }
+                      return {
+                        response: {
+                          id: entry.id,
+                          path: entry.path,
+                          title: entry.title,
+                          tags: entry.tags,
+                          content: entry.content,
+                        },
+                      };
+                    },
+                    write_memory_page: async (toolCall) => {
+                      const { path, title, content } = toolCall.function.arguments;
+                      const user = 'agent:question_answer';
+
+                      const existing = await memory.getByPath({ path });
+
+                      if (existing) {
+                        await memory.update({
+                          id: existing.id,
+                          content,
+                          title,
+                          user,
+                          changeSummary: `Updated based on answered question: "${questionContext.question}"`,
+                        });
+                        taskLogger.info(`Updated memory page: ${path}`);
+                      } else {
+                        await memory.create({
+                          path,
+                          title,
+                          content,
+                          tags: ['auto-generated'],
+                          user,
+                        });
+                        taskLogger.info(`Created memory page: ${path}`);
+                      }
+
+                      return {
+                        response: {
+                          success: true,
+                          action: existing ? 'updated' : 'created',
+                          path,
+                        },
+                      };
+                    },
+                    delete_entry: async (toolCall) => {
+                      const { entry_id: entryId } = toolCall.function.arguments;
+                      const entry = entryMap.get(entryId);
+                      if (!entry) {
+                        return { response: { error: `Entry ${entryId} not found` } };
+                      }
+                      await memory.delete({ id: entryId, user: 'agent:question_answer' });
+                      taskLogger.info(`Deleted entry ${entryId}: ${entry.path}`);
+                      return { response: { success: true, deleted: entry.path } };
+                    },
+                  },
+                });
+
+                await taskClient.complete<MemoryGenerationTaskParams, MemoryGenerationTaskResult>(
+                  _task,
+                  { questionContext },
+                  { streamsProcessed: 0 }
+                );
+                return;
+              }
+
+              // ── Normal synthesis flow ──
               const streamGroups = groupInputsByStream({ insights, features, queries });
 
               if (streamGroups.length === 0) {
@@ -163,6 +286,12 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                           },
                         };
                       },
+
+                      ask_question: createAskQuestionCallback({
+                        memory,
+                        logger: taskLogger,
+                        user: 'agent:memory_generation',
+                      }),
 
                       write_memory_page: async (toolCall) => {
                         const { path, title, content, tags } = toolCall.function.arguments;

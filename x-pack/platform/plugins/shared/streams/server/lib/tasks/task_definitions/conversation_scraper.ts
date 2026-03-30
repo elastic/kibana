@@ -15,6 +15,7 @@ import type { TaskParams } from '../types';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import { MemoryServiceImpl } from '../../memory';
+import { createAskQuestionCallback } from '../../memory/ask_question_tool';
 import { ConversationScraperPrompt } from './conversation_scraper_prompt';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -203,6 +204,12 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                         },
                       };
                     },
+
+                    ask_question: createAskQuestionCallback({
+                      memory,
+                      logger: taskLogger,
+                      user: 'agent:conversation_scraper',
+                    }),
 
                     write_memory_page: async (toolCall) => {
                       const { path, title, content, tags } = toolCall.function.arguments;

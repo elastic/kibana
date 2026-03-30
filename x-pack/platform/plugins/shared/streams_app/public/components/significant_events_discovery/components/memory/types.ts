@@ -52,3 +52,15 @@ export interface MemoryVersionRecord {
   created_at: string;
   created_by: string;
 }
+
+export interface MemoryQuestion {
+  id: string;
+  question: string;
+  category: 'quality' | 'gap';
+  related_entries: string[];
+  context: string;
+  status: 'open' | 'answered' | 'dismissed';
+  answer?: string;
+  created_at: string;
+  created_by: string;
+}

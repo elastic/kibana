@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
+import { askQuestionToolDefinition } from '../../memory/ask_question_tool';
 
 const systemPrompt = `You are a wiki curator responsible for keeping a knowledge base clean, well-organized, and useful.
 
@@ -29,7 +30,8 @@ Review the memory wiki and consolidate, reorganize, and clean up entries to main
 - **Preserve valuable content**: When merging, keep all unique information from both sources.
 - **Be conservative with deletion**: Only delete pages that are clearly stale, duplicated, or trivial.
 - **Maintain cross-references**: When moving or merging pages, update any pages that reference them.
-- **Skip system pages**: Don't modify pages under the \`_system/\` path.`;
+- **Skip system pages**: Don't modify pages under the \`_system/\` path.
+- **Ask when uncertain**: If you encounter contradictions or ambiguities you cannot resolve, use \`ask_question\` to queue a question for the human operator.`;
 
 const taskPrompt = `## Current wiki state ({{entryCount}} entries)
 
@@ -117,6 +119,7 @@ export const MemoryConsolidationPrompt = createPrompt({
           required: ['path'] as const,
         },
       },
+      ask_question: askQuestionToolDefinition,
       get_recent_changes: {
         description:
           'Get recent changes across all memory entries. Shows what was changed, by whom, and when. ' +

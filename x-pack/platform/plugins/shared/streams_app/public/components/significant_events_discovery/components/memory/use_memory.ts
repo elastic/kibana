@@ -7,7 +7,13 @@
 
 import { useQuery, useMutation, useQueryClient, type UseMutationResult } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { MemoryEntry, MemoryTreeNode, MemorySearchResult, MemoryVersionRecord } from './types';
+import type {
+  MemoryEntry,
+  MemoryTreeNode,
+  MemorySearchResult,
+  MemoryVersionRecord,
+  MemoryQuestion,
+} from './types';
 
 const MEMORY_BASE = '/internal/streams/memory';
 
@@ -19,6 +25,7 @@ const memoryKeys = {
   history: (entryId: string) => ['memory', 'history', entryId] as const,
   version: (entryId: string, version: number) => ['memory', 'version', entryId, version] as const,
   recentChanges: ['memory', 'recent-changes'] as const,
+  questions: ['memory', 'questions'] as const,
 };
 
 export const useMemoryTree = () => {
@@ -152,4 +159,41 @@ export const useScrapeConversations = () => {
 
 export const useConsolidateMemory = () => {
   return useMemoryTaskAction(`${MEMORY_BASE}/_consolidate`);
+};
+
+export const useOpenQuestions = () => {
+  const { core } = useKibana();
+  return useQuery({
+    queryKey: memoryKeys.questions,
+    queryFn: () => core.http.get<{ questions: MemoryQuestion[] }>(`${MEMORY_BASE}/questions`),
+  });
+};
+
+export const useAnswerQuestion = () => {
+  const { core } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, answer }: { id: string; answer: string }) =>
+      core.http.post<{ question: MemoryQuestion; taskScheduled: boolean }>(
+        `${MEMORY_BASE}/questions/${id}/answer`,
+        { body: JSON.stringify({ answer }) }
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: memoryKeys.all });
+    },
+  });
+};
+
+export const useDismissQuestion = () => {
+  const { core } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      core.http.post<{ dismissed: boolean }>(`${MEMORY_BASE}/questions/${id}/dismiss`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: memoryKeys.questions });
+    },
+  });
 };

@@ -15,6 +15,7 @@ import type {
   MemoryTreeNode,
   MemorySearchResult,
   MemoryVersionRecord,
+  MemoryQuestion,
 } from '../../../lib/memory';
 import { MemoryServiceImpl } from '../../../lib/memory';
 import type { StreamsServer } from '../../../types';
@@ -30,6 +31,11 @@ import {
   type MemoryConsolidationTaskParams,
   type MemoryConsolidationTaskResult,
 } from '../../../lib/tasks/task_definitions/memory_consolidation';
+import {
+  MEMORY_GENERATION_TASK_TYPE,
+  type MemoryGenerationTaskParams,
+  type MemoryGenerationTaskResult,
+} from '../../../lib/tasks/task_definitions/memory_generation';
 
 const getMemoryService = (server: StreamsServer, logger: Logger) => {
   return new MemoryServiceImpl({
@@ -489,6 +495,124 @@ const consolidateMemoryRoute = createServerRoute({
   },
 });
 
+const MEMORY_GENERATION_TASK_ID = 'streams_memory_generation_question';
+
+const getOpenQuestionsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/memory/questions',
+  options: {
+    access: 'internal',
+    summary: 'Get open memory questions',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: z
+      .object({
+        size: z.coerce.number().min(1).max(100).optional(),
+      })
+      .optional()
+      .default({}),
+  }),
+  handler: async ({
+    params,
+    request,
+    server,
+    logger,
+  }): Promise<{ questions: MemoryQuestion[] }> => {
+    const memory = getMemoryService(server, logger);
+
+    const questions = await memory.getOpenQuestions({
+      size: params.query?.size,
+    });
+    return { questions };
+  },
+});
+
+const answerQuestionRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/memory/questions/{id}/answer',
+  options: {
+    access: 'internal',
+    summary: 'Answer a memory question and trigger memory update',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+    body: z.object({ answer: z.string() }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ question: MemoryQuestion; taskScheduled: boolean }> => {
+    const memory = getMemoryService(server, logger);
+
+    const question = await memory.answerQuestion({
+      id: params.path.id,
+      answer: params.body.answer,
+    });
+
+    // Schedule a memory generation task to incorporate the answer
+    let taskScheduled = false;
+    try {
+      const { taskClient } = await getScopedClients({ request });
+
+      await handleTaskAction<MemoryGenerationTaskParams, MemoryGenerationTaskResult>({
+        taskClient,
+        taskId: MEMORY_GENERATION_TASK_ID,
+        action: 'schedule',
+        scheduleConfig: {
+          taskType: MEMORY_GENERATION_TASK_TYPE,
+          taskId: MEMORY_GENERATION_TASK_ID,
+          params: {
+            questionContext: {
+              question: question.question,
+              answer: params.body.answer,
+              relatedEntryIds: question.related_entries,
+            },
+          },
+          request,
+        },
+      });
+      taskScheduled = true;
+    } catch (err) {
+      logger.warn(`Failed to schedule memory generation task: ${(err as Error).message}`);
+    }
+
+    return { question, taskScheduled };
+  },
+});
+
+const dismissQuestionRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/memory/questions/{id}/dismiss',
+  options: {
+    access: 'internal',
+    summary: 'Dismiss a memory question',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+  }),
+  handler: async ({ params, server, logger }): Promise<{ dismissed: boolean }> => {
+    const memory = getMemoryService(server, logger);
+
+    await memory.dismissQuestion({ id: params.path.id });
+    return { dismissed: true };
+  },
+});
+
 export const internalMemoryRoutes = {
   ...createEntryRoute,
   ...getEntryRoute,
@@ -504,4 +628,7 @@ export const internalMemoryRoutes = {
   ...recentChangesRoute,
   ...scrapeConversationsRoute,
   ...consolidateMemoryRoute,
+  ...getOpenQuestionsRoute,
+  ...answerQuestionRoute,
+  ...dismissQuestionRoute,
 };

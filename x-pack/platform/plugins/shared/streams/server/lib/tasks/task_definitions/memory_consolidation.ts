@@ -14,6 +14,7 @@ import type { TaskParams } from '../types';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import { MemoryServiceImpl } from '../../memory';
+import { createAskQuestionCallback } from '../../memory/ask_question_tool';
 import { MemoryConsolidationPrompt } from './memory_consolidation_prompt';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -185,6 +186,12 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
                         },
                       };
                     },
+
+                    ask_question: createAskQuestionCallback({
+                      memory,
+                      logger: taskLogger,
+                      user: 'agent:memory_consolidation',
+                    }),
 
                     delete_memory_page: async (toolCall) => {
                       const { path } = toolCall.function.arguments;

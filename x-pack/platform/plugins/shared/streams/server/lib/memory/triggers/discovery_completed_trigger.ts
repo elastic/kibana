@@ -7,6 +7,7 @@
 
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { SigeventsSynthesisPrompt } from '../../../agent_builder/hooks/memory/sigevents_synthesis_prompt';
+import { createAskQuestionCallback } from '../ask_question_tool';
 import type { MemoryUpdateTrigger } from './types';
 
 export const DISCOVERY_COMPLETED_TRIGGER_ID = 'discovery-completed';
@@ -96,6 +97,12 @@ export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
                 },
               };
             },
+
+            ask_question: createAskQuestionCallback({
+              memory,
+              logger,
+              user: 'system:discovery-completed-trigger',
+            }),
 
             write_memory_page: async (toolCall) => {
               const { path, title, content, tags } = toolCall.function.arguments;

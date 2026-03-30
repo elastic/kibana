@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
+import { askQuestionToolDefinition } from '../../memory/ask_question_tool';
 
 const systemPrompt = `You are a knowledge curator extracting reusable learnings from chat conversations about an observability system.
 
@@ -21,6 +22,7 @@ Review conversations between users and an AI assistant. Extract durable knowledg
 - **Merge with existing knowledge**: Read existing pages before writing. Update them with new information rather than creating duplicates.
 - **Be selective**: Not every conversation contains durable knowledge. It's fine to process conversations and write nothing if they don't contain reusable information.
 - **Attribute patterns, not conversations**: Write "the nginx service uses port 8080" not "in a conversation, the user mentioned nginx uses port 8080".
+- **Ask when uncertain**: If you encounter contradictory information or gaps you cannot resolve from the conversations, use \`ask_question\` to queue a question for the human operator.
 
 ## Page conventions
 
@@ -124,6 +126,7 @@ export const ConversationScraperPrompt = createPrompt({
           required: ['path', 'title', 'content'] as const,
         },
       },
+      ask_question: askQuestionToolDefinition,
     } as const,
   })
   .get();

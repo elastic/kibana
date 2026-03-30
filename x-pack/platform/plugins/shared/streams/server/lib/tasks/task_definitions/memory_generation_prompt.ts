@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
+import { askQuestionToolDefinition } from '../../memory/ask_question_tool';
 
 const systemPrompt = `You are a concise technical writer maintaining a wiki about a live system's architecture based on observability data.
 
@@ -21,6 +22,7 @@ Synthesize knowledge indicators (features, insights, queries) discovered from a 
 - **Relationships are the prize**: The most valuable insight is how things connect — which services depend on which, what infrastructure supports what, which error patterns correlate. Focus on these connections.
 - **Only fetch what you need**: You have access to indicator summaries. Use \`get_indicator_details\` selectively to understand specifics — don't fetch every indicator.
 - **Read before writing**: Before updating an existing page, read it with \`read_memory_page\` to understand what's already there. Preserve accurate content, correct outdated information, and add genuinely new insights.
+- **Ask when uncertain**: If you encounter contradictions, ambiguities, or missing context that you cannot resolve from the data, use \`ask_question\` to queue a question for the human operator rather than guessing.
 
 ## Page conventions
 
@@ -110,8 +112,7 @@ export const MemorySynthesisPrompt = createPrompt({
           properties: {
             path: {
               type: 'string' as const,
-              description:
-                'The wiki page path (e.g. "architecture/logs.otel/services/nginx")',
+              description: 'The wiki page path (e.g. "architecture/logs.otel/services/nginx")',
             },
             title: {
               type: 'string' as const,
@@ -128,6 +129,110 @@ export const MemorySynthesisPrompt = createPrompt({
             },
           },
           required: ['path', 'title', 'content', 'tags'] as const,
+        },
+      },
+      ask_question: askQuestionToolDefinition,
+    } as const,
+  })
+  .get();
+
+// ── Question Answer Prompt ──
+
+const questionAnswerSystemPrompt = `You are updating a knowledge base based on a user's answer to a question about the knowledge base state.
+
+Use the available tools to:
+1. Read the related memory entries to understand the current state
+2. Read other entries if needed for cross-referencing
+3. Write updated pages or create new ones to incorporate the answer
+
+Guidelines:
+- Incorporate the user's answer naturally into the entry content
+- Preserve the existing structure and writing style of entries
+- If the answer makes an entry obsolete, delete it
+- If the answer affects multiple entries, update all of them`;
+
+const questionAnswerTaskPrompt = `## Question that was asked
+{{{question}}}
+
+## User's answer
+{{{answer}}}
+
+## Related entry IDs
+{{{related_entry_ids}}}
+
+## All memory entries (index)
+{{{entry_index}}}
+
+Start by reading the related entries, then decide what updates are needed based on the user's answer.`;
+
+export const QuestionAnswerPrompt = createPrompt({
+  name: 'memory_question_answer',
+  description: 'Incorporate a user answer to a memory question into wiki pages',
+  input: z.object({
+    question: z.string(),
+    answer: z.string(),
+    entry_index: z.string(),
+    related_entry_ids: z.string(),
+  }),
+})
+  .version({
+    system: {
+      mustache: {
+        template: questionAnswerSystemPrompt,
+      },
+    },
+    template: {
+      mustache: {
+        template: questionAnswerTaskPrompt,
+      },
+    },
+    tools: {
+      read_entry: {
+        description:
+          'Read the full content of a memory entry by its ID. Use to inspect entries before updating them.',
+        schema: {
+          type: 'object' as const,
+          properties: {
+            entry_id: {
+              type: 'string' as const,
+              description: 'The ID of the memory entry to read',
+            },
+          },
+          required: ['entry_id'] as const,
+        },
+      },
+      write_memory_page: {
+        description: 'Create or update a wiki page.',
+        schema: {
+          type: 'object' as const,
+          properties: {
+            path: {
+              type: 'string' as const,
+              description: 'The wiki page path',
+            },
+            title: {
+              type: 'string' as const,
+              description: 'Human-readable page title',
+            },
+            content: {
+              type: 'string' as const,
+              description: 'Markdown content',
+            },
+          },
+          required: ['path', 'title', 'content'] as const,
+        },
+      },
+      delete_entry: {
+        description: 'Delete a memory entry by ID. Use when the answer makes an entry obsolete.',
+        schema: {
+          type: 'object' as const,
+          properties: {
+            entry_id: {
+              type: 'string' as const,
+              description: 'The ID of the entry to delete',
+            },
+          },
+          required: ['entry_id'] as const,
         },
       },
     } as const,

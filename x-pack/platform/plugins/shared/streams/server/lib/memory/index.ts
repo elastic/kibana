@@ -11,9 +11,13 @@ export type {
   MemoryChangeType,
   MemoryTreeNode,
   MemorySearchResult,
+  MemoryQuestion,
+  MemoryQuestionCategory,
+  MemoryQuestionStatus,
   CreateMemoryParams,
   UpdateMemoryParams,
   SearchMemoryParams,
+  CreateQuestionParams,
   MemoryService,
 } from './types';
 

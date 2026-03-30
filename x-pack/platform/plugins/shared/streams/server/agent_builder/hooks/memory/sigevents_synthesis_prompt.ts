@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
+import { askQuestionToolDefinition } from '../../../lib/memory/ask_question_tool';
 
 const systemPrompt = `You are building a wiki that documents a live system based on observability data.
 
@@ -18,6 +19,7 @@ Given raw knowledge indicators (features, queries, patterns) discovered from a d
 - **Read before writing**: Always read existing pages before updating them. Preserve accurate content and correct anything now outdated.
 - **Brief pages**: Keep pages short — a few paragraphs max. Brief pages stay accurate as the system evolves.
 - **Only document what you have evidence for**: Don't invent services or components.
+- **Ask when uncertain**: If you encounter contradictions or ambiguities you cannot resolve from the data, use \`ask_question\` to queue a question for the human operator.
 
 ## Page conventions
 
@@ -108,6 +110,7 @@ export const SigeventsSynthesisPrompt = createPrompt({
           required: ['path', 'title', 'content', 'tags'] as const,
         },
       },
+      ask_question: askQuestionToolDefinition,
     } as const,
   })
   .get();

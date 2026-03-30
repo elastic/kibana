@@ -7,10 +7,12 @@
 
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiConfirmModal,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -44,8 +46,11 @@ import {
   useRecentChanges,
   useScrapeConversations,
   useConsolidateMemory,
+  useOpenQuestions,
+  useAnswerQuestion,
+  useDismissQuestion,
 } from './use_memory';
-import type { MemoryTreeNode, MemoryVersionRecord } from './types';
+import type { MemoryTreeNode, MemoryVersionRecord, MemoryQuestion } from './types';
 
 export function MemoryTab() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,11 +61,13 @@ export function MemoryTab() {
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);
 
   const { data: recentChangesData, isLoading: isRecentChangesLoading } = useRecentChanges();
+  const { data: questionsData } = useOpenQuestions();
 
   const scrapeConversations = useScrapeConversations();
   const consolidateMemory = useConsolidateMemory();
 
   const isSearchActive = searchQuery.length >= 2;
+  const openQuestions = questionsData?.questions ?? [];
 
   const treeItems = useMemo(() => {
     if (!treeData?.tree) return [];
@@ -74,6 +81,7 @@ export function MemoryTab() {
 
   return (
     <>
+      {openQuestions.length > 0 && <QuestionsCallout questions={openQuestions} />}
       <EuiFlexGroup
         gutterSize="l"
         className={css`
@@ -245,6 +253,108 @@ export function MemoryTab() {
           onBack={() => setShowHistory(false)}
         />
       )}
+    </>
+  );
+}
+
+function QuestionsCallout({ questions }: { questions: MemoryQuestion[] }) {
+  const answerQuestion = useAnswerQuestion();
+  const dismissQuestion = useDismissQuestion();
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+
+  const handleAnswer = useCallback(
+    (questionId: string) => {
+      const answer = answers[questionId];
+      if (answer?.trim()) {
+        answerQuestion.mutate({ id: questionId, answer });
+      }
+    },
+    [answers, answerQuestion]
+  );
+
+  return (
+    <>
+      <EuiAccordion
+        id="memory-questions"
+        buttonContent={i18n.translate('xpack.streams.memory.questions.title', {
+          defaultMessage: '{count} open {count, plural, one {question} other {questions}}',
+          values: { count: questions.length },
+        })}
+        initialIsOpen
+        data-test-subj="streamsMemoryQuestionsAccordion"
+      >
+        <EuiSpacer size="s" />
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {questions.map((q) => (
+            <EuiFlexItem key={q.id}>
+              <EuiCallOut
+                size="s"
+                color={q.category === 'quality' ? 'warning' : 'primary'}
+                iconType="questionInCircle"
+                title={
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color={q.category === 'quality' ? 'warning' : 'primary'}>
+                        {q.category}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <span>{q.question}</span>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                }
+              >
+                {q.context && (
+                  <EuiText size="xs" color="subdued">
+                    {q.context}
+                  </EuiText>
+                )}
+                <EuiSpacer size="s" />
+                <EuiTextArea
+                  placeholder={i18n.translate('xpack.streams.memory.questions.answerPlaceholder', {
+                    defaultMessage: 'Type your answer...',
+                  })}
+                  value={answers[q.id] ?? ''}
+                  onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                  rows={2}
+                  fullWidth
+                  data-test-subj="streamsMemoryQuestionAnswer"
+                />
+                <EuiSpacer size="s" />
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      fill
+                      onClick={() => handleAnswer(q.id)}
+                      isLoading={answerQuestion.isLoading}
+                      disabled={!answers[q.id]?.trim()}
+                      data-test-subj="streamsMemoryQuestionAnswerButton"
+                    >
+                      {i18n.translate('xpack.streams.memory.questions.answerButton', {
+                        defaultMessage: 'Answer',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="s"
+                      onClick={() => dismissQuestion.mutate(q.id)}
+                      isLoading={dismissQuestion.isLoading}
+                      data-test-subj="streamsMemoryQuestionDismissButton"
+                    >
+                      {i18n.translate('xpack.streams.memory.questions.dismissButton', {
+                        defaultMessage: 'Dismiss',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiCallOut>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiAccordion>
+      <EuiSpacer size="m" />
     </>
   );
 }
