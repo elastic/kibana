@@ -16,6 +16,7 @@ import { getPlaywrightGrepTag } from '../playwright/utils';
 import { getConfigRootDir, loadServersConfig } from './configs';
 import type { StartServerOptions } from './flags';
 import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_indexes';
+import { ensureDefaultSpaceNPRE } from './ensure_default_space_npre';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
 
@@ -60,6 +61,8 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
 
     // Pre-create Elasticsearch Security indexes after server startup
     await preCreateSecurityIndexesViaSamlAuth(config, log);
+    // Ensure default space CPS routing expression for local CPS setups
+    await ensureDefaultSpaceNPRE(config, log);
 
     log.success(
       '\n\n' +
