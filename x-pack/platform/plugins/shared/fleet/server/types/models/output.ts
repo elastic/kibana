@@ -370,7 +370,7 @@ const BaseSOSchemaV9 = {
 export const ElasticSearchSchemaV9 = schema.object({
   ...BaseSOSchemaV9,
   type: schema.literal(outputType.Elasticsearch),
-  hosts: schema.maybe(schema.arrayOf(schema.string())),
+  hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   preset: schema.maybe(schema.string()),
   write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
 });
@@ -381,7 +381,7 @@ export const ElasticSearchSchemaV9 = schema.object({
 export const OutputSOForwardCompatSchemaV9 = schema.object({
   ...BaseSOSchemaV9,
   type: schema.maybe(schema.string()),
-  hosts: schema.maybe(schema.arrayOf(schema.string())),
+  hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   preset: schema.maybe(schema.string()),
   write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
   service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
@@ -395,8 +395,8 @@ export const OutputSOForwardCompatSchemaV9 = schema.object({
   password: schema.maybe(schema.string()),
   partition: schema.maybe(schema.string()),
   topic: schema.maybe(schema.string()),
-  topics: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-  headers: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  topics: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })),
+  headers: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })),
   hash: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   round_robin: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   random: schema.maybe(schema.object({}, { unknowns: 'allow' })),
@@ -412,7 +412,7 @@ export const OutputSchemaV9 = schema.oneOf([
   schema.object({
     ...BaseSOSchemaV9,
     type: schema.literal(outputType.RemoteElasticsearch),
-    hosts: schema.maybe(schema.arrayOf(schema.string())),
+    hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
     preset: schema.maybe(schema.string()),
     service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
     write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
@@ -421,13 +421,13 @@ export const OutputSchemaV9 = schema.oneOf([
   schema.object({
     ...BaseSOSchemaV9,
     type: schema.literal(outputType.Logstash),
-    hosts: schema.maybe(schema.arrayOf(schema.string())),
+    hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   }),
   // Kafka
   schema.object({
     ...BaseSOSchemaV9,
     type: schema.literal(outputType.Kafka),
-    hosts: schema.maybe(schema.arrayOf(schema.string())),
+    hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
     version: schema.maybe(schema.string()),
     compression: schema.maybe(schema.string()),
     timeout: schema.maybe(schema.number()),
@@ -438,8 +438,12 @@ export const OutputSchemaV9 = schema.oneOf([
     password: schema.maybe(schema.string()),
     partition: schema.maybe(schema.string()),
     topic: schema.maybe(schema.string()),
-    topics: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-    headers: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+    topics: schema.maybe(
+      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
+    ),
+    headers: schema.maybe(
+      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
+    ),
     hash: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     round_robin: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     random: schema.maybe(schema.object({}, { unknowns: 'allow' })),
