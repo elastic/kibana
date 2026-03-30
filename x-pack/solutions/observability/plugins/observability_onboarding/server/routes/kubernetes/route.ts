@@ -138,7 +138,15 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
     const { elasticsearch } = await resources.context.core;
 
     try {
-      const query: estypes.QueryDslQueryContainer = {
+      const commonSearchParams = {
+        ignore_unavailable: true,
+        allow_partial_search_results: true,
+        size: 0 as const,
+        terminate_after: 1,
+      };
+
+      // Indexed fields only, no runtime mapping (broad logs-*/metrics-* would time out with scripts).
+      const indexedQuery: estypes.QueryDslQueryContainer = {
         bool: {
           filter: [
             {
@@ -146,7 +154,6 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
                 should: [
                   ...termQuery('fields.onboarding_id', onboardingId),
                   ...termQuery('resource.attributes.onboarding.id', onboardingId),
-                  ...termQuery('resource.attributes.onboarding.id._rt', onboardingId),
                   ...termQuery('labels.onboarding_id', onboardingId),
                 ],
                 minimum_should_match: 1,
@@ -156,11 +163,12 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         },
       };
 
-      // Logs Essentials + Wired Streams: logs.otel uses a passthrough mapping for
-      // resource.attributes, storing fields in _source without indexing them.
-      // We use a distinct runtime field name so it does not shadow the indexed
-      // mapping on classic streams where resource.attributes.onboarding.id is
-      // already a keyword. The query includes both names in the should clause.
+      // Logs Essentials + Wired Streams: logs.otel uses a passthrough mapping
+      // for resource.attributes, storing fields in _source without indexing
+      // them. A runtime field extracts onboarding.id at query time.
+      // We scope this to wired stream indices only (logs.*, metrics.*) to
+      // avoid running the script across all classic data streams which would
+      // time out on large clusters.
       const runtimeMappings: estypes.MappingRuntimeFields = {
         'resource.attributes.onboarding.id._rt': {
           type: 'keyword',
@@ -171,26 +179,39 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         },
       };
 
-      const [logsResult, metricsResult] = await Promise.allSettled([
-        elasticsearch.client.asCurrentUser.search({
-          index: ['logs-*', 'logs.*'],
-          ignore_unavailable: true,
-          allow_partial_search_results: true,
-          size: 0,
-          terminate_after: 1,
-          runtime_mappings: runtimeMappings,
-          query,
-        }),
-        elasticsearch.client.asCurrentUser.search({
-          index: ['metrics-*', 'metrics.*'],
-          ignore_unavailable: true,
-          allow_partial_search_results: true,
-          size: 0,
-          terminate_after: 1,
-          runtime_mappings: runtimeMappings,
-          query,
-        }),
-      ]);
+      const wiredStreamQuery: estypes.QueryDslQueryContainer = {
+        bool: {
+          filter: termQuery('resource.attributes.onboarding.id._rt', onboardingId),
+        },
+      };
+
+      const [logsResult, metricsResult, wiredLogsResult, wiredMetricsResult] =
+        await Promise.allSettled([
+          // Fast: indexed fields on broad index patterns, no runtime mapping
+          elasticsearch.client.asCurrentUser.search({
+            index: ['logs-*'],
+            ...commonSearchParams,
+            query: indexedQuery,
+          }),
+          elasticsearch.client.asCurrentUser.search({
+            index: ['metrics-*'],
+            ...commonSearchParams,
+            query: indexedQuery,
+          }),
+          // Scoped: runtime mapping only on wired stream indices
+          elasticsearch.client.asCurrentUser.search({
+            index: ['logs.*'],
+            ...commonSearchParams,
+            runtime_mappings: runtimeMappings,
+            query: wiredStreamQuery,
+          }),
+          elasticsearch.client.asCurrentUser.search({
+            index: ['metrics.*'],
+            ...commonSearchParams,
+            runtime_mappings: runtimeMappings,
+            query: wiredStreamQuery,
+          }),
+        ]);
 
       const resolveProbe = (result: PromiseSettledResult<estypes.SearchResponse>): boolean => {
         if (result.status === 'fulfilled') {
@@ -202,8 +223,8 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         throwHasDataSearchError(result.reason);
       };
 
-      const hasLogs = resolveProbe(logsResult);
-      const hasMetrics = resolveProbe(metricsResult);
+      const hasLogs = resolveProbe(logsResult) || resolveProbe(wiredLogsResult);
+      const hasMetrics = resolveProbe(metricsResult) || resolveProbe(wiredMetricsResult);
 
       return {
         hasData: hasLogs || hasMetrics,
