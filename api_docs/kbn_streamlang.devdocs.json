@@ -461,7 +461,7 @@
           ") => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -483,7 +483,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -1771,10 +1771,10 @@
           "\nGet the processor type (action) from a processor definition"
         ],
         "signature": [
-          "(processor: TProcessorDefinition) => \"sort\" | \"concat\" | \"replace\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"math\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"convert\" | \"dissect\" | \"drop_document\" | \"remove_by_prefix\" | \"redact\" | \"network_direction\" | \"json_extract\" | \"manual_ingest_pipeline\""
+          "(processor: TProcessorDefinition) => \"enrich\" | \"sort\" | \"concat\" | \"replace\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"math\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"convert\" | \"dissect\" | \"drop_document\" | \"remove_by_prefix\" | \"redact\" | \"network_direction\" | \"json_extract\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 854,
+        "lineNumber": 877,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1790,7 +1790,7 @@
               "TProcessorDefinition"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 858,
+            "lineNumber": 881,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2341,7 +2341,7 @@
           "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 802,
+        "lineNumber": 825,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2377,7 +2377,7 @@
           "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 797,
+        "lineNumber": 820,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2500,7 +2500,7 @@
           "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 792,
+        "lineNumber": 815,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2687,7 +2687,7 @@
           "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 777,
+        "lineNumber": 799,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2723,7 +2723,7 @@
           "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 772,
+        "lineNumber": 794,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2759,7 +2759,7 @@
           "<TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 807,
+        "lineNumber": 830,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2898,12 +2898,14 @@
           },
           ", transpilationOptions?: ",
           "IngestPipelineTranspilationOptions",
-          " | undefined) => { processors: ",
-          "IngestProcessorContainer",
-          "[]; }"
+          " | undefined, resolverOptions?: ",
+          "StreamlangResolverOptions",
+          " | undefined) => Promise<",
+          "IngestPipelineTranspilationResult",
+          ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/ingest_pipeline/index.ts",
-        "lineNumber": 20,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2925,7 +2927,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/ingest_pipeline/index.ts",
-            "lineNumber": 21,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2943,7 +2945,25 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/ingest_pipeline/index.ts",
-            "lineNumber": 22,
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.transpile.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "resolverOptions",
+            "description": [],
+            "signature": [
+              "StreamlangResolverOptions",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/ingest_pipeline/index.ts",
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2971,11 +2991,14 @@
           },
           ", transpilationOptions?: ",
           "ESQLTranspilationOptions",
-          ") => ",
-          "ESQLTranspilationResult"
+          ", resolverOptions?: ",
+          "StreamlangResolverOptions",
+          " | undefined) => Promise<",
+          "ESQLTranspilationResult",
+          ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2997,7 +3020,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3014,11 +3037,29 @@
               "ESQLTranspilationOptions"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.transpile.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "resolverOptions",
+            "description": [],
+            "signature": [
+              "StreamlangResolverOptions",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -4150,6 +4191,115 @@
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
             "lineNumber": 367,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.EnrichProcessor",
+        "type": "Interface",
+        "tags": [],
+        "label": "EnrichProcessor",
+        "description": [
+          "\nEnrich processor"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.EnrichProcessor",
+            "text": "EnrichProcessor"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ProcessorBaseWithWhere",
+            "text": "ProcessorBaseWithWhere"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "lineNumber": 721,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.EnrichProcessor.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "\"enrich\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 726,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.EnrichProcessor.policy_name",
+            "type": "string",
+            "tags": [],
+            "label": "policy_name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 727,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.EnrichProcessor.to",
+            "type": "string",
+            "tags": [],
+            "label": "to",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 728,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.EnrichProcessor.ignore_missing",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_missing",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 729,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.EnrichProcessor.override",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "override",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 730,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7681,6 +7831,23 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.enrichProcessorSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "enrichProcessorSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "lineNumber": 733,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.FieldType",
         "type": "Type",
         "tags": [],
@@ -8044,10 +8211,10 @@
           "\nProcessorType is the union of all possible 'action' values"
         ],
         "signature": [
-          "\"sort\" | \"concat\" | \"replace\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"math\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"convert\" | \"dissect\" | \"drop_document\" | \"remove_by_prefix\" | \"redact\" | \"network_direction\" | \"json_extract\" | \"manual_ingest_pipeline\""
+          "\"enrich\" | \"sort\" | \"concat\" | \"replace\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"math\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"convert\" | \"dissect\" | \"drop_document\" | \"remove_by_prefix\" | \"redact\" | \"network_direction\" | \"json_extract\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 812,
+        "lineNumber": 835,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8063,10 +8230,10 @@
           "\nGet all processor types as a string array (derived from the Zod schema)"
         ],
         "signature": [
-          "(\"sort\" | \"concat\" | \"replace\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"math\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"convert\" | \"dissect\" | \"drop_document\" | \"remove_by_prefix\" | \"redact\" | \"network_direction\" | \"json_extract\" | \"manual_ingest_pipeline\")[]"
+          "(\"enrich\" | \"sort\" | \"concat\" | \"replace\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"math\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"convert\" | \"dissect\" | \"drop_document\" | \"remove_by_prefix\" | \"redact\" | \"network_direction\" | \"json_extract\" | \"manual_ingest_pipeline\")[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 830,
+        "lineNumber": 853,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8605,12 +8772,20 @@
             "pluginId": "@kbn/streamlang",
             "scope": "common",
             "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.EnrichProcessor",
+            "text": "EnrichProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
             "section": "def-common.ManualIngestPipelineProcessor",
             "text": "ManualIngestPipelineProcessor"
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 721,
+        "lineNumber": 741,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8658,7 +8833,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 746,
+        "lineNumber": 767,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10648,10 +10823,10 @@
           },
           {
             "parentPluginId": "@kbn/streamlang",
-            "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline",
+            "id": "def-common.ACTION_METADATA_MAP.enrich",
             "type": "Object",
             "tags": [],
-            "label": "manual_ingest_pipeline",
+            "label": "enrich",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
             "lineNumber": 857,
@@ -10661,7 +10836,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/streamlang",
-                "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline.name",
+                "id": "def-common.ACTION_METADATA_MAP.enrich.name",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -10674,7 +10849,7 @@
               },
               {
                 "parentPluginId": "@kbn/streamlang",
-                "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline.description",
+                "id": "def-common.ACTION_METADATA_MAP.enrich.description",
                 "type": "string",
                 "tags": [],
                 "label": "description",
@@ -10687,13 +10862,99 @@
               },
               {
                 "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.enrich.usage",
+                "type": "string",
+                "tags": [],
+                "label": "usage",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 864,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.enrich.examples",
+                "type": "Array",
+                "tags": [],
+                "label": "examples",
+                "description": [],
+                "signature": [
+                  "{ description: string; yaml: string; }[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 867,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.enrich.tips",
+                "type": "Array",
+                "tags": [],
+                "label": "tips",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 877,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline",
+            "type": "Object",
+            "tags": [],
+            "label": "manual_ingest_pipeline",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+            "lineNumber": 884,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 885,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 888,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
                 "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline.usage",
                 "type": "string",
                 "tags": [],
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 867,
+                "lineNumber": 894,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10709,7 +10970,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 871,
+                "lineNumber": 898,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10725,7 +10986,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 898,
+                "lineNumber": 925,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
