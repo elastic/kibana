@@ -48,6 +48,7 @@ import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
+import { registerUISettings } from './ui_settings';
 import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
@@ -284,6 +285,8 @@ export class ActionsPlugin
         'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     }
+
+    registerUISettings({ uiSettings: core.uiSettings });
 
     plugins.features.registerKibanaFeature(ACTIONS_FEATURE);
 

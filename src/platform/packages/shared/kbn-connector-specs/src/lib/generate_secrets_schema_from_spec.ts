@@ -14,12 +14,13 @@ import { getSchemaForAuthType } from '.';
 
 interface GenerateOptions {
   isPfxEnabled?: boolean;
+  isEarsEnabled?: boolean;
   authMode?: AuthMode | '';
 }
 
 export const generateSecretsSchemaFromSpec = (
   authSpec: ConnectorSpec['auth'],
-  { isPfxEnabled, authMode }: GenerateOptions = {
+  { isPfxEnabled, isEarsEnabled = true, authMode }: GenerateOptions = {
     isPfxEnabled: true,
   }
 ) => {
@@ -27,6 +28,9 @@ export const generateSecretsSchemaFromSpec = (
   for (const authType of authSpec?.types || []) {
     const schema = getSchemaForAuthType(authType);
     if (schema.id === 'pfx_certificate' && !isPfxEnabled) {
+      continue;
+    }
+    if (schema.id === 'ears' && !isEarsEnabled) {
       continue;
     }
 

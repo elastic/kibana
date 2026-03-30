@@ -12,6 +12,7 @@ import { type ConnectorSpec } from '@kbn/connector-specs';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { EARS_OAUTH_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { getIcon } from './get_icon';
 import {
   createConnectorFormSerializer,
@@ -49,10 +50,12 @@ export function registerConnectorTypesFromSpecs({
       /* webpackChunkName: "generateSchema" */
       './generate_schema'
     ),
-  ]).then(([{ connectorsSpecs }, { generateFormFields }, { generateSchema }]) => {
+    uiSettingsPromise,
+  ]).then(([{ connectorsSpecs }, { generateFormFields }, { generateSchema }, uiSettings]) => {
+    const isEarsEnabled = uiSettings.get<boolean>(EARS_OAUTH_ENABLED_SETTING_ID, false);
     for (const spec of Object.values(connectorsSpecs)) {
       connectorTypeRegistry.register(
-        createConnectorTypeFromSpec(spec, ref, generateFormFields, generateSchema)
+        createConnectorTypeFromSpec(spec, ref, generateFormFields, generateSchema, isEarsEnabled)
       );
     }
   });
@@ -61,11 +64,12 @@ export function registerConnectorTypesFromSpecs({
 const createConnectorFields = (
   spec: ConnectorSpec,
   generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
-  generateSchema: typeof import('./generate_schema').generateSchema
+  generateSchema: typeof import('./generate_schema').generateSchema,
+  isEarsEnabled: boolean
 ) => {
   const ConnectorFields = (props: ActionConnectorFieldsProps) => {
     const schema = useMemo(
-      () => generateSchema(spec, { authMode: props.authMode }),
+      () => generateSchema(spec, { isEarsEnabled, authMode: props.authMode }),
       [props.authMode]
     );
 
@@ -82,9 +86,10 @@ const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   ref: { uiSettings?: IUiSettingsClient },
   generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
-  generateSchema: typeof import('./generate_schema').generateSchema
+  generateSchema: typeof import('./generate_schema').generateSchema,
+  isEarsEnabled: boolean
 ): ActionTypeModel => {
-  const schema = generateSchema(spec);
+  const schema = generateSchema(spec, { isEarsEnabled });
 
   return {
     id: spec.metadata.id,
@@ -106,7 +111,7 @@ const createConnectorTypeFromSpec = (
     },
     actionConnectorFields: lazy(() =>
       Promise.resolve({
-        default: createConnectorFields(spec, generateFormFields, generateSchema),
+        default: createConnectorFields(spec, generateFormFields, generateSchema, isEarsEnabled),
       })
     ),
     actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
