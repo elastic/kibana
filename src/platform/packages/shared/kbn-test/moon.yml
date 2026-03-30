@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/es'
   - '@kbn/dev-proc-runner'
+  - '@kbn/test-kibana-server'
   - '@kbn/jest-serializers'
   - '@kbn/stdio-dev-helpers'
   - '@kbn/babel-register'
@@ -56,26 +57,6 @@ fileGroups:
     - '!types/**/*'
     - '!**/__fixtures__/**/*'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}
