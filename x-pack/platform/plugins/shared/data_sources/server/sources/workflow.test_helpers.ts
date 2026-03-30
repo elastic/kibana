@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { OpeningAndClosingTags } from 'mustache';
+import Mustache from 'mustache';
 import { parse } from 'yaml';
+import { trimStart } from 'lodash';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -18,7 +21,10 @@ import type { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integra
 import { ServerStepRegistry } from '@kbn/workflows-extensions/server/step_registry/step_registry';
 import { registerInternalStepDefinitions } from '@kbn/workflows-extensions/server/steps';
 import { APPROVED_STEP_DEFINITIONS } from '@kbn/workflows-extensions/test/scout/api/fixtures/approved_step_definitions';
+import { getWorkflowTemplatesForConnector } from '@kbn/connector-specs';
 import { createDataSourceAndRelatedResources } from '../routes/data_sources_helpers';
+
+const TEMPLATE_DELIMITERS: OpeningAndClosingTags = ['<%=', '%>'];
 
 const internalRegistry = new ServerStepRegistry();
 registerInternalStepDefinitions({} as any, internalRegistry);
@@ -178,4 +184,39 @@ export async function loadWorkflowsThroughProductionPath(
   });
 
   return capturedWorkflows;
+}
+
+/**
+ * Loads workflows from a connector spec's agentBuilderWorkflows templates.
+ *
+ * This mirrors the production path used by the connector lifecycle handler:
+ *   getWorkflowTemplatesForConnector → Mustache.render → parse/validate
+ */
+export function loadWorkflowsFromConnectorSpec(
+  connectorTypeId: string,
+  options?: { connectorName?: string }
+): ProcessedWorkflow[] {
+  const connectorName = options?.connectorName ?? 'fake-connector';
+  const connectorTypeKey = trimStart(connectorTypeId, '.');
+  const templateInputs = { [`${connectorTypeKey}-stack-connector-id`]: connectorName };
+
+  const templates = getWorkflowTemplatesForConnector(connectorTypeId);
+  if (templates.length === 0) {
+    throw new Error(
+      `No agentBuilderWorkflows found for connector type '${connectorTypeId}'. ` +
+        `Ensure the connector spec exports an agentBuilderWorkflows array.`
+    );
+  }
+
+  return templates.map((rawYaml) => {
+    const rendered = Mustache.render(rawYaml, templateInputs, {}, TEMPLATE_DELIMITERS);
+    const validation = validateWorkflowYaml(rendered, WORKFLOW_ZOD_SCHEMA);
+    const liquidErrors = validation.diagnostics
+      .filter((d) => d.source === 'liquid')
+      .map((d) => d.message);
+    const parsedYaml = parse(rendered);
+    const name = parsedYaml?.name ?? 'unknown';
+
+    return { yaml: rendered, name, valid: validation.valid, liquidErrors };
+  });
 }

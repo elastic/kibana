@@ -80,6 +80,7 @@ import type { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-pl
 import type { SearchPrivilegesIndicesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/search_indices.gen';
 import type { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
 import type { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
+import type { SyncWatchlistRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/sync/sync.gen';
 import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,
@@ -727,6 +728,18 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  syncWatchlist(props: SyncWatchlistProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_analytics/watchlists/{watchlist_id}/sync', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
   /**
    * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
    */
@@ -969,6 +982,9 @@ export interface StartEntityEngineProps {
 }
 export interface StopEntityEngineProps {
   params: StopEntityEngineRequestParamsInput;
+}
+export interface SyncWatchlistProps {
+  params: SyncWatchlistRequestParamsInput;
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;

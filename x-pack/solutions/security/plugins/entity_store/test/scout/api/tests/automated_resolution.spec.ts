@@ -16,6 +16,7 @@ import {
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
+  clearEntityStoreIndices,
   seedUserEntity,
   waitForResolution,
   assertNotResolved,
@@ -66,13 +67,14 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
     });
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest(

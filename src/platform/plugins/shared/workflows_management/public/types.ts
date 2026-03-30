@@ -18,6 +18,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -76,6 +77,7 @@ export interface WorkflowsPublicPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  kql: KqlPluginStart;
   fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   data: DataPublicPluginStart;
