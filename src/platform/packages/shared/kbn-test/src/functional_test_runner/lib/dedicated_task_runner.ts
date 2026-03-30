@@ -13,13 +13,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import Supertest from 'supertest';
 
 import { KbnClient } from '@kbn/kbn-client';
-<<<<<<< HEAD
-import { Config } from './config';
-import { getKibanaCliArg } from '../../functional_tests/lib/kibana_cli_args';
-=======
 import { DedicatedTaskRunnerConfig, getKibanaCliArg } from '@kbn/test-kibana-server';
 import type { Config } from './config';
->>>>>>> 0702344b8f29 (add kbn/test-kibana-server (#259090))
 
 export class DedicatedTaskRunner {
   static getPort(uiPort: number) {
