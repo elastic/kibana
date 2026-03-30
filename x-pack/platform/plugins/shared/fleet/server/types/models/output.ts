@@ -338,19 +338,53 @@ const KafkaUpdateSchema = {
 
 /**
  * Versioned schemas for SO model versions (used by the check_saved_objects CLI)
+ *
+ * Note: these schemas reflect the SO storage shape, not the API shape.
+ * In particular, `ssl` is stored as a JSON-serialised string (binary mapping),
+ * `secrets` uses `{ id: string }` references, and all fields that are absent in
+ * a given output type must be marked optional.
  */
 
-// Schema representing the ingest-outputs SO shape at model version 9 (adds otel_exporter_config_yaml)
-export const OutputSchemaV9 = schema.object({
-  ...BaseSchema,
-  type: schema.string(),
-  // ES output fields
+// Base SO schema fields shared across all output types at model version 9.
+// `ssl` is stored as a JSON string (binary), so we accept a plain string here.
+const BaseSOSchemaV9 = {
+  id: schema.maybe(schema.string()),
+  name: schema.string(),
+  is_default: schema.boolean({ defaultValue: false }),
+  is_default_monitoring: schema.boolean({ defaultValue: false }),
+  is_internal: schema.maybe(schema.boolean()),
+  is_preconfigured: schema.maybe(schema.boolean()),
+  ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  ca_trusted_fingerprint: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  otel_exporter_config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  // ssl is stored as a JSON-serialised string in the SO (binary ES mapping)
+  ssl: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  shipper: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
+  secrets: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+};
+
+// Schema representing the ingest-outputs ES SO shape at model version 9
+export const ElasticSearchSchemaV9 = schema.object({
+  ...BaseSOSchemaV9,
+  type: schema.literal(outputType.Elasticsearch),
   hosts: schema.maybe(schema.arrayOf(schema.string())),
   preset: schema.maybe(schema.string()),
-  // Remote ES output fields
+  write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
+});
+
+// Loose schema used for SO forwardCompatibility at model version 9.
+// Must be a plain schema.object() (not oneOf) so that .extends({}, { unknowns: 'ignore' }) works.
+// It accepts all fields that any output type may have, making all type-specific fields optional.
+export const OutputSOForwardCompatSchemaV9 = schema.object({
+  ...BaseSOSchemaV9,
+  type: schema.maybe(schema.string()),
+  hosts: schema.maybe(schema.arrayOf(schema.string())),
+  preset: schema.maybe(schema.string()),
+  write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
   service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  // Logstash output fields
-  // Kafka output fields
   version: schema.maybe(schema.string()),
   compression: schema.maybe(schema.string()),
   timeout: schema.maybe(schema.number()),
@@ -370,6 +404,50 @@ export const OutputSchemaV9 = schema.object({
   auth_type: schema.maybe(schema.string()),
   connection_type: schema.maybe(schema.string()),
 });
+
+// Schema representing the ingest-outputs SO shape at model version 9 (adds otel_exporter_config_yaml)
+export const OutputSchemaV9 = schema.oneOf([
+  ElasticSearchSchemaV9,
+  // Remote Elasticsearch
+  schema.object({
+    ...BaseSOSchemaV9,
+    type: schema.literal(outputType.RemoteElasticsearch),
+    hosts: schema.maybe(schema.arrayOf(schema.string())),
+    preset: schema.maybe(schema.string()),
+    service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+    write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
+  }),
+  // Logstash
+  schema.object({
+    ...BaseSOSchemaV9,
+    type: schema.literal(outputType.Logstash),
+    hosts: schema.maybe(schema.arrayOf(schema.string())),
+  }),
+  // Kafka
+  schema.object({
+    ...BaseSOSchemaV9,
+    type: schema.literal(outputType.Kafka),
+    hosts: schema.maybe(schema.arrayOf(schema.string())),
+    version: schema.maybe(schema.string()),
+    compression: schema.maybe(schema.string()),
+    timeout: schema.maybe(schema.number()),
+    broker_timeout: schema.maybe(schema.number()),
+    required_acks: schema.maybe(schema.number()),
+    client_id: schema.maybe(schema.string()),
+    username: schema.maybe(schema.string()),
+    password: schema.maybe(schema.string()),
+    partition: schema.maybe(schema.string()),
+    topic: schema.maybe(schema.string()),
+    topics: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+    headers: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+    hash: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    round_robin: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    random: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    sasl: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    auth_type: schema.maybe(schema.string()),
+    connection_type: schema.maybe(schema.string()),
+  }),
+]);
 
 export const OutputSchema = schema.oneOf([
   schema.object({ ...ElasticSearchSchema }, { meta: { id: 'output_elasticsearch' } }),

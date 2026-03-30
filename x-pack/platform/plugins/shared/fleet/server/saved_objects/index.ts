@@ -45,7 +45,7 @@ import {
   SettingsSchemaV7,
   SettingsSchemaV8,
   PackagePolicySchemaV22,
-  OutputSchemaV9,
+  OutputSOForwardCompatSchemaV9,
 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -814,8 +814,8 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: OutputSchemaV9.extends({}, { unknowns: 'ignore' }),
-            create: OutputSchemaV9.extends({}, { unknowns: 'ignore' }),
+            forwardCompatibility: OutputSOForwardCompatSchemaV9.extends({}, { unknowns: 'ignore' }),
+            create: OutputSOForwardCompatSchemaV9.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
