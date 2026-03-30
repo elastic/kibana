@@ -10,6 +10,11 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  DEFAULT_DATA_CONTROL_STATE,
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+  DEFAULT_RANGE_SLIDER_STATE,
+  DEFAULT_TIME_SLIDER_STATE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
@@ -35,7 +40,8 @@ import type {
 export const controlGroupStateBuilder = {
   addDataControlFromField: async (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: Omit<DataControlState & Partial<FlattenedPinnedControlState>, 'type'>,
+    controlState: Partial<Omit<DataControlState & FlattenedPinnedControlState, 'type'>> &
+      Pick<DataControlState, 'data_view_id' | 'field_name'>,
     uiActionsService: UiActionsStart,
     controlId?: string
   ) => {
@@ -53,6 +59,8 @@ export const controlGroupStateBuilder = {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
+        ...DEFAULT_DATA_CONTROL_STATE,
+        ...DEFAULT_PINNED_CONTROL_STATE,
         type,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
@@ -61,16 +69,21 @@ export const controlGroupStateBuilder = {
   },
   addOptionsListControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: Omit<
-      Omit<PinnedControlState, keyof OptionsListDSLControlState | 'config'> &
-        OptionsListDSLControlState,
-      'type'
-    >,
+    controlState: Partial<
+      Omit<
+        Omit<PinnedControlState, keyof OptionsListDSLControlState | 'config'> &
+          OptionsListDSLControlState,
+        'type'
+      >
+    > &
+      Pick<OptionsListDSLControlState, 'data_view_id' | 'field_name'>,
     controlId?: string
   ) => {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         type: OPTIONS_LIST_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
@@ -82,12 +95,15 @@ export const controlGroupStateBuilder = {
     controlState: Omit<
       Omit<PinnedControlState, keyof RangeSliderControlState> & RangeSliderControlState,
       'type'
-    >,
+    > &
+      Pick<RangeSliderControlState, 'data_view_id' | 'field_name'>,
     controlId?: string
   ) => {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_RANGE_SLIDER_STATE,
         type: RANGE_SLIDER_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
@@ -101,9 +117,11 @@ export const controlGroupStateBuilder = {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
+        ...DEFAULT_TIME_SLIDER_STATE,
         type: TIME_SLIDER_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         width: 'large',
+        grow: true,
       },
     };
   },

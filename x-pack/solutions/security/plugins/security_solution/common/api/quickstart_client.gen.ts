@@ -408,6 +408,10 @@ import type {
   UpdateWatchlistResponse,
 } from './entity_analytics/watchlists/management/update.gen';
 import type {
+  SyncWatchlistRequestParamsInput,
+  SyncWatchlistResponse,
+} from './entity_analytics/watchlists/sync/sync.gen';
+import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
 } from './timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
@@ -3264,6 +3268,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async syncWatchlist(props: SyncWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SyncWatchlist`);
+    return this.kbnClient
+      .request<SyncWatchlistResponse>({
+        path: replaceParams('/api/entity_analytics/watchlists/{watchlist_id}/sync', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
    */
@@ -3945,6 +3961,9 @@ export interface StopRuleMigrationProps {
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
+}
+export interface SyncWatchlistProps {
+  params: SyncWatchlistRequestParamsInput;
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;

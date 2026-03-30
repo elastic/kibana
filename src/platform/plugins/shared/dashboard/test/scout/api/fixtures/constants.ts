@@ -22,7 +22,7 @@ export const KBN_ARCHIVES = {
   BASIC: 'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
   TAGS: 'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/tags.json',
   MANY_DASHBOARDS:
-    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many-dashboards.json',
+    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many_dashboards.json',
 } as const;
 
 /** Test dashboard ID used in fixtures - is a saved object loaded by the kbn_archiver */

@@ -239,10 +239,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openManagementAlertFlyout = async () => {
-    await PageObjects.common.navigateToApp('management');
-    await PageObjects.header.waitUntilLoadingHasFinished();
     // TODO: Navigation to Rule Management is different in Serverless
-    await PageObjects.common.navigateToApp('triggersActions');
+    await PageObjects.common.navigateToApp('rules');
     await PageObjects.header.waitUntilLoadingHasFinished();
     await testSubjects.click('createFirstRuleButton');
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -304,7 +302,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const openAlertRuleInManagement = async (ruleName: string) => {
     // Navigation to Rule Management is different in Serverless
-    await PageObjects.common.navigateToApp('triggersActions');
+    await PageObjects.common.navigateToApp('rules');
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     let retries = 0;
@@ -326,7 +324,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const clickViewInApp = async (ruleName: string) => {
     // navigate to discover using view in app link
     await openAlertRuleInManagement(ruleName);
-    await testSubjects.click('ruleDetails-viewInApp');
+    await testSubjects.click('ruleDetails-viewInDiscover');
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
@@ -504,7 +502,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertRuleInManagement(RULE_NAME);
-      await testSubjects.click('ruleDetails-viewInApp');
+      await testSubjects.click('ruleDetails-viewInDiscover');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW, true);
@@ -680,7 +678,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await createDataView(SOURCE_DATA_VIEW);
 
       // Navigation to Rule Management is different in Serverless
-      await PageObjects.common.navigateToApp('triggersActions');
+      await PageObjects.common.navigateToApp('rules');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('createRuleButton');

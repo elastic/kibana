@@ -417,13 +417,47 @@
     "misc": [
       {
         "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB",
+        "type": "string",
+        "tags": [],
+        "label": "EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB",
+        "description": [],
+        "signature": [
+          "\"{examples,x-pack/examples}/**/test/scout{_*,}\""
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB",
+        "type": "string",
+        "tags": [],
+        "label": "PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB",
+        "description": [],
+        "signature": [
+          "\"{src/platform,src/core,x-pack/**}/{plugins,packages}/**/test/scout{_*,}\""
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
         "id": "def-common.SCOUT_CI_CONFIG_PATH",
         "type": "string",
         "tags": [],
         "label": "SCOUT_CI_CONFIG_PATH",
         "description": [],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
-        "lineNumber": 63,
+        "lineNumber": 98,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -437,7 +471,7 @@
         "label": "SCOUT_CONFIG_MANIFEST_PATH_GLOB",
         "description": [],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
-        "lineNumber": 59,
+        "lineNumber": 66,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -451,7 +485,7 @@
         "label": "SCOUT_CONFIG_PATH_GLOB",
         "description": [],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
-        "lineNumber": 49,
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -628,7 +662,7 @@
           "string[]"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
-        "lineNumber": 47,
+        "lineNumber": 54,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -816,11 +850,8 @@
         "tags": [],
         "label": "TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB",
         "description": [],
-        "signature": [
-          "\"{src/platform,src/core,x-pack/**}/{plugins,packages}/**/test/scout{_*,}\""
-        ],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
-        "lineNumber": 35,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -864,7 +895,45 @@
           "RegExp"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
-        "lineNumber": 53,
+        "lineNumber": 60,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX",
+        "description": [
+          "\nPlaywright configs under top-level `examples/` and `x-pack/examples/` (developer example plugins).\n`module.name` for these paths is resolved from `plugin.id` in kibana.jsonc (see test_config.fromPath)."
+        ],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_UNIFIED_CONFIG_PATH_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "SCOUT_UNIFIED_CONFIG_PATH_REGEX",
+        "description": [
+          "\nUnified regex matching both platform/solution and example plugin Playwright config paths.\nUses named capture groups so callers can branch on `examplesRoot` to decide how to\nresolve module metadata (kibana.jsonc vs directory-derived)."
+        ],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "lineNumber": 84,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -881,7 +950,7 @@
           "RegExp"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
-        "lineNumber": 38,
+        "lineNumber": 45,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
