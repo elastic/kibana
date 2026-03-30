@@ -94,7 +94,8 @@ describe('schema validation', () => {
         },
         overview_mode: 'groups',
       });
-      if ('group_filters' in result && result.group_filters) {
+      expect(result.overview_mode).toBe('groups');
+      if (result.overview_mode === 'groups') {
         expect(result.group_filters.filters).toHaveLength(1);
         expect(result.group_filters.filters?.[0]).toMatchObject({
           type: 'condition',
@@ -172,20 +173,27 @@ describe('schema validation', () => {
       expect(() => overviewEmbeddableSchema.validate(minimalState)).not.toThrow();
     });
 
-    it('should validate group overview state with empty group_filters or missing group_by', () => {
-      const stateWithEmptyGroupFilters = {
+    it('should default group_filters to { group_by: "status" } when group_filters is absent', () => {
+      const result = overviewEmbeddableSchema.validate({
+        overview_mode: 'groups' as const,
+      });
+      expect(result).toMatchObject({ group_filters: { group_by: 'status' } });
+    });
+
+    it('should default group_by to "status" when group_filters is empty', () => {
+      const result = overviewEmbeddableSchema.validate({
         group_filters: {},
         overview_mode: 'groups' as const,
-      };
-      expect(() => overviewEmbeddableSchema.validate(stateWithEmptyGroupFilters)).not.toThrow();
+      });
+      expect(result).toMatchObject({ group_filters: { group_by: 'status' } });
+    });
 
-      const stateWithGroupFiltersWithoutGroupBy = {
+    it('should default group_by to "status" when group_filters omits group_by', () => {
+      const result = overviewEmbeddableSchema.validate({
         group_filters: { groups: ['healthy'] },
         overview_mode: 'groups' as const,
-      };
-      expect(() =>
-        overviewEmbeddableSchema.validate(stateWithGroupFiltersWithoutGroupBy)
-      ).not.toThrow();
+      });
+      expect(result).toMatchObject({ group_filters: { group_by: 'status' } });
     });
 
     it('should reject groups array exceeding maxSize (100)', () => {
@@ -262,16 +270,14 @@ describe('schema validation', () => {
     expect(() => overviewEmbeddableSchema.validate(stateWithOnlyRequiredFields)).not.toThrow();
   });
 
-  it('should validate group overview state with optional fields omitted', () => {
-    // Test that optional fields within group_filters can be omitted
-    const stateWithOnlyRequiredGroupFields = {
+  it('should validate group overview state when groups, filters and kql_query are omitted', () => {
+    const stateWithoutOptionalGroupFields = {
       group_filters: {
         group_by: 'status' as const,
-        // groups, filters, kql_query are all optional
       },
       overview_mode: 'groups' as const,
     };
 
-    expect(() => overviewEmbeddableSchema.validate(stateWithOnlyRequiredGroupFields)).not.toThrow();
+    expect(() => overviewEmbeddableSchema.validate(stateWithoutOptionalGroupFields)).not.toThrow();
   });
 });

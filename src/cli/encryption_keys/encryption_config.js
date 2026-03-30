@@ -46,7 +46,7 @@ export class EncryptionConfig {
   }
 
   _generateEncryptionKey() {
-    return crypto.randomBytes(16).toString('hex');
+    return crypto.randomBytes(32).toString('hex');
   }
 
   docs({ comment } = {}) {

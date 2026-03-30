@@ -10,12 +10,20 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { KeyValueTable } from '@kbn/key-value-metadata-table';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 interface Props {
   properties: Array<{ field: string; value: string[] | number[] }>;
 }
 
 export function Section({ properties }: Props) {
+  const {
+    services: { uiSettings },
+  } = useKibana();
+  const dateFormatSetting = uiSettings?.get(UI_SETTINGS.DATE_FORMAT);
+  const timezoneSetting = uiSettings?.get(UI_SETTINGS.DATEFORMAT_TZ);
+
   if (!isEmpty(properties)) {
     return (
       <KeyValueTable
@@ -23,6 +31,8 @@ export function Section({ properties }: Props) {
           key: property.field,
           value: property.value,
         }))}
+        dateFormat={dateFormatSetting}
+        dateTimezone={timezoneSetting}
       />
     );
   }

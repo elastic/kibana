@@ -155,8 +155,8 @@ function buildFormBasedLayer(layer: RegionMapStateNoESQL): FormBasedPersistedSta
 
 function getValueColumns(layer: RegionMapStateESQL) {
   return [
-    getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
-    getValueColumn(getAccessorName('region'), layer.region.column),
+    getValueColumn(getAccessorName('metric'), layer.metric, 'number'),
+    getValueColumn(getAccessorName('region'), layer.region),
   ];
 }
 

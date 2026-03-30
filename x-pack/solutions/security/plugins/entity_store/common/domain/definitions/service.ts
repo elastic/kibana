@@ -12,10 +12,7 @@ import { collectValues as collect, newestValue, oldestValue } from './field_rete
 export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   type: 'service',
   name: `Security 'service' Entity Store Definition`,
-  identityField: {
-    requiresOneOfFields: ['service.entity.id', 'service.name'],
-    euidFields: [[{ field: 'service.entity.id' }], [{ field: 'service.name' }]],
-  },
+  identityField: { singleField: 'service.name' },
   indexPatterns: [],
   entityTypeFallback: 'Service',
   fields: [

@@ -71,15 +71,17 @@ export interface ExpressionContextOptions {
 }
 
 export interface FunctionParameterContext {
+  // Resolved signatures: validSignatures if non-empty, else functionDefinition.signatures
+  signatures: Signature[];
   paramDefinitions: FunctionParameter[];
   // Flag to suggest comma after function parameters when more mandatory args exist
-  hasMoreMandatoryArgs?: boolean;
+  hasMoreMandatoryArgs: boolean;
   // Function definition for function-specific parameter handling (e.g., CASE function)
   functionDefinition?: FunctionDefinition;
   firstArgumentType?: SupportedDataType | 'unknown';
   // Type of first value in repeating signatures, used to enforce type homogeneity
   firstValueType?: SupportedDataType | 'unknown';
-  currentParameterIndex?: number;
+  currentParameterIndex: number;
   validSignatures?: Signature[];
 }
 

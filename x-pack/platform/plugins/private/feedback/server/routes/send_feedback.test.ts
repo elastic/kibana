@@ -91,6 +91,7 @@ describe('registerSendFeedbackRoute', () => {
       allow_email_contact: true,
       url: '/app/management/ai/aiAssistantManagementSelection',
       user_id: 'test-user-id',
+      source: 'kibana',
     });
 
     expect(mockResponse.ok).toHaveBeenCalledWith({

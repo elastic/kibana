@@ -229,7 +229,7 @@ export const AnomalyTimeline: FC = () => {
           : {}),
         // For cases attachment, pass just the job IDs to maintain stale data
         jobIds: selectedJobs?.map((v) => v.id),
-        timeRange: globalTimeRange,
+        time_range: globalTimeRange,
         ...(isDefined(queryString) && queryString !== ''
           ? {
               query: {
@@ -459,7 +459,7 @@ export const AnomalyTimeline: FC = () => {
                     color="text"
                     display="base"
                     isSelected={isMenuOpen}
-                    iconType="boxesHorizontal"
+                    iconType="boxesVertical"
                     onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                     data-test-subj="mlAnomalyTimelinePanelMenu"
                   />

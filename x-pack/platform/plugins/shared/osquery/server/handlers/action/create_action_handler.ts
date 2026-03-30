@@ -27,6 +27,18 @@ interface Metadata {
   userProfileUid: string | undefined;
 }
 
+interface OsqueryActionQuery {
+  action_id?: string;
+  id?: string;
+  query?: string;
+  ecs_mapping?: Record<string, unknown>;
+  version?: string;
+  platform?: string;
+  timeout?: number;
+  agents?: string[];
+  error?: string;
+}
+
 interface CreateActionHandlerOptions {
   space?: { id: string };
   metadata?: Metadata;
@@ -103,6 +115,7 @@ export const createActionHandler = async (
     pack_prebuilt: params.pack_id
       ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
+    tags: [],
     space_id: options.space?.id ?? DEFAULT_SPACE_ID,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
@@ -134,19 +147,22 @@ export const createActionHandler = async (
         }),
   };
 
+  const actionQueries = osqueryAction.queries as OsqueryActionQuery[];
   const fleetActions = !error
     ? map(
-        filter(osqueryAction.queries, (query) => !query.error),
+        filter(actionQueries, (query) => !query.error),
         (query) => ({
-          action_id: query.action_id,
+          action_id: query.action_id as string,
           '@timestamp': moment().toISOString(),
           expiration: moment().add(5, 'minutes').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'osquery',
-          agents: query.agents,
+          agents: query.agents as string[],
           user_id: metadata?.currentUser,
           ...(query.timeout !== QUERY_TIMEOUT.DEFAULT ? { timeout: query.timeout } : {}),
-          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']) as {
+            [k: string]: unknown;
+          },
         })
       )
     : [];

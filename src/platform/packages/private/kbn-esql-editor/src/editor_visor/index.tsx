@@ -12,10 +12,10 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
@@ -28,10 +28,10 @@ import { NoConnectorMessage } from './no_connector_message';
 import { NLInput } from './nl_input';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
+import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 
+export { NL_TO_ESQL_FLAG } from '../hooks/use_nl_to_esql_check';
 export { VisorMode } from './mode_selector';
-
-export const NL_TO_ESQL_FLAG = 'esql.nlToEsqlEnabled';
 
 export interface QuickSearchVisorProps {
   // Current ESQL query
@@ -58,6 +58,10 @@ const closeButtonAriaLabel = i18n.translate('esqlEditor.visor.closeButtonAriaLab
   defaultMessage: 'Close quick search visor',
 });
 
+const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip', {
+  defaultMessage: 'Technical preview',
+});
+
 export function QuickSearchVisor({
   query,
   isSpaceReduced,
@@ -67,36 +71,20 @@ export function QuickSearchVisor({
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, core, data } = kibana.services;
-  const getLicense = kibana.services?.esql?.getLicense;
-  const isNlToEsqlFlagEnabled = core.featureFlags.getBooleanValue(NL_TO_ESQL_FLAG, false);
-  const isDarkMode = useKibanaIsDarkMode();
-  const { euiTheme } = useEuiTheme();
+  const isNlToEsqlEnabled = useNlToEsqlCheck();
+  const euiThemeContext = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
   const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(undefined);
-  const [hasValidLicense, setHasValidLicense] = useState(false);
-  const licenseCheckRef = useRef(false);
   const connectorCheckRef = useRef(false);
   const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
   const kqlInputRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
   const userSelectedSourceRef = useRef(false);
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
-
-  useEffect(() => {
-    if (!isNlToEsqlFlagEnabled || !getLicense || licenseCheckRef.current) return;
-    licenseCheckRef.current = true;
-    getLicense().then((license) => {
-      setHasValidLicense(
-        Boolean(license && license.status === 'active' && license.hasAtLeast('enterprise'))
-      );
-    });
-  }, [isNlToEsqlFlagEnabled, getLicense]);
-
-  const isNlToEsqlEnabled = isNlToEsqlFlagEnabled && hasValidLicense;
 
   const onKqlValueChange = useCallback((kqlQuery: string) => {
     setSearchValue(kqlQuery);
@@ -236,13 +224,11 @@ export function QuickSearchVisor({
   }, [selectedSources]);
 
   const styles = visorStyles(
-    euiTheme,
+    euiThemeContext,
     comboBoxWidth,
     Boolean(isSpaceReduced),
     isVisible,
-    isDarkMode,
-    visorMode,
-    isNlToEsqlEnabled
+    visorMode
   );
 
   if (!KQLComponent) {
@@ -265,10 +251,13 @@ export function QuickSearchVisor({
           alignItems="center"
           justifyContent="flexStart"
           responsive={false}
-          css={styles.visorGradientBox}
+          css={styles.visorBox}
         >
           {isNlToEsqlEnabled && (
             <>
+              <EuiFlexItem grow={false} css={styles.techPreviewIcon}>
+                <EuiIconTip type="beaker" size="s" color="subdued" content={techPreviewTooltip} />
+              </EuiFlexItem>
               <EuiFlexItem grow={false} css={styles.modeSelectWrapper}>
                 <ModeSelector onModeChange={onModeChange} />
               </EuiFlexItem>

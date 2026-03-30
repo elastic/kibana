@@ -30,6 +30,10 @@ validation against the vendor API.
 - If non-MCP: valid structure with required fields, correct auth type
 - **ID alignment**: `metadata.id` (e.g. `.zendesk`), `DataSource.stackConnectors[].type`, `DataSource.iconType`, and
   `ConnectorIconsMap` key all match. IDs must start with a dot.
+- **`metadata.description` quality**: The description must list the key actions the connector supports and the objects
+  they operate on (e.g., "Search messages, list public channels, and send messages in Slack"). Flag descriptions that
+  are vague ("Connect to X to pull data"), say nothing about capabilities ("Kibana Stack Connector for X"), or omit
+  actions the connector actually provides. Keep to one sentence, ~15 words.
 - **Schema UI**: Every config field in `schema` has `.meta()` with at least `label` (or uses a `UISchemas.*` helper).
   Otherwise fields render as unlabeled.
 - **Action param schema (Workflow editor)**: For custom connector actions, the Zod schema in the input handler should

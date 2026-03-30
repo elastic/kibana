@@ -9,19 +9,37 @@ import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
 import {
   INVESTIGATION_SECTION_TEST_ID,
   INVESTIGATION_SECTION_TITLE,
   InvestigationSection,
 } from './investigation_section';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
+import { useKibana } from '../../../common/lib/kibana';
+import { HighlightedFields } from './highlighted_fields';
 
 jest.mock('../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
 
+jest.mock('../../../common/lib/kibana', () => ({
+  useKibana: jest.fn(),
+}));
+
 jest.mock('./investigation_guide', () => ({
   InvestigationGuide: () => <div data-test-subj="investigationGuideMock" />,
+}));
+
+jest.mock('./highlighted_fields', () => ({
+  HighlightedFields: jest.fn(() => <div data-test-subj="highlightedFieldsMock" />),
+}));
+
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => ({
+  useRuleWithFallback: jest.fn().mockReturnValue({ rule: null, loading: false, error: null }),
 }));
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
@@ -40,11 +58,27 @@ const nonSignalMockHit = createMockHit({
   'event.kind': 'event',
 });
 
+const mockRenderCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
+  <>{children}</>
+));
+
 describe('InvestigationSection', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseKibana = jest.mocked(useKibana);
+  const mockHighlightedFields = jest.mocked(HighlightedFields);
+  const store = createStore(() => ({}));
+  const history = createMemoryHistory();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: {
+        overlays: {
+          openSystemFlyout: jest.fn(),
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+    mockHighlightedFields.mockReturnValue(<div data-test-subj="highlightedFieldsMock" />);
   });
 
   it('renders the Investigation expandable section', () => {
@@ -52,7 +86,11 @@ describe('InvestigationSection', () => {
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <InvestigationSection hit={mockHit} />
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
       </IntlProvider>
     );
 
@@ -66,7 +104,11 @@ describe('InvestigationSection', () => {
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <InvestigationSection hit={mockHit} />
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
       </IntlProvider>
     );
 
@@ -80,7 +122,11 @@ describe('InvestigationSection', () => {
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <InvestigationSection hit={mockHit} />
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
       </IntlProvider>
     );
 
@@ -94,7 +140,11 @@ describe('InvestigationSection', () => {
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <InvestigationSection hit={mockHit} />
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
       </IntlProvider>
     );
 
@@ -106,10 +156,39 @@ describe('InvestigationSection', () => {
 
     const { queryByTestId } = render(
       <IntlProvider locale="en">
-        <InvestigationSection hit={nonSignalMockHit} />
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection
+              hit={nonSignalMockHit}
+              renderCellActions={mockRenderCellActions}
+            />
+          </Router>
+        </Provider>
       </IntlProvider>
     );
 
     expect(queryByTestId('investigationGuideMock')).not.toBeInTheDocument();
+  });
+
+  it('passes renderCellActions to HighlightedFields', () => {
+    mockUseExpandSection.mockReturnValue(true);
+    const localMockRenderCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ));
+
+    render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} renderCellActions={localMockRenderCellActions} />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    expect(mockHighlightedFields).toHaveBeenCalledWith(
+      expect.objectContaining({ renderCellActions: localMockRenderCellActions }),
+      expect.anything()
+    );
   });
 });

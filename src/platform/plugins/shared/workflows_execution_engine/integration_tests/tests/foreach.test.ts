@@ -9,7 +9,7 @@
 
 import type { JsonObject } from '@kbn/utility-types';
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin.mock';
+import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('workflow with foreach', () => {
@@ -283,6 +283,135 @@ steps:
         });
       });
     });
+  });
+
+  describe('foreach with native YAML array', () => {
+    function createYamlSpecWith(
+      items: string[],
+      options: { inline: boolean; customMessage?: string }
+    ) {
+      // inline: ["a", "b", "c"]
+      // not inline:
+      //   - a
+      //   - b
+      //   - c
+      const itemsString = options.inline
+        ? `["${items.join('", "')}"]`
+        : `\n      - ${items.join('\n      - ')}`;
+      return `steps:
+  - name: nativeForeach
+    type: foreach
+    foreach: ${itemsString}
+    steps:
+      - name: childStep
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: '${options.customMessage ?? 'Item: {{foreach.item}}'}'`;
+    }
+
+    const FOREACH_VALUES = [
+      { values: ['alpha', 'beta', 'gamma'], inline: false },
+      { values: ['alpha', 'beta', 'gamma'], inline: true },
+    ];
+
+    it.each(FOREACH_VALUES)(
+      'should resolve foreach.item for each element in a native array inline: $inline',
+      async ({ values, inline }) => {
+        const yaml = createYamlSpecWith(values, { inline });
+        await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+        const workflowExecution =
+          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+        values.forEach((item) => {
+          expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: FakeConnectors.slack1.id,
+              params: { message: `Item: ${item}` },
+            })
+          );
+        });
+      }
+    );
+
+    it('should resolve foreach.item correctly with a native array using context variables', async () => {
+      const yaml = `
+inputs:
+  type: object
+  properties:
+    James:
+      type: string
+      default: "foo"
+    Laura:
+      type: string
+      default: "bar" 
+steps:
+  - name: process_items
+    type: foreach
+    foreach: 
+      - name: "James"
+        surname: "{{inputs.James}}"
+      - name: "Laura"
+        surname: "{{inputs.Laura}}"
+    steps:
+      - name: log_item
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: "Item: {{ foreach.item | json}}"`;
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: yaml,
+        inputs: {},
+      });
+
+      const workflowExecution =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+      [
+        { name: 'James', surname: 'foo' },
+        { name: 'Laura', surname: 'bar' },
+      ].forEach((item) => {
+        expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: FakeConnectors.slack1.id,
+            params: { message: `Item: ${JSON.stringify(item)}` },
+          })
+        );
+      });
+    });
+
+    it.each(FOREACH_VALUES)(
+      'should resolve foreach.index and foreach.total for a native array inline: $inline',
+      async ({ values, inline }) => {
+        const yaml = createYamlSpecWith(values, {
+          inline,
+          customMessage: 'idx:{{foreach.index}};total:{{foreach.total}}',
+        });
+        await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+        const workflowExecution =
+          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+        values.forEach((_, index) => {
+          expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: FakeConnectors.slack1.id,
+              params: { message: `idx:${index};total:${values.length}` },
+            })
+          );
+        });
+      }
+    );
   });
 
   describe.each(['${{inputs.notExistingInput}}', 'not array', '["broken", json]'])(

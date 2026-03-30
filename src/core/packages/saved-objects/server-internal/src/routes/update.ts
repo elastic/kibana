@@ -62,7 +62,8 @@ export const registerUpdateRoute = (
                 name: schema.string(),
                 type: schema.string(),
                 id: schema.string(),
-              })
+              }),
+              { maxSize: 1000 }
             )
           ),
           upsert: schema.maybe(schema.recordOf(schema.string(), schema.any())),

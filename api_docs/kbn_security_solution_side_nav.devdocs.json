@@ -347,7 +347,7 @@
         "label": "SolutionSideNavProps",
         "description": [],
         "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -372,7 +372,7 @@
               "<string>[]"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -387,7 +387,7 @@
               "The id of the selected item to highlight. It only affects the top level items rendered in the main panel"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -412,7 +412,7 @@
               "<string>[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -430,7 +430,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -448,7 +448,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -473,7 +473,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/side-nav/src/solution_side_nav.tsx",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

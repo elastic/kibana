@@ -19,7 +19,7 @@ const APIToSavedObjectOptionsKeys = {
   auto_apply_filters: 'autoApplyFilters',
 } as const;
 
-export function transformOptionsIn(options: DashboardState['options']): string {
+export function transformOptionsIn(options: Partial<DashboardState['options']>): string {
   const apiOptions = options ?? {};
   const savedObjectOptions: { [key: string]: unknown } = {};
 

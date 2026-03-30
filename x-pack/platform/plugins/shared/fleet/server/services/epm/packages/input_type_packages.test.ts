@@ -14,14 +14,15 @@ import { PackageNotFoundError } from '../../../errors';
 import { dataStreamService } from '../../data_streams';
 
 import { getInstalledPackageWithAssets, getInstallation } from './get';
+import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import {
   installAssetsForInputPackagePolicy,
   removeAssetsForInputPackagePolicy,
   isInputPackageDatasetUsedByMultiplePolicies,
+  hasDynamicSignalTypes,
 } from './input_type_packages';
 import { cleanupAssets } from './remove';
-import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 
 jest.mock('../../data_streams');
 jest.mock('./get');
@@ -58,6 +59,12 @@ jest.mock('../../app_context', () => {
 describe('installAssetsForInputPackagePolicy', () => {
   beforeEach(() => {
     jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
+    jest.mocked(installIndexTemplatesAndPipelines).mockClear();
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+    mockedLogger.debug.mockClear();
+    mockedLogger.error.mockClear();
+    mockedLogger.warn.mockClear();
+    mockedLogger.info.mockClear();
   });
 
   it('should do nothing for non input package', async () => {
@@ -286,6 +293,378 @@ describe('installAssetsForInputPackagePolicy', () => {
     );
   });
 
+  it('should remove time_series index mode for non-metrics data stream types', async () => {
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+
+    const pkgInfoWithTimeSeries = {
+      ...TEST_PKG_INFO_INPUT,
+      elasticsearch: {
+        index_mode: 'time_series',
+        'index_template.mappings': {},
+      },
+    };
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'test',
+        version: '1.0.0',
+      },
+      packageInfo: pkgInfoWithTimeSeries,
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: pkgInfoWithTimeSeries as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: false,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: { 'data_stream.dataset': { value: 'test.tata' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Ignoring time_series index mode')
+    );
+
+    // Verify index_mode was actually removed
+    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const dataStreams = installCall?.[0]?.onlyForDataStreams;
+    expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBeUndefined();
+  });
+
+  it('should preserve time_series index mode for metrics data stream type', async () => {
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+
+    const pkgInfoWithTimeSeries = {
+      type: 'input',
+      name: 'test',
+      version: '1.0.0',
+      policy_templates: [
+        {
+          name: 'metrics',
+          type: 'metrics',
+        },
+      ],
+      elasticsearch: {
+        index_mode: 'time_series',
+        'index_template.mappings': {},
+      },
+    };
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'test',
+        version: '1.0.0',
+      },
+      packageInfo: pkgInfoWithTimeSeries,
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: pkgInfoWithTimeSeries as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: false,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'metrics',
+            type: 'metrics',
+            streams: [
+              {
+                data_stream: { type: 'metrics' },
+                vars: { 'data_stream.dataset': { value: 'test.metrics' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(mockedLogger.debug).not.toHaveBeenCalledWith(
+      expect.stringContaining('Ignoring time_series index mode')
+    );
+
+    // Verify index_mode was preserved
+    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const dataStreams = installCall?.[0]?.onlyForDataStreams;
+    expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBe('time_series');
+  });
+
+  it('should use data_stream_type var when provided', async () => {
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+
+    const pkgInfoWithTimeSeries = {
+      ...TEST_PKG_INFO_INPUT,
+      elasticsearch: {
+        index_mode: 'time_series',
+        'index_template.mappings': {},
+      },
+    };
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'test',
+        version: '1.0.0',
+      },
+      packageInfo: pkgInfoWithTimeSeries,
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: pkgInfoWithTimeSeries as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: false,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'traces',
+            type: 'traces',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: {
+                  'data_stream.dataset': { value: 'test.traces' },
+                  'data_stream.type': { value: 'traces' },
+                },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Ignoring time_series index mode')
+    );
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('data stream type is "traces"')
+    );
+
+    // Verify index_mode was removed
+    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const dataStreams = installCall?.[0]?.onlyForDataStreams;
+    expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBeUndefined();
+  });
+
+  it('should add time_series index mode for OTel metrics data streams when not present', async () => {
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+
+    const pkgInfoWithoutTimeSeries = {
+      type: 'input',
+      name: 'otel',
+      version: '1.0.0',
+      policy_templates: [
+        {
+          name: 'metrics',
+          type: 'metrics',
+        },
+      ],
+      // No elasticsearch config with index_mode
+    };
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'otel',
+        version: '1.0.0',
+      },
+      packageInfo: pkgInfoWithoutTimeSeries,
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: pkgInfoWithoutTimeSeries as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: false,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'otelcol',
+            type: 'otelcol',
+            streams: [
+              {
+                data_stream: { type: 'metrics' },
+                vars: { 'data_stream.dataset': { value: 'otel.metrics' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Adding time_series index mode for OTel package')
+    );
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('data stream type is "metrics"')
+    );
+
+    // Verify index_mode was added
+    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const dataStreams = installCall?.[0]?.onlyForDataStreams;
+    expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBe('time_series');
+  });
+
+  it('should preserve existing time_series index mode for OTel metrics data streams', async () => {
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+
+    const pkgInfoWithTimeSeries = {
+      type: 'input',
+      name: 'otel',
+      version: '1.0.0',
+      policy_templates: [
+        {
+          name: 'metrics',
+          type: 'metrics',
+        },
+      ],
+      elasticsearch: {
+        index_mode: 'time_series',
+        'index_template.mappings': {},
+      },
+    };
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'otel',
+        version: '1.0.0',
+      },
+      packageInfo: pkgInfoWithTimeSeries,
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: pkgInfoWithTimeSeries as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: false,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'otelcol',
+            type: 'otelcol',
+            streams: [
+              {
+                data_stream: { type: 'metrics' },
+                vars: { 'data_stream.dataset': { value: 'otel.metrics' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    // Should not log about ignoring or adding time_series
+    expect(mockedLogger.debug).not.toHaveBeenCalledWith(
+      expect.stringContaining('Ignoring time_series index mode')
+    );
+    expect(mockedLogger.debug).not.toHaveBeenCalledWith(
+      expect.stringContaining('Adding time_series index mode')
+    );
+
+    // Verify index_mode was preserved
+    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const dataStreams = installCall?.[0]?.onlyForDataStreams;
+    expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBe('time_series');
+  });
+
+  it('should not add time_series index mode for non-OTel metrics data streams without it', async () => {
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+
+    const pkgInfoWithoutTimeSeries = {
+      type: 'input',
+      name: 'test',
+      version: '1.0.0',
+      policy_templates: [
+        {
+          name: 'metrics',
+          type: 'metrics',
+        },
+      ],
+      // No elasticsearch config with index_mode
+    };
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'test',
+        version: '1.0.0',
+      },
+      packageInfo: pkgInfoWithoutTimeSeries,
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: pkgInfoWithoutTimeSeries as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: false,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                data_stream: { type: 'metrics' },
+                vars: { 'data_stream.dataset': { value: 'test.metrics' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(mockedLogger.debug).not.toHaveBeenCalledWith(
+      expect.stringContaining('Adding time_series index mode')
+    );
+
+    // Verify index_mode was not added
+    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const dataStreams = installCall?.[0]?.onlyForDataStreams;
+    expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBeUndefined();
+  });
+
   describe('with dynamic_signal_types', () => {
     const OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES = {
       type: 'input',
@@ -296,6 +675,20 @@ describe('installAssetsForInputPackagePolicy', () => {
           name: 'otel',
           type: 'logs',
           input: 'otelcol',
+          dynamic_signal_types: true,
+        },
+      ],
+    };
+
+    const OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES_NO_TYPE = {
+      type: 'input',
+      name: 'otel',
+      version: '1.0.0',
+      policy_templates: [
+        {
+          name: 'otel',
+          input: 'otelcol',
+          template_path: 'otel/otel.hbl',
           dynamic_signal_types: true,
         },
       ],
@@ -406,6 +799,46 @@ describe('installAssetsForInputPackagePolicy', () => {
           ],
         })
       );
+    });
+
+    it('should install index templates for all signal types when dynamic_signal_types is true and policy template has no type', async () => {
+      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+        installation: {
+          name: 'otel',
+          version: '1.0.0',
+        },
+        packageInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES_NO_TYPE,
+        assetsMap: new Map(),
+        paths: [],
+      } as any);
+      const mockedLogger = jest.mocked(appContextService.getLogger());
+
+      await installAssetsForInputPackagePolicy({
+        pkgInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES_NO_TYPE as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: false,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'otel',
+              type: 'otelcol',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'otel.test' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(3);
+      const calls = jest.mocked(installIndexTemplatesAndPipelines).mock.calls;
+      const types = calls.map((c) => c[0]?.onlyForDataStreams?.[0]?.type);
+      expect(types.sort()).toEqual(['logs', 'metrics', 'traces']);
     });
 
     it('should install index template for single signal type when dynamic_signal_types is false', async () => {
@@ -937,5 +1370,89 @@ describe('removeAssetsForInputPackagePolicy', () => {
       );
       expect(res).toEqual(true);
     });
+  });
+});
+
+describe('hasDynamicSignalTypes', () => {
+  it('returns false when packageInfo is undefined', () => {
+    expect(hasDynamicSignalTypes(undefined)).toBe(false);
+  });
+
+  it('returns true for an input-only package with dynamic_signal_types on the policy template', () => {
+    expect(
+      hasDynamicSignalTypes({
+        policy_templates: [
+          {
+            name: 'otel',
+            input: 'otelcol',
+            template_path: 'path.hbl',
+            title: 'OTel',
+            description: 'OTel',
+            dynamic_signal_types: true,
+          },
+        ],
+      } as any)
+    ).toBe(true);
+  });
+
+  it('returns false for an input-only package without dynamic_signal_types', () => {
+    expect(
+      hasDynamicSignalTypes({
+        policy_templates: [
+          {
+            name: 'logfile',
+            input: 'logfile',
+            type: 'logs',
+            template_path: 'path.hbl',
+            title: 'Logfile',
+            description: 'Logfile',
+          },
+        ],
+      } as any)
+    ).toBe(false);
+  });
+
+  it('returns true for a composable integration package with a dynamic OTel nested input', () => {
+    expect(
+      hasDynamicSignalTypes({
+        type: 'integration',
+        policy_templates: [
+          {
+            name: 'composable-otel',
+            title: 'Composable OTel',
+            description: 'desc',
+            inputs: [
+              {
+                type: 'otelcol',
+                title: 'OTel',
+                description: 'OTel',
+                dynamic_signal_types: true,
+              },
+              { type: 'logfile', title: 'Logfile', description: 'Logfile' },
+            ],
+          },
+        ],
+      } as any)
+    ).toBe(true);
+  });
+
+  it('returns false for a composable integration package with no dynamic OTel nested inputs', () => {
+    expect(
+      hasDynamicSignalTypes({
+        type: 'integration',
+        policy_templates: [
+          {
+            name: 'composable',
+            title: 'Composable',
+            description: 'desc',
+            inputs: [{ type: 'logfile', title: 'Logfile', description: 'Logfile' }],
+          },
+        ],
+      } as any)
+    ).toBe(false);
+  });
+
+  it('returns false for a package with no policy_templates', () => {
+    expect(hasDynamicSignalTypes({ policy_templates: [] } as any)).toBe(false);
   });
 });

@@ -83,6 +83,11 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                     title: {
                       type: 'string',
                     },
+                    description: {
+                      type: 'string',
+                      description:
+                        'A semantically searchable description explaining what the query detects and why it matters. Should be 1-2 sentences that help users find this query when searching by concept or intent.',
+                    },
                     category: {
                       type: 'string',
                       enum: [
@@ -105,7 +110,7 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                       },
                     },
                   },
-                  required: ['esql', 'title', 'category', 'severity_score'],
+                  required: ['esql', 'title', 'description', 'category', 'severity_score'],
                 },
               },
             },

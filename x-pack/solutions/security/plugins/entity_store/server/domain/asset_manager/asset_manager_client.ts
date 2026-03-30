@@ -18,7 +18,11 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityType } from '../../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../../tasks/extract_entity_task';
 import { scheduleHistorySnapshotTasks } from '../../tasks/history_snapshot_task';
-import { installElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
+import {
+  installSharedElasticsearchAssets,
+  installIndicesAndDataStreams,
+  uninstallElasticsearchAssets,
+} from './install_assets';
 import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
@@ -27,7 +31,7 @@ import {
   HistorySnapshotState,
   LogExtractionConfig,
 } from '../saved_objects';
-import type { HistorySnapshotBodyParams, LogExtractionBodyParams } from '../../routes/constants';
+import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
 import {
   ENGINE_STATUS,
   ENTITY_STORE_CLUSTER_PRIVILEGES,
@@ -42,7 +46,7 @@ import type {
   GetStatusResult,
 } from '../types';
 import { getExtractEntityTaskId } from '../../tasks/extract_entity_task';
-import { getLatestEntitiesIndexName } from './latest_index';
+import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
 import { getUpdatesIndexTemplateId } from './updates_index_template';
 import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
@@ -104,12 +108,15 @@ export class AssetManagerClient {
   public async init(
     request: KibanaRequest,
     entityTypes: EntityType[],
-    logsExtractionParams?: LogExtractionBodyParams,
+    logsExtractionParams?: LogExtractionInstallParams,
     historySnapshotParams?: HistorySnapshotBodyParams
   ) {
     try {
       const logsExtraction = LogExtractionConfig.parse(logsExtractionParams ?? {});
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
+
+      // Phase 1: Install shared ES assets and run independent setup tasks.
+      // All component templates and index templates must exist before any index is created.
       await Promise.all([
         this.globalStateClient.init({ historySnapshot, logsExtraction }),
 
@@ -129,6 +136,15 @@ export class AssetManagerClient {
           taskManager: this.taskManager,
         }),
 
+        installSharedElasticsearchAssets({
+          esClient: this.esClient,
+          logger: this.logger,
+          namespace: this.namespace,
+        }),
+      ]);
+
+      // Phase 2: Create indices and start engines, now that templates are in place.
+      await Promise.all([
         ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
 
         scheduleHistorySnapshotTasks({
@@ -197,7 +213,6 @@ export class AssetManagerClient {
       if (!engines.some((e) => e.type === type)) {
         return false;
       }
-      const definition = getEntityDefinition(type, this.namespace);
       await this.stop(type);
 
       await Promise.all([
@@ -205,7 +220,6 @@ export class AssetManagerClient {
         uninstallElasticsearchAssets({
           esClient: this.esClient,
           logger: this.logger.get(type),
-          definition,
           namespace: this.namespace,
         }),
         deleteEuidStoredScripts({
@@ -326,16 +340,10 @@ export class AssetManagerClient {
       }
 
       this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
-      const definition = getEntityDefinition(type, this.namespace);
-      await Promise.all([
-        this.engineDescriptorClient.init(type),
-        installElasticsearchAssets({
-          esClient: this.esClient,
-          logger: this.logger,
-          definition,
-          namespace: this.namespace,
-        }),
-      ]);
+      // Those 3 operations have to happen in order: 1. Init engine; 2. Install
+      // Indices & Data Streams; 3. Update engine.
+      await this.engineDescriptorClient.init(type);
+      await installIndicesAndDataStreams(this.esClient, this.namespace, this.logger);
       await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
       this.logger.debug(`Installed definition: ${type}`);
 

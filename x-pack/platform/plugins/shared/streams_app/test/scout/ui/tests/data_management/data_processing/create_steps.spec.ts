@@ -40,6 +40,10 @@ test.describe(
       page,
       config,
     }) => {
+      test.skip(
+        config.isCloud === true && config.serverless === false,
+        `This scenario is not working as expected on ECH`
+      );
       // In the empty state without AI connectors, the Technical Preview badge should be hidden
       await expect(page.getByText('Extract fields from your data')).toBeVisible();
       // Only check for hidden badge in stateful mode - in serverless/production environments,

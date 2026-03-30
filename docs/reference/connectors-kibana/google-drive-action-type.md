@@ -2,8 +2,6 @@
 navigation_title: "Google Drive"
 type: reference
 description: "Use the Google Drive connector to search, list, and download files and folders from Google Drive."
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/google-drive-action-type.html
 applies_to:
   stack: preview 9.4
   serverless: preview

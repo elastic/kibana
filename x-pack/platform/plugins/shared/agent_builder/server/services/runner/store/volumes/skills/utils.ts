@@ -12,18 +12,12 @@ import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
 
 /**
- * Skill with a guaranteed basePath, used for VFS mounting.
- */
-type MountableSkill = InternalSkillDefinition & { basePath: string };
-
-/**
  * Get the VFS entry path for a skill.
- * Accepts either a SkillDefinition or InternalSkillDefinition with basePath.
  */
 export const getSkillEntryPath = ({
   skill,
 }: {
-  skill: Pick<MountableSkill, 'basePath' | 'name'>;
+  skill: Pick<InternalSkillDefinition, 'basePath' | 'name'>;
 }): string => {
   return `${skill.basePath}/${skill.name}/SKILL.md`;
 };
@@ -32,7 +26,7 @@ export const getSkillReferencedContentEntryPath = ({
   skill,
   referencedContent,
 }: {
-  skill: Pick<MountableSkill, 'basePath' | 'name'>;
+  skill: Pick<InternalSkillDefinition, 'basePath' | 'name'>;
   referencedContent: { relativePath: string; name: string };
 }): string => {
   return `${skill.basePath}/${skill.name}/${referencedContent.relativePath}/${referencedContent.name}.md`;
@@ -53,10 +47,9 @@ ${skill.content}`;
 
 /**
  * Creates VFS file entries for a skill that has a basePath.
- * Only skills with basePath should be passed to this function (builtin skills).
  */
 export const createSkillEntries = (
-  skill: MountableSkill
+  skill: InternalSkillDefinition
 ): (SkillFileEntry | SkillReferencedContentFileEntry)[] => {
   const stringifiedContent = getSkillPlainText({ skill });
 

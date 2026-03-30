@@ -2262,7 +2262,7 @@
           "<T, Options>"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2278,7 +2278,7 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2294,7 +2294,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2310,7 +2310,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2326,7 +2326,7 @@
               "Options | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2635,7 +2635,7 @@
         "label": "MSearchIn",
         "description": [],
         "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
-        "lineNumber": 44,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2651,7 +2651,7 @@
               "{ contentTypeId: string; version?: number | undefined; }[]"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
-            "lineNumber": 45,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2673,7 +2673,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
-            "lineNumber": 46,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2699,7 +2699,7 @@
           "<T>"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
-        "lineNumber": 51,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2715,7 +2715,7 @@
               "{ contentTypeId: string; version?: number | undefined; }[]"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
-            "lineNumber": 52,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2731,7 +2731,7 @@
               "{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
-            "lineNumber": 53,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2821,7 +2821,7 @@
           "<T, Options>"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
-        "lineNumber": 77,
+        "lineNumber": 78,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2837,7 +2837,7 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2859,7 +2859,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
-            "lineNumber": 79,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2875,7 +2875,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2891,7 +2891,7 @@
               "Options | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
-            "lineNumber": 81,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2907,7 +2907,7 @@
         "label": "SearchQuery",
         "description": [],
         "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
-        "lineNumber": 63,
+        "lineNumber": 64,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2925,7 +2925,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2943,7 +2943,7 @@
               "{ included?: string[] | undefined; excluded?: string[] | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2961,7 +2961,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
-            "lineNumber": 71,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2979,7 +2979,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3125,7 +3125,7 @@
           "<T, ItemMeta>[]; meta: ResultMeta; }"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3182,7 +3182,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
-        "lineNumber": 42,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3199,7 +3199,7 @@
           "{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
-        "lineNumber": 49,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3250,7 +3250,7 @@
           "M extends void ? { hits: T[]; pagination: { total: number; cursor?: string | undefined; }; } : { hits: T[]; pagination: { total: number; cursor?: string | undefined; }; meta: M; }"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
-        "lineNumber": 84,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

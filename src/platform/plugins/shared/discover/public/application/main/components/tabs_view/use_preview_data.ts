@@ -17,7 +17,11 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { RuntimeStateManager, TabState } from '../../state_management/redux';
+import type {
+  RecentlyClosedTabState,
+  RuntimeStateManager,
+  TabState,
+} from '../../state_management/redux';
 import {
   selectTabRuntimeState,
   useInternalStateSelector,
@@ -25,7 +29,6 @@ import {
   selectRecentlyClosedTabs,
 } from '../../state_management/redux';
 import { FetchStatus } from '../../../types';
-import type { RecentlyClosedTabState } from '../../state_management/redux/types';
 
 export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
   const allTabs = useInternalStateSelector(selectAllTabs);
@@ -159,9 +162,9 @@ const getPreviewDataObservable = (
 
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabState.id);
 
-  return tabRuntimeState.stateContainer$.pipe(
-    switchMap((tabStateContainer) => {
-      if (!tabStateContainer) {
+  return tabRuntimeState.dataStateContainer$.pipe(
+    switchMap((dataStateContainer) => {
+      if (!dataStateContainer) {
         const derivedDataViewName = getDataViewNameFromInitialInternalState(
           tabState.initialInternalState,
           savedDataViews
@@ -173,10 +176,7 @@ const getPreviewDataObservable = (
         });
       }
 
-      return combineLatest([
-        tabStateContainer.dataState.data$.main$,
-        tabRuntimeState.currentDataView$,
-      ]).pipe(
+      return combineLatest([dataStateContainer.data$.main$, tabRuntimeState.currentDataView$]).pipe(
         map(([{ fetchStatus }, dataView]) => ({
           fetchStatus,
           dataViewName: dataView?.name,

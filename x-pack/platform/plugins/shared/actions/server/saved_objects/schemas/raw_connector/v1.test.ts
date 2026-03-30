@@ -39,7 +39,7 @@ describe('Raw Connector Schema', () => {
 
   test('invalid action', () => {
     expect(() => rawConnectorSchema.validate({ ...action, foo: 'bar' })).toThrow(
-      '[foo]: definition for this key is missing'
+      "[foo]: Additional properties are not allowed ('foo' was unexpected)"
     );
   });
 
@@ -52,7 +52,7 @@ describe('Raw Connector Schema', () => {
 
   test('invalid preconfigured action', () => {
     expect(() => rawConnectorSchema.validate({ ...preconfiguredAction, foo: '1' })).toThrow(
-      '[foo]: definition for this key is missing'
+      "[foo]: Additional properties are not allowed ('foo' was unexpected)"
     );
   });
 });

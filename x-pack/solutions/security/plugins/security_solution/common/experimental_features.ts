@@ -93,9 +93,23 @@ export const allowedExperimentalValues = Object.freeze({
   entityDetailsHighlightsEnabled: true,
 
   /**
-   * Enables the experimental Threat Hunting home experience.
+   * Enables the new Entity Analytics home page experience.
    */
-  entityThreatHuntingEnabled: false,
+  entityAnalyticsNewHomePageEnabled: false,
+
+  /**
+   * Enables the lead generation pipeline for Entity Analytics.
+   * When enabled, the lead generation engine, observation modules,
+   * API routes, and persistence indices are activated.
+   */
+  leadGenerationEnabled: false,
+
+  /**
+   * Enables lead generation details: the "i" icon on lead cards/list items
+   * and the "How this lead was generated" flyout.
+   * Requires `leadGenerationEnabled` to also be true.
+   */
+  leadGenerationDetailsEnabled: false,
 
   /**
    * disables ES|QL rules
@@ -103,9 +117,10 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables the storing of gaps in the event log
+   * Enables gap reason detection and display in the gaps table.
+   * When off, gap_reason is not calculated or passed to rule metrics/telemetry.
    */
-  storeGapsInEventLogEnabled: true,
+  gapReasonDetectionEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -170,10 +185,6 @@ export const allowedExperimentalValues = Object.freeze({
   automaticDashboardsMigration: true,
 
   /**
-   * Enables the SIEM Readiness Dashboard feature
-   */
-  siemReadinessDashboard: false,
-  /**
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.2.0
    */
@@ -231,6 +242,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
+
+  /**
+   * Uses entity store v2 for entity analytics skill
+   */
+  entityAnalyticsEntityStoreV2: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -28,22 +28,22 @@ export const LOADING_RISK_ENGINE_SETTINGS = i18n.translate(
   }
 );
 
-export const RISK_ENGINE_STATUS = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.status',
+export const ENTITY_ANALYTICS_STATUS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.status',
   {
     defaultMessage: 'Status',
   }
 );
 
-export const RISK_ENGINE_STATUS_ON = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.statusOn',
+export const ENTITY_ANALYTICS_STATUS_ON = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.statusOn',
   {
     defaultMessage: 'On',
   }
 );
 
-export const RISK_ENGINE_STATUS_OFF = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.statusOff',
+export const ENTITY_ANALYTICS_STATUS_OFF = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.statusOff',
   {
     defaultMessage: 'Off',
   }
@@ -153,17 +153,24 @@ export const ERROR_PANEL_ERRORS = i18n.translate(
   }
 );
 
-export const RISK_ENGINE_TURNED_ON = i18n.translate(
-  'xpack.securitySolution.riskScore.moduleTurnedOn',
+export const ENTITY_ANALYTICS_TURNED_ON = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.moduleTurnedOn',
   {
-    defaultMessage: 'Entity risk score has been turned on',
+    defaultMessage: 'Entity Analytics has been turned on',
   }
 );
 
-export const RISK_ENGINE_TURNED_OFF = i18n.translate(
-  'xpack.securitySolution.riskScore.moduleTurnedOff',
+export const ENTITY_ANALYTICS_TURNED_OFF = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.moduleTurnedOff',
   {
-    defaultMessage: 'Entity risk score has been turned off',
+    defaultMessage: 'Entity Analytics has been turned off',
+  }
+);
+
+export const ENTITY_ANALYTICS_TOGGLE_ERROR = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.toggleError',
+  {
+    defaultMessage: 'Failed to toggle Entity Analytics',
   }
 );
 
@@ -217,10 +224,10 @@ export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: string) =>
     values: { timeInMinutes },
   });
 
-export const RISK_ENGINE_STATUS_SWITCH_LABEL = i18n.translate(
-  'xpack.securitySolution.riskScore.riskEngineStatus',
+export const ENTITY_ANALYTICS_STATUS_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.statusSwitchLabel',
   {
-    defaultMessage: 'Risk engine status',
+    defaultMessage: 'Entity analytics',
   }
 );
 
