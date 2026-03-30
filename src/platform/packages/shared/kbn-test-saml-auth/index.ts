@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runFtrCli } from './ftr';
+export {
+  SamlSessionManager,
+  type GetCookieOptions,
+  type HostOptions,
+  type SamlSessionManagerOptions,
+} from './src/session_manager';
+
+export type { Role } from './src/types';
