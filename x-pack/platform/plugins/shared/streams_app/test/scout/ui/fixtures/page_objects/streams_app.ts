@@ -16,7 +16,7 @@ import {
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
+import type { FieldTypeOption } from '../../../../../public/components/stream_management/data_management/schema_editor/constants';
 
 export class StreamsApp {
   public readonly processorFieldComboBox;
