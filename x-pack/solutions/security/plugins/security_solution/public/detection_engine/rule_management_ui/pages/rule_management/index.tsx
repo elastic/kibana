@@ -47,7 +47,8 @@ const RulesPageContent = () => {
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const [isRuleSettingsModalOpen, openRuleSettingsModal, closeRuleSettingsModal] = useBoolState();
   const kibanaServices = useKibana().services;
-  const { navigateToApp } = kibanaServices.application;
+  const { application } = kibanaServices;
+  const { navigateToApp } = application;
 
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
