@@ -7,10 +7,8 @@
 
 import { useCallback, useRef } from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
+import { useSecurityAgentId } from './use_security_agent_id';
 
 export interface UseAgentBuilderAttachmentParams {
   /**
@@ -44,10 +42,7 @@ export const useAgentBuilderAttachment = ({
   attachmentPrompt,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
   const { agentBuilder } = useKibana().services;
-  const skillsEnabled = useUiSetting<boolean>(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-    false
-  );
+  const agentId = useSecurityAgentId();
   const hasWarned = useRef(false);
 
   const openAgentBuilderFlyout = useCallback(() => {
@@ -76,9 +71,9 @@ export const useAgentBuilderAttachment = ({
       initialMessage: attachmentPrompt,
       attachments: [attachment],
       sessionTag: 'security',
-      ...(skillsEnabled ? {} : { agentId: THREAT_HUNTING_AGENT_ID }),
+      ...(agentId ? { agentId } : {}),
     });
-  }, [attachmentType, attachmentData, attachmentPrompt, agentBuilder, skillsEnabled]);
+  }, [attachmentType, attachmentData, attachmentPrompt, agentBuilder, agentId]);
 
   return {
     openAgentBuilderFlyout,
