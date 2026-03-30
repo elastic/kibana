@@ -12,7 +12,8 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { getSampleDocuments } from '@kbn/ai-tools';
 import { MANAGED_STREAM_SEARCH_PATTERN, type KIFeatureExtractionScenario } from '../datasets';
 
-const SAMPLE_DOCS_MAX = 60;
+const SAMPLE_DOCS_MAX = 50;
+const MAX_BACKFILL_ATTEMPTS = 5;
 
 const getAppNameFromFields = (fields: Record<string, unknown>): string | undefined => {
   const app = fields['resource.attributes.app'];
@@ -115,8 +116,10 @@ export const collectSampleDocuments = async ({
     uniqueApps,
   });
 
-  // fill remaining capacity with random documents
-  while (docs.length < SAMPLE_DOCS_MAX) {
+  // fill remaining capacity with random documents.
+  // limit attempts to avoid infinite loops in case of small pool of documents.
+  let attempts = 0;
+  while (docs.length < SAMPLE_DOCS_MAX && attempts < MAX_BACKFILL_ATTEMPTS) {
     const { hits } = await getSampleDocuments({
       esClient,
       index: MANAGED_STREAM_SEARCH_PATTERN,
@@ -127,6 +130,7 @@ export const collectSampleDocuments = async ({
     });
 
     addUniqueHitsToSample({ hits, docs, seen, uniqueApps });
+    attempts++;
   }
 
   log.info(
