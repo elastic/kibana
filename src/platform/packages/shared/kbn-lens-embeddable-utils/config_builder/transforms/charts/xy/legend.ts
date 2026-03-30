@@ -285,7 +285,6 @@ export function convertLegendToAPIFormat(
     legend: stripUndefined({
       visibility,
       statistics,
-      ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
       ...getLegendAlignment(legend),
       ...getLegendLayout(legend),
     }),
