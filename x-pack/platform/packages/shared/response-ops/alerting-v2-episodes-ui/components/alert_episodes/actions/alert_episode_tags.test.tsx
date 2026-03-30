@@ -36,6 +36,7 @@ describe('AlertEpisodeTags', () => {
 
   it('opens popover with remaining tags when overflow badge is clicked', async () => {
     const user = userEvent.setup();
+
     render(
       <IntlProvider locale="en">
         <AlertEpisodeTags tags={['a', 'b', 'c', 'd']} size={2} />
@@ -43,6 +44,6 @@ describe('AlertEpisodeTags', () => {
     );
     await user.click(screen.getByText('+2'));
     expect(await screen.findByText('c')).toBeInTheDocument();
-    expect(screen.getByText('d')).toBeInTheDocument();
+    expect(await screen.findByText('d')).toBeInTheDocument();
   });
 });

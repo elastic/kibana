@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction } from '../../../types/episode_action';
 import { AlertEpisodeStatusBadge } from './alert_episode_status_badge';
 
@@ -17,8 +18,8 @@ export interface AlertEpisodeStatusCellProps {
 }
 
 export function AlertEpisodeStatusCell({ status, episodeAction }: AlertEpisodeStatusCellProps) {
-  const isAcknowledged = episodeAction?.lastAckAction === 'ack';
-  const isSnoozed = episodeAction?.lastSnoozeAction === 'snooze';
+  const isAcknowledged = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
+  const isSnoozed = episodeAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE;
 
   return (
     <EuiFlexGroup
@@ -30,23 +31,21 @@ export function AlertEpisodeStatusCell({ status, episodeAction }: AlertEpisodeSt
     >
       <EuiFlexItem grow={false}>
         <AlertEpisodeStatusBadge
-          status={episodeAction?.lastDeactivateAction === 'deactivate' ? 'inactive' : status}
+          status={
+            episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
+              ? 'inactive'
+              : status
+          }
         />
       </EuiFlexItem>
       {isSnoozed && (
         <EuiFlexItem grow={false}>
-          <EuiBadge
-            iconType="bellSlash"
-            data-test-subj="alertEpisodeStatusCellSnoozeIndicator"
-          />
+          <EuiBadge iconType="bellSlash" data-test-subj="alertEpisodeStatusCellSnoozeIndicator" />
         </EuiFlexItem>
       )}
       {isAcknowledged && (
         <EuiFlexItem grow={false}>
-          <EuiBadge
-            iconType="checkCircle"
-            data-test-subj="alertEpisodeStatusCellAckIndicator"
-          />
+          <EuiBadge iconType="checkCircle" data-test-subj="alertEpisodeStatusCellAckIndicator" />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

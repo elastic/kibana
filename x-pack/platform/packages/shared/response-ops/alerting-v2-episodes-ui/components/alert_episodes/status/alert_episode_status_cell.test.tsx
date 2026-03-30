@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AlertEpisodeStatusCell } from './alert_episode_status_cell';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 
 describe('AlertEpisodeStatusCell', () => {
   it('renders status badge only when no action indicators', () => {
@@ -27,7 +28,7 @@ describe('AlertEpisodeStatusCell', () => {
           ruleId: '1',
           groupHash: '1',
           lastAckAction: null,
-          lastSnoozeAction: 'snooze',
+          lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
           lastDeactivateAction: null,
           tags: [],
         }}
@@ -44,7 +45,7 @@ describe('AlertEpisodeStatusCell', () => {
           episodeId: '1',
           ruleId: '1',
           groupHash: '1',
-          lastAckAction: 'ack',
+          lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
           lastSnoozeAction: null,
           lastDeactivateAction: null,
           tags: [],
@@ -52,5 +53,23 @@ describe('AlertEpisodeStatusCell', () => {
       />
     );
     expect(screen.getByTestId('alertEpisodeStatusCellAckIndicator')).toBeInTheDocument();
+  });
+
+  it('renders inactive badge when last deactivate action is deactivate', () => {
+    render(
+      <AlertEpisodeStatusCell
+        status="active"
+        episodeAction={{
+          episodeId: '1',
+          ruleId: '1',
+          groupHash: '1',
+          lastAckAction: null,
+          lastSnoozeAction: null,
+          lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          tags: [],
+        }}
+      />
+    );
+    expect(screen.getByText('Inactive')).toBeInTheDocument();
   });
 });

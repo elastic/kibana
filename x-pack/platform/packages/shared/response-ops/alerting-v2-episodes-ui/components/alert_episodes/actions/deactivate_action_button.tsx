@@ -27,7 +27,7 @@ export function ResolveActionButton({
   const actionType = isDeactivated
     ? ALERT_EPISODE_ACTION_TYPE.ACTIVATE
     : ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
-  const createAlertActionMutation = useCreateAlertAction(http);
+  const { mutate: createAlertAction } = useCreateAlertAction(http);
 
   const label = isDeactivated
     ? i18n.translate('xpack.alertingV2.episodesUi.resolveAction.activate', {
@@ -48,7 +48,7 @@ export function ResolveActionButton({
         if (!groupHash) {
           return;
         }
-        createAlertActionMutation.mutate({
+        createAlertAction({
           groupHash,
           actionType,
           body: {

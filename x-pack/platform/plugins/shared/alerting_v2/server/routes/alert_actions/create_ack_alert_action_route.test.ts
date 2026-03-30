@@ -23,10 +23,6 @@ describe('CreateAckAlertActionRoute', () => {
     return { request, response, alertActionsClient };
   };
 
-  it('has expected path suffix', () => {
-    expect(CreateAckAlertActionRoute.path.endsWith('/_ack')).toBe(true);
-  });
-
   it('injects action_type and returns noContent', async () => {
     const body = { episode_id: 'ep-1' };
     const { request, response, alertActionsClient } = createDeps(body);

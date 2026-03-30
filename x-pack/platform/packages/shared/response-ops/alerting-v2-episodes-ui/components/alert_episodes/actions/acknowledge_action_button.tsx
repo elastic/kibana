@@ -29,7 +29,7 @@ export function AcknowledgeActionButton({
   const actionType = isAcknowledged
     ? ALERT_EPISODE_ACTION_TYPE.UNACK
     : ALERT_EPISODE_ACTION_TYPE.ACK;
-  const createAlertActionMutation = useCreateAlertAction(http);
+  const { mutate: createAlertAction, isLoading } = useCreateAlertAction(http);
 
   const label = isAcknowledged
     ? i18n.translate('xpack.alertingV2.episodesUi.acknowledgeAction.unacknowledge', {
@@ -49,13 +49,13 @@ export function AcknowledgeActionButton({
         if (!episodeId || !groupHash) {
           return;
         }
-        createAlertActionMutation.mutate({
+        createAlertAction({
           groupHash,
           actionType,
           body: { episode_id: episodeId },
         });
       }}
-      isLoading={createAlertActionMutation.isLoading}
+      isLoading={isLoading}
       isDisabled={!episodeId || !groupHash}
       data-test-subj="alertEpisodeAcknowledgeActionButton"
     >

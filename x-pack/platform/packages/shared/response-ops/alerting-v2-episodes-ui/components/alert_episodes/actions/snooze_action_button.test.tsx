@@ -19,6 +19,7 @@ const mockServices = { http: {} as any };
 
 describe('SnoozeActionButton', () => {
   const mutate = jest.fn();
+
   beforeEach(() => {
     mutate.mockReset();
     useCreateAlertActionMock.mockReturnValue({
@@ -28,7 +29,22 @@ describe('SnoozeActionButton', () => {
   });
 
   it('renders Snooze with bellSlash when not snoozed', () => {
-    render(<SnoozeActionButton lastSnoozeAction={null} http={mockServices.http} />);
+    render(
+      <SnoozeActionButton
+        lastSnoozeAction={ALERT_EPISODE_ACTION_TYPE.UNSNOOZE}
+        http={mockServices.http}
+      />
+    );
+    expect(screen.getByTestId('alertEpisodeSnoozeActionButton')).toHaveTextContent('Snooze');
+    expect(
+      screen
+        .getByTestId('alertEpisodeSnoozeActionButton')
+        .querySelector('[data-euiicon-type="bellSlash"]')
+    ).toBeInTheDocument();
+  });
+
+  it('renders Snooze with bellSlash when previous action is undefined', () => {
+    render(<SnoozeActionButton lastSnoozeAction={undefined} http={mockServices.http} />);
     expect(screen.getByTestId('alertEpisodeSnoozeActionButton')).toHaveTextContent('Snooze');
     expect(
       screen
@@ -60,7 +76,7 @@ describe('SnoozeActionButton', () => {
 
     await user.click(screen.getByTestId('alertEpisodeSnoozeActionButton'));
 
-    expect(screen.getByTestId('alertEpisodeSnoozeForm')).toBeInTheDocument();
+    expect(await screen.findByTestId('alertEpisodeSnoozeForm')).toBeInTheDocument();
     expect(screen.getByLabelText('Snooze duration value')).toBeInTheDocument();
     expect(screen.getByLabelText('Snooze duration unit')).toBeInTheDocument();
   });
@@ -92,7 +108,6 @@ describe('SnoozeActionButton', () => {
     await user.click(screen.getByTestId('alertEpisodeSnoozeActionButton'));
 
     const cancelButton = screen.getByRole('button', { name: 'Cancel snooze' });
-    expect(cancelButton).toBeInTheDocument();
 
     await user.click(cancelButton);
 

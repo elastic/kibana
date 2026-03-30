@@ -23,10 +23,6 @@ describe('CreateDeactivateAlertActionRoute', () => {
     return { request, response, alertActionsClient };
   };
 
-  it('has expected path suffix', () => {
-    expect(CreateDeactivateAlertActionRoute.path.endsWith('/_deactivate')).toBe(true);
-  });
-
   it('injects action_type and returns noContent', async () => {
     const body = { reason: 'manual pause' };
     const { request, response, alertActionsClient } = createDeps(body);

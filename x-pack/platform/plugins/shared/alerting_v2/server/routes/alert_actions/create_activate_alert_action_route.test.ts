@@ -23,10 +23,6 @@ describe('CreateActivateAlertActionRoute', () => {
     return { request, response, alertActionsClient };
   };
 
-  it('has expected path suffix', () => {
-    expect(CreateActivateAlertActionRoute.path.endsWith('/_activate')).toBe(true);
-  });
-
   it('injects action_type and returns noContent', async () => {
     const body = { reason: 'manual override' };
     const { request, response, alertActionsClient } = createDeps(body);

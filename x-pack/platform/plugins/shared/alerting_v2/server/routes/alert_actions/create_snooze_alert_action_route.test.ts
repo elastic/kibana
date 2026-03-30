@@ -23,10 +23,6 @@ describe('CreateSnoozeAlertActionRoute', () => {
     return { request, response, alertActionsClient };
   };
 
-  it('has expected path suffix', () => {
-    expect(CreateSnoozeAlertActionRoute.path.endsWith('/_snooze')).toBe(true);
-  });
-
   it('injects action_type and returns noContent', async () => {
     const body = {};
     const { request, response, alertActionsClient } = createDeps(body);

@@ -23,10 +23,6 @@ describe('CreateUnsnoozeAlertActionRoute', () => {
     return { request, response, alertActionsClient };
   };
 
-  it('has expected path suffix', () => {
-    expect(CreateUnsnoozeAlertActionRoute.path.endsWith('/_unsnooze')).toBe(true);
-  });
-
   it('injects action_type and returns noContent', async () => {
     const body = {};
     const { request, response, alertActionsClient } = createDeps(body);

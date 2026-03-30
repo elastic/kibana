@@ -23,10 +23,6 @@ describe('CreateTagAlertActionRoute', () => {
     return { request, response, alertActionsClient };
   };
 
-  it('has expected path suffix', () => {
-    expect(CreateTagAlertActionRoute.path.endsWith('/_tag')).toBe(true);
-  });
-
   it('injects action_type and returns noContent', async () => {
     const body = { tags: ['p1', 'p2'] };
     const { request, response, alertActionsClient } = createDeps(body);

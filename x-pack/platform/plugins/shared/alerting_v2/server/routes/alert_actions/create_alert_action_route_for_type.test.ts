@@ -28,14 +28,15 @@ describe('createAlertActionRouteForType', () => {
   };
 
   it('creates a route class with expected static metadata', () => {
+    const suffix = '_tag';
     const RouteClass = createAlertActionRouteForType({
       actionType: 'tag',
-      pathSuffix: '_tag',
+      pathSuffix: suffix,
       bodySchema: createTagAlertActionBodySchema,
     });
 
     expect(RouteClass.method).toBe('post');
-    expect(RouteClass.path).toBe('/internal/alerting/v2/alerts/{group_hash}/action/_tag');
+    expect(RouteClass.path).toBe(`/internal/alerting/v2/alerts/{group_hash}/action/${suffix}`);
     expect(RouteClass.validate).toBeDefined();
   });
 

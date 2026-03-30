@@ -40,23 +40,20 @@ describe('AlertEpisodeSnoozeForm', () => {
     expect(Number.isNaN(Date.parse(onApplySnooze.mock.calls[0][0]))).toBe(false);
   });
 
-  it('shows cancel button only when isSnoozed is true', () => {
-    const { rerender } = render(
-      <AlertEpisodeSnoozeForm
-        isSnoozed={false}
-        onApplySnooze={jest.fn()}
-        onCancelSnooze={jest.fn()}
-      />
-    );
-    expect(screen.queryByRole('button', { name: 'Cancel snooze' })).not.toBeInTheDocument();
+  it('shows cancel button only when isSnoozed is true', async () => {
+    const user = userEvent.setup();
+    const onCancelSnooze = jest.fn();
 
-    rerender(
+    render(
       <AlertEpisodeSnoozeForm
         isSnoozed={true}
         onApplySnooze={jest.fn()}
-        onCancelSnooze={jest.fn()}
+        onCancelSnooze={onCancelSnooze}
       />
     );
-    expect(screen.getByRole('button', { name: 'Cancel snooze' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Cancel snooze' }));
+
+    expect(onCancelSnooze).toHaveBeenCalledTimes(1);
   });
 });

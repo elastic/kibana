@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 
-export type AlertEpisodeDurationUnit = 'm' | 'h' | 'd';
+type AlertEpisodeDurationUnit = 'm' | 'h' | 'd';
 
 export const computeEpisodeSnoozedUntil = (
   value: number,
@@ -30,29 +30,28 @@ export const computeEpisodeSnoozedUntil = (
   return new Date(Date.now() + value * ms[unit]).toISOString();
 };
 
-export const ALERT_EPISODE_UNIT_OPTIONS: Array<{ value: AlertEpisodeDurationUnit; text: string }> =
-  [
-    {
-      value: 'm',
-      text: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.minutes', {
-        defaultMessage: 'Minutes',
-      }),
-    },
-    {
-      value: 'h',
-      text: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.hours', {
-        defaultMessage: 'Hours',
-      }),
-    },
-    {
-      value: 'd',
-      text: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.days', {
-        defaultMessage: 'Days',
-      }),
-    },
-  ];
+const ALERT_EPISODE_UNIT_OPTIONS: Array<{ value: AlertEpisodeDurationUnit; text: string }> = [
+  {
+    value: 'm',
+    text: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.minutes', {
+      defaultMessage: 'Minutes',
+    }),
+  },
+  {
+    value: 'h',
+    text: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.hours', {
+      defaultMessage: 'Hours',
+    }),
+  },
+  {
+    value: 'd',
+    text: i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.days', {
+      defaultMessage: 'Days',
+    }),
+  },
+];
 
-export const ALERT_EPISODE_COMMON_SNOOZE_TIMES: Array<{
+const ALERT_EPISODE_COMMON_SNOOZE_TIMES: Array<{
   label: string;
   value: number;
   unit: AlertEpisodeDurationUnit;
@@ -87,17 +86,15 @@ export const ALERT_EPISODE_COMMON_SNOOZE_TIMES: Array<{
   },
 ];
 
-interface AlertEpisodeSnoozeFormProps {
-  isSnoozed: boolean;
-  onApplySnooze: (expiry: string) => void;
-  onCancelSnooze: () => void;
-}
-
 export const AlertEpisodeSnoozeForm = ({
   isSnoozed,
   onApplySnooze,
   onCancelSnooze,
-}: AlertEpisodeSnoozeFormProps) => {
+}: {
+  isSnoozed: boolean;
+  onApplySnooze: (expiry: string) => void;
+  onCancelSnooze: () => void;
+}) => {
   const [durationValue, setDurationValue] = useState(1);
   const [durationUnit, setDurationUnit] = useState<AlertEpisodeDurationUnit>('h');
 

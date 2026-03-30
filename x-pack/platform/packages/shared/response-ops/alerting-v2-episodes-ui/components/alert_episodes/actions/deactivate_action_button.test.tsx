@@ -27,14 +27,14 @@ describe('ResolveActionButton', () => {
     } as any);
   });
 
-  it('renders Deactivate when not deactivated', () => {
+  it('renders Unresolve when not deactivated', () => {
     render(<ResolveActionButton lastDeactivateAction={null} http={mockServices.http} />);
     expect(screen.getByTestId('alertingEpisodeActionsResolveActionButton')).toHaveTextContent(
       'Unresolve'
     );
   });
 
-  it('renders Activate when deactivated', () => {
+  it('renders Resolve when deactivated', () => {
     render(
       <ResolveActionButton
         lastDeactivateAction={ALERT_EPISODE_ACTION_TYPE.DEACTIVATE}

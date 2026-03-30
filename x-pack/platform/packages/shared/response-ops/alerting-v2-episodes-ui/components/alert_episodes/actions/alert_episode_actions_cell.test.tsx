@@ -32,7 +32,7 @@ describe('AlertEpisodeActionsCell', () => {
     expect(screen.getByTestId('alertingEpisodeActionsMoreButton')).toBeInTheDocument();
   });
 
-  it('opens popover and shows Deactivate from episode action state', async () => {
+  it('opens popover and shows Unresolve from episode action state', async () => {
     const user = userEvent.setup();
     render(
       <AlertEpisodeActionsCell
@@ -54,7 +54,7 @@ describe('AlertEpisodeActionsCell', () => {
     ).toHaveTextContent('Unresolve');
   });
 
-  it('shows Activate in popover when episode is deactivated', async () => {
+  it('shows Resolve in popover when episode is deactivated', async () => {
     const user = userEvent.setup();
     render(
       <AlertEpisodeActionsCell

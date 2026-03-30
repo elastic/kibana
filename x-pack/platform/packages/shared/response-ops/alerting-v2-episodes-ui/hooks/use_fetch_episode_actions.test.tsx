@@ -121,7 +121,7 @@ describe('useFetchEpisodeActions', () => {
     expect(result.current.actionsMap.get('ep-2')?.tags).toEqual(['solo']);
   });
 
-  it('converts tags to empty arraywhen row tags are null', async () => {
+  it('converts tags to empty array when row tags are null', async () => {
     executeEsqlQueryMock.mockResolvedValue({
       rows: [
         {

@@ -13,18 +13,20 @@ import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeSnoozeForm } from './alert_episode_snooze_form';
 import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
 
-export interface SnoozeActionButtonProps {
+export function SnoozeActionButton({
+  lastSnoozeAction,
+  groupHash,
+  http,
+}: {
   lastSnoozeAction?: string | null;
   groupHash?: string | null;
   http: HttpStart;
-}
-
-export function SnoozeActionButton({ lastSnoozeAction, groupHash, http }: SnoozeActionButtonProps) {
+}) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isSnoozed = lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE;
   const togglePopover = () => setIsPopoverOpen((prev) => !prev);
   const closePopover = () => setIsPopoverOpen(false);
-  const createAlertActionMutation = useCreateAlertAction(http);
+  const { mutate: createAlertAction, isLoading } = useCreateAlertAction(http);
 
   const label = isSnoozed
     ? i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.unsnooze', {
@@ -48,7 +50,7 @@ export function SnoozeActionButton({ lastSnoozeAction, groupHash, http }: Snooze
           iconType={isSnoozed ? 'bell' : 'bellSlash'}
           onClick={togglePopover}
           isDisabled={!groupHash}
-          isLoading={createAlertActionMutation.isLoading}
+          isLoading={isLoading}
           data-test-subj="alertEpisodeSnoozeActionButton"
         >
           {label}
@@ -66,7 +68,7 @@ export function SnoozeActionButton({ lastSnoozeAction, groupHash, http }: Snooze
           if (!groupHash) {
             return;
           }
-          createAlertActionMutation.mutate({
+          createAlertAction({
             groupHash,
             actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
             body: { expiry },
@@ -77,7 +79,7 @@ export function SnoozeActionButton({ lastSnoozeAction, groupHash, http }: Snooze
           if (!groupHash) {
             return;
           }
-          createAlertActionMutation.mutate({
+          createAlertAction({
             groupHash,
             actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
             body: {},
