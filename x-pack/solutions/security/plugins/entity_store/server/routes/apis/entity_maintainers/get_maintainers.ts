@@ -6,6 +6,7 @@
  */
 
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { LicenseType } from '@kbn/licensing-types';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
@@ -21,6 +22,7 @@ interface EntityMaintainerResponseItem {
   taskStatus: EntityMaintainerTaskStatus;
   interval: string;
   description: string | null;
+  minLicense: LicenseType;
   customState: EntityMaintainerState | null;
   runs: number;
   lastSuccessTimestamp: string | null;
@@ -36,6 +38,7 @@ function toGetMaintainersResponseItem(
     taskStatus: entry.taskStatus,
     interval: entry.interval,
     description: entry.description ?? null,
+    minLicense: entry.minLicense,
     customState: snapshot?.state ?? null,
     runs: snapshot?.runs ?? 0,
     lastSuccessTimestamp: snapshot?.lastSuccessTimestamp ?? null,
