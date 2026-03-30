@@ -575,7 +575,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       stream: this._definition.name,
       request: {
         id: getProcessingPipelineName(this._definition.name),
-        ...generateClassicIngestPipelineBody(this._definition),
+        ...(await generateClassicIngestPipelineBody(this._definition, this.dependencies.esClient)),
       },
     });
 

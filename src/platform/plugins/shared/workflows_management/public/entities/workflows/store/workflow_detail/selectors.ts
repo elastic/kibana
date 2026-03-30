@@ -62,6 +62,11 @@ export const selectHasYamlSchemaValidationErrors = createSelector(
   (detail): boolean => detail.hasYamlSchemaValidationErrors
 );
 
+export const selectAiAssisted = createSelector(
+  selectDetail,
+  (detail): boolean => detail.aiAssisted
+);
+
 export const selectFocusedStepId = createSelector(selectDetail, (detail) => detail.focusedStepId);
 
 export const selectHighlightedStepId = createSelector(

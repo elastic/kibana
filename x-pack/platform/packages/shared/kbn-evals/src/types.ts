@@ -65,6 +65,10 @@ export interface EvaluatorParams<TExample extends Example, TTaskOutput extends T
 /**
  * Evaluation output returned by evaluators.
  *
+ * Follows the trace-first evaluator contract (vision Section 5.2.1): evaluators produce
+ * standardized score/label/explanation outputs. The `metadata` field can carry trace
+ * references and evaluator-specific details for explainability.
+ *
  * This shape is intentionally compatible with the existing evaluator implementations and
  * the Phoenix client types:
  * - `score` may be omitted or `null` for "unavailable"/"error" cases
@@ -83,6 +87,17 @@ type EvaluatorCallback<TExample extends Example, TTaskOutput extends TaskOutput>
   params: EvaluatorParams<TExample, TTaskOutput>
 ) => Promise<EvaluationResult>;
 
+/**
+ * Core evaluator interface.
+ *
+ * All evaluators — whether CODE-kind (deterministic) or LLM-kind (model-scored) — implement
+ * this interface. Per the @kbn/evals vision (Section 5.2.1), evaluators should progressively
+ * migrate to deriving signals from OTel traces stored in Elasticsearch rather than only
+ * operating on in-memory task output. Use {@link createTraceBasedEvaluator} for trace-native
+ * evaluators.
+ *
+ * @see TraceBasedEvaluatorConfig for the trace-first evaluator factory configuration
+ */
 export interface Evaluator<
   TExample extends Example = Example,
   TTaskOutput extends TaskOutput = TaskOutput

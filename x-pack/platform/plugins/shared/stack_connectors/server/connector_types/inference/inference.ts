@@ -201,6 +201,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       {
         method: 'POST',
         path: `_inference/chat_completion/${this.inferenceId}/_stream`,
+        querystring: {
+          timeout: '180s',
+        },
         body,
       },
       {
