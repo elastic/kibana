@@ -43,7 +43,7 @@ const getStepTypeLabel = (stepType: string): string => {
   return stepType;
 };
 
-const calculateVisibleIconsCount = (containerWidth: number, totalIcons: number): number => {
+export const calculateVisibleIconsCount = (containerWidth: number, totalIcons: number): number => {
   if (totalIcons === 0) {
     return 0;
   }
