@@ -16,6 +16,8 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
+import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
+import { getRequestSavedObjectClient } from '../../../shared/utils';
 
 export const updateEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -51,7 +53,11 @@ export const updateEntitySourceRoute = (
 
           try {
             const secSol = await context.securitySolution;
-            const client = secSol.getMonitoringEntitySourceDataClient();
+            const core = await context.core;
+            const client = new WatchlistEntitySourceClient({
+              soClient: getRequestSavedObjectClient(core),
+              namespace: secSol.getSpaceId(),
+            });
             const body = await client.update({ ...request.body, id: request.params.id });
 
             return response.ok({ body });

@@ -281,7 +281,7 @@
           "(props: Props) => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -297,7 +297,7 @@
               "Props"
             ],
             "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,

@@ -149,7 +149,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"generic\\",
- entity.hashedId = HASH(\\"MD5\\", recent.entity.id)
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id)
 | RENAME
     recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
@@ -210,6 +210,13 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  recent.host.geo.region_iso_code = MV_DEDUPE(TOP(TO_STRING(host.geo.region_iso_code), 10)) WHERE host.geo.region_iso_code IS NOT NULL,
  recent.host.geo.region_name = MV_DEDUPE(TOP(TO_STRING(host.geo.region_name), 10)) WHERE host.geo.region_name IS NOT NULL,
  recent.host.geo.timezone = MV_DEDUPE(TOP(TO_STRING(host.geo.timezone), 10)) WHERE host.geo.timezone IS NOT NULL,
+ recent.cloud.provider = LAST(TO_STRING(cloud.provider), @timestamp) WHERE cloud.provider IS NOT NULL,
+ recent.cloud.region = LAST(TO_STRING(cloud.region), @timestamp) WHERE cloud.region IS NOT NULL,
+ recent.cloud.instance.id = LAST(TO_STRING(cloud.instance.id), @timestamp) WHERE cloud.instance.id IS NOT NULL,
+ recent.cloud.machine.type = LAST(TO_STRING(cloud.machine.type), @timestamp) WHERE cloud.machine.type IS NOT NULL,
+ recent.agent.id = LAST(TO_STRING(agent.id), @timestamp) WHERE agent.id IS NOT NULL,
+ recent.agent.type = LAST(TO_STRING(agent.type), @timestamp) WHERE agent.type IS NOT NULL,
+ recent.endpoint.id = LAST(TO_STRING(endpoint.id), @timestamp) WHERE endpoint.id IS NOT NULL,
  recent.entity.source = LAST(TO_STRING(_index), @timestamp) WHERE _index IS NOT NULL,
  recent.asset.id = LAST(TO_STRING(asset.id), @timestamp) WHERE asset.id IS NOT NULL,
  recent.asset.name = LAST(TO_STRING(asset.name), @timestamp) WHERE asset.name IS NOT NULL,
@@ -290,6 +297,13 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  host.geo.region_iso_code = MV_SLICE(MV_UNION(recent.host.geo.region_iso_code, host.geo.region_iso_code), 0, 9),
  host.geo.region_name = MV_SLICE(MV_UNION(recent.host.geo.region_name, host.geo.region_name), 0, 9),
  host.geo.timezone = MV_SLICE(MV_UNION(recent.host.geo.timezone, host.geo.timezone), 0, 9),
+ cloud.provider = COALESCE(recent.cloud.provider, cloud.provider),
+ cloud.region = COALESCE(recent.cloud.region, cloud.region),
+ cloud.instance.id = COALESCE(recent.cloud.instance.id, cloud.instance.id),
+ cloud.machine.type = COALESCE(recent.cloud.machine.type, cloud.machine.type),
+ agent.id = COALESCE(recent.agent.id, agent.id),
+ agent.type = COALESCE(recent.agent.type, agent.type),
+ endpoint.id = COALESCE(recent.endpoint.id, endpoint.id),
  entity.source = COALESCE(recent.entity.source, entity.source),
  asset.id = COALESCE(recent.asset.id, asset.id),
  asset.name = COALESCE(recent.asset.name, asset.name),
@@ -330,13 +344,16 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
- entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
 | RENAME
     recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
 | KEEP entity*,
 host*,
+cloud*,
+agent*,
+endpoint*,
 asset*,
 @timestamp"
 `;
@@ -391,6 +408,13 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.host.geo.region_iso_code = MV_DEDUPE(TOP(TO_STRING(host.geo.region_iso_code), 10)) WHERE host.geo.region_iso_code IS NOT NULL,
  recent.host.geo.region_name = MV_DEDUPE(TOP(TO_STRING(host.geo.region_name), 10)) WHERE host.geo.region_name IS NOT NULL,
  recent.host.geo.timezone = MV_DEDUPE(TOP(TO_STRING(host.geo.timezone), 10)) WHERE host.geo.timezone IS NOT NULL,
+ recent.cloud.provider = LAST(TO_STRING(cloud.provider), @timestamp) WHERE cloud.provider IS NOT NULL,
+ recent.cloud.region = LAST(TO_STRING(cloud.region), @timestamp) WHERE cloud.region IS NOT NULL,
+ recent.cloud.instance.id = LAST(TO_STRING(cloud.instance.id), @timestamp) WHERE cloud.instance.id IS NOT NULL,
+ recent.cloud.machine.type = LAST(TO_STRING(cloud.machine.type), @timestamp) WHERE cloud.machine.type IS NOT NULL,
+ recent.agent.id = LAST(TO_STRING(agent.id), @timestamp) WHERE agent.id IS NOT NULL,
+ recent.agent.type = LAST(TO_STRING(agent.type), @timestamp) WHERE agent.type IS NOT NULL,
+ recent.endpoint.id = LAST(TO_STRING(endpoint.id), @timestamp) WHERE endpoint.id IS NOT NULL,
  recent.entity.source = LAST(TO_STRING(_index), @timestamp) WHERE _index IS NOT NULL,
  recent.asset.id = LAST(TO_STRING(asset.id), @timestamp) WHERE asset.id IS NOT NULL,
  recent.asset.name = LAST(TO_STRING(asset.name), @timestamp) WHERE asset.name IS NOT NULL,
@@ -474,6 +498,13 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  host.geo.region_iso_code = MV_SLICE(MV_UNION(recent.host.geo.region_iso_code, host.geo.region_iso_code), 0, 9),
  host.geo.region_name = MV_SLICE(MV_UNION(recent.host.geo.region_name, host.geo.region_name), 0, 9),
  host.geo.timezone = MV_SLICE(MV_UNION(recent.host.geo.timezone, host.geo.timezone), 0, 9),
+ cloud.provider = COALESCE(recent.cloud.provider, cloud.provider),
+ cloud.region = COALESCE(recent.cloud.region, cloud.region),
+ cloud.instance.id = COALESCE(recent.cloud.instance.id, cloud.instance.id),
+ cloud.machine.type = COALESCE(recent.cloud.machine.type, cloud.machine.type),
+ agent.id = COALESCE(recent.agent.id, agent.id),
+ agent.type = COALESCE(recent.agent.type, agent.type),
+ endpoint.id = COALESCE(recent.endpoint.id, endpoint.id),
  entity.source = COALESCE(recent.entity.source, entity.source),
  asset.id = COALESCE(recent.asset.id, asset.id),
  asset.name = COALESCE(recent.asset.name, asset.name),
@@ -514,13 +545,16 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
- entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
 | RENAME
     recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
 | KEEP entity*,
 host*,
+cloud*,
+agent*,
+endpoint*,
 asset*,
 @timestamp"
 `;
@@ -575,6 +609,13 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.host.geo.region_iso_code = MV_DEDUPE(TOP(TO_STRING(host.geo.region_iso_code), 10)) WHERE host.geo.region_iso_code IS NOT NULL,
  recent.host.geo.region_name = MV_DEDUPE(TOP(TO_STRING(host.geo.region_name), 10)) WHERE host.geo.region_name IS NOT NULL,
  recent.host.geo.timezone = MV_DEDUPE(TOP(TO_STRING(host.geo.timezone), 10)) WHERE host.geo.timezone IS NOT NULL,
+ recent.cloud.provider = LAST(TO_STRING(cloud.provider), @timestamp) WHERE cloud.provider IS NOT NULL,
+ recent.cloud.region = LAST(TO_STRING(cloud.region), @timestamp) WHERE cloud.region IS NOT NULL,
+ recent.cloud.instance.id = LAST(TO_STRING(cloud.instance.id), @timestamp) WHERE cloud.instance.id IS NOT NULL,
+ recent.cloud.machine.type = LAST(TO_STRING(cloud.machine.type), @timestamp) WHERE cloud.machine.type IS NOT NULL,
+ recent.agent.id = LAST(TO_STRING(agent.id), @timestamp) WHERE agent.id IS NOT NULL,
+ recent.agent.type = LAST(TO_STRING(agent.type), @timestamp) WHERE agent.type IS NOT NULL,
+ recent.endpoint.id = LAST(TO_STRING(endpoint.id), @timestamp) WHERE endpoint.id IS NOT NULL,
  recent.entity.source = LAST(TO_STRING(_index), @timestamp) WHERE _index IS NOT NULL,
  recent.asset.id = LAST(TO_STRING(asset.id), @timestamp) WHERE asset.id IS NOT NULL,
  recent.asset.name = LAST(TO_STRING(asset.name), @timestamp) WHERE asset.name IS NOT NULL,
@@ -658,6 +699,13 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  host.geo.region_iso_code = MV_SLICE(MV_UNION(recent.host.geo.region_iso_code, host.geo.region_iso_code), 0, 9),
  host.geo.region_name = MV_SLICE(MV_UNION(recent.host.geo.region_name, host.geo.region_name), 0, 9),
  host.geo.timezone = MV_SLICE(MV_UNION(recent.host.geo.timezone, host.geo.timezone), 0, 9),
+ cloud.provider = COALESCE(recent.cloud.provider, cloud.provider),
+ cloud.region = COALESCE(recent.cloud.region, cloud.region),
+ cloud.instance.id = COALESCE(recent.cloud.instance.id, cloud.instance.id),
+ cloud.machine.type = COALESCE(recent.cloud.machine.type, cloud.machine.type),
+ agent.id = COALESCE(recent.agent.id, agent.id),
+ agent.type = COALESCE(recent.agent.type, agent.type),
+ endpoint.id = COALESCE(recent.endpoint.id, endpoint.id),
  entity.source = COALESCE(recent.entity.source, entity.source),
  asset.id = COALESCE(recent.asset.id, asset.id),
  asset.name = COALESCE(recent.asset.name, asset.name),
@@ -698,13 +746,16 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
- entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
 | RENAME
     recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
 | KEEP entity*,
 host*,
+cloud*,
+agent*,
+endpoint*,
 asset*,
 @timestamp"
 `;
@@ -829,7 +880,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"service\\",
- entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Service\\")
 | RENAME
     recent.entity.id AS entity.id,
@@ -872,7 +923,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
  recent.entity.confidence = FIRST(TO_STRING(entity.confidence), @timestamp) WHERE entity.confidence IS NOT NULL,
  recent.user.domain = MV_DEDUPE(TOP(TO_STRING(user.domain), 10)) WHERE user.domain IS NOT NULL,
  recent.user.email = MV_DEDUPE(TOP(TO_STRING(user.email), 10)) WHERE user.email IS NOT NULL,
- recent.user.name = MV_DEDUPE(TOP(TO_STRING(user.name), 10)) WHERE user.name IS NOT NULL,
+ recent.user.name = LAST(TO_STRING(user.name), @timestamp) WHERE user.name IS NOT NULL,
  recent.user.full_name = MV_DEDUPE(TOP(TO_STRING(user.full_name), 10)) WHERE user.full_name IS NOT NULL,
  recent.user.hash = MV_DEDUPE(TOP(TO_STRING(user.hash), 10)) WHERE user.hash IS NOT NULL,
  recent.user.id = MV_DEDUPE(TOP(TO_STRING(user.id), 10)) WHERE user.id IS NOT NULL,
@@ -919,7 +970,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
  recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(user.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE user.entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL,
  recent.host.entity.id = MV_DEDUPE(TOP(TO_STRING(host.entity.id), 10)) WHERE host.entity.id IS NOT NULL,
  recent.host.id = MV_DEDUPE(TOP(TO_STRING(host.id), 10)) WHERE host.id IS NOT NULL,
- recent.host.name = MV_DEDUPE(TOP(TO_STRING(host.name), 10)) WHERE host.name IS NOT NULL
+ recent.host.name = LAST(TO_STRING(host.name), @timestamp) WHERE host.name IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
 | EVAL recent.entity.id = CONCAT(\\"user:\\", recent.entity.EngineMetadata.UntypedId)
 | LOOKUP JOIN latest-index
@@ -942,7 +993,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
  entity.confidence = COALESCE(entity.confidence, recent.entity.confidence),
  user.domain = MV_SLICE(MV_UNION(recent.user.domain, user.domain), 0, 9),
  user.email = MV_SLICE(MV_UNION(recent.user.email, user.email), 0, 9),
- user.name = MV_SLICE(MV_UNION(recent.user.name, user.name), 0, 9),
+ user.name = COALESCE(recent.user.name, user.name),
  user.full_name = MV_SLICE(MV_UNION(recent.user.full_name, user.full_name), 0, 9),
  user.hash = MV_SLICE(MV_UNION(recent.user.hash, user.hash), 0, 9),
  user.id = MV_SLICE(MV_UNION(recent.user.id, user.id), 0, 9),
@@ -989,11 +1040,11 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
  entity.relationships.resolution.risk.calculated_score_norm = COALESCE(recent.entity.relationships.resolution.risk.calculated_score_norm, entity.relationships.resolution.risk.calculated_score_norm),
  host.entity.id = MV_SLICE(MV_UNION(recent.host.entity.id, host.entity.id), 0, 9),
  host.id = MV_SLICE(MV_UNION(recent.host.id, host.id), 0, 9),
- host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
+ host.name = COALESCE(recent.host.name, host.name),
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"user\\",
- entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Identity\\")
 | RENAME
     recent.entity.id AS entity.id,

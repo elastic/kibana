@@ -81,6 +81,11 @@ import type {
   GetRuleExecutionResultsResponse,
 } from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import type {
+  ReadRuleExecutionResultsRequestParamsInput,
+  ReadRuleExecutionResultsRequestBodyInput,
+  ReadRuleExecutionResultsResponse,
+} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.gen';
+import type {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
   RulePreviewResponse,
@@ -402,6 +407,10 @@ import type {
   UpdateWatchlistRequestBodyInput,
   UpdateWatchlistResponse,
 } from './entity_analytics/watchlists/management/update.gen';
+import type {
+  SyncWatchlistRequestParamsInput,
+  SyncWatchlistResponse,
+} from './entity_analytics/watchlists/sync/sync.gen';
 import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
@@ -2851,6 +2860,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async readRuleExecutionResults(props: ReadRuleExecutionResultsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReadRuleExecutionResults`);
+    return this.kbnClient
+      .request<ReadRuleExecutionResultsResponse>({
+        path: replaceParams(
+          '/internal/detection_engine/rules/{ruleId}/execution/results',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * List all unique tags from all detection rules.
    */
@@ -3240,6 +3265,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         method: 'POST',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async syncWatchlist(props: SyncWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SyncWatchlist`);
+    return this.kbnClient
+      .request<SyncWatchlistResponse>({
+        path: replaceParams('/api/entity_analytics/watchlists/{watchlist_id}/sync', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3857,6 +3894,10 @@ export interface ReadAlertsMigrationStatusProps {
 export interface ReadRuleProps {
   query: ReadRuleRequestQueryInput;
 }
+export interface ReadRuleExecutionResultsProps {
+  params: ReadRuleExecutionResultsRequestParamsInput;
+  body: ReadRuleExecutionResultsRequestBodyInput;
+}
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
@@ -3920,6 +3961,9 @@ export interface StopRuleMigrationProps {
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
+}
+export interface SyncWatchlistProps {
+  params: SyncWatchlistRequestParamsInput;
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;

@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { XYState } from '@kbn/lens-plugin/public';
+import type { XYVisualizationState } from '@kbn/lens-plugin/public';
 
 import { getRiskScoreOverTimeAreaAttributes } from './risk_score_over_time_area';
 import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
@@ -66,7 +66,7 @@ describe('getRiskScoreOverTimeAreaAttributes', () => {
     );
 
     expect(
-      (result?.current?.state.visualization as XYState).layers.find(
+      (result?.current?.state.visualization as XYVisualizationState).layers.find(
         (layer) => layer.layerType === 'referenceLine'
       )
     ).toEqual(

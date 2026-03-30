@@ -29,7 +29,7 @@ export class ServiceInventoryPage {
 
   async waitForServicesTableToLoad() {
     await this.page
-      .getByTestId('allServices')
+      .getByTestId('serviceInventoryTab')
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 

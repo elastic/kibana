@@ -287,7 +287,12 @@ describe('OAuthStateClient', () => {
         close: jest.fn(),
       };
       mockUnsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue(mockFinder);
-      mockUnsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({});
+      mockUnsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: 'expired-1', type: OAUTH_STATE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'expired-2', type: OAUTH_STATE_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
 
       const result = await client.cleanupExpiredStates();
 
@@ -331,7 +336,16 @@ describe('OAuthStateClient', () => {
         close: jest.fn(),
       };
       mockUnsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue(mockFinder);
-      mockUnsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({});
+      mockUnsecuredSavedObjectsClient.bulkDelete
+        .mockResolvedValueOnce({
+          statuses: [{ id: 'expired-1', type: OAUTH_STATE_SAVED_OBJECT_TYPE, success: true }],
+        })
+        .mockResolvedValueOnce({
+          statuses: [
+            { id: 'expired-2', type: OAUTH_STATE_SAVED_OBJECT_TYPE, success: true },
+            { id: 'expired-3', type: OAUTH_STATE_SAVED_OBJECT_TYPE, success: true },
+          ],
+        });
 
       const result = await client.cleanupExpiredStates();
 

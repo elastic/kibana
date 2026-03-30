@@ -12,11 +12,10 @@ import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-
+import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
-import { FlyoutMissingAlertsPrivilege } from '../../flyout/shared/components/flyout_missing_alerts_privilege';
-import type { ResolverCellActionRenderer } from '../../resolver/types';
+import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../data_view_manager/constants';
 import { EventKind } from './constants/event_kinds';
@@ -62,7 +61,7 @@ export interface DocumentFlyoutWrapperProps {
   /**
    * A function that renders cell actions for the overview tab.
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 /**

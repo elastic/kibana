@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTaskWithSingleConcurrency',
     'taskToDisable',
     'sampleLongRunningRecurringTask',
+    'sampleRecurringTaskTimingOutWithError',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -54,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
       const types = (await getRegisteredTypes())
         .filter((t: string) => !TEST_TYPES.includes(t) && !actionTypeIdsFromSpecs.has(t))
         .sort();
+
       expect(types).to.eql([
         'Fleet-Metrics-Task',
         'Fleet-Usage-Logger',
@@ -108,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.xsoar',
         'actions:connector_usage_reporting',
         'actions:oauth_state_cleanup',
+        'actions:user_connector_token_cleanup',
         'actions_telemetry',
         'ad_hoc_run-backfill',
         'agent-builder:run-agent',
