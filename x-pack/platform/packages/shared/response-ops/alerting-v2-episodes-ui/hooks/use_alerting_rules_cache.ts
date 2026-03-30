@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse } from '@kbn/alerting-v2-plugin/public/services/rules_api';
 import useAsync from 'react-use/lib/useAsync';
@@ -27,11 +27,10 @@ type Rule = FindRulesResponse['items'][number];
  * Returns rulesCache as state so consumers re-render when rules are loaded.
  */
 export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCacheOptions) => {
-  const cacheRef = useRef<Record<string, Rule>>({});
   const [rulesCache, setRulesCache] = useState<Record<string, Rule>>({});
 
   const { loading, error } = useAsync(async () => {
-    const uncachedIds = ruleIds.filter((id) => !cacheRef.current[id]);
+    const uncachedIds = ruleIds.filter((id) => !rulesCache[id]);
 
     if (uncachedIds.length === 0) {
       return;
@@ -41,9 +40,9 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
       query: { ids: uncachedIds },
     });
     rulesResponse.items.forEach((rule) => {
-      cacheRef.current[rule.id] = rule;
+      rulesCache[rule.id] = rule;
     });
-    setRulesCache({ ...cacheRef.current });
+    setRulesCache({ ...rulesCache });
   }, [ruleIds, services.http]);
 
   return {
