@@ -32,7 +32,7 @@ const projectRouting = {
   type: ['keyword'],
   serverlessOnly: true,
   preview: true,
-  snapshotOnly: true,
+  snapshotOnly: false,
   description:
     'A project routing expression, used to define which projects to route the query to. Only supported if Cross-Project Search is enabled.',
   ignoreAsSuggestion: true,
@@ -56,7 +56,7 @@ const unmappedFields = {
   preview: true,
   snapshotOnly: false,
   description:
-    'Defines how unmapped fields are treated. Possible values are: "FAIL" (default) - fails the query if unmapped fields are present; "NULLIFY" - treats unmapped fields as null values. ',
+    'Defines how unmapped fields are treated. Possible values are: "DEFAULT" (default) - standard ESQL queries fail when referencing unmapped fields, while other query types (e.g. PromQL) may treat them differently; "NULLIFY" - treats unmapped fields as null values. ',
   ignoreAsSuggestion: false,
 };
 
