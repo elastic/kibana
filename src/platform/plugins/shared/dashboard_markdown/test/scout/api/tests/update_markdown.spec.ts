@@ -99,30 +99,27 @@ apiTest.describe('markdown - upsert', { tag: tags.deploymentAgnostic }, () => {
     }
   );
 
-  apiTest(
-    'should create new markdown library item',
-    async ({ apiClient }) => {
-      const id = 'new-markdown';
-      const response = await apiClient.put(`${MARKDOWN_API_PATH}/${id}`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...editorCredentials.apiKeyHeader,
-        },
-        body: {
-          title: 'New markdown',
-          content: '# hello world',
-        },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.id).toBe(id);
-      expect(response.body.data).toMatchObject({
+  apiTest('should create new markdown library item', async ({ apiClient }) => {
+    const id = 'new-markdown';
+    const response = await apiClient.put(`${MARKDOWN_API_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
         title: 'New markdown',
         content: '# hello world',
-      });
-    }
-  );
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.id).toBe(id);
+    expect(response.body.data).toMatchObject({
+      title: 'New markdown',
+      content: '# hello world',
+    });
+  });
 
   apiTest('validation - returns error when content is not provided', async ({ apiClient }) => {
     const response = await apiClient.put(`${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID}`, {

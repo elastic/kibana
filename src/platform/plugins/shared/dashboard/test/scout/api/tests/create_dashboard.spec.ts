@@ -10,12 +10,7 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import {
-  apiTest,
-  COMMON_HEADERS,
-  DASHBOARD_API_PATH,
-  KBN_ARCHIVES,
-} from '../fixtures';
+import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES } from '../fixtures';
 
 apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
