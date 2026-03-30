@@ -18,7 +18,7 @@ import type {
   UserMessage,
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/common/constants';
+import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 
 function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
   const fns = [
