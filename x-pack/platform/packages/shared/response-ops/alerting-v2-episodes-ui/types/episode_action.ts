@@ -12,5 +12,6 @@ export interface EpisodeAction {
   lastAckAction: string | null;
   lastDeactivateAction: string | null;
   lastSnoozeAction: string | null;
+  snoozeExpiry: string | null;
   tags: string[];
 }

@@ -31,10 +31,10 @@ export function ResolveActionButton({
 
   const label = isDeactivated
     ? i18n.translate('xpack.alertingV2.episodesUi.resolveAction.activate', {
-        defaultMessage: 'Resolve',
+        defaultMessage: 'Unresolve',
       })
     : i18n.translate('xpack.alertingV2.episodesUi.resolveAction.deactivate', {
-        defaultMessage: 'Unresolve',
+        defaultMessage: 'Resolve',
       });
 
   const iconType = isDeactivated ? 'check' : 'cross';

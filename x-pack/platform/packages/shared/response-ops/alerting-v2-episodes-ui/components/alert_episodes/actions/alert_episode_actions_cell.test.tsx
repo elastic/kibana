@@ -44,6 +44,7 @@ describe('AlertEpisodeActionsCell', () => {
           lastAckAction: null,
           lastDeactivateAction: null,
           lastSnoozeAction: null,
+          snoozeExpiry: null,
           tags: [],
         }}
       />
@@ -66,6 +67,7 @@ describe('AlertEpisodeActionsCell', () => {
           lastAckAction: null,
           lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
           lastSnoozeAction: null,
+          snoozeExpiry: null,
           tags: [],
         }}
       />

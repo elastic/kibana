@@ -41,9 +41,10 @@ const buildBulkGetAlertActionsQuery = (episodeIds: string[]): string => {
         tags = LAST(tags, @timestamp) WHERE action_type IN ("tag"),
         last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
         last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-        last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
+        last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
+        snooze_expiry = LAST(expiry, @timestamp) WHERE action_type IN ("snooze")
       BY episode_id, rule_id, group_hash
-    | KEEP episode_id, rule_id, group_hash, last_ack_action, last_deactivate_action, last_snooze_action, tags
+    | KEEP episode_id, rule_id, group_hash, last_ack_action, last_deactivate_action, last_snooze_action, snooze_expiry, tags
   `;
 };
 
@@ -72,6 +73,7 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
           lastAckAction: (row.last_ack_action as string) ?? null,
           lastDeactivateAction: (row.last_deactivate_action as string) ?? null,
           lastSnoozeAction: (row.last_snooze_action as string) ?? null,
+          snoozeExpiry: (row.snooze_expiry as string) ?? null,
           tags: tagsFromRow(row.tags),
         })
       );

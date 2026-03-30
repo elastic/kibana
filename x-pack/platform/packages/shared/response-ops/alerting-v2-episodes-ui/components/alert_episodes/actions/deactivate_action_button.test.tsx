@@ -27,14 +27,14 @@ describe('ResolveActionButton', () => {
     } as any);
   });
 
-  it('renders Unresolve when not deactivated', () => {
+  it('renders Resolve when active', () => {
     render(<ResolveActionButton lastDeactivateAction={null} http={mockServices.http} />);
     expect(screen.getByTestId('alertingEpisodeActionsResolveActionButton')).toHaveTextContent(
-      'Unresolve'
+      'Resolve'
     );
   });
 
-  it('renders Resolve when deactivated', () => {
+  it('renders Unresolve when deactivated', () => {
     render(
       <ResolveActionButton
         lastDeactivateAction={ALERT_EPISODE_ACTION_TYPE.DEACTIVATE}
@@ -42,7 +42,7 @@ describe('ResolveActionButton', () => {
       />
     );
     expect(screen.getByTestId('alertingEpisodeActionsResolveActionButton')).toHaveTextContent(
-      'Resolve'
+      'Unresolve'
     );
   });
 

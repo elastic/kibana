@@ -60,6 +60,7 @@ describe('useFetchEpisodeActions', () => {
           last_ack_action: 'ack',
           last_deactivate_action: null,
           last_snooze_action: 'snooze',
+          snooze_expiry: '2035-01-02T12:00:00.000Z',
           tags: ['t1', 't2'],
         },
       ],
@@ -89,6 +90,7 @@ describe('useFetchEpisodeActions', () => {
       lastAckAction: 'ack',
       lastDeactivateAction: null,
       lastSnoozeAction: 'snooze',
+      snoozeExpiry: '2035-01-02T12:00:00.000Z',
       tags: ['t1', 't2'],
     });
   });
@@ -103,6 +105,7 @@ describe('useFetchEpisodeActions', () => {
           last_ack_action: null,
           last_deactivate_action: null,
           last_snooze_action: null,
+          snooze_expiry: null,
           tags: 'solo',
         },
       ],
@@ -131,6 +134,7 @@ describe('useFetchEpisodeActions', () => {
           last_ack_action: null,
           last_deactivate_action: null,
           last_snooze_action: null,
+          snooze_expiry: null,
           tags: null,
         },
       ],
@@ -178,6 +182,7 @@ describe('useFetchEpisodeActions', () => {
           last_ack_action: 'ack',
           last_deactivate_action: null,
           last_snooze_action: null,
+          snooze_expiry: null,
           tags: [],
         },
         {
@@ -187,6 +192,7 @@ describe('useFetchEpisodeActions', () => {
           last_ack_action: 'unack',
           last_deactivate_action: null,
           last_snooze_action: null,
+          snooze_expiry: null,
           tags: [],
         },
       ],

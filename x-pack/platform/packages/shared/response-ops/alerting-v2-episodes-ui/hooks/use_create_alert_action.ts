@@ -28,7 +28,7 @@ export const useCreateAlertAction = (http: HttpStart) => {
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.all });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.actionsAll() });
     },
   });
 };
