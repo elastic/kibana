@@ -28,6 +28,7 @@ import {
   CASE_RULES_SAVED_OBJECT,
   CASES_CONNECTOR_SUB_ACTION,
   MAX_OPEN_CASES_ADVANCED_SETTING,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
   getMaximumOpenCases,
 } from '../../../common/constants';
 import { getSavedObjectsTypes } from '../../../common';
@@ -172,7 +173,7 @@ export class CasesConnector extends SubActionConnector<
     if (params.internallyManagedAlerts) {
       return {
         ...params,
-        maximumCasesToOpen: configuredMaxOpenCases,
+        maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
       };
     }
 

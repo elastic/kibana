@@ -10,7 +10,7 @@ import moment from 'moment';
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import {
   CASE_RULES_SAVED_OBJECT,
-  MAX_OPEN_CASES,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM_DEFAULT_MAXIMUM,
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
@@ -2810,7 +2810,7 @@ describe('CasesConnectorExecutor', () => {
     });
 
     describe('effective maximum', () => {
-      const allAlerts = Array.from({ length: MAX_OPEN_CASES + 1 }).map((_, index) => ({
+      const allAlerts = Array.from({ length: MAX_OPEN_CASES_DEFAULT_MAXIMUM + 1 }).map((_, index) => ({
         _id: `alert-id-${index}`,
         _index: `alert-index-${index}`,
         'host.name': `host-${index}`,
@@ -2821,7 +2821,7 @@ describe('CasesConnectorExecutor', () => {
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          maximumCasesToOpen: MAX_OPEN_CASES,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
@@ -2838,7 +2838,7 @@ describe('CasesConnectorExecutor', () => {
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          maximumCasesToOpen: MAX_OPEN_CASES,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
@@ -2856,7 +2856,7 @@ describe('CasesConnectorExecutor', () => {
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          maximumCasesToOpen: MAX_OPEN_CASES,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
@@ -2882,7 +2882,7 @@ describe('CasesConnectorExecutor', () => {
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          maximumCasesToOpen: MAX_OPEN_CASES,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(

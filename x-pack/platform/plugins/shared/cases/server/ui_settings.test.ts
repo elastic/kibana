@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import {
-  MAX_OPEN_CASES,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
   MAX_OPEN_CASES_ADVANCED_SETTING,
 } from '../common/constants';
 import { initUiSettings } from './ui_settings';
@@ -24,7 +24,7 @@ describe('initUiSettings', () => {
     expect(registeredSettings[MAX_OPEN_CASES_ADVANCED_SETTING]).toEqual(
       expect.objectContaining({
         name: 'Maximum cases created per rule run',
-        value: MAX_OPEN_CASES,
+        value: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         type: 'number',
       })
     );

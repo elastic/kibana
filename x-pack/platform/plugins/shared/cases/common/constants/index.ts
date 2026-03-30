@@ -16,16 +16,17 @@ export { LENS_ATTACHMENT_TYPE } from './visualizations';
 /**
  * Cases connector limits.
  */
-export const MAX_OPEN_CASES = 20;
+export const MAX_OPEN_CASES_DEFAULT_MAXIMUM = 20;
+export const ABSOLUTE_MAX_CASES_PER_RUN = 1000;
 export const DEFAULT_MAX_OPEN_CASES = 5;
 export const MAX_OPEN_CASES_ADVANCED_SETTING = 'cases:maxOpenCasesPerRuleRun' as const;
 
 export const getMaximumOpenCases = (maxOpenCases?: number | null): number => {
   if (maxOpenCases == null || Number.isNaN(maxOpenCases)) {
-    return MAX_OPEN_CASES;
+    return MAX_OPEN_CASES_DEFAULT_MAXIMUM;
   }
 
-  return Math.min(MAX_OPEN_CASES, Math.max(1, Math.floor(maxOpenCases)));
+  return Math.min(ABSOLUTE_MAX_CASES_PER_RUN, Math.max(1, Math.floor(maxOpenCases)));
 };
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;

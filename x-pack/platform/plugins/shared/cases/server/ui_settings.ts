@@ -10,7 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import {
   APP_ID,
-  MAX_OPEN_CASES,
+  ABSOLUTE_MAX_CASES_PER_RUN,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
   MAX_OPEN_CASES_ADVANCED_SETTING,
 } from '../common/constants';
 
@@ -20,7 +21,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       name: i18n.translate('xpack.cases.uiSettings.maxOpenCasesPerRuleRunLabel', {
         defaultMessage: 'Maximum cases created per rule run',
       }),
-      value: MAX_OPEN_CASES,
+      value: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
       type: 'number',
       description: i18n.translate('xpack.cases.uiSettings.maxOpenCasesPerRuleRunDescription', {
         defaultMessage:
@@ -29,7 +30,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       category: [APP_ID],
       requiresPageReload: false,
       order: 0,
-      schema: schema.number({ min: 1, max: MAX_OPEN_CASES }),
+      schema: schema.number({ min: 1, max: ABSOLUTE_MAX_CASES_PER_RUN }),
     },
   });
 };

@@ -15,6 +15,7 @@ import { CasesConnectorExecutor } from './cases_connector_executor';
 import {
   CASES_CONNECTOR_ID,
   MAX_OPEN_CASES_ADVANCED_SETTING,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
 } from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
@@ -201,8 +202,8 @@ describe('CasesConnector', () => {
     });
   });
 
-  it('overrides maximumCasesToOpen for internally managed alerts', async () => {
-    mockUiSettingsGet.mockResolvedValue(15);
+  it('overrides maximumCasesToOpen to MAX_OPEN_CASES_DEFAULT_MAXIMUM for internally managed alerts, regardless of the setting', async () => {
+    mockUiSettingsGet.mockResolvedValue(500);
 
     await connector.run({
       alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
@@ -226,7 +227,7 @@ describe('CasesConnector', () => {
     expect(mockExecute).toBeCalledWith(
       expect.objectContaining({
         internallyManagedAlerts: true,
-        maximumCasesToOpen: 15,
+        maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
       })
     );
   });

@@ -22,7 +22,6 @@ import {
   CASES_CONNECTOR_TITLE,
   OWNER_INFO,
   DEFAULT_MAX_OPEN_CASES,
-  MAX_OPEN_CASES,
 } from '../../../common/constants';
 import { getOwnerFromRuleConsumerProducer } from '../../../common/utils/owner';
 

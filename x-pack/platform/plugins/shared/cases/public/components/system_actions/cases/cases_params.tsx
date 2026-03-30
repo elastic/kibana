@@ -30,7 +30,7 @@ import {
   CASES_CONNECTOR_SUB_ACTION,
   DEFAULT_MAX_OPEN_CASES,
   MAX_OPEN_CASES_ADVANCED_SETTING,
-  MAX_OPEN_CASES,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
   getMaximumOpenCases,
 } from '../../../../common/constants';
 import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
@@ -92,7 +92,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     try {
       return getMaximumOpenCases(uiSettings.get<number>(MAX_OPEN_CASES_ADVANCED_SETTING));
     } catch {
-      return MAX_OPEN_CASES;
+      return MAX_OPEN_CASES_DEFAULT_MAXIMUM;
     }
   }, [uiSettings]);
 

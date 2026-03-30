@@ -32,7 +32,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
   CASE_RULES_SAVED_OBJECT,
-  MAX_OPEN_CASES,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
   MAX_OPEN_CASES_ADVANCED_SETTING,
 } from '@kbn/cases-plugin/common/constants';
 import type { User } from '../../../../../common/lib/authentication/types';
@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
       await clearOracleRecords(es, kibanaServer);
       await kibanaServer.uiSettings.update({
-        [MAX_OPEN_CASES_ADVANCED_SETTING]: MAX_OPEN_CASES,
+        [MAX_OPEN_CASES_ADVANCED_SETTING]: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
       });
     });
 

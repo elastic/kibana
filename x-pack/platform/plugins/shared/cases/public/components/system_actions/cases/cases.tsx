@@ -17,7 +17,7 @@ import {
   CASES_CONNECTOR_TITLE,
   CASES_CONNECTOR_TIME_WINDOW_REGEX,
   MAX_OPEN_CASES_ADVANCED_SETTING,
-  MAX_OPEN_CASES,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
   getMaximumOpenCases,
 } from '../../../../common/constants';
 import type { CasesActionParams } from './types';
@@ -35,7 +35,7 @@ const getConfiguredMaximumOpenCases = () => {
       KibanaServices.get().uiSettings?.get<number>(MAX_OPEN_CASES_ADVANCED_SETTING)
     );
   } catch {
-    return MAX_OPEN_CASES;
+    return MAX_OPEN_CASES_DEFAULT_MAXIMUM;
   }
 };
 

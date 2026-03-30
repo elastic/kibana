@@ -11,6 +11,8 @@ import { getCasesConnectorAdapter, getCasesConnectorType } from '.';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   DEFAULT_MAX_OPEN_CASES,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
+  ABSOLUTE_MAX_CASES_PER_RUN,
   OBSERVABILITY_PROJECT_TYPE_ID,
   SECURITY_PROJECT_TYPE_ID,
 } from '../../../common/constants';
@@ -135,12 +137,22 @@ describe('getCasesConnectorType', () => {
         ).toThrow();
       });
 
-      it('accepts maximumCasesToOpen values above the default ceiling', () => {
+      it('accepts maximumCasesToOpen values above the default maximum', () => {
         const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
-        expect(adapter.ruleActionParamsSchema.validate(getParams({ maximumCasesToOpen: 22 }))).toEqual(
-          getParams({ maximumCasesToOpen: 22 })
-        );
+        expect(
+          adapter.ruleActionParamsSchema.validate(getParams({ maximumCasesToOpen: 21 }))
+        ).toEqual(getParams({ maximumCasesToOpen: 21 }));
+      });
+
+      it('does not accept maximumCasesToOpen above ABSOLUTE_MAX_CASES_PER_RUN', () => {
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
+
+        expect(() =>
+          adapter.ruleActionParamsSchema.validate(
+            getParams({ maximumCasesToOpen: ABSOLUTE_MAX_CASES_PER_RUN + 1 })
+          )
+        ).toThrow();
       });
     });
 
@@ -201,7 +213,7 @@ describe('getCasesConnectorType', () => {
             // @ts-expect-error: not all fields are needed
             alerts,
             rule,
-            params: getParams({ maximumCasesToOpen: 22 }),
+            params: getParams({ maximumCasesToOpen: 10 }),
             spaceId: 'default',
             ruleUrl: 'https://example.com',
           })
@@ -223,7 +235,7 @@ describe('getCasesConnectorType', () => {
               "groupedAlerts": null,
               "groupingBy": Array [],
               "internallyManagedAlerts": false,
-              "maximumCasesToOpen": 22,
+              "maximumCasesToOpen": 10,
               "owner": "cases",
               "reopenClosedCases": false,
               "rule": Object {

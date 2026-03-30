@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { getMaximumOpenCases, MAX_OPEN_CASES } from '.';
+import { getMaximumOpenCases, MAX_OPEN_CASES_DEFAULT_MAXIMUM, ABSOLUTE_MAX_CASES_PER_RUN } from '.';
 
 describe('getMaximumOpenCases', () => {
-  it('returns MAX_OPEN_CASES for null', () => {
-    expect(getMaximumOpenCases(null)).toBe(MAX_OPEN_CASES);
+  it('returns MAX_OPEN_CASES_DEFAULT_MAXIMUM for null', () => {
+    expect(getMaximumOpenCases(null)).toBe(MAX_OPEN_CASES_DEFAULT_MAXIMUM);
   });
 
-  it('returns MAX_OPEN_CASES for undefined', () => {
-    expect(getMaximumOpenCases(undefined)).toBe(MAX_OPEN_CASES);
+  it('returns MAX_OPEN_CASES_DEFAULT_MAXIMUM for undefined', () => {
+    expect(getMaximumOpenCases(undefined)).toBe(MAX_OPEN_CASES_DEFAULT_MAXIMUM);
   });
 
-  it('returns MAX_OPEN_CASES for NaN', () => {
-    expect(getMaximumOpenCases(NaN)).toBe(MAX_OPEN_CASES);
+  it('returns MAX_OPEN_CASES_DEFAULT_MAXIMUM for NaN', () => {
+    expect(getMaximumOpenCases(NaN)).toBe(MAX_OPEN_CASES_DEFAULT_MAXIMUM);
   });
 
   it('clips to 1 for negative values', () => {
@@ -36,11 +36,15 @@ describe('getMaximumOpenCases', () => {
     expect(getMaximumOpenCases(10)).toBe(10);
   });
 
-  it('clips to MAX_OPEN_CASES for values above the ceiling', () => {
-    expect(getMaximumOpenCases(99999)).toBe(MAX_OPEN_CASES);
+  it('accepts values above MAX_OPEN_CASES_DEFAULT_MAXIMUM up to ABSOLUTE_MAX_CASES_PER_RUN', () => {
+    expect(getMaximumOpenCases(ABSOLUTE_MAX_CASES_PER_RUN)).toBe(ABSOLUTE_MAX_CASES_PER_RUN);
   });
 
-  it('returns MAX_OPEN_CASES exactly when given MAX_OPEN_CASES', () => {
-    expect(getMaximumOpenCases(MAX_OPEN_CASES)).toBe(MAX_OPEN_CASES);
+  it('clips to ABSOLUTE_MAX_CASES_PER_RUN for values above the absolute ceiling', () => {
+    expect(getMaximumOpenCases(ABSOLUTE_MAX_CASES_PER_RUN + 1)).toBe(ABSOLUTE_MAX_CASES_PER_RUN);
+  });
+
+  it('returns MAX_OPEN_CASES_DEFAULT_MAXIMUM exactly when given MAX_OPEN_CASES_DEFAULT_MAXIMUM', () => {
+    expect(getMaximumOpenCases(MAX_OPEN_CASES_DEFAULT_MAXIMUM)).toBe(MAX_OPEN_CASES_DEFAULT_MAXIMUM);
   });
 });
