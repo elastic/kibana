@@ -8,7 +8,7 @@ The snapshots are written to **GCS** (bucket: `significant-events-datasets`) und
 
 ## What this does
 
-For each selected scenario, the [capture_otel_demo_snapshots](capture_otel_demo_snapshots.ts) script:
+For each selected scenario, the [capture_otel_demo_snapshots](index.ts) script:
 
 1. Deploys the selected demo app on minikube
 2. Waits for pods to become ready
