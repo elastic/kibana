@@ -10,6 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { GETTING_STARTED_SESSIONSTORAGE_KEY } from '@kbn/search-shared-ui';
 import { useStats } from '../hooks/api/use_stats';
 import { useKibana } from '../hooks/use_kibana';
+import { useGetLicenseInfo } from '../hooks/use_get_license_info';
 
 interface Props {
   coreStart: CoreStart;
@@ -21,13 +22,15 @@ export const GettingStartedRedirectGate = ({ coreStart, children }: Props) => {
   const { data: storageStats, isLoading, isError } = useStats();
   const { cloud, isServerless } = useKibana().services;
   const hasRedirected = useRef(false);
+  const { isTrial } = useGetLicenseInfo();
 
   const gettingStartedSessionStorage = sessionStorage.getItem(GETTING_STARTED_SESSIONSTORAGE_KEY);
   const hasNotVisitedGettingStarted =
     !gettingStartedSessionStorage || gettingStartedSessionStorage === 'false'; // visit if null or value is false
-
+  console.log(cloud, cloud?.isInTrial(), 'isTrial', isTrial);
   const shouldRedirect =
-    storageStats !== undefined && (cloud?.isInTrial() || storageStats.documents === 0);
+    storageStats !== undefined &&
+    ((isServerless ? cloud?.isInTrial() : isTrial) || storageStats.documents === 0);
 
   useEffect(() => {
     if (shouldRedirect && hasNotVisitedGettingStarted && !hasRedirected.current) {
