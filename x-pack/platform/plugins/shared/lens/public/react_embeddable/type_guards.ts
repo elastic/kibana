@@ -18,6 +18,7 @@ import type {
   UserMessage,
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/common/constants';
 
 function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
   const fns = [
@@ -32,7 +33,7 @@ function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
 export const isLensApi = (api: unknown): api is LensApi => {
   return Boolean(
     api &&
-      apiIsOfType(api, 'lens') &&
+      apiIsOfType(api, LENS_EMBEDDABLE_TYPE) &&
       'canViewUnderlyingData$' in api &&
       apiHasLensCallbacks(api) &&
       apiPublishesTitle(api) &&
