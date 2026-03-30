@@ -49,7 +49,7 @@ export class EmbeddableEditorService {
   }
 
   public canSaveToDashboard = (): boolean =>
-    !this.isEmbeddedEditor &&
+    !this.isEmbeddedEditor() &&
     Boolean(this.application.capabilities.dashboard_v2.show) &&
     Boolean(this.application.capabilities.dashboard_v2.createNew);
 
