@@ -219,9 +219,9 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
 
   if (isLegendInside(legend)) {
     return {
-      placement: 'inside' as const,
+      placement: 'inside',
       layout: {
-        type: 'grid' as const,
+        type: 'grid',
         ...(max_lines != null ? { truncate: { max_lines } } : {}),
       },
       ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
@@ -242,11 +242,11 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
     ...baseOutside,
     layout: isListLayout
       ? {
-          type: 'list' as const,
+          type: 'list',
           ...(max_pixels != null ? { truncate: { max_pixels } } : {}),
         }
       : {
-          type: 'grid' as const,
+          type: 'grid',
           ...(max_lines != null ? { truncate: { max_lines } } : {}),
         },
   } satisfies HorizontalOutsideLayoutLegend | VerticalOutsideLayoutLegend;
