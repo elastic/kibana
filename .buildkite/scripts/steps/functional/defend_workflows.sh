@@ -10,6 +10,9 @@ export CYPRESS_SHARE_STACKS=true
 
 source .buildkite/scripts/steps/functional/ensure_virtualbox.sh
 
+echo "--- Generating split Cypress specs"
+node x-pack/solutions/security/plugins/security_solution/public/management/cypress/scripts/generate_cypress_split_specs.js
+
 echo "--- Defend Workflows Cypress tests"
 
 cd x-pack/solutions/security/plugins/security_solution

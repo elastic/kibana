@@ -12,6 +12,7 @@
     "cypress:changed-specs-only": "yarn cypress:dw run --changed-specs-only --env burn=2",
     "cypress:dw": "node ./scripts/start_cypress_parallel --config-file plugins/security_solution/public/management/cypress/cypress.config.ts --ftr-config-file ../../../../solutions/security/test/defend_workflows_cypress/cli_config",
     "cypress:dw:open": "yarn cypress:dw open",
+    "cypress:dw:generate-split-specs": "node public/management/cypress/scripts/generate_cypress_split_specs.js",
     "cypress:dw:run": "yarn cypress:dw run",
     "cypress:dw:serverless": "node ./scripts/start_cypress_parallel --config-file plugins/security_solution/public/management/cypress/cypress_serverless.config.ts --ftr-config-file ../../../../solutions/security/test/defend_workflows_cypress/serverless_config",
     "cypress:dw:serverless:open": "yarn cypress:dw:serverless open",
