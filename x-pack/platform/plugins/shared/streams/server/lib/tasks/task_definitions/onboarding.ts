@@ -33,11 +33,11 @@ import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
   getFeaturesIdentificationTaskId,
 } from './features_identification';
-import type { SignificantEventsQueriesGenerationTaskParams } from './significant_events_queries_generation';
+import type { SignificantEventsQueriesGenerationTaskParams } from '../../sig_events/tasks/significant_events_queries_generation';
 import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
-} from './significant_events_queries_generation';
+} from '../../sig_events/tasks/significant_events_queries_generation';
 
 export interface OnboardingTaskParams {
   streamName: string;
@@ -52,6 +52,30 @@ export const STREAMS_ONBOARDING_TASK_TYPE = 'streams_onboarding';
 export function getOnboardingTaskId(streamName: string, saveQueries: boolean = true) {
   const base = `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
   return saveQueries ? base : `${base}_no_save_queries`;
+}
+
+const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
+async function areFeaturesUpToDate({
+  taskClient,
+  featuresTaskId,
+}: {
+  taskClient: TaskClient<StreamsTaskType>;
+  featuresTaskId: string;
+}) {
+  const featuresTask = await taskClient.get<
+    FeaturesIdentificationTaskParams,
+    IdentifyFeaturesResult
+  >(featuresTaskId);
+
+  if (featuresTask.status !== TaskStatus.Completed) {
+    return false;
+  }
+
+  return (
+    featuresTask.last_completed_at &&
+    Date.now() - new Date(featuresTask.last_completed_at).getTime() <
+      FEATURES_IDENTIFICATION_RECENCY_MS
+  );
 }
 
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
@@ -88,26 +112,41 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 for (const step of steps) {
                   switch (step) {
-                    case OnboardingStep.FeaturesIdentification:
-                      const featuresTaskId = await scheduleFeaturesIdentificationTask(
-                        {
-                          start: from,
-                          end: to,
-                          streamName,
-                        },
-                        taskClient,
-                        runContext.fakeRequest
-                      );
+                    case OnboardingStep.FeaturesIdentification: {
+                      const featuresTaskId = getFeaturesIdentificationTaskId(streamName);
 
-                      featuresTaskResult = await waitForSubtask<
-                        FeaturesIdentificationTaskParams,
-                        IdentifyFeaturesResult
-                      >(featuresTaskId, runContext.taskInstance.id, taskClient);
+                      if (
+                        await areFeaturesUpToDate({
+                          taskClient,
+                          featuresTaskId,
+                        })
+                      ) {
+                        featuresTaskResult = await taskClient.getStatus<
+                          FeaturesIdentificationTaskParams,
+                          IdentifyFeaturesResult
+                        >(featuresTaskId);
+                      } else {
+                        await scheduleFeaturesIdentificationTask(
+                          {
+                            start: from,
+                            end: to,
+                            streamName,
+                          },
+                          taskClient,
+                          runContext.fakeRequest
+                        );
+
+                        featuresTaskResult = await waitForSubtask<
+                          FeaturesIdentificationTaskParams,
+                          IdentifyFeaturesResult
+                        >(featuresTaskId, runContext.taskInstance.id, taskClient);
+                      }
 
                       if (featuresTaskResult.status !== TaskStatus.Completed) {
                         return;
                       }
                       break;
+                    }
 
                     case OnboardingStep.QueriesGeneration:
                       const queriesTaskId = await scheduleQueriesGenerationTask(
