@@ -83,31 +83,7 @@ export class WorkflowsPlugin
 
     registerConnectorType();
 
-    // Resolve Agent Builder client contract lazily for AI authoring features.
-    // Eagerly kick off the dynamic import so the chunk downloads in parallel
-    // with onStart resolution, minimising the window where attachment renderers
-    // are not yet registered when the sidebar opens.
-    const isAiAgentEnabled = core.uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID, false);
-    if (isAiAgentEnabled) {
-      const aiIntegrationModule = import('./features/ai_integration');
-
-      this.agentBuilderPromise = core.plugins
-        .onStart<{ agentBuilder: AgentBuilderPluginStartContract }>('agentBuilder')
-        .then(async ({ agentBuilder }) => {
-          if (agentBuilder.found) {
-            const [coreStart] = await core.getStartServices();
-            const { registerWorkflowAttachmentRenderers } = await aiIntegrationModule;
-            registerWorkflowAttachmentRenderers(agentBuilder.contract.attachments, {
-              http: coreStart.http,
-              notifications: coreStart.notifications,
-              application: coreStart.application,
-            });
-            return agentBuilder.contract;
-          }
-          return undefined;
-        })
-        .catch(() => undefined);
-    }
+    this.setupAiIntegration(core);
 
     core.application.register({
       id: PLUGIN_ID,
@@ -151,6 +127,39 @@ export class WorkflowsPlugin
   }
 
   public stop() {}
+
+  /**
+   * Sets up AI authoring features: resolves the Agent Builder contract and
+   * registers workflow attachment renderers. Eagerly kicks off the dynamic
+   * import so the chunk downloads in parallel with onStart resolution,
+   * minimising the window where renderers are not yet registered.
+   */
+  private setupAiIntegration(
+    core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
+  ): void {
+    const isAiAgentEnabled = core.uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID, false);
+    if (!isAiAgentEnabled) {
+      return;
+    }
+
+    const aiIntegrationModule = import('./features/ai_integration');
+
+    this.agentBuilderPromise = core.plugins
+      .onStart<{ agentBuilder: AgentBuilderPluginStartContract }>('agentBuilder')
+      .then(async ({ agentBuilder }) => {
+        if (agentBuilder.found) {
+          const [coreStart] = await core.getStartServices();
+          const { registerWorkflowAttachmentRenderers } = await aiIntegrationModule;
+          registerWorkflowAttachmentRenderers(agentBuilder.contract.attachments, {
+            core: coreStart,
+            telemetry: this.telemetryService.getClient(),
+          });
+          return agentBuilder.contract;
+        }
+        return undefined;
+      })
+      .catch(() => undefined);
+  }
 
   /** Creates the start services to be used in the Kibana services context of the workflows application */
   private async createWorkflowsStartServices(

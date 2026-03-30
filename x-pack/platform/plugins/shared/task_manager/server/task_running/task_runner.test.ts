@@ -23,7 +23,7 @@ import {
   TaskPersistence,
   asTaskManagerStatEvent,
 } from '../task_events';
-import type { ConcreteTaskInstance } from '../task';
+import type { ConcreteTaskInstance, TaskEventLogger } from '../task';
 import { getDeleteTaskRunResult, TaskStatus } from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
@@ -52,6 +52,8 @@ const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 const minutesFromDate = (date: Date, mins: number): Date => secondsFromDate(date, mins * 60);
 const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
+const eventLoggerMock = { logEvent: jest.fn() } as unknown as TaskEventLogger;
+const dateRegExp = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
@@ -2654,6 +2656,414 @@ describe('TaskManagerRunner', () => {
       });
     });
 
+    describe('logTaskRunEvent', () => {
+      test('eventLog logs an event when a task is run successfully', async () => {
+        const id = _.random(1, 20).toString();
+        const onTaskEvent = jest.fn();
+        const { runner } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
+          event: {
+            action: 'task-run',
+            duration: expect.any(Number),
+            end: expect.stringMatching(dateRegExp),
+            outcome: 'success',
+            start: expect.stringMatching(dateRegExp),
+          },
+          kibana: {
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
+          },
+          message: `Task bar "${id}" completed successfully.`,
+        });
+      });
+
+      test('eventLog logs a failure event when a recurring task returns a success result with taskRunError', async () => {
+        const id = _.random(1, 20).toString();
+        const runAt = minutesFromNow(_.random(5));
+        const onTaskEvent = jest.fn();
+        const { runner } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+            schedule: { interval: '1m' },
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return {
+                    runAt,
+                    state: {},
+                    taskRunError: createTaskRunError(new Error('test'), TaskErrorSource.FRAMEWORK),
+                  };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
+          error: expect.any(Object),
+          event: {
+            action: 'task-run',
+            duration: expect.any(Number),
+            end: expect.stringMatching(dateRegExp),
+            outcome: 'failure',
+            start: expect.stringMatching(dateRegExp),
+          },
+          kibana: {
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
+          },
+          message: `Task bar "${id}" failed with a taskRunError.`,
+        });
+      });
+
+      test('eventLog logs a failure event when a task run throws an error', async () => {
+        const id = _.random(1, 20).toString();
+        const error = new Error('Dangit!');
+        const onTaskEvent = jest.fn();
+        const { runner } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  throw error;
+                },
+              }),
+            },
+          },
+        });
+        await runner.run();
+
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
+          error: expect.any(Object),
+          event: {
+            action: 'task-run',
+            duration: expect.any(Number),
+            end: expect.stringMatching(dateRegExp),
+            outcome: 'failure',
+            start: expect.stringMatching(dateRegExp),
+          },
+          kibana: {
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
+          },
+          message: `Task bar "${id}" failed.`,
+        });
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledTimes(1);
+      });
+
+      test('eventLog logs failure and cancel events when a recurring task run throws an error due to timeout', async () => {
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        const id = _.random(1, 20).toString();
+        const error = new Error('Task was cancelled');
+        const onTaskEvent = jest.fn();
+        let wasCancelled = false;
+        const { runner } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+            schedule: { interval: '1s' },
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `15s`,
+              createTaskRunner: () => ({
+                async run() {
+                  const promise = new Promise((r) => setTimeout(r, 20000));
+                  jest.advanceTimersByTime(20000);
+                  await promise;
+                  if (wasCancelled) {
+                    throw error;
+                  }
+                },
+                async cancel() {
+                  wasCancelled = true;
+                },
+              }),
+            },
+          },
+        });
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        const promise = runner.run();
+        await Promise.resolve();
+        await runner.cancel();
+        await promise;
+
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
+          event: {
+            action: 'task-cancel',
+            duration: expect.any(Number),
+            end: expect.stringMatching(dateRegExp),
+            start: expect.stringMatching(dateRegExp),
+          },
+          kibana: {
+            task: { id, type: 'bar', scheduled: expect.any(String) },
+          },
+          message: `Task bar "${id}" has been cancelled.`,
+        });
+
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
+          error: expect.any(Object),
+          event: {
+            action: 'task-run',
+            duration: expect.any(Number),
+            end: expect.stringMatching(dateRegExp),
+            outcome: 'failure',
+            start: expect.stringMatching(dateRegExp),
+            reason: `Task "${id}" was cancelled.`,
+          },
+          kibana: {
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
+          },
+          message: `Task bar "${id}" failed.`,
+        });
+
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledTimes(2);
+      });
+
+      test('eventLog logs failure and cancel events when an ad-hoc task run throws an error due to timeout', async () => {
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        const id = _.random(1, 20).toString();
+        const error = new Error('Task was cancelled');
+        const onTaskEvent = jest.fn();
+        let wasCancelled = false;
+        const { runner } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `15s`,
+              createTaskRunner: () => ({
+                async run() {
+                  const promise = new Promise((r) => setTimeout(r, 20000));
+                  jest.advanceTimersByTime(20000);
+                  await promise;
+                  if (wasCancelled) {
+                    throw error;
+                  }
+                },
+                async cancel() {
+                  wasCancelled = true;
+                },
+              }),
+            },
+          },
+        });
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        const promise = runner.run();
+        await Promise.resolve();
+        await runner.cancel();
+        await promise;
+
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
+          event: {
+            action: 'task-cancel',
+            duration: expect.any(Number),
+            end: expect.stringMatching(dateRegExp),
+            start: expect.stringMatching(dateRegExp),
+          },
+          kibana: {
+            task: { id, type: 'bar', scheduled: expect.any(String) },
+          },
+          message: `Task bar "${id}" has been cancelled.`,
+        });
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
+          error: expect.any(Object),
+          event: {
+            action: 'task-run',
+            duration: expect.any(Number),
+            end: expect.stringMatching(dateRegExp),
+            outcome: 'failure',
+            start: expect.stringMatching(dateRegExp),
+            reason: `Task "${id}" was cancelled.`,
+          },
+          kibana: {
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
+          },
+          message: `Task bar "${id}" failed.`,
+        });
+
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
+      });
+
+      test('emits TaskEvent when a recurring task run times out without throwing error', async () => {
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        const id = _.random(1, 20).toString();
+        const onTaskEvent = jest.fn();
+        const { runner } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+            schedule: { interval: '1s' },
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `15s`,
+              createTaskRunner: () => ({
+                async run() {
+                  const promise = new Promise((r) => setTimeout(r, 20000));
+                  jest.advanceTimersByTime(20000);
+                  await promise;
+                },
+              }),
+            },
+          },
+        });
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        const promise = runner.run();
+        await Promise.resolve();
+        await runner.cancel();
+        await promise;
+
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
+          event: {
+            action: 'task-cancel',
+            duration: expect.any(Number),
+            end: expect.stringMatching(dateRegExp),
+            start: expect.stringMatching(dateRegExp),
+          },
+          kibana: {
+            task: { id, type: 'bar', scheduled: expect.any(String) },
+          },
+          message: `Task bar "${id}" has been cancelled.`,
+        });
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
+          event: {
+            action: 'task-run',
+            duration: expect.any(Number),
+            end: expect.stringMatching(dateRegExp),
+            outcome: 'success',
+            start: expect.stringMatching(dateRegExp),
+          },
+          kibana: {
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
+          },
+          message: `Task bar "${id}" completed successfully.`,
+        });
+
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
+      });
+
+      test('emits TaskEvent when an ad-hoc task run times out without throwing error', async () => {
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        const id = _.random(1, 20).toString();
+        const onTaskEvent = jest.fn();
+        const { runner } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `15s`,
+              createTaskRunner: () => ({
+                async run() {
+                  const promise = new Promise((r) => setTimeout(r, 20000));
+                  jest.advanceTimersByTime(20000);
+                  await promise;
+                },
+              }),
+            },
+          },
+        });
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        const promise = runner.run();
+        await Promise.resolve();
+        await runner.cancel();
+        await promise;
+
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
+          event: {
+            action: 'task-cancel',
+            duration: expect.any(Number),
+            end: expect.stringMatching(dateRegExp),
+            start: expect.stringMatching(dateRegExp),
+          },
+          kibana: {
+            task: { id, type: 'bar', scheduled: expect.any(String) },
+          },
+          message: `Task bar "${id}" has been cancelled.`,
+        });
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
+          event: {
+            action: 'task-run',
+            duration: expect.any(Number),
+            end: expect.stringMatching(dateRegExp),
+            outcome: 'success',
+            start: expect.stringMatching(dateRegExp),
+          },
+          kibana: {
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
+          },
+          message: `Task bar "${id}" completed successfully.`,
+        });
+
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
+      });
+    });
+
     test('does not update saved object if recurring task expires without throwing error and timeout is greater than schedule', async () => {
       const id = _.random(1, 20).toString();
       const onTaskEvent = jest.fn();
@@ -3165,6 +3575,7 @@ describe('TaskManagerRunner', () => {
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
       strategy: opts.strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY,
       getPollInterval: () => 500,
+      eventLogger: eventLoggerMock,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {
