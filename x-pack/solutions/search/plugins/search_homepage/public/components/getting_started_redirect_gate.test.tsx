@@ -8,10 +8,10 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { GettingStartedRedirectGate } from './getting_started_redirect_gate';
-import { GETTING_STARTED_LOCALSTORAGE_KEY } from '@kbn/search-shared-ui';
+import { GETTING_STARTED_SESSIONSTORAGE_KEY } from '@kbn/search-shared-ui';
 
 jest.mock('@kbn/search-shared-ui', () => ({
-  GETTING_STARTED_LOCALSTORAGE_KEY: 'search.gettingStarted.visited',
+  GETTING_STARTED_SESSIONSTORAGE_KEY: 'search.gettingStarted.visited',
 }));
 
 describe('GettingStartedRedirectGate', () => {
@@ -35,7 +35,7 @@ describe('GettingStartedRedirectGate', () => {
     );
 
   it('renders children when already visited', () => {
-    localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'true');
+    localStorage.setItem(GETTING_STARTED_SESSIONSTORAGE_KEY, 'true');
     const { getByTestId } = renderGate();
     expect(getByTestId('child')).toBeInTheDocument();
     expect(navigateToApp).not.toHaveBeenCalled();
@@ -48,7 +48,7 @@ describe('GettingStartedRedirectGate', () => {
   });
 
   it('does NOT render children and redirects when visited=false', async () => {
-    localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'false');
+    localStorage.setItem(GETTING_STARTED_SESSIONSTORAGE_KEY, 'false');
     const { queryByTestId } = renderGate();
     expect(queryByTestId('child')).not.toBeInTheDocument();
     await waitFor(() => expect(navigateToApp).toHaveBeenCalledWith('searchGettingStarted'));
