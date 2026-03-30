@@ -14,8 +14,7 @@ import {
   dataStreamsApiBasePath,
 } from '../fixtures/api_test_constants';
 
-// Failing: See https://github.com/elastic/kibana/issues/259261
-apiTest.describe.skip(
+apiTest.describe(
   'automatic_import_v2 Data Stream API (manager)',
   { tag: tags.stateful.all },
   () => {
