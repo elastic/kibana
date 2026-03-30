@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { useFetchSloDefinitionsWithRemote } from '../../../hooks/use_fetch_slo_definitions_with_remote';
 import { useFetchSloInstances } from '../../../hooks/use_fetch_slo_instances';
@@ -172,12 +172,20 @@ interface MemberRowProps {
 }
 
 function MemberRow({ index, members, onRemove }: MemberRowProps) {
-  const { control, watch } = useFormContext<CreateCompositeSLOForm>();
+  const { control, watch, setValue } = useFormContext<CreateCompositeSLOForm>();
   const sloId = watch(`members.${index}.sloId`);
   const sloName = watch(`members.${index}.sloName`);
   const groupBy = watch(`members.${index}.groupBy`);
 
   const isGrouped = [groupBy].flat().some((g) => g !== ALL_VALUE);
+
+  // If the member SLO's groupBy was removed after the composite was created, reset
+  // the stale instanceId so it is not silently sent to the API.
+  useEffect(() => {
+    if (!isGrouped) {
+      setValue(`members.${index}.instanceId`, ALL_VALUE);
+    }
+  }, [isGrouped, index, setValue]);
 
   const { data: instances, isLoading: isLoadingInstances } = useFetchSloInstances({
     sloId,
