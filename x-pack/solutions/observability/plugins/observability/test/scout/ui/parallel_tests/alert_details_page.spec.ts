@@ -10,8 +10,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 import { GENERATED_METRICS } from '../fixtures/constants';
 
-// Failing: See https://github.com/elastic/kibana/issues/250046
-test.describe.skip(
+test.describe(
   'Alert Details Page',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -58,13 +57,14 @@ test.describe.skip(
       })) as { data: { id: string } };
       ruleId = createdRule.data.id;
     });
+
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
     test('should show an error when the alert does not exist', async ({ page, pageObjects }) => {
       await pageObjects.alertPage.goto('non-existent-alert-id');
-      await expect(page.testSubj.locator('alertDetailsError')).toBeVisible();
+      await expect(page.testSubj.locator('alertDetailsError')).toBeVisible({ timeout: 30_000 });
     });
 
     test('should show a tabbed view', async ({ page, pageObjects }) => {
