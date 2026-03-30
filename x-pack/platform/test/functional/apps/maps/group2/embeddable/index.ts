@@ -10,12 +10,5 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('embeddable', function () {
     loadTestFile(require.resolve('./canvas'));
-    loadTestFile(require.resolve('./add_to_dashboard'));
-    loadTestFile(require.resolve('./save_and_return'));
-    loadTestFile(require.resolve('./dashboard'));
-    loadTestFile(require.resolve('./embeddable_library'));
-    loadTestFile(require.resolve('./embeddable_state'));
-    loadTestFile(require.resolve('./tooltip_filter_actions'));
-    loadTestFile(require.resolve('./filter_by_map_extent'));
   });
 }

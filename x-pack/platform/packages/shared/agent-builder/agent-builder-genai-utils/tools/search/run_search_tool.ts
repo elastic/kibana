@@ -20,6 +20,7 @@ export const runSearchTool = async ({
   index,
   rowLimit,
   customInstructions,
+  allowPatternTarget = false,
   timeRange,
   model,
   esClient,
@@ -31,6 +32,8 @@ export const runSearchTool = async ({
   index?: string;
   rowLimit?: number;
   customInstructions?: string;
+  /** When true, a pattern (e.g. logs-*) targets all matching indices via ESQL. When false, a single index is chosen via index explorer. */
+  allowPatternTarget?: boolean;
   timeRange?: TimeRange;
   model: ScopedModel;
   esClient: ElasticsearchClient;
@@ -61,6 +64,7 @@ export const runSearchTool = async ({
           targetPattern: index,
           rowLimit,
           customInstructions,
+          allowPatternTarget,
           timeRange: resolvedTimeRange,
         },
         { tags: ['search_tool'], metadata: { graphName: 'search_tool' } }

@@ -231,6 +231,10 @@ const colorCodeSchema = schema.object(
 
 const colorDefSchema = schema.oneOf([colorFromPaletteSchema, colorCodeSchema]);
 
+const unassignedColorSchema = schema.oneOf([colorFromPaletteSchema, colorCodeSchema], {
+  meta: { description: 'The color to use for unassigned values.', id: 'unassignedColorSchema' },
+});
+
 const categoricalColorMappingSchema = schema.object(
   {
     mode: schema.literal('categorical'),
@@ -244,7 +248,7 @@ const categoricalColorMappingSchema = schema.object(
       }),
       { maxSize: 1000 }
     ),
-    unassignedColor: schema.maybe(colorDefSchema),
+    unassigned: schema.maybe(unassignedColorSchema),
   },
   { meta: { id: 'categoricalColorMapping', title: 'Categorical Color Mapping' } }
 );
@@ -269,7 +273,7 @@ const gradientColorMappingSchema = schema.object(
       )
     ),
     gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
-    unassignedColor: schema.maybe(colorDefSchema),
+    unassigned: schema.maybe(unassignedColorSchema),
   },
   { meta: { id: 'gradientColorMapping', title: 'Gradient Color Mapping' } }
 );
@@ -305,6 +309,7 @@ export type ColorMappingCategoricalType = TypeOf<typeof categoricalColorMappingS
 export type ColorMappingGradientType = TypeOf<typeof gradientColorMappingSchema>;
 export type ColorMappingColorDefType = TypeOf<typeof colorDefSchema>;
 export type AllColoringTypes = TypeOf<typeof allColoringTypeSchema>;
+export type UnassignedColorType = TypeOf<typeof unassignedColorSchema>;
 /**
  * Schema for where to apply the color (to value or background).
  */
