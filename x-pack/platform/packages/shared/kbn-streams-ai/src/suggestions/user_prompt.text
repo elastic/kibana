@@ -1,0 +1,28 @@
+Analyse the following stream and suggest improvements.
+
+## Stream
+
+`name`
+{{{name}}}
+
+`description`
+{{{description}}}
+
+`stream_type`
+{{{stream_type}}}
+
+`already_partitioned`
+{{{already_partitioned}}}
+
+## Data quality
+
+`degraded_docs_pct`
+{{{degraded_docs_pct}}}
+
+## Dataset analysis
+
+{{{dataset_analysis}}}
+
+## Log patterns
+
+{{{log_patterns}}}

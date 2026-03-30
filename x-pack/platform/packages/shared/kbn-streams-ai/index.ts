@@ -6,6 +6,11 @@
  */
 
 export { generateStreamDescription } from './src/description/generate_description';
+export {
+  generateStreamSuggestions,
+  type StreamSuggestion,
+  type StreamSuggestionType,
+} from './src/suggestions/generate_suggestions';
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,

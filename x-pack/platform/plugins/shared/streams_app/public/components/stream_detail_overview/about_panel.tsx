@@ -28,19 +28,14 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 export function AboutPanel() {
   const { definition } = useStreamDetail();
   const router = useStreamsAppRouter();
-  const {
-    features: { significantEvents },
-  } = useStreamsPrivileges();
+  useStreamsPrivileges();
 
   const { name, description } = definition.stream;
 
   const queryStream = Streams.QueryStream.GetResponse.is(definition) ? definition : null;
 
   const canEditDescription =
-    Streams.ingest.all.GetResponse.is(definition) &&
-    definition.privileges.manage &&
-    !!significantEvents?.enabled &&
-    !!significantEvents?.available;
+    Streams.ingest.all.GetResponse.is(definition) && definition.privileges.manage;
 
   const canEditQuery = Streams.QueryStream.GetResponse.is(definition);
   const showEditButton = canEditDescription || canEditQuery;
@@ -48,10 +43,6 @@ export function AboutPanel() {
   const advancedTabHref = router.link('/{key}/management/{tab}', {
     path: { key: name, tab: 'advanced' },
   });
-
-  if (!queryStream && !description && !showEditButton) {
-    return null;
-  }
 
   return (
     <EuiPanel
@@ -75,6 +66,7 @@ export function AboutPanel() {
               })}
             </h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
         </EuiFlexItem>
         {showEditButton && (
           <EuiFlexItem grow={false}>
@@ -98,7 +90,6 @@ export function AboutPanel() {
 
       {queryStream && (
         <>
-          <EuiSpacer size="m" />
           <EuiCodeBlock language="esql" isCopyable paddingSize="m" overflowHeight={200}>
             {queryStream.stream.query.esql}
           </EuiCodeBlock>
@@ -107,13 +98,12 @@ export function AboutPanel() {
 
       {(description || canEditDescription) && (
         <>
-          <EuiSpacer size="m" />
           {description ? (
             <div style={{ maxHeight: 400, overflowY: 'auto' }}>
               <EuiMarkdownFormat textSize="s">{description}</EuiMarkdownFormat>
             </div>
           ) : (
-            <EuiText size="s">
+            <EuiText size="s" color="subdued">
               <EuiLink href={advancedTabHref}>
                 {i18n.translate('xpack.streams.streamOverview.aboutPanel.enterDescription', {
                   defaultMessage: 'Enter description',
