@@ -33,6 +33,7 @@ import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { getMockSearchConfig } from '../../../config.mock';
 import type { ICPSManager } from '@kbn/cps-utils';
+import moment from 'moment';
 
 jest.mock('./create_request_hash', () => {
   const originalModule = jest.requireActual('./create_request_hash');
@@ -2488,6 +2489,154 @@ describe('SearchInterceptor', () => {
         const requestBody = JSON.parse(requestOptions.body as string);
         expect(requestBody.projectRouting).toBeUndefined();
       });
+    });
+  });
+
+  describe('pollLength configuration', () => {
+    const inspectorServiceMock = {
+      open: () => {},
+    } as unknown as InspectorStart;
+
+    beforeEach(() => {
+      mockCoreSetup.http.post.mockReset();
+    });
+
+    test('should use DEFAULT_MULTIPLEXING_POLL_LENGTH when pollLength is not set and protocol supports multiplexing', async () => {
+      const interceptor = new SearchInterceptor({
+        toasts: mockCoreSetup.notifications.toasts,
+        startServices: new Promise((resolve) => {
+          resolve([
+            mockCoreStart,
+            { inspector: inspectorServiceMock } as unknown as SearchServiceStartDependencies,
+            {},
+          ]);
+        }),
+        uiSettings: mockCoreSetup.uiSettings,
+        http: mockCoreSetup.http,
+        executionContext: mockCoreSetup.executionContext,
+        session: sessionService,
+        searchConfig: {
+          asyncSearch: {
+            waitForCompletion: moment.duration(100, 'ms'),
+            keepAlive: moment.duration(1, 'm'),
+            batchedReduceSize: 64,
+            pollLength: undefined, // Explicitly undefined
+          },
+          sessions: {
+            enabled: true,
+            defaultExpiration: moment.duration(7, 'd'),
+          },
+        } as any,
+      });
+      (interceptor as any).protocolSupportsMultiplexing = true;
+
+      const responses = [
+        {
+          time: 10,
+          value: getMockSearchResponse({
+            isPartial: true,
+            isRunning: true,
+            id: '1',
+            rawResponse: {},
+          }),
+        },
+        {
+          time: 20,
+          value: getMockSearchResponse({
+            isPartial: false,
+            isRunning: false,
+            id: '1',
+            rawResponse: {},
+          }),
+        },
+      ];
+
+      mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+
+      const response = interceptor.search({ params: {} }, { pollInterval: 0 });
+      response.subscribe({ next, error, complete });
+
+      await timeTravel(10);
+      await timeTravel(20);
+
+      expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+
+      const pollRequest = (
+        mockCoreSetup.http.post.mock.calls[1] as unknown as [string, HttpFetchOptions]
+      )[1];
+      const pollBody = JSON.parse(pollRequest?.body as string);
+
+      // Should use DEFAULT_MULTIPLEXING_POLL_LENGTH (30000ms)
+      expect(pollBody.params.wait_for_completion_timeout).toBe('30000ms');
+    });
+
+    test('should not set wait_for_completion_timeout when pollLength is not set and protocol does not support multiplexing', async () => {
+      const interceptor = new SearchInterceptor({
+        toasts: mockCoreSetup.notifications.toasts,
+        startServices: new Promise((resolve) => {
+          resolve([
+            mockCoreStart,
+            { inspector: inspectorServiceMock } as unknown as SearchServiceStartDependencies,
+            {},
+          ]);
+        }),
+        uiSettings: mockCoreSetup.uiSettings,
+        http: mockCoreSetup.http,
+        executionContext: mockCoreSetup.executionContext,
+        session: sessionService,
+        searchConfig: {
+          asyncSearch: {
+            waitForCompletion: moment.duration(100, 'ms'),
+            keepAlive: moment.duration(1, 'm'),
+            batchedReduceSize: 64,
+            pollLength: undefined, // Explicitly undefined
+          },
+          sessions: {
+            enabled: true,
+            defaultExpiration: moment.duration(7, 'd'),
+          },
+        } as any,
+      });
+      (interceptor as any).protocolSupportsMultiplexing = false;
+
+      const responses = [
+        {
+          time: 10,
+          value: getMockSearchResponse({
+            isPartial: true,
+            isRunning: true,
+            id: '1',
+            rawResponse: {},
+          }),
+        },
+        {
+          time: 20,
+          value: getMockSearchResponse({
+            isPartial: false,
+            isRunning: false,
+            id: '1',
+            rawResponse: {},
+          }),
+        },
+      ];
+
+      mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+
+      const response = interceptor.search({ params: {} }, { pollInterval: 0 });
+      response.subscribe({ next, error, complete });
+
+      await timeTravel(10);
+      await timeTravel(20);
+
+      expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+
+      const pollRequest = (
+        mockCoreSetup.http.post.mock.calls[1] as unknown as [string, HttpFetchOptions]
+      )[1];
+      const pollBody = JSON.parse(pollRequest?.body as string);
+
+      // Should not have wait_for_completion_timeout
+      expect(pollBody.params.wait_for_completion_timeout).toBeUndefined();
     });
   });
 });

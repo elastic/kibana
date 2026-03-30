@@ -17,12 +17,12 @@ export const getMockSearchConfig = ({
   },
   asyncSearch: {
     waitForCompletion = moment.duration(100, 'ms'),
-    pollLength = 2000,
+    pollLength = moment.duration(2000, 'ms'),
     keepAlive = moment.duration(1, 'm'),
     batchedReduceSize = 64,
   } = {
     waitForCompletion: moment.duration(100, 'ms'),
-    pollLength: 2000,
+    pollLength: moment.duration(2000, 'ms'),
     keepAlive: moment.duration(1, 'm'),
     batchedReduceSize: 64,
   },

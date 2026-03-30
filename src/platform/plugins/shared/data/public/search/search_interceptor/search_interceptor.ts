@@ -524,10 +524,8 @@ export class SearchInterceptor {
     const paramsToUse = request.id
       ? {
           wait_for_completion_timeout:
-            typeof this.deps.searchConfig.asyncSearch.pollLength === 'number'
-              ? `${this.deps.searchConfig.asyncSearch.pollLength}ms`
-              : this.protocolSupportsMultiplexing
-              ? `${DEFAULT_MULTIPLEXING_POLL_LENGTH}ms` // todo - limit to socket timeout
+            !this.deps.searchConfig.asyncSearch.pollLength && this.protocolSupportsMultiplexing
+              ? `${DEFAULT_MULTIPLEXING_POLL_LENGTH}ms`
               : undefined,
 
           // FIXME: the dropNullColumns param shouldn't be needed during polling

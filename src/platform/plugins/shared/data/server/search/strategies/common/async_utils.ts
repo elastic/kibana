@@ -67,8 +67,8 @@ export function getCommonDefaultAsyncGetParams(
 
   return {
     // Wait up to the timeout for the response to return
-    ...(typeof config.asyncSearch.pollLength === 'number'
-      ? { wait_for_completion_timeout: `${config.asyncSearch.pollLength}ms` }
+    ...(config.asyncSearch.pollLength
+      ? { wait_for_completion_timeout: `${config.asyncSearch.pollLength.asMilliseconds()}ms` }
       : {}),
     ...(useSearchSessions && options.isStored
       ? // Use session's keep_alive if search belongs to a stored session
