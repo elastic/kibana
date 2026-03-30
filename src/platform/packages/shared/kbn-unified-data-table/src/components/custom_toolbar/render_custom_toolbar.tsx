@@ -172,11 +172,11 @@ export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = internal
  * Render custom element on the left side and all controls to the right
  */
 export const getRenderCustomToolbarWithElements = ({
-  saveButton,
+  saveToDashboardButton: saveButton,
   leftSide,
   bottomSection,
 }: {
-  saveButton?: React.ReactElement;
+  saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
 }): UnifiedDataTableRenderCustomToolbar => {

@@ -463,19 +463,17 @@ function DiscoverDocumentsComponent({
     [isDataLoading, styles.progress]
   );
 
-  const canSaveDiscoverTable =
-    !services.embeddableEditor.isEmbeddedEditor() && services.embeddableEditor.canSaveToDashboard();
+  const canSaveDiscoverTable = services.embeddableEditor.canSaveToDashboard();
 
-  const saveModalButton = useMemo(
-    () =>
-      canSaveDiscoverTable ? <SaveDiscoverTableButton key="SaveDiscoverTableButton" /> : undefined,
+  const saveToDashboardButton = useMemo(
+    () => (canSaveDiscoverTable ? <SaveDiscoverTableButton /> : undefined),
     [canSaveDiscoverTable]
   );
 
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
-        saveButton: saveModalButton,
+        saveToDashboardButton,
         leftSide: isDataGridFullScreen ? undefined : viewModeToggle,
         bottomSection: (
           <>
@@ -484,7 +482,7 @@ function DiscoverDocumentsComponent({
           </>
         ),
       }),
-    [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen, saveModalButton]
+    [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen, saveToDashboardButton]
   );
 
   const cascadedDocumentsFetcher = useCurrentTabRuntimeState(

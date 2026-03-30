@@ -49,8 +49,9 @@ export class EmbeddableEditorService {
   }
 
   public canSaveToDashboard = (): boolean =>
-    (this.application.capabilities.dashboard_v2.show as boolean) &&
-    (this.application.capabilities.dashboard_v2.createNew as boolean);
+    !this.isEmbeddedEditor &&
+    Boolean(this.application.capabilities.dashboard_v2.show) &&
+    Boolean(this.application.capabilities.dashboard_v2.createNew);
 
   public isByValueEditor = (): boolean => Boolean(this.embeddableState?.valueInput);
 

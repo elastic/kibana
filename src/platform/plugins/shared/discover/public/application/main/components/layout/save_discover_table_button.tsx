@@ -30,7 +30,7 @@ const OBJECT_TYPE = i18n.translate('discover.saveDiscoverTable.modalTitle', {
 });
 
 const BUTTON_LABEL = i18n.translate('discover.saveDiscoverTable.buttonLabel', {
-  defaultMessage: 'Save Discover session table',
+  defaultMessage: 'Add table to dashboard',
 });
 
 export function SaveDiscoverTableButton() {
