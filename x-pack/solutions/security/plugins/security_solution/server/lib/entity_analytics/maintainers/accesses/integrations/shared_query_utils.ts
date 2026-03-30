@@ -90,12 +90,13 @@ export function buildBucketUserFilter(buckets: CompositeBucket[]): QueryDslQuery
 export function buildAccessEsqlQuery(indexPattern: string, whereClause: string): string {
   const userFieldEvals = getFieldEvaluationsEsql('user');
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
+  const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
+  const hostIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('host');
   const userEuidEval = euid.esql.getEuidEvaluation('user', { withTypeId: false });
-  const userIdFilter = euid.esql.getEuidEsqlRawDocumentsFilter('user');
-  const hostIdFilter = euid.esql.getEuidEsqlRawDocumentsFilter('host');
   const hostEuidEval = euid.esql.getEuidEvaluation('host', { withTypeId: false });
 
-  return `FROM ${indexPattern}
+  return `SET unmapped_fields="nullify";
+FROM ${indexPattern}
 | WHERE ${whereClause}
     AND event.outcome == "success"
     AND (${userIdFilter})

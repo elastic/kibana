@@ -213,8 +213,8 @@ describe('buildAccessEsqlQuery', () => {
     expect(query).toContain(`| LIMIT ${COMPOSITE_PAGE_SIZE}`);
   });
 
-  it('does not reference entity.id — uses raw documents filter to avoid verification_exception on event indices', () => {
+  it('includes SET unmapped_fields="nullify" before FROM to handle missing fields like entity.id on raw event indices', () => {
     const query = buildAccessEsqlQuery(indexPattern, whereClause);
-    expect(query).not.toContain('entity.id');
+    expect(query).toMatch(/^SET unmapped_fields="nullify";\nFROM/);
   });
 });

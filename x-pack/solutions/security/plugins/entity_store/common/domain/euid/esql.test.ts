@@ -8,7 +8,6 @@
 import {
   getEuidEsqlEvaluation,
   getEuidEsqlDocumentsContainsIdFilter,
-  getEuidEsqlRawDocumentsFilter,
   getEuidEsqlFilterBasedOnDocument,
   getFieldEvaluationsEsqlFromDefinition,
 } from './esql';
@@ -214,29 +213,6 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
   it('returns documents filter AND postAggFilter for user (IDP or non-IDP only)', () => {
     const result = getEuidEsqlDocumentsContainsIdFilter('user');
 
-    expect(result).toMatchSnapshot();
-  });
-});
-
-describe('getEuidEsqlRawDocumentsFilter', () => {
-  it('returns single field condition for generic (one required field)', () => {
-    const result = getEuidEsqlRawDocumentsFilter('generic');
-
-    expect(result).toBe('(entity.id IS NOT NULL AND entity.id != "")');
-  });
-
-  it('returns OR of required fields for host — same as getEuidEsqlDocumentsContainsIdFilter since host has no postAggFilter', () => {
-    const result = getEuidEsqlRawDocumentsFilter('host');
-
-    const expected =
-      'NOT(`host.id` IS NULL) AND `host.id` != "" OR NOT(`host.name` IS NULL) AND `host.name` != "" OR NOT(`host.hostname` IS NULL) AND `host.hostname` != ""';
-    expect(result).toBe(expected);
-  });
-
-  it('returns only documentsFilter for user — does NOT include postAggFilter (no entity.id reference)', () => {
-    const result = getEuidEsqlRawDocumentsFilter('user');
-
-    expect(result).not.toContain('entity.id');
     expect(result).toMatchSnapshot();
   });
 });

@@ -258,22 +258,6 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
 }
 
 /**
- * Like getEuidEsqlDocumentsContainsIdFilter but uses only documentsFilter — without merging
- * postAggFilter. Use this when querying raw event indices where store-only fields like
- * `entity.id` do not exist and would cause a verification_exception.
- */
-export function getEuidEsqlRawDocumentsFilter(entityType: EntityType) {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
-  const { identityField } = entityDefinition;
-
-  if (isSingleFieldIdentity(identityField)) {
-    return `(${esqlIsNotNullOrEmpty(identityField.singleField)})`;
-  }
-
-  return conditionToESQL(identityField.documentsFilter ?? { always: true });
-}
-
-/**
  * Constructs an ESQL evaluation for the provided entity type to generate the entity id.
  *
  * You will need to prepend the result with a `| EVAL` clause, or just add to your existing EVAL clause.
