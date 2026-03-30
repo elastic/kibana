@@ -129,10 +129,6 @@ export const createManagementFooterItemsTree = (
               id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
             },
-            {
-              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-              link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-            },
           ],
         },
         {
@@ -156,6 +152,10 @@ export const createManagementFooterItemsTree = (
                     breadcrumbStatus: 'hidden',
                   },
                   {
+                    link: 'management:evals',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
                     link: 'management:securityAiAssistantManagement',
                     breadcrumbStatus: 'hidden',
                   },
@@ -163,6 +163,10 @@ export const createManagementFooterItemsTree = (
               : [
                   {
                     link: 'management:genAiSettings',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:evals',
                     breadcrumbStatus: 'hidden',
                   },
                 ],

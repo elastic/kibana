@@ -25,8 +25,7 @@
       "cloud",
       "fleet",
       "actions",
-      "discover",
-      "cases"
+      "discover"
     ],
     "optionalPlugins": [
       "securitySolutionEss",

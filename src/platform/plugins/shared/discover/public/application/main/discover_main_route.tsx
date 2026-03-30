@@ -18,10 +18,12 @@ import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
+import { DiscoverCustomizationContextProvider } from '../../customizations';
 import {
   type DiscoverInternalState,
   internalStateActions,
   InternalStateProvider,
+  RuntimeStateManagerProvider,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from './state_management/redux';
@@ -84,16 +86,20 @@ export const DiscoverMainRoute = ({
   useUnsavedChanges({ internalState, runtimeStateManager, onAppLeave });
 
   return (
-    <InternalStateProvider store={internalState}>
-      <DiscoverMainRouteContent
-        customizationContext={customizationContext}
-        customizationCallbacks={customizationCallbacks}
-        urlStateStorage={urlStateStorage}
-        internalState={internalState}
-        runtimeStateManager={runtimeStateManager}
-        searchSessionManager={searchSessionManager}
-      />
-    </InternalStateProvider>
+    <DiscoverCustomizationContextProvider value={customizationContext}>
+      <RuntimeStateManagerProvider value={runtimeStateManager}>
+        <InternalStateProvider store={internalState}>
+          <DiscoverMainRouteContent
+            customizationContext={customizationContext}
+            customizationCallbacks={customizationCallbacks}
+            urlStateStorage={urlStateStorage}
+            internalState={internalState}
+            runtimeStateManager={runtimeStateManager}
+            searchSessionManager={searchSessionManager}
+          />
+        </InternalStateProvider>
+      </RuntimeStateManagerProvider>
+    </DiscoverCustomizationContextProvider>
   );
 };
 

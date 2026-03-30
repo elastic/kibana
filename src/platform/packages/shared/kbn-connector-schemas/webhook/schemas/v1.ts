@@ -34,7 +34,23 @@ const configSchemaProps = {
   additionalFields: AuthConfiguration.additionalFields,
 };
 
-export const ConfigSchema = z.object(configSchemaProps).strict();
+function normalizeAuthTypeForUnauthenticatedConnectors(value: unknown): unknown {
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+
+  const config = value as Record<string, unknown>;
+  if (config.hasAuth === false && config.authType === undefined) {
+    return { ...config, authType: null };
+  }
+
+  return value;
+}
+
+export const ConfigSchema = z.preprocess(
+  normalizeAuthTypeForUnauthenticatedConnectors,
+  z.object(configSchemaProps).strict()
+);
 
 export const ParamsSchema = z
   .object({

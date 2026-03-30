@@ -49,6 +49,7 @@ export interface GroupingQueryArgs {
   };
   multiValueFieldsToFlatten?: string[];
   countByKeyForMultiValueFields?: string;
+  unitsCountFilter?: estypes.QueryDslQueryContainer;
 }
 
 export interface MainAggregation extends NamedAggregation {

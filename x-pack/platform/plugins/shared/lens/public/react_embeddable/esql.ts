@@ -33,7 +33,7 @@ export async function loadESQLAttributes({
   if (!isESQLModeEnabled({ uiSettings })) {
     return;
   }
-  const indexName = await getIndexForESQLQuery({ dataViews });
+  const indexName = await getIndexForESQLQuery({ http: coreStart.http });
   // Early exit if there's no data view to use
   if (!indexName) {
     return;

@@ -387,6 +387,8 @@ export function registerChatRoutes({
             'Content-Type': cloud?.isCloudEnabled
               ? 'application/octet-stream'
               : 'text/event-stream',
+            // another attempt at disabling compression
+            'Content-Encoding': 'identity',
             'Cache-Control': 'no-cache',
             Connection: 'keep-alive',
             'Transfer-Encoding': 'chunked',

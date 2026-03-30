@@ -14,7 +14,7 @@ import type { Services } from '../../../services/types';
 export const DocsLinkSubtitle = React.memo(() => {
   const { docLinks } = useKibana<Services>().services;
   return (
-    <EuiText size="s" color="subdued">
+    <EuiText size="s" color="subdued" component="span">
       <FormattedMessage
         id="xpack.automaticImportV2.createIntegrationUpload.uploadHelpText"
         defaultMessage="For more information, refer to {link}"

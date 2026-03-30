@@ -8,6 +8,7 @@
  */
 
 import { testConfig, testConfigs } from './test_config';
+import { readKibanaModuleManifest } from '../helpers/read_manifest';
 import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'node:fs';
 import fg from 'fast-glob';
@@ -15,6 +16,9 @@ import path from 'node:path';
 
 jest.mock('node:fs');
 jest.mock('fast-glob');
+jest.mock('../helpers/read_manifest', () => ({
+  readKibanaModuleManifest: jest.fn(),
+}));
 
 const dummyManifestProps = {
   exists: false,
@@ -22,9 +26,14 @@ const dummyManifestProps = {
   tests: [],
 };
 
+const mockReadKibanaModuleManifest = readKibanaModuleManifest as jest.MockedFunction<
+  typeof readKibanaModuleManifest
+>;
+
 describe('test_config module', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockReadKibanaModuleManifest.mockReset();
   });
 
   describe('testConfig.fromPath', () => {
@@ -153,6 +162,9 @@ describe('test_config module', () => {
             exists: true,
             ...validManifestContent,
           },
+          server: {
+            configSet: expected.customScoutName || 'default',
+          },
         });
       }
     );
@@ -183,6 +195,9 @@ describe('test_config module', () => {
           path: manifestPath,
           ...dummyManifestProps,
         },
+        server: {
+          configSet: 'default',
+        },
       });
     });
 
@@ -203,6 +218,48 @@ describe('test_config module', () => {
       expect(() => testConfig.fromPath(configPath)).toThrow(
         `Failed to create Scout config from path '${configPath}': path did not match the expected regex pattern`
       );
+    });
+
+    it('parses examples/ developer plugin paths using plugin.id from kibana.jsonc', () => {
+      const moduleRoot = path.join('examples', 'hello_world');
+      const scoutRoot = path.join(moduleRoot, 'test/scout_examples');
+      const configPath = path.join(scoutRoot, '/api/playwright.config.ts');
+      const manifestPath = path.join(scoutRoot, '/.meta/api/standard.json');
+
+      mockReadKibanaModuleManifest.mockReturnValue({
+        id: 'helloWorld',
+        type: 'plugin',
+        group: 'platform',
+        visibility: 'private',
+        owner: [],
+      });
+
+      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+
+      const config = testConfig.fromPath(configPath);
+
+      expect(mockReadKibanaModuleManifest).toHaveBeenCalledWith(
+        path.join(REPO_ROOT, moduleRoot, 'kibana.jsonc')
+      );
+      expect(config).toEqual({
+        path: configPath,
+        category: 'api',
+        type: 'standard',
+        module: {
+          name: 'helloWorld',
+          group: 'platform',
+          type: 'plugin',
+          visibility: 'private',
+          root: moduleRoot,
+        },
+        manifest: {
+          path: manifestPath,
+          ...dummyManifestProps,
+        },
+        server: {
+          configSet: 'examples',
+        },
+      });
     });
 
     it('throws if the manifest file is present but invalid', () => {
@@ -239,6 +296,9 @@ describe('test_config module', () => {
           path: 'src/platform/plugins/shared/pluggy_mc_pluginface/test/scout/.meta/api/standard.json',
           ...dummyManifestProps,
         },
+        server: {
+          configSet: 'default',
+        },
       },
       {
         path: 'x-pack/solutions/security/packages/halt_who_goes_there/test/scout/api/playwright.config.ts',
@@ -254,6 +314,9 @@ describe('test_config module', () => {
         manifest: {
           path: 'x-pack/solutions/security/packages/halt_who_goes_there/test/scout/.meta/api/standard.json',
           ...dummyManifestProps,
+        },
+        server: {
+          configSet: 'default',
         },
       },
     ];

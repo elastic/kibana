@@ -111,8 +111,11 @@ const breadcrumbGetters: {
       }),
     },
     {
+      text: scheduleId,
+    },
+    {
       text: i18n.translate('xpack.osquery.breadcrumbs.scheduledExecutionTitle', {
-        defaultMessage: 'Scheduled execution #{executionCount}',
+        defaultMessage: 'Execution #{executionCount}',
         values: { executionCount },
       }),
     },

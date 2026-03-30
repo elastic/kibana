@@ -132,7 +132,7 @@ export const useIntegrationForm = () => {
     // Additional conditional validation for log source having a sample or an index selected
     const logsSourceOption = formData.logsSourceOption;
     const logSourceValid =
-      (logsSourceOption === 'upload' && !!formData.logSample) ||
+      (logsSourceOption === 'file' && !!formData.logSample) ||
       (logsSourceOption === 'index' && formData.selectedIndex && formData.selectedIndex.trim());
 
     return baseFieldsValid && logSourceValid;

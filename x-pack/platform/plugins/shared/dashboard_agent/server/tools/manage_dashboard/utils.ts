@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type {
-  AttachmentPanel,
-  DashboardAttachmentData,
-  LensAttachmentPanel,
-} from '@kbn/dashboard-agent-common';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  isGenericAttachmentPanel,
-  type GenericAttachmentPanel,
-} from '@kbn/dashboard-agent-common';
+import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
+import { toEmbeddablePanel, type VisualizationContent } from '@kbn/dashboard-agent-common';
 
 /**
  * Failure record for tracking visualization errors.
@@ -42,35 +33,24 @@ export const getErrorMessage = (error: unknown): string => {
 
 const visualizationAttachmentDataSchema = z.object({
   visualization: z.record(z.string(), z.unknown()),
-  query: z.string().optional(),
 });
 
-type ResolvedPanelWithoutGrid = Omit<LensAttachmentPanel, 'grid'>;
-
-const resolvePanelsFromVisualizationAttachment = (data: unknown): ResolvedPanelWithoutGrid[] => {
+const resolvePanelsFromVisualizationAttachment = (data: unknown): VisualizationContent[] => {
   const parseResult = visualizationAttachmentDataSchema.safeParse(data);
   if (!parseResult.success) {
     throw new Error('Visualization attachment does not contain a valid visualization payload.');
   }
-
-  const { visualization, query } = parseResult.data;
-  const title =
-    typeof visualization.title === 'string'
-      ? visualization.title
-      : query ?? 'Generated visualization';
+  const { visualization } = parseResult.data;
 
   return [
     {
       type: 'lens',
-      panelId: uuidv4(),
-      visualization: visualization as LensApiSchemaType,
-      title,
-      ...(query ? { query } : {}),
+      config: visualization as LensApiSchemaType,
     },
   ];
 };
 
-const resolvePanelsFromAttachment = (type: string, data: unknown): ResolvedPanelWithoutGrid[] => {
+const resolvePanelsFromAttachment = (type: string, data: unknown): VisualizationContent[] => {
   if (type === AttachmentType.visualization) {
     return resolvePanelsFromVisualizationAttachment(data);
   }
@@ -84,7 +64,7 @@ const resolvePanelsFromAttachment = (type: string, data: unknown): ResolvedPanel
  * Resolves attachment ids into dashboard panel entries.
  * Supports visualization attachments and dashboard-compatible panel payloads.
  */
-export const resolvePanelsFromAttachments = async ({
+export const resolvePanelsFromAttachments = ({
   attachmentInputs,
   attachments,
   logger,
@@ -92,7 +72,7 @@ export const resolvePanelsFromAttachments = async ({
   attachmentInputs?: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>;
   attachments: AttachmentStateManager;
   logger: Logger;
-}): Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }> => {
+}): { panels: AttachmentPanel[]; failures: VisualizationFailure[] } => {
   if (!attachmentInputs || attachmentInputs.length === 0) {
     return { panels: [], failures: [] };
   }
@@ -113,7 +93,9 @@ export const resolvePanelsFromAttachments = async ({
       }
 
       const resolvedPanels = resolvePanelsFromAttachment(attachmentRecord.type, latestVersion.data);
-      panels.push(...resolvedPanels.map((panel) => ({ ...panel, grid })));
+      panels.push(
+        ...resolvedPanels.map((visContent) => toEmbeddablePanel({ ...visContent, grid }))
+      );
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       logger.error(
@@ -134,93 +116,6 @@ export const resolvePanelsFromAttachments = async ({
   return { panels, failures };
 };
 
-interface UpsertMarkdownPanelResult {
-  panels: AttachmentPanel[];
-  changedPanel?: AttachmentPanel;
-}
-
-const isDashboardMarkdownPanel = (
-  panel: AttachmentPanel
-): panel is GenericAttachmentPanel & { type: typeof MARKDOWN_EMBEDDABLE_TYPE } => {
-  return isGenericAttachmentPanel(panel) && panel.type === MARKDOWN_EMBEDDABLE_TYPE;
-};
-
-const getMarkdownContent = (panel: AttachmentPanel): string | undefined => {
-  if (!isDashboardMarkdownPanel(panel)) {
-    return undefined;
-  }
-
-  const { content } = panel.rawConfig;
-  return typeof content === 'string' ? content : undefined;
-};
-
-const MARKDOWN_GRID_W = 48;
-const MARKDOWN_MIN_H = 4;
-const MARKDOWN_MAX_H = 9;
-
-const estimateMarkdownGridHeight = (content: string): number => {
-  const nonEmptyLines = content.split('\n').filter((line) => line.trim().length > 0).length;
-  return Math.min(MARKDOWN_MAX_H, Math.max(MARKDOWN_MIN_H, nonEmptyLines + 2));
-};
-
-const buildMarkdownGrid = (
-  content: string,
-  existingGrid?: { w: number; h: number; x: number; y: number }
-) => ({
-  w: MARKDOWN_GRID_W,
-  h: estimateMarkdownGridHeight(content),
-  x: existingGrid?.x ?? 0,
-  y: existingGrid?.y ?? 0,
-});
-
-export const upsertMarkdownPanel = (
-  panels: AttachmentPanel[],
-  markdownContent?: string
-): UpsertMarkdownPanelResult => {
-  if (!markdownContent) {
-    return { panels };
-  }
-
-  const existingMarkdownPanelIndex = panels.findIndex((panel) => isDashboardMarkdownPanel(panel));
-  if (existingMarkdownPanelIndex === -1) {
-    const markdownPanel: AttachmentPanel = {
-      type: MARKDOWN_EMBEDDABLE_TYPE,
-      panelId: uuidv4(),
-      rawConfig: { content: markdownContent },
-      grid: buildMarkdownGrid(markdownContent),
-    };
-    return {
-      panels: [markdownPanel, ...panels],
-      changedPanel: markdownPanel,
-    };
-  }
-
-  const existingMarkdownPanel = panels[existingMarkdownPanelIndex];
-  if (!isDashboardMarkdownPanel(existingMarkdownPanel)) {
-    return { panels };
-  }
-
-  if (getMarkdownContent(existingMarkdownPanel) === markdownContent) {
-    return { panels };
-  }
-
-  const updatedMarkdownPanel: AttachmentPanel = {
-    ...existingMarkdownPanel,
-    rawConfig: {
-      ...existingMarkdownPanel.rawConfig,
-      content: markdownContent,
-    },
-    grid: buildMarkdownGrid(markdownContent, existingMarkdownPanel.grid),
-  };
-  const updatedPanels = [...panels];
-  updatedPanels[existingMarkdownPanelIndex] = updatedMarkdownPanel;
-
-  return {
-    panels: updatedPanels,
-    changedPanel: updatedMarkdownPanel,
-  };
-};
-
 export const getRemovedPanels = (
   panels: AttachmentPanel[],
   removePanelIds?: string[]
@@ -237,7 +132,7 @@ export const getRemovedPanels = (
   const panelsToKeep: AttachmentPanel[] = [];
 
   for (const panel of panels) {
-    if (removeSet.has(panel.panelId)) {
+    if (removeSet.has(panel.uid)) {
       panelsToRemove.push(panel);
     } else {
       panelsToKeep.push(panel);

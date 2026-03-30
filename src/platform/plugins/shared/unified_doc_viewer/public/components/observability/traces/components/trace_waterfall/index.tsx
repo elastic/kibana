@@ -195,6 +195,8 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           rangeTo={rangeTo}
           dataView={dataView}
           serviceName={serviceName}
+          highlightedSpanId={docId}
+          scrollToHighlightedOnMount={docId != null}
           docId={activeDocId}
           docIndex={activeDocIndex}
           activeFlyoutType={activeFlyoutType}
@@ -204,6 +206,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           onErrorClick={onErrorClick}
           onCloseFlyout={clearActiveFlyout}
           onExitFullScreen={onExitFullScreen}
+          skipNextEventReport={isRestoringRef.current}
         />
       ) : null}
       <ContentFrameworkSection
@@ -213,33 +216,31 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
         description={sectionTip}
         actions={actions}
       >
-        {docId ? (
-          <div
-            data-test-subj="unifiedDocViewerTraceSummaryTraceWaterfallClickArea"
-            aria-label={fullScreenButtonLabel}
-            tabIndex={0}
-            onClick={() => setShowFullScreenWaterfall(true)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setShowFullScreenWaterfall(true);
-              }
-            }}
-            css={css`
-              &,
-              & * {
-                cursor: pointer;
-              }
-            `}
-          >
-            <FocusedTraceWaterfall
-              traceId={traceId}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              docId={docId}
-            />
-          </div>
-        ) : null}
+        <div
+          data-test-subj="unifiedDocViewerTraceSummaryTraceWaterfallClickArea"
+          aria-label={fullScreenButtonLabel}
+          tabIndex={0}
+          onClick={() => setShowFullScreenWaterfall(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setShowFullScreenWaterfall(true);
+            }
+          }}
+          css={css`
+            &,
+            & * {
+              cursor: pointer;
+            }
+          `}
+        >
+          <FocusedTraceWaterfall
+            traceId={traceId}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            docId={docId}
+          />
+        </div>
         <EuiDelayRender delay={500}>
           <TraceWaterfallTourStep
             actionId={actionId}

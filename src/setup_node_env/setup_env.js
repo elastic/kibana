@@ -15,3 +15,13 @@ require('./harden');
 require('symbol-observable');
 require('source-map-support').install();
 require('./node_version_validator');
+
+// Patch zod v4 globalRegistry to use WeakMap instead of Map to prevent memory leaks
+// eslint-disable-next-line @kbn/eslint/module_migration
+var zodReg = require('zod/v4/core').globalRegistry;
+zodReg._map = new WeakMap();
+zodReg.clear = function () {
+  zodReg._map = new WeakMap();
+  zodReg._idmap = new Map();
+  return this;
+};

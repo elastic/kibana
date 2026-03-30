@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { isEmpty } from 'lodash';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { invalidOriginError } from './add_monitor';
@@ -38,6 +38,7 @@ import {
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -181,13 +182,15 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 
       editMonitorAPI.initDefaultAlerts(editedMonitorSavedObject.attributes.name);
 
-      return mapSavedObjectToMonitor({
+      const warning = getBrowserTimeoutWarningForMonitor(monitorWithRevision, monitorId);
+      const monitorResponse = mapSavedObjectToMonitor({
         internal: reqQuery.internal,
         monitor: {
           ...(editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>),
           created_at: previousMonitor.created_at,
         },
       });
+      return warning ? { ...monitorResponse, warnings: [warning] } : monitorResponse;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return getMonitorNotFoundResponse(response, monitorId);
@@ -256,10 +259,11 @@ export const syncEditedMonitor = async ({
   const monitorPrivateLocations = normalizedMonitor[ConfigKey.LOCATIONS].filter(
     (loc) => !loc.isServiceManaged
   );
+  const packagePolicySoType = await getPackagePolicySavedObjectType();
   const references = monitorPrivateLocations.map((loc) => ({
     id: `${monitorId}-${loc.id}`,
     name: `${monitorId}-${loc.id}`,
-    type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    type: packagePolicySoType,
   }));
 
   try {

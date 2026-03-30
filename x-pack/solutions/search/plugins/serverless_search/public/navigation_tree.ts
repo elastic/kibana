@@ -275,6 +275,11 @@ export function createNavigationTree({
                 link: 'management:model_settings',
                 breadcrumbStatus: 'hidden',
               },
+              {
+                id: 'searchInferenceEndpointsElasticInferenceService',
+                link: 'management:elastic_inference_service',
+                breadcrumbStatus: 'hidden',
+              },
               { link: 'management:anomaly_detection' },
               { link: 'management:analytics' },
             ],
@@ -284,6 +289,7 @@ export function createNavigationTree({
             title: AI_TITLE,
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+              { link: 'management:evals', breadcrumbStatus: 'hidden' },
               ...(showAiAssistant
                 ? [
                     {

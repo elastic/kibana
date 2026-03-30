@@ -23,7 +23,6 @@ import { isEmpty } from 'lodash';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import { ServicesTable } from './services_table';
-import { SearchBar } from '../../shared/search_bar/search_bar';
 import { StorageChart } from './storage_chart';
 import { PermissionDenied } from './prompts/permission_denied';
 import { useFetcher, FETCH_STATUS, isPending } from '../../../hooks/use_fetcher';
@@ -118,7 +117,6 @@ export function StorageExplorer() {
 
   return (
     <>
-      <SearchBar />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <ApmEnvironmentFilter />
@@ -135,7 +133,7 @@ export function StorageExplorer() {
           title={i18n.translate('xpack.apm.storageExplorer.longLoadingTimeCalloutTitle', {
             defaultMessage: 'Long loading time?',
           })}
-          iconType="timeRefresh"
+          iconType="refreshTime"
           data-test-subj="apmStorageExplorerLongLoadingTimeCallout"
         >
           <p>
@@ -178,7 +176,7 @@ export function StorageExplorer() {
             title={i18n.translate('xpack.apm.storageExplorer.crossClusterSearchCalloutTitle', {
               defaultMessage: 'Searching across clusters?',
             })}
-            iconType="search"
+            iconType="magnify"
           >
             <p>
               {i18n.translate('xpack.apm.storageExplorer.crossClusterSearchCalloutText', {

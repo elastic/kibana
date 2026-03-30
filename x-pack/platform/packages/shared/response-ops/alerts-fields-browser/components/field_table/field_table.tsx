@@ -14,6 +14,7 @@ import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
 import type { BrowserFieldItem, FieldBrowserProps, GetFieldTableColumns } from '../../types';
 import { FieldTableHeader } from './field_table_header';
 import { styles } from './field_table.styles';
+import * as i18n from '../../translations';
 
 const DEFAULT_SORTING: { field: keyof BrowserFieldItem; direction: Direction } = {
   field: 'name',
@@ -144,6 +145,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
 
       <div css={styles.tableContainer({ height: TABLE_HEIGHT, euiTheme })}>
         <EuiInMemoryTable
+          tableCaption={i18n.FIELDS_BROWSER}
           data-test-subj="field-table"
           className={`${CATEGORY_TABLE_CLASS_NAME} eui-yScroll`}
           items={fieldItems}

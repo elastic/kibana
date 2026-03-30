@@ -11,8 +11,8 @@ import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowContext } from '@kbn/workflows';
 import {
   applyInputDefaults,
-  normalizeInputsToJsonSchema,
-} from '@kbn/workflows/spec/lib/input_conversion';
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import type { ContextDependencies } from './types';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
 
@@ -28,7 +28,7 @@ export function buildWorkflowContext(
     workflowExecution.workflowId,
     workflowExecution.id
   );
-  const normalizedInputsSchema = normalizeInputsToJsonSchema(
+  const normalizedInputsSchema = normalizeFieldsToJsonSchema(
     workflowExecution.workflowDefinition.inputs
   );
 
@@ -43,6 +43,11 @@ export function buildWorkflowContext(
     workflowExecution.context?.inputs as Record<string, unknown> | undefined,
     normalizedInputsSchema
   );
+
+  const metadata = (workflowExecution.metadata ??
+    (workflowExecution.context?.metadata as Record<string, unknown> | undefined)) as
+    | Record<string, unknown>
+    | undefined;
 
   return {
     execution: {
@@ -63,6 +68,7 @@ export function buildWorkflowContext(
     consts: workflowExecution.workflowDefinition?.consts ?? {},
     event: workflowExecution.context?.event,
     inputs: inputsWithDefaults,
+    output: workflowExecution.context?.output,
     now: new Date(),
     parent:
       parentWorkflowId && parentWorkflowExecutionId
@@ -72,5 +78,6 @@ export function buildWorkflowContext(
             depth: parentDepth !== undefined ? parentDepth + 1 : 0,
           }
         : undefined,
+    metadata,
   };
 }

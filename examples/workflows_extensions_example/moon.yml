@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/workflows-extensions-example'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workflows-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/workflows-extensions-example'
+  title: '@kbn/workflows-extensions-example'
   description: Moon project for @kbn/workflows-extensions-example
   channel: ''
   owner: '@elastic/workflows-eng'
-  metadata:
-    sourceRoot: examples/workflows_extensions_example
+  sourceRoot: examples/workflows_extensions_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/workflows-extensions'

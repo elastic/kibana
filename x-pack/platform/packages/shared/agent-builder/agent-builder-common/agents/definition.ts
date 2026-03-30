@@ -6,7 +6,6 @@
  */
 
 import type { ToolSelection } from '../tools';
-import type { SkillSelection } from '../skills';
 import type { UserIdAndName } from '../base/users';
 import type { AgentVisibility } from './visibility';
 
@@ -99,15 +98,26 @@ export interface AgentConfiguration {
   tools: ToolSelection[];
 
   /**
-   * Optional list of skills exposed to the agent.
+   * Optional list of skill IDs exposed to the agent.
    * When undefined, all skills are available (backward compatibility).
    */
-  skills?: SkillSelection[];
+  skill_ids?: string[];
+
+  /**
+   * When true, enables built-in Elastic capabilities for the agent.
+   */
+  enable_elastic_capabilities?: boolean;
 
   /**
    * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
    */
   workflow_ids?: string[];
+
+  /**
+   * Optional list of plugin IDs assigned to this agent.
+   * Skills contributed by these plugins will be available to the agent during execution.
+   */
+  plugin_ids?: string[];
 
   /**
    * Custom configuration for the research step of the agent.

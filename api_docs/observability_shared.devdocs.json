@@ -586,7 +586,7 @@
           "() => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/external_resource_links/index.tsx",
-        "lineNumber": 23,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1865,7 +1865,7 @@
           " | undefined) => [{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; }; }, (state: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; }; }) => void]"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
-        "lineNumber": 160,
+        "lineNumber": 198,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1881,7 +1881,7 @@
               "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
-            "lineNumber": 161,
+            "lineNumber": 199,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1905,7 +1905,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
-            "lineNumber": 162,
+            "lineNumber": 200,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4143,7 +4143,7 @@
           "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; }; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
-        "lineNumber": 37,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

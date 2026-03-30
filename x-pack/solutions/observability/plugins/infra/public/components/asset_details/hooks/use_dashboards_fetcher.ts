@@ -36,7 +36,7 @@ export function useDashboardFetcher(query = ''): SearchDashboardsResult {
       try {
         const findDashboardsService = await dashboard?.findDashboardsService();
         const data = await findDashboardsService.search({
-          search: query,
+          query,
           per_page: 1000,
         });
 

@@ -10,10 +10,11 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { once } from 'lodash';
 import { getRouteConfig } from '../get_route_config';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
-import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
+import { allowUnmappedKeysSchema, getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -24,6 +25,13 @@ export function registerUpdateRoute(
     path: `${basePath}/{id}`,
     summary: `Replace current dashboard state with the dashboard state from request body.`,
     ...routeConfig,
+  });
+
+  // Do not call getDashboardStateSchema when registering route.
+  // Route is registered during setup and before all plugins have registered embeddable schemas.
+  // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
+  const getCachedDashboardStateSchema = once(() => {
+    return getDashboardStateSchema(isDashboardAppRequest);
   });
 
   updateRoute.addVersion(
@@ -46,13 +54,26 @@ export function registerUpdateRoute(
         response: {
           200: {
             body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
+            description: 'Indicates the dashboard is updated successfully',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates that the dashboard with the given ID is not found.',
           },
         },
       }),
     },
     async (ctx, req, res) => {
       try {
-        const result = await update(ctx, req.params.id, req.body, isDashboardAppRequest);
+        const result = await update(
+          ctx,
+          getCachedDashboardStateSchema(),
+          req.params.id,
+          req.body,
+          isDashboardAppRequest
+        );
         return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
@@ -63,9 +84,9 @@ export function registerUpdateRoute(
           });
         }
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: { message: e.message } });
         }
-        return res.badRequest({ body: e.output.payload });
+        return res.badRequest({ body: { message: e.message } });
       }
     }
   );
