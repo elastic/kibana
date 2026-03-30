@@ -54,7 +54,11 @@ const AI_TITLE = i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.ai.
 export function createNavigationTree({
   isAppRegistered,
   showAiAssistant = true,
-}: ApplicationStart & { showAiAssistant?: boolean }): NavigationTreeDefinition {
+  showAlertingV2 = false,
+}: ApplicationStart & {
+  showAiAssistant?: boolean;
+  showAlertingV2?: boolean;
+}): NavigationTreeDefinition {
   return {
     body: [
       {
@@ -245,6 +249,22 @@ export function createNavigationTree({
               },
             ],
           },
+          ...(showAlertingV2
+            ? [
+                {
+                  id: 'v2_alerting_preview',
+                  title: 'V2 Alerting Preview',
+                  breadcrumbStatus: 'hidden' as const,
+                  children: [
+                    { link: 'management:rules' as const, breadcrumbStatus: 'hidden' as const },
+                    {
+                      link: 'management:notification_policies' as const,
+                      breadcrumbStatus: 'hidden' as const,
+                    },
+                  ],
+                },
+              ]
+            : []),
           {
             id: 'settings_alerts',
             title: ALERTS_AND_INSIGHTS_TITLE,

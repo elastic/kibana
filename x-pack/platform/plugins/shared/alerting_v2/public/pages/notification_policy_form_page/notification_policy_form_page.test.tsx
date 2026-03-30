@@ -29,6 +29,10 @@ jest.mock('../../components/notification_policy/form/components/matcher_input', 
   ),
 }));
 
+jest.mock('../../application/breadcrumb_context', () => ({
+  useSetBreadcrumbs: () => jest.fn(),
+}));
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: jest.fn((token: unknown) => {
     const tokenStr = String(token);
@@ -42,7 +46,7 @@ jest.mock('@kbn/core-di-browser', () => ({
       };
     }
     if (tokenStr.includes('chrome')) {
-      return { setBreadcrumbs: jest.fn(), docTitle: { change: jest.fn() } };
+      return { docTitle: { change: jest.fn() } };
     }
     if (tokenStr.includes('http')) {
       return { basePath: mockBasePath };

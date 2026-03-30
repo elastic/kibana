@@ -25,13 +25,17 @@ const mockUnsnoozeNotificationPolicy = jest.fn();
 const mockSettingsClientGet = jest.fn();
 const mockUseFetchWorkflow = jest.fn();
 
+jest.mock('../../application/breadcrumb_context', () => ({
+  useSetBreadcrumbs: () => jest.fn(),
+}));
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
       return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
     }
     if (token === 'chrome') {
-      return { setBreadcrumbs: jest.fn(), docTitle: { change: jest.fn() } };
+      return { docTitle: { change: jest.fn() } };
     }
     if (token === 'http') {
       return { basePath: { prepend: (path: string) => path } };

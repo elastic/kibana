@@ -9,13 +9,17 @@ import { renderHook } from '@testing-library/react';
 import { useBreadcrumbs } from './use_breadcrumbs';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 
+const mockSetBreadcrumbs = jest.fn();
+jest.mock('../application/breadcrumb_context', () => ({
+  useSetBreadcrumbs: () => mockSetBreadcrumbs,
+}));
+
 jest.mock('@kbn/core-di-browser');
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
 
 describe('useBreadcrumbs', () => {
-  const mockSetBreadcrumbs = jest.fn();
   const mockDocTitleChange = jest.fn();
   const mockGetUrlForApp = jest.fn().mockReturnValue('/app/management/alertingV2/rules');
   const mockNavigateToUrl = jest.fn().mockResolvedValue(undefined);
@@ -29,7 +33,6 @@ describe('useBreadcrumbs', () => {
     mockUseService.mockImplementation((service: unknown) => {
       if (service === 'chrome') {
         return {
-          setBreadcrumbs: mockSetBreadcrumbs,
           docTitle: { change: mockDocTitleChange },
         } as any;
       }

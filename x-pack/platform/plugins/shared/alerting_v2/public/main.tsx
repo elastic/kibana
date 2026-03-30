@@ -14,6 +14,7 @@ import type {
   AppMountParameters,
   AppUnmount,
 } from '@kbn/core-application-browser';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { CoreDiServiceStart } from '@kbn/core-di';
 import { ApplicationParameters, Context, CoreStart } from '@kbn/core-di-browser';
@@ -23,6 +24,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALERTING_V2_RULES_APP_ID } from './constants';
 import { RulesApp } from './application/rules_app';
 import { NotificationPoliciesApp } from './application/notification_policies_app';
+import { BreadcrumbProvider } from './application/breadcrumb_context';
 
 @injectable()
 export class AlertingV2App {
@@ -34,15 +36,28 @@ export class AlertingV2App {
 
   constructor(
     @inject(ApplicationParameters) private readonly params: AppMountParameters,
-    @inject(CoreStart('injection')) private readonly di: CoreDiServiceStart
+    @inject(CoreStart('injection')) private readonly di: CoreDiServiceStart,
+    @inject(CoreStart('chrome'))
+    private readonly chrome: { setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void }
   ) {}
 
   public mount(): AppUnmount {
-    return mountAlertingV2App({ params: this.params, container: this.di.getContainer() });
+    return mountAlertingV2App({
+      params: {
+        element: this.params.element,
+        history: this.params.history,
+        setBreadcrumbs: this.chrome.setBreadcrumbs,
+      },
+      container: this.di.getContainer(),
+    });
   }
 }
 
-type AlertingV2MountParams = Pick<AppMountParameters, 'element' | 'history'>;
+interface AlertingV2MountParams {
+  element: HTMLElement;
+  history: AppMountParameters['history'];
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+}
 
 export const mountAlertingV2App = ({
   params,
@@ -51,18 +66,20 @@ export const mountAlertingV2App = ({
   params: AlertingV2MountParams;
   container: Container;
 }): AppUnmount => {
-  const { element, history } = params;
+  const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
 
   ReactDOM.render(
     <Context.Provider value={container}>
       <QueryClientProvider client={queryClient}>
-        <I18nProvider>
-          <Router history={history}>
-            <RulesApp />
-          </Router>
-        </I18nProvider>
+        <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+          <I18nProvider>
+            <Router history={history}>
+              <RulesApp />
+            </Router>
+          </I18nProvider>
+        </BreadcrumbProvider>
       </QueryClientProvider>
     </Context.Provider>,
     element
@@ -78,18 +95,20 @@ export const mountNotificationPoliciesApp = ({
   params: AlertingV2MountParams;
   container: Container;
 }): AppUnmount => {
-  const { element, history } = params;
+  const { element, history, setBreadcrumbs } = params;
 
   const queryClient = new QueryClient();
 
   ReactDOM.render(
     <Context.Provider value={container}>
       <QueryClientProvider client={queryClient}>
-        <I18nProvider>
-          <Router history={history}>
-            <NotificationPoliciesApp />
-          </Router>
-        </I18nProvider>
+        <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+          <I18nProvider>
+            <Router history={history}>
+              <NotificationPoliciesApp />
+            </Router>
+          </I18nProvider>
+        </BreadcrumbProvider>
       </QueryClientProvider>
     </Context.Provider>,
     element

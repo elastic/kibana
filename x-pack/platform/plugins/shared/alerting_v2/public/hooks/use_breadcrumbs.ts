@@ -15,6 +15,7 @@ import {
   MANAGEMENT_APP_ID,
 } from '../constants';
 import { getAlertingV2Breadcrumb, type AlertingV2BreadcrumbPage } from '../lib/breadcrumb';
+import { useSetBreadcrumbs } from '../application/breadcrumb_context';
 
 export interface UseBreadcrumbsOptions {
   ruleName?: string;
@@ -43,6 +44,7 @@ export function useBreadcrumbs(
   page: AlertingV2BreadcrumbPage,
   options: UseBreadcrumbsOptions = {}
 ) {
+  const setBreadcrumbs = useSetBreadcrumbs();
   const chrome = useService(CoreStart('chrome'));
   const application = useService(CoreStart('application'));
 
@@ -111,9 +113,9 @@ export function useBreadcrumbs(
     }
 
     const withClick = addClickHandlers(breadcrumbs, (url) => application.navigateToUrl(url));
-    chrome.setBreadcrumbs(withClick);
+    setBreadcrumbs(withClick);
 
     const docTitle = [...withClick].reverse().map((b) => (b.text as string) ?? '');
     chrome.docTitle.change(docTitle);
-  }, [page, options.ruleName, chrome, application]);
+  }, [page, options.ruleName, setBreadcrumbs, chrome, application]);
 }
