@@ -28,11 +28,7 @@ import {
 } from '../../tasks/integrations';
 import { DEFAULT_POLICY } from '../../screens/fleet';
 import { getIdFormField, LIVE_QUERY_EDITOR } from '../../screens/live_query';
-import {
-  loadSavedQuery,
-  cleanupSavedQuery,
-  cleanupPack,
-} from '../../tasks/api_fixtures';
+import { loadSavedQuery, cleanupSavedQuery, cleanupPack } from '../../tasks/api_fixtures';
 import { SAVED_QUERY_DROPDOWN_SELECT } from '../../screens/packs';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
