@@ -17,12 +17,12 @@ import { filter } from 'lodash';
  * to it, which url.parse doesn't catch all variants of
  */
 const isBogusUrl = (url: string) => {
-  if (url.startsWith('//')) {
+  if (url.trim().startsWith('//')) {
     return true;
   }
 
   try {
-    new URL(url);
+    new URL(url.replace(/\s/g, ''));
     return true;
   } catch {
     return false;
