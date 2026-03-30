@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { HostEntity } from '../../api/entity_analytics/entity_store/entities/common.gen';
 import { UpsertEntitiesBulkRequestBody } from '../../api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
 import {
   preprocessUpsertEntitiesBulkRequestBody,
@@ -109,7 +110,8 @@ describe('sanitize_entity_record_for_upsert', () => {
     const parsed = bulkBodySchema.safeParse(raw);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
-      expect(parsed.data.entities[0].record.host?.name).toBe('host-a');
+      const record = parsed.data.entities[0].record as HostEntity;
+      expect(record.host?.name).toBe('host-a');
     }
   });
 });
