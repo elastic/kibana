@@ -171,9 +171,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
             />
           );
           if (isTarget) {
-            return (
-              <EuiToolTip content={CANNOT_REMOVE_TARGET_TOOLTIP}>{button}</EuiToolTip>
-            );
+            return <EuiToolTip content={CANNOT_REMOVE_TARGET_TOOLTIP}>{button}</EuiToolTip>;
           }
           return button;
         },

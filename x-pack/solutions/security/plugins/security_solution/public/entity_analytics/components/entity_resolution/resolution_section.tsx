@@ -29,7 +29,12 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
   entityId,
   openDetailsPanel,
 }) => {
-  const { data: group, isLoading, isFetching, isError } = useResolutionGroup(entityId, {
+  const {
+    data: group,
+    isLoading,
+    isFetching,
+    isError,
+  } = useResolutionGroup(entityId, {
     enabled: !!entityId,
   });
 

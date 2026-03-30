@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EntityType as EntityStoreEntityType } from '@kbn/entity-store/public';
 import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
 import type { FieldsTableProps } from '../../../flyout/entity_details/generic_right/components/fields_table';
 import { FieldsTableTab } from '../../../cloud_security_posture/components/csp_details/fields_table_tab';
 import type { EntityType } from '../../../../common/search_strategy';
-import type { EntityType as EntityStoreEntityType } from '@kbn/entity-store/public';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import type { RiskInputsTabProps } from './tabs/risk_inputs/risk_inputs_tab';
