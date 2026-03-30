@@ -357,17 +357,49 @@ export class QueryUtils {
    * Flat TTLT is derived from the union of all per-model TTLT lists.
    */
   async getAllRoundMetrics(dateFilter?: { gte: string }): Promise<{
-    ttft: { p50: number; p75: number; p90: number; p95: number; p99: number; mean: number; total_samples: number };
-    ttlt: { p50: number; p75: number; p90: number; p95: number; p99: number; mean: number; total_samples: number };
+    ttft: {
+      p50: number;
+      p75: number;
+      p90: number;
+      p95: number;
+      p99: number;
+      mean: number;
+      total_samples: number;
+    };
+    ttlt: {
+      p50: number;
+      p75: number;
+      p90: number;
+      p95: number;
+      p99: number;
+      mean: number;
+      total_samples: number;
+    };
     byModel: Array<{
       model: string;
-      ttlt_p50: number; ttlt_p75: number; ttlt_p90: number; ttlt_p95: number; ttlt_p99: number; ttlt_mean: number; ttlt_samples: number;
-      input_tokens: number; output_tokens: number; total_tokens: number; rounds: number; avg_tokens_per_round: number;
+      ttlt_p50: number;
+      ttlt_p75: number;
+      ttlt_p90: number;
+      ttlt_p95: number;
+      ttlt_p99: number;
+      ttlt_mean: number;
+      ttlt_samples: number;
+      input_tokens: number;
+      output_tokens: number;
+      total_tokens: number;
+      rounds: number;
+      avg_tokens_per_round: number;
       tool_calls: number;
     }>;
     byAgent: Array<{
       agent_id: string;
-      p50: number; p75: number; p90: number; p95: number; p99: number; mean: number; total_samples: number;
+      p50: number;
+      p75: number;
+      p90: number;
+      p95: number;
+      p99: number;
+      mean: number;
+      total_samples: number;
     }>;
   }> {
     const empty = {
@@ -645,8 +677,12 @@ export class QueryUtils {
     const { byModel } = await this.getAllRoundMetrics();
     return byModel.map((m) => ({
       model: m.model,
-      p50: m.ttlt_p50, p75: m.ttlt_p75, p90: m.ttlt_p90,
-      p95: m.ttlt_p95, p99: m.ttlt_p99, mean: m.ttlt_mean,
+      p50: m.ttlt_p50,
+      p75: m.ttlt_p75,
+      p90: m.ttlt_p90,
+      p95: m.ttlt_p95,
+      p99: m.ttlt_p99,
+      mean: m.ttlt_mean,
       total_samples: m.ttlt_samples,
       sample_count: m.ttlt_samples,
     }));
