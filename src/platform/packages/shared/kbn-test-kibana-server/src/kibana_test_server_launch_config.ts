@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  SamlSessionManager,
-  type GetCookieOptions,
-  type HostOptions,
-  type SamlSessionManagerOptions,
-} from './session_manager';
+/**
+ * Minimal config surface used to spawn Kibana (and optional dedicated task runner) for tests.
+ * Satisfied by the FTR {@link Config} type and Scout server configs.
+ */
+export interface KibanaTestServerLaunchConfig {
+  get(path: string): unknown;
+}
