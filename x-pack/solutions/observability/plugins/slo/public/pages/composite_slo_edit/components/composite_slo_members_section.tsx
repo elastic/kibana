@@ -179,10 +179,19 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
     enabled: isGrouped,
   });
 
+  const members = watch('members');
+  const usedInstanceIds = members
+    .filter((m, i) => i !== index && m.sloId === sloId && m.instanceId !== ALL_VALUE)
+    .map((m) => m.instanceId);
+
   const instanceOptions: EuiComboBoxOptionOption[] = (instances?.results ?? []).map((inst) => ({
     label: inst.instanceId,
     value: inst.instanceId,
   }));
+
+  const availableInstanceOptions = instanceOptions.filter(
+    (opt) => !usedInstanceIds.includes(String(opt.value))
+  );
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart">
@@ -197,20 +206,34 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
           <Controller
             name={`members.${index}.instanceId`}
             control={control}
-            render={({ field: { value, onChange } }) => {
+            rules={{ validate: (v) => v !== ALL_VALUE }}
+            render={({ field: { value, onChange }, fieldState }) => {
               const selected = instanceOptions.filter((opt) => opt.value === value);
               return (
-                <EuiComboBox
-                  fullWidth
-                  singleSelection={{ asPlainText: true }}
-                  isLoading={isLoadingInstances}
-                  options={instanceOptions}
-                  selectedOptions={selected}
-                  onChange={(opts) => onChange(opts[0]?.value ?? ALL_VALUE)}
-                  isClearable={false}
-                  compressed
-                  data-test-subj={`compositeSloMemberInstanceComboBox-${index}`}
-                />
+                <EuiFormRow
+                  isInvalid={fieldState.invalid}
+                  error={
+                    fieldState.invalid
+                      ? i18n.translate(
+                          'xpack.slo.compositeSloEdit.members.instanceId.required',
+                          { defaultMessage: 'Select a specific instance.' }
+                        )
+                      : undefined
+                  }
+                >
+                  <EuiComboBox
+                    fullWidth
+                    singleSelection={{ asPlainText: true }}
+                    isLoading={isLoadingInstances}
+                    isInvalid={fieldState.invalid}
+                    options={availableInstanceOptions}
+                    selectedOptions={selected}
+                    onChange={(opts) => onChange(opts[0]?.value ?? ALL_VALUE)}
+                    isClearable={false}
+                    compressed
+                    data-test-subj={`compositeSloMemberInstanceComboBox-${index}`}
+                  />
+                </EuiFormRow>
               );
             }}
           />
@@ -229,15 +252,26 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
           control={control}
           rules={{ required: true, min: 1, validate: (v) => Number.isInteger(v) }}
           render={({ field: { ref, onChange, value }, fieldState }) => (
-            <EuiFieldNumber
-              compressed
+            <EuiFormRow
               isInvalid={fieldState.invalid}
-              value={value}
-              min={1}
-              step={1}
-              onChange={(e) => onChange(parseInt(e.target.value, 10))}
-              data-test-subj={`compositeSloMemberWeightInput-${index}`}
-            />
+              error={
+                fieldState.invalid
+                  ? i18n.translate('xpack.slo.compositeSloEdit.members.weight.error', {
+                      defaultMessage: 'Weight must be a positive integer.',
+                    })
+                  : undefined
+              }
+            >
+              <EuiFieldNumber
+                compressed
+                isInvalid={fieldState.invalid}
+                value={value}
+                min={1}
+                step={1}
+                onChange={(e) => onChange(parseInt(e.target.value, 10))}
+                data-test-subj={`compositeSloMemberWeightInput-${index}`}
+              />
+            </EuiFormRow>
           )}
         />
       </EuiFlexItem>
