@@ -229,9 +229,7 @@ describe('FieldsMetadataClient class', () => {
         // When a specific dataset is requested, return only that dataset's fields.
         // When all datasets are requested (dataset is '*' or undefined), return everything.
         if (dataset && dataset !== '*') {
-          return Promise.resolve(
-            dataset === 'system.process' ? systemProcessFields : {}
-          );
+          return Promise.resolve(dataset === 'system.process' ? systemProcessFields : {});
         }
         return Promise.resolve(systemIntegrationAllFields);
       }
@@ -346,15 +344,11 @@ describe('FieldsMetadataClient class', () => {
     it('should resolve a field whose dataset cannot be correctly inferred from the field name by falling back to all datasets', async () => {
       // "system.process.summary.total" belongs to dataset "system.process_summary",
       // but the 2-segment heuristic infers "system.process" (a different valid dataset).
-      const fieldInstance = await fieldsMetadataClient.getByName(
-        'system.process.summary.total'
-      );
+      const fieldInstance = await fieldsMetadataClient.getByName('system.process.summary.total');
 
       expectToBeDefined(fieldInstance);
       expect(fieldInstance).toBeInstanceOf(FieldMetadata);
-      expect(fieldInstance.toPlain().description).toBe(
-        'Total number of processes on this host.'
-      );
+      expect(fieldInstance.toPlain().description).toBe('Total number of processes on this host.');
     });
 
     it('should not resolve the field from an integration if the integration name cannot be inferred from the field name and integration and dataset params are not provided', async () => {
