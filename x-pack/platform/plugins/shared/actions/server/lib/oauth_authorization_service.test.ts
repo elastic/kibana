@@ -94,33 +94,6 @@ describe('OAuthAuthorizationService', () => {
       });
     });
 
-    it('supports auth.type for OAuth validation', async () => {
-      const service = createService();
-      const getResult = createMockConnector({
-        id: 'connector-1',
-        config: { auth: { type: 'oauth_authorization_code' } },
-      });
-      mockActionsClient.get.mockResolvedValue(getResult);
-      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        attributes: {
-          secrets: {
-            authorizationUrl: 'https://provider.example.com/authorize',
-            clientId: 'client-id',
-          },
-          config: {},
-        },
-      });
-
-      const result = await service.getOAuthConfig('connector-1', undefined);
-
-      expect(result).toEqual({
-        authTypeId: 'oauth_authorization_code',
-        authorizationUrl: 'https://provider.example.com/authorize',
-        clientId: 'client-id',
-        scope: undefined,
-      });
-    });
-
     it('passes namespace when provided', async () => {
       const service = createService();
       const getResult = createMockConnector({

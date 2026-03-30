@@ -117,7 +117,7 @@ export class OAuthAuthorizationService {
     config: OAuthConnectorConfig,
     authMode?: AuthMode
   ): 'oauth_authorization_code' | 'ears' {
-    const authType = config?.authType || config?.auth?.type;
+    const authType = config?.authType;
 
     if (authType === 'oauth_authorization_code' || authType === 'ears') {
       return authType;
