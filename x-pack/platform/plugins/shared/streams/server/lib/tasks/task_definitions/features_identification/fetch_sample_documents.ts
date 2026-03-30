@@ -53,22 +53,26 @@ export async function fetchSampleDocuments({
       getSampleDocuments({ esClient, index, start, end, size }),
     ]);
 
-    const documents = mergeDocuments(
+    const { documents, bucketCounts } = mergeDocuments(
       [
         { hits: diverseHits, cap: diverseSize },
         { hits: randomHits, cap: size },
       ],
       size
     );
-    return { documents, totalFilters: 0, filtersCapped: false, hasFilteredDocuments: false };
-  }
 
-  logger.debug(
-    () =>
-      `Fetching sample documents after excluding ${entityFilters.length} KI features (${
-        features.length - entityFilters.length
-      } omitted):\n${JSON.stringify(entityFilters, null, 2)}`
-  );
+    logger.debug(
+      () =>
+        `Sampled ${documents.length} documents (${bucketCounts[0]} diverse, ${bucketCounts[1]} random). No entities available to filter by.`
+    );
+
+    return {
+      documents,
+      totalFilters: 0,
+      filtersCapped: false,
+      hasFilteredDocuments: false,
+    };
+  }
 
   const runtimeMappings = await getRuntimeMappings(esClient, index, entityFilters);
   const entityFilteredSize = Math.round(size * ENTITY_FILTERED_RATIO);
@@ -104,13 +108,22 @@ export async function fetchSampleDocuments({
       }),
     ]);
 
-  const documents = mergeDocuments(
+  const { documents, bucketCounts } = mergeDocuments(
     [
       { hits: entityFilteredHits, cap: entityFilteredSize },
       { hits: diverseHits, cap: diverseSize },
       { hits: randomHits, cap: size },
     ],
     size
+  );
+
+  logger.debug(
+    () =>
+      `Sampled ${documents.length} documents (${bucketCounts[0]} entity-filtered, ${
+        bucketCounts[1]
+      } diverse, ${bucketCounts[2]} random). ${entityFilters.length} entity filters applied (${
+        features.length - entityFilters.length
+      } omitted):\n${JSON.stringify(entityFilters)}`
   );
 
   return {
@@ -127,11 +140,13 @@ function mergeDocuments(
     cap: number;
   }>,
   totalSize: number
-): Array<SearchHit<Record<string, unknown>>> {
+): { documents: Array<SearchHit<Record<string, unknown>>>; bucketCounts: number[] } {
   const seen = new Set<string>();
   const result: Array<SearchHit<Record<string, unknown>>> = [];
+  const bucketCounts = prioritizedHits.map(() => 0);
 
-  for (const { hits, cap } of prioritizedHits) {
+  for (let i = 0; i < prioritizedHits.length; i++) {
+    const { hits, cap } = prioritizedHits[i];
     let added = 0;
     for (const hit of hits) {
       if (added >= cap || result.length >= totalSize) break;
@@ -140,9 +155,10 @@ function mergeDocuments(
       result.push(hit);
       added++;
     }
+    bucketCounts[i] = added;
   }
 
-  return result;
+  return { documents: result, bucketCounts };
 }
 
 async function getRuntimeMappings(
