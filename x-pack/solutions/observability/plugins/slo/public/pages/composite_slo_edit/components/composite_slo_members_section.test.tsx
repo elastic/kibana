@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { useForm, FormProvider } from 'react-hook-form';
 import { render } from '../../../utils/test_helper';
@@ -30,19 +30,6 @@ beforeEach(() => {
   useFetchSloDefinitionsWithRemoteMock.mockReturnValue({ data: defaultDefinitions, isLoading: false });
   useFetchSloInstancesMock.mockReturnValue({ data: undefined, isLoading: false });
 });
-
-function Wrapper({
-  defaultValues,
-}: {
-  defaultValues: Partial<CreateCompositeSLOForm>;
-}) {
-  const methods = useForm<CreateCompositeSLOForm>({ defaultValues });
-  return (
-    <FormProvider {...methods}>
-      <CompositeSloMembersSection />
-    </FormProvider>
-  );
-}
 
 describe('CompositeSloMembersSection', () => {
   describe('instanceId reset when groupBy is removed from member SLO', () => {
