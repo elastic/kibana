@@ -17,7 +17,7 @@ import type { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { StaticESQLControlState } from '@kbn/controls-schemas';
 import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { aggFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
@@ -30,9 +30,9 @@ interface IdentifierControlFormProps {
   variableName: string;
   queryString: string;
   esqlVariables: ESQLControlVariable[];
-  setControlState: (state: OptionsListESQLControlState) => void;
+  setControlState: (state: StaticESQLControlState) => void;
   cursorPosition?: monaco.Position;
-  initialState?: OptionsListESQLControlState;
+  initialState?: StaticESQLControlState;
   currentApp?: string;
 }
 
@@ -157,8 +157,8 @@ export function IdentifierControlForm({
       title: label || variableNameWithoutQuestionmark,
       variable_name: variableNameWithoutQuestionmark,
       variable_type: variableType,
-      esql_query: queryString,
-      control_type: EsqlControlType.STATIC_VALUES,
+      // esql_query: queryString,
+      control_type: EsqlControlType.STATIC_VALUES as StaticESQLControlState['control_type'],
     };
     if (!isEqual(state, initialState)) {
       setControlState(state);

@@ -102,7 +102,7 @@ export function ValueControlForm({
   );
 
   const [selectedValues, setSelectedValues] = useState<EuiComboBoxOptionOption[]>(
-    initialState?.available_options
+    initialState?.control_type === EsqlControlType.STATIC_VALUES
       ? initialState.available_options.map((option) => {
           return {
             label: option,
@@ -115,7 +115,9 @@ export function ValueControlForm({
 
   const [valuesQuery, setValuesQuery] = useState<string>(
     variableType === ESQLVariableType.VALUES
-      ? initialState?.esql_query ?? INITIAL_EMPTY_STATE_QUERY
+      ? initialState?.control_type === EsqlControlType.VALUES_FROM_QUERY
+        ? initialState.esql_query
+        : INITIAL_EMPTY_STATE_QUERY
       : ''
   );
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
@@ -240,7 +242,7 @@ export function ValueControlForm({
 
   useEffect(() => {
     if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
-      if (initialState?.esql_query) {
+      if (initialState?.control_type === EsqlControlType.VALUES_FROM_QUERY) {
         onValuesQuerySubmit(initialState.esql_query);
       } else if (valuesRetrieval) {
         setSuggestedQuery();
@@ -249,7 +251,7 @@ export function ValueControlForm({
   }, [
     selectedValues?.length,
     controlFlyoutType,
-    initialState?.esql_query,
+    initialState,
     variableName,
     valuesRetrieval,
     onValuesQuerySubmit,

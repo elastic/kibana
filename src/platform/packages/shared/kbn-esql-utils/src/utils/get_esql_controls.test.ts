@@ -28,7 +28,6 @@ const createControlState = (variableName: string): OptionsListESQLControlState =
   selected_options: ['option-1'],
   variable_name: variableName,
   variable_type: ESQLVariableType.VALUES,
-  esql_query: 'FROM index',
   control_type: EsqlControlType.STATIC_VALUES,
   single_select: true,
   available_options: ['option-1', 'option-2'],
