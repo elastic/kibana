@@ -38,9 +38,9 @@ export const DeprecatedRulesCallout: React.FC<DeprecatedRulesCalloutProps> = ({
         <EuiText size="s" data-test-subj="deprecated-rule-callout-description">
           <p>{description}</p>
         </EuiText>
+        <EuiSpacer size="s" />
         {reason && (
           <>
-            <EuiSpacer size="s" />
             <EuiText size="s" data-test-subj="deprecated-rule-reason">
               <p>
                 {i18n.DEPRECATION_REASON_LABEL} {reason}
