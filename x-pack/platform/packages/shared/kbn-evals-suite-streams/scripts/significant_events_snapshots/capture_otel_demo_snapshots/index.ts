@@ -25,10 +25,10 @@ import {
   HEALTHY_BASELINE_SCENARIO,
   DEFAULT_LOGS_INDEX,
   DEFAULT_DEMO_APP,
-} from './lib/constants';
-import { getConnectionConfig, type ConnectionConfig } from './lib/get_connection_config';
-import { createSnapshot, generateGcsBasePath, registerGcsRepository } from './lib/gcs';
-import { sleep } from './lib/sleep';
+} from '../lib/constants';
+import { getConnectionConfig, type ConnectionConfig } from '../lib/get_connection_config';
+import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
+import { sleep } from '../lib/sleep';
 import {
   cleanupSigEventsExtractedKIsData,
   configureModelSelectionSettings,
@@ -39,8 +39,8 @@ import {
   persistSigEventsExtractedKIsForSnapshot,
   triggerSigEventsKIFeatureExtraction,
   waitForSigEventsKIFeatureExtraction,
-} from './lib/significant_events_workflow';
-import type { Scenario } from './lib/types';
+} from '../lib/significant_events_workflow';
+import type { Scenario } from '../lib/types';
 
 run(
   async ({ log, flags }) => {

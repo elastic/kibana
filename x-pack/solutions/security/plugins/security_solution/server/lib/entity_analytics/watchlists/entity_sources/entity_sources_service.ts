@@ -58,6 +58,16 @@ export const createEntitySourcesService = ({
             };
           }
 
+          if (source.type === 'store') {
+            const identity: IdentityProvider = {
+              type: 'store',
+              queryRule: source.queryRule || '',
+            };
+            const entityStoreEntityIdsByType =
+              await watchlistEntitiesService.listEntityStoreEntities(identity);
+            return { sourceId: source.id, entityStoreEntityIdsByType };
+          }
+
           const identity: IdentityProvider = {
             type: 'integration',
             name: source.integrationName as IntegrationType,
