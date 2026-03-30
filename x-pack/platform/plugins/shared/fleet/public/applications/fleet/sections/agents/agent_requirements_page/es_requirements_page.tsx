@@ -40,7 +40,7 @@ export const RequirementItem: React.FunctionComponent<{
           {isMissing ? (
             <EuiIcon type="error" color="danger" />
           ) : (
-            <EuiIcon type="checkInCircleFilled" color="success" />
+            <EuiIcon type="checkCircleFill" color="success" />
           )}
         </EuiText>
       </EuiFlexItem>

@@ -20,8 +20,6 @@ components:
     EntityField:
       type: object
       additionalProperties: false
-      required:
-        - id
       properties:
         id:
           type: string
@@ -170,8 +168,6 @@ components:
     UserEntity:
       type: object
       additionalProperties: false
-      required:
-        - entity
       properties:
         "@timestamp":
           type: string
@@ -211,8 +207,6 @@ components:
             risk:
              $ref: '#/components/schemas/EntityRiskScoreRecord'
              additionalProperties: false
-          required:
-            - name
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
@@ -227,8 +221,6 @@ components:
     HostEntity:
       type: object
       additionalProperties: false
-      required:
-        - entity
       properties:
         "@timestamp":
           type: string
@@ -269,12 +261,37 @@ components:
               type: array
               items:
                 type: string
+            os:
+              type: object
+              additionalProperties: false
+              description: ECS host.os fields materialized on the entity latest index (v2).
+              properties:
+                name:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                type:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                family:
+                  type: string
+                full:
+                  type: string
+                kernel:
+                  type: string
+                platform:
+                  type: string
+                version:
+                  type: string
             risk:
               $ref: '#/components/schemas/EntityRiskScoreRecord'
             entity:
               $ref: '#/components/schemas/EntityField'
-          required:
-            - name
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
@@ -289,8 +306,6 @@ components:
     ServiceEntity:
       type: object
       additionalProperties: false
-      required:
-        - entity
       properties:
         "@timestamp":
           type: string
@@ -307,8 +322,6 @@ components:
               $ref: '#/components/schemas/EntityRiskScoreRecord'
             entity:
               $ref: '#/components/schemas/EntityField'
-          required:
-            - name
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
@@ -329,8 +342,6 @@ components:
     GenericEntity:
       type: object
       additionalProperties: false
-      required:
-        - entity
       properties:
         "@timestamp":
           type: string

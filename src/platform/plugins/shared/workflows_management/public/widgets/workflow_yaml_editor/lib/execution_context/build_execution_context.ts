@@ -43,17 +43,35 @@ export function buildExecutionContext(
     return null;
   }
 
-  // Build steps object from step executions
+  // Build steps object from step executions.
+  // For foreach steps the server emits multiple executions with the same stepId
+  // (enter, each iteration advance, exit). Preserve the entry that carries
+  // state.index so findForeachContext can re-evaluate the foreach expression.
   const steps: Record<string, StepExecutionData> = {};
 
   for (const stepExecution of stepExecutions) {
-    steps[stepExecution.stepId] = {
-      output: stepExecution.output as JsonValue | undefined,
-      error: stepExecution.error,
-      input: stepExecution.input as JsonValue | undefined,
-      status: stepExecution.status,
-      state: stepExecution.state as JsonObject | undefined,
-    };
+    const existing = steps[stepExecution.stepId];
+    const newState = stepExecution.state as JsonObject | undefined;
+
+    if (
+      existing?.state &&
+      typeof existing.state.index === 'number' &&
+      newState &&
+      typeof newState.index !== 'number'
+    ) {
+      // Don't overwrite a foreach entry (has state.index) with the exit (no index)
+      existing.output = existing.output ?? (stepExecution.output as JsonValue | undefined);
+      existing.error = existing.error ?? stepExecution.error;
+      existing.status = stepExecution.status;
+    } else {
+      steps[stepExecution.stepId] = {
+        output: stepExecution.output as JsonValue | undefined,
+        error: stepExecution.error,
+        input: stepExecution.input as JsonValue | undefined,
+        status: stepExecution.status,
+        state: newState,
+      };
+    }
   }
 
   // Build full context

@@ -127,7 +127,7 @@ export const ArtifactEntryCardMinified = memo(
                 color="primary"
                 size="s"
                 flush="left"
-                iconType={accordionTrigger === 'open' ? 'arrowUp' : 'arrowDown'}
+                iconType={accordionTrigger === 'open' ? 'chevronSingleUp' : 'chevronSingleDown'}
                 iconSide="right"
                 iconSize="m"
                 onClick={handleOnToggleAccordion}

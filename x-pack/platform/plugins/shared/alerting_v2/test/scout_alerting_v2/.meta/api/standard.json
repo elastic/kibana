@@ -1,0 +1,61 @@
+{
+  "sha1": "c5ec26defe4b75e10db3ef6422243cdebb3c14b9",
+  "tests": [
+    {
+      "id": "7d659b2da63538a-85f1c7853cd9e1b",
+      "title": "Episode lifecycle for alert rules should transition through pending -> active when source data keeps breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
+        "line": 211,
+        "column": 10
+      }
+    },
+    {
+      "id": "7d659b2da63538a-e615b55e187194d",
+      "title": "Episode lifecycle for alert rules should transition active -> recovering -> inactive when source data stops breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
+        "line": 281,
+        "column": 10
+      }
+    },
+    {
+      "id": "7d659b2da63538a-650627f974905d2",
+      "title": "Episode lifecycle for alert rules should track multiple groups independently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
+        "line": 351,
+        "column": 10
+      }
+    },
+    {
+      "id": "7d659b2da63538a-a04d736fac0b492",
+      "title": "Episode lifecycle for alert rules should use pending_count threshold before transitioning to active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
+        "line": 432,
+        "column": 10
+      }
+    }
+  ]
+}

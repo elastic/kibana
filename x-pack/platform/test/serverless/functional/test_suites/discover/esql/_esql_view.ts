@@ -62,6 +62,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilTabIsLoaded();
     });
 
+    afterEach(async () => {
+      await PageObjects.discover.resetQueryMode();
+    });
+
     after(async () => {
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });

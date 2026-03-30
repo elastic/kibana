@@ -72,7 +72,7 @@ const PackagePolicyStreamsSchema = {
   ),
   data_stream: schema.object({
     dataset: schema.string(),
-    type: schema.string(),
+    type: schema.maybe(schema.string()),
     elasticsearch: schema.maybe(
       schema.object({
         privileges: schema.maybe(
@@ -100,6 +100,7 @@ export const PackagePolicyInputsSchema = {
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
   vars: schema.maybe(ConfigRecordSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 }),
   deprecated: schema.maybe(DeprecationInfoSchema),

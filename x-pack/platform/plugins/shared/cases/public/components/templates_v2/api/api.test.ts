@@ -139,6 +139,67 @@ describe('templates_v2 api bulk actions', () => {
 
       expect(res).toEqual(mockResponse);
     });
+
+    it('includes isEnabled in query when provided', async () => {
+      const mockResponse = {
+        templates: [],
+        page: 1,
+        perPage: 10,
+        total: 0,
+      };
+      fetchMock.mockResolvedValue(mockResponse);
+
+      await getTemplates({
+        queryParams: {
+          page: 1,
+          perPage: 10,
+          search: '',
+          sortField: 'name',
+          sortOrder: 'asc',
+          tags: [],
+          author: [],
+          owner: [],
+          isDeleted: false,
+          isEnabled: false,
+        },
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        INTERNAL_TEMPLATES_URL,
+        expect.objectContaining({
+          query: expect.objectContaining({
+            isEnabled: false,
+          }),
+        })
+      );
+    });
+
+    it('omits isEnabled from query when undefined', async () => {
+      const mockResponse = {
+        templates: [],
+        page: 1,
+        perPage: 10,
+        total: 0,
+      };
+      fetchMock.mockResolvedValue(mockResponse);
+
+      await getTemplates({
+        queryParams: {
+          page: 1,
+          perPage: 10,
+          search: '',
+          sortField: 'name',
+          sortOrder: 'asc',
+          tags: [],
+          author: [],
+          owner: [],
+          isDeleted: false,
+        },
+      });
+
+      const callQuery = fetchMock.mock.calls[0][1].query;
+      expect(callQuery).not.toHaveProperty('isEnabled');
+    });
   });
 
   describe('getTemplate', () => {
