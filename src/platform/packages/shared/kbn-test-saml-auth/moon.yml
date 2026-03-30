@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-saml-auth'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-operations'
+  defaultOwner: '@elastic/appex-qa'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/test-saml-auth'
   description: Moon project for @kbn/test-saml-auth
   channel: ''
-  owner: '@elastic/kibana-operations'
+  owner: '@elastic/appex-qa'
   sourceRoot: src/platform/packages/shared/kbn-test-saml-auth
 dependsOn:
   - '@kbn/es'
