@@ -1,0 +1,177 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render } from '@testing-library/react';
+import { TestProviders } from '../../../common/mock';
+import { DocumentDetailsContext } from '../../../flyout/document_details/shared/context';
+import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
+import {
+  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
+} from './test_ids';
+import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
+import { useFetchRelatedAlertsByAncestry } from '../../document/hooks/use_fetch_related_alerts_by_ancestry';
+import {
+  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
+  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
+} from '../../shared/components/test_ids';
+import { usePaginatedAlerts } from '../../../flyout/document_details/left/hooks/use_paginated_alerts';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+
+jest.mock('../../document/hooks/use_fetch_related_alerts_by_ancestry');
+jest.mock('../../../flyout/document_details/left/hooks/use_paginated_alerts');
+jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('../../../data_view_manager/hooks/use_security_default_patterns');
+jest.mock('../../../common/hooks/is_in_security_app');
+jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+
+const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
+
+const documentId = 'documentId';
+const scopeId = 'scopeId';
+const mockOnShowAlert = jest.fn();
+
+const TOGGLE_ICON = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
+  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID
+);
+const TITLE_ICON = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(
+  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID
+);
+const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
+  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID
+);
+
+const renderRelatedAlertsByAncestry = (hidePreviewLink = false) =>
+  render(
+    <TestProviders>
+      <DocumentDetailsContext.Provider value={mockContextValue}>
+        <RelatedAlertsByAncestry
+          documentId={documentId}
+          scopeId={scopeId}
+          onShowAlert={mockOnShowAlert}
+          hidePreviewLink={hidePreviewLink}
+        />
+      </DocumentDetailsContext.Provider>
+    </TestProviders>
+  );
+
+describe('<RelatedAlertsByAncestry />', () => {
+  beforeEach(() => {
+    useAlertsPrivilegesMock.mockReturnValue({
+      hasAlertsRead: true,
+    });
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({ indexPatterns: ['index1'] });
+    jest.mocked(useIsInSecurityApp).mockReturnValue(true);
+  });
+
+  it('should render many related alerts correctly', () => {
+    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: ['1', '2'],
+      dataCount: 2,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          _id: '1',
+          _index: 'index',
+          fields: {
+            '@timestamp': ['2022-01-01'],
+            'kibana.alert.rule.name': ['Rule1'],
+            'kibana.alert.reason': ['Reason1'],
+            'kibana.alert.severity': ['Severity1'],
+          },
+        },
+        {
+          _id: '2',
+          _index: 'index',
+          fields: {
+            '@timestamp': ['2022-01-02'],
+            'kibana.alert.rule.name': ['Rule2'],
+            'kibana.alert.reason': ['Reason2'],
+            'kibana.alert.severity': ['Severity2'],
+          },
+        },
+      ],
+    });
+
+    const { getByTestId } = renderRelatedAlertsByAncestry();
+    expect(getByTestId(TOGGLE_ICON)).toBeInTheDocument();
+    expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
+    expect(getByTestId(TITLE_TEXT)).toBeInTheDocument();
+    expect(
+      getByTestId(`${CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}InvestigateInTimeline`)
+    ).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should not render rule preview links when hidePreviewLink is true', () => {
+    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: ['1'],
+      dataCount: 1,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          _id: '1',
+          _index: 'index',
+          fields: {
+            '@timestamp': ['2022-01-01'],
+            'kibana.alert.rule.name': ['Rule1'],
+            'kibana.alert.reason': ['Reason1'],
+            'kibana.alert.severity': ['Severity1'],
+          },
+        },
+      ],
+    });
+
+    const { queryByTestId } = renderRelatedAlertsByAncestry(true);
+    expect(
+      queryByTestId(`${CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}RulePreview`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('should render null if error', () => {
+    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+      loading: false,
+      error: true,
+    });
+
+    const { container } = renderRelatedAlertsByAncestry();
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should render no data message', () => {
+    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 0,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    const { getByText } = renderRelatedAlertsByAncestry();
+    expect(getByText('No alerts related by ancestry.')).toBeInTheDocument();
+  });
+});
