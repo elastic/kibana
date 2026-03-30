@@ -49,6 +49,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       defaultMessage: 'Search Microsoft Teams channels, chats, and teams',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
