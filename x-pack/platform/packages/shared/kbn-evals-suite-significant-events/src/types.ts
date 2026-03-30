@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { EvaluationWorkerFixtures } from '@kbn/evals/src/types';
+import type { EvaluationWorkerFixtures } from '@kbn/evals';
 
 export interface SignificantEventsSpecificEvaluationWorkerFixtures {
   logger: Logger;
