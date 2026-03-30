@@ -106,7 +106,7 @@ export function AdvancedConfiguration({
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="apmSettingsAddAdvancedConfigurationButton"
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={addNewRow}
               >
                 {i18n.translate('xpack.apm.settingsPage.addCustomSettingButton', {

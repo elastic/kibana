@@ -1659,6 +1659,59 @@ Object {
             },
             Object {
               "additionalProperties": false,
+              "description": "Enrich a field with a policy",
+              "properties": Object {
+                "action": Object {
+                  "const": "enrich",
+                  "type": "string",
+                },
+                "customIdentifier": Object {
+                  "description": "Custom identifier to correlate this processor across outputs",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "description": Object {
+                  "description": "Human-readable notes about this processor step",
+                  "type": "string",
+                },
+                "ignore_failure": Object {
+                  "description": "Continue pipeline execution if this processor fails",
+                  "type": "boolean",
+                },
+                "ignore_missing": Object {
+                  "type": "boolean",
+                },
+                "override": Object {
+                  "type": "boolean",
+                },
+                "policy_name": Object {
+                  "description": "A non-empty string.",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "to": Object {
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "where": Object {
+                  "allOf": Array [
+                    Object {
+                      "$ref": "#/definitions/Condition",
+                    },
+                  ],
+                  "description": "Conditional expression controlling whether this processor runs",
+                },
+              },
+              "required": Array [
+                "action",
+                "policy_name",
+                "to",
+              ],
+              "title": "Enrich",
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
               "description": "Execute raw Elasticsearch ingest processors directly",
               "properties": Object {
                 "action": Object {
@@ -1741,6 +1794,7 @@ Object {
                 "convert",
                 "concat",
                 "json_extract",
+                "enrich",
                 "manual_ingest_pipeline",
               ],
               "type": "string",
@@ -3066,6 +3120,59 @@ Object {
               },
               Object {
                 "additionalProperties": false,
+                "description": "Enrich a field with a policy",
+                "properties": Object {
+                  "action": Object {
+                    "const": "enrich",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "type": "boolean",
+                  },
+                  "override": Object {
+                    "type": "boolean",
+                  },
+                  "policy_name": Object {
+                    "description": "A non-empty string.",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "to": Object {
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/Condition",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "policy_name",
+                  "to",
+                ],
+                "title": "Enrich",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
                 "description": "Execute raw Elasticsearch ingest processors directly",
                 "properties": Object {
                   "action": Object {
@@ -3148,6 +3255,7 @@ Object {
                   "convert",
                   "concat",
                   "json_extract",
+                  "enrich",
                   "manual_ingest_pipeline",
                 ],
                 "type": "string",

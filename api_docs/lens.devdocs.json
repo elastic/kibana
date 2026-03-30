@@ -8392,6 +8392,10 @@
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
               },
               {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/visualization_actions/lens_attributes/ai/cost_savings_metric.ts"
               },
@@ -17192,7 +17196,7 @@
           "\"lens\""
         ],
         "path": "x-pack/platform/plugins/shared/lens/common/constants.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -25174,7 +25178,7 @@
           "\"___records___\""
         ],
         "path": "x-pack/platform/plugins/shared/lens/common/constants.ts",
-        "lineNumber": 58,
+        "lineNumber": 64,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
