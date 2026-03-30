@@ -220,7 +220,9 @@ export function AlertsV2Page() {
                   actions: (props) => {
                     const episodeId = props.row.flattened['episode.id'] as string;
                     const episodeAction = actionsMap.get(episodeId);
-                    return <AlertEpisodeActionsCell episodeAction={episodeAction} http={services.http} />;
+                    return (
+                      <AlertEpisodeActionsCell episodeAction={episodeAction} http={services.http} />
+                    );
                   },
                   tags: (props) => {
                     const episodeId = props.row.flattened['episode.id'] as string;
