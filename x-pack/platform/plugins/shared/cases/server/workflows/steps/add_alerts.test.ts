@@ -44,4 +44,55 @@ describe('addAlertsStepDefinition', () => {
       ],
     });
   });
+
+  it('adds alerts when provided as a valid stringified array', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get },
+      attachments: { bulkCreate },
+    } as unknown as CasesClient);
+    const definition = addAlertsStepDefinition(getCasesClient);
+
+    await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        alerts: JSON.stringify([{ alertId: 'alert-1', index: '.alerts-security.alerts-default' }]),
+      })
+    );
+
+    expect(bulkCreate).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      attachments: [
+        {
+          type: 'alert',
+          alertId: 'alert-1',
+          index: '.alerts-security.alerts-default',
+          owner: createCaseResponseFixture.owner,
+          rule: { id: null, name: null },
+        },
+      ],
+    });
+  });
+
+  it('returns an error for an invalid alert array string', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get },
+      attachments: { bulkCreate },
+    } as unknown as CasesClient);
+    const definition = addAlertsStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        alerts: '{"alertId":"alert-1"}',
+      })
+    );
+
+    expect(get).not.toHaveBeenCalled();
+    expect(bulkCreate).not.toHaveBeenCalled();
+    expect(result).toEqual({ error: expect.any(Error) });
+  });
 });

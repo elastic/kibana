@@ -109,4 +109,66 @@ describe('unassignCaseStepDefinition', () => {
       },
     });
   });
+
+  it('unassigns users when assignees is a valid stringified array', async () => {
+    const existingAssignees = [{ uid: 'user-1' }, { uid: 'user-2' }, { uid: 'user-3' }];
+    const assigneesAfterUnassign = [{ uid: 'user-1' }, { uid: 'user-3' }];
+    const { get, bulkUpdate, getCasesClient } = createBulkUpdateCasesClientMock({
+      ...createCaseResponseFixture,
+      assignees: assigneesAfterUnassign,
+    });
+    get.mockResolvedValue({
+      ...createCaseResponseFixture,
+      assignees: existingAssignees,
+    });
+    const definition = unassignCaseStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        version: 'provided-version',
+        assignees: JSON.stringify([{ uid: 'user-2' }]),
+      })
+    );
+
+    expect(get).toHaveBeenCalledWith({ id: 'case-1', includeComments: false });
+    expect(bulkUpdate).toHaveBeenCalledWith({
+      cases: [
+        expect.objectContaining({
+          id: 'case-1',
+          version: 'provided-version',
+          assignees: assigneesAfterUnassign,
+        }),
+      ],
+    });
+    expect(result).toEqual({
+      output: {
+        case: { ...createCaseResponseFixture, assignees: assigneesAfterUnassign },
+      },
+    });
+  });
+
+  it('returns translated error when assignees is an invalid array string', async () => {
+    const { get, bulkUpdate, getCasesClient } = createBulkUpdateCasesClientMock({
+      ...createCaseResponseFixture,
+      assignees: [],
+    });
+    const definition = unassignCaseStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        version: 'provided-version',
+        assignees: '{"uid":"user-2"}',
+      })
+    );
+
+    expect(get).not.toHaveBeenCalled();
+    expect(bulkUpdate).not.toHaveBeenCalled();
+    expect(result.error).toEqual(
+      expect.objectContaining({
+        message: 'Case "case-1" could not be updated.',
+      })
+    );
+  });
 });

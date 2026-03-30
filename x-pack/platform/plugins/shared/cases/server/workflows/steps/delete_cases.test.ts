@@ -58,4 +58,43 @@ describe('deleteCasesStepDefinition', () => {
       })
     );
   });
+
+  it('deletes cases when case_ids is a valid stringified array', async () => {
+    const deleteCases = jest.fn().mockResolvedValue(undefined);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { delete: deleteCases },
+    } as unknown as CasesClient);
+    const definition = deleteCasesStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({
+        case_ids: JSON.stringify(['case-1', 'case-2']),
+      })
+    );
+
+    expect(deleteCases).toHaveBeenCalledWith(['case-1', 'case-2']);
+    expect(result).toEqual({
+      output: {
+        case_ids: ['case-1', 'case-2'],
+      },
+    });
+  });
+
+  it('throws when case_ids is an invalid array string', async () => {
+    const deleteCases = jest.fn().mockResolvedValue(undefined);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { delete: deleteCases },
+    } as unknown as CasesClient);
+    const definition = deleteCasesStepDefinition(getCasesClient);
+
+    await expect(
+      definition.handler(
+        createContext({
+          case_ids: '{"case_id":"case-1"}',
+        })
+      )
+    ).rejects.toThrow();
+
+    expect(deleteCases).not.toHaveBeenCalled();
+  });
 });

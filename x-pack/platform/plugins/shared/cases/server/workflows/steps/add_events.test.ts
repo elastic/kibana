@@ -43,4 +43,54 @@ describe('addEventsStepDefinition', () => {
       ],
     });
   });
+
+  it('adds events when provided as a valid stringified array', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get },
+      attachments: { bulkCreate },
+    } as unknown as CasesClient);
+    const definition = addEventsStepDefinition(getCasesClient);
+
+    await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        events: JSON.stringify([{ eventId: 'event-1', index: '.ds-logs-*' }]),
+      })
+    );
+
+    expect(bulkCreate).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      attachments: [
+        {
+          type: 'event',
+          eventId: 'event-1',
+          index: '.ds-logs-*',
+          owner: createCaseResponseFixture.owner,
+        },
+      ],
+    });
+  });
+
+  it('returns an error for an invalid event array string', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get },
+      attachments: { bulkCreate },
+    } as unknown as CasesClient);
+    const definition = addEventsStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        events: '{"eventId":"event-1"}',
+      })
+    );
+
+    expect(get).not.toHaveBeenCalled();
+    expect(bulkCreate).not.toHaveBeenCalled();
+    expect(result).toEqual({ error: expect.any(Error) });
+  });
 });

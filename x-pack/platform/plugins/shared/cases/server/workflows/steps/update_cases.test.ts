@@ -75,6 +75,57 @@ describe('updateCasesStepDefinition', () => {
     });
   });
 
+  it('updates cases when provided as a valid stringified array', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = jest
+      .fn()
+      .mockResolvedValue([
+        { ...createCaseResponseFixture, id: 'case-1', title: 'Updated title 1' },
+      ]);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get, bulkUpdate },
+    } as unknown as CasesClient);
+    const definition = updateCasesStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({
+        cases: JSON.stringify([{ case_id: 'case-1', updates: { title: 'Updated title 1' } }]),
+      })
+    );
+
+    expect(get).toHaveBeenCalledWith({ id: 'case-1', includeComments: false });
+    expect(bulkUpdate).toHaveBeenCalledWith({
+      cases: [
+        { id: 'case-1', version: createCaseResponseFixture.version, title: 'Updated title 1' },
+      ],
+    });
+    expect(result).toEqual({
+      output: {
+        cases: [{ ...createCaseResponseFixture, id: 'case-1', title: 'Updated title 1' }],
+      },
+    });
+  });
+
+  it('throws when cases is an invalid array string', async () => {
+    const get = jest.fn();
+    const bulkUpdate = jest.fn();
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get, bulkUpdate },
+    } as unknown as CasesClient);
+    const definition = updateCasesStepDefinition(getCasesClient);
+
+    await expect(
+      definition.handler(
+        createContext({
+          cases: '{"case_id":"case-1","updates":{"title":"Updated title 1"}}',
+        })
+      )
+    ).rejects.toThrow();
+
+    expect(get).not.toHaveBeenCalled();
+    expect(bulkUpdate).not.toHaveBeenCalled();
+  });
+
   it('returns translated error when bulk update throws', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const bulkUpdate = jest.fn().mockRejectedValue(new Error('bulk update failed'));

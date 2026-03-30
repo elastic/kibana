@@ -36,4 +36,46 @@ describe('addObservablesStepDefinition', () => {
       observables: [{ typeKey: 'ip', value: '10.0.0.8', description: null }],
     });
   });
+
+  it('adds observables when provided as a valid stringified array', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkAddObservables = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get, bulkAddObservables },
+    } as unknown as CasesClient);
+    const definition = addObservablesStepDefinition(getCasesClient);
+
+    await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        observables: JSON.stringify([{ typeKey: 'ip', value: '10.0.0.8' }]),
+      })
+    );
+
+    expect(get).toHaveBeenCalledWith({ id: 'case-1', includeComments: false });
+    expect(bulkAddObservables).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      observables: [{ typeKey: 'ip', value: '10.0.0.8', description: null }],
+    });
+  });
+
+  it('returns an error for an invalid observables array string', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkAddObservables = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get, bulkAddObservables },
+    } as unknown as CasesClient);
+    const definition = addObservablesStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        observables: '{"typeKey":"ip","value":"10.0.0.8"}',
+      })
+    );
+
+    expect(get).not.toHaveBeenCalled();
+    expect(bulkAddObservables).not.toHaveBeenCalled();
+    expect(result).toEqual({ error: expect.any(Error) });
+  });
 });
