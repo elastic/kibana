@@ -51,6 +51,27 @@ describe('XY Legend Transforms', () => {
       forbiddenApiPaths: ['layout.truncate.max_lines'],
     },
     {
+      title: 'inside grid legend persists truncate.max_lines',
+      state: {
+        isVisible: true,
+        isInside: true,
+        position: 'right',
+        shouldTruncate: true,
+        maxLines: 2,
+        verticalAlignment: 'bottom',
+        horizontalAlignment: 'left',
+        floatingColumns: 2,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'inside',
+        columns: 2,
+        position: 'bottom_left',
+        layout: { type: 'grid', truncate: { max_lines: 2 } },
+      },
+      forbiddenApiPaths: ['layout.truncate.max_pixels'],
+    },
+    {
       title: 'outside top list legend persists default truncate.max_pixels = 250',
       state: {
         isVisible: true,

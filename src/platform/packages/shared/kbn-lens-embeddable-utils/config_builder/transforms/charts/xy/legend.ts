@@ -153,6 +153,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
           isInside: true,
           position: DEFAULT_LEGEND_POSITON,
           ...(legend?.columns ? { floatingColumns: legend?.columns } : {}),
+          ...(truncateMaxLines ? { maxLines: truncateMaxLines } : {}),
         }
       : {
           position: legend?.position ?? DEFAULT_LEGEND_POSITON,
@@ -217,8 +218,8 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
     return {
       placement: 'inside' as const,
       layout: stripUndefined({
-        type: 'list' as const,
-        truncate: max_pixels ? { max_pixels } : undefined,
+        type: 'grid' as const,
+        truncate: max_lines != null ? { max_lines } : undefined,
       }),
       ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
       ...getLegendAlignment(legend),
