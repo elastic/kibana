@@ -125,10 +125,16 @@ export interface SecuritySolutionAlertFlyoutHeaderTitleFeature {
   renderHeader: (hit: DataTableRecord) => JSX.Element;
 }
 
+export interface SecuritySolutionAlertFlyoutFooterTitleFeature {
+  id: 'security-solution-alert-flyout-footer-title';
+  renderFooter: (hit: DataTableRecord) => JSX.Element;
+}
+
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
   | SecuritySolutionAlertFlyoutOverviewTabFeature
-  | SecuritySolutionAlertFlyoutHeaderTitleFeature;
+  | SecuritySolutionAlertFlyoutHeaderTitleFeature
+  | SecuritySolutionAlertFlyoutFooterTitleFeature;
 
 /** ****************************************************************************************/
 
