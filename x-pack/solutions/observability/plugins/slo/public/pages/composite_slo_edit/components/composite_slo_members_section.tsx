@@ -220,15 +220,15 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
         <Controller
           name={`members.${index}.weight`}
           control={control}
-          rules={{ required: true, min: 0.01, max: 1000 }}
+          rules={{ required: true, min: 1, validate: (v) => Number.isInteger(v) }}
           render={({ field: { ref, onChange, value }, fieldState }) => (
             <EuiFieldNumber
               compressed
               isInvalid={fieldState.invalid}
               value={value}
-              min={0.01}
-              step={0.01}
-              onChange={(e) => onChange(parseFloat(e.target.value))}
+              min={1}
+              step={1}
+              onChange={(e) => onChange(parseInt(e.target.value, 10))}
               data-test-subj={`compositeSloMemberWeightInput-${index}`}
             />
           )}
