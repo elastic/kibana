@@ -6,8 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import { metrics } from './metrics';
 import { createInventoryModel } from '../../shared/create_inventory_model';
+import type { DataSchemaFormat } from '../../types';
+import { DATASTREAM_DATASET, KUBELET_STATS_RECEIVER_OTEL } from '../../../constants';
+
 export const pod = createInventoryModel('pod', {
   displayName: i18n.translate('xpack.metricsData.inventoryModel.pod.displayName', {
     defaultMessage: 'Kubernetes Pods',
@@ -31,5 +35,34 @@ export const pod = createInventoryModel('pod', {
     ip: 'kubernetes.pod.ip',
   },
   metrics,
-  nodeFilter: () => [{ term: { 'event.module': 'kubernetes' } }],
+  nodeFilter: (args?: { schema?: DataSchemaFormat }): estypes.QueryDslQueryContainer[] => {
+    const { schema } = args ?? {};
+    if (!schema) {
+      return [];
+    }
+
+    return [
+      {
+        bool:
+          schema === 'ecs'
+            ? {
+                filter: [{ term: { 'event.module': 'kubernetes' } }],
+              }
+            : {
+                filter: [
+                  {
+                    term: {
+                      [DATASTREAM_DATASET]: KUBELET_STATS_RECEIVER_OTEL,
+                    },
+                  },
+                  {
+                    exists: {
+                      field: 'kubernetes.pod.uid',
+                    },
+                  },
+                ],
+              },
+      },
+    ];
+  },
 });
