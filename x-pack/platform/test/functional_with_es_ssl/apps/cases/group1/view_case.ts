@@ -29,8 +29,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
-  const security = getPageObject('security');
-  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
 
@@ -878,136 +876,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Assignees field', () => {
-      before(async () => {
-        await createUsersAndRoles(getService, users, roles);
-        await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
-      });
-
-      after(async () => {
-        await deleteUsersAndRoles(getService, users, roles);
-      });
-
-      describe('unknown users', () => {
-        beforeEach(async () => {
-          await kibanaServer.importExport.load(
-            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_assignees.json'
-          );
-
-          await cases.navigation.navigateToApp();
-          await cases.casesTable.waitForCasesToBeListed();
-          await cases.casesTable.goToFirstListedCase();
-          await header.waitUntilLoadingHasFinished();
-        });
-
-        afterEach(async () => {
-          await kibanaServer.importExport.unload(
-            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_assignees.json'
-          );
-
-          await cases.api.deleteAllCases();
-        });
-
-        it('shows the unknown assignee', async () => {
-          await testSubjects.existOrFail('user-profile-assigned-user-abc-remove-group');
-        });
-
-        it('removes the unknown assignee when selecting the remove all users in the popover', async () => {
-          await testSubjects.existOrFail('user-profile-assigned-user-abc-remove-group');
-
-          await cases.singleCase.openAssigneesPopover();
-          await cases.common.setSearchTextInAssigneesPopover('case');
-          await cases.common.selectFirstRowInAssigneesPopover();
-
-          await (await find.byButtonText('Remove all assignees')).click();
-          await cases.singleCase.closeAssigneesPopover();
-          await testSubjects.missingOrFail('user-profile-assigned-user-abc-remove-group');
-        });
-      });
-
-      describe('login with cases all user', () => {
-        before(async () => {
-          await security.forceLogout();
-          await security.login(casesAllUser.username, casesAllUser.password);
-          await createAndNavigateToCase(getPageObject, getService);
-        });
-
-        after(async () => {
-          await cases.api.deleteAllCases();
-          await security.forceLogout();
-        });
-
-        it('assigns the case to the current user when clicking the assign to self link', async () => {
-          await testSubjects.click('case-view-assign-yourself-link');
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
-        });
-      });
-
-      describe('logs in with default user', () => {
-        beforeEach(async () => {
-          await createAndNavigateToCase(getPageObject, getService);
-        });
-
-        afterEach(async () => {
-          await cases.api.deleteAllCases();
-        });
-
-        it('shows the assign users popover when clicked', async () => {
-          await testSubjects.missingOrFail('euiSelectableList');
-          await cases.singleCase.openAssigneesPopover();
-          await cases.singleCase.closeAssigneesPopover();
-        });
-
-        it('assigns a user from the popover', async () => {
-          await cases.singleCase.openAssigneesPopover();
-          await cases.common.setSearchTextInAssigneesPopover('case');
-          await cases.common.selectFirstRowInAssigneesPopover();
-          await cases.singleCase.closeAssigneesPopover();
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
-        });
-
-        it('assigns multiple users', async () => {
-          await cases.singleCase.openAssigneesPopover();
-          await cases.common.setSearchTextInAssigneesPopover('case');
-          await cases.common.selectAllRowsInAssigneesPopover();
-
-          await cases.singleCase.closeAssigneesPopover();
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
-          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user2-remove-group');
-        });
-      });
-
-      describe('logs in with default user and creates case before each', () => {
-        createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
-
-        it('removes an assigned user', async () => {
-          await cases.singleCase.openAssigneesPopover();
-          await cases.common.setSearchTextInAssigneesPopover('case');
-          await cases.common.selectFirstRowInAssigneesPopover();
-
-          // navigate out of the modal
-          await cases.singleCase.closeAssigneesPopover();
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
-
-          // hover over the assigned user
-          await (
-            await find.byCssSelector(
-              '[data-test-subj="user-profile-assigned-user-cases_all_user-remove-group"]'
-            )
-          ).moveMouseTo();
-
-          // delete the user
-          await testSubjects.click('user-profile-assigned-user-cases_all_user-remove-button');
-
-          await testSubjects.existOrFail('case-view-assign-yourself-link');
-        });
-      });
-    });
-
     describe('Tabs', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
@@ -1031,14 +899,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('case-view-tab-content-activity');
       });
 
-      it("shows the 'alerts' tab when clicked", async () => {
-        await testSubjects.click('case-view-tab-title-alerts');
-        await testSubjects.existOrFail('case-view-tab-content-alerts');
-      });
-
-      it("shows the 'files' tab when clicked", async () => {
-        await testSubjects.click('case-view-tab-title-files');
-        await testSubjects.existOrFail('case-view-tab-content-files');
+      it("shows the 'attachments' tab when clicked", async () => {
+        await testSubjects.click('case-view-tab-title-attachments');
+        await testSubjects.existOrFail('case-view-attachments');
       });
 
       describe('Query params', () => {

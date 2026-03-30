@@ -382,9 +382,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('case-view-tab-content-activity');
       });
 
-      it("shows the 'files' tab when clicked", async () => {
-        await testSubjects.click('case-view-tab-title-files');
-        await testSubjects.existOrFail('case-view-tab-content-files');
+      it("shows the 'attachments' tab when clicked", async () => {
+        await testSubjects.click('case-view-tab-title-attachments');
+        await testSubjects.existOrFail('case-view-attachments');
       });
     });
 
