@@ -8,20 +8,15 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/tooling-log",
-    "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
-    "@kbn/scout-info",
+    "@kbn/dev-proc-runner",
     "@kbn/repo-info",
-    "@kbn/code-owners",
-    "@kbn/get-repo-files",
-    "@kbn/repo-packages",
-    "@kbn/zod",
+    "@kbn/repo-packages"
   ]
 }

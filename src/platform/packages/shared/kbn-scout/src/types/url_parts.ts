@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  SamlSessionManager,
-  type GetCookieOptions,
-  type HostOptions,
-  type SamlSessionManagerOptions,
-} from './session_manager';
+/**
+ * Parsed URL pieces for test server endpoints.
+ * Duplicated from @kbn/test `UrlParts` so Scout typings do not import @kbn/test.
+ */
+export interface UrlParts {
+  protocol?: string;
+  hostname?: string;
+  port?: number;
+  auth?: string;
+  username?: string;
+  password?: string;
+}
