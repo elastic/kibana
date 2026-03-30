@@ -78,7 +78,7 @@ describe('StatusFilter', () => {
         expect.objectContaining({
           options: [
             { label: 'Active', value: 'active' },
-            { label: 'Recovered', value: 'recovering' },
+            { label: 'Recovering', value: 'recovering' },
             { label: 'Pending', value: 'pending' },
             { label: 'Inactive', value: 'inactive' },
           ],

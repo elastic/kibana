@@ -107,7 +107,7 @@ describe('useAlertingEpisodesDataView', () => {
           includeSpaceWithSuffix: true,
           inputFormat: 'milliseconds',
           outputFormat: 'humanizePrecise',
-          outputPrecision: 2,
+          outputPrecision: 0,
           useShortSuffix: true,
         },
       },
