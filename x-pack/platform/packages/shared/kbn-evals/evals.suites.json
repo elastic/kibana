@@ -138,6 +138,18 @@
         "evals:entity-analytics-v2"
       ],
       "serverConfigSet": "evals_entity_analytics_v2"
+    },
+    {
+      "id": "attack-discovery",
+      "name": "Attack Discovery",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/playwright.config.ts",
+      "tags": [
+        "security",
+        "attack-discovery"
+      ],
+      "ciLabels": [
+        "evals:attack-discovery"
+      ]
     }
   ]
 }
