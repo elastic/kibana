@@ -82,6 +82,8 @@ export const deserializeState = async ({
     return {
       ...savedSearchWithoutTabs,
       ...panelState,
+      savedObjectTitle: savedSearchWithoutTabs.title,
+      savedObjectDescription: savedSearchWithoutTabs.description,
       nonPersistedDisplayOptions: serializedState.nonPersistedDisplayOptions,
     };
   }

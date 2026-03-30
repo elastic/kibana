@@ -155,7 +155,6 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickSaveDiscoverTableToDashboard(title: string, existing?: string) {
-    await this.testSubjects.moveMouseTo('saveDiscoverTableToDashboardButton');
     await this.testSubjects.click('saveDiscoverTableToDashboardButton');
     await this.retry.waitFor('Save Discover session table modal', () =>
       this.testSubjects.exists('savedObjectSaveModal')

@@ -108,7 +108,7 @@ export const getSearchEmbeddableFactory = ({
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
 
       /** Build API */
-      const titleManager = initializeTitleManager(initialState);
+      const titleManager = initializeTitleManager(runtimeState);
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
       const searchEmbeddable = await initializeSearchEmbeddableApi({

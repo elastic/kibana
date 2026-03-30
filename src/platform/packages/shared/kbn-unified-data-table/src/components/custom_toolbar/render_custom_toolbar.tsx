@@ -25,7 +25,7 @@ export type UnifiedDataTableRenderCustomToolbar = (
 ) => React.ReactElement;
 
 interface RenderCustomToolbarProps extends UnifiedDataTableRenderCustomToolbarProps {
-  saveButton?: React.ReactElement;
+  saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
 }
@@ -34,7 +34,7 @@ export const internalRenderCustomToolbar = (
   props: RenderCustomToolbarProps
 ): React.ReactElement => {
   const {
-    saveButton,
+    saveToDashboardButton,
     leftSide,
     bottomSection,
     toolbarProps: {
@@ -139,12 +139,12 @@ export const internalRenderCustomToolbar = (
                       {fullScreenControl}
                     </div>
                   )}
-                  {Boolean(saveButton) && (
+                  {Boolean(saveToDashboardButton) && (
                     <div
                       className="unifiedDataTableToolbarControlIconButton"
                       css={styles.controlGroupIconButton}
                     >
-                      {saveButton}
+                      {saveToDashboardButton}
                     </div>
                   )}
                 </div>
@@ -172,7 +172,7 @@ export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = internal
  * Render custom element on the left side and all controls to the right
  */
 export const getRenderCustomToolbarWithElements = ({
-  saveToDashboardButton: saveButton,
+  saveToDashboardButton,
   leftSide,
   bottomSection,
 }: {
@@ -186,7 +186,7 @@ export const getRenderCustomToolbarWithElements = ({
       ...props,
       leftSide: leftSide || reservedSpace,
       bottomSection,
-      saveButton,
+      saveToDashboardButton,
     });
 };
 

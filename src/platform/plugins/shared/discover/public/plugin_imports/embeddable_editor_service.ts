@@ -89,7 +89,7 @@ export class EmbeddableEditorService {
     const app = options?.app || this.embeddableState?.originatingApp;
     const path = options?.path || this.embeddableState?.originatingPath;
 
-    if (app) {
+    if (app && path) {
       this.embeddableStateTransfer.clearEditorState('discover');
       this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
         path,

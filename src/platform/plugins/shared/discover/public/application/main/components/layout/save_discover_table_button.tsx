@@ -40,7 +40,11 @@ export function SaveDiscoverTableButton() {
   const runtimeStateManager = useRuntimeStateManager();
 
   const onSave = useCallback(
-    async ({ dashboardId }: OnSaveProps & { dashboardId: string | null }) => {
+    async ({
+      dashboardId,
+      newTitle,
+      newDescription,
+    }: OnSaveProps & { dashboardId: string | null }) => {
       const internalState = getState();
       const tabId = internalState.tabs.unsafeCurrentId;
       const savedSearch = await selectTabSavedSearch({
@@ -54,7 +58,7 @@ export function SaveDiscoverTableButton() {
       const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
       services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
-        state: { ...attributes, references },
+        state: { ...attributes, title: newTitle, description: newDescription, references },
         app: 'dashboards',
         path: dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create',
       });
