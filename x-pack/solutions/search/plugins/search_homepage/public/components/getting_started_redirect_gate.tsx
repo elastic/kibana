@@ -42,11 +42,10 @@ export const GettingStartedRedirectGate = ({ coreStart, children }: Props) => {
   // While stats are loading, suppress children to avoid mounting the homepage
   // only to immediately unmount it if a redirect is needed. If the stats call
   // fails, fall through and render children (fail open).
-  if (isLoading && shouldVisitGettingStartedPage && !isError) {
-    return null;
-  }
-
-  if (shouldRedirect && shouldVisitGettingStartedPage) {
+  if (
+    (isLoading && shouldVisitGettingStartedPage && !isError) ||
+    (shouldRedirect && shouldVisitGettingStartedPage)
+  ) {
     // Don't render children if we're going to redirect immediately.
     // This prevents mounting the homepage (with its console) only to unmount it milliseconds later.
     return null;
