@@ -16,6 +16,7 @@ import {
   type EntityType,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEuidEsqlEvaluation } from '../../../common/domain/euid/esql';
+import { HASH_ALG } from '../constants';
 import {
   buildExtractionSourceClause,
   buildFieldEvaluations,
@@ -38,7 +39,6 @@ import {
 } from './query_builder_commons';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
-const HASH_ALG = 'MD5';
 
 export const MAIN_EXTRACTION_PAGINATION_FIELDS: PaginationFields = {
   timestampField: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,

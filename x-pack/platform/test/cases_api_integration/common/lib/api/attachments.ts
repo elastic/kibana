@@ -31,20 +31,20 @@ import { postCaseReq } from '../mock';
 
 export const bulkGetAttachments = async ({
   supertest,
-  attachmentIds,
+  savedObjectIds,
   caseId,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.Agent;
-  attachmentIds: string[];
+  savedObjectIds: string[];
   caseId: string;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<BulkGetAttachmentsResponse> => {
   const { body: comments } = await supertest
     .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_get`)
-    .send({ ids: attachmentIds })
+    .send({ ids: savedObjectIds })
     .set('kbn-xsrf', 'abc')
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);

@@ -288,7 +288,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const createdAction = await createJsmConnector(connectorName);
         objectRemover.add(createdAction.id, 'connector', 'actions');
 
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
       });
 
       beforeEach(async () => {

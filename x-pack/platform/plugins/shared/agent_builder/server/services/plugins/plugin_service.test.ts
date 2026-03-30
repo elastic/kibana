@@ -55,7 +55,6 @@ const createMockParsedArchive = (
   },
   skills: [],
   unmanagedAssets: {
-    commands: ['commands/cmd.md'],
     agents: [],
     hooks: [],
     mcp_servers: [],
@@ -82,7 +81,6 @@ const createMockPersistedPlugin = (
   source_url: 'https://github.com/test/repo/tree/main/plugin',
   skill_ids: [],
   unmanaged_assets: {
-    commands: ['commands/cmd.md'],
     agents: [],
     hooks: [],
     mcp_servers: [],
