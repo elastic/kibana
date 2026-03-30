@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export * from './steps';
+import type { GcsConfig } from './types';
+
+export const GCS_BUCKET = 'obs-ai-datasets';
+
+export const PAYMENT_SERVICE_GCS: GcsConfig = {
+  bucket: GCS_BUCKET,
+  basePath: 'otel-demo/payment-service-failures',
+};
