@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/aiops-utils'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/aiops-utils'
+  title: '@kbn/aiops-utils'
   description: Moon project for @kbn/aiops-utils
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-aiops-utils
+  sourceRoot: src/platform/packages/shared/kbn-aiops-utils
 dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/field-types'
@@ -34,14 +33,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
