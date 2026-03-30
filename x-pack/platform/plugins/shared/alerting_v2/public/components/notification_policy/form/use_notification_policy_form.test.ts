@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { useNotificationPolicyForm } from './use_notification_policy_form';
-import { DEFAULT_FORM_STATE } from './constants';
+import { DEFAULT_FORM_STATE, DEFAULT_SUPPRESSION_MECHANISMS } from './constants';
 
 const EXISTING_POLICY: NotificationPolicyResponse = {
   id: 'policy-1',
@@ -137,8 +137,10 @@ describe('useNotificationPolicyForm', () => {
         description: 'Routes critical alerts',
         matcher: 'data.severity : "critical"',
         groupBy: ['host.name', 'service.name'],
-        frequency: { type: 'throttle', interval: '5m' },
+        dispatchPer: 'group',
+        frequency: { type: 'group_throttle', repeatValue: 5, repeatUnit: 'm' },
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        suppressionMechanisms: DEFAULT_SUPPRESSION_MECHANISMS,
       });
     });
 
@@ -155,7 +157,7 @@ describe('useNotificationPolicyForm', () => {
         })
       );
 
-      expect(result.current.methods.getValues().frequency).toEqual({ type: 'immediate' });
+      expect(result.current.methods.getValues().frequency).toEqual({ type: 'group_immediate' });
     });
 
     it('calls onSubmitUpdate with id, payload, and version on submit', async () => {

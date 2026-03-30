@@ -15,6 +15,29 @@ import { DEFAULT_FORM_STATE } from './constants';
 import { NotificationPolicyForm } from './notification_policy_form';
 import type { NotificationPolicyFormState } from './types';
 
+jest.mock('@kbn/core-di-browser', () => {
+  const { WORKFLOWS_UI_SETTING_ID } = jest.requireActual('@kbn/workflows') as {
+    WORKFLOWS_UI_SETTING_ID: string;
+  };
+  return {
+    useService: jest.fn((token: unknown) => {
+      const tokenStr = String(token);
+      if (tokenStr.includes('uiSettings')) {
+        return {
+          get: jest.fn((key: string, defaultValue?: boolean) =>
+            key === WORKFLOWS_UI_SETTING_ID ? true : defaultValue
+          ),
+        };
+      }
+      if (tokenStr.includes('http')) {
+        return { basePath: { prepend: (path: string) => `/mock${path}` } };
+      }
+      return {};
+    }),
+    CoreStart: jest.fn((name: string) => `CoreStart(${name})`),
+  };
+});
+
 jest.mock('./components/matcher_input', () => ({
   MatcherInput: (props: {
     value: string;
@@ -27,6 +50,10 @@ jest.mock('./components/matcher_input', () => ({
       onChange={(e) => props.onChange(e.target.value)}
     />
   ),
+}));
+
+jest.mock('./components/quick_filters', () => ({
+  QuickFilters: () => null,
 }));
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
@@ -59,7 +86,7 @@ const TEST_SUBJ = {
   nameInput: 'nameInput',
   descriptionInput: 'descriptionInput',
   frequencySelect: 'frequencySelect',
-  throttleIntervalInput: 'throttleIntervalInput',
+  repeatIntervalValueInput: 'repeatIntervalValueInput',
 } as const;
 
 describe('NotificationPolicyForm', () => {
@@ -72,30 +99,19 @@ describe('NotificationPolicyForm', () => {
     expect(await screen.findByText('Name is required.')).toBeInTheDocument();
   });
 
-  it('shows throttle interval input only when throttle frequency is selected', async () => {
+  it('shows repeat interval controls when group throttle frequency is selected', async () => {
     const user = userEvent.setup();
-    renderForm();
+    renderForm({
+      ...DEFAULT_FORM_STATE,
+      dispatchPer: 'group',
+      groupBy: ['host.name'],
+      frequency: { type: 'group_immediate' },
+    });
 
-    expect(screen.queryByTestId(TEST_SUBJ.throttleIntervalInput)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ.repeatIntervalValueInput)).not.toBeInTheDocument();
 
-    await user.selectOptions(screen.getByTestId(TEST_SUBJ.frequencySelect), 'throttle');
+    await user.selectOptions(screen.getByTestId(TEST_SUBJ.frequencySelect), 'group_throttle');
 
-    expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toBeInTheDocument();
-  });
-
-  it('validates throttle interval format when in throttle mode', async () => {
-    const user = userEvent.setup();
-    renderForm();
-
-    await user.selectOptions(screen.getByTestId(TEST_SUBJ.frequencySelect), 'throttle');
-
-    const intervalInput = screen.getByTestId(TEST_SUBJ.throttleIntervalInput);
-    await user.clear(intervalInput);
-    await user.type(intervalInput, '10x');
-    await user.tab();
-
-    expect(
-      await screen.findByText('Invalid throttle interval. Must be in the format of 1h, 5m, 30s')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.repeatIntervalValueInput)).toBeInTheDocument();
   });
 });

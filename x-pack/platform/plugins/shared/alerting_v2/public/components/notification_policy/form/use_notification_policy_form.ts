@@ -12,7 +12,6 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import { useCallback, useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { THROTTLE_INTERVAL_PATTERN } from './constants';
 import { DEFAULT_FORM_STATE } from './constants';
 import { toCreatePayload, toFormState, toUpdatePayload } from './form_utils';
 import type { NotificationPolicyFormState } from './types';
@@ -40,19 +39,26 @@ export const useNotificationPolicyForm = ({
     defaultValues,
   });
 
-  const [name, destinations, frequency] = useWatch({
+  const [name, destinations, frequency, dispatchPer, groupBy] = useWatch({
     control: methods.control,
-    name: ['name', 'destinations', 'frequency'],
+    name: ['name', 'destinations', 'frequency', 'dispatchPer', 'groupBy'],
   });
 
   const isSubmitEnabled = useMemo(() => {
     const hasName = name.trim().length > 0;
     const hasDestinations = destinations.length > 0;
-    const hasValidThrottleInterval =
-      frequency.type !== 'throttle' || THROTTLE_INTERVAL_PATTERN.test(frequency.interval);
 
-    return hasName && hasDestinations && hasValidThrottleInterval;
-  }, [destinations.length, frequency, name]);
+    let frequencyValid = true;
+    if (frequency.type === 'group_throttle' || frequency.type === 'episode_status_change_repeat') {
+      const { repeatValue } = frequency;
+      frequencyValid =
+        typeof repeatValue === 'number' && !Number.isNaN(repeatValue) && repeatValue >= 1;
+    }
+
+    const groupByValid = dispatchPer !== 'group' || groupBy.length > 0;
+
+    return hasName && hasDestinations && frequencyValid && groupByValid;
+  }, [destinations.length, dispatchPer, frequency, groupBy.length, name]);
 
   const onSubmitValid = useCallback(
     (values: NotificationPolicyFormState) => {

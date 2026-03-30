@@ -8,7 +8,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { DEFAULT_FORM_STATE } from './constants';
+import { DEFAULT_FORM_STATE, DEFAULT_SUPPRESSION_MECHANISMS } from './constants';
 import { NotificationPolicyForm } from './notification_policy_form';
 import type { NotificationPolicyFormState } from './types';
 
@@ -59,8 +59,10 @@ export const EditMode: Story = {
       description: 'Routes critical production alerts to escalation workflows',
       matcher: 'data.severity : "critical" and data.env : "prod"',
       groupBy: ['host.name', 'service.name'],
-      frequency: { type: 'throttle', interval: '5m' },
+      dispatchPer: 'group',
+      frequency: { type: 'group_throttle', repeatValue: 5, repeatUnit: 'm' },
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
+      suppressionMechanisms: DEFAULT_SUPPRESSION_MECHANISMS.map((m) => ({ ...m })),
     },
   },
 };
