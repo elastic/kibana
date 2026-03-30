@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
@@ -12,6 +13,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiComboBox,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -21,12 +24,18 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { useAbortController } from '@kbn/react-hooks';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
+import { DEFAULT_INDEX_PATTERNS, Streams } from '@kbn/streams-schema';
+import {
+  DEFAULT_EXTRACTION_INTERVAL_HOURS,
+  MIN_EXTRACTION_INTERVAL_HOURS,
+} from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useGenAIConnectors } from '../../../../../hooks/use_genai_connectors';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
@@ -74,12 +83,42 @@ export const SettingsTab = () => {
     [streams.streamsRepositoryClient]
   );
 
+  const streamsListFetch = useStreamsAppFetch(
+    ({ signal }) =>
+      streams.streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', { signal }),
+    [streams.streamsRepositoryClient]
+  );
+
+  const streamOptions: EuiComboBoxOptionOption[] = useMemo(
+    () =>
+      (streamsListFetch.value?.streams ?? [])
+        .filter((s) => !Streams.QueryStream.Definition.is(s))
+        .map((s) => ({ label: s.name })),
+    [streamsListFetch.value]
+  );
+
   const [knowledgeIndicatorExtraction, setKnowledgeIndicatorExtraction] = useState<string>('');
   const [ruleGeneration, setRuleGeneration] = useState<string>('');
   const [discovery, setDiscovery] = useState<string>('');
   const [indexPatterns, setIndexPatterns] = useState<string>('');
+  const [continuousExtraction, setContinuousExtraction] = useState({
+    enabled: false,
+    intervalHours: DEFAULT_EXTRACTION_INTERVAL_HOURS,
+    excludedStreams: [] as string[],
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
+
+  const savedCE = useMemo(
+    () => ({
+      enabled: settingsFetch.value?.continuousExtraction?.enabled ?? false,
+      intervalHours:
+        settingsFetch.value?.continuousExtraction?.intervalHours ??
+        DEFAULT_EXTRACTION_INTERVAL_HOURS,
+      excludedStreams: settingsFetch.value?.continuousExtraction?.excludedStreams ?? [],
+    }),
+    [settingsFetch.value]
+  );
 
   useEffect(() => {
     if (!settingsFetch.value) return;
@@ -88,7 +127,8 @@ export const SettingsTab = () => {
     setRuleGeneration(toFormValue(v.connectorIdRuleGeneration));
     setDiscovery(toFormValue(v.connectorIdDiscovery));
     setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
-  }, [settingsFetch.value]);
+    setContinuousExtraction(savedCE);
+  }, [settingsFetch.value, savedCE]);
 
   const hasChanges = useMemo(() => {
     if (!settingsFetch.value) return false;
@@ -97,9 +137,20 @@ export const SettingsTab = () => {
       knowledgeIndicatorExtraction !== toFormValue(v.connectorIdKnowledgeIndicatorExtraction) ||
       ruleGeneration !== toFormValue(v.connectorIdRuleGeneration) ||
       discovery !== toFormValue(v.connectorIdDiscovery) ||
-      indexPatterns !== (v.indexPatterns || DEFAULT_INDEX_PATTERNS)
+      indexPatterns !== (v.indexPatterns || DEFAULT_INDEX_PATTERNS) ||
+      continuousExtraction.enabled !== savedCE.enabled ||
+      continuousExtraction.intervalHours !== savedCE.intervalHours ||
+      !isEqual(continuousExtraction.excludedStreams, savedCE.excludedStreams)
     );
-  }, [settingsFetch.value, knowledgeIndicatorExtraction, ruleGeneration, discovery, indexPatterns]);
+  }, [
+    settingsFetch.value,
+    knowledgeIndicatorExtraction,
+    ruleGeneration,
+    discovery,
+    indexPatterns,
+    continuousExtraction,
+    savedCE,
+  ]);
 
   const handleCancel = useCallback(() => {
     if (!settingsFetch.value) return;
@@ -108,8 +159,9 @@ export const SettingsTab = () => {
     setRuleGeneration(toFormValue(v.connectorIdRuleGeneration));
     setDiscovery(toFormValue(v.connectorIdDiscovery));
     setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
+    setContinuousExtraction(savedCE);
     setSaveError(null);
-  }, [settingsFetch.value]);
+  }, [settingsFetch.value, savedCE]);
 
   const handleSave = useCallback(async () => {
     setSaveError(null);
@@ -125,6 +177,7 @@ export const SettingsTab = () => {
               connectorIdRuleGeneration: ruleGeneration,
               connectorIdDiscovery: discovery,
               indexPatterns,
+              continuousExtraction,
             },
           },
         }
@@ -142,6 +195,7 @@ export const SettingsTab = () => {
     ruleGeneration,
     discovery,
     indexPatterns,
+    continuousExtraction,
     settingsFetch,
   ]);
 
@@ -375,10 +429,159 @@ export const SettingsTab = () => {
         </EuiPanel>
       </EuiPanel>
 
+      <EuiSpacer />
+
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
+        <EuiPanel hasShadow={false} color="subdued">
+          <EuiText size="s">
+            <h3>
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.continuousExtractionTitle',
+                { defaultMessage: 'Continuous KI extraction' }
+              )}
+            </h3>
+          </EuiText>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} hasBorder={false}>
+          {settingsFetch.value?.continuousExtraction?.enabled && (
+            <>
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="success"
+                iconType="check"
+                title={i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.continuousExtractionActiveStatus',
+                  {
+                    defaultMessage:
+                      'Continuous extraction is active. Knowledge indicators are extracted every {hours} hours.',
+                    values: {
+                      hours:
+                        settingsFetch.value?.continuousExtraction?.intervalHours ??
+                        DEFAULT_EXTRACTION_INTERVAL_HOURS,
+                    },
+                  }
+                )}
+                data-test-subj="streams-settings-continuous-extraction-status"
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
+          <EuiFlexGroup alignItems="flexStart" gutterSize="l">
+            <EuiFlexItem grow={2}>
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiText size="m">
+                    <h4>
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.continuousExtractionLabel',
+                        { defaultMessage: 'Automatic extraction' }
+                      )}
+                    </h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText color="subdued" size="s">
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.continuousExtractionHelp',
+                      {
+                        defaultMessage:
+                          'When enabled, knowledge indicator extraction runs automatically on managed streams at the configured interval.',
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={5}>
+              <EuiForm component="div">
+                <EuiFormRow>
+                  <EuiSwitch
+                    data-test-subj="streams-settings-continuous-extraction-toggle"
+                    label={i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.enableContinuousExtraction',
+                      { defaultMessage: 'Enable continuous KI extraction' }
+                    )}
+                    checked={continuousExtraction.enabled}
+                    onChange={(e) =>
+                      setContinuousExtraction((prev) => ({ ...prev, enabled: e.target.checked }))
+                    }
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.extractionIntervalLabel',
+                    { defaultMessage: 'Extraction interval (hours)' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.extractionIntervalHelp',
+                    {
+                      defaultMessage:
+                        'How often to run KI extraction per stream. Minimum: {min} hour.',
+                      values: { min: MIN_EXTRACTION_INTERVAL_HOURS },
+                    }
+                  )}
+                >
+                  <EuiFieldNumber
+                    data-test-subj="streams-settings-extraction-interval"
+                    value={continuousExtraction.intervalHours}
+                    onChange={(e) =>
+                      setContinuousExtraction((prev) => ({
+                        ...prev,
+                        intervalHours: Math.max(
+                          MIN_EXTRACTION_INTERVAL_HOURS,
+                          Number(e.target.value)
+                        ),
+                      }))
+                    }
+                    min={MIN_EXTRACTION_INTERVAL_HOURS}
+                    disabled={!continuousExtraction.enabled}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.excludedStreamsLabel',
+                    { defaultMessage: 'Excluded streams' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.excludedStreamsHelp',
+                    {
+                      defaultMessage:
+                        'Streams selected here will be skipped during continuous extraction.',
+                    }
+                  )}
+                >
+                  <EuiComboBox
+                    data-test-subj="streams-settings-excluded-streams"
+                    options={streamOptions}
+                    selectedOptions={continuousExtraction.excludedStreams.map((s) => ({
+                      label: s,
+                    }))}
+                    onChange={(selected) =>
+                      setContinuousExtraction((prev) => ({
+                        ...prev,
+                        excludedStreams: selected.map((o) => o.label),
+                      }))
+                    }
+                    isLoading={streamsListFetch.loading}
+                    isDisabled={!continuousExtraction.enabled}
+                    placeholder={i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.excludedStreamsPlaceholder',
+                      { defaultMessage: 'Select streams to exclude' }
+                    )}
+                  />
+                </EuiFormRow>
+              </EuiForm>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiPanel>
+
       {saveError && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.streams.significantEventsDiscovery.settings.saveErrorTitle',
               { defaultMessage: 'Failed to save settings' }

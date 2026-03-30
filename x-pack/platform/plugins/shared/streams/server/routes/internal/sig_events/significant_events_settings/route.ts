@@ -6,11 +6,15 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { ModelSettings } from '../../../../lib/sig_events/saved_objects/model_settings_config_service';
 import { getConfiguredIndexPatterns } from '../../../../lib/sig_events/helpers/get_configured_index_patterns';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import {
+  STREAMS_API_PRIVILEGES,
+  MIN_EXTRACTION_INTERVAL_HOURS,
+} from '../../../../../common/constants';
 
 export type SignificantEventsSettingsResponse = ModelSettings & {
   /** Resolved index patterns (with server default applied). Use this for filtering; do not duplicate default on the client. */
@@ -49,6 +53,13 @@ const putSignificantEventsSettingsBodySchema = z.object({
   connectorIdRuleGeneration: z.string().optional(),
   connectorIdDiscovery: z.string().optional(),
   indexPatterns: z.string().optional(),
+  continuousExtraction: z
+    .object({
+      enabled: z.boolean().optional(),
+      intervalHours: z.number().min(MIN_EXTRACTION_INTERVAL_HOURS).optional(),
+      excludedStreams: z.array(z.string()).optional(),
+    })
+    .optional(),
 });
 
 export const putSignificantEventsSettingsRoute = createServerRoute({
@@ -67,12 +78,29 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
   params: z.object({
     body: putSignificantEventsSettingsBodySchema,
   }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ success: true }> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    continuousExtractionWorkflow,
+  }): Promise<{ success: true }> => {
     const { modelSettingsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await modelSettingsClient.updateSettings(params.body);
+
+    const { enabled } = params.body.continuousExtraction ?? {};
+    if (enabled !== undefined && continuousExtractionWorkflow) {
+      await continuousExtractionWorkflow.ensureWorkflow({
+        enabled,
+        request,
+        spaceId: DEFAULT_SPACE_ID,
+        modelSettingsClient,
+      });
+    }
+
     return { success: true };
   },
 });

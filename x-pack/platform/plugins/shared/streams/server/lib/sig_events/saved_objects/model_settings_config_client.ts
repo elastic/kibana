@@ -16,11 +16,19 @@ import type { ModelSettingsConfigAttributes } from './model_settings_config';
  * Raw model settings as stored or returned by the API.
  * Each property is undefined when no saved object exists or the value was never set.
  */
+interface ContinuousExtractionSettings {
+  enabled?: boolean;
+  intervalHours?: number;
+  workflowId?: string;
+  excludedStreams?: string[];
+}
+
 export interface ModelSettings {
   connectorIdKnowledgeIndicatorExtraction?: string;
   connectorIdRuleGeneration?: string;
   connectorIdDiscovery?: string;
   indexPatterns?: string;
+  continuousExtraction?: ContinuousExtractionSettings;
 }
 
 export interface ModelSettingsConfigClient {
@@ -61,10 +69,12 @@ export class ModelSettingsConfigClientImpl implements ModelSettingsConfigClient 
         connectorIdRuleGeneration: undefined,
         connectorIdDiscovery: undefined,
         indexPatterns: undefined,
+        continuousExtraction: undefined,
       };
     }
 
     const toOptional = (v: string | undefined) => (v != null && v.trim() !== '' ? v : undefined);
+    const ce = attributes.continuousExtraction;
     return {
       connectorIdKnowledgeIndicatorExtraction: toOptional(
         attributes.connectorIdKnowledgeIndicatorExtraction
@@ -72,6 +82,14 @@ export class ModelSettingsConfigClientImpl implements ModelSettingsConfigClient 
       connectorIdRuleGeneration: toOptional(attributes.connectorIdRuleGeneration),
       connectorIdDiscovery: toOptional(attributes.connectorIdDiscovery),
       indexPatterns: toOptional(attributes.indexPatterns),
+      continuousExtraction: ce
+        ? {
+            enabled: ce.enabled,
+            intervalHours: ce.intervalHours,
+            workflowId: ce.workflowId,
+            excludedStreams: ce.excludedStreams,
+          }
+        : undefined,
     };
   }
 
@@ -80,7 +98,14 @@ export class ModelSettingsConfigClientImpl implements ModelSettingsConfigClient 
     const updates = Object.fromEntries(
       Object.entries(settings).filter(([, v]) => v !== undefined)
     ) as Partial<ModelSettingsConfigAttributes>;
-    const merged: ModelSettings = { ...current, ...updates };
+    const merged: ModelSettings = {
+      ...current,
+      ...updates,
+      continuousExtraction:
+        current.continuousExtraction || updates.continuousExtraction
+          ? { ...current.continuousExtraction, ...updates.continuousExtraction }
+          : undefined,
+    };
     const toWrite = Object.fromEntries(
       Object.entries(merged).filter(([, v]) => v !== undefined)
     ) as ModelSettingsConfigAttributes;

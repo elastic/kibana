@@ -96,9 +96,25 @@ export class StreamsAppPlugin
     this.logger = context.logger.get();
     this.version = context.env.packageInfo.version;
   }
-  setup(coreSetup: CoreSetup<StreamsAppStartDependencies>): StreamsAppPublicSetup {
+  setup(
+    coreSetup: CoreSetup<StreamsAppStartDependencies>,
+    plugins: StreamsAppSetupDependencies
+  ): StreamsAppPublicSetup {
     this.telemetry.setup(coreSetup.analytics);
     const startServicesPromise = coreSetup.getStartServices();
+
+    if (plugins.workflowsExtensions) {
+      plugins.workflowsExtensions.registerStepDefinition(() =>
+        import('./workflows/continuous_extraction_step').then(
+          (m) => m.kiSelectStreamsPublicStepDefinition
+        )
+      );
+      plugins.workflowsExtensions.registerStepDefinition(() =>
+        import('./workflows/continuous_extraction_step').then(
+          (m) => m.kiFeaturesExtractStreamPublicStepDefinition
+        )
+      );
+    }
 
     coreSetup.application.register({
       id: 'streams',

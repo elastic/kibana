@@ -55,3 +55,12 @@ export const STREAMS_TIERED_FEATURES = [
 ];
 
 export const FAILURE_STORE_SELECTOR = '::failures';
+
+export const DEFAULT_EXTRACTION_INTERVAL_HOURS = 12;
+export const MIN_EXTRACTION_INTERVAL_HOURS = 1;
+export const MAX_CONCURRENT_TASKS = 5;
+
+export const COORDINATOR_INTERVAL_MINUTES = 10;
+
+export const KI_SELECT_STREAMS_STEP_TYPE = 'streams.ki_select_streams';
+export const KI_FEATURES_EXTRACT_STREAM_STEP_TYPE = 'streams.ki_features_extract_stream';

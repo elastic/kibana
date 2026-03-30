@@ -57,6 +57,12 @@ import { InsightService } from './lib/sig_events/insights/client/insight_service
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
+import { registerKiSelectStreamsStep } from './lib/workflows/ki_select_streams_step';
+import { registerKiFeaturesExtractStreamStep } from './lib/workflows/ki_features_extract_stream_step';
+import {
+  createContinuousExtractionWorkflowService,
+  type ContinuousExtractionWorkflowService,
+} from './lib/workflows/continuous_extraction_workflow';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -211,6 +217,24 @@ export class StreamsPlugin
       });
     }
 
+    let continuousExtractionWorkflow: ContinuousExtractionWorkflowService | undefined;
+
+    if (plugins.workflowsExtensions && plugins.workflowsManagement) {
+      registerKiSelectStreamsStep({
+        workflowsExtensions: plugins.workflowsExtensions,
+        getScopedClients,
+        logger: this.logger,
+      });
+      registerKiFeaturesExtractStreamStep({
+        workflowsExtensions: plugins.workflowsExtensions,
+        getScopedClients,
+      });
+      continuousExtractionWorkflow = createContinuousExtractionWorkflowService(
+        this.logger,
+        plugins.workflowsManagement.management
+      );
+    }
+
     const telemetryClient = this.ebtTelemetryService.getClient();
 
     taskService.registerTasks({
@@ -280,6 +304,7 @@ export class StreamsPlugin
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
+        continuousExtractionWorkflow,
       },
       core,
       logger: this.logger,
