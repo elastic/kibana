@@ -88,7 +88,10 @@ function getTabLabel(tab: AdministrationSubTab): string {
   }
 }
 
-function getPathForTab(tab: AdministrationSubTab): string {
+function getPathForTab(
+  tab: AdministrationSubTab,
+  visibleTabs: AdministrationSubTab[] = []
+): string {
   switch (tab) {
     case AdministrationSubTab.endpointExceptions:
       return getEndpointExceptionsListPath();
@@ -103,7 +106,7 @@ function getPathForTab(tab: AdministrationSubTab): string {
     case AdministrationSubTab.blocklist:
       return getBlocklistsListPath();
     default:
-      return getTrustedAppsListPath();
+      return visibleTabs.length > 0 ? getPathForTab(visibleTabs[0]) : getTrustedAppsListPath();
   }
 }
 
@@ -173,9 +176,9 @@ export const ArtifactsPage = memo(() => {
 
   const onTabClick = useCallback(
     (tab: AdministrationSubTab) => {
-      history.push(getPathForTab(tab));
+      history.push(getPathForTab(tab, visibleTabs));
     },
-    [history]
+    [history, visibleTabs]
   );
 
   return (
