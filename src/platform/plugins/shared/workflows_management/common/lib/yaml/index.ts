@@ -27,6 +27,9 @@ export { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_
 export { getYamlDocumentErrors } from './validate_yaml_document';
 export { parseWorkflowYamlForAutocomplete } from './parse_workflow_yaml_for_autocomplete';
 export { correctYamlSyntax } from './correct_yaml_syntax';
-export { stringifyWorkflowDefinition } from './stringify_workflow_definition';
+export {
+  stringifyWorkflowDefinition,
+  WORKFLOW_DEFINITION_KEYS_ORDER,
+} from './stringify_workflow_definition';
 export { updateYamlField } from './update_yaml_field';
 export { affectsYamlMetadata, updateWorkflowYamlFields } from './update_workflow_yaml_fields';

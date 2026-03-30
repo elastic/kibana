@@ -35,12 +35,10 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     cascadedDocumentsMap: {},
   },
   esqlVariables: [],
-  resetDefaultProfileState: {
+  defaultProfileState: {
     resetId: '',
-    columns: false,
-    rowHeight: false,
-    breakdownField: false,
-    hideChart: false,
+    fieldsToReset: 'none',
+    snapshotsByProfileId: {},
   },
   expandedDoc: undefined,
   uiState: {},

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpHandler } from '@kbn/core/public';
-import type { KbnClient } from '@kbn/test';
-import { KbnClientRequesterError } from '@kbn/test';
+import type { KbnClient } from '@kbn/kbn-client';
+import { KbnClientRequesterError } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 // redefine args type to make it easier to handle in a type-safe way
@@ -19,7 +19,7 @@ type HttpHandlerArgs =
 
 /**
  * Creates a function that matches the HttpHandler interface from Core's
- * API, using the KbnClient from @kbn/test
+ * API, using the KbnClient from @kbn/kbn-client
  */
 export function httpHandlerFromKbnClient({
   kbnClient,

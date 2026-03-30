@@ -320,7 +320,7 @@ interface AssetCriticalitySystemProcessedAssignmentFileEvent {
     endTime: string;
     tookMs: number;
   };
-  result?: BulkUpsertAssetCriticalityRecordsResponse['stats'];
+  result?: BulkUpsertAssetCriticalityRecordsResponse['stats'] & { unmatched?: number };
   status: 'success' | 'partial_success' | 'fail';
 }
 
@@ -344,6 +344,14 @@ export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventType
           failed: {
             type: 'long',
             _meta: { description: 'Number of criticality records which had errors' },
+          },
+          unmatched: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'Number of criticality records which did not match any entities to update',
+            },
           },
           total: { type: 'long', _meta: { description: 'Total number of lines in the file' } },
         },
@@ -662,6 +670,62 @@ export const ENTITY_HIGHLIGHTS_USAGE_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Space where the highlight request originated (e.g. "default")',
+      },
+    },
+  },
+};
+
+export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
+  entitiesReturned: number;
+  entityTypes: string[];
+  errorMessage?: string;
+  spaceId: string;
+  success: boolean;
+  toolId: string;
+}> = {
+  eventType: 'entity_ai_tool_usage',
+  schema: {
+    toolId: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent tool being used (e.g. "security.get_entity")',
+      },
+    },
+    entityTypes: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Type of entity the tool was called for (e.g. "host")',
+        },
+      },
+      _meta: {
+        description: 'Entity types the tool was called for (e.g. ["host", "user"])',
+      },
+    },
+    spaceId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Space where the highlight request originated (e.g. "default")',
+      },
+    },
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the tool usage was successful or not',
+      },
+    },
+    entitiesReturned: {
+      type: 'long',
+      _meta: {
+        description: 'Number of entities returned by the tool',
+      },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description: 'Contains the error message in case the tool usage was not successful',
       },
     },
   },
@@ -1678,6 +1742,7 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
   ruleType: string;
   ruleSource: string;
   isCustomized: boolean;
+  gapReasonType?: string;
 }> = {
   eventType: 'gap_detected_event',
   schema: {
@@ -1717,6 +1782,13 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
         description: 'Whether the prebuilt rule is customized',
       },
     },
+    gapReasonType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Detected reason for the gap (rule_disabled or rule_did_not_run)',
+        optional: true,
+      },
+    },
   },
 };
 
@@ -1741,6 +1813,7 @@ export const events = [
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
+  ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT,
   ENTITY_HIGHLIGHTS_USAGE_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,

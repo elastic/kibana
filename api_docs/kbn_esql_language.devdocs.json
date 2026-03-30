@@ -112,6 +112,62 @@
     "functions": [
       {
         "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.getDocumentHighlightItems",
+        "type": "Function",
+        "tags": [],
+        "label": "getDocumentHighlightItems",
+        "description": [
+          "\nReturns all occurrences of the field (column) at the given offset in the query.\nIf the cursor is not on a column node, returns an empty array."
+        ],
+        "signature": [
+          "(fullText: string, offset: number) => DocumentHighlightItem[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/language/document_highlight/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.getDocumentHighlightItems.$1",
+            "type": "string",
+            "tags": [],
+            "label": "fullText",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/language/document_highlight/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.getDocumentHighlightItems.$2",
+            "type": "number",
+            "tags": [],
+            "label": "offset",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/language/document_highlight/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
         "id": "def-common.getHoverItem",
         "type": "Function",
         "tags": [],
@@ -974,7 +1030,7 @@
           "[]>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/language/autocomplete/autocomplete.ts",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -990,7 +1046,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/autocomplete/autocomplete.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1007,7 +1063,7 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/autocomplete/autocomplete.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1031,7 +1087,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/autocomplete/autocomplete.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1203,7 +1259,7 @@
           "ISuggestionItem"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/autocomplete/helpers.ts",
-        "lineNumber": 400,
+        "lineNumber": 341,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1219,7 +1275,7 @@
               "ISuggestionItem"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/autocomplete/helpers.ts",
-            "lineNumber": 407,
+            "lineNumber": 348,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -1423,7 +1479,7 @@
         "label": "ESQLCommandSummary",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
-        "lineNumber": 132,
+        "lineNumber": 142,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1441,7 +1497,7 @@
               "Set<string>"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
-            "lineNumber": 133,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1459,7 +1515,7 @@
               "Set<string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
-            "lineNumber": 138,
+            "lineNumber": 148,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1477,7 +1533,7 @@
               "Set<[string, string]> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
-            "lineNumber": 143,
+            "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1497,7 +1553,7 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
-            "lineNumber": 148,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1517,7 +1573,7 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
-            "lineNumber": 156,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3595,7 +3651,7 @@
         "label": "EsqlFunctionNames",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated/function_names.ts",
-        "lineNumber": 257,
+        "lineNumber": 258,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3988,7 +4044,7 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/options/metadata/index.ts",
-        "lineNumber": 19,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4036,7 +4092,7 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/all_operators.ts",
-        "lineNumber": 183,
+        "lineNumber": 186,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

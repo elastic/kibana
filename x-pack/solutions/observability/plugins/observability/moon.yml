@@ -132,6 +132,7 @@ dependsOn:
   - '@kbn/esql'
   - '@kbn/synthtrace-client'
   - '@kbn/scout-oblt'
+  - '@kbn/scout-synthtrace'
   - '@kbn/licensing-types'
   - '@kbn/deeplinks-management'
   - '@kbn/content-management-content-editor'
@@ -154,6 +155,12 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/apm-types'
   - '@kbn/apm-types-shared'
+  - '@kbn/cps'
+  - '@kbn/cell-actions'
+  - '@kbn/unified-data-table'
+  - '@kbn/alerting-v2-plugin'
+  - '@kbn/alerting-v2-episodes-ui'
+  - '@kbn/expressions-plugin'
 tags:
   - plugin
   - prod
@@ -168,26 +175,6 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

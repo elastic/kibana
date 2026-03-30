@@ -52,7 +52,7 @@ export const getTemplates = async ({
   signal?: AbortSignal;
   queryParams: TemplatesFindRequest;
 }): Promise<TemplatesFindResponse> => {
-  const { page, perPage, search, sortField, sortOrder, tags, author, owner, isDeleted } =
+  const { page, perPage, search, sortField, sortOrder, tags, author, owner, isDeleted, isEnabled } =
     queryParams;
 
   const response = await KibanaServices.get().http.fetch<TemplatesFindResponse>(
@@ -66,6 +66,7 @@ export const getTemplates = async ({
         sortField,
         sortOrder,
         isDeleted,
+        ...(isEnabled !== undefined ? { isEnabled } : {}),
         ...(tags && tags.length > 0 ? { tags } : {}),
         ...(author && author.length > 0 ? { author } : {}),
         ...(owner && owner.length > 0 ? { owner } : {}),

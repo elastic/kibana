@@ -56,7 +56,8 @@
       "spaces",
       "serverless",
       "observabilityAIAssistant",
-      "investigate"
+      "investigate",
+      "cps"
     ],
     "requiredBundles": [
       "aiops",

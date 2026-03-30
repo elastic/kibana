@@ -160,3 +160,20 @@ export const USER_ACTION_EDITED = (type: string) =>
     values: { type },
     defaultMessage: `Edited "{type}"`,
   });
+
+export const UPDATED_TEMPLATE_FIELDS = i18n.translate(
+  'xpack.cases.caseView.userActions.updatedTemplateFields',
+  {
+    defaultMessage: 'updated template fields',
+  }
+);
+
+export const SET_TEMPLATE_FIELD_LABEL = (fieldName: string, value: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.setTemplateFieldLabel', {
+    defaultMessage: 'set {fieldName} to {value}',
+    values: { fieldName, value },
+  });
+
+export const EXTENDED_FIELDS = i18n.translate('xpack.cases.caseView.userActions.extendedFields', {
+  defaultMessage: 'Template Fields',
+});

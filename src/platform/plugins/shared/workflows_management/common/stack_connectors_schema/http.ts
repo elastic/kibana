@@ -27,7 +27,6 @@ export const HttpParamsSchema = z.object({
   body: z.string().optional(),
   query: z.record(z.string(), z.string()).optional(),
   headers: z.record(z.string(), z.string()).optional(),
-  timeout: z.number().positive().optional(),
   fetcher: z
     .object({
       skip_ssl_verification: z.boolean().optional(),

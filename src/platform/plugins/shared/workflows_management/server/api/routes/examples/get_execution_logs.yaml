@@ -1,0 +1,44 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          getExecutionLogsResponseExample:
+            description: 'Example response returning paginated execution logs'
+            value:
+              logs:
+                - id: log-001
+                  timestamp: '2025-11-20T12:00:01.000Z'
+                  level: info
+                  message: 'Workflow execution started'
+                  stepId: hello_world_step
+                  stepName: Hello World
+                  connectorType: console
+                  duration: 150
+                  additionalData:
+                    workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    executionId: exec-a1b2c3d4-e5f6-7890
+                - id: log-002
+                  timestamp: '2025-11-20T12:00:02.000Z'
+                  level: info
+                  message: 'Step completed successfully'
+                  stepId: hello_world_step
+                  stepName: Hello World
+                  connectorType: console
+                  duration: 200
+                  additionalData:
+                    workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    executionId: exec-a1b2c3d4-e5f6-7890
+              total: 2
+              size: 100
+              page: 1
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/logs?size=100&page=1" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/executions/{executionId}/logs?size=100&page=1

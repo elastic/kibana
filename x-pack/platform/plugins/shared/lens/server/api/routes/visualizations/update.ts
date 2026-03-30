@@ -7,9 +7,18 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import {
+  isLensESQLConfig,
+  isLensLegacyAttributes,
+} from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
+
+import {
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+  LENS_API_TAG,
+} from '../../../../common/constants';
 import type { LensUpdateIn, LensSavedObject } from '../../../content_management';
 import type { LensUpdateResponseBody, RegisterAPIRouteFn } from '../../../types';
 import {
@@ -25,12 +34,12 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 ) => {
   const updateRoute = router.put({
     path: `${LENS_VIS_API_PATH}/{id}`,
-    access: 'internal', // to go public in 9.4
+    access: LENS_API_ACCESS,
     enableQueryVersion: true,
-    summary: 'Update Lens visualization',
-    description: 'Update an existing Lens visualization.',
+    summary: 'Update visualization',
+    description: 'Update an existing visualization.',
     options: {
-      tags: ['oas-tag:Lens'],
+      tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
       },
@@ -78,6 +87,14 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       const requestBodyData = req.body;
       if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
         throw new Error('visualizationType is required');
+      }
+
+      if (isLensESQLConfig(req.body)) {
+        return res.badRequest({
+          body: {
+            message: 'ES|QL charts are not yet supported in Lens.',
+          },
+        });
       }
 
       // TODO fix IContentClient to type this client based on the actual

@@ -56,7 +56,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            icon: 'node',
+            icon: 'vectorTriangle',
             timestamp,
             risk: 55,
             ips: ['5.5.5.5'],

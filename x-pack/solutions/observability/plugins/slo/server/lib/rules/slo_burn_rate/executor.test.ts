@@ -487,6 +487,7 @@ describe('BurnRateRuleExecutor', () => {
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo,asia. Alert when above 2 for both windows',
           alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-foo,asia',
+          viewInAppUrl: `https://kibana.dev/s/irrelevant/app/slos/${slo.id}?instanceId=foo,asia`,
         }),
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
@@ -498,6 +499,7 @@ describe('BurnRateRuleExecutor', () => {
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar,asia. Alert when above 2 for both windows',
           alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-bar,asia',
+          viewInAppUrl: `https://kibana.dev/s/irrelevant/app/slos/${slo.id}?instanceId=bar,asia`,
         }),
       });
     });

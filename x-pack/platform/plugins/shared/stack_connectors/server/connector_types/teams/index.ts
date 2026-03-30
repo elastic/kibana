@@ -24,6 +24,7 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -67,6 +68,7 @@ export function getConnectorType(): TeamsConnectorType {
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
       WorkflowsConnectorFeatureId,
+      AgentBuilderConnectorFeatureId,
     ],
     validate: {
       config: { schema: ConfigSchema },

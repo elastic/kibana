@@ -9,7 +9,16 @@
 
 import React from 'react';
 import type { ReactNode, PropsWithChildren, ButtonHTMLAttributes, MouseEventHandler } from 'react';
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiFlexGroup,
+  EuiIcon,
+  EuiLink,
+  EuiMarkdownFormat,
+  EuiText,
+  useEuiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 
 import { useDateRangePickerPanelNavigation } from './date_range_picker_panel_navigation';
@@ -132,6 +141,61 @@ export const PanelBodySection = ({
     <div css={[styles.root, spacing[spacingSide]]} className={className}>
       {children}
     </div>
+  );
+};
+
+export interface PanelBodySectionInfoProps {
+  /** Optional bold heading rendered as an h3. */
+  heading?: string;
+  /** Markdown content rendered with EuiMarkdownFormat. */
+  markdown: string;
+  /** Label for an optional external link shown below the markdown. Requires `linkHref`. */
+  linkLabel?: string;
+  /** href for the optional external link. Requires `linkLabel`. */
+  linkHref?: string;
+  /** @default 's' */
+  textSize?: 'xs' | 's';
+}
+
+/** An info block within `PanelBody`: optional bold heading, markdown content, and an optional external link. */
+export const PanelBodySectionInfo = ({
+  heading,
+  markdown,
+  linkLabel,
+  linkHref,
+  textSize = 's',
+}: PanelBodySectionInfoProps) => {
+  const { euiTheme } = useEuiTheme();
+  const font = useEuiFontSize(textSize);
+  const headingStyles = css`
+    font-size: ${font.fontSize};
+    line-height: ${font.lineHeight};
+    font-weight: ${euiTheme.font.weight.bold};
+  `;
+
+  return (
+    <EuiFlexGroup gutterSize="s" direction="column">
+      {heading && <h3 css={headingStyles}>{heading}</h3>}
+      <EuiMarkdownFormat
+        color="text"
+        textSize={textSize}
+        css={css`
+          .euiCode {
+            color: ${euiTheme.colors.textSubdued};
+            font-weight: ${euiTheme.font.weight.semiBold};
+          }
+        `}
+      >
+        {markdown}
+      </EuiMarkdownFormat>
+      {linkLabel && linkHref && (
+        <EuiText size="xs">
+          <EuiLink href={linkHref} target="_blank" external>
+            {linkLabel}
+          </EuiLink>
+        </EuiText>
+      )}
+    </EuiFlexGroup>
   );
 };
 

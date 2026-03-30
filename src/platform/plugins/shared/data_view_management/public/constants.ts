@@ -10,3 +10,6 @@
 export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
 
 export const MAX_DISPLAYED_RELATIONSHIPS = 10;
+
+export const IPM_APP_ID = 'dataViews';
+export const NEW_APP_PATH = `management/kibana/${IPM_APP_ID}`;
