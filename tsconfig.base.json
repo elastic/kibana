@@ -2258,6 +2258,8 @@
       "@kbn/telemetry-tools/*": ["src/platform/packages/private/kbn-telemetry-tools/*"],
       "@kbn/test": ["src/platform/packages/shared/kbn-test"],
       "@kbn/test/*": ["src/platform/packages/shared/kbn-test/*"],
+      "@kbn/test-docker-servers": ["src/platform/packages/shared/kbn-test-docker-servers"],
+      "@kbn/test-docker-servers/*": ["src/platform/packages/shared/kbn-test-docker-servers/*"],
       "@kbn/test-es-server": ["src/platform/packages/shared/kbn-test-es-server"],
       "@kbn/test-es-server/*": ["src/platform/packages/shared/kbn-test-es-server/*"],
       "@kbn/test-eui-helpers": ["src/platform/packages/private/kbn-test-eui-helpers"],
