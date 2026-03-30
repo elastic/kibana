@@ -11,45 +11,48 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { parseArrayInput } from './workflow_schema_helpers';
 
 /**
- * Poll the AD _find API until discoveries appear for the given alert IDs.
- * Returns an array of discovery document IDs for deep linking via ?id=.
+ * Poll the AD _find API until discoveries with the matching generation_uuid appear.
+ * Each _generate call produces a unique execution_uuid that maps to generation_uuid
+ * on the resulting discovery documents — this ensures we only link to THIS case's AD,
+ * not discoveries from other concurrent forEach iterations.
  */
 const pollForDiscoveries = async ({
   kibanaUrl,
   authHeaders,
-  alertIds,
+  executionUuid,
   maxAttempts,
   intervalMs,
   logger,
 }: {
   kibanaUrl: string;
   authHeaders: Record<string, string>;
-  alertIds: string[];
+  executionUuid: string;
   maxAttempts: number;
   intervalMs: number;
   logger: { info: (msg: string) => void; warn: (msg: string) => void };
 }): Promise<string[]> => {
-  const alertIdsParam = alertIds.slice(0, 20).join(',');
-
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
 
     try {
       const findResponse = await fetch(
-        `${kibanaUrl}/api/attack_discovery/_find?alert_ids=${encodeURIComponent(
-          alertIdsParam
-        )}&per_page=10&sort_order=desc`,
+        `${kibanaUrl}/api/attack_discovery/_find?per_page=50&sort_order=desc`,
         { headers: authHeaders }
       );
 
       if (findResponse.ok) {
         const findResult = await findResponse.json();
-        const discoveries = findResult.data ?? [];
+        const allDiscoveries = findResult.data ?? [];
 
-        if (discoveries.length > 0) {
-          const ids = discoveries.map((d: { id?: string }) => d.id).filter(Boolean) as string[];
+        // Filter to only discoveries from THIS generation run
+        const matched = allDiscoveries.filter(
+          (d: { generation_uuid?: string }) => d.generation_uuid === executionUuid
+        );
+
+        if (matched.length > 0) {
+          const ids = matched.map((d: { id?: string }) => d.id).filter(Boolean) as string[];
           logger.info(
-            `Found ${ids.length} AD discoveries after ${attempt} poll(s) for case alerts`
+            `Found ${ids.length} AD discoveries for generation ${executionUuid} after ${attempt} poll(s)`
           );
           return ids;
         }
@@ -59,12 +62,14 @@ const pollForDiscoveries = async ({
     }
 
     if (attempt % 3 === 0) {
-      logger.info(`Polling for AD results... attempt ${attempt}/${maxAttempts}`);
+      logger.info(
+        `Polling for AD results (generation ${executionUuid})... attempt ${attempt}/${maxAttempts}`
+      );
     }
   }
 
   logger.warn(
-    `AD discoveries not found after ${maxAttempts} polls — generation may still be running`
+    `AD discoveries for generation ${executionUuid} not found after ${maxAttempts} polls`
   );
   return [];
 };
@@ -191,11 +196,11 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
               `AD generation triggered for case ${caseId}, execution: ${executionUuid}`
             );
 
-            // Poll for completed discoveries to get document IDs for deep linking
+            // Poll for completed discoveries matching this generation's UUID
             const discoveryIds = await pollForDiscoveries({
               kibanaUrl,
               authHeaders,
-              alertIds,
+              executionUuid,
               maxAttempts: 18,
               intervalMs: 10_000,
               logger: context.logger,
