@@ -2404,6 +2404,8 @@
       "@kbn/telemetry-tools/*": ["src/platform/packages/private/kbn-telemetry-tools/*"],
       "@kbn/test": ["src/platform/packages/shared/kbn-test"],
       "@kbn/test/*": ["src/platform/packages/shared/kbn-test/*"],
+      "@kbn/test-docker-servers": ["src/platform/packages/shared/kbn-test-docker-servers"],
+      "@kbn/test-docker-servers/*": ["src/platform/packages/shared/kbn-test-docker-servers/*"],
       "@kbn/test-es-server": ["src/platform/packages/shared/kbn-test-es-server"],
       "@kbn/test-es-server/*": ["src/platform/packages/shared/kbn-test-es-server/*"],
       "@kbn/test-eui-helpers": ["src/platform/packages/private/kbn-test-eui-helpers"],
@@ -2662,8 +2664,12 @@
       "@langchain/langgraph/prebuilt": ["node_modules/@langchain/langgraph/dist/prebuilt"],
       "@langchain/classic/chains": ["node_modules/@langchain/classic/dist/chains"],
       "@langchain/classic/evaluation": ["node_modules/@langchain/classic/dist/evaluation"],
-      "@langchain/classic/document_loaders/fs/directory": ["node_modules/@langchain/classic/dist/document_loaders/fs/directory"],
-      "@langchain/classic/document_loaders/fs/text": ["node_modules/@langchain/classic/dist/document_loaders/fs/text"]
+      "@langchain/classic/document_loaders/fs/directory": [
+        "node_modules/@langchain/classic/dist/document_loaders/fs/directory"
+      ],
+      "@langchain/classic/document_loaders/fs/text": [
+        "node_modules/@langchain/classic/dist/document_loaders/fs/text"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
