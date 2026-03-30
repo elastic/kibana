@@ -12,11 +12,15 @@ export const VARIABLE_REGEX_GLOBAL = new RegExp(VARIABLE_REGEX.source, 'g');
 export const UNFINISHED_VARIABLE_REGEX_GLOBAL =
   /\{\{\s*(?<key>[\w.\s|()\[\],"']*?[\w.\s|()\[\],"']?)\s*$/g;
 
-export const ALLOWED_KEY_REGEX =
-  /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*(?:\s*\|.*)?$/;
+const BRACKET_ACCESSOR = String.raw`\[\s*(?:\d+|"[^"]*"|'[^']*'|[a-zA-Z_$][a-zA-Z0-9_$.]*)\s*\]`;
+const SEGMENT = String.raw`(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|${BRACKET_ACCESSOR})`;
+const PATH_BASE = String.raw`[a-zA-Z_$][a-zA-Z0-9_$]*${SEGMENT}*`;
 
-export const PROPERTY_PATH_REGEX =
-  /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*$/;
+export const ALLOWED_KEY_REGEX = new RegExp(`^${PATH_BASE}(?:\\s*\\|.*)?$`);
+
+export const PROPERTY_PATH_REGEX = new RegExp(`^${PATH_BASE}$`);
+
+export const DYNAMIC_BRACKET_ACCESS_REGEX = /\[\s*[a-zA-Z_$][a-zA-Z0-9_$.]*\s*\]/;
 
 // Liquid-specific regex patterns
 // Matches: {{ variable | filter_prefix (but not {{ variable | filter }})

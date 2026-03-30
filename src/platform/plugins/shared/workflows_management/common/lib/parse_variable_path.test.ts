@@ -64,6 +64,16 @@ describe('validateVariablePath', () => {
   it('should validate a complex path with filters', () => {
     expect(validateVariablePath('steps.data["key"] | join(",") | upper')).toBe(true);
   });
+
+  it('should validate paths with dynamic bracket access', () => {
+    expect(
+      validateVariablePath(
+        'steps.load_comment_sync_state.output._source[steps.note_sync_space_comment.output].id'
+      )
+    ).toBe(true);
+    expect(validateVariablePath('data[fieldName]')).toBe(true);
+    expect(validateVariablePath('obj[steps.a.output] | json')).toBe(true);
+  });
 });
 
 describe('parseVariablePath', () => {
@@ -72,6 +82,7 @@ describe('parseVariablePath', () => {
     expect(result).toEqual({
       propertyPath: 'foo',
       filters: [],
+      hasDynamicBracketAccess: false,
     });
   });
 
@@ -80,6 +91,7 @@ describe('parseVariablePath', () => {
     expect(result).toEqual({
       propertyPath: 'steps.data["key"][0]',
       filters: [],
+      hasDynamicBracketAccess: false,
     });
   });
 
@@ -97,6 +109,7 @@ describe('parseVariablePath', () => {
     expect(result).toEqual({
       propertyPath: 'foo',
       filters: ['title'],
+      hasDynamicBracketAccess: false,
     });
   });
 
@@ -105,6 +118,7 @@ describe('parseVariablePath', () => {
     expect(result).toEqual({
       propertyPath: 'foo',
       filters: ['join(",")'],
+      hasDynamicBracketAccess: false,
     });
   });
 
@@ -113,6 +127,7 @@ describe('parseVariablePath', () => {
     expect(result).toEqual({
       propertyPath: 'foo',
       filters: ['replace("foo", "bar")', 'capitalize'],
+      hasDynamicBracketAccess: false,
     });
   });
 
@@ -121,6 +136,7 @@ describe('parseVariablePath', () => {
     expect(result).toEqual({
       propertyPath: 'steps.data["key"]',
       filters: ['join(",")', 'upper', 'trim'],
+      hasDynamicBracketAccess: false,
     });
   });
 
@@ -129,6 +145,7 @@ describe('parseVariablePath', () => {
     expect(result).toEqual({
       propertyPath: 'foo',
       filters: ['replace("(test)", "bar")', 'title'],
+      hasDynamicBracketAccess: false,
     });
   });
 
@@ -137,6 +154,7 @@ describe('parseVariablePath', () => {
     expect(result).toEqual({
       propertyPath: 'foo',
       filters: ["replace('old', 'new')"],
+      hasDynamicBracketAccess: false,
     });
   });
 
@@ -145,6 +163,7 @@ describe('parseVariablePath', () => {
     expect(result).toEqual({
       propertyPath: 'foo',
       filters: ['replace(old="old", new="new")'],
+      hasDynamicBracketAccess: false,
     });
   });
 
@@ -153,6 +172,52 @@ describe('parseVariablePath', () => {
     expect(result).toEqual({
       propertyPath: 'foo',
       filters: ['title', 'upper'],
+      hasDynamicBracketAccess: false,
+    });
+  });
+
+  it('should parse paths with dynamic bracket access', () => {
+    const result = parseVariablePath(
+      'steps.load_comment_sync_state.output._source[steps.note_sync_space_comment.output].id'
+    );
+    expect(result).toEqual({
+      propertyPath:
+        'steps.load_comment_sync_state.output._source[steps.note_sync_space_comment.output].id',
+      filters: [],
+      hasDynamicBracketAccess: true,
+      dynamicAccess: {
+        prefixPath: 'steps.load_comment_sync_state.output._source',
+        dynamicKey: 'steps.note_sync_space_comment.output',
+        suffixPath: 'id',
+      },
+    });
+  });
+
+  it('should parse simple dynamic bracket access', () => {
+    const result = parseVariablePath('data[fieldName]');
+    expect(result).toEqual({
+      propertyPath: 'data[fieldName]',
+      filters: [],
+      hasDynamicBracketAccess: true,
+      dynamicAccess: {
+        prefixPath: 'data',
+        dynamicKey: 'fieldName',
+        suffixPath: null,
+      },
+    });
+  });
+
+  it('should parse dynamic bracket access with filters', () => {
+    const result = parseVariablePath('obj[steps.a.output] | json');
+    expect(result).toEqual({
+      propertyPath: 'obj[steps.a.output]',
+      filters: ['json'],
+      hasDynamicBracketAccess: true,
+      dynamicAccess: {
+        prefixPath: 'obj',
+        dynamicKey: 'steps.a.output',
+        suffixPath: null,
+      },
     });
   });
 
