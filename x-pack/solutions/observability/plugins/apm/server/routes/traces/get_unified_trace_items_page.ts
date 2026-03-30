@@ -185,6 +185,9 @@ async function paginate({
     searchAfter,
   });
 
+  // A document can be indexed in multiple indices (e.g. traces-apm and apm-*) and appear
+  // more than once in the same response. Previously handled with collapse, which only works
+  // within a single page. seenIds deduplicates across both within-page and cross-page results.
   const newHits = response.hits.filter((hit) => {
     const id = (hit.fields?.[SPAN_ID]?.[0] ?? hit.fields?.[TRANSACTION_ID]?.[0]) as
       | string
