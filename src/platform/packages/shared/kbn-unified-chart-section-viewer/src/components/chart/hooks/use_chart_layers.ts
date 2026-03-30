@@ -34,14 +34,12 @@ const resolveMetricUnit = (
   metricName: string,
   units: NullableMetricUnit[]
 ): MetricUnit | undefined => {
-  // Filter out null/undefined values and normalize each unit
-  const normalizedUnits = units
-    .filter((u) => u != null)
-    .map((unit) => normalizeUnit({ fieldName: metricName, unit }))
-    .filter((u) => u != null);
-
-  // Return the first normalized unit, or undefined if none exist
-  return normalizedUnits[0];
+  for (const unit of units) {
+    if (unit == null) continue;
+    const normalized = normalizeUnit({ fieldName: metricName, unit });
+    if (normalized != null) return normalized;
+  }
+  return undefined;
 };
 
 /**
