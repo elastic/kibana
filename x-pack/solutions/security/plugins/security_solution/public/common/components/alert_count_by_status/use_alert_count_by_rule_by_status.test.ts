@@ -31,6 +31,22 @@ jest.mock('../../../detections/containers/detection_engine/alerts/use_query', ()
   };
 });
 
+jest.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: jest.fn(() => ({
+    entity: null,
+    entityRecord: null,
+    firstSeen: null,
+    lastSeen: null,
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  })),
+}));
+
+jest.mock('../../lib/kibana', () => ({
+  useUiSetting: jest.fn(() => false),
+}));
+
 const from = '2020-07-07T08:20:18.966Z';
 const to = '2020-07-08T08:20:18.966Z';
 

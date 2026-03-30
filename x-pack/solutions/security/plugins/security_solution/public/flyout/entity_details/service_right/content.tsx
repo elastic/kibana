@@ -8,6 +8,7 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 import type { ServiceItem } from '../../../../common/search_strategy';
+import type { Entity } from '../../../../common/api/entity_analytics';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -30,10 +31,12 @@ interface ServicePanelContentProps {
   scopeId: string;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  entityRecord?: Entity;
 }
 
 export const ServicePanelContent = ({
   serviceName,
+  entityRecord,
   observedService,
   riskScoreState,
   recalculatingScore,
@@ -55,6 +58,7 @@ export const ServicePanelContent = ({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={false}
             entityType={EntityType.service}
+            entityId={entityRecord?.entity.id}
           />
           <EuiHorizontalRule />
         </>
@@ -64,7 +68,7 @@ export const ServicePanelContent = ({
         onChange={onAssetCriticalityChange}
       />
       <ObservedEntity
-        observedData={observedService}
+        observedData={{ ...observedService, entityId: entityRecord?.entity.id }}
         contextID={contextID}
         scopeId={scopeId}
         observedFields={observedFields}

@@ -246,6 +246,10 @@
                         "id": {
                             "type": "keyword"
                         },
+                        "type": {
+                            "type": "keyword",
+                            "ignore_above": 1024
+                        },
                         "scheduled": {
                             "type": "date"
                         },
