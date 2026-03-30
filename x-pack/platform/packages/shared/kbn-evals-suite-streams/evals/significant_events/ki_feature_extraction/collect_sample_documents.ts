@@ -96,7 +96,7 @@ export const collectSampleDocuments = async ({
   const seen = new Set<string>();
   const requiredApps = extractRequiredAppsFromCriteria(scenario);
 
-  while (docs.length < SAMPLE_DOCS_MAX && uniqueApps.size < requiredApps.length) {
+  while (docs.length < SAMPLE_DOCS_MAX && (requiredApps.length === 0 || uniqueApps.size < requiredApps.length)) {
     const seenAppFilters: QueryDslQueryContainer[] = [...uniqueApps].map((app) => ({
       term: { 'resource.attributes.app': app },
     }));
