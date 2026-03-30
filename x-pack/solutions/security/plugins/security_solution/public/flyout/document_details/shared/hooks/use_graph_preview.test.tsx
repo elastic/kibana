@@ -21,9 +21,9 @@ import {
 jest.mock('../../../../common/hooks/use_has_graph_visualization_license');
 const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
 
-jest.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store');
-import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
-const mockUseEntityStoreStatus = useEntityStoreStatus as jest.Mock;
+jest.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store_v2_status');
+import { useEntityStoreV2Status } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store_v2_status';
+const mockUseEntityStoreV2Status = useEntityStoreV2Status as jest.Mock;
 
 // All EUID source fields (must explicitly handle to avoid mockFieldData bleed-through)
 const ALL_EUID_SOURCE_FIELDS: readonly string[] = [
@@ -80,7 +80,7 @@ describe('useGraphPreview', () => {
     // Default mock: graph visualization feature is available
     mockUseHasGraphVisualizationLicense.mockReturnValue(true);
     // Default mock: entity store is running
-    mockUseEntityStoreStatus.mockReturnValue({ data: { status: 'running' } });
+    mockUseEntityStoreV2Status.mockReturnValue({ data: { status: 'running' } });
   });
 
   it(`should return false when missing actor and target`, () => {
@@ -647,7 +647,7 @@ describe('useGraphPreview', () => {
   });
 
   it('should return false for shouldShowGraph when entity store is not running', () => {
-    mockUseEntityStoreStatus.mockReturnValue({ data: { status: 'not_installed' } });
+    mockUseEntityStoreV2Status.mockReturnValue({ data: { status: 'not_installed' } });
 
     const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
