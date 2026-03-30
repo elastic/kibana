@@ -27,7 +27,7 @@ import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
-import type { SmlService, SmlServiceSetup } from './sml';
+import type { SmlService, SmlServiceSetup, SmlRuleService } from './sml';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
 import type { AuditLogService } from '../audit';
@@ -62,6 +62,7 @@ export interface InternalStartServices {
   execution: AgentExecutionService;
   taskHandler: TaskHandler;
   sml: SmlService;
+  smlRules: SmlRuleService;
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
 }

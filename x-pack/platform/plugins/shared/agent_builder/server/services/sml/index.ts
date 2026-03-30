@@ -33,3 +33,8 @@ export {
   scheduleSmlCrawlerTasks,
   SML_CRAWLER_TASK_TYPE,
 } from './sml_task_definitions';
+export {
+  createSmlRuleService,
+  SmlRuleNotFoundError,
+  type SmlRuleService,
+} from './sml_rule_service';

@@ -20,7 +20,7 @@ import { ConversationServiceImpl } from './conversation';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
-import { createSmlService, type SmlServiceInstance } from './sml';
+import { createSmlService, createSmlRuleService, type SmlServiceInstance } from './sml';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
 import {
@@ -223,6 +223,12 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
+    const smlRules = createSmlRuleService({
+      logger: logger.get('sml-rules'),
+      elasticsearch,
+      spaces,
+    });
+
     this.internalStart = {
       tools,
       agents,
@@ -239,6 +245,7 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       sml,
+      smlRules,
       plugins,
       consumption,
     };
