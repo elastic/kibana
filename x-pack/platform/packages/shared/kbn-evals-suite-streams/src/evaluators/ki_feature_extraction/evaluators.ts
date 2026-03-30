@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { getFlattenedObject } from '@kbn/std';
 import { partition } from 'lodash';
 import { selectEvaluators } from '@kbn/evals';
 import { type BaseFeature } from '@kbn/streams-schema';
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { flattenObject } from '@kbn/object-utils';
 import { createScenarioCriteriaLlmEvaluator } from '../scenario_criteria/evaluators';
 import { isEvidenceGrounded } from './is_evidence_grounded';
 
@@ -93,8 +93,8 @@ const typeValidationEvaluator = {
       explanation:
         invalidFeatures.length > 0
           ? `Invalid types: ${invalidFeatures
-              .map((feature) => `"${feature.id}" has type "${feature.type}"`)
-              .join('; ')} (expected one of: ${VALID_KI_FEATURE_TYPES.join(', ')})`
+            .map((feature) => `"${feature.id}" has type "${feature.type}"`)
+            .join('; ')} (expected one of: ${VALID_KI_FEATURE_TYPES.join(', ')})`
           : 'All KI features have a valid type',
       details: {
         total: features.length,
@@ -125,17 +125,18 @@ const evidenceGroundingEvaluator = {
     const rawDocs: Array<Record<string, unknown>> = input.sample_documents.map((hit) => ({
       _id: hit._id,
       _source: hit._source,
+      fields: hit.fields,
     }));
 
     const docsById = new Map<string, Record<string, unknown>>();
     const documents = rawDocs.map((doc) => {
       const id = typeof doc._id === 'string' ? doc._id : undefined;
-      const source =
-        doc._source != null && typeof doc._source === 'object'
-          ? (doc._source as Record<string, unknown>)
-          : undefined;
+
       // flatten the object so we can lookup evidence keys by dotted path
-      const resolved = flattenObject(source ?? doc);
+      const resolved = {
+        ...(doc.fields ?? {}),
+        ...getFlattenedObject(doc._source ?? {}),
+      };
       if (id) {
         docsById.set(id, resolved);
       }
@@ -206,8 +207,8 @@ const evidenceGroundingEvaluator = {
     const docIdScore =
       totalDocIds > 0
         ? (validDocIds / totalDocIds +
-            (totalRefEvidence > 0 ? groundedRefEvidence / totalRefEvidence : 1)) /
-          2
+          (totalRefEvidence > 0 ? groundedRefEvidence / totalRefEvidence : 1)) /
+        2
         : 1;
     const score = totalDocIds > 0 ? (groundingScore + docIdScore) / 2 : groundingScore;
 
@@ -218,7 +219,7 @@ const evidenceGroundingEvaluator = {
         allIssues.length > 0
           ? `${allIssues.slice(0, 5).join('; ')}`
           : `All ${totalEvidence} evidence strings are grounded` +
-            (totalDocIds > 0 ? ` and all ${totalDocIds} doc IDs are valid` : ''),
+          (totalDocIds > 0 ? ` and all ${totalDocIds} doc IDs are valid` : ''),
       details: {
         totalEvidence,
         groundedEvidence,
@@ -290,11 +291,10 @@ const confidenceBoundsEvaluator = {
       score: violations.length === 0 ? 1 : 1 - violations.length / features.length,
       explanation:
         violations.length > 0
-          ? `${violations.length}/${
-              features.length
-            } KI features exceed max confidence ${max_confidence}: ${violations
-              .map((feature) => `"${feature.id}" (${feature.confidence})`)
-              .join(', ')}`
+          ? `${violations.length}/${features.length
+          } KI features exceed max confidence ${max_confidence}: ${violations
+            .map((feature) => `"${feature.id}" (${feature.confidence})`)
+            .join(', ')}`
           : `All KI features have confidence ≤ ${max_confidence}`,
       details: {
         max_confidence,
@@ -393,8 +393,8 @@ const filterPresenceEvaluator = {
       explanation:
         missing.length > 0
           ? `${missing.length}/${entities.length} entity feature(s) missing filter: ${missing.join(
-              ', '
-            )}`
+            ', '
+          )}`
           : 'All entity features have a filter',
       details: { totalEntities: entities.length, withFilter: withFilter.length, missing },
     };
