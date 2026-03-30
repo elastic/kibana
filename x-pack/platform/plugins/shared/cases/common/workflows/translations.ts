@@ -45,7 +45,7 @@ export const CREATE_CASE_FROM_TEMPLATE_STEP_DOCUMENTATION_DETAILS = i18n.transla
   'xpack.cases.workflowSteps.createCaseFromTemplate.documentation.details',
   {
     defaultMessage:
-      'This step resolves a case template from the securitySolution case configuration and creates a new case. You can optionally provide overwrite fields to customize the created case.',
+      'This step resolves a case template from the securitySolution case configuration and creates a new case. You can optionally specify overwrite fields to customize the created case.',
   }
 );
 
@@ -56,7 +56,7 @@ export const UPDATE_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.
 export const UPDATE_CASE_STEP_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowSteps.updateCase.description',
   {
-    defaultMessage: 'Updates a case with the provided fields',
+    defaultMessage: 'Updates a case with the specified fields',
   }
 );
 
@@ -64,7 +64,7 @@ export const UPDATE_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.updateCase.documentation.details',
   {
     defaultMessage:
-      'This step updates a case using the provided fields. If a version is provided, it is used directly. Otherwise, the step fetches the case to resolve the latest version before updating.',
+      'This step updates a case using the specified fields. If a version is specified, it is used directly. Otherwise, the step fetches the case to resolve the latest version before updating.',
   }
 );
 
@@ -86,7 +86,7 @@ export const UPDATE_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.updateCases.documentation.details',
   {
     defaultMessage:
-      'This step updates multiple cases at once. Each case can provide a version directly or let the step fetch the latest version before applying updates.',
+      'This step updates multiple cases at once. Each case can specify a version directly or let the step fetch the latest version before applying updates.',
   }
 );
 
@@ -186,7 +186,7 @@ export const SET_SEVERITY_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.setSeverity.documentation.details',
   {
     defaultMessage:
-      'This step sets only the severity field of an existing case. If version is not provided, the latest case version is resolved automatically.',
+      'This step sets only the severity field of an existing case. If version is not specified, the latest case version is resolved automatically.',
   }
 );
 
@@ -205,7 +205,7 @@ export const SET_STATUS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.setStatus.documentation.details',
   {
     defaultMessage:
-      'This step sets only the status field of an existing case. If version is not provided, the latest case version is resolved automatically.',
+      'This step sets only the status field of an existing case. If version is not specified, the latest case version is resolved automatically.',
   }
 );
 
@@ -224,7 +224,7 @@ export const CLOSE_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.closeCase.documentation.details',
   {
     defaultMessage:
-      'This step closes an existing case by setting its status to `closed`. If version is not provided, the latest case version is resolved automatically.',
+      'This step closes an existing case by setting its status to `closed`. If version is not specified, the latest case version is resolved automatically.',
   }
 );
 
@@ -246,7 +246,7 @@ export const DELETE_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.deleteCases.documentation.details',
   {
     defaultMessage:
-      'This step deletes the provided cases, including their comments and user action history.',
+      'This step deletes the specified cases, including their comments and user action history.',
   }
 );
 
@@ -257,15 +257,14 @@ export const ASSIGN_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.
 export const ASSIGN_CASE_STEP_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowSteps.assignCase.description',
   {
-    defaultMessage: 'Sets assignees for an existing case',
+    defaultMessage: 'Assigns users to an existing case',
   }
 );
 
 export const ASSIGN_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.assignCase.documentation.details',
   {
-    defaultMessage:
-      'This step sets the assignees array on an existing case. The provided assignees become the full source of truth for assignment.',
+    defaultMessage: 'This step assigns the specified users to an existing case.',
   }
 );
 
@@ -287,7 +286,7 @@ export const UNASSIGN_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.unassignCase.documentation.details',
   {
     defaultMessage:
-      'This step removes the given assignees from an existing case. Provide an empty array to clear all assignees.',
+      'This step removes the specified assignees from an existing case. Specify an empty array to clear all assignees.',
   }
 );
 
@@ -339,7 +338,7 @@ export const FIND_SIMILAR_CASES_STEP_LABEL = i18n.translate(
 export const FIND_SIMILAR_CASES_STEP_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowSteps.findSimilarCases.description',
   {
-    defaultMessage: 'Finds cases similar to the provided case ID',
+    defaultMessage: 'Finds cases similar to the specified case ID',
   }
 );
 
@@ -369,7 +368,7 @@ export const SET_DESCRIPTION_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.setDescription.documentation.details',
   {
     defaultMessage:
-      'This step sets only the description field of an existing case. If version is not provided, the latest case version is resolved automatically.',
+      'This step sets only the description field of an existing case. If version is not specified, the latest case version is resolved automatically.',
   }
 );
 
@@ -388,7 +387,7 @@ export const SET_TITLE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.setTitle.documentation.details',
   {
     defaultMessage:
-      'This step sets only the title field of an existing case. If version is not provided, the latest case version is resolved automatically.',
+      'This step sets only the title field of an existing case. If version is not specified, the latest case version is resolved automatically.',
   }
 );
 
@@ -421,36 +420,35 @@ export const ADD_TAG_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.addT
 export const ADD_TAG_STEP_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowSteps.addTag.description',
   {
-    defaultMessage: 'Sets tags for an existing case',
+    defaultMessage: 'Add tags to an existing case',
   }
 );
 
 export const ADD_TAG_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.addTag.documentation.details',
   {
-    defaultMessage:
-      'This step sets the full tags array on an existing case. Provide all tags that should remain on the case.',
+    defaultMessage: 'This step adds tags to an existing case.',
   }
 );
 
 export const ADD_CATEGORY_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.addCategory.label',
   {
-    defaultMessage: 'Cases - Add category to case',
+    defaultMessage: 'Cases - Set category on a case',
   }
 );
 
 export const ADD_CATEGORY_STEP_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowSteps.addCategory.description',
   {
-    defaultMessage: 'Sets category for an existing case',
+    defaultMessage: 'Sets the category for an existing case',
   }
 );
 
 export const ADD_CATEGORY_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.addCategory.documentation.details',
   {
-    defaultMessage: 'This step sets the category field on an existing case.',
+    defaultMessage: 'This step sets the category on an existing case.',
   }
 );
 
