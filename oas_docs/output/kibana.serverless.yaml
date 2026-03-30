@@ -52159,6 +52159,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -77251,6 +77252,11 @@ components:
         - name
         - type
     Security_Detections_API_ResponseAction:
+      discriminator:
+        mapping:
+          .endpoint: '#/components/schemas/Security_Detections_API_EndpointResponseAction'
+          .osquery: '#/components/schemas/Security_Detections_API_OsqueryResponseAction'
+        propertyName: action_type_id
       oneOf:
         - $ref: '#/components/schemas/Security_Detections_API_OsqueryResponseAction'
         - $ref: '#/components/schemas/Security_Detections_API_EndpointResponseAction'
@@ -77467,6 +77473,15 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRuleCreateProps'
         - $ref: '#/components/schemas/Security_Detections_API_EsqlRuleCreateProps'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/Security_Detections_API_EqlRuleCreateProps'
+          esql: '#/components/schemas/Security_Detections_API_EsqlRuleCreateProps'
+          machine_learning: '#/components/schemas/Security_Detections_API_MachineLearningRuleCreateProps'
+          new_terms: '#/components/schemas/Security_Detections_API_NewTermsRuleCreateProps'
+          query: '#/components/schemas/Security_Detections_API_QueryRuleCreateProps'
+          saved_query: '#/components/schemas/Security_Detections_API_SavedQueryRuleCreateProps'
+          threat_match: '#/components/schemas/Security_Detections_API_ThreatMatchRuleCreateProps'
+          threshold: '#/components/schemas/Security_Detections_API_ThresholdRuleCreateProps'
         propertyName: type
     Security_Detections_API_RuleDescription:
       description: The rule’s description.
@@ -77727,6 +77742,15 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRule'
         - $ref: '#/components/schemas/Security_Detections_API_EsqlRule'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/Security_Detections_API_EqlRule'
+          esql: '#/components/schemas/Security_Detections_API_EsqlRule'
+          machine_learning: '#/components/schemas/Security_Detections_API_MachineLearningRule'
+          new_terms: '#/components/schemas/Security_Detections_API_NewTermsRule'
+          query: '#/components/schemas/Security_Detections_API_QueryRule'
+          saved_query: '#/components/schemas/Security_Detections_API_SavedQueryRule'
+          threat_match: '#/components/schemas/Security_Detections_API_ThreatMatchRule'
+          threshold: '#/components/schemas/Security_Detections_API_ThresholdRule'
         propertyName: type
     Security_Detections_API_RuleRevision:
       description: |
@@ -77763,6 +77787,15 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRuleUpdateProps'
         - $ref: '#/components/schemas/Security_Detections_API_EsqlRuleUpdateProps'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/Security_Detections_API_EqlRuleUpdateProps'
+          esql: '#/components/schemas/Security_Detections_API_EsqlRuleUpdateProps'
+          machine_learning: '#/components/schemas/Security_Detections_API_MachineLearningRuleUpdateProps'
+          new_terms: '#/components/schemas/Security_Detections_API_NewTermsRuleUpdateProps'
+          query: '#/components/schemas/Security_Detections_API_QueryRuleUpdateProps'
+          saved_query: '#/components/schemas/Security_Detections_API_SavedQueryRuleUpdateProps'
+          threat_match: '#/components/schemas/Security_Detections_API_ThreatMatchRuleUpdateProps'
+          threshold: '#/components/schemas/Security_Detections_API_ThresholdRuleUpdateProps'
         propertyName: type
     Security_Detections_API_RuleVersion:
       description: |
@@ -80178,14 +80211,14 @@ components:
           cancel: '#/components/schemas/Security_Endpoint_Management_API_Cancel'
           execute: '#/components/schemas/Security_Endpoint_Management_API_Execute'
           get-file: '#/components/schemas/Security_Endpoint_Management_API_GetFile'
-          isolate: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+          isolate: '#/components/schemas/Security_Endpoint_Management_API_Isolate'
           kill-process: '#/components/schemas/Security_Endpoint_Management_API_KillProcess'
           memory-dump: '#/components/schemas/Security_Endpoint_Management_API_MemoryDump'
           running-processes: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
           runscript: '#/components/schemas/Security_Endpoint_Management_API_Runscript'
           scan: '#/components/schemas/Security_Endpoint_Management_API_Scan'
           suspend-process: '#/components/schemas/Security_Endpoint_Management_API_SuspendProcess'
-          unisolate: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+          unisolate: '#/components/schemas/Security_Endpoint_Management_API_Unisolate'
           upload: '#/components/schemas/Security_Endpoint_Management_API_Upload'
         propertyName: command
       oneOf:
@@ -80196,8 +80229,8 @@ components:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_Upload'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_Scan'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_Cancel'
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Isolate'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Unisolate'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_SuspendProcess'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_MemoryDump'
@@ -80264,9 +80297,12 @@ components:
       example: endpoint
       type: string
     Security_Endpoint_Management_API_ApiPageSize:
-      allOf:
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_PageSize'
-        - maximum: 1000
+      default: 10
+      description: Number of items per page
+      example: 10
+      maximum: 1000
+      minimum: 1
+      type: integer
     Security_Endpoint_Management_API_ApiSortField:
       description: Determines which field is used to sort the results.
       enum:
@@ -80979,7 +81015,10 @@ components:
         type: string
       type: array
     Security_Endpoint_Management_API_Isolate:
-      $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - description: Details of an isolate action response.
+          type: object
     Security_Endpoint_Management_API_IsolateRouteResponse:
       example:
         action: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -82113,7 +82152,10 @@ components:
       minLength: 1
       type: array
     Security_Endpoint_Management_API_Unisolate:
-      $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - description: Details of an unisolate action response.
+          type: object
     Security_Endpoint_Management_API_UnisolateRouteResponse:
       example:
         action: 233db9ea-6733-4849-9226-5a7039c7161d
