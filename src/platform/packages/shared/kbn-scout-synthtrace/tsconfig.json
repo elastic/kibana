@@ -8,7 +8,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/scout",
-    "@kbn/synthtrace",
-    "@kbn/synthtrace-client"
+    "@kbn/apm-synthtrace",
+    "@kbn/apm-synthtrace-client"
   ]
 }
