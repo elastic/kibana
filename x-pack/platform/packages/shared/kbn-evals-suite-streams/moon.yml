@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/otel-demo'
   - '@kbn/ai-tools'
+  - '@kbn/std'
 tags:
   - functional-tests
   - package
