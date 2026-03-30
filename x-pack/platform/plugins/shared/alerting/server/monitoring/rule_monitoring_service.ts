@@ -44,6 +44,7 @@ export class RuleMonitoringService {
       total_indexing_duration_ms: this.metrics.total_indexing_duration_ms ?? null,
       gap_duration_s: this.metrics.gap_duration_s ?? null,
       gap_range: this.metrics.gap_range ?? null,
+      ...(this.metrics.gap_reason ? { gap_reason: this.metrics.gap_reason } : {}),
     });
 
     return result;
@@ -92,12 +93,13 @@ export class RuleMonitoringService {
     return {
       setMetric: this.setMetric.bind(this),
       setMetrics: this.setMetrics.bind(this),
-      clearGapRange: this.clearGapRange.bind(this),
+      clearGap: this.clearGap.bind(this),
     };
   }
 
-  private clearGapRange(): void {
+  private clearGap(): void {
     delete this.metrics.gap_range;
+    delete this.metrics.gap_reason;
   }
 
   private buildExecutionSuccessRatio() {
