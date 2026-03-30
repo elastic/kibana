@@ -25,6 +25,7 @@ export async function update(
     id,
     updateBody,
     {
+      upsert: updateBody,
       /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
       mergeAttributes: false,
     }
