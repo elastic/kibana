@@ -102,7 +102,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
         );
       }
     },
-    [groupQueryReady, hasGroup, targetEntityId, linkEntities, http, addError]
+    [groupQueryReady, hasGroup, targetEntityId, entityId, linkEntities, http, addError]
   );
 
   const handleConfirmResolution = useCallback(
