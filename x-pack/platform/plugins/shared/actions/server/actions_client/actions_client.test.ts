@@ -1675,7 +1675,7 @@ describe('getOAuthAccessToken()', () => {
           },
         },
       })
-    ).rejects.toMatchInlineSnapshot(`[Error: Token URL must contain hostname]`);
+    ).rejects.toMatchInlineSnapshot(`[TypeError: Invalid URL: /path/to/myfile]`);
 
     expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
   });
