@@ -120,7 +120,7 @@ Flow Type tests check whether a flow matches Standard, Superflow A, Superflow B,
 "Read from your network traffic indices and keep only records that represent standard flows (normal bidirectional sessions) and that have at least source IP, destination IP, ports, protocol, bytes, and packets populated."
 
 - Define the notion of a flow
-"Treat a flow as a conversation identified by the 5‑tuple (source IP, source port, destination IP, destination port, protocol), plus its start and end times, and use that as the unit of aggregation instead of individual packets."
+"Treat a flow as a conversation identified by source IP, source port, destination IP, destination port, protocol, plus its start and end times, and use that as the unit of aggregation instead of individual packets."
 
 - Aggregate per window and per flow key
 "Group the data by the flow key and time window. For each group, calculate total bytes, total packets, first‑seen time, last‑seen time, and any other useful attributes (like application ID or VLAN), effectively turning many low‑level events into one standard flow record."
