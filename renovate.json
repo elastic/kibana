@@ -2725,6 +2725,23 @@
       "enabled": true
     },
     {
+      "groupName": "alerting v2 dependencies",
+      "matchDepNames": [
+        "apache-arrow"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:ResponseOps"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
       "groupName": "react-day-picker",
       "matchDepNames": ["react-day-picker"],
       "reviewers": ["team:eui-team"],
