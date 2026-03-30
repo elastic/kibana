@@ -35,11 +35,16 @@ const dashboardCanvasContentStyles = {
     css({
       padding: euiTheme.size.m,
     }),
-  renderer: css({
-    flex: 1,
-    minHeight: 0,
-    display: 'flex',
-  }),
+  renderer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: 1,
+      minHeight: 0,
+      display: 'flex',
+      '.controlGroup': {
+        padding: `${euiTheme.size.s} !important`,
+        borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+      },
+    }),
   searchBar: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexShrink: 0,
