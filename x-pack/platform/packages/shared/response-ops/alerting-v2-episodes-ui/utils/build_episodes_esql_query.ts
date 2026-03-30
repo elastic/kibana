@@ -7,11 +7,7 @@
 
 import type { ComposerQuery } from '@elastic/esql';
 import { esql } from '@elastic/esql';
-import {
-  LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE,
-  PAGE_SIZE_ESQL_VARIABLE,
-  ALERT_EVENTS_DATA_STREAM,
-} from '../constants';
+import { PAGE_SIZE_ESQL_VARIABLE, ALERT_EVENTS_DATA_STREAM } from '../constants';
 
 export interface EpisodesFilterState {
   /** Single episode status (inactive | pending | active | recovering) or null for All */
@@ -46,20 +42,17 @@ const buildAlertEventsBaseQuery = () => esql.from(ALERT_EVENTS_DATA_STREAM).wher
  * the alerting-events data stream.
  */
 export const buildEpisodesBaseQuery = (): ComposerQuery => {
-  const timestampParam = esql.par(undefined, LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE);
   // This will be simplified when the `$.alerting-episodes` ES|QL view works.
   return buildAlertEventsBaseQuery()
-    .where`${timestampParam} IS NULL OR @timestamp < ${timestampParam}`
     .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
 };
 
 /**
- * Builds an ES|QL query for the paginated episodes request.
- * The lastEpisodeTimestamp and pageSize variables are used to perform cursor-based pagination.
+ * Builds an ES|QL query for episodes request with sorting.
  */
-export const buildEpisodesPaginatedQuery = (
+export const buildEpisodesQuery = (
   sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' }
 ): ComposerQuery => {
   const sortField = sanitizeSortField(sortState.sortField);
@@ -68,9 +61,3 @@ export const buildEpisodesPaginatedQuery = (
 
   return buildEpisodesBaseQuery().sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`;
 };
-
-/**
- * Builds an ES|QL query to count the total number of addressable episodes.
- */
-export const buildEpisodesCountQuery = (): ComposerQuery =>
-  buildAlertEventsBaseQuery().pipe`STATS total = COUNT_DISTINCT(episode.id)`;

@@ -34,17 +34,17 @@ import type {
   EpisodesSortState,
 } from '@kbn/alerting-v2-episodes-ui/utils/build_episodes_esql_query';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
-import { pagesToDatatableRecords } from '@kbn/alerting-v2-episodes-ui/utils/pages_to_datatable_records';
 import { AlertingEpisodeStatusBadge } from '@kbn/alerting-v2-episodes-ui/components/alerting_episode_status_badge';
-import { useAlertingRulesIndex } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_index';
+import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_index';
 import useObservable from 'react-use/lib/useObservable';
 import type { InputTimeRange } from '@kbn/data-plugin/public/query';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 1000;
 
 const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
 
@@ -96,7 +96,6 @@ export function AlertsV2Page() {
     data: episodesData,
     dataView,
     isLoading,
-    fetchNextPage,
     refetch,
   } = useFetchAlertingEpisodesQuery({
     pageSize: PAGE_SIZE,
@@ -112,43 +111,52 @@ export function AlertsV2Page() {
   );
 
   const onSort = useCallback((nextSort: string[][]) => {
-    if (nextSort.length > 0) {
-      // Table supports multiple sort columns; the last element is the one the user just changed
-      const [field, dir] = nextSort[nextSort.length - 1];
-      if (field != null && dir != null) {
-        setSortState({
-          sortField: String(field),
-          sortDirection: dir === 'asc' ? 'asc' : 'desc',
-        });
-      }
+    if (!nextSort.length) {
+      setSortState(DEFAULT_SORT);
+      return;
+    }
+    // Table supports multiple sort columns; the last element is the one the user just changed
+    const [field, dir] = nextSort[nextSort.length - 1];
+    if (field != null && dir != null) {
+      setSortState({
+        sortField: String(field),
+        sortDirection: dir === 'asc' ? 'asc' : 'desc',
+      });
     }
   }, []);
 
   const ruleIds = useMemo(
-    () => [
-      ...new Set(
-        episodesData?.pages.flatMap((page) => page.rows).map((row) => row['rule.id'] as string) ??
-          []
-      ),
-    ],
-    [episodesData?.pages]
+    () => [...new Set(episodesData?.rows.map((row) => row['rule.id'] as string) ?? [])],
+    [episodesData?.rows]
   );
 
-  const { rulesIndex, loading: isLoadingRules } = useAlertingRulesIndex({
+  const { rulesCache, loading: isLoadingRules } = useAlertingRulesCache({
     ruleIds,
     services,
   });
 
   const ruleOptions = useMemo(
     () =>
-      Object.entries(rulesIndex).map(([id, rule]) => ({
+      Object.entries(rulesCache).map(([id, rule]) => ({
         label: rule.metadata?.name ?? id,
         value: id,
       })),
-    [rulesIndex]
+    [rulesCache]
   );
 
-  const rows = useMemo(() => pagesToDatatableRecords(episodesData?.pages), [episodesData?.pages]);
+  const rows = useMemo(
+    () =>
+      episodesData?.rows.map((row, idx) => {
+        const record: DataTableRecord = {
+          id: String(idx),
+          raw: row,
+          flattened: row,
+        };
+
+        return record;
+      }),
+    [episodesData?.rows]
+  );
 
   const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
     setColumns(cols);
@@ -244,11 +252,11 @@ export function AlertsV2Page() {
                     return <AlertingEpisodeStatusBadge status={status} />;
                   },
                   'rule.id': (props) => {
-                    if (!Object.keys(rulesIndex).length && isLoadingRules) {
+                    if (!Object.keys(rulesCache).length && isLoadingRules) {
                       return <EuiSkeletonText />;
                     }
                     const ruleId = props.row.flattened[props.columnId] as string;
-                    const rule = rulesIndex[ruleId];
+                    const rule = rulesCache[ruleId];
                     if (!rule) {
                       return ruleId;
                     }
@@ -290,13 +298,16 @@ export function AlertsV2Page() {
                 }}
                 // Data
                 rows={rows}
-                totalHits={episodesData?.pages?.[0].total ?? 0}
+                // Forcing totalHits to be greater than the max page size to show
+                // the footer callout about the max limit reached
+                totalHits={!episodesData?.rows.length ? 0 : PAGE_SIZE + 1}
                 loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
                 // Pagination
+                // We're not really paginating, this is just to show the
+                // footer callout about the max limit reached
                 isPaginationEnabled
                 paginationMode="singlePage"
-                onFetchMoreRecords={fetchNextPage}
-                sampleSizeState={0}
+                sampleSizeState={PAGE_SIZE}
                 // Sorting
                 isSortEnabled
                 sort={sort}

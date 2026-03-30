@@ -26,7 +26,7 @@ type Rule = FindRulesResponse['items'][number];
  * with the minimum number of bulk requests possible.
  * Returns rulesIndex as state so consumers re-render when rules are loaded.
  */
-export const useAlertingRulesIndex = ({ ruleIds, services }: UseAlertingRulesIndexOptions) => {
+export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesIndexOptions) => {
   const cacheRef = useRef<Record<string, Rule>>({});
   const [rulesIndex, setRulesIndex] = useState<Record<string, Rule>>({});
 
@@ -47,7 +47,7 @@ export const useAlertingRulesIndex = ({ ruleIds, services }: UseAlertingRulesInd
   }, [ruleIds, services.http]);
 
   return {
-    rulesIndex,
+    rulesCache: rulesIndex,
     loading,
     error,
   };

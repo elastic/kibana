@@ -7,7 +7,7 @@
 
 import {
   buildEpisodesBaseQuery,
-  buildEpisodesPaginatedQuery,
+  buildEpisodesQuery,
   buildEpisodesCountQuery,
 } from './build_episodes_esql_query';
 import {
@@ -51,7 +51,7 @@ describe('buildEpisodesBaseQuery', () => {
 
 describe('buildEpisodesPaginatedQuery', () => {
   it('should build query with default sort', () => {
-    const query = buildEpisodesPaginatedQuery();
+    const query = buildEpisodesQuery();
     const queryString = query.print('basic');
 
     // Default sort is @timestamp DESC
@@ -62,7 +62,7 @@ describe('buildEpisodesPaginatedQuery', () => {
   });
 
   it('should correctly sanitize and apply custom sort', () => {
-    const query = buildEpisodesPaginatedQuery({
+    const query = buildEpisodesQuery({
       sortField: 'episode.id',
       sortDirection: 'asc',
     });
@@ -76,7 +76,7 @@ describe('buildEpisodesPaginatedQuery', () => {
   });
 
   it('should sanitize invalid sort fields to @timestamp', () => {
-    const query = buildEpisodesPaginatedQuery({
+    const query = buildEpisodesQuery({
       sortField: 'invalid.field',
       sortDirection: 'desc',
     });
@@ -91,7 +91,7 @@ describe('buildEpisodesPaginatedQuery', () => {
     const allowlistedFields = ['@timestamp', 'episode.id', 'episode.status', 'rule.id', 'duration'];
 
     allowlistedFields.forEach((field) => {
-      const query = buildEpisodesPaginatedQuery({
+      const query = buildEpisodesQuery({
         sortField: field,
         sortDirection: 'asc',
       });

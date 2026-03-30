@@ -9,7 +9,7 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { buildEpisodesPaginatedQuery } from '../utils/build_episodes_esql_query';
+import { buildEpisodesQuery } from '../utils/build_episodes_esql_query';
 import { fetchAlertingEpisodes } from './fetch_alerting_episodes';
 
 jest.mock('../utils/execute_esql_query');
@@ -28,7 +28,7 @@ describe('fetchAlertingEpisodes', () => {
 
   it('should call executeEsqlQuery with correct parameters for first page', () => {
     const pageSize = 10;
-    const expectedQuery = buildEpisodesPaginatedQuery({
+    const expectedQuery = buildEpisodesQuery({
       sortField: '@timestamp',
       sortDirection: 'desc',
     }).print('basic');
@@ -65,7 +65,7 @@ describe('fetchAlertingEpisodes', () => {
   it('should call executeEsqlQuery with correct parameters when beforeTimestamp is provided', () => {
     const pageSize = 20;
     const beforeTimestamp = '2024-01-15T10:30:00.000Z';
-    const expectedQuery = buildEpisodesPaginatedQuery({
+    const expectedQuery = buildEpisodesQuery({
       sortField: '@timestamp',
       sortDirection: 'desc',
     }).print('basic');
@@ -104,7 +104,7 @@ describe('fetchAlertingEpisodes', () => {
     const pageSize = 15;
     const abortController = new AbortController();
     const abortSignal = abortController.signal;
-    const expectedQuery = buildEpisodesPaginatedQuery({
+    const expectedQuery = buildEpisodesQuery({
       sortField: '@timestamp',
       sortDirection: 'desc',
     }).print('basic');
@@ -144,7 +144,7 @@ describe('fetchAlertingEpisodes', () => {
     const beforeTimestamp = '2024-02-20T15:45:30.000Z';
     const abortController = new AbortController();
     const abortSignal = abortController.signal;
-    const expectedQuery = buildEpisodesPaginatedQuery({
+    const expectedQuery = buildEpisodesQuery({
       sortField: '@timestamp',
       sortDirection: 'desc',
     }).print('basic');
