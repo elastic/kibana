@@ -15,14 +15,14 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { AnomalyBand } from './pad_anomaly_bands';
+import type { AnomalyBand } from './anomaly_bands';
 
 interface SeverityFilterProps {
   anomalyBands: AnomalyBand[];
   toggleHiddenBand: (band: AnomalyBand) => void;
 }
 
-export const PrivilegedAccessDetectionSeverityFilter: React.FC<SeverityFilterProps> = ({
+export const AnomalySeverityFilter: React.FC<SeverityFilterProps> = ({
   anomalyBands,
   toggleHiddenBand,
 }) => {
@@ -30,7 +30,7 @@ export const PrivilegedAccessDetectionSeverityFilter: React.FC<SeverityFilterPro
 
   return (
     <EuiFlexGroup>
-      <EuiPanel grow={false} hasBorder hasShadow={false}>
+      <EuiPanel paddingSize="s" grow={false} hasBorder hasShadow={false}>
         <EuiFlexGroup alignItems={'center'}>
           <p css={{ fontWeight: euiTheme.font.weight.bold }}>{'Anomaly score'}</p>
           {anomalyBands.map((band) => {

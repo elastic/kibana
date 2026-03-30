@@ -17,21 +17,15 @@ import {
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
-  EuiText,
-  EuiTitle,
   EuiLoadingChart,
   EuiCallOut,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useIntervalForHeatmap } from './hooks/pad_heatmap_interval_hooks';
-import { padChartStyling } from './pad_chart_styling';
-import type { ESQLAnomalyRecord } from './hooks/pad_query_hooks';
-import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
-import type { AnomalyBand } from './pad_anomaly_bands';
-import illustration from '../../../../../../common/images/illustration_product_no_results_magnifying_glass.svg';
+import { useIntervalForHeatmap } from './anomaly_heatmap_interval';
+import { getAnomalyChartStyling } from './anomaly_chart_styling';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import type { AnomalyBand } from './anomaly_bands';
 
 const heatmapComponentStyle: RecursivePartial<HeatmapStyle> = {
   brushTool: {
@@ -52,57 +46,24 @@ const heatmapComponentStyle: RecursivePartial<HeatmapStyle> = {
     padding: { top: 10, bottom: 10 },
   },
   yAxisLabel: {
-    visible: false, // We do not show the yAxisLabel, as we instead render the user names separately in order to link to the User flyout
+    visible: false, // We do not show the yAxisLabel, as we instead render the entity names separately in order to link to the entity flyout
     fontSize: 14,
     width: 'auto',
     padding: { left: 10, right: 10 },
   },
 };
 
-interface PrivilegedAccessDetectionHeatmapProps {
-  records: ESQLAnomalyRecord[];
+interface AnomalyHeatmapProps {
+  records: Array<Record<string, unknown>>;
   anomalyBands: AnomalyBand[];
-  userNames: string[];
+  entityNames: string[];
+  entityAccessor: string;
+  heatmapId: string;
   isLoading: boolean;
   isError: boolean;
+  compressed?: boolean;
+  noResultsComponent?: React.ReactNode;
 }
-
-const PrivilegedAccessDetectionHeatmapNoResults: React.FC = () => {
-  return (
-    <EuiFlexGroup css={{ maxWidth: '600px' }}>
-      <EuiFlexItem>
-        <EuiText size="s">
-          <EuiTitle>
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.noResultsTitle"
-                defaultMessage="No privileged access detection results match your search criteria"
-              />
-            </h3>
-          </EuiTitle>
-          <p>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.noResultsDescription"
-              defaultMessage={`Now that you've got the privileged access detection anomaly jobs installed, you can click "ML job settings" above to configure and run them within your environment.`}
-            />
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiImage
-          size="200px"
-          alt={i18n.translate(
-            'xpack.securitySolution.privilegedUserMonitoring.privilegedAccessDetection.emptyState.illustrationAlt',
-            {
-              defaultMessage: 'No results',
-            }
-          )}
-          url={illustration}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
 
 const useGlobalTimeInMillis = () => {
   const { from, to } = useGlobalTime();
@@ -131,22 +92,27 @@ const useTimeFormatter = () => {
     });
 };
 
-export const PrivilegedAccessDetectionHeatmap: React.FC<PrivilegedAccessDetectionHeatmapProps> = ({
+export const AnomalyHeatmap: React.FC<AnomalyHeatmapProps> = ({
   records,
   anomalyBands,
-  userNames,
+  entityNames,
+  entityAccessor,
+  heatmapId,
   isLoading,
   isError,
+  compressed = false,
+  noResultsComponent,
 }) => {
   const intervalForHeatmap = useIntervalForHeatmap();
   const timeFormatter = useTimeFormatter();
   const xDomain = useXDomainFromGlobalTime();
+  const styling = getAnomalyChartStyling(compressed);
 
   return (
     <EuiFlexItem
       css={{
-        marginTop: `${padChartStyling.heightOfTopLegend}px`,
-        height: `${padChartStyling.heightOfHeatmap(userNames)}px`,
+        marginTop: `${styling.heightOfTopLegend}px`,
+        height: `${styling.heightOfHeatmap(entityNames)}px`,
       }}
     >
       {isLoading && (
@@ -158,10 +124,9 @@ export const PrivilegedAccessDetectionHeatmap: React.FC<PrivilegedAccessDetectio
         <EuiCallOut
           announceOnMount
           title={i18n.translate(
-            'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.anomalyDetectionDataError',
+            'xpack.securitySolution.entityAnalytics.anomalyHeatmap.dataError',
             {
-              defaultMessage:
-                'There was an error retrieving privileged access detection anomaly data.',
+              defaultMessage: 'There was an error retrieving anomaly data.',
             }
           )}
           color="danger"
@@ -172,11 +137,11 @@ export const PrivilegedAccessDetectionHeatmap: React.FC<PrivilegedAccessDetectio
         <Chart>
           <Settings
             theme={{ heatmap: heatmapComponentStyle }}
-            noResults={<PrivilegedAccessDetectionHeatmapNoResults />}
+            noResults={noResultsComponent ?? undefined}
             xDomain={xDomain}
           />
           <Heatmap
-            id={'privileged-access-detection-heatmap-chart'}
+            id={heatmapId}
             xScale={{
               type: ScaleType.Time,
               interval: {
@@ -191,14 +156,14 @@ export const PrivilegedAccessDetectionHeatmap: React.FC<PrivilegedAccessDetectio
             }}
             data={records}
             name={i18n.translate(
-              'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetections.maxAnomalyScore',
+              'xpack.securitySolution.entityAnalytics.anomalyHeatmap.maxAnomalyScore',
               { defaultMessage: 'Max anomaly score' }
             )}
             xAccessor="@timestamp"
             xAxisLabelName={''}
             xAxisLabelFormatter={timeFormatter}
-            yAccessor="user.name"
-            yAxisLabelName={'user.name'}
+            yAccessor={entityAccessor}
+            yAxisLabelName={entityAccessor}
             ySortPredicate="numDesc"
             valueAccessor="record_score"
           />
