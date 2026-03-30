@@ -154,10 +154,13 @@ export default ({ getService }: FtrProviderContext) => {
         '\n'
       );
 
-      // First upload
+      // First upload — links entities
       await uploadCsv(csv);
 
-      // Second upload — same CSV
+      // Ensure the resolved_to updates from linkEntities are visible
+      await es.indices.refresh({ index: getLatestEntitiesIndexName('default') });
+
+      // Second upload — same CSV, entities should be skipped
       const { body } = await uploadCsv(csv);
 
       expect(body.successful).toBe(1);
