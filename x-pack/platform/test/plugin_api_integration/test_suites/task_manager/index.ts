@@ -19,6 +19,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./check_registered_task_types'));
     loadTestFile(require.resolve('./kibana_discovery_service'));
     loadTestFile(require.resolve('./task_partitions'));
+    loadTestFile(require.resolve('./task_cost'));
     loadTestFile(require.resolve('./task_event_log'));
 
     loadTestFile(require.resolve('./migrations'));

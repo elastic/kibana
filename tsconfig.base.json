@@ -2404,6 +2404,8 @@
       "@kbn/telemetry-tools/*": ["src/platform/packages/private/kbn-telemetry-tools/*"],
       "@kbn/test": ["src/platform/packages/shared/kbn-test"],
       "@kbn/test/*": ["src/platform/packages/shared/kbn-test/*"],
+      "@kbn/test-docker-servers": ["src/platform/packages/shared/kbn-test-docker-servers"],
+      "@kbn/test-docker-servers/*": ["src/platform/packages/shared/kbn-test-docker-servers/*"],
       "@kbn/test-es-server": ["src/platform/packages/shared/kbn-test-es-server"],
       "@kbn/test-es-server/*": ["src/platform/packages/shared/kbn-test-es-server/*"],
       "@kbn/test-eui-helpers": ["src/platform/packages/private/kbn-test-eui-helpers"],
@@ -2654,15 +2656,20 @@
       ],
       "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
       "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"],
-      "zod": ["typings/zod/v3"],
-      "zod/v4": ["typings/zod/v4"],
       "vega-lite": ["typings/vega/vega_lite"],
       "vega-tooltip": ["typings/vega/vega_tooltip"],
+      "zod": ["node_modules/zod/v4/index.d.ts"],
+      "zod/v4": ["node_modules/zod/v4/index.d.ts"],
+      "zod/v4/core": ["node_modules/zod/v4/core/index.d.ts"],
       "@langchain/langgraph/prebuilt": ["node_modules/@langchain/langgraph/dist/prebuilt"],
       "@langchain/classic/chains": ["node_modules/@langchain/classic/dist/chains"],
       "@langchain/classic/evaluation": ["node_modules/@langchain/classic/dist/evaluation"],
-      "@langchain/classic/document_loaders/fs/directory": ["node_modules/@langchain/classic/dist/document_loaders/fs/directory"],
-      "@langchain/classic/document_loaders/fs/text": ["node_modules/@langchain/classic/dist/document_loaders/fs/text"]
+      "@langchain/classic/document_loaders/fs/directory": [
+        "node_modules/@langchain/classic/dist/document_loaders/fs/directory"
+      ],
+      "@langchain/classic/document_loaders/fs/text": [
+        "node_modules/@langchain/classic/dist/document_loaders/fs/text"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
