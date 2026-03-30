@@ -25,7 +25,7 @@ export async function resolveConnectorIdAndCheckAllowlist({
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   request: KibanaRequest;
 }): Promise<string> {
-  const resolved = await resolveConnectorId({ connectorId, uiSettingsClient, logger });
+  const resolved = await resolveConnectorId({ connectorId, uiSettingsClient, logger, request });
   return logIfConnectorNotInAllowlist({
     resolvedConnectorId: resolved,
     featureId,
