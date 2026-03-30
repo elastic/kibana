@@ -1,0 +1,4 @@
+# Auto-generated Cypress spec files (created by scripts/generate_cypress_split_specs.js)
+# These files are generated on CI before Cypress runs. Do not commit them.
+e2e/artifacts/artifact_tabs_in_policy_details_*.cy.ts
+e2e/artifacts/*_rbac_siem*.cy.ts
