@@ -2447,23 +2447,7 @@
       "zod": ["typings/zod/v3"],
       "zod/v4": ["typings/zod/v4"],
       "vega-lite": ["typings/vega/vega_lite"],
-<<<<<<< HEAD
       "vega-tooltip": ["typings/vega/vega_tooltip"]
-=======
-      "vega-tooltip": ["typings/vega/vega_tooltip"],
-      "zod": ["node_modules/zod/v4/index.d.ts"],
-      "zod/v4": ["node_modules/zod/v4/index.d.ts"],
-      "zod/v4/core": ["node_modules/zod/v4/core/index.d.ts"],
-      "@langchain/langgraph/prebuilt": ["node_modules/@langchain/langgraph/dist/prebuilt"],
-      "@langchain/classic/chains": ["node_modules/@langchain/classic/dist/chains"],
-      "@langchain/classic/evaluation": ["node_modules/@langchain/classic/dist/evaluation"],
-      "@langchain/classic/document_loaders/fs/directory": [
-        "node_modules/@langchain/classic/dist/document_loaders/fs/directory"
-      ],
-      "@langchain/classic/document_loaders/fs/text": [
-        "node_modules/@langchain/classic/dist/document_loaders/fs/text"
-      ]
->>>>>>> b2e07540eb46 (add kbn/test-docker-servers package (#259079))
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
