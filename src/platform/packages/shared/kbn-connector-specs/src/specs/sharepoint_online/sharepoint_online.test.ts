@@ -135,7 +135,17 @@ describe('SharepointOnline', () => {
   });
 
   describe('getAllSites action', () => {
-    it('should list all sites', async () => {
+    const appOnlyContext = {
+      ...mockContext,
+      secrets: { authType: 'oauth_client_credentials' },
+    } as unknown as ActionContext;
+
+    const delegatedContext = {
+      ...mockContext,
+      secrets: { authType: 'oauth_authorization_code' },
+    } as unknown as ActionContext;
+
+    it('should list all sites with app-only auth via /sites/getAllSites', async () => {
       const mockResponse = {
         data: {
           value: [
@@ -155,7 +165,7 @@ describe('SharepointOnline', () => {
       mockClient.get.mockResolvedValue(mockResponse);
 
       const result = (await SharepointOnline.actions.getAllSites.handler(
-        mockContext,
+        appOnlyContext,
         {}
       )) as SharePointListResponse<SharePointSite>;
 
@@ -167,9 +177,58 @@ describe('SharepointOnline', () => {
           },
         }
       );
-      expect(mockContext.log.debug).toHaveBeenCalledWith('SharePoint listing all sites');
+      expect(mockContext.log.debug).toHaveBeenCalledWith(
+        'SharePoint listing all sites (app-only auth)'
+      );
       expect(result).toEqual(mockResponse.data);
       expect(result.value).toHaveLength(2);
+    });
+
+    it('should fall back to /sites?search= with delegated auth', async () => {
+      const mockResponse = {
+        data: {
+          value: [
+            {
+              id: 'site-1',
+              displayName: 'Site 1',
+              webUrl: 'https://contoso.sharepoint.com/sites/site1',
+            },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.getAllSites.handler(delegatedContext, {
+        search: 'contoso',
+      })) as SharePointListResponse<SharePointSite>;
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/sites', {
+        params: {
+          search: 'contoso',
+          $select: 'id,displayName,webUrl,siteCollection',
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should use wildcard search when no search term with delegated auth', async () => {
+      const mockResponse = {
+        data: { value: [] },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.getAllSites.handler(
+        delegatedContext,
+        {}
+      )) as SharePointListResponse<SharePointSite>;
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/sites', {
+        params: {
+          search: '*',
+          $select: 'id,displayName,webUrl,siteCollection',
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
     });
 
     it('should handle empty site list', async () => {
@@ -181,7 +240,7 @@ describe('SharepointOnline', () => {
       mockClient.get.mockResolvedValue(mockResponse);
 
       const result = (await SharepointOnline.actions.getAllSites.handler(
-        mockContext,
+        appOnlyContext,
         {}
       )) as SharePointListResponse<SharePointSite>;
 
@@ -189,14 +248,14 @@ describe('SharepointOnline', () => {
       expect(result.value).toHaveLength(0);
     });
 
-    it('should work with undefined input', async () => {
+    it('should work with undefined input for app-only auth', async () => {
       const mockResponse = {
         data: { value: [] },
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
       const result = (await SharepointOnline.actions.getAllSites.handler(
-        mockContext,
+        appOnlyContext,
         undefined
       )) as SharePointListResponse<SharePointSite>;
 
@@ -214,9 +273,9 @@ describe('SharepointOnline', () => {
     it('should propagate API errors', async () => {
       mockClient.get.mockRejectedValue(new Error('Access denied'));
 
-      await expect(SharepointOnline.actions.getAllSites.handler(mockContext, {})).rejects.toThrow(
-        'Access denied'
-      );
+      await expect(
+        SharepointOnline.actions.getAllSites.handler(appOnlyContext, {})
+      ).rejects.toThrow('Access denied');
     });
   });
 

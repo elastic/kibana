@@ -17,6 +17,10 @@ inputs:
       - "getSiteListItems"
       - "getDriveItems"
     required: true
+  - name: search
+    type: string
+    required: false
+    description: "Search keyword to filter sites (required for getAllSites with delegated auth)"
   - name: site_id
     type: string
     required: false
@@ -37,7 +41,8 @@ steps:
     type: sharepoint-online.getAllSites
     if: "${{ inputs.list_action == 'getAllSites' }}"
     connector-id: <%= sharepoint-online-stack-connector-id %>
-    with: {}
+    with:
+      search: "${{ inputs.search }}"
   - name: get-site-by-id
     type: sharepoint-online.getSite
     if: "${{ inputs.list_action == 'getSite' and inputs.site_id }}"
@@ -82,3 +87,43 @@ steps:
     with:
       driveId: "${{ inputs.drive_id }}"
       path: "${{ inputs.path }}"
+  - name: set-result-all-sites
+    type: data.set
+    if: "${{ inputs.list_action == 'getAllSites' }}"
+    with:
+      result: "${{ steps.get-all-sites.output }}"
+  - name: set-result-site-by-id
+    type: data.set
+    if: "${{ inputs.list_action == 'getSite' and inputs.site_id }}"
+    with:
+      result: "${{ steps.get-site-by-id.output }}"
+  - name: set-result-site-by-url
+    type: data.set
+    if: "${{ inputs.list_action == 'getSite' and inputs.relative_url }}"
+    with:
+      result: "${{ steps.get-site-by-relative-url.output }}"
+  - name: set-result-site-pages
+    type: data.set
+    if: "${{ inputs.list_action == 'getSitePages' }}"
+    with:
+      result: "${{ steps.get-site-pages.output }}"
+  - name: set-result-site-drives
+    type: data.set
+    if: "${{ inputs.list_action == 'getSiteDrives' }}"
+    with:
+      result: "${{ steps.get-site-drives.output }}"
+  - name: set-result-site-lists
+    type: data.set
+    if: "${{ inputs.list_action == 'getSiteLists' }}"
+    with:
+      result: "${{ steps.get-site-lists.output }}"
+  - name: set-result-list-items
+    type: data.set
+    if: "${{ inputs.list_action == 'getSiteListItems' }}"
+    with:
+      result: "${{ steps.get-site-list-items.output }}"
+  - name: set-result-drive-items
+    type: data.set
+    if: "${{ inputs.list_action == 'getDriveItems' }}"
+    with:
+      result: "${{ steps.get-drive-items.output }}"

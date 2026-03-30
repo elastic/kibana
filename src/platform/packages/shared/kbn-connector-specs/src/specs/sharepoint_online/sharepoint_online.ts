@@ -109,18 +109,44 @@ export const SharepointOnline: ConnectorSpec = {
   actions: {
     getAllSites: {
       isTool: true,
-      input: z.object({}).optional(),
+      input: z
+        .object({
+          search: z
+            .string()
+            .optional()
+            .describe(
+              'Search keyword to filter sites. Used with delegated auth (oauth_authorization_code) where /sites/getAllSites is not available.'
+            ),
+        })
+        .optional(),
       output: GraphCollectionOutputSchema,
-      handler: async (ctx) => {
-        ctx.log.debug('SharePoint listing all sites');
-        const response = await ctx.client.get(
-          'https://graph.microsoft.com/v1.0/sites/getAllSites/',
-          {
-            params: {
-              $select: 'id,displayName,webUrl,siteCollection',
-            },
-          }
-        );
+      handler: async (ctx, input) => {
+        const typedInput = input as { search?: string } | undefined;
+        const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
+
+        if (isAppOnly) {
+          ctx.log.debug('SharePoint listing all sites (app-only auth)');
+          const response = await ctx.client.get(
+            'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+            {
+              params: {
+                $select: 'id,displayName,webUrl,siteCollection',
+              },
+            }
+          );
+          return response.data;
+        }
+
+        // Delegated auth: /sites/getAllSites is application-only, so fall back to
+        // /sites?search={query} which supports delegated permissions.
+        const search = typedInput?.search || '*';
+        ctx.log.debug(`SharePoint searching sites with keyword: ${search} (delegated auth)`);
+        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/sites', {
+          params: {
+            search,
+            $select: 'id,displayName,webUrl,siteCollection',
+          },
+        });
         return response.data;
       },
     },
