@@ -3,7 +3,7 @@ info:
   title: Watchlists Entity Source Common Schema
   description: Common schema for Watchlists Entity Source
   version: "1"
-  
+
 paths: {}
 components:
   schemas:
@@ -12,6 +12,7 @@ components:
       enum:
         - index
         - entity_analytics_integration
+        - store
 
     UpdateableMonitoringEntitySourceProperties:
       type: object
@@ -24,6 +25,12 @@ components:
           type: string
         enabled:
           type: boolean
+        identifierField:
+          type: string
+          description: Field used to query the entity store for index-type sources
+        queryRule:
+          type: string
+          description: KQL query used to filter data from the provided index patterns
         matchers:
           type: array
           items:
