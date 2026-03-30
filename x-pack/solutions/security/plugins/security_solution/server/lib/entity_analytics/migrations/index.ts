@@ -15,6 +15,7 @@ import { renameRiskScoreComponentTemplate } from '../risk_engine/migrations/rena
 import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_ingested_pipeline';
 import { updatePrivilegedMonitoringSourceIndex } from '../privilege_monitoring/migrations/update_source_index';
 import { upsertPrivilegedMonitoringEntitySource } from '../privilege_monitoring/migrations/upsert_entity_source';
+import { installPrebuiltWatchlists } from '../watchlists/migrations/install_prebuilt_watchlists';
 
 export interface EntityAnalyticsMigrationsParams {
   taskManager?: TaskManagerSetupContract;
@@ -46,6 +47,10 @@ export interface EntityAnalyticsMigrationsParams {
  *     - Update the matchers definitions [here](../privilege_monitoring/data_sources/constants.ts)
  *     - Pump the `MANAGED_SOURCES_VERSION` [here](../privilege_monitoring/saved_objects/monitoring_entity_source_type.ts)
  * note: If you change the `latest` property, the transform will reinstall after the engine task runs.
+ * 
+ * ### How to update prebuilt watchlists?
+ * - Update the prebuilt watchlists definitions [here](../watchlists/migrations/install_prebuilt_watchlists.ts)
+ * - Pump the `PREBUILT_WATCHLISTS_VERSION` [here](../watchlists/migrations/install_prebuilt_watchlists.ts)
  */
 export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMigrationsParams) => {
   const paramsWithScopedLogger = {
@@ -59,4 +64,5 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
   await updateRiskScoreMappings(paramsWithScopedLogger);
   await updatePrivilegedMonitoringSourceIndex(paramsWithScopedLogger);
   await upsertPrivilegedMonitoringEntitySource(paramsWithScopedLogger);
+  await installPrebuiltWatchlists(paramsWithScopedLogger);
 };
