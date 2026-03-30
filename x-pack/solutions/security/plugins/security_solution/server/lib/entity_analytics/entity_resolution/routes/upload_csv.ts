@@ -58,14 +58,7 @@ export const entityResolutionCsvUploadRoute = ({
 
         try {
           const [, startPlugins] = await getStartServices();
-          const entityStoreStart = startPlugins.entityStore;
-
-          if (!entityStoreStart) {
-            return siemResponse.error({
-              statusCode: 400,
-              body: 'Entity Store plugin is not available',
-            });
-          }
+          const { entityStore: entityStoreStart } = startPlugins;
 
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
