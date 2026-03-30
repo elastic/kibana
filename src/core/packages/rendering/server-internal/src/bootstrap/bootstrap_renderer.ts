@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
+import Path from 'path';
 import { createHash } from 'crypto';
 import type { BehaviorSubject } from 'rxjs';
 import type { PackageInfo } from '@kbn/config';
@@ -72,6 +74,19 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   const useRspack = isRspackModeEnabled();
   const useHMR = !packageInfo.dist && process.env.KBN_HMR !== 'false';
 
+  // Detect external plugins once at startup (not per-request).
+  // External plugins have a standalone ${pluginId}.plugin.js in their target/public dir,
+  // while internal plugins are compiled into the unified kibana.bundle.js.
+  const externalPluginIds = new Set<string>();
+  if (useRspack) {
+    for (const [pluginId, { publicTargetDir }] of uiPlugins.internal.entries()) {
+      const standaloneBundle = Path.join(publicTargetDir, `${pluginId}.plugin.js`);
+      if (Fs.existsSync(standaloneBundle)) {
+        externalPluginIds.add(pluginId);
+      }
+    }
+  }
+
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
     let darkMode: DarkModeValue = false;
     const themeName = themeName$.getValue();
@@ -105,21 +120,36 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     let body: string;
 
     if (useRspack) {
-      // RSPack unified mode - all plugins in single bundle at /bundles/kibana.bundle.js
-      // Async chunks are served from /bundles/chunks/
-      const rspackPaths = getRspackDependencyPaths(bundlesHref, bundlePaths);
+      // Build script paths for external plugins using the same route scheme as bundle routes
+      const externalPluginScriptPaths = [...externalPluginIds].map((pluginId) => {
+        const { version } = uiPlugins.internal.get(pluginId)!;
+        return `${bundlesHref}/plugin/${pluginId}/${version}/${pluginId}.plugin.js`;
+      });
 
-      // All plugins use the same bundles directory for loading async chunks
-      // Shared deps are still served from webpack-built bundles
+      const rspackPaths = getRspackDependencyPaths(
+        bundlesHref,
+        bundlePaths,
+        externalPluginScriptPaths
+      );
+
       const bundlesDir = `${bundlesHref}/`;
       const publicPathMap = JSON.stringify({
         core: bundlesDir,
         'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
         'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
         'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
-        // All plugins use the same bundles directory
+        // Internal plugins use the unified bundles directory
         ...Object.fromEntries(
-          [...bundlePaths.entries()].map(([pluginId]) => [pluginId, bundlesDir])
+          [...bundlePaths.entries()]
+            .filter(([pluginId]) => !externalPluginIds.has(pluginId))
+            .map(([pluginId]) => [pluginId, bundlesDir])
+        ),
+        // External plugins use their own versioned bundle route
+        ...Object.fromEntries(
+          [...externalPluginIds].map((pluginId) => {
+            const { version } = uiPlugins.internal.get(pluginId)!;
+            return [pluginId, `${bundlesHref}/plugin/${pluginId}/${version}/`];
+          })
         ),
       });
 

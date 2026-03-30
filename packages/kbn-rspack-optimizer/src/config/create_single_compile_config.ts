@@ -384,6 +384,7 @@ export async function createSingleCompileConfig(
       // Use 'auto' to dynamically resolve publicPath at runtime based on document.currentScript
       publicPath: 'auto',
       clean: !watch,
+      uniqueName: 'kibana-bundle',
     },
 
     // Only externalize shared deps (npm packages), NOT cross-plugin imports

@@ -107,6 +107,7 @@ export async function createExternalPluginConfig(
         : `${pluginId}.[name].[contenthash:8].js`,
       publicPath: 'auto',
       clean: !watch,
+      uniqueName: pluginId,
     },
 
     // Externalize shared deps AND cross-plugin imports

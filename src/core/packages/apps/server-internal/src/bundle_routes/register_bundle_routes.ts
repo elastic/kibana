@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
+import Path from 'path';
+
 import type { PackageInfo } from '@kbn/config';
 import { fromRoot } from '@kbn/repo-info';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
@@ -82,8 +85,7 @@ export function registerBundleRoutes({
   });
 
   if (useRspack) {
-    // RSPack mode: serve all bundles from central directory
-    // This includes core and all plugins in one location
+    // RSPack mode: serve unified build bundles from central directory
     const rspackBundlesPath = '/bundles/';
     registerRouteForBundle(router, {
       publicPath: staticAssets.prependPublicUrl(rspackBundlesPath) + '/',
@@ -91,6 +93,23 @@ export function registerBundleRoutes({
       bundlesPath: fromRoot('target/public/bundles'),
       fileHashCache,
       isDist,
+    });
+
+    // External plugins have standalone bundles in their own directories.
+    // Internal plugins are compiled into the unified kibana.bundle.js and
+    // do NOT have individual .plugin.js files in their directories.
+    [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
+      const standaloneBundle = Path.join(publicTargetDir, `${id}.plugin.js`);
+      if (Fs.existsSync(standaloneBundle)) {
+        const pluginBundlesPath = `/bundles/plugin/${id}/${version}/`;
+        registerRouteForBundle(router, {
+          publicPath: staticAssets.prependPublicUrl(pluginBundlesPath) + '/',
+          routePath: staticAssets.prependServerPath(pluginBundlesPath) + '/',
+          bundlesPath: publicTargetDir,
+          fileHashCache,
+          isDist,
+        });
+      }
     });
   } else {
     // Legacy webpack mode: serve from individual plugin directories
