@@ -31,6 +31,8 @@ yaml-language-server
 @opentelemetry/exporter-metrics-otlp-proto
 simple-statistics
 monaco-promql
+json-stable-stringify
+apache-arrow
 oxlint
 react-element-to-jsx-string
 @swc/core

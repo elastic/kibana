@@ -131,6 +131,7 @@
     "@kbn/scout",
     "@kbn/scout-synthtrace",
     "@kbn/synthtrace-client",
+    "@kbn/alerting-v2-plugin",
     "@kbn/cps-utils",
     "@kbn/core-saved-objects-common",
     "@kbn/as-code-filters-constants",
