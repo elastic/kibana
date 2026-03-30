@@ -9,7 +9,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
-import type { ModelSettingsConfigClient } from '../lib/saved_objects/significant_events/model_settings_config_client';
+import type { ModelSettingsConfigClient } from '../lib/sig_events/saved_objects/model_settings_config_client';
 import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { streamExplorationSkill } from './skills/stream_exploration_skill';

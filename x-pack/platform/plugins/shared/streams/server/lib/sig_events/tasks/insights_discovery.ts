@@ -19,10 +19,10 @@ import { generateInsights } from '../insights/generate_insights';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
-import type { MemoryGenerationTaskParams } from './memory_generation';
-import { MEMORY_GENERATION_TASK_TYPE } from './memory_generation';
+import type { MemoryGenerationTaskParams } from '../../tasks/task_definitions/memory_generation';
+import { MEMORY_GENERATION_TASK_TYPE } from '../../tasks/task_definitions/memory_generation';
 import { MemoryServiceImpl } from '../../memory';
-import { createMemoryDiscoveryTools } from '../../significant_events/memory_discovery_tools';
+import { createMemoryDiscoveryTools } from '../memory_discovery_tools';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
