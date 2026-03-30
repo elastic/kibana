@@ -86,6 +86,7 @@ describe('InferenceConnector', () => {
           },
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
+          querystring: { timeout: '180s' },
         },
         {
           asStream: true,
@@ -316,6 +317,7 @@ describe('InferenceConnector', () => {
           },
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
+          querystring: { timeout: '180s' },
         },
         {
           asStream: true,
@@ -341,6 +343,7 @@ describe('InferenceConnector', () => {
           body: { messages: [{ content: 'Hello world', role: 'user' }], n: undefined },
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
+          querystring: { timeout: '180s' },
         },
         {
           asStream: true,
