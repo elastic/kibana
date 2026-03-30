@@ -10,4 +10,7 @@ export const queryKeys = {
   list: (pageSize: number) => [...queryKeys.all, 'list', pageSize] as const,
   actionsAll: () => [...queryKeys.all, 'actions'] as const,
   actions: (episodeIds: string[]) => [...queryKeys.actionsAll(), ...episodeIds] as const,
+  groupActionsAll: () => [...queryKeys.all, 'group-actions'] as const,
+  groupActions: (groupHashes: string[]) =>
+    [...queryKeys.groupActionsAll(), ...groupHashes] as const,
 };

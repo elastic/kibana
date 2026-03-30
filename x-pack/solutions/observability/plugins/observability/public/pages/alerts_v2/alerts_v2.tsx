@@ -32,6 +32,7 @@ import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hook
 import { pagesToDatatableRecords } from '@kbn/alerting-v2-episodes-ui/utils/pages_to_datatable_records';
 import { useAlertingRulesIndex } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_index';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
+import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { AlertEpisodeStatusCell } from '@kbn/alerting-v2-episodes-ui/components/alert_episodes/status/alert_episode_status_cell';
 import { AlertEpisodeActionsCell } from '@kbn/alerting-v2-episodes-ui/components/alert_episodes/actions/alert_episode_actions_cell';
 import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/alert_episodes/actions/alert_episode_tags';
@@ -127,7 +128,13 @@ export function AlertsV2Page() {
     [rows]
   );
 
-  const { actionsMap } = useFetchEpisodeActions({ episodeIds, services });
+  const groupHashes = useMemo(
+    () => [...new Set(rows.map((row) => row.flattened.group_hash as string).filter(Boolean))],
+    [rows]
+  );
+
+  const { episodeActionsMap } = useFetchEpisodeActions({ episodeIds, services });
+  const { groupActionsMap } = useFetchGroupActions({ groupHashes, services });
 
   const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
     setColumns(cols);
@@ -213,22 +220,35 @@ export function AlertsV2Page() {
                   'episode.status': (props) => {
                     const status = props.row.flattened[props.columnId] as AlertEpisodeStatus;
                     const episodeId = props.row.flattened['episode.id'] as string;
-                    const episodeAction = actionsMap.get(episodeId);
+                    const groupHash = props.row.flattened.group_hash as string;
 
-                    return <AlertEpisodeStatusCell status={status} episodeAction={episodeAction} />;
+                    return (
+                      <AlertEpisodeStatusCell
+                        status={status}
+                        episodeAction={episodeActionsMap.get(episodeId)}
+                        groupAction={groupActionsMap.get(groupHash)}
+                      />
+                    );
                   },
                   actions: (props) => {
                     const episodeId = props.row.flattened['episode.id'] as string;
-                    const episodeAction = actionsMap.get(episodeId);
+                    const groupHash = props.row.flattened.group_hash as string;
+
                     return (
-                      <AlertEpisodeActionsCell episodeAction={episodeAction} http={services.http} />
+                      <AlertEpisodeActionsCell
+                        episodeId={episodeId}
+                        groupHash={groupHash}
+                        episodeAction={episodeActionsMap.get(episodeId)}
+                        groupAction={groupActionsMap.get(groupHash)}
+                        http={services.http}
+                      />
                     );
                   },
                   tags: (props) => {
-                    const episodeId = props.row.flattened['episode.id'] as string;
-                    const episodeAction = actionsMap.get(episodeId);
+                    const groupHash = props.row.flattened.group_hash as string;
+                    const groupAction = groupActionsMap.get(groupHash);
 
-                    return <AlertEpisodeTags tags={episodeAction?.tags ?? []} />;
+                    return <AlertEpisodeTags tags={groupAction?.tags ?? []} />;
                   },
                   'rule.id': (props) => {
                     if (!Object.keys(rulesIndex).length && isLoadingRules) {

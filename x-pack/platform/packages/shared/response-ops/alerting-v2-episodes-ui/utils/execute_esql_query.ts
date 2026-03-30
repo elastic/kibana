@@ -13,6 +13,8 @@ export interface ExecuteEsqlQueryOptions<Input> {
   query: string;
   abortSignal?: AbortSignal;
   input: Input;
+  /** When true, passes `allowCache: false` to `expressions.execute` to bypass expression-layer caching. */
+  noCache?: boolean;
 }
 
 /**
@@ -24,8 +26,13 @@ export const executeEsqlQuery = <Input = unknown>({
   query,
   input,
   abortSignal,
+  noCache,
 }: ExecuteEsqlQueryOptions<Input>) => {
-  const executionContract = expressions.execute<Input, Datatable>(`esql '${query}'`, input);
+  const executionContract = expressions.execute<Input, Datatable>(
+    `esql '${query}'`,
+    input,
+    noCache ? { allowCache: false } : undefined
+  );
   abortSignal?.addEventListener('abort', (e) => {
     executionContract.cancel((e.target as AbortSignal)?.reason);
   });

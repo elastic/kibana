@@ -45,7 +45,8 @@ describe('executeEsqlQuery', () => {
 
     expect(mockExpressionsService.execute).toHaveBeenCalledWith(
       "esql 'FROM index | STATS count() BY status'",
-      null
+      null,
+      undefined
     );
     expect(result).toEqual(mockDatatable);
   });
@@ -72,7 +73,11 @@ describe('executeEsqlQuery', () => {
       input,
     });
 
-    expect(mockExpressionsService.execute).toHaveBeenCalledWith("esql 'FROM logs'", input);
+    expect(mockExpressionsService.execute).toHaveBeenCalledWith(
+      "esql 'FROM logs'",
+      input,
+      undefined
+    );
   });
 
   it('should handle query with single quotes correctly', async () => {
@@ -97,7 +102,8 @@ describe('executeEsqlQuery', () => {
 
     expect(mockExpressionsService.execute).toHaveBeenCalledWith(
       "esql 'FROM index | WHERE status == 'active''",
-      null
+      null,
+      undefined
     );
   });
 

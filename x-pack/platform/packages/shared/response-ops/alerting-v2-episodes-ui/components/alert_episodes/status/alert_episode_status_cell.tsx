@@ -8,19 +8,25 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
-import type { EpisodeAction } from '../../../types/episode_action';
+import type { EpisodeAction, GroupAction } from '../../../types/action';
 import { AlertEpisodeStatusBadge } from './alert_episode_status_badge';
 
 export interface AlertEpisodeStatusCellProps {
   status: AlertEpisodeStatus;
   episodeAction?: EpisodeAction;
+  groupAction?: GroupAction;
 }
 
-export function AlertEpisodeStatusCell({ status, episodeAction }: AlertEpisodeStatusCellProps) {
+export function AlertEpisodeStatusCell({
+  status,
+  episodeAction,
+  groupAction,
+}: AlertEpisodeStatusCellProps) {
   const isAcknowledged = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
-  const isSnoozed = episodeAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE;
+  const isSnoozed = groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE;
 
   return (
     <EuiFlexGroup
@@ -33,7 +39,7 @@ export function AlertEpisodeStatusCell({ status, episodeAction }: AlertEpisodeSt
       <EuiFlexItem grow={false}>
         <AlertEpisodeStatusBadge
           status={
-            episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
+            groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
               ? 'inactive'
               : status
           }
@@ -43,14 +49,14 @@ export function AlertEpisodeStatusCell({ status, episodeAction }: AlertEpisodeSt
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={
-              episodeAction?.snoozeExpiry ? (
+              groupAction?.snoozeExpiry ? (
                 <FormattedMessage
                   id="xpack.alertingV2EpisodesUi.snoozedUntilTooltip"
                   defaultMessage="Notifications snoozed until {expiry}."
                   values={{
                     expiry: (
                       <FormattedDate
-                        value={new Date(episodeAction.snoozeExpiry)}
+                        value={new Date(groupAction.snoozeExpiry)}
                         year="numeric"
                         month="short"
                         day="numeric"
@@ -78,7 +84,23 @@ export function AlertEpisodeStatusCell({ status, episodeAction }: AlertEpisodeSt
       )}
       {isAcknowledged && (
         <EuiFlexItem grow={false}>
-          <EuiBadge iconType="checkCircle" data-test-subj="alertEpisodeStatusCellAckIndicator" />
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.alertingV2EpisodesUi.acknowledgedTooltip"
+                defaultMessage="This alert is acknowledged."
+              />
+            }
+          >
+            <EuiBadge
+              tabIndex={0}
+              iconType="checkCircle"
+              aria-label={i18n.translate('xpack.alertingV2EpisodesUi.acknowledgedBadgeAriaLabel', {
+                defaultMessage: 'Acknowledged',
+              })}
+              data-test-subj="alertEpisodeStatusCellAckIndicator"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

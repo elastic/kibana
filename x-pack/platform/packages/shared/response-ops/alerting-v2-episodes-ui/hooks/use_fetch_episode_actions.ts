@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { EpisodeAction } from '../types/episode_action';
+import type { EpisodeAction } from '../types/action';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { queryKeys } from '../query_keys';
 
@@ -17,34 +17,17 @@ const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
 const escapeEsqlString = (value: string): string =>
   value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
-const tagsFromRow = (value: unknown): string[] => {
-  if (value == null) {
-    return [];
-  }
-  if (typeof value === 'string') {
-    return [value];
-  }
-  if (Array.isArray(value)) {
-    return value as string[];
-  }
-  return [];
-};
-
-const buildBulkGetAlertActionsQuery = (episodeIds: string[]): string => {
+const buildEpisodeActionsQuery = (episodeIds: string[]): string => {
   const escapedIds = episodeIds.map((id) => `"${escapeEsqlString(id)}"`).join(', ');
 
   return `
     FROM ${ALERT_ACTIONS_DATA_STREAM}
     | WHERE episode_id IN (${escapedIds})
-    | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze", "tag")
+    | WHERE action_type IN ("ack", "unack")
     | STATS
-        tags = LAST(tags, @timestamp) WHERE action_type IN ("tag"),
-        last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
-        last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-        last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
-        snooze_expiry = LAST(expiry, @timestamp) WHERE action_type IN ("snooze")
+        last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack")
       BY episode_id, rule_id, group_hash
-    | KEEP episode_id, rule_id, group_hash, last_ack_action, last_deactivate_action, last_snooze_action, snooze_expiry, tags
+    | KEEP episode_id, rule_id, group_hash, last_ack_action
   `;
 };
 
@@ -57,12 +40,13 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.actions(episodeIds),
     queryFn: async ({ signal }) => {
-      const query = buildBulkGetAlertActionsQuery(episodeIds);
+      const query = buildEpisodeActionsQuery(episodeIds);
       const result = await executeEsqlQuery({
         expressions: services.expressions,
         query,
         input: null,
         abortSignal: signal,
+        noCache: true,
       });
 
       return result.rows.map(
@@ -71,10 +55,6 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
           ruleId: (row.rule_id as string) ?? null,
           groupHash: (row.group_hash as string) ?? null,
           lastAckAction: (row.last_ack_action as string) ?? null,
-          lastDeactivateAction: (row.last_deactivate_action as string) ?? null,
-          lastSnoozeAction: (row.last_snooze_action as string) ?? null,
-          snoozeExpiry: (row.snooze_expiry as string) ?? null,
-          tags: tagsFromRow(row.tags),
         })
       );
     },
@@ -82,7 +62,7 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
     keepPreviousData: true,
   });
 
-  const actionsMap = useMemo(() => {
+  const episodeActionsMap = useMemo(() => {
     const map = new Map<string, EpisodeAction>();
     if (data) {
       for (const action of data) {
@@ -92,5 +72,5 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
     return map;
   }, [data]);
 
-  return { actionsMap, isLoading };
+  return { episodeActionsMap, isLoading };
 };

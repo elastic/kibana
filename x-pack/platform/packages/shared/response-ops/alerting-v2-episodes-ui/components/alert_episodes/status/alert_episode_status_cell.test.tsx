@@ -23,15 +23,13 @@ describe('AlertEpisodeStatusCell', () => {
     expect(screen.queryByTestId('alertEpisodeStatusCellAckIndicator')).not.toBeInTheDocument();
   });
 
-  it('renders snoozed bellSlash badge when last snooze action is snooze', () => {
+  it('renders snoozed bellSlash badge when group action has snooze', () => {
     renderWithI18n(
       <AlertEpisodeStatusCell
         status="active"
-        episodeAction={{
-          episodeId: '1',
-          ruleId: '1',
+        groupAction={{
           groupHash: '1',
-          lastAckAction: null,
+          ruleId: '1',
           lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
           lastDeactivateAction: null,
           snoozeExpiry: null,
@@ -47,11 +45,9 @@ describe('AlertEpisodeStatusCell', () => {
     renderWithI18n(
       <AlertEpisodeStatusCell
         status="active"
-        episodeAction={{
-          episodeId: '1',
-          ruleId: '1',
+        groupAction={{
           groupHash: '1',
-          lastAckAction: null,
+          ruleId: '1',
           lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
           lastDeactivateAction: null,
           snoozeExpiry: '2035-06-15T14:30:00.000Z',
@@ -70,11 +66,9 @@ describe('AlertEpisodeStatusCell', () => {
     renderWithI18n(
       <AlertEpisodeStatusCell
         status="active"
-        episodeAction={{
-          episodeId: '1',
-          ruleId: '1',
+        groupAction={{
           groupHash: '1',
-          lastAckAction: null,
+          ruleId: '1',
           lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
           lastDeactivateAction: null,
           snoozeExpiry: null,
@@ -86,7 +80,7 @@ describe('AlertEpisodeStatusCell', () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent(/snoozed/i);
   });
 
-  it('renders checkCircle badge when acknowledged', () => {
+  it('renders checkCircle badge when acknowledged via episodeAction', () => {
     renderWithI18n(
       <AlertEpisodeStatusCell
         status="active"
@@ -95,17 +89,14 @@ describe('AlertEpisodeStatusCell', () => {
           ruleId: '1',
           groupHash: '1',
           lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
-          lastSnoozeAction: null,
-          lastDeactivateAction: null,
-          snoozeExpiry: null,
-          tags: [],
         }}
       />
     );
     expect(screen.getByTestId('alertEpisodeStatusCellAckIndicator')).toBeInTheDocument();
   });
 
-  it('renders inactive badge when last deactivate action is deactivate', () => {
+  it('shows acknowledged tooltip on hover', async () => {
+    const user = userEvent.setup();
     renderWithI18n(
       <AlertEpisodeStatusCell
         status="active"
@@ -113,7 +104,21 @@ describe('AlertEpisodeStatusCell', () => {
           episodeId: '1',
           ruleId: '1',
           groupHash: '1',
-          lastAckAction: null,
+          lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
+        }}
+      />
+    );
+    await user.hover(screen.getByTestId('alertEpisodeStatusCellAckIndicator'));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(/acknowledged/i);
+  });
+
+  it('renders inactive badge when group action has deactivate', () => {
+    renderWithI18n(
+      <AlertEpisodeStatusCell
+        status="active"
+        groupAction={{
+          groupHash: '1',
+          ruleId: '1',
           lastSnoozeAction: null,
           lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
           snoozeExpiry: null,

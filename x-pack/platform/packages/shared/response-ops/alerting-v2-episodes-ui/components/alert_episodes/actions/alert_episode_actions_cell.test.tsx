@@ -32,16 +32,14 @@ describe('AlertEpisodeActionsCell', () => {
     expect(screen.getByTestId('alertingEpisodeActionsMoreButton')).toBeInTheDocument();
   });
 
-  it('opens popover and shows Unresolve from episode action state', async () => {
+  it('opens popover and shows Resolve when not deactivated', async () => {
     const user = userEvent.setup();
     render(
       <AlertEpisodeActionsCell
         http={mockServices.http}
-        episodeAction={{
-          episodeId: 'e1',
-          ruleId: 'r1',
+        groupAction={{
           groupHash: 'g1',
-          lastAckAction: null,
+          ruleId: 'r1',
           lastDeactivateAction: null,
           lastSnoozeAction: null,
           snoozeExpiry: null,
@@ -52,19 +50,17 @@ describe('AlertEpisodeActionsCell', () => {
     await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
     expect(
       await screen.findByTestId('alertingEpisodeActionsResolveActionButton')
-    ).toHaveTextContent('Unresolve');
+    ).toHaveTextContent('Resolve');
   });
 
-  it('shows Resolve in popover when episode is deactivated', async () => {
+  it('shows Unresolve in popover when group action is deactivated', async () => {
     const user = userEvent.setup();
     render(
       <AlertEpisodeActionsCell
         http={mockServices.http}
-        episodeAction={{
-          episodeId: 'e1',
-          ruleId: 'r1',
+        groupAction={{
           groupHash: 'g1',
-          lastAckAction: null,
+          ruleId: 'r1',
           lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
           lastSnoozeAction: null,
           snoozeExpiry: null,
@@ -75,6 +71,6 @@ describe('AlertEpisodeActionsCell', () => {
     await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
     expect(
       await screen.findByTestId('alertingEpisodeActionsResolveActionButton')
-    ).toHaveTextContent('Resolve');
+    ).toHaveTextContent('Unresolve');
   });
 });

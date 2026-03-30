@@ -10,6 +10,11 @@ export interface EpisodeAction {
   ruleId: string | null;
   groupHash: string | null;
   lastAckAction: string | null;
+}
+
+export interface GroupAction {
+  groupHash: string;
+  ruleId: string | null;
   lastDeactivateAction: string | null;
   lastSnoozeAction: string | null;
   snoozeExpiry: string | null;

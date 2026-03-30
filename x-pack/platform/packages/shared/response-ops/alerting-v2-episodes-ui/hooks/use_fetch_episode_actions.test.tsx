@@ -50,7 +50,7 @@ describe('useFetchEpisodeActions', () => {
     expect(executeEsqlQueryMock).not.toHaveBeenCalled();
   });
 
-  it('fetches and builds actionsMap keyed by episode id', async () => {
+  it('fetches and builds episodeActionsMap keyed by episode id', async () => {
     executeEsqlQueryMock.mockResolvedValue({
       rows: [
         {
@@ -58,10 +58,6 @@ describe('useFetchEpisodeActions', () => {
           rule_id: 'rule-1',
           group_hash: 'gh-1',
           last_ack_action: 'ack',
-          last_deactivate_action: null,
-          last_snooze_action: 'snooze',
-          snooze_expiry: '2035-01-02T12:00:00.000Z',
-          tags: ['t1', 't2'],
         },
       ],
     } as unknown as Awaited<ReturnType<typeof executeEsqlQuery>>);
@@ -80,77 +76,16 @@ describe('useFetchEpisodeActions', () => {
     expect(executeEsqlQueryMock).toHaveBeenCalledTimes(1);
     const call = executeEsqlQueryMock.mock.calls[0][0];
     expect(call.query).toContain('ep-1');
+    expect(call.query).toContain('"ack", "unack"');
     expect(call.expressions).toBe(mockExpressions);
 
-    const action = result.current.actionsMap.get('ep-1');
+    const action = result.current.episodeActionsMap.get('ep-1');
     expect(action).toEqual({
       episodeId: 'ep-1',
       ruleId: 'rule-1',
       groupHash: 'gh-1',
       lastAckAction: 'ack',
-      lastDeactivateAction: null,
-      lastSnoozeAction: 'snooze',
-      snoozeExpiry: '2035-01-02T12:00:00.000Z',
-      tags: ['t1', 't2'],
     });
-  });
-
-  it('normalizes string tags into a single-element array', async () => {
-    executeEsqlQueryMock.mockResolvedValue({
-      rows: [
-        {
-          episode_id: 'ep-2',
-          rule_id: null,
-          group_hash: null,
-          last_ack_action: null,
-          last_deactivate_action: null,
-          last_snooze_action: null,
-          snooze_expiry: null,
-          tags: 'solo',
-        },
-      ],
-    } as unknown as Awaited<ReturnType<typeof executeEsqlQuery>>);
-
-    const { result } = renderHook(
-      () =>
-        useFetchEpisodeActions({
-          episodeIds: ['ep-2'],
-          services: { expressions: mockExpressions },
-        }),
-      { wrapper }
-    );
-
-    await waitFor(() => expect(result.current.actionsMap.has('ep-2')).toBe(true));
-    expect(result.current.actionsMap.get('ep-2')?.tags).toEqual(['solo']);
-  });
-
-  it('converts tags to empty array when row tags are null', async () => {
-    executeEsqlQueryMock.mockResolvedValue({
-      rows: [
-        {
-          episode_id: 'ep-3',
-          rule_id: null,
-          group_hash: null,
-          last_ack_action: null,
-          last_deactivate_action: null,
-          last_snooze_action: null,
-          snooze_expiry: null,
-          tags: null,
-        },
-      ],
-    } as unknown as Awaited<ReturnType<typeof executeEsqlQuery>>);
-
-    const { result } = renderHook(
-      () =>
-        useFetchEpisodeActions({
-          episodeIds: ['ep-3'],
-          services: { expressions: mockExpressions },
-        }),
-      { wrapper }
-    );
-
-    await waitFor(() => expect(result.current.actionsMap.has('ep-3')).toBe(true));
-    expect(result.current.actionsMap.get('ep-3')?.tags).toEqual([]);
   });
 
   it('escapes quotes in episode ids in the generated query', async () => {
@@ -180,20 +115,12 @@ describe('useFetchEpisodeActions', () => {
           rule_id: 'r1',
           group_hash: null,
           last_ack_action: 'ack',
-          last_deactivate_action: null,
-          last_snooze_action: null,
-          snooze_expiry: null,
-          tags: [],
         },
         {
           episode_id: 'dup',
           rule_id: 'r2',
           group_hash: null,
           last_ack_action: 'unack',
-          last_deactivate_action: null,
-          last_snooze_action: null,
-          snooze_expiry: null,
-          tags: [],
         },
       ],
     } as unknown as Awaited<ReturnType<typeof executeEsqlQuery>>);
@@ -207,6 +134,6 @@ describe('useFetchEpisodeActions', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(result.current.actionsMap.get('dup')?.ruleId).toBe('r2'));
+    await waitFor(() => expect(result.current.episodeActionsMap.get('dup')?.ruleId).toBe('r2'));
   });
 });

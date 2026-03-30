@@ -11,15 +11,24 @@ import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { AcknowledgeActionButton } from './acknowledge_action_button';
 import { SnoozeActionButton } from './snooze_action_button';
-import type { EpisodeAction } from '../../../types/episode_action';
+import type { EpisodeAction, GroupAction } from '../../../types/action';
 import { ResolveActionButton } from './deactivate_action_button';
 
 export interface AlertEpisodeActionsCellProps {
+  episodeId?: string;
+  groupHash?: string;
   episodeAction?: EpisodeAction;
+  groupAction?: GroupAction;
   http: HttpStart;
 }
 
-export function AlertEpisodeActionsCell({ episodeAction, http }: AlertEpisodeActionsCellProps) {
+export function AlertEpisodeActionsCell({
+  episodeId,
+  groupHash,
+  episodeAction,
+  groupAction,
+  http,
+}: AlertEpisodeActionsCellProps) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   return (
@@ -33,15 +42,15 @@ export function AlertEpisodeActionsCell({ episodeAction, http }: AlertEpisodeAct
       <EuiFlexItem grow={false}>
         <AcknowledgeActionButton
           lastAckAction={episodeAction?.lastAckAction}
-          episodeId={episodeAction?.episodeId}
-          groupHash={episodeAction?.groupHash}
+          episodeId={episodeId}
+          groupHash={groupHash}
           http={http}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SnoozeActionButton
-          lastSnoozeAction={episodeAction?.lastSnoozeAction}
-          groupHash={episodeAction?.groupHash}
+          lastSnoozeAction={groupAction?.lastSnoozeAction}
+          groupHash={groupHash}
           http={http}
         />
       </EuiFlexItem>
@@ -76,8 +85,8 @@ export function AlertEpisodeActionsCell({ episodeAction, http }: AlertEpisodeAct
         >
           <EuiListGroup gutterSize="none" bordered={false} flush={true} size="l">
             <ResolveActionButton
-              lastDeactivateAction={episodeAction?.lastDeactivateAction}
-              groupHash={episodeAction?.groupHash}
+              lastDeactivateAction={groupAction?.lastDeactivateAction}
+              groupHash={groupHash}
               http={http}
             />
           </EuiListGroup>
