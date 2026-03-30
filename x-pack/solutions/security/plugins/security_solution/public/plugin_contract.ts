@@ -12,7 +12,6 @@ import type {
   ProductFeatureKeyType,
   ProductFeatureKeys,
 } from '@kbn/security-solution-features/src/types';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
@@ -55,11 +54,6 @@ export class PluginContract {
         this.solutionNavigationTree$.next(navigationTree);
       },
       setOnboardingSettings: this.onboardingService.setSettings.bind(this.onboardingService),
-      getDefaultArtifactsPageId: (): SecurityPageName => {
-        return this.experimentalFeatures.endpointExceptionsMovedUnderManagement
-          ? SecurityPageName.endpointExceptions
-          : SecurityPageName.trustedApps;
-      },
     };
   }
 

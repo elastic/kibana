@@ -34,7 +34,6 @@ const startMock = (): PluginStart => ({
   getBreadcrumbsNav$: jest.fn(
     () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })
   ),
-  getDefaultArtifactsPageId: jest.fn(),
   getUpselling: () => upselling,
   setOnboardingSettings: onboardingService.setSettings.bind(onboardingService),
   setSolutionNavigationTree: jest.fn(),

@@ -77,10 +77,7 @@ export const createNavigationTree = (
       icon: 'editorChecklist',
       link: securityLink(SecurityPageName.assetInventory),
     },
-    // Pass default artifacts page so the Artifacts nav link goes to the correct default tab (endpoint exceptions vs trusted apps).
-    defaultNavigationTree.assets(services, {
-      defaultArtifactsPageId: services.securitySolution.getDefaultArtifactsPageId(),
-    }),
+    defaultNavigationTree.assets(services),
     defaultNavigationTree.ml(),
   ],
   footer: [

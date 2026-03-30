@@ -12,20 +12,7 @@ import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 import { i18nStrings } from '../i18n_strings';
 
-/** Callers (e.g. ESS, Serverless) should pass defaultArtifactsPageId so the Artifacts nav link goes to the correct default tab. */
-export interface AssetsNavigationTreeOptions {
-  defaultArtifactsPageId?: SecurityPageName;
-}
-
-export const createAssetsNavigationTree = (
-  core: CoreStart,
-  options?: AssetsNavigationTreeOptions
-): NodeDefinition => {
-  // When not provided, default to trusted apps so the Artifacts link still works; callers should pass the default.
-  const artifactsLink = securityLink(
-    options?.defaultArtifactsPageId ?? SecurityPageName.trustedApps
-  );
-
+export const createAssetsNavigationTree = (_core: CoreStart): NodeDefinition => {
   return {
     id: SecurityGroupName.assets,
     icon: 'display',
@@ -73,7 +60,7 @@ export const createAssetsNavigationTree = (
           {
             id: SecurityPageName.artifacts,
             title: i18nStrings.assets.artifacts.title,
-            link: artifactsLink,
+            link: securityLink(SecurityPageName.artifacts),
           },
           {
             id: SecurityPageName.responseActionsHistory,
