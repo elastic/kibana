@@ -114,6 +114,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'automatic_troubleshooting',
   'entity-analytics',
   'alert-analysis',
+  'alert-investigation',
 
   // O11Y
   'observability.rca',

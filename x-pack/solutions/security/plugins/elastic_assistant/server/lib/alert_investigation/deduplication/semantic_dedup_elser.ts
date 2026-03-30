@@ -42,9 +42,7 @@ export async function isElserAvailable(esClient: ElasticsearchClient): Promise<b
       model_id: elserModel.model_id,
     });
 
-    const modelStats = stats.trained_model_stats.find(
-      (s) => s.model_id === elserModel.model_id
-    );
+    const modelStats = stats.trained_model_stats.find((s) => s.model_id === elserModel.model_id);
 
     const state = modelStats?.deployment_stats?.state;
     return state === 'started' || state === 'fully_allocated';
@@ -146,7 +144,7 @@ export async function deduplicateWithHybridApproach(
             },
           },
         },
-        size: 20,
+        size: 5,
         _source: ['alert_id'],
       });
 
@@ -164,18 +162,27 @@ export async function deduplicateWithHybridApproach(
       }
     }
 
-    // Build clusters from similarity graph using Union-Find
-    const clusters = buildClustersFromSimilarityGraph(alerts, similarityGraph);
+    // Filter to mutual similarity — only keep edges where A→B AND B→A both exist
+    // This prevents loose transitive chains from merging unrelated alerts
+    const mutualGraph = new Map<string, string[]>();
+    for (const [alertId, neighbors] of similarityGraph) {
+      const mutual = neighbors.filter((neighborId) => {
+        const reverseNeighbors = similarityGraph.get(neighborId);
+        return reverseNeighbors?.includes(alertId);
+      });
+      if (mutual.length > 0) {
+        mutualGraph.set(alertId, mutual);
+      }
+    }
 
-    logger.info(
-      `ELSER semantic dedup: ${alerts.length} alerts → ${clusters.size} clusters`
-    );
+    // Build clusters from mutual similarity graph using Union-Find
+    const clusters = buildClustersFromSimilarityGraph(alerts, mutualGraph);
+
+    logger.info(`ELSER semantic dedup: ${alerts.length} alerts → ${clusters.size} clusters`);
 
     return clusters;
   } catch (error) {
-    logger.warn(
-      `ELSER deduplication failed: ${error instanceof Error ? error.message : error}`
-    );
+    logger.warn(`ELSER deduplication failed: ${error instanceof Error ? error.message : error}`);
     return null;
   } finally {
     // Cleanup temp index and pipeline

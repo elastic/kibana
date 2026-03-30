@@ -15,16 +15,49 @@ import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
 
+/**
+ * Parse alerts input from workflow context.
+ * Handles Liquid template serialization where `| json` produces a JSON string
+ * instead of a native array, and Zod wrapping that creates ["[{...}]"].
+ */
+const parseAlertsInput = (
+  val: unknown
+): Array<{ alertId: string; index: string; rule?: { id?: string; name?: string } }> => {
+  if (Array.isArray(val)) {
+    // Zod-wrapped: single-element array with a JSON string
+    if (val.length === 1 && typeof val[0] === 'string') {
+      try {
+        const parsed = JSON.parse(val[0]);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        // not JSON
+      }
+    }
+    return val;
+  }
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // not JSON
+    }
+  }
+  return [];
+};
+
 export const addAlertsStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
     ...addAlertsStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: AddAlertsStepInput) => {
+      const alerts = parseAlertsInput(input.alerts);
+
       return withCaseOwner(client, input.case_id, async (owner) => {
         const updatedCase = await client.attachments.bulkCreate({
           caseId: input.case_id,
-          attachments: input.alerts.map((alert) => ({
+          attachments: alerts.map((alert) => ({
             type: AttachmentType.alert,
             alertId: alert.alertId,
             index: alert.index,
