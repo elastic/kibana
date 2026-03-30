@@ -6,7 +6,8 @@
  */
 
 import expect from 'expect';
-import { getLatestEntitiesIndexName, hashEuid } from '@kbn/entity-store/server';
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
+import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import { ENTITY_STORE_ROUTES, API_VERSIONS } from '@kbn/entity-store/common';
 import { ENTITY_RESOLUTION_CSV_UPLOAD_URL } from '@kbn/security-solution-plugin/common/entity_analytics/entity_store/constants';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
