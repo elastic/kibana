@@ -20,11 +20,12 @@ const CONNECTOR_SML_TYPE = 'connector';
 interface ConnectorSmlTypeDeps {
   getToolRegistry: (request: KibanaRequest) => Promise<ToolRegistry>;
   /**
-   * Returns a saved objects client that can read hidden `action` saved objects.
-   * The standard scoped client and default internal repository cannot access
-   * hidden types, so this factory creates one with `includedHiddenTypes: ['action']`.
+   * Returns a saved objects client scoped to the given request that can read
+   * hidden `action` saved objects. Uses `includedHiddenTypes: ['action']` so
+   * the client respects the user's security context while still accessing the
+   * hidden type.
    */
-  getActionSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
+  getActionSavedObjectsClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
   logger: Logger;
 }
 
@@ -69,8 +70,13 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
     }),
 
     getSmlData: async (originId, context) => {
+      if (!context.request) {
+        throw new Error(
+          `SML connector: no request available for '${originId}' — cannot create scoped client`
+        );
+      }
       try {
-        const soClient = await getActionSavedObjectsClient();
+        const soClient = await getActionSavedObjectsClient(context.request);
         const so = await soClient.get('action', originId);
         const attrs = so.attributes as { name?: string; actionTypeId?: string };
         const name = attrs.name ?? originId;
@@ -110,7 +116,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
 
     toAttachment: async (item, context) => {
       try {
-        const soClient = await getActionSavedObjectsClient();
+        const soClient = await getActionSavedObjectsClient(context.request);
         const so = await soClient.get('action', item.origin_id);
         const attrs = so.attributes as { name?: string; actionTypeId?: string };
         const connectorName = attrs.name ?? item.origin_id;

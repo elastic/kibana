@@ -94,7 +94,7 @@ interface ConnectorStepProps {
 
 export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
   const { euiTheme } = useEuiTheme();
-  const { http, notifications, triggersActionsUi, settings } = useKibana().services;
+  const { http, triggersActionsUi, settings } = useKibana().services;
   const { setConnector, completeStep } = useActions();
 
   const [connectors, setConnectors] = useState<AIConnector[]>();
@@ -112,7 +112,6 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
     refetch: refetchConnectors,
   } = useLoadConnectors({
     http,
-    toasts: notifications.toasts,
     featureId: 'automatic_import',
     settings,
   });

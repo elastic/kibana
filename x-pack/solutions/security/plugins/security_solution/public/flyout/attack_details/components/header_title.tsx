@@ -10,7 +10,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { Status } from './status';
 import { Assignees } from './assignees';

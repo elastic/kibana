@@ -32,9 +32,3 @@ export const CALENDAR_SHIFT_MONTHS = 12;
  * Pixel threshold from the top/bottom edge at which the calendar shifts month chunks.
  */
 export const CALENDAR_SCROLL_EDGE_THRESHOLD = 120;
-
-/**
- * Fallback intrinsic month height used by CSS `content-visibility`.
- * The browser uses this size before a month is actually rendered.
- */
-export const CALENDAR_MONTH_ESTIMATED_HEIGHT = 280;

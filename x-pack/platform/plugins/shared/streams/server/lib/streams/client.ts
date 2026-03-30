@@ -491,9 +491,11 @@ export class StreamsClient {
   async createQueryStream({
     name,
     query,
+    field_descriptions,
   }: {
     name: string;
     query: Streams.QueryStream.UpsertRequest['stream']['query'];
+    field_descriptions?: Record<string, string>;
   }): Promise<UpsertStreamResponse> {
     await State.attemptChanges(
       [
@@ -506,6 +508,7 @@ export class StreamsClient {
             updated_at: new Date().toISOString(),
             query_streams: [],
             query,
+            ...(field_descriptions && { field_descriptions }),
           },
         },
       ],

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
+import {
+  SECURITY_FEATURE_ID,
+  ALERTS_FEATURE_ID,
+} from '@kbn/security-solution-plugin/common/constants';
 import type { Role } from './types';
 
 export const noKibanaPrivileges: Role = {
@@ -129,6 +132,7 @@ export const securitySolutionOnlyAllSpacesAll: Role = {
       {
         feature: {
           [SECURITY_FEATURE_ID]: ['all'],
+          [ALERTS_FEATURE_ID]: ['read'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
         },
@@ -210,6 +214,7 @@ export const securitySolutionOnlyAllSpacesAllAttackDiscoveryMinimalAll: Role = {
       {
         feature: {
           [SECURITY_FEATURE_ID]: ['all'],
+          [ALERTS_FEATURE_ID]: ['read'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['minimal_all'],
         },

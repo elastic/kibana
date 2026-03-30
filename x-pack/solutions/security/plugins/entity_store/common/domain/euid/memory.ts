@@ -8,7 +8,15 @@
 import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { getDocument, getFieldValue, isEuidField } from './commons';
+import {
+  applyWhenConditionTrueSetFields,
+  documentPassesCalculatedIdentityPipelineGate,
+  getDocument,
+  getEffectiveEuidRanking,
+  getFieldsToBeFilteredOn,
+  getFieldValue,
+  isEuidField,
+} from './commons';
 import { applyFieldEvaluations } from './field_evaluations';
 
 /**
@@ -53,7 +61,20 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  const composedId = getComposedFieldValues(doc, identityField.euidFields);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  }
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
+  }
+
+  if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
+    return undefined;
+  }
+
+  const effectiveRanking = getEffectiveEuidRanking(doc, identityField);
+  const composedId = getComposedFieldValues(doc, effectiveRanking);
   if (composedId.length === 0) {
     return undefined;
   }
@@ -63,6 +84,58 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     return rawId;
   }
   return `${entityType}:${rawId}`;
+}
+
+/**
+ * Extracts identity field name → value pairs from a document (flattened, nested, or ES hit with `_source`)
+ * using the same rules as {@link getEuidFromObject}. Use for entity store resolution / flyout identity seeds.
+ */
+export function getEntityIdentifiersFromDocument(
+  entityType: EntityType,
+  doc: unknown
+): Record<string, string> | undefined {
+  if (!doc) {
+    return undefined;
+  }
+
+  let workingDoc = getDocument(doc);
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+
+  if (isSingleFieldIdentity(identityField)) {
+    const value = getFieldValue(workingDoc, identityField.singleField);
+    if (value === undefined) {
+      return undefined;
+    }
+    return { [identityField.singleField]: value };
+  }
+
+  if (identityField.fieldEvaluations?.length) {
+    const evaluated = applyFieldEvaluations(workingDoc, identityField.fieldEvaluations);
+    workingDoc = { ...workingDoc, ...evaluated };
+  }
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    applyWhenConditionTrueSetFields(workingDoc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  }
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    applyWhenConditionTrueSetFields(
+      workingDoc,
+      entityDefinition.whenConditionTrueSetFieldsAfterStats
+    );
+  }
+
+  if (!documentPassesCalculatedIdentityPipelineGate(workingDoc, entityDefinition)) {
+    return undefined;
+  }
+
+  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(
+    workingDoc,
+    getEffectiveEuidRanking(workingDoc, identityField)
+  );
+  if (fieldsToBeFilteredOn.rankingPosition === -1) {
+    return undefined;
+  }
+  return fieldsToBeFilteredOn.values;
 }
 
 function getComposedFieldValues(doc: any, euidFields: EuidAttribute[][]): string[] {

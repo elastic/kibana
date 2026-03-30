@@ -36,7 +36,7 @@ export const platformCoreTools = {
 } as const;
 
 export const platformStreamsSigEventsTools = {
-  searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.search_knowledge_indicators`,
+  searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.search_kis`,
 } as const;
 
 export const attachmentTools = {

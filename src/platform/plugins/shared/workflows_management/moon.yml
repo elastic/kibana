@@ -55,6 +55,7 @@ dependsOn:
   - '@kbn/serverless'
   - '@kbn/field-types'
   - '@kbn/data-views-plugin'
+  - '@kbn/kql'
   - '@kbn/field-formats-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/es-query'
@@ -107,26 +108,6 @@ fileGroups:
     - .storybook/**/*.tsx
     - server/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

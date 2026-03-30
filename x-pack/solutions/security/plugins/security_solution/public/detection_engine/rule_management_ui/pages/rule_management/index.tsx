@@ -40,6 +40,7 @@ import {
 } from '../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { CpsMlRuleCallout } from '../../components/cps_ml_rule_callout/callout';
 
 const RulesPageContent = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -92,6 +93,7 @@ const RulesPageContent = () => {
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingDetectionsPrivilegesCallOut />
+      <CpsMlRuleCallout />
       <MlJobCompatibilityCallout />
       <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
       <RuleImportModal
@@ -126,7 +128,7 @@ const RulesPageContent = () => {
                 >
                   <EuiButtonEmpty
                     data-test-subj="open-value-lists-modal-button"
-                    iconType="importAction"
+                    iconType="download"
                     isDisabled={isImportValueListDisabled}
                     onClick={showValueListFlyout}
                   >
@@ -137,7 +139,7 @@ const RulesPageContent = () => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="rules-import-modal-button"
-                  iconType="importAction"
+                  iconType="download"
                   isDisabled={!canEditRules || loading}
                   onClick={showImportModal}
                 >
@@ -151,7 +153,7 @@ const RulesPageContent = () => {
                   <SecuritySolutionLinkButton
                     data-test-subj="create-new-rule"
                     fill
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     isDisabled={!canEditRules || loading}
                     deepLinkId={SecurityPageName.rulesCreate}
                   >
