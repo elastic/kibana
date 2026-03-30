@@ -22,7 +22,7 @@ import {
   setYamlString,
 } from '../../../../entities/workflows/store/workflow_detail/slice';
 import type { ComputedData } from '../../../../entities/workflows/store/workflow_detail/types';
-import type { StepInfo } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import { createStepInfo } from '../../../../shared/test_utils';
 
 // Mock Monaco Range
 jest.mock('@kbn/monaco', () => {
@@ -134,16 +134,7 @@ const createMockEditor = () => {
   } as unknown as monaco.editor.IStandaloneCodeEditor;
 };
 
-// Helper function to create step info
-const createStepInfo = (overrides: Partial<StepInfo> = {}): StepInfo => ({
-  stepId: 'step-1',
-  stepType: 'action',
-  stepYamlNode: {} as any,
-  lineStart: 1,
-  lineEnd: 3,
-  propInfos: {},
-  ...overrides,
-});
+// createStepInfo imported from shared/test_utils
 
 // Helper to render hook with Redux provider
 const renderHookWithProviders = (

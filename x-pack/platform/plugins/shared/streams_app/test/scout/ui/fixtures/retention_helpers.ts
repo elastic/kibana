@@ -384,6 +384,7 @@ export async function setFailureStoreRetention(
   }
 
   await page.getByTestId('failureStoreModalSaveButton').click();
+  await expect(page.getByRole('dialog')).toBeHidden();
 }
 
 /**
@@ -400,6 +401,7 @@ export async function toggleFailureStore(page: ScoutPage, enabled: boolean): Pro
   await waitForElementToBeEnabled(page, 'enableFailureStoreToggle');
   await page.getByTestId('enableFailureStoreToggle').click();
   await page.getByTestId('failureStoreModalSaveButton').click();
+  await expect(page.getByRole('dialog')).toBeHidden();
 }
 
 /**
