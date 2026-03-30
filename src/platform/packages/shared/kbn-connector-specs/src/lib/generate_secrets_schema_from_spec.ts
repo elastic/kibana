@@ -20,8 +20,9 @@ interface GenerateOptions {
 
 export const generateSecretsSchemaFromSpec = (
   authSpec: ConnectorSpec['auth'],
-  { isPfxEnabled, isEarsEnabled = false, authMode }: GenerateOptions = {
+  { isPfxEnabled, isEarsEnabled, authMode }: GenerateOptions = {
     isPfxEnabled: true,
+    isEarsEnabled: false,
   }
 ) => {
   const secretSchemas: z.core.$ZodTypeDiscriminable[] = [];
