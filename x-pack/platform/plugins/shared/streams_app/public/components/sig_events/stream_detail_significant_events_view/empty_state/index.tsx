@@ -8,15 +8,21 @@
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiLink,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useGenAIConnectors } from '../../../../hooks/use_genai_connectors';
+import { useKibana } from '../../../../hooks/use_kibana';
 import noSigEventsImage from './no_sig_events.svg';
+
+const GEN_AI_SETTINGS_PATH = '/ai/genAiSettings';
 
 export function EmptyState({
   isGenerating,
@@ -31,6 +37,23 @@ export function EmptyState({
   onCancelGenerationClick: () => void;
   onGenerateSuggestionsClick: () => void;
 }) {
+  const {
+    core,
+    dependencies: {
+      start: { streams },
+    },
+  } = useKibana();
+  const genAiConnectors = useGenAIConnectors({
+    streamsRepositoryClient: streams.streamsRepositoryClient,
+    uiSettings: core.uiSettings,
+  });
+
+  const isDefaultAiConnectorMissing =
+    !genAiConnectors.loading && !Boolean(genAiConnectors.defaultConnector);
+  const genAiSettingsUrl = core.application.getUrlForApp('management', {
+    path: GEN_AI_SETTINGS_PATH,
+  });
+
   return (
     <EuiEmptyPrompt
       titleSize="xs"
@@ -59,35 +82,52 @@ export function EmptyState({
               })}
             </EuiText>
           </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false}>
-              {isGenerating ? (
+          {isDefaultAiConnectorMissing ? (
+            <EuiFlexItem>
+              <EuiCallOut
+                announceOnMount
+                title={NO_DEFAULT_CONNECTOR_CALLOUT_TITLE}
+                color="warning"
+                iconType="warning"
+              >
+                <p>
+                  {NO_DEFAULT_CONNECTOR_CALLOUT_DESCRIPTION}{' '}
+                  <EuiLink href={genAiSettingsUrl} external>
+                    {NO_DEFAULT_CONNECTOR_CALLOUT_LINK_LABEL}
+                  </EuiLink>
+                </p>
+              </EuiCallOut>
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false}>
+                {isGenerating ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
+                      iconType="stop"
+                      onClick={onCancelGenerationClick}
+                    />
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
-                    iconType="stop"
-                    onClick={onCancelGenerationClick}
-                  />
+                  <EuiButton
+                    fill
+                    color="primary"
+                    isLoading={isGenerating}
+                    isDisabled={isGenerateDisabled || isGenerating}
+                    onClick={onGenerateSuggestionsClick}
+                  >
+                    {isGenerating
+                      ? isCanceling
+                        ? CANCELING_BUTTON_LABEL
+                        : GENERATING_BUTTON_LABEL
+                      : GENERATE_BUTTON_LABEL}
+                  </EuiButton>
                 </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="primary"
-                  isLoading={isGenerating}
-                  isDisabled={isGenerateDisabled || isGenerating}
-                  onClick={onGenerateSuggestionsClick}
-                >
-                  {isGenerating
-                    ? isCanceling
-                      ? CANCELING_BUTTON_LABEL
-                      : GENERATING_BUTTON_LABEL
-                    : GENERATE_BUTTON_LABEL}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       }
     />
@@ -126,5 +166,27 @@ const CANCEL_GENERATION_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.streams.significantEvents.emptyState.cancelGenerationButtonAriaLabel',
   {
     defaultMessage: 'Cancel generation',
+  }
+);
+
+const NO_DEFAULT_CONNECTOR_CALLOUT_TITLE = i18n.translate(
+  'xpack.streams.significantEvents.emptyState.noDefaultConnectorCalloutTitle',
+  {
+    defaultMessage: 'No default connector configured',
+  }
+);
+
+const NO_DEFAULT_CONNECTOR_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEvents.emptyState.noDefaultConnectorCalloutDescription',
+  {
+    defaultMessage:
+      'Generating significant events requires a default AI connector. Open GenAI Settings to configure one.',
+  }
+);
+
+const NO_DEFAULT_CONNECTOR_CALLOUT_LINK_LABEL = i18n.translate(
+  'xpack.streams.significantEvents.emptyState.noDefaultConnectorCalloutLinkLabel',
+  {
+    defaultMessage: 'Open GenAI Settings',
   }
 );
