@@ -10,24 +10,23 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   registerExtensionSteps,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { pagerdutyDataSource } from './data_type';
 
-const CONNECTOR_NAME = 'fake-mcp-connector';
-const CONNECTOR_ID = 'fake-mcp-connector-uuid';
+const CONNECTOR_NAME = 'fake-pagerduty-connector';
+const CONNECTOR_ID = 'fake-pagerduty-connector-uuid';
 
-const mcpResponse = (data: unknown) => JSON.stringify(Array.isArray(data) ? data : [data]);
+const mockResponse = (data: unknown) => (Array.isArray(data) ? data : [data]);
 
 describe('pagerduty workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(pagerdutyDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.pagerduty_mcp', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 
@@ -35,7 +34,7 @@ describe('pagerduty workflows', () => {
     fixture = new WorkflowRunFixture();
 
     fixture.scopedActionsClientMock.getAll.mockResolvedValue([
-      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.mcp' },
+      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.pagerduty_mcp' },
     ]);
 
     registerExtensionSteps(fixture);
@@ -48,9 +47,7 @@ describe('pagerduty workflows', () => {
     }): Promise<ActionTypeExecutorResult<unknown>> => ({
       status: 'ok',
       actionId,
-      data: {
-        content: [{ text: mcpResponse({ response: [] }) }],
-      },
+      data: mockResponse({ response: [] }),
     });
   });
 
@@ -67,7 +64,7 @@ describe('pagerduty workflows', () => {
   });
 
   describe('who_am_i workflow', () => {
-    it('calls get_user_data with no arguments', async () => {
+    it('calls getUserData with no arguments', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'who_am_i'),
         inputs: {},
@@ -78,11 +75,8 @@ describe('pagerduty workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
-            subActionParams: {
-              name: 'get_user_data',
-              arguments: {},
-            },
+            subAction: 'getUserData',
+            subActionParams: {},
           }),
         })
       );
@@ -90,7 +84,7 @@ describe('pagerduty workflows', () => {
   });
 
   describe('search workflow', () => {
-    it('searches users via list_users MCP tool', async () => {
+    it('searches users via listUsers action', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'search'),
         inputs: { item_type: 'users', limit: 5, query: 'john' },
@@ -101,22 +95,17 @@ describe('pagerduty workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
+            subAction: 'listUsers',
             subActionParams: {
-              name: 'list_users',
-              arguments: {
-                query_model: {
-                  limit: 5,
-                  query: 'john',
-                },
-              },
+              limit: 5,
+              query: 'john',
             },
           }),
         })
       );
     });
 
-    it('searches schedules via list_schedules MCP tool', async () => {
+    it('searches schedules via listSchedules action', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'search'),
         inputs: { item_type: 'schedules', limit: 10, query: 'primary' },
@@ -127,16 +116,11 @@ describe('pagerduty workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
+            subAction: 'listSchedules',
             subActionParams: {
-              name: 'list_schedules',
-              arguments: {
-                query_model: {
-                  limit: 10,
-                  query: 'primary',
-                  include: [],
-                },
-              },
+              limit: 10,
+              query: 'primary',
+              include: [],
             },
           }),
         })
@@ -145,7 +129,7 @@ describe('pagerduty workflows', () => {
   });
 
   describe('get_incidents workflow', () => {
-    it('calls list_incidents MCP tool with filter params', async () => {
+    it('calls listIncidents action with filter params', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'get_incidents'),
         inputs: { limit: 10, status: ['triggered', 'acknowledged'] },
@@ -156,22 +140,17 @@ describe('pagerduty workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
+            subAction: 'listIncidents',
             subActionParams: {
-              name: 'list_incidents',
-              arguments: {
-                query_model: {
-                  limit: 10,
-                  status: ['triggered', 'acknowledged'],
-                  service_ids: [],
-                  user_ids: [],
-                  since: undefined,
-                  until: undefined,
-                  urgencies: [],
-                  request_scope: undefined,
-                  sort_by: [],
-                },
-              },
+              limit: 10,
+              status: ['triggered', 'acknowledged'],
+              service_ids: [],
+              user_ids: [],
+              since: undefined,
+              until: undefined,
+              urgencies: [],
+              request_scope: undefined,
+              sort_by: [],
             },
           }),
         })
@@ -191,12 +170,9 @@ describe('pagerduty workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
+            subAction: 'getIncident',
             subActionParams: {
-              name: 'get_incident',
-              arguments: {
-                incident_id: 'P123ABC',
-              },
+              incident_id: 'P123ABC',
             },
           }),
         })
@@ -214,12 +190,9 @@ describe('pagerduty workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
+            subAction: 'getSchedule',
             subActionParams: {
-              name: 'get_schedule',
-              arguments: {
-                schedule_id: 'PSCHED1',
-              },
+              schedule_id: 'PSCHED1',
             },
           }),
         })
@@ -228,7 +201,7 @@ describe('pagerduty workflows', () => {
   });
 
   describe('get_oncalls workflow', () => {
-    it('calls list_oncalls MCP tool', async () => {
+    it('calls listOncalls action', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'get_oncalls'),
         inputs: { limit: 5 },
@@ -239,21 +212,16 @@ describe('pagerduty workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
+            subAction: 'listOncalls',
             subActionParams: {
-              name: 'list_oncalls',
-              arguments: {
-                query_model: {
-                  limit: 5,
-                  schedule_ids: [],
-                  user_ids: [],
-                  escalation_policy_ids: [],
-                  since: undefined,
-                  until: undefined,
-                  time_zone: undefined,
-                  earliest: undefined,
-                },
-              },
+              limit: 5,
+              schedule_ids: [],
+              user_ids: [],
+              escalation_policy_ids: [],
+              since: undefined,
+              until: undefined,
+              time_zone: undefined,
+              earliest: undefined,
             },
           }),
         })
@@ -262,7 +230,7 @@ describe('pagerduty workflows', () => {
   });
 
   describe('get_escalation_policies workflow', () => {
-    it('calls list_escalation_policies MCP tool', async () => {
+    it('calls listEscalationPolicies action', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'get_escalation_policies'),
         inputs: { query: 'production', limit: 10 },
@@ -273,17 +241,12 @@ describe('pagerduty workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
+            subAction: 'listEscalationPolicies',
             subActionParams: {
-              name: 'list_escalation_policies',
-              arguments: {
-                query_model: {
-                  query: 'production',
-                  limit: 10,
-                  user_ids: [],
-                  team_ids: [],
-                },
-              },
+              query: 'production',
+              limit: 10,
+              user_ids: [],
+              team_ids: [],
             },
           }),
         })
