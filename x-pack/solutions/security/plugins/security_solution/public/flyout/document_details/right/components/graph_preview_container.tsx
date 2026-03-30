@@ -32,12 +32,7 @@ export const GraphPreviewContainer: React.FC = () => {
 
   const allowFlyoutExpansion = !isPreviewMode && !isRulePreview;
 
-  const {
-    eventIds,
-    timestamp = new Date().toISOString(),
-    shouldShowGraph,
-    isAlert,
-  } = useGraphPreview({
+  const { eventIds, timestamp, shouldShowGraph, isAlert } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
@@ -48,7 +43,7 @@ export const GraphPreviewContainer: React.FC = () => {
       mode="event"
       shouldShowGraph={shouldShowGraph}
       isAlert={isAlert}
-      timestamp={timestamp}
+      timestamp={timestamp ?? new Date().toISOString()}
       eventIds={eventIds}
       indexName={indexName}
       scopeId={scopeId}

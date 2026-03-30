@@ -93,7 +93,11 @@ const renderVisualizationsSection = (contextValue = panelContextValue) =>
     <IntlProvider locale="en">
       <TestProviders>
         <DocumentDetailsContext.Provider value={contextValue}>
-          <VisualizationsSection />
+          <VisualizationsSection
+            entityId="test-entity-id"
+            isPreviewMode={false}
+            scopeId="test-scope-id"
+          />
         </DocumentDetailsContext.Provider>
       </TestProviders>
     </IntlProvider>

@@ -59,6 +59,8 @@ export class TelemetryService {
       );
     }
 
-    return { reportEvent };
+    return {
+      reportEvent: reportEvent as TelemetryServiceStart['reportEvent'],
+    };
   }
 }

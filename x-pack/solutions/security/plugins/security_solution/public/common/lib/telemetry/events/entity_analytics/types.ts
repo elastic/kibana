@@ -114,6 +114,7 @@ export interface EntityAnalyticsTelemetryEventsMap {
   [EntityEventTypes.EntityRiskFiltered]: ReportEntityRiskFilteredParams;
   [EntityEventTypes.EntityStoreEnablementToggleClicked]: ReportEntityStoreEnablementParams;
   [EntityEventTypes.EntityStoreDashboardInitButtonClicked]: ReportEntityStoreInitParams;
+  [EntityEventTypes.EntityGraphClicked]: EntityParam;
   [EntityEventTypes.ToggleRiskSummaryClicked]: ReportToggleRiskSummaryClickedParams;
   [EntityEventTypes.AddRiskInputToTimelineClicked]: ReportAddRiskInputToTimelineClickedParams;
   [EntityEventTypes.RiskInputsExpandedFlyoutOpened]: ReportRiskInputsExpandedFlyoutOpenedParams;
