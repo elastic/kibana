@@ -70,7 +70,11 @@ export const getBurnRateEmbeddableFactory = ({
       const unsavedChangesApi = initializeUnsavedChanges<BurnRateEmbeddableState>({
         uuid,
         parentApi,
-        anyStateChange$: merge(titleManager.anyStateChange$, sloBurnRateManager.anyStateChange$),
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          sloBurnRateManager.anyStateChange$,
+          drilldownsManager.anyStateChange$
+        ),
         serializeState,
         getComparators: () => ({
           ...titleComparators,
@@ -82,6 +86,7 @@ export const getBurnRateEmbeddableFactory = ({
         onReset: (lastSaved) => {
           sloBurnRateManager.reinitializeState(lastSaved);
           titleManager.reinitializeState(lastSaved);
+          drilldownsManager.reinitializeState(lastSaved ?? {});
         },
       });
 
