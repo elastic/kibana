@@ -37,7 +37,7 @@ export const GettingStartedRedirectGate = ({ coreStart, children }: Props) => {
       hasRedirected.current = true;
       coreStart.application.navigateToApp('searchGettingStarted');
     }
-  }, [coreStart, shouldVisitGettingStartedPage, cloud, isServerless, shouldRedirect]);
+  }, [coreStart, shouldVisitGettingStartedPage, shouldRedirect]);
 
   // While stats are loading, suppress children to avoid mounting the homepage
   // only to immediately unmount it if a redirect is needed. If the stats call
