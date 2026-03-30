@@ -89,6 +89,7 @@ export interface SecuritySolutionPluginStartDependencies {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
+  entityStore: EntityStoreStartContract;
   elasticAssistant: ElasticAssistantPluginStart;
   eventLog: IEventLogClientService;
   fleet?: FleetPluginStart;

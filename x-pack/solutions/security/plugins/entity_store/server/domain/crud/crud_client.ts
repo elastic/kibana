@@ -16,10 +16,10 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
-import { getEuidFromObject } from '../../../common/domain/euid';
+import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { BadCRUDRequestError, EntityNotFoundError, EntityAlreadyExistsError } from '../errors';
-import { hashEuid, validateAndTransformDoc } from './utils';
+import { validateAndTransformDoc } from './utils';
 import { runWithSpan } from '../../telemetry/traces';
 import {
   searchEntitiesV2,
