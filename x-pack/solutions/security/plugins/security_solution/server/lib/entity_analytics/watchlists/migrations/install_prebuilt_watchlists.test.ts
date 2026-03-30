@@ -28,23 +28,22 @@ jest.mock('../../risk_score/tasks/helpers', () => ({
   buildScopedInternalSavedObjectsClientUnsafe: () => mockSavedObjectsClient.create(),
 }));
 
-const buildSavedObjectResponse = (namespaces: string[] = ['default']) => ({
+const buildSpacesResponse = (spaceIds: string[]) => ({
   page: 1,
-  per_page: 100,
-  total: namespaces.length,
-  saved_objects: namespaces.map((namespace) => ({
-    namespaces: [namespace],
-    attributes: {},
-    id: 'id',
-    type: 'entity-engine-descriptor-v2',
+  per_page: 1000,
+  total: spaceIds.length,
+  saved_objects: spaceIds.map((id) => ({
+    id,
+    attributes: { name: id },
+    type: 'space',
     references: [],
     score: 1,
   })),
 });
 
-const buildEmptyResponse = () => ({
+const buildEmptySpacesResponse = () => ({
   page: 1,
-  per_page: 100,
+  per_page: 1000,
   total: 0,
   saved_objects: [],
 });
@@ -80,20 +79,20 @@ describe('installPrebuiltWatchlists', () => {
     ]);
   });
 
-  it('should skip installation when no entity engine descriptors exist', async () => {
-    mockSoClient.find.mockResolvedValue(buildEmptyResponse());
+  it('should install in default namespace even when no spaces are found', async () => {
+    mockSoClient.find.mockResolvedValue(buildEmptySpacesResponse());
+    mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
 
     await callInstall();
 
-    expect(mockLogger.debug).toHaveBeenCalledWith(
-      'No entity engine descriptors found. Skipping prebuilt watchlist installation.'
+    expect(mockWatchlistCreate).toHaveBeenCalledTimes(1);
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining("Prebuilt watchlist 'Privileged Users' initialized.")
     );
-    expect(mockWatchlistGet).not.toHaveBeenCalled();
-    expect(mockWatchlistCreate).not.toHaveBeenCalled();
   });
 
   it('should skip creation when the prebuilt watchlist already exists', async () => {
-    mockSoClient.find.mockResolvedValue(buildSavedObjectResponse(['default']));
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
     mockWatchlistGet.mockResolvedValue({ id: PRIVILEGED_USER_WATCHLIST_ID });
 
     await callInstall();
@@ -103,7 +102,7 @@ describe('installPrebuiltWatchlists', () => {
   });
 
   it('should create the prebuilt watchlist when it does not exist', async () => {
-    mockSoClient.find.mockResolvedValue(buildSavedObjectResponse(['default']));
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
     mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
 
     await callInstall();
@@ -117,14 +116,12 @@ describe('installPrebuiltWatchlists', () => {
       { id: PRIVILEGED_USER_WATCHLIST_ID }
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'Prebuilt watchlist \'Privileged Users\' initialized in namespace "default"'
-      )
+      expect.stringContaining("Prebuilt watchlist 'Privileged Users' initialized.")
     );
   });
 
   it('should log an error when get throws a non-"not found" error', async () => {
-    mockSoClient.find.mockResolvedValue(buildSavedObjectResponse(['default']));
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
     mockWatchlistGet.mockRejectedValue(new Error('Connection refused'));
 
     await callInstall();
@@ -132,44 +129,27 @@ describe('installPrebuiltWatchlists', () => {
     expect(mockWatchlistCreate).not.toHaveBeenCalled();
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.stringContaining(
-        'Error checking prebuilt watchlist \'Privileged Users\' in namespace "default": Connection refused'
+        "Error checking prebuilt watchlist 'Privileged Users': Connection refused"
       )
     );
   });
 
-  it('should log an error when a saved object has no namespace', async () => {
-    const response = buildSavedObjectResponse([]);
-    mockSoClient.find.mockResolvedValue({
-      ...response,
-      total: 1,
-      saved_objects: [
-        {
-          ...response.saved_objects[0],
-          namespaces: [],
-        },
-      ],
-    });
-
-    await callInstall();
-
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'Unexpected saved object. Entity engine descriptor saved objects must have a namespace'
-    );
-    expect(mockWatchlistGet).not.toHaveBeenCalled();
-  });
-
   it('should install prebuilt watchlists in multiple namespaces', async () => {
-    mockSoClient.find.mockResolvedValue(buildSavedObjectResponse(['default', 'space-1']));
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default', 'space-1']));
     mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
 
     await callInstall();
 
     expect(mockWatchlistCreate).toHaveBeenCalledTimes(2);
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('initialized in namespace "default"')
-    );
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('initialized in namespace "space-1"')
-    );
+  });
+
+  it('should deduplicate default namespace when it appears in spaces response', async () => {
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default', 'space-1']));
+    mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+    await callInstall();
+
+    // default is in the spaces response AND always added — should still only run twice, not three times
+    expect(mockWatchlistCreate).toHaveBeenCalledTimes(2);
   });
 });
