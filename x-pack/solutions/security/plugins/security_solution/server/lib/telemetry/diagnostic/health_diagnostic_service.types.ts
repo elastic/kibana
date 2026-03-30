@@ -109,13 +109,15 @@ export interface HealthDiagnosticQueryV1 extends HealthDiagnosticQueryBase {
 }
 
 /**
- * v2 query descriptor — targets integrations matched by regex patterns.
- * The executor resolves patterns to concrete indices via Fleet before running.
+ * v2 query descriptor: targets integrations matched by regex patterns,
+ * or a direct index pattern (mutually exclusive with integrations).
+ * Invariant enforced by parser: exactly one of integrations or index is present.
  */
 export interface HealthDiagnosticQueryV2 extends HealthDiagnosticQueryBase {
   version: 2;
-  integrations: string[]; // regex patterns, parsed from comma-separated YAML value
-  datastreamTypes?: string[]; // optional datastream-type regex filters, e.g. ['logs', 'metrics.*']
+  integrations?: string[]; // regex patterns resolved via Fleet
+  datastreamTypes?: string[]; // only relevant when integrations is set
+  index?: string; // alternative to integrations: direct index pattern
 }
 
 /**
@@ -150,7 +152,8 @@ export interface IntegrationResolution {
  */
 export type ExecutableQuery =
   | { kind: 'executable'; query: HealthDiagnosticQueryV1 }
-  | { kind: 'executable'; query: HealthDiagnosticQueryV2; resolution: IntegrationResolution };
+  | { kind: 'executable'; query: HealthDiagnosticQueryV2; resolution: IntegrationResolution }
+  | { kind: 'executable'; query: HealthDiagnosticQueryV2 & { index: string } };
 
 export type SkipReason =
   | 'datastreams_not_matched'

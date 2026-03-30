@@ -285,6 +285,63 @@ describe('IntegrationResolverImpl', () => {
     });
   });
 
+  describe('v2 with direct index', () => {
+    it('returns ExecutableQuery without resolution when index is set', async () => {
+      const query = createMockQueryV2(QueryType.DSL, {
+        integrations: undefined,
+        index: 'logs-test-*',
+      });
+      const results = await resolver.resolve([query]);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].kind).toBe('executable');
+      if (results[0].kind !== 'executable') throw new Error('type guard');
+      expect(results[0].query.version).toBe(2);
+      expect('resolution' in results[0]).toBe(false);
+    });
+
+    it('does not call Fleet when index is set', async () => {
+      const query = createMockQueryV2(QueryType.DSL, {
+        integrations: undefined,
+        index: 'logs-test-*',
+      });
+      await resolver.resolve([query]);
+
+      expect(packageService.asInternalUser.getPackages).not.toHaveBeenCalled();
+    });
+
+    it('executes index-based v2 query even when Fleet is unavailable', async () => {
+      packageService.asInternalUser.getPackages.mockRejectedValue(new Error('Fleet is down'));
+
+      const query = createMockQueryV2(QueryType.DSL, {
+        integrations: undefined,
+        index: 'logs-test-*',
+      });
+      const results = await resolver.resolve([query]);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].kind).toBe('executable');
+    });
+
+    it('resolves index-based v2 alongside integrations-based v2 in one call', async () => {
+      const indexQuery = createMockQueryV2(QueryType.DSL, {
+        id: 'q-index',
+        integrations: undefined,
+        index: 'logs-test-*',
+      });
+      const integrationsQuery = createMockQueryV2(QueryType.DSL, {
+        id: 'q-integrations',
+        integrations: ['endpoint'],
+      });
+      const results = await resolver.resolve([indexQuery, integrationsQuery]);
+
+      expect(results).toHaveLength(2);
+      expect(results[0].kind).toBe('executable');
+      expect(results[1].kind).toBe('executable');
+      expect(packageService.asInternalUser.getPackages).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('unknown version queries', () => {
     it('returns SkippedQuery for ParseFailureQuery', async () => {
       const unknown = { version: 99, id: 'future', name: 'future', _raw: {} };

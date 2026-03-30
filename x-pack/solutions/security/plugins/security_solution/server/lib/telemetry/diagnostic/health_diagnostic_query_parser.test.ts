@@ -111,7 +111,7 @@ filterlist:
       expect(q.id).toBe('q2');
     });
 
-    it('returns ParseFailureQuery when v2 descriptor is missing required integrations field', () => {
+    it('returns ParseFailureQuery when neither integrations nor index is present', () => {
       const yaml = `---
 version: 2
 id: bad-v2
@@ -120,9 +120,66 @@ type: DSL
 query: 'x'
 scheduleCron: 5m
 filterlist:
-  user.name: keep`;
+  user.name: keep
+enabled: true`;
       const [q] = parseHealthDiagnosticQueries(yaml);
       expect((q as ParseFailureQuery)._raw).toBeDefined();
+    });
+  });
+
+  describe('v2 with index', () => {
+    it('parses successfully when index is present and integrations is absent', () => {
+      const yaml = `---
+version: 2
+id: q2-index
+name: my-v2-index-query
+index: logs-test-*
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      const v2 = q as unknown as HealthDiagnosticQueryV2;
+      expect(v2.version).toBe(2);
+      expect(v2.index).toBe('logs-test-*');
+      expect(v2.integrations).toBeUndefined();
+      expect(v2.datastreamTypes).toBeUndefined();
+    });
+
+    it('returns ParseFailureQuery when both integrations and index are present', () => {
+      const yaml = `---
+version: 2
+id: bad-both
+name: bad-both
+integrations: 'endpoint.*'
+index: logs-test-*
+type: DSL
+query: 'x'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      expect((q as ParseFailureQuery)._raw).toBeDefined();
+      expect((q as ParseFailureQuery).id).toBe('bad-both');
+    });
+
+    it('returns ParseFailureQuery when neither integrations nor index is present (explicit)', () => {
+      const yaml = `---
+version: 2
+id: bad-neither
+name: bad-neither
+type: DSL
+query: 'x'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      expect((q as ParseFailureQuery)._raw).toBeDefined();
+      expect((q as ParseFailureQuery).id).toBe('bad-neither');
     });
   });
 

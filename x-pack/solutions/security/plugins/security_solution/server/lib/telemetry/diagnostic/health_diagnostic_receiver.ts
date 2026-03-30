@@ -254,6 +254,9 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     if (query.version === 1) {
       baseIndices = [query.index];
       this.logger.debug('Using index from v1 query', { queryName: query.name } as LogMeta);
+    } else if ('index' in query && query.index) {
+      baseIndices = [query.index as string];
+      this.logger.trace('Using index from v2 query', { queryName: query.name } as LogMeta);
     } else {
       const v2Query = executableQuery as Extract<
         ExecutableQuery,
@@ -338,6 +341,9 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
   private originalIndicesFor(executableQuery: ExecutableQuery): string[] {
     if (executableQuery.query.version === 1) {
       return [executableQuery.query.index];
+    }
+    if ('index' in executableQuery.query && executableQuery.query.index) {
+      return [executableQuery.query.index as string];
     }
     const v2 = executableQuery as Extract<ExecutableQuery, { resolution: IntegrationResolution }>;
     return v2.resolution.indices;

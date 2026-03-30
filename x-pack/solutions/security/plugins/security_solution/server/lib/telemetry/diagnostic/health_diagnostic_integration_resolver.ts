@@ -26,11 +26,13 @@ export class IntegrationResolverImpl implements IntegrationResolver {
   constructor(private readonly packageService: PackageService, private readonly logger: Logger) {}
 
   async resolve(queries: HealthDiagnosticQuery[]): Promise<ResolvedQuery[]> {
-    const hasV2 = queries.some((q) => 'version' in q && q.version === 2);
+    const hasV2WithIntegrations = queries.some(
+      (q) => 'version' in q && q.version === 2 && !(q as HealthDiagnosticQueryV2).index
+    );
     let installedPackages: InstalledPackage[] = [];
     let fleetUnavailable = false;
 
-    if (hasV2) {
+    if (hasV2WithIntegrations) {
       try {
         installedPackages = await this.fetchInstalledPackages();
       } catch (err) {
@@ -50,6 +52,10 @@ export class IntegrationResolverImpl implements IntegrationResolver {
       if ('version' in query && query.version === 1) {
         return [this.resolveV1(query)];
       } else if ('version' in query && query.version === 2) {
+        if ((query as HealthDiagnosticQueryV2).index) {
+          // index-based v2: resolve directly, no Fleet needed
+          return [{ kind: 'executable', query } as ExecutableQuery];
+        }
         if (fleetUnavailable) {
           return [{ kind: 'skipped', query, reason: 'fleet_unavailable' } as SkippedQuery];
         }
@@ -58,7 +64,7 @@ export class IntegrationResolverImpl implements IntegrationResolver {
         if (query.type === QueryType.ESQL && /^[\s\r\n]*FROM/i.test(query.query)) {
           return [{ kind: 'skipped', query, reason: 'unsupported_query' } as SkippedQuery];
         }
-        return this.resolveV2(query, installedPackages);
+        return this.resolveV2(query as HealthDiagnosticQueryV2, installedPackages);
       } else {
         return [this.resolveUnknown(query)];
       }
@@ -74,6 +80,9 @@ export class IntegrationResolverImpl implements IntegrationResolver {
     installedPackages: InstalledPackage[]
   ): ResolvedQuery[] {
     const { integrations: patterns, datastreamTypes: typePatterns } = query;
+    if (!patterns) {
+      return [];
+    }
     const matched = installedPackages.filter((pkg) =>
       patterns.some((pattern) => {
         try {

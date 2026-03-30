@@ -49,19 +49,29 @@ const parseV1 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV1 =
 const parseV2 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV2 => {
   assertRequiredString(raw, 'id');
   assertRequiredString(raw, 'name');
-  assertRequiredString(raw, 'integrations');
   assertRequiredString(raw, 'type');
   assertRequiredString(raw, 'query');
   assertRequiredString(raw, 'scheduleCron');
   assertRequiredObject(raw, 'filterlist');
   assertRequiredBoolean(raw, 'enabled');
 
-  const integrations = ((raw as Record<string, unknown>).integrations as string)
-    .split(',')
-    .map((p) => p.trim())
-    .filter((p) => p.length > 0);
+  const hasIntegrations = raw && typeof raw.integrations === 'string' && raw.integrations !== '';
+  const hasIndex = raw && typeof raw.index === 'string' && raw.index !== '';
+  if (!hasIntegrations && !hasIndex) {
+    throw new Error('v2 descriptor must have either integrations or index');
+  }
+  if (hasIntegrations && hasIndex) {
+    throw new Error('v2 descriptor must not have both integrations and index');
+  }
 
-  const typesRaw = (raw as Record<string, unknown>).datastreamTypes;
+  const integrations = hasIntegrations
+    ? (raw.integrations as string)
+        .split(',')
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0)
+    : undefined;
+
+  const typesRaw = hasIntegrations ? (raw as Record<string, unknown>).datastreamTypes : undefined;
   const types =
     typeof typesRaw === 'string'
       ? typesRaw
@@ -73,8 +83,7 @@ const parseV2 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV2 =
   return {
     ...(raw as Record<string, unknown>),
     version: 2,
-    integrations,
-    datastreamTypes: types,
+    ...(integrations !== undefined ? { integrations, datastreamTypes: types } : {}),
   } as HealthDiagnosticQueryV2;
 };
 
