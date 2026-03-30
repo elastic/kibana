@@ -59,8 +59,10 @@ const deduplicateEntityDocuments = (docs: NodeDocumentDataModel[]): NodeDocument
           existingSf[key] = value;
         } else if (existingVal !== value) {
           const arr = Array.isArray(existingVal) ? existingVal : [existingVal];
-          if (!arr.includes(value)) {
-            existingSf[key] = [...arr, value];
+          const valuesToAdd = Array.isArray(value) ? value : [value];
+          const newValues = valuesToAdd.filter((v) => !arr.includes(v));
+          if (newValues.length > 0) {
+            existingSf[key] = [...arr, ...newValues];
           }
         }
       }
