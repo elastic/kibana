@@ -45,6 +45,8 @@ describe('getMaximumOpenCases', () => {
   });
 
   it('returns MAX_OPEN_CASES_DEFAULT_MAXIMUM exactly when given MAX_OPEN_CASES_DEFAULT_MAXIMUM', () => {
-    expect(getMaximumOpenCases(MAX_OPEN_CASES_DEFAULT_MAXIMUM)).toBe(MAX_OPEN_CASES_DEFAULT_MAXIMUM);
+    expect(getMaximumOpenCases(MAX_OPEN_CASES_DEFAULT_MAXIMUM)).toBe(
+      MAX_OPEN_CASES_DEFAULT_MAXIMUM
+    );
   });
 });

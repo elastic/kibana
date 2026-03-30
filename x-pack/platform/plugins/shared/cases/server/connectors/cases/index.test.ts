@@ -11,7 +11,6 @@ import { getCasesConnectorAdapter, getCasesConnectorType } from '.';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   DEFAULT_MAX_OPEN_CASES,
-  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
   ABSOLUTE_MAX_CASES_PER_RUN,
   OBSERVABILITY_PROJECT_TYPE_ID,
   SECURITY_PROJECT_TYPE_ID,

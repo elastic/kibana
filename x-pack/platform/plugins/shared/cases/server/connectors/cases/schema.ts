@@ -188,11 +188,7 @@ export const ZCasesConnectorRunParamsSchema = z
   .object({
     alerts: z.array(ZAlertSchema),
     autoPushCase: z.boolean().nullable().default(false),
-    groupedAlerts: z
-      .array(ZCasesGroupedAlertsSchema)
-      .min(0)
-      .default([])
-      .nullable(),
+    groupedAlerts: z.array(ZCasesGroupedAlertsSchema).min(0).default([]).nullable(),
     groupingBy: ZGroupingSchema,
     owner: z.string(),
     rule: ZRuleSchema,
@@ -217,7 +213,11 @@ export const CasesConnectorRuleActionParamsSchema = schema.object({
     timeWindow: TimeWindowSchema,
     templateId: schema.nullable(schema.string()),
     maximumCasesToOpen: schema.nullable(
-      schema.number({ min: 1, max: ABSOLUTE_MAX_CASES_PER_RUN, defaultValue: DEFAULT_MAX_OPEN_CASES })
+      schema.number({
+        min: 1,
+        max: ABSOLUTE_MAX_CASES_PER_RUN,
+        defaultValue: DEFAULT_MAX_OPEN_CASES,
+      })
     ),
   }),
 });
