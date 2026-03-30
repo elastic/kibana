@@ -96,6 +96,12 @@ export const UserPanelContent = ({
             <EuiHorizontalRule />
           </>
         )}
+      {entityStoreEntityId && !isPreviewMode && (
+        <>
+          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
+          <EuiHorizontalRule />
+        </>
+      )}
       {!skipRiskAndCriticality && (
         <AssetCriticalityAccordion
           entity={{ name: userName, type: EntityType.user }}
@@ -104,12 +110,6 @@ export const UserPanelContent = ({
           criticalityFromEntityStore={criticalityFromEntityStore}
           onSaveViaEntityStore={onSaveAssetCriticalityViaEntityStore}
         />
-      )}
-      {entityStoreEntityId && !isPreviewMode && (
-        <>
-          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
-          <EuiHorizontalRule />
-        </>
       )}
       <EntityInsight
         identityFields={identityFields}
