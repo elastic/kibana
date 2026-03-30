@@ -31,7 +31,6 @@ import {
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
 } from '../../../common/type_guards';
-import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
 import { TASK_TYPE_TOOLTIPS } from '../all_inference_endpoints/render_table_columns/render_endpoint/translations';
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
@@ -214,14 +213,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       </EuiFlyoutFooter>
       {isModalOpen && (
         <AddEndpointModal
-          mode={editingEndpoint ? 'edit' : 'add'}
+          mode={editingEndpoint ? 'view' : 'add'}
           modelId={modelId}
           taskTypes={taskTypeOptions}
           initialEndpointId={editingEndpoint?.inference_id}
           initialTaskType={editingEndpoint?.task_type}
-          isPreconfigured={
-            editingEndpoint ? isEndpointPreconfigured(editingEndpoint.inference_id) : false
-          }
           onSave={onSaveEndpoint}
           onCancel={handleCloseModal}
         />

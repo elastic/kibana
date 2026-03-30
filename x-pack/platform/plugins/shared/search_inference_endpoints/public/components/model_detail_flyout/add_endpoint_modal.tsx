@@ -37,7 +37,7 @@ export interface TaskTypeOption {
   recommended?: boolean;
 }
 
-export type EndpointModalMode = 'add' | 'edit';
+export type EndpointModalMode = 'add' | 'view';
 
 export interface AddEndpointModalProps {
   mode?: EndpointModalMode;
@@ -45,7 +45,6 @@ export interface AddEndpointModalProps {
   taskTypes: TaskTypeOption[];
   initialEndpointId?: string;
   initialTaskType?: string;
-  isPreconfigured?: boolean;
   onSave: () => void;
   onCancel: () => void;
 }
@@ -53,7 +52,7 @@ export interface AddEndpointModalProps {
 const ENDPOINT_ID_PATTERN = /^[a-z0-9][a-z0-9_-]*[a-z0-9]$/;
 
 function generateEndpointId(modelId: string, taskType: string): string {
-  const sanitizedModelId = modelId.replace(/\./g, '_').replace(/^_+/, '');
+  const sanitizedModelId = modelId.toLowerCase().replace(/\./g, '_').replace(/^_+/, '');
   return `${sanitizedModelId}-${taskType}-${Math.random().toString(36).slice(2)}`;
 }
 
@@ -68,7 +67,6 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
   taskTypes,
   initialEndpointId,
   initialTaskType,
-  isPreconfigured = false,
   onSave,
   onCancel,
 }) => {
@@ -83,8 +81,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
       onCancel();
     }
   );
-  const isEdit = mode === 'edit';
-  const isReadOnly = isEdit && isPreconfigured;
+  const isView = mode === 'view';
   const radioGroupName = useGeneratedHtmlId();
   const modalTitleId = useGeneratedHtmlId();
 
@@ -98,7 +95,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
   const [endpointId, setEndpointId] = useState(
     () => initialEndpointId ?? generateEndpointId(modelId, defaultTaskType)
   );
-  const [endpointIdTouched, setEndpointIdTouched] = useState(isEdit);
+  const [endpointIdTouched, setEndpointIdTouched] = useState(isView);
 
   useEffect(() => {
     if (!endpointIdTouched) {
@@ -134,11 +131,12 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
         },
         secrets: { providerSecrets: {} },
       },
-      isEdit
+      false
     );
-  }, [saveEndpoint, endpointId, selectedTaskType, modelId, isEdit]);
+  }, [saveEndpoint, endpointId, selectedTaskType, modelId]);
 
   const endpointIdError = useMemo(() => {
+    if (isView) return undefined;
     const trimmed = endpointId.trim();
     if (trimmed.length === 0) return undefined;
     if (!isValidEndpointId(trimmed)) {
@@ -151,26 +149,18 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
       );
     }
     return undefined;
-  }, [endpointId]);
-
-  const hasChanges = isEdit
-    ? endpointId !== initialEndpointId || selectedTaskType !== initialTaskType
-    : true;
+  }, [endpointId, isView]);
 
   const isValid =
-    endpointId.trim().length > 0 &&
-    selectedTaskType.length > 0 &&
-    !endpointIdError &&
-    hasChanges &&
-    !isReadOnly;
+    !isView && endpointId.trim().length > 0 && selectedTaskType.length > 0 && !endpointIdError;
 
   return (
     <EuiModal onClose={onCancel} style={{ width: 640 }} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
-          {isEdit
-            ? i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.editTitle', {
-                defaultMessage: 'Edit endpoint',
+          {isView
+            ? i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.viewTitle', {
+                defaultMessage: 'View endpoint',
               })
             : i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.title', {
                 defaultMessage: 'Add endpoint',
@@ -235,7 +225,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
                   }
                   checked={selectedTaskType === taskType.value}
                   onChange={() => handleTaskTypeChange(taskType.value)}
-                  disabled={isEdit}
+                  disabled={isView}
                 >
                   <div style={{ marginTop: 4, marginBottom: 4 }}>
                     <EuiText size="xs" color="subdued">
@@ -280,7 +270,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
             isInvalid={endpointIdTouched && !!endpointIdError}
             value={endpointId}
             onChange={handleEndpointIdChange}
-            readOnly={isEdit}
+            readOnly={isView}
             fullWidth
             prepend={
               <EuiButtonIcon
@@ -299,22 +289,32 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
-          {i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.cancelButton', {
-            defaultMessage: 'Cancel',
-          })}
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          onClick={handleSave}
-          isLoading={isSaving}
-          disabled={!isValid}
-          data-test-subj="addEndpointModalSaveButton"
-        >
-          {i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.saveButton', {
-            defaultMessage: 'Save',
-          })}
-        </EuiButton>
+        {isView ? (
+          <EuiButton onClick={onCancel}>
+            {i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.closeButton', {
+              defaultMessage: 'Close',
+            })}
+          </EuiButton>
+        ) : (
+          <>
+            <EuiButtonEmpty onClick={onCancel}>
+              {i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+            <EuiButton
+              fill
+              onClick={handleSave}
+              isLoading={isSaving}
+              disabled={!isValid}
+              data-test-subj="addEndpointModalSaveButton"
+            >
+              {i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.saveButton', {
+                defaultMessage: 'Save',
+              })}
+            </EuiButton>
+          </>
+        )}
       </EuiModalFooter>
     </EuiModal>
   );

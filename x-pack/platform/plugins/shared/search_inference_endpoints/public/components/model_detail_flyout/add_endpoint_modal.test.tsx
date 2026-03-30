@@ -11,6 +11,24 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import type { TaskTypeOption } from './add_endpoint_modal';
 import { AddEndpointModal } from './add_endpoint_modal';
 
+const mockMutate = jest.fn();
+
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      http: {},
+      notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
+    },
+  }),
+}));
+
+jest.mock('@kbn/inference-endpoint-ui-common', () => ({
+  useInferenceEndpointMutation: () => ({
+    mutate: mockMutate,
+    isLoading: false,
+  }),
+}));
+
 const defaultTaskTypes: TaskTypeOption[] = [
   {
     value: 'chat_completion',
@@ -27,7 +45,7 @@ const defaultTaskTypes: TaskTypeOption[] = [
 
 function getEndpointIdInput(): HTMLInputElement {
   const inputs = screen.getAllByRole('textbox') as HTMLInputElement[];
-  const endpointInput = inputs.find((input) => /^elastic-/.test(input.value) || !input.readOnly);
+  const endpointInput = inputs.find((input) => !input.readOnly);
   if (!endpointInput) throw new Error('Could not find endpoint ID input');
   return endpointInput;
 }
@@ -36,7 +54,9 @@ describe('AddEndpointModal', () => {
   const onSave = jest.fn();
   const onCancel = jest.fn();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   const renderModal = (overrides = {}) =>
     render(
@@ -71,17 +91,17 @@ describe('AddEndpointModal', () => {
     expect(screen.getByText('Recommended')).toBeInTheDocument();
   });
 
-  it('auto-generates endpoint ID with elastic prefix and task type', () => {
+  it('auto-generates endpoint ID based on model and task type', () => {
     renderModal();
     const input = getEndpointIdInput();
-    expect(input.value).toMatch(/^elastic-chat_completion-[a-z0-9]+$/);
+    expect(input.value).toMatch(/^anthropic-claude-4_6-opus-chat_completion-[a-z0-9]+$/);
   });
 
   it('updates endpoint ID when task type changes', () => {
     renderModal();
     fireEvent.click(screen.getByLabelText('Completion'));
     const input = getEndpointIdInput();
-    expect(input.value).toMatch(/^elastic-completion-[a-z0-9]+$/);
+    expect(input.value).toMatch(/^anthropic-claude-4_6-opus-completion-[a-z0-9]+$/);
   });
 
   it('preserves user-edited endpoint ID when task type changes', () => {
@@ -93,12 +113,20 @@ describe('AddEndpointModal', () => {
     expect(screen.getByDisplayValue('my-custom-id')).toBeInTheDocument();
   });
 
-  it('calls onSave with endpoint ID and task type', () => {
+  it('calls saveEndpoint mutation with correct config on save', () => {
     renderModal();
     fireEvent.click(screen.getByTestId('addEndpointModalSaveButton'));
-    expect(onSave).toHaveBeenCalledWith(
-      expect.stringMatching(/^elastic-chat_completion-/),
-      'chat_completion'
+    expect(mockMutate).toHaveBeenCalledWith(
+      {
+        config: {
+          inferenceId: expect.stringMatching(/^anthropic-claude-4_6-opus-chat_completion-/),
+          taskType: 'chat_completion',
+          provider: 'elastic',
+          providerConfig: { model_id: 'anthropic-claude-4.6-opus' },
+        },
+        secrets: { providerSecrets: {} },
+      },
+      false
     );
   });
 
@@ -120,5 +148,25 @@ describe('AddEndpointModal', () => {
     const input = getEndpointIdInput();
     fireEvent.change(input, { target: { value: '.invalid-id' } });
     expect(screen.getByTestId('addEndpointModalSaveButton')).toBeDisabled();
+  });
+
+  describe('view mode', () => {
+    it('renders View endpoint title', () => {
+      renderModal({ mode: 'view', initialEndpointId: 'my-ep', initialTaskType: 'completion' });
+      expect(screen.getByText('View endpoint')).toBeInTheDocument();
+    });
+
+    it('shows Close button instead of Save/Cancel', () => {
+      renderModal({ mode: 'view', initialEndpointId: 'my-ep', initialTaskType: 'completion' });
+      expect(screen.getByText('Close')).toBeInTheDocument();
+      expect(screen.queryByText('Save')).not.toBeInTheDocument();
+      expect(screen.queryByText('Cancel')).not.toBeInTheDocument();
+    });
+
+    it('calls onCancel when Close is clicked', () => {
+      renderModal({ mode: 'view', initialEndpointId: 'my-ep', initialTaskType: 'completion' });
+      fireEvent.click(screen.getByText('Close'));
+      expect(onCancel).toHaveBeenCalled();
+    });
   });
 });
