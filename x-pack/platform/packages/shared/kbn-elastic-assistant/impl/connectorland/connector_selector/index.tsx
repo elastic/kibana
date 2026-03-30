@@ -44,6 +44,7 @@ interface Props {
   displayFancy?: (label: string, aIConnector?: AIConnector) => React.ReactNode;
   setIsOpen?: (isOpen: boolean) => void;
   stats?: AttackDiscoveryStats | null;
+  loadConnectorFeatureId?: string;
 
   /**
    * Allows parent components to control whether the default connector should be
@@ -86,6 +87,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     setIsOpen,
     stats = null,
     explicitConnectorSelection,
+    loadConnectorFeatureId = 'elastic_assistant',
   }) => {
     const { actionTypeRegistry, http, assistantAvailability, settings, navigateToApp } =
       useAssistantContext();
@@ -99,7 +101,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     const { data: aiConnectors, refetch: refetchConnectors } = useLoadConnectors({
       http,
-      featureId: 'elastic_assistant',
+      featureId: loadConnectorFeatureId,
       settings,
     });
 
@@ -225,7 +227,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const input = useMemo(() => {
       return (
         <EuiButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           size="s"
           color="text"
@@ -261,7 +263,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const addConnectorButton = (
       <EuiButtonEmpty
         data-test-subj="addNewConnectorButton"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isDisabled={isAddConnectorDisabled}
         size="xs"
         onClick={() => setIsConnectorModalVisible(true)}

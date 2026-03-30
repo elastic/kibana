@@ -29,7 +29,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ attributes: { size: 4096 } }];
       await testBed.ingest(indexName, docs, processors);
@@ -76,9 +76,9 @@ apiTest.describe(
           ],
         };
 
-        expect(() => {
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed'); // Should throw validation error for Mustache templates
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       });
     });
 
@@ -95,7 +95,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'should-be-copied' }];
       await testBed.ingest(indexName, docs, processors);
@@ -118,7 +118,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ attributes: { status: 'active' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -141,7 +141,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ attributes: { status: 'active' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -160,7 +160,7 @@ apiTest.describe(
         ],
       };
 
-      expect(() => transpile(streamlangDSL)).toThrowError(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Set processor must have either value or copy_from, but not both.'
       );
     });
@@ -177,7 +177,7 @@ apiTest.describe(
         ],
       };
 
-      expect(() => transpile(streamlangDSL)).toThrowError(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Set processor must have either value or copy_from, but not both.'
       );
     });

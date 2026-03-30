@@ -18,6 +18,7 @@ import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
 import { getIdForLayer, isLensStateDataLayer } from './helpers';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
+import { getScaleTypeFromColumnType } from '../utils';
 import {
   buildAPIAnnotationsLayer,
   buildAPIDataLayer,
@@ -126,9 +127,9 @@ function convertAxisSettingsToStateFormat(
             axis?.right?.labels?.orientation ?? 'horizontal'
           ),
         };
-  const xTitle = axis?.x?.title?.value;
-  const yTitle = axis?.left?.title?.value;
-  const yRightTitle = axis?.right?.title?.value;
+  const xTitle = axis?.x?.title?.text;
+  const yTitle = axis?.left?.title?.text;
+  const yRightTitle = axis?.right?.title?.text;
   const yLeftScale = axis?.left?.scale;
   const yRightScale = axis?.right?.scale;
   return stripUndefined({
@@ -263,33 +264,25 @@ function convertAxisSettingsToAPIFormat(
   layers: Record<string, DataSourceStateLayer>
 ): Pick<XYState, 'axis'> | {} {
   const axis: EditableAxisType = {};
-
-  let xAxisScale: string | undefined;
+  let xAxisScale: XAxisType['scale'];
   const firstLayer = config.layers[0];
   const dataSourceLayer = layers[firstLayer.layerId];
   if (isTextBasedLayer(dataSourceLayer) && isLensStateDataLayer(firstLayer)) {
     const xColumn = dataSourceLayer.columns.find((c) => c.columnId === firstLayer.xAccessor);
-    if (xColumn?.meta?.type === 'date') {
-      xAxisScale = 'temporal';
-    } else if (xColumn?.meta?.type === 'number') {
-      xAxisScale = 'linear';
-    } else {
-      xAxisScale = 'ordinal';
-    }
+    xAxisScale = getScaleTypeFromColumnType(xColumn?.meta?.type);
   }
 
   const xAxis: XAxisType = stripUndefined({
     title:
       config.xTitle || config.axisTitlesVisibilitySettings?.x != null
         ? stripUndefined({
-            value: config.xTitle,
+            text: config.xTitle,
             visible:
               config.axisTitlesVisibilitySettings?.x != null
                 ? config.axisTitlesVisibilitySettings.x
                 : undefined,
           })
         : undefined,
-
     ticks:
       config.tickLabelsVisibilitySettings?.x != null
         ? { visible: config.tickLabelsVisibilitySettings.x }
@@ -307,7 +300,7 @@ function convertAxisSettingsToAPIFormat(
         }
       : {}),
     scale: xAxisScale,
-  });
+  } satisfies XAxisType);
   if (Object.keys(xAxis).length) {
     axis.x = xAxis;
   }
@@ -316,7 +309,7 @@ function convertAxisSettingsToAPIFormat(
     title:
       config.yTitle || config.axisTitlesVisibilitySettings?.yLeft != null
         ? stripUndefined({
-            value: config.yTitle,
+            text: config.yTitle,
             visible:
               config.axisTitlesVisibilitySettings?.yLeft != null
                 ? config.axisTitlesVisibilitySettings.yLeft
@@ -349,7 +342,7 @@ function convertAxisSettingsToAPIFormat(
     title:
       config.yRightTitle || config.axisTitlesVisibilitySettings?.yRight != null
         ? stripUndefined({
-            value: config.yRightTitle,
+            text: config.yRightTitle,
             visible:
               config.axisTitlesVisibilitySettings?.yRight != null
                 ? config.axisTitlesVisibilitySettings.yRight
