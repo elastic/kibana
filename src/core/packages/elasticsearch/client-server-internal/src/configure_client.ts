@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { performance } from 'perf_hooks';
 import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
@@ -108,6 +109,16 @@ function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logg
     }
 
     cpsRequestCounter.add(1, metricAttributes);
+
+    // Report ES request timing to Server-Timing header
+    const timingContext = (event.meta.request.options?.context as any)?.timingContext;
+    if (timingContext?.kibanaRequest?.serverTiming && timingContext.startTime) {
+      const duration = performance.now() - timingContext.startTime;
+      const method = event.meta.request.params.method || 'unknown';
+      const path = event.meta.request.params.path || 'unknown';
+
+      timingContext.kibanaRequest.serverTiming.measure('es-request', duration, `${method} ${path}`);
+    }
 
     logger.debug('CPS request completed', {
       event: {

@@ -12,7 +12,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import type { MetricUnit } from '../../../types';
+import type { NullableMetricUnit } from '../../../types';
 import { useEsqlQueryInfo } from '../../../hooks';
 import { getLensMetricFormat } from '../../../common/utils';
 import type { UnifiedMetricsGridProps } from '../../../types';
@@ -20,7 +20,7 @@ import type { UnifiedMetricsGridProps } from '../../../types';
 interface ChartLayersFromEsqlProps {
   query: string;
   color?: string;
-  unit?: MetricUnit;
+  unit?: NullableMetricUnit;
   timeRange: TimeRange;
   seriesType: LensSeriesLayer['seriesType'];
   services: UnifiedMetricsGridProps['services'];
