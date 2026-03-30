@@ -6,20 +6,20 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import type { PluginClient } from '../../plugins/client/client';
-import type { PersistedPluginDefinition } from '../../plugins/client/types';
+import type { PluginDefinition } from '@kbn/agent-builder-common';
+import type { PluginRegistry } from '../../plugins/plugin_registry';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 import { createPluginsService } from './plugins';
 
-const createPluginDefinition = (id: string, skillIds: string[]): PersistedPluginDefinition => ({
+const createPluginDefinition = (id: string, skillIds: string[]): PluginDefinition => ({
   id,
   name: `plugin-${id}`,
   version: '1.0.0',
   description: `Description for ${id}`,
+  readonly: false,
   manifest: {},
   skill_ids: skillIds,
   unmanaged_assets: {
-    commands: [],
     agents: [],
     hooks: [],
     mcp_servers: [],
@@ -30,22 +30,22 @@ const createPluginDefinition = (id: string, skillIds: string[]): PersistedPlugin
   updated_at: new Date().toISOString(),
 });
 
-const createPluginsServiceStartMock = (
-  clientOverrides: Partial<PluginClient> = {}
-): PluginsServiceStart => {
-  const client: PluginClient = {
-    get: jest.fn(),
-    list: jest.fn(),
-    has: jest.fn(),
-    findByName: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    ...clientOverrides,
-  };
+const createMockRegistry = (getMock: jest.Mock = jest.fn()): PluginRegistry => ({
+  has: jest.fn(),
+  get: getMock,
+  findByName: jest.fn(),
+  list: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+});
 
+const createPluginsServiceStartMock = (
+  registryOverrides: Partial<PluginRegistry> = {}
+): PluginsServiceStart => {
+  const registry = { ...createMockRegistry(), ...registryOverrides };
   return {
-    getScopedClient: jest.fn().mockReturnValue(client),
+    getRegistry: jest.fn().mockReturnValue(registry),
     installPlugin: jest.fn(),
     deletePlugin: jest.fn(),
   };
@@ -62,7 +62,7 @@ describe('createPluginsService', () => {
       const result = await service.resolveSkillIds([]);
 
       expect(result).toEqual([]);
-      expect(pluginsServiceStart.getScopedClient).not.toHaveBeenCalled();
+      expect(pluginsServiceStart.getRegistry).not.toHaveBeenCalled();
     });
 
     it('returns skill IDs from a single plugin', async () => {

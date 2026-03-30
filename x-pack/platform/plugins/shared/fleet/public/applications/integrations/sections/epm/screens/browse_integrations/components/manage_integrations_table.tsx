@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFilterButton,
   EuiFilterGroup,
@@ -24,6 +23,7 @@ import {
   EuiInMemoryTable,
   EuiText,
   useEuiTheme,
+  EuiCallOut,
 } from '@elastic/eui';
 import type {
   EuiBasicTableColumn,
@@ -762,7 +762,9 @@ export const ManageIntegrationsTable: React.FC<{
       placeholder: 'Search integrations',
       'data-test-subj': 'manageIntegrationsSearchInput',
     },
-    toolsRight: [filterButtons],
+    toolsRight: [
+      <React.Fragment key="manageIntegrationsSearchTools">{filterButtons}</React.Fragment>,
+    ],
   };
 
   const countText = (

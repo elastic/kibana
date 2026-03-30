@@ -36,10 +36,12 @@ export interface AlertWorkflowsPanelProps {
     _index: string;
   }[];
   onClose: () => void;
+  /** Optional callback invoked when workflow execution is triggered. */
+  onExecute?: () => void;
 }
 
 /** A panel that lets users select and execute a workflow against one or more alerts. **/
-export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelProps) => {
+export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkflowsPanelProps) => {
   const {
     services: { application, rendering },
   } = useKibana<{ application: ApplicationStart; rendering: RenderingService }>();
@@ -52,6 +54,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
   const handleExecuteClick = useCallback(() => {
     if (!selectedId) return;
     setIsLoading(true);
+    onExecute?.();
 
     const inputsPayload: AlertTriggerInput = {
       event: {
@@ -108,6 +111,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
     workflowTriggerFailed,
     rendering,
     onClose,
+    onExecute,
     alertIds,
   ]);
 

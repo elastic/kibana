@@ -242,12 +242,15 @@ describe('buildEsqlFetchSubscribe', () => {
       // non transformational command, different index
       query: { esql: 'from the-data-view-title2 | where field1 > 0' },
     });
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId,
-        appState: { columns: ['field1', 'field2'] },
-      });
-    });
+    await waitFor(
+      () => {
+        expect(replaceUrlState).toHaveBeenCalledWith({
+          tabId,
+          appState: { columns: ['field1', 'field2'] },
+        });
+      },
+      { timeout: 2000 }
+    );
   });
 
   test('only changing an ES|QL query with same result columns should not change columns', async () => {

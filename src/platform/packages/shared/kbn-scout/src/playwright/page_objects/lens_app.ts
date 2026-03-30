@@ -124,7 +124,8 @@ export class LensApp {
     await expect(input).toHaveValue(`${value}`);
   }
 
-  async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
+  async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
+    await this.page.testSubj.click('lnsDatatable_dynamicColoring_groups');
     await this.page.testSubj.click(`lnsDatatable_dynamicColoring_groups_${coloringType}`);
   }
 

@@ -245,6 +245,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.closePalettePanel();
     });
 
+    it('should render values as badges when badge coloring is enabled', async () => {
+      await lens.setTableDynamicColoring('badge');
+      await lens.waitForVisualization();
+      const cell = await lens.getDatatableCell(0, 2);
+      const badge = await cell.findByTestSubject('lnsTableCellContentBadge');
+      const badgeText = await badge.getVisibleText();
+      expect(badgeText).to.not.be.empty();
+      const cellStyle = await lens.getDatatableCellStyle(0, 2);
+      expect(cellStyle['background-color']).to.be(undefined);
+    });
+
     it('should allow to show a summary table for metric columns', async () => {
       await lens.setTableSummaryRowFunction('sum');
       await lens.waitForVisualization();

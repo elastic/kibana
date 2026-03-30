@@ -14164,6 +14164,10 @@
                 "path": "x-pack/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_maintenance_windows.tsx"
               },
               {
+                "plugin": "@kbn/inference-connectors",
+                "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts"
+              },
+              {
                 "plugin": "@kbn/elastic-assistant",
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/capabilities/use_capabilities.tsx"
               },
@@ -14245,6 +14249,14 @@
               },
               {
                 "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template_tags.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template_creators.ts"
+              },
+              {
+                "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_case.tsx"
               },
               {
@@ -14288,18 +14300,6 @@
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_case_metrics.tsx"
               },
               {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template_tags.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template_creators.ts"
-              },
-              {
-                "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/use_load_connectors/index.tsx"
-              },
-              {
                 "plugin": "@kbn/elastic-assistant",
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/use_load_action_types/index.tsx"
               },
@@ -14326,6 +14326,34 @@
               {
                 "plugin": "@kbn/inference-endpoint-ui-common",
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_providers.ts"
+              },
+              {
+                "plugin": "alertingVTwo",
+                "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_fetch_rule.ts"
+              },
+              {
+                "plugin": "alertingVTwo",
+                "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_fetch_rules.ts"
+              },
+              {
+                "plugin": "alertingVTwo",
+                "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_fetch_workflow.ts"
+              },
+              {
+                "plugin": "alertingVTwo",
+                "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_fetch_notification_policies.ts"
+              },
+              {
+                "plugin": "alertingVTwo",
+                "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_fetch_workflows.ts"
+              },
+              {
+                "plugin": "alertingVTwo",
+                "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_fetch_notification_policy.ts"
+              },
+              {
+                "plugin": "alertingVTwo",
+                "path": "x-pack/platform/plugins/shared/alerting_v2/public/hooks/use_existing_rule.ts"
               },
               {
                 "plugin": "dataSources",
@@ -14425,31 +14453,31 @@
               },
               {
                 "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_significant_events.ts"
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_fetch_significant_events.ts"
               },
               {
                 "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_stream_features.ts"
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_stream_features.ts"
               },
               {
                 "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_unbacked_queries_count.ts"
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_unbacked_queries_count.ts"
               },
               {
                 "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_features.ts"
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_fetch_features.ts"
               },
               {
                 "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_discovery_queries.ts"
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_fetch_discovery_queries.ts"
               },
               {
                 "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_discovery_queries_occurrences.ts"
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_fetch_discovery_queries_occurrences.ts"
               },
               {
                 "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/components/significant_events_discovery/hooks/use_fetch_streams.ts"
+                "path": "x-pack/platform/plugins/shared/streams_app/public/components/sig_events/significant_events_discovery/hooks/use_fetch_streams.ts"
               },
               {
                 "plugin": "osquery",
@@ -14512,6 +14540,14 @@
                 "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_grouped_node_preview_panel/use_fetch_document_details.ts"
               },
               {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_findings.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_preview.ts"
+              },
+              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/configurations/latest_findings/use_grouped_findings.tsx"
               },
@@ -14549,10 +14585,6 @@
               },
               {
                 "plugin": "@kbn/cloud-security-posture",
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_preview.ts"
-              },
-              {
-                "plugin": "@kbn/cloud-security-posture",
                 "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_vulnerabilities_preview.ts"
               },
               {
@@ -14566,10 +14598,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_rule.ts"
-              },
-              {
-                "plugin": "@kbn/cloud-security-posture",
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_findings.ts"
               },
               {
                 "plugin": "@kbn/cloud-security-posture",
@@ -14605,15 +14633,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_suggest_users.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_get_current_user_profile.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_ai_connectors.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14629,15 +14649,15 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/components/execution_events_table/use_execution_events.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/components/execution_results_table/use_execution_results.tsx"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_suggest_users.tsx"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/use_find_attack_discoveries/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_ai_connectors.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14646,6 +14666,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/unified_alerts/hooks/use_search_unified_alerts.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/components/execution_events_table/use_execution_events.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/components/execution_results_table/use_execution_results.tsx"
               },
               {
                 "plugin": "securitySolution",
