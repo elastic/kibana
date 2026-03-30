@@ -101,9 +101,19 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
   };
 
   private _effectiveSettings?: IngestStreamSettings;
+  private _dataStream?: IndicesDataStream | null;
 
   constructor(definition: Streams.ClassicStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
+  }
+
+  private async fetchDataStream(): Promise<IndicesDataStream | null> {
+    if (this._dataStream === undefined) {
+      this._dataStream = await this.dependencies.streamsClient
+        .getDataStream(this._definition.name)
+        .catch(() => null);
+    }
+    return this._dataStream;
   }
 
   protected doClone(): StreamActiveRecord<Streams.ClassicStream.Definition> {
@@ -674,14 +684,9 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
   }
 
   private async getPipelineTargets({ useFallbackName }: { useFallbackName: boolean }) {
-    let dataStream: IndicesDataStream;
-    try {
-      dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
-    } catch (error) {
-      if (isNotFoundError(error)) {
-        return undefined;
-      }
-      throw error;
+    const dataStream = await this.fetchDataStream();
+    if (!dataStream) {
+      return undefined;
     }
     const unmanagedAssets = await getUnmanagedElasticsearchAssets({
       dataStream,
@@ -709,12 +714,9 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
   private async getEffectiveSettings() {
     if (!this._effectiveSettings) {
-      // Check if the data stream is replicated (no local index template).
-      // The getDataStreamSettings ES API returns HTTP 400 for replicated
-      // data streams, so we skip it and return empty settings.
-      const dataStream = await this.dependencies.streamsClient
-        .getDataStream(this._definition.name)
-        .catch(() => null);
+      // Replicated data streams have no local index template and the
+      // getDataStreamSettings ES API returns HTTP 400, so return empty settings.
+      const dataStream = await this.fetchDataStream();
       if (dataStream?.replicated) {
         this._effectiveSettings = {};
         return this._effectiveSettings;
