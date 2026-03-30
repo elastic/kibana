@@ -44,8 +44,8 @@ export function buildWorkflowContext(
     typeof workflowExecution.context.event === 'object' &&
     'inputs' in workflowExecution.context?.event
   ) {
-    // TODO(https://github.com/elastic/security-team/issues/16526): Remove this compatibility bridge.
-    // We copy event.inputs into context.inputs for backwards compatibility with previous workflows.
+    // Inputs in execution context is the alias for manual trigger and workflow_call trigger.
+    // We copy event.inputs into context.inputs.
     inputs = workflowExecution.context.event.inputs as Record<string, unknown>;
   }
 
