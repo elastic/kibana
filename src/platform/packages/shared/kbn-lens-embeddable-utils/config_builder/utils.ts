@@ -357,7 +357,10 @@ export function isLensAPIFormat(config: unknown): config is LensApiState {
   // We need to check the type is not lens because embeddable logic sometimes add it for some reason.
   // See https://github.com/elastic/kibana/issues/250115
   return (
-    typeof config === 'object' && config !== null && 'type' in config && config.type !== LENS_EMBEDDABLE_TYPE
+    typeof config === 'object' &&
+    config !== null &&
+    'type' in config &&
+    config.type !== LENS_EMBEDDABLE_TYPE
   );
 }
 
