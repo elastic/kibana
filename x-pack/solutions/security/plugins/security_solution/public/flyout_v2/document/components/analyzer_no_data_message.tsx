@@ -26,7 +26,7 @@ export const AnalyzerPreviewNoDataMessage = memo(() => {
             target="_blank"
           >
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.noDataLinkText"
+              id="xpack.securitySolution.flyout.document.visualizations.analyzerPreview.noDataLinkText"
               defaultMessage="Visual event analyzer"
             />
           </EuiLink>

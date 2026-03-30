@@ -1,5 +1,5 @@
 {
-  "sha1": "59142f64bdde5469783193a6368c44593920dceb",
+  "sha1": "a627c927f79d6de75891ebd40b2b02449e0a5ce2",
   "tests": [
     {
       "id": "a88e11e11af63ac-04de5a79d29d1c0",
@@ -15,52 +15,52 @@
     {
       "id": "4d02e446d082177-e5040a56b0ee7d7",
       "title": "Lens Convert to ES|QL should display ES|QL conversion modal for inline visualizations",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
     {
       "id": "4d02e446d082177-0e83d94e28c3793",
       "title": "Lens Convert to ES|QL should update and reflect the visualization configuration after the conversion",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
-        "line": 73,
+        "line": 74,
         "column": 12
       }
     },
     {
       "id": "4d02e446d082177-d972ca73bd4e33a",
       "title": "Lens Convert to ES|QL should correctly cancel the conversion and close the flyout",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
-        "line": 107,
+        "line": 108,
         "column": 12
       }
     },
     {
       "id": "4d02e446d082177-cfb66e0984c0af4",
       "title": "Lens Convert to ES|QL should disable Convert to ES|QL button for visualizations saved to library",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 12
       }
     }

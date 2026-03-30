@@ -19,7 +19,6 @@ import {
   getFieldsSuggestions,
   getFunctionsSuggestions,
   getLiteralsSuggestions,
-  handleFragment,
 } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
 import { Location } from '../types';
@@ -96,17 +95,7 @@ export async function getVectorFieldSuggestions(
     ? fieldSuggestions.filter((suggestion) => columnExists(suggestion.label, context))
     : fieldSuggestions;
 
-  return handleFragment(
-    innerText,
-    (fragment) => columnExists(fragment, context),
-    (_fragment, rangeToReplace) => [
-      ...filteredFieldSuggestions.map((suggestion) => ({
-        ...suggestion,
-        rangeToReplace,
-      })),
-    ],
-    () => [...filteredFieldSuggestions]
-  );
+  return [...filteredFieldSuggestions];
 }
 
 function isAstItemIncomplete(item: ESQLAstItem | undefined): boolean {

@@ -17,10 +17,11 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
-import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
+import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
@@ -107,7 +108,9 @@ export function AlertActions(
           key="defaultRowActions"
           onActionExecuted={closeActionsPopover}
           resolveRulePagePath={(ruleId, currentPageId) =>
-            currentPageId !== RULE_DETAILS_PAGE_ID ? paths.observability.ruleDetails(ruleId) : null
+            currentPageId !== RULE_DETAILS_PAGE_ID
+              ? `${rulesAppRoute}${getRulesAppDetailsRoute(ruleId)}`
+              : null
           }
         />
       ),

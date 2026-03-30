@@ -48,7 +48,7 @@ export const RetentionPeriodField: FunctionComponent<{ disabled: boolean }> = ({
                       <EuiButton
                         data-test-subj="selectFailureStoreRetentionPeriodUnit"
                         disabled={disabled}
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         iconSide="right"
                         color="text"
                         onClick={() => setOpen((isOpen) => !isOpen)}

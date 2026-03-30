@@ -7,14 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import {
+  HEATMAP_NAME,
   type FormBasedLayer,
   type HeatmapVisualizationState,
   type TextBasedLayer,
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
+
+import type { XScaleSchemaType } from '../../../schema/charts/shared';
 import { DEFAULT_LAYER_ID } from '../../../constants';
-import { getDatasourceLayers, getSharedChartLensStateToAPI, stripUndefined } from '../utils';
+import {
+  getDatasourceLayers,
+  getLegendTruncateAfterLines,
+  getSharedChartLensStateToAPI,
+  getScaleTypeFromColumnType,
+  stripUndefined,
+} from '../utils';
 import type { HeatmapState } from '../../../schema';
 import { fromColorByValueLensStateToAPI } from '../../coloring';
 import { type LensAttributes } from '../../../types';
@@ -34,7 +43,7 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapSta
     visible: legend.isVisible,
     position: legend.position,
     ...stripUndefined<HeatmapState['legend']>({
-      truncate_after_lines: legend.maxLines,
+      truncate_after_lines: getLegendTruncateAfterLines(legend),
       size: legend.legendSize,
     }),
   };
@@ -45,7 +54,8 @@ function getOrientationFromRotation(rotation: number): 'angled' | 'vertical' | '
 }
 
 function getGridConfigProps(
-  gridConfig: HeatmapVisualizationState['gridConfig']
+  gridConfig: HeatmapVisualizationState['gridConfig'],
+  xAxisScale?: XScaleSchemaType
 ): HeatmapState['axes'] {
   return {
     x: {
@@ -56,15 +66,16 @@ function getGridConfigProps(
         }),
       },
       title: {
-        value: gridConfig.xTitle,
+        text: gridConfig.xTitle,
         visible: gridConfig.isXAxisTitleVisible,
       },
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
+      ...(xAxisScale ? { scale: xAxisScale } : {}),
     },
     y: {
       labels: { visible: gridConfig.isYAxisLabelVisible },
       title: {
-        value: gridConfig.yTitle,
+        text: gridConfig.yTitle,
         visible: gridConfig.isYAxisTitleVisible,
       },
       ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
@@ -85,11 +96,17 @@ function reverseBuildVisualizationState(
     throw new Error('Value accessor is missing in the visualization state');
   }
 
+  let xAxisScale: XScaleSchemaType | undefined;
+  if (isTextBasedLayer(layer) && visualization.xAccessor) {
+    const xColumn = layer.columns.find((c) => c.columnId === visualization.xAccessor);
+    xAxisScale = getScaleTypeFromColumnType(xColumn?.meta?.type);
+  }
+
   const sharedProps = {
     ...generateApiLayer(layer),
-    type: 'heat_map' as const,
+    type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
-    axes: getGridConfigProps(visualization.gridConfig),
+    axes: getGridConfigProps(visualization.gridConfig, xAxisScale),
     cells: {
       labels: { visible: visualization.gridConfig.isCellLabelVisible },
     },
@@ -115,8 +132,8 @@ function reverseBuildVisualizationState(
         ...getValueApiColumn(valueAccessor, layer),
         ...paletteProps,
       },
-      xAxis: getValueApiColumn(visualization.xAccessor, layer),
-      ...(visualization.yAccessor && { yAxis: getValueApiColumn(visualization.yAccessor, layer) }),
+      x: getValueApiColumn(visualization.xAccessor, layer),
+      ...(visualization.yAccessor && { y: getValueApiColumn(visualization.yAccessor, layer) }),
     } satisfies HeatmapStateESQL;
   }
 
@@ -135,8 +152,8 @@ function reverseBuildVisualizationState(
       ...operationFromColumn(valueAccessor, layer),
       ...paletteProps,
     } as LensApiAllMetricOperations,
-    xAxis: operationFromColumn(visualization.xAccessor!, layer),
-    yAxis: visualization.yAccessor && operationFromColumn(visualization.yAccessor, layer),
+    x: operationFromColumn(visualization.xAccessor!, layer),
+    y: visualization.yAccessor && operationFromColumn(visualization.yAccessor, layer),
   } as HeatmapStateNoESQL;
 }
 

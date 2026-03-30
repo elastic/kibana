@@ -55,6 +55,9 @@ const CONTEXT_BOOSTS: Partial<Record<Location, Partial<Record<SuggestionCategory
   [Location.STATS_BY]: {
     [SuggestionCategory.USER_DEFINED_COLUMN]: -300, // From 300 to 0
   },
+  [Location.LIMIT_BY]: {
+    [SuggestionCategory.USER_DEFINED_COLUMN]: -300, // From 300 to 0
+  },
   [Location.PROMQL]: {
     // Push language keywords (e.g. "by") after pipe but before operators.
     [SuggestionCategory.LANGUAGE_KEYWORD]: 100, // From 50 to 150

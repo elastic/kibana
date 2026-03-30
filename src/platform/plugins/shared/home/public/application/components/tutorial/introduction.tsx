@@ -93,7 +93,7 @@ function IntroductionUI({
     <>
       <div>
         <EuiButtonEmpty
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           size="xs"
           flush="left"
           href={basePath.prepend(`/app/integrations`)}

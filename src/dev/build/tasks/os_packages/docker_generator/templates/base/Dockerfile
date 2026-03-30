@@ -15,7 +15,12 @@ FROM {{{baseImageName}}} AS builder
 RUN microdnf install -y findutils tar gzip
 {{/ubi}}
 {{#wolfi}}
-RUN apk --no-cache add curl
+RUN for iter in 1 2 3 4 5; do \
+      apk --no-cache add curl && break; \
+      echo "apk add failed (attempt $iter/5), retrying in $((iter * 10))s..."; \
+      sleep $((iter * 10)); \
+      [ $iter -eq 5 ] && exit 1; \
+    done
 {{/wolfi}}
 
 {{#usePublicArtifact}}
@@ -92,8 +97,13 @@ RUN microdnf install --setopt=tsflags=nodocs -y \
       microdnf clean all
 {{/ubi}}
 {{#wolfi}}
-# TODO: Remove pinned shadow version once Wolfi image is updated. Newer releases of shadow require glibc 2.43 which is not available in the current image SHA.
-RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow=4.19.3-r0 ca-certificates{{#serverless}} libjemalloc2 mimalloc2{{/serverless}}
+RUN for iter in 1 2 3 4 5; do \
+      # TODO: Remove pinned shadow version once Wolfi image is updated. Newer releases of shadow require glibc 2.43 which is not available in the current image SHA.
+      apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow=4.19.3-r0 ca-certificates{{#serverless}} libjemalloc2 mimalloc2{{/serverless}} && break; \
+      echo "apk add failed (attempt $iter/5), retrying in $((iter * 10))s..."; \
+      sleep $((iter * 10)); \
+      [ $iter -eq 5 ] && exit 1; \
+    done
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.

@@ -22,7 +22,7 @@ interface CanvasContextValue {
   previewedAttachmentKey: string | null;
   openCanvas: (attachment: UnknownAttachment, isSidebar: boolean, version?: number) => void;
   closeCanvas: () => void;
-  setCanvasAttachmentOrigin: (origin: unknown) => void;
+  setCanvasAttachmentOrigin: (origin: string) => void;
   setPreviewedAttachmentKey: (attachmentKey: string | null) => void;
 }
 
@@ -57,7 +57,7 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
     setCanvasState(null);
   }, [canvasState, previewedAttachmentKey]);
 
-  const setCanvasAttachmentOrigin = useCallback((origin: unknown) => {
+  const setCanvasAttachmentOrigin = useCallback((origin: string) => {
     setCanvasState((prev) => {
       if (!prev) return null;
       return {

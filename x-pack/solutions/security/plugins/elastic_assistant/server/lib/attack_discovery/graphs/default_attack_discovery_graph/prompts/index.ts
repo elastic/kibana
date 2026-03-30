@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { getPromptsByGroupId, promptDictionary } from '../../../../prompt';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 
@@ -30,23 +28,20 @@ export interface GenerationPrompts {
 export interface CombinedPrompts extends AttackDiscoveryPrompts, GenerationPrompts {}
 
 export const getAttackDiscoveryPrompts = async ({
-  actionsClient,
-  connector,
+  getInferenceConnectorById,
   connectorId,
   model,
   provider,
   savedObjectsClient,
 }: {
-  actionsClient: PublicMethodsOf<ActionsClient>;
-  connector?: Connector;
+  getInferenceConnectorById?: (id: string) => Promise<InferenceConnector>;
   connectorId: string;
   model?: string;
   provider?: string;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<CombinedPrompts> => {
   const prompts = await getPromptsByGroupId({
-    actionsClient,
-    connector,
+    getInferenceConnectorById,
     connectorId,
     // if in future oss has different prompt, add it as model here
     model,

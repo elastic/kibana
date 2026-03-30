@@ -19,8 +19,13 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
   type: 'host',
   name: `Security 'host' Entity Store Definition`,
   identityField: {
-    // Ranking mechanism for the identity field
-    euidFields: [[{ field: 'host.id' }], [{ field: 'host.name' }], [{ field: 'host.hostname' }]],
+    euidRanking: {
+      branches: [
+        {
+          ranking: [[{ field: 'host.id' }], [{ field: 'host.name' }], [{ field: 'host.hostname' }]],
+        },
+      ],
+    },
     documentsFilter: {
       or: [
         isNotEmptyCondition('host.id'),
@@ -73,7 +78,7 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'host.network.ingress.packets', mapping: { type: 'long' } }),
     newestValue({ source: 'host.uptime', mapping: { type: 'long' } }),
     newestValue({ source: 'host.pid_ns_ino' }),
-    newestValue({ source: 'host.os.family' }),
+    newestValue({ source: 'host.os.family', mapping: { type: 'keyword' } }),
     newestValue({ source: 'host.os.full' }),
     newestValue({ source: 'host.os.kernel' }),
     newestValue({ source: 'host.os.platform' }),
@@ -89,6 +94,15 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'host.geo.region_iso_code' }),
     collect({ source: 'host.geo.region_name' }),
     collect({ source: 'host.geo.timezone' }),
+    // Cloud fields (used by Host Details page)
+    newestValue({ source: 'cloud.provider' }),
+    newestValue({ source: 'cloud.region' }),
+    newestValue({ source: 'cloud.instance.id' }),
+    newestValue({ source: 'cloud.machine.type' }),
+    // Agent/Endpoint fields (for endpoint metadata and Responder)
+    newestValue({ source: 'agent.id' }),
+    newestValue({ source: 'agent.type' }),
+    newestValue({ source: 'endpoint.id' }),
     ...getCommonFieldDescriptions('host'),
     ...getEntityFieldsDescriptions('host'),
   ],

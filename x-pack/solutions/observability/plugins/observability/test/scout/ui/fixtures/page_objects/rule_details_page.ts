@@ -16,7 +16,7 @@ export class RuleDetailsPage {
    * Navigates to the rule details page by rule ID
    */
   async gotoById(ruleId: string) {
-    await this.page.gotoApp(`observability/alerts/rules/${ruleId}`);
+    await this.page.gotoApp(`rules/rule/${ruleId}`);
     await this.page.testSubj.waitForSelector(RULE_DETAILS_TEST_SUBJECTS.RULE_DETAILS, {
       timeout: BIGGER_TIMEOUT,
     });

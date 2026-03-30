@@ -50,6 +50,10 @@ import type {
   ZoomGetMeetingParticipantsInput,
   ZoomGetMeetingRegistrantsInput,
 } from './types';
+import downloadRecordingFileWorkflow from './workflows/download_recording_file.yaml';
+import getMeetingWorkflow from './workflows/get_meeting.yaml';
+import listWorkflow from './workflows/list.yaml';
+import whoAmIWorkflow from './workflows/who_am_i.yaml';
 import {
   ZOOM_DEFAULT_MAX_RECORDING_CONTENT_CHARS,
   ZoomPaginationOutputSchema,
@@ -93,11 +97,11 @@ export const Zoom: ConnectorSpec = {
     id: '.zoom',
     displayName: 'Zoom',
     description: i18n.translate('core.kibanaConnectorSpecs.zoom.metadata.description', {
-      defaultMessage:
-        'Kibana Stack Connector for Zoom — access meetings, recordings, transcripts, and participants.',
+      defaultMessage: 'Access meetings, recordings, transcripts, and participants in Zoom',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -491,4 +495,11 @@ export const Zoom: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [
+    downloadRecordingFileWorkflow,
+    getMeetingWorkflow,
+    listWorkflow,
+    whoAmIWorkflow,
+  ],
 };

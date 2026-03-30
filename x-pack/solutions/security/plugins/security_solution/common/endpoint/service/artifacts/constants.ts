@@ -13,6 +13,8 @@ export const BY_POLICY_ARTIFACT_TAG_PREFIX = 'policy:';
 
 export const GLOBAL_ARTIFACT_TAG = `${BY_POLICY_ARTIFACT_TAG_PREFIX}all`;
 
+export const IMPORTED_ARTIFACT_TAG = 'imported_artifact';
+
 export const ADVANCED_MODE_TAG = 'form_mode:advanced';
 
 /** The tag name for process descendants in event filters */

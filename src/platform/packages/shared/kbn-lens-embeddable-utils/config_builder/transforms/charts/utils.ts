@@ -9,15 +9,20 @@
 
 import { pickBy } from 'lodash';
 
+import type { TypeOf } from '@kbn/config-schema';
 import type {
   FormBasedLayer,
   GaugeVisualizationState,
+  HeatmapVisualizationState,
+  XYVisualizationState,
   MetricVisualizationState,
+  SharedPartitionLayerState,
   TextBasedLayer,
 } from '@kbn/lens-common';
 
 import type { LensAttributes } from '../../types';
 import type { LensApiState } from '../../schema';
+import type { legendTruncateAfterLinesSchema } from '../../schema/shared';
 import { buildReferences, getAdhocDataviews, isTextBasedLayer, nonNullable } from '../utils';
 import { LENS_LAYER_SUFFIX } from '../constants';
 import type { APIAdHocDataView, APIDataView } from '../columns/types';
@@ -147,4 +152,40 @@ export function processMetricColumnsWithReferences<T extends AnyMetricLensStateC
   }
 
   return result;
+}
+
+type LegendTruncateAfterLines = TypeOf<typeof legendTruncateAfterLinesSchema>;
+
+export function getLegendTruncateAfterLines(
+  legend:
+    | Pick<XYVisualizationState['legend'], 'shouldTruncate' | 'maxLines'>
+    | Pick<HeatmapVisualizationState['legend'], 'shouldTruncate' | 'maxLines'>
+    | Pick<SharedPartitionLayerState, 'truncateLegend' | 'legendMaxLines'>
+): LegendTruncateAfterLines {
+  if (!legend) return;
+
+  const { shouldTruncate, maxLines = 1 } =
+    'shouldTruncate' in legend
+      ? legend
+      : 'truncateLegend' in legend
+      ? { shouldTruncate: legend.truncateLegend, maxLines: legend.legendMaxLines }
+      : {};
+
+  return shouldTruncate && maxLines > 0 ? maxLines : undefined;
+}
+
+/**
+ * Determines the x-axis scale type based on column metadata type.
+ * Returns 'temporal' for date columns, 'linear' for numeric columns, and 'ordinal' for others.
+ */
+export function getScaleTypeFromColumnType(
+  columnType: string | undefined
+): 'temporal' | 'linear' | 'ordinal' {
+  if (columnType === 'date') {
+    return 'temporal';
+  } else if (columnType === 'number') {
+    return 'linear';
+  } else {
+    return 'ordinal';
+  }
 }

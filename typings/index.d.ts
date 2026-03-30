@@ -10,4 +10,16 @@
 declare module 'axios/lib/adapters/xhr';
 
 declare module 'find-cypress-specs';
-declare module '@cypress/grep/src/plugin';
+
+declare module '@cypress/grep' {
+  export function register(): void;
+}
+
+declare module '@cypress/grep/plugin' {
+  interface CypressConfigOptions {
+    env?: Record<string, unknown>;
+    specPattern?: string | string[];
+    excludeSpecPattern?: string | string[];
+  }
+  export function plugin(config: CypressConfigOptions): CypressConfigOptions;
+}

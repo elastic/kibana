@@ -8,20 +8,23 @@
  */
 
 import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-
+import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   AllColoringTypes,
   ColorByValueAbsolute,
   ColorByValueStep,
   ColorByValueType,
+  ColorMappingCategoricalType,
   ColorMappingColorDefType,
+  ColorMappingGradientType,
   ColorMappingType,
   StaticColorType,
+  UnassignedColorType,
 } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
 
 const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE = 'percentage';
-const LENS_DEFAULT_COLOR_MAPPING_PALETTE = 'default';
+const LENS_DEFAULT_COLOR_MAPPING_PALETTE: KbnPaletteId = 'default';
 
 const LEGACY_TO_API_RANGE_NAMES: Record<'percent' | 'number', 'percentage' | 'absolute'> = {
   number: 'absolute',
@@ -274,12 +277,11 @@ function isLensStateCategoricalConfigColorMapping(
 
 function fromUnassignedColorLensStateToAPI(
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode | ColorMapping.LoopColor | undefined
-): { unassignedColor: Extract<ColorMappingColorDefType, { type: 'color_code' }> } | {} {
+): UnassignedColorType | undefined {
   if (!color || color.type === 'loop') {
-    return {};
+    return undefined;
   }
-  const unassignedColor = fromColorLensStateToAPI(color);
-  return { unassignedColor };
+  return fromColorLensStateToAPI(color);
 }
 
 export function fromColorMappingLensStateToAPI(
@@ -291,15 +293,13 @@ export function fromColorMappingLensStateToAPI(
       mode: 'categorical',
       palette: `${LEGACY_PALETTE_PREFIX}${legacyPalette.name}`,
       mapping: [],
-    };
+    } satisfies ColorMappingCategoricalType;
   }
   if (!colorMapping) {
     return;
   }
 
-  const unassignedColor = fromUnassignedColorLensStateToAPI(
-    colorMapping.specialAssignments[0]?.color
-  );
+  const unassigned = fromUnassignedColorLensStateToAPI(colorMapping.specialAssignments[0]?.color);
   if (isLensStateCategoricalConfigColorMapping(colorMapping)) {
     return {
       mode: 'categorical',
@@ -310,8 +310,8 @@ export function fromColorMappingLensStateToAPI(
           color: fromColorLensStateToAPI(color),
         };
       }),
-      ...unassignedColor,
-    };
+      ...(unassigned ? { unassigned } : {}),
+    } satisfies ColorMappingCategoricalType;
   }
 
   // because of early return above, we know it is a gradient at this point so casting is safe
@@ -328,8 +328,8 @@ export function fromColorMappingLensStateToAPI(
     }),
     sort: (colorMapping.colorMode as ColorMapping.GradientColorMode).sort,
     gradient: colorMode.steps.map((color) => fromColorLensStateToAPI(color)),
-    ...unassignedColor,
-  };
+    ...(unassigned ? { unassigned } : {}),
+  } satisfies ColorMappingGradientType;
 }
 
 function fromColorDefAPIToLensState(
@@ -343,7 +343,7 @@ function fromColorDefAPIToLensState(
   }
   return {
     type: 'categorical',
-    paletteId: color.palette ?? LENS_DEFAULT_COLOR_MAPPING_PALETTE,
+    paletteId: (color.palette as KbnPaletteId) ?? LENS_DEFAULT_COLOR_MAPPING_PALETTE,
     colorIndex: color.index,
   };
 }
@@ -411,8 +411,8 @@ export function fromColorMappingAPIToLensState(
           type: 'other',
         },
       ],
-      color: colorMapping.unassignedColor
-        ? fromColorDefAPIToLensState(colorMapping.unassignedColor)
+      color: colorMapping.unassigned
+        ? fromColorDefAPIToLensState(colorMapping.unassigned)
         : { type: 'loop' },
       touched: false,
     },
@@ -433,7 +433,7 @@ export function fromColorMappingAPIToLensState(
   return {
     colorMapping: {
       colorMode,
-      paletteId: colorMapping.palette,
+      paletteId: colorMapping.palette as KbnPaletteId,
       assignments,
       specialAssignments,
     },

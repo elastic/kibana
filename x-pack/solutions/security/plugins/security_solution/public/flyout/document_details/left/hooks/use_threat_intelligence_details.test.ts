@@ -7,25 +7,14 @@
 
 import { useThreatIntelligenceDetails } from './use_threat_intelligence_details';
 import { renderHook } from '@testing-library/react';
-import { SecurityPageName } from '@kbn/deeplinks-security';
-import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
-import type { RouteSpyState } from '../../../../common/utils/route/types';
-import {
-  type UseBasicDataFromDetailsDataResult,
-  useBasicDataFromDetailsData,
-} from '../../shared/hooks/use_basic_data_from_details_data';
+import { useInvestigationTimeEnrichment } from '../../../../flyout_v2/document/hooks/use_investigation_enrichment';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 
-jest.mock('../../../../timelines/containers/details');
-jest.mock('../../../../sourcerer/containers');
-jest.mock('../../../../common/utils/route/use_route_spy');
+jest.mock('@kbn/discover-utils');
 jest.mock('../../shared/context');
-jest.mock('../../shared/hooks/use_investigation_enrichment');
-jest.mock('../../shared/hooks/use_basic_data_from_details_data');
+jest.mock('../../../../flyout_v2/document/hooks/use_investigation_enrichment');
 
 describe('useThreatIntelligenceDetails', () => {
   beforeEach(() => {
@@ -36,31 +25,15 @@ describe('useThreatIntelligenceDetails', () => {
       range: { from: '2023-04-27T00:00:00Z', to: '2023-04-27T23:59:59Z' },
     });
 
-    jest
-      .mocked(useTimelineEventsDetails)
-      .mockReturnValue([false, [], undefined, null, async () => {}]);
-
-    jest
-      .mocked(useBasicDataFromDetailsData)
-      .mockReturnValue({ isAlert: true } as unknown as UseBasicDataFromDetailsDataResult);
-
-    jest.mocked(useSourcererDataView).mockReturnValue({
-      browserFields: {},
-      dataViewId: '',
-      loading: false,
-      indicesExist: true,
-      selectedPatterns: [],
-      sourcererDataView: {},
-    });
-
-    jest
-      .mocked(useRouteSpy)
-      .mockReturnValue([
-        { pageName: SecurityPageName.detections } as unknown as RouteSpyState,
-        () => {},
-      ]);
-
     jest.mocked(useDocumentDetailsContext).mockReturnValue(mockContextValue);
+    jest.mocked(buildDataTableRecord).mockReturnValue({
+      id: '1',
+      raw: {},
+      flattened: {
+        'kibana.alert.rule.uuid': ['ruleId'],
+      },
+      isAnchor: false,
+    });
   });
 
   afterEach(() => {

@@ -62,7 +62,7 @@ const compatibilityMap: Record<string, string> = {
   lnsLegacyMetric: 'legacy_metric',
   lnsXY: 'xy',
   lnsGauge: 'gauge',
-  lnsHeatmap: 'heat_map',
+  lnsHeatmap: 'heatmap',
   lnsTagcloud: 'tag_cloud',
   lnsChoropleth: 'region_map',
   lnsPie: 'pie',
@@ -115,7 +115,7 @@ const apiConvertersByChart = {
     fromAPItoLensState: fromGaugeAPItoLensState,
     fromLensStateToAPI: fromGaugeLensStateToAPI,
   },
-  heat_map: {
+  heatmap: {
     fromAPItoLensState: fromHeatmapAPItoLensState,
     fromLensStateToAPI: fromHeatmapLensStateToAPI,
   },
@@ -234,15 +234,21 @@ export class LensConfigBuilder {
 
     const converter = this.apiConvertersByChart[chartType];
     const attributes = converter.fromAPItoLensState(config as any); // handle type mismatches
+    const { filters, query, references } = filtersAndQueryToLensState(
+      config,
+      attributes.references ?? []
+    );
 
     return {
       // @TODO investigate why it complains about missing type
       // type: 'lens',
       ...attributes,
+      references: [...(attributes.references ?? []), ...references],
       state: {
         ...attributes.state,
         query: { language: 'kuery', query: '' },
-        ...filtersAndQueryToLensState(config),
+        ...(query ? { query } : {}),
+        filters,
       },
     };
   }

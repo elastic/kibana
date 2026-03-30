@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { HardcodedIcons } from './hardcoded_icons';
 
 export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
   switch (triggerType) {
@@ -24,8 +26,10 @@ export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
   }
 };
 
-export const getStepIconType = (nodeType: string): EuiIconType => {
-  let iconType: EuiIconType = 'info';
+// Switch has good readability as it is
+// eslint-disable-next-line complexity
+export const getStepIconType = (nodeType: string): IconType => {
+  let iconType: IconType = 'info';
 
   switch (nodeType) {
     // built-in node types
@@ -39,13 +43,24 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
       iconType = 'database';
       break;
     case 'workflow.execute':
+      iconType = HardcodedIcons['workflow.execute'];
+      break;
     case 'workflow.executeAsync':
-      iconType = 'link';
+      iconType = HardcodedIcons['workflow.executeAsync'];
+      break;
+    case 'workflow.output':
+      iconType = HardcodedIcons['workflow.output'];
+      break;
+    case 'workflow.fail':
+      iconType = HardcodedIcons['workflow.fail'];
       break;
 
     // flow control nodes
     case 'wait':
       iconType = 'clock';
+      break;
+    case 'waitForInput':
+      iconType = 'user';
       break;
     case 'enter-if':
     case 'exit-if':
@@ -72,6 +87,15 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
     case 'loop-break':
     case 'loop-continue':
       iconType = 'controls';
+      break;
+    case 'switch':
+    case 'enter-switch':
+    case 'exit-switch':
+    case 'enter-case-branch':
+    case 'exit-case-branch':
+    case 'enter-default-branch':
+    case 'exit-default-branch':
+      iconType = 'productStreamsWired';
       break;
 
     // connectors which use EUI icons
