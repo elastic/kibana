@@ -2567,6 +2567,45 @@
       },
       {
         "parentPluginId": "@kbn/ai-tools",
+        "id": "def-server.getDiverseSampleDocuments",
+        "type": "Function",
+        "tags": [],
+        "label": "getDiverseSampleDocuments",
+        "description": [],
+        "signature": [
+          "({\n  esClient,\n  index,\n  start,\n  end,\n  size = 100,\n  filter,\n  runtime_mappings,\n  timeout = '10s',\n}: GetDiverseSampleDocumentsOptions) => Promise<{ hits: ",
+          "SearchHit",
+          "<Record<string, unknown>>[]; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_diverse_sample_documents.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-tools",
+            "id": "def-server.getDiverseSampleDocuments.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  esClient,\n  index,\n  start,\n  end,\n  size = 100,\n  filter,\n  runtime_mappings,\n  timeout = '10s',\n}",
+            "description": [],
+            "signature": [
+              "GetDiverseSampleDocumentsOptions"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/get_diverse_sample_documents.ts",
+            "lineNumber": 37,
+            "columnNumber": 49,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-tools",
         "id": "def-server.getLogPatterns",
         "type": "Function",
         "tags": [],

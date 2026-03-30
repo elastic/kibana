@@ -20,7 +20,7 @@ export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: { environment, kuery, comparisonEnabled },
+    query: { environment, kuery, comparisonEnabled, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/errors');
 
   const { errorDistributionData, errorDistributionStatus } = useErrorGroupDistributionFetcher({
@@ -46,6 +46,18 @@ export function ErrorGroupOverview() {
                   fetchStatus={errorDistributionStatus}
                   distribution={errorDistributionData}
                   title={headerTitle}
+                  discoverParams={{
+                    label: i18n.translate('xpack.apm.errorGroupOverview.openErrorsInDiscover', {
+                      defaultMessage: 'Open errors in Discover',
+                    }),
+                    rangeFrom,
+                    rangeTo,
+                    queryParams: {
+                      kuery,
+                      serviceName,
+                      sortDirection: 'DESC',
+                    },
+                  }}
                 />
               </EuiPanel>
             </EuiFlexItem>
