@@ -7,7 +7,7 @@
 
 import type { DataStreamAttributes, IntegrationAttributes } from '../saved_objects/schemas/types';
 import type { FieldMappingEntry } from '../saved_objects/saved_objects_service';
-import { buildReadme } from './readme';
+import { buildReadme } from './package_readme';
 
 const baseIntegration = (): IntegrationAttributes => ({
   integration_id: 'my_integration',

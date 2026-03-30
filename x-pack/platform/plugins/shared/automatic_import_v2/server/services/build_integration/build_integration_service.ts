@@ -26,7 +26,7 @@ import {
   addReadmeToZip,
 } from './util';
 import { generateFieldMappings } from './fields';
-import { buildReadme } from './readme';
+import { buildReadme } from './package_readme';
 import { getInputVars } from './input_vars';
 
 const FORMAT_VERSION = '3.4.0';
