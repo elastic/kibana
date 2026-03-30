@@ -49,8 +49,10 @@ export function CompositeSloMembersSection() {
       if (!selected.length) return;
       const { label, value } = selected[0];
       const sloId = String(value);
-      const alreadyAdded = members.some((m) => m.sloId === sloId);
-      if (!alreadyAdded && members.length < MAX_COMPOSITE_MEMBERS) {
+      const hasUnresolvedInstance = members.some(
+        (m) => m.sloId === sloId && (!m.instanceId || m.instanceId === ALL_VALUE)
+      );
+      if (!hasUnresolvedInstance && members.length < MAX_COMPOSITE_MEMBERS) {
         const sloDefinition = sloDefinitions?.results.find((slo) => slo.id === sloId);
         const groupBy = sloDefinition?.groupBy ?? ALL_VALUE;
         append({ sloId, sloName: label, groupBy, instanceId: ALL_VALUE, weight: 1 });
@@ -96,7 +98,12 @@ export function CompositeSloMembersSection() {
             fullWidth
             isDisabled={atMax}
             isLoading={isLoadingSlos}
-            options={sloOptions.filter((opt) => !members.some((m) => m.sloId === String(opt.value)))}
+            options={sloOptions.filter(
+              (opt) =>
+                !members.some(
+                  (m) => m.sloId === String(opt.value) && (!m.instanceId || m.instanceId === ALL_VALUE)
+                )
+            )}
             selectedOptions={[]}
             onSearchChange={setSloSearch}
             onChange={handleAddMember}
