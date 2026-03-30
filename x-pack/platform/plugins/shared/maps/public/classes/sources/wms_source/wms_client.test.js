@@ -9,7 +9,7 @@ import { WmsClient } from './wms_client';
 
 describe('getCapabilities', () => {
   it('Should extract flat Layer elements', async () => {
-    const wmsClient = new WmsClient({ serviceUrl: 'myWMSUrl' });
+    const wmsClient = new WmsClient({ serviceUrl: 'https://elastic.co/wms' });
     wmsClient._fetch = () => {
       return {
         status: 200,
@@ -53,7 +53,7 @@ describe('getCapabilities', () => {
   // Good example of Layer hierarchy in the wild can be found at
   // https://idpgis.ncep.noaa.gov/arcgis/services/NWS_Forecasts_Guidance_Warnings/NDFD_temp/MapServer/WMSServer
   it('Should extract hierarchical Layer elements', async () => {
-    const wmsClient = new WmsClient({ serviceUrl: 'myWMSUrl' });
+    const wmsClient = new WmsClient({ serviceUrl: 'https://elastic.co/wms' });
     wmsClient._fetch = () => {
       return {
         status: 200,
@@ -112,7 +112,7 @@ describe('getCapabilities', () => {
   });
 
   it('Should create group from common parts of Layer hierarchy', async () => {
-    const wmsClient = new WmsClient({ serviceUrl: 'myWMSUrl' });
+    const wmsClient = new WmsClient({ serviceUrl: 'https://elastic.co/wms' });
     wmsClient._fetch = () => {
       return {
         status: 200,
@@ -176,7 +176,7 @@ describe('getCapabilities', () => {
   });
 
   it('Should ensure no option labels have name collisions', async () => {
-    const wmsClient = new WmsClient({ serviceUrl: 'myWMSUrl' });
+    const wmsClient = new WmsClient({ serviceUrl: 'https://elastic.co/wms' });
     wmsClient._fetch = () => {
       return {
         status: 200,
@@ -223,7 +223,7 @@ describe('getCapabilities', () => {
   });
 
   it('Should not create group common hierarchy when there is only a single layer', async () => {
-    const wmsClient = new WmsClient({ serviceUrl: 'myWMSUrl' });
+    const wmsClient = new WmsClient({ serviceUrl: 'https://elastic.co/wms' });
     wmsClient._fetch = () => {
       return {
         status: 200,
