@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/es-snapshot-loader'
   - '@kbn/es-errors'
   - '@kbn/otel-demo'
+  - '@kbn/grok-heuristics'
 tags:
   - functional-tests
   - package
