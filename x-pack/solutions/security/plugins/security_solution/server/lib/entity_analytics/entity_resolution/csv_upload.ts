@@ -6,11 +6,10 @@
  */
 
 import type { Readable } from 'stream';
-import { get } from 'lodash';
 import Papa from 'papaparse';
 import type { Logger } from '@kbn/logging';
 import type { EntityStoreCRUDClient, ResolutionClient } from '@kbn/entity-store/server';
-import { ENGINE_METADATA_TYPE_FIELD } from '@kbn/entity-store/server';
+import { ENGINE_METADATA_TYPE_FIELD, getFieldValue } from '@kbn/entity-store/server';
 import type {
   ResolutionCsvUploadRowResponse,
   ResolutionCsvUploadResponse,
@@ -142,8 +141,7 @@ async function resolveTarget(
     return entry;
   }
 
-  const targetEntity = entities[0] as unknown as Record<string, unknown>;
-  const targetResolvedTo = getNestedValue(targetEntity, RESOLVED_TO_FIELD);
+  const targetResolvedTo = getFieldValue(entities[0], RESOLVED_TO_FIELD);
 
   if (targetResolvedTo) {
     const entry: TargetCacheEntry = {
@@ -184,10 +182,7 @@ async function findMatchingEntities(
     });
 
     for (const entity of entities) {
-      const entityId = getNestedValue(
-        entity as unknown as Record<string, unknown>,
-        ENTITY_ID_FIELD
-      ) as string | undefined;
+      const entityId = getFieldValue(entity, ENTITY_ID_FIELD);
       if (entityId && entityId !== targetId) {
         entityIds.push(entityId);
       }
@@ -254,9 +249,4 @@ async function processRow(
       error: e instanceof Error ? e.message : String(e),
     };
   }
-}
-
-function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
-  // Check flat dotted key first (ES may store fields as flat keys)
-  return obj[path] ?? get(obj, path);
 }

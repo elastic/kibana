@@ -19,6 +19,7 @@ export { getLatestEntitiesIndexName } from '../common';
 export { getHistorySnapshotIndexPattern } from './domain/asset_manager/history_snapshot_index';
 export { ENGINE_METADATA_TYPE_FIELD } from './domain/logs_extraction/query_builder_commons';
 export { hashEuid } from './domain/crud/utils';
+export { getFieldValue } from '../common/domain/euid/commons';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { EntityStorePlugin } = await import('./plugin');
