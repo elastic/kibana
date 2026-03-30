@@ -1,0 +1,1461 @@
+{
+  "id": "@kbn/alerting-v2-schemas",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.parseDurationToMs",
+        "type": "Function",
+        "tags": [],
+        "label": "parseDurationToMs",
+        "description": [],
+        "signature": [
+          "(value: string) => number"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/validation.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.parseDurationToMs.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/validation.ts",
+            "lineNumber": 21,
+            "columnNumber": 35,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.validateDuration",
+        "type": "Function",
+        "tags": [],
+        "label": "validateDuration",
+        "description": [
+          "\nValidate a duration string format (e.g., \"5m\", \"1h\", \"30s\", \"250ms\")"
+        ],
+        "signature": [
+          "(value: string) => string | void"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/validation.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.validateDuration.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/validation.ts",
+            "lineNumber": 31,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Error message if invalid, undefined if valid"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.validateEsqlQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "validateEsqlQuery",
+        "description": [
+          "\nValidate an ES|QL query string"
+        ],
+        "signature": [
+          "(query: string) => string | void"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/validation.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.validateEsqlQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/validation.ts",
+            "lineNumber": 67,
+            "columnNumber": 35,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Error message if invalid, undefined if valid"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.validateMaxDuration",
+        "type": "Function",
+        "tags": [],
+        "label": "validateMaxDuration",
+        "description": [
+          "\nValidate that a duration string does not exceed a maximum duration.\nBoth values must be valid duration strings."
+        ],
+        "signature": [
+          "(value: string, max: string) => string | void"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/validation.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.validateMaxDuration.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/validation.ts",
+            "lineNumber": 42,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.validateMaxDuration.$2",
+            "type": "string",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/validation.ts",
+            "lineNumber": 42,
+            "columnNumber": 52,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Error message if exceeded, undefined if valid"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.validateMinDuration",
+        "type": "Function",
+        "tags": [],
+        "label": "validateMinDuration",
+        "description": [
+          "\nValidate that a duration string is not below a minimum duration.\nBoth values must be valid duration strings."
+        ],
+        "signature": [
+          "(value: string, min: string) => string | void"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/validation.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.validateMinDuration.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/validation.ts",
+            "lineNumber": 55,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.validateMinDuration.$2",
+            "type": "string",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/validation.ts",
+            "lineNumber": 55,
+            "columnNumber": 52,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Error message if below minimum, undefined if valid"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.MatcherContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "MatcherContext",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.MatcherContext.last_event_timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "last_event_timestamp",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.MatcherContext.group_hash",
+            "type": "string",
+            "tags": [],
+            "label": "group_hash",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.MatcherContext.episode_id",
+            "type": "string",
+            "tags": [],
+            "label": "episode_id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.MatcherContext.episode_status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "episode_status",
+            "description": [],
+            "signature": [
+              "\"pending\" | \"active\" | \"inactive\" | \"recovering\""
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.MatcherContext.rule",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "MatcherContextRule"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.MatcherContextFieldDescriptor",
+        "type": "Interface",
+        "tags": [],
+        "label": "MatcherContextFieldDescriptor",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.MatcherContextFieldDescriptor.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.MatcherContextFieldDescriptor.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"string\" | \"boolean\" | \"string[]\""
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.NotificationPolicyResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "NotificationPolicyResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.destinations",
+            "type": "Array",
+            "tags": [],
+            "label": "destinations",
+            "description": [],
+            "signature": [
+              "z.infer<any>[]"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.matcher",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "matcher",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.groupBy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "groupBy",
+            "description": [],
+            "signature": [
+              "string[] | null"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.throttle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "throttle",
+            "description": [],
+            "signature": [
+              "{ interval: string; } | null"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.snoozedUntil",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "snoozedUntil",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.auth",
+            "type": "Object",
+            "tags": [],
+            "label": "auth",
+            "description": [],
+            "signature": [
+              "{ owner: string; createdByUser: boolean; }"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.createdBy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.createdByUsername",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "createdByUsername",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.updatedBy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "updatedBy",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.updatedByUsername",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "updatedByUsername",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-schemas",
+            "id": "def-common.NotificationPolicyResponse.updatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_response.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.BulkActionNotificationPoliciesBody",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkActionNotificationPoliciesBody",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.bulkActionNotificationPoliciesBodySchema",
+        "type": "Any",
+        "tags": [],
+        "label": "bulkActionNotificationPoliciesBodySchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 70,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.BulkCreateAlertActionBody",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkCreateAlertActionBody",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.bulkCreateAlertActionBodySchema",
+        "type": "Any",
+        "tags": [],
+        "label": "bulkCreateAlertActionBodySchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 76,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.BulkCreateAlertActionItemBody",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkCreateAlertActionItemBody",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.bulkCreateAlertActionItemBodySchema",
+        "type": "Any",
+        "tags": [],
+        "label": "bulkCreateAlertActionItemBodySchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.BulkGetAlertActionsBody",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkGetAlertActionsBody",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.bulkGetAlertActionsBodySchema",
+        "type": "Any",
+        "tags": [],
+        "label": "bulkGetAlertActionsBodySchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 85,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.BulkGetAlertActionsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkGetAlertActionsResponse",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 120,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.bulkGetAlertActionsResponseSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "bulkGetAlertActionsResponseSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 97,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.BulkOperationParams",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkOperationParams",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/bulk_operation_schema.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.bulkOperationParamsSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "bulkOperationParamsSchema",
+        "description": [
+          "\nSchema for bulk operation request bodies.\n\nEnforces that exactly one of `ids` or `filter` must be provided:\n- `ids`: An explicit list of rule IDs to operate on (1–100).\n- `filter`: A KQL filter string to match rules."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/bulk_operation_schema.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.bulkOperationResponseSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "bulkOperationResponseSchema",
+        "description": [
+          "Bulk operation response schema."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 300,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.CreateAlertActionBody",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateAlertActionBody",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.createAlertActionBodySchema",
+        "type": "Any",
+        "tags": [],
+        "label": "createAlertActionBodySchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.CreateAlertActionParams",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateAlertActionParams",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.createAlertActionParamsSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "createAlertActionParamsSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/alert_action_schema.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.CreateNotificationPolicyData",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateNotificationPolicyData",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.createNotificationPolicyDataSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "createNotificationPolicyDataSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 78,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.CreateRuleData",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateRuleData",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 242,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.createRuleDataSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "createRuleDataSchema",
+        "description": [
+          "\nThe `.refine` method adds a custom validation to the schema.\nIn this case, it enforces that the `state_transition` property is only allowed when `kind` is \"alert\".\nThe predicate `data.kind === 'alert' || data.state_transition == null` means:\n- If the rule kind is \"alert\", `state_transition` may be present (or absent).\n- For any other `kind`, `state_transition` must be `null` or `undefined`.\nIf validation fails, the specified error message will be associated with the `state_transition` field."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 219,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.findRulesResponseSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "findRulesResponseSchema",
+        "description": [
+          "Paginated list response schema."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 290,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.MATCHER_CONTEXT_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "MATCHER_CONTEXT_FIELDS",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/alerting-v2-schemas",
+            "scope": "common",
+            "docId": "kibKbnAlertingV2SchemasPluginApi",
+            "section": "def-common.MatcherContextFieldDescriptor",
+            "text": "MatcherContextFieldDescriptor"
+          },
+          "[]"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/matcher_context.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.MAX_CONSECUTIVE_BREACHES",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_CONSECUTIVE_BREACHES",
+        "description": [
+          "Maximum number of consecutive breaches before transition"
+        ],
+        "signature": [
+          "1000"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.MAX_DURATION",
+        "type": "string",
+        "tags": [],
+        "label": "MAX_DURATION",
+        "description": [
+          "Maximum allowed duration for schedule and timeframe fields"
+        ],
+        "signature": [
+          "\"365d\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.MIN_SCHEDULE_INTERVAL",
+        "type": "string",
+        "tags": [],
+        "label": "MIN_SCHEDULE_INTERVAL",
+        "description": [
+          "Minimum allowed interval for schedule.every"
+        ],
+        "signature": [
+          "\"5s\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.NotificationPolicyBulkAction",
+        "type": "Type",
+        "tags": [],
+        "label": "NotificationPolicyBulkAction",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.notificationPolicyBulkActionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "notificationPolicyBulkActionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.NotificationPolicyDestination",
+        "type": "Type",
+        "tags": [],
+        "label": "NotificationPolicyDestination",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.notificationPolicyDestinationSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "notificationPolicyDestinationSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.recoveryPolicyType",
+        "type": "Any",
+        "tags": [],
+        "label": "recoveryPolicyType",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 91,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.RecoveryPolicyType",
+        "type": "Type",
+        "tags": [],
+        "label": "RecoveryPolicyType",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 92,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.recoveryPolicyTypeSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "recoveryPolicyTypeSchema",
+        "description": [
+          "Recovery policy (optional)"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 90,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.RuleKind",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleKind",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.ruleKindSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "ruleKindSchema",
+        "description": [
+          "Kind"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.RuleResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleResponse",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 287,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.ruleResponseSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "ruleResponseSchema",
+        "description": [
+          "\nSchema for rule response data returned from the API.\nExtends the base rule schema with server-generated fields."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 278,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.SnoozeNotificationPolicyBody",
+        "type": "Type",
+        "tags": [],
+        "label": "SnoozeNotificationPolicyBody",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.snoozeNotificationPolicyBodySchema",
+        "type": "Any",
+        "tags": [],
+        "label": "snoozeNotificationPolicyBodySchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.UpdateNotificationPolicyBody",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateNotificationPolicyBody",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.updateNotificationPolicyBodySchema",
+        "type": "Any",
+        "tags": [],
+        "label": "updateNotificationPolicyBodySchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 105,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.UpdateNotificationPolicyData",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateNotificationPolicyData",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.updateNotificationPolicyDataSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "updateNotificationPolicyDataSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/notification_policy_data_schema.ts",
+        "lineNumber": 91,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.UpdateRuleData",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateRuleData",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 272,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.updateRuleDataSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "updateRuleDataSchema",
+        "description": [
+          "Update rule API schema — all fields optional for partial updates"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 246,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
