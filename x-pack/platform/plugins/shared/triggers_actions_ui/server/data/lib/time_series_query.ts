@@ -9,7 +9,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
-import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import {
+  toElasticsearchQuery,
+  fromKueryExpression,
+  getKqlFieldNamesFromExpression,
+} from '@kbn/es-query';
 import {
   buildAggregation,
   getDateRangeInfo,
@@ -34,6 +39,38 @@ export interface TimeSeriesQueryParameters {
   query: TimeSeriesQuery;
   condition?: TimeSeriesCondition;
   useCalculatedDateRange?: boolean;
+}
+
+export async function fetchDataViewBase(
+  esClient: ElasticsearchClient,
+  index: string | string[],
+  fieldNames?: string[]
+): Promise<DataViewBase> {
+  const indices = Array.isArray(index) ? index : [index];
+  const title = indices.join(',');
+
+  const fieldCapsResponse = await esClient.fieldCaps({
+    index: indices,
+    fields: fieldNames?.length ? fieldNames : ['*'],
+    ignore_unavailable: true,
+    allow_no_indices: true,
+  });
+
+  const fields: DataViewFieldBase[] = [];
+  for (const [fieldName, fieldCaps] of Object.entries(fieldCapsResponse.fields)) {
+    const esTypes = Object.keys(fieldCaps);
+    const primaryType = esTypes[0];
+    if (!primaryType || primaryType.startsWith('_')) continue;
+
+    fields.push({
+      name: fieldName,
+      type: primaryType,
+      esTypes,
+      scripted: false,
+    });
+  }
+
+  return { title, fields };
 }
 
 export async function timeSeriesQuery(
@@ -61,6 +98,20 @@ export async function timeSeriesQuery(
   const dateRangeInfo = getDateRangeInfo({ dateStart, dateEnd, window, interval });
   const { aggType, aggField, termField, termSize } = queryParams;
 
+  let filterQuery: object[] = [];
+  if (filterKuery) {
+    let dataView: DataViewBase | undefined;
+    try {
+      const fieldNames = getKqlFieldNamesFromExpression(filterKuery);
+      dataView = await fetchDataViewBase(esClient, index, fieldNames);
+    } catch (err) {
+      logger.warn(
+        `indexThreshold timeSeriesQuery: failed to fetch field caps for filter, falling back to untyped conversion: ${err.message}`
+      );
+    }
+    filterQuery = [toElasticsearchQuery(fromKueryExpression(filterKuery), dataView)];
+  }
+
   // core query
   // Constructing a typesafe ES query in JS is problematic, use any escapehatch for now
 
@@ -79,7 +130,7 @@ export async function timeSeriesQuery(
               },
             },
           },
-          ...(!!filterKuery ? [toElasticsearchQuery(fromKueryExpression(filterKuery))] : []),
+          ...filterQuery,
         ],
       },
     },
