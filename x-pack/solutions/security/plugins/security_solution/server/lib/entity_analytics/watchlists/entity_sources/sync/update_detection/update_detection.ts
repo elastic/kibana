@@ -7,10 +7,11 @@
 
 import { uniq } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
-import type { EntityStoreEntityIdsByType } from '../../../entities/service';
+import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../../entities/service';
 import type { WatchlistBulkEntity } from '../../types';
 import { createWatchlistSyncMarkersService } from '../sync_markers';
 import type { WatchlistEntitySourceClient } from '../../infra';
@@ -26,7 +27,8 @@ export type UpdateDetectionService = ReturnType<typeof createUpdateDetectionServ
 type UpdateDetection = (
   source: WatchlistDataSources.MonitoringEntitySource,
   entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
-  correlationMap?: CorrelationMap
+  correlationMap: CorrelationMap | undefined,
+  watchlistsByEuid: WatchlistsByEuid
 ) => Promise<WatchlistBulkEntity[]>;
 
 interface MappedBucket {
@@ -127,18 +129,18 @@ const getAllowedEntityIds = (
 
 export const createUpdateDetectionService = ({
   esClient,
+  crudClient,
   logger,
   targetIndex,
   descriptorClient,
   watchlistName,
-  namespace,
 }: {
   esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
   logger: Logger;
   targetIndex: string;
   descriptorClient?: WatchlistEntitySourceClient;
   watchlistName: string;
-  namespace: string;
 }) => {
   const syncMarkersService = descriptorClient
     ? createWatchlistSyncMarkersService(descriptorClient, esClient)
@@ -268,7 +270,8 @@ export const createUpdateDetectionService = ({
   const updateDetection: UpdateDetection = async (
     source: WatchlistDataSources.MonitoringEntitySource,
     entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
-    correlationMap?: CorrelationMap
+    correlationMap: CorrelationMap | undefined,
+    watchlistsByEuid: WatchlistsByEuid
   ) => {
     const allEntities: WatchlistBulkEntity[] = [];
     let maxProcessedTimestamp: string | undefined;
@@ -313,14 +316,18 @@ export const createUpdateDetectionService = ({
       allEntities.push(...entities);
     }
 
+    for (const entity of allEntities) {
+      entity.currentWatchlists = watchlistsByEuid.get(entity.euid);
+    }
+
     await applyBulkUpsert({
       esClient,
+      crudClient,
       logger,
       entities: allEntities,
       source,
       targetIndex,
       watchlistName,
-      namespace,
     });
 
     logger.info(

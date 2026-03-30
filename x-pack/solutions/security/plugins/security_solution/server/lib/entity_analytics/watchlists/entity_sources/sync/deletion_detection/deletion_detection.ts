@@ -6,7 +6,9 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { WatchlistsByEuid } from '../../../entities/service';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { WatchlistEntityDoc } from '../../../entities/types';
 import type { WatchlistEntitySourceClient } from '../../infra';
@@ -18,18 +20,18 @@ export type DeletionDetectionService = ReturnType<typeof createDeletionDetection
 
 export const createDeletionDetectionService = ({
   esClient,
+  crudClient,
   logger,
   targetIndex,
   descriptorClient,
   watchlistName,
-  namespace,
 }: {
   esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
   logger: Logger;
   targetIndex: string;
   descriptorClient: WatchlistEntitySourceClient;
   watchlistName: string;
-  namespace: string;
 }) => {
   const syncMarkersService = createWatchlistSyncMarkersService(descriptorClient, esClient);
 
@@ -76,7 +78,8 @@ export const createDeletionDetectionService = ({
 
   const deletionDetection = async (
     source: MonitoringEntitySource,
-    currentEuids: string[]
+    currentEuids: string[],
+    watchlistsByEuid: WatchlistsByEuid
   ): Promise<void> => {
     if (source.type === 'entity_analytics_integration') {
       const hasNewFullSync = await syncMarkersService.detectNewFullSync(source);
@@ -101,12 +104,13 @@ export const createDeletionDetectionService = ({
 
     await applyBulkRemoveSource({
       esClient,
+      crudClient,
       logger,
       staleEntities,
       sourceType: source.type ?? 'index',
       targetIndex,
       watchlistName,
-      namespace,
+      watchlistsByEuid,
     });
   };
 

@@ -10,8 +10,20 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
+import type { WatchlistsByEuid } from '../../../entities/service';
 import { createDeletionDetectionService } from './deletion_detection';
+
+const createMockCrudClient = (): jest.Mocked<CRUDClient> =>
+  ({
+    searchLatestEntities: jest
+      .fn()
+      .mockResolvedValue({ records: [], total: 0, inspect: { dsl: [], response: [] } }),
+    bulkUpdateEntity: jest.fn().mockResolvedValue([]),
+  } as unknown as jest.Mocked<CRUDClient>);
+
+const emptyWatchlistsByEuid: WatchlistsByEuid = new Map();
 
 jest.mock('../../infra/entity_source_client');
 jest.mock('../../bulk/soft_delete');
@@ -39,9 +51,11 @@ describe('DeletionDetectionService', () => {
     });
     return createDeletionDetectionService({
       esClient,
+      crudClient: createMockCrudClient(),
       logger,
       targetIndex,
       descriptorClient,
+      watchlistName: 'test-watchlist',
     });
   };
 
@@ -78,7 +92,7 @@ describe('DeletionDetectionService', () => {
   describe('index sources', () => {
     it('skips bulk operations when no stale entities are found', async () => {
       const service = createService();
-      await service.deletionDetection(indexSource, ['euid-1', 'euid-2']);
+      await service.deletionDetection(indexSource, ['euid-1', 'euid-2'], emptyWatchlistsByEuid);
 
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -106,7 +120,7 @@ describe('DeletionDetectionService', () => {
       } as unknown as ReturnType<typeof esClient.search>);
 
       const service = createService();
-      await service.deletionDetection(indexSource, ['euid-1']);
+      await service.deletionDetection(indexSource, ['euid-1'], emptyWatchlistsByEuid);
 
       expect(applyBulkRemoveSource).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -122,7 +136,7 @@ describe('DeletionDetectionService', () => {
 
     it('omits must_not when currentEuids is empty (all entities are stale)', async () => {
       const service = createService();
-      await service.deletionDetection(indexSource, []);
+      await service.deletionDetection(indexSource, [], emptyWatchlistsByEuid);
 
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -137,7 +151,7 @@ describe('DeletionDetectionService', () => {
 
     it('does not check detectNewFullSync for index sources', async () => {
       const service = createService();
-      await service.deletionDetection(indexSource, ['euid-1']);
+      await service.deletionDetection(indexSource, ['euid-1'], emptyWatchlistsByEuid);
 
       // detectNewFullSync queries the sync marker index — should not happen for index sources
       // The only search call should be the stale entity query on the target index
@@ -155,7 +169,7 @@ describe('DeletionDetectionService', () => {
       } as unknown as ReturnType<typeof esClient.search>);
 
       const service = createService();
-      await service.deletionDetection(integrationSource, ['euid-1']);
+      await service.deletionDetection(integrationSource, ['euid-1'], emptyWatchlistsByEuid);
 
       // Only the sync marker index query should happen, NOT the stale entity query
       expect(esClient.search).toHaveBeenCalledTimes(1);
@@ -184,7 +198,7 @@ describe('DeletionDetectionService', () => {
       } as unknown as ReturnType<typeof esClient.search>);
 
       const service = createService();
-      await service.deletionDetection(integrationSource, ['euid-1']);
+      await service.deletionDetection(integrationSource, ['euid-1'], emptyWatchlistsByEuid);
 
       expect(mockUpdateLastFullSyncMarker).toHaveBeenCalledWith(
         integrationSource,
@@ -208,7 +222,7 @@ describe('DeletionDetectionService', () => {
       } as unknown as ReturnType<typeof esClient.search>);
 
       const service = createService();
-      await service.deletionDetection(integrationSource, ['euid-1']);
+      await service.deletionDetection(integrationSource, ['euid-1'], emptyWatchlistsByEuid);
 
       expect(applyBulkRemoveSource).not.toHaveBeenCalled();
     });

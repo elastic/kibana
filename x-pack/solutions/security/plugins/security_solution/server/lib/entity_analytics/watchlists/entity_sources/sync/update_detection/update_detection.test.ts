@@ -11,10 +11,21 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { createUpdateDetectionService } from './update_detection';
 import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
-import type { EntityStoreEntityIdsByType } from '../../../entities/service';
+import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../../entities/service';
 import type { CorrelationMap } from '../../../entities/types';
+
+const emptyWatchlistsByEuid: WatchlistsByEuid = new Map();
+
+const createMockCrudClient = (): jest.Mocked<CRUDClient> =>
+  ({
+    searchLatestEntities: jest
+      .fn()
+      .mockResolvedValue({ records: [], total: 0, inspect: { dsl: [], response: [] } }),
+    bulkUpdateEntity: jest.fn().mockResolvedValue([]),
+  } as unknown as jest.Mocked<CRUDClient>);
 
 jest.mock('../../infra/entity_source_client');
 
@@ -116,13 +127,14 @@ describe('Watchlist update detection service', () => {
         logger,
         targetIndex,
         watchlistName: 'test-watchlist',
-        namespace: 'default',
+        crudClient: createMockCrudClient(),
       });
 
       await service.updateDetection(
         indexSource,
         createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
-        correlationMap
+        correlationMap,
+        emptyWatchlistsByEuid
       );
 
       expect(searchCalls.length).toBeGreaterThan(0);
@@ -142,14 +154,15 @@ describe('Watchlist update detection service', () => {
         logger,
         targetIndex: '.watchlist-entities-default',
         watchlistName: 'test-watchlist',
-        namespace: 'default',
+        crudClient: createMockCrudClient(),
       });
 
       const correlationMap: CorrelationMap = new Map();
       const result = await service.updateDetection(
         indexSource,
         createEntityStoreEntityIdsByType(),
-        correlationMap
+        correlationMap,
+        emptyWatchlistsByEuid
       );
 
       expect(result).toEqual([]);
@@ -165,12 +178,14 @@ describe('Watchlist update detection service', () => {
         logger,
         targetIndex: '.watchlist-entities-default',
         watchlistName: 'test-watchlist',
-        namespace: 'default',
+        crudClient: createMockCrudClient(),
       });
 
       const result = await service.updateDetection(
         indexSource,
-        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
+        undefined,
+        emptyWatchlistsByEuid
       );
 
       expect(result).toEqual([]);
@@ -189,12 +204,14 @@ describe('Watchlist update detection service', () => {
         logger,
         targetIndex: '.watchlist-entities-default',
         watchlistName: 'test-watchlist',
-        namespace: 'default',
+        crudClient: createMockCrudClient(),
       });
 
       const result = await service.updateDetection(
         integrationSource,
-        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
+        undefined,
+        emptyWatchlistsByEuid
       );
 
       expect(result).toEqual([]);
@@ -237,12 +254,14 @@ describe('Watchlist update detection service', () => {
         targetIndex: '.watchlist-entities-default',
         descriptorClient,
         watchlistName: 'test-watchlist',
-        namespace: 'default',
+        crudClient: createMockCrudClient(),
       });
 
       await service.updateDetection(
         integrationSource,
-        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
+        undefined,
+        emptyWatchlistsByEuid
       );
 
       expect(mockGetLastProcessedMarker).toHaveBeenCalledWith(integrationSource);
@@ -300,12 +319,14 @@ describe('Watchlist update detection service', () => {
         targetIndex: '.watchlist-entities-default',
         descriptorClient,
         watchlistName: 'test-watchlist',
-        namespace: 'default',
+        crudClient: createMockCrudClient(),
       });
 
       await service.updateDetection(
         integrationSource,
-        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
+        undefined,
+        emptyWatchlistsByEuid
       );
 
       expect(mockUpdateLastProcessedMarker).toHaveBeenCalledWith(integrationSource, maxTimestamp);

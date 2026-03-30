@@ -80,12 +80,16 @@ describe('createEntitySourcesService', () => {
           generic: [],
         },
         correlationMap: new Map(),
+        watchlistsByEuid: new Map(),
       })
       .mockResolvedValueOnce({
-        user: ['user:2'],
-        host: ['host:1'],
-        service: [],
-        generic: [],
+        entityIdsByType: {
+          user: ['user:2'],
+          host: ['host:1'],
+          service: [],
+          generic: [],
+        },
+        watchlistsByEuid: new Map(),
       });
     mockPlainIndexSync.mockResolvedValue(undefined);
     mockGetIndexForWatchlist.mockReturnValue('.lists-watchlist-vip-users-default');
@@ -126,6 +130,7 @@ describe('createEntitySourcesService', () => {
           generic: [],
         },
         correlationMap: expect.any(Map),
+        watchlistsByEuid: expect.any(Map),
       },
       {
         sourceId: 'source-c',
@@ -135,6 +140,7 @@ describe('createEntitySourcesService', () => {
           service: [],
           generic: [],
         },
+        watchlistsByEuid: expect.any(Map),
       },
     ]);
 

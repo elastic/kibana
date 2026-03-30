@@ -6,10 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { WatchlistBulkEntity } from '../types';
 import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
-import { addWatchlistAttributeToStore } from './entity_store_sync';
+import { addWatchlistAttributeToStore } from '../sync/entity_store_sync';
 
 export const UPDATE_SCRIPT_SOURCE = `
 def src = ctx._source;
@@ -88,20 +89,20 @@ export const bulkUpsertOperationsFactory =
 
 export const applyBulkUpsert = async ({
   esClient,
+  crudClient,
   logger,
   entities,
   source,
   targetIndex,
   watchlistName,
-  namespace,
 }: {
   esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
   logger: Logger;
   entities: WatchlistBulkEntity[];
   source: MonitoringEntitySource;
   targetIndex: string;
   watchlistName: string;
-  namespace: string;
 }) => {
   if (entities.length === 0) {
     return;
@@ -127,10 +128,13 @@ export const applyBulkUpsert = async ({
   }
 
   await addWatchlistAttributeToStore({
-    esClient,
+    crudClient,
     logger,
-    euids: entities.map((e) => e.euid),
+    entityRefs: entities.map((e) => ({
+      euid: e.euid,
+      type: e.type,
+      currentWatchlists: e.currentWatchlists,
+    })),
     watchlistName,
-    namespace,
   });
 };

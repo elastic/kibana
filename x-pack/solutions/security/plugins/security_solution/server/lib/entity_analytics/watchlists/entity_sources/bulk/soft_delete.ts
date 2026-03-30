@@ -6,8 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
+import type { EntityType } from '@kbn/entity-store/common';
+import type { WatchlistsByEuid } from '../../entities/service';
 import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
-import { removeWatchlistAttributeFromStore } from './entity_store_sync';
+import { removeWatchlistAttributeFromStore } from '../sync/entity_store_sync';
 
 export interface StaleEntity {
   docId: string;
@@ -76,20 +79,22 @@ export const bulkRemoveSourceOperationsFactory =
 
 export const applyBulkRemoveSource = async ({
   esClient,
+  crudClient,
   logger,
   staleEntities,
   sourceType,
   targetIndex,
   watchlistName,
-  namespace,
+  watchlistsByEuid,
 }: {
   esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
   logger: Logger;
   staleEntities: StaleEntity[];
   sourceType: string;
   targetIndex: string;
   watchlistName: string;
-  namespace: string;
+  watchlistsByEuid: WatchlistsByEuid;
 }): Promise<void> => {
   if (staleEntities.length === 0) {
     return;
@@ -121,11 +126,14 @@ export const applyBulkRemoveSource = async ({
 
   if (hardDeletedEuids.length > 0) {
     await removeWatchlistAttributeFromStore({
-      esClient,
+      crudClient,
       logger,
-      euids: hardDeletedEuids,
+      entityRefs: hardDeletedEuids.map((euid) => ({
+        euid,
+        type: euid.split(':')[0] as EntityType,
+        currentWatchlists: watchlistsByEuid.get(euid),
+      })),
       watchlistName,
-      namespace,
     });
   }
 };
