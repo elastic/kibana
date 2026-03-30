@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EuiBadgeProps, EuiIconTip } from '@elastic/eui';
+import { type EuiBadgeProps, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -16,11 +16,12 @@ type WorkflowStatusProps = EuiBadgeProps & {
 };
 
 export function WorkflowStatus({ valid, ...props }: WorkflowStatusProps) {
+  const { euiTheme } = useEuiTheme();
   if (valid) return null;
   return (
     <EuiIconTip
       type="errorFilled"
-      color="red"
+      color={euiTheme.colors.danger}
       size="m"
       content={i18n.translate('workflows.workflowList.workflowInvalid', {
         defaultMessage:
