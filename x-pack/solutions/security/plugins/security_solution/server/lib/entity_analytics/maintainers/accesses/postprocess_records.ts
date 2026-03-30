@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { ProcessedEntityRecord } from './types';
 
 interface EsqlColumn {
@@ -30,7 +29,7 @@ export function postprocessEsqlResults(
     });
 
     return {
-      entityId: euid.getEuidFromObject('user', record) ?? null,
+      entityId: (record.actorUserId as string) ?? null,
       accesses_frequently: toStringArray(record.accesses_frequently),
       accesses_infrequently: toStringArray(record.accesses_infrequently),
     };

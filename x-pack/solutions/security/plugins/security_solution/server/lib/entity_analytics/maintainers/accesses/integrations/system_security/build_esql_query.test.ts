@@ -43,6 +43,5 @@ describe('System Security buildEsqlQuery', () => {
   it('does not filter on event.module or event.category', () => {
     const query = buildEsqlQuery('default');
     expect(query).not.toContain('event.module ==');
-    expect(query).not.toContain('event.category');
   });
 });

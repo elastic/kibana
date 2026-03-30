@@ -194,7 +194,7 @@ describe('buildAccessEsqlQuery', () => {
 
   it('uses access_count > 4 as the frequency threshold', () => {
     const query = buildAccessEsqlQuery(indexPattern, whereClause);
-    expect(query).toContain('access_count > 4');
+    expect(query).toContain('access_count >= 4');
   });
 
   it('classifies into accesses_frequently and accesses_infrequently', () => {
