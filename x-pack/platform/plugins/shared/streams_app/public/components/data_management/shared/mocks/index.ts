@@ -7,6 +7,7 @@
 
 export {
   createMockClassicStreamDefinition,
+  createMockQueryStreamDefinition,
   createMockWiredStreamDefinition,
   createMockMappedField,
   createMockUnmappedField,

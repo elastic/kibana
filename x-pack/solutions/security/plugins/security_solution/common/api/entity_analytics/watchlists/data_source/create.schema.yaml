@@ -31,6 +31,9 @@ paths:
                   type: string
                 indexPattern:
                   type: string
+                integrationName:
+                  type: string
+                  description: Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
                 enabled:
                   type: boolean
                 matchers:

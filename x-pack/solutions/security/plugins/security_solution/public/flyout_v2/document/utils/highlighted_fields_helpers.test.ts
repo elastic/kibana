@@ -5,7 +5,82 @@
  * 2.0.
  */
 
-import { convertHighlightedFieldsToPrevalenceFilters } from './highlighted_fields_helpers';
+import {
+  convertHighlightedFieldsToPrevalenceFilters,
+  convertHighlightedFieldsToTableRow,
+} from './highlighted_fields_helpers';
+
+const scopeId = 'scopeId';
+const showCellActions = false;
+
+describe('convertHighlightedFieldsToTableRow', () => {
+  it('should convert highlighted fields to a table row', () => {
+    const highlightedFields = {
+      'host.name': {
+        values: ['host-1'],
+      },
+    };
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions)).toEqual(
+      [
+        {
+          field: 'host.name',
+          description: {
+            field: 'host.name',
+            values: ['host-1'],
+            scopeId: 'scopeId',
+            showCellActions,
+          },
+        },
+      ]
+    );
+  });
+
+  it('should convert take override name over default name and use original values if not present in the override', () => {
+    const highlightedFields = {
+      'host.name': {
+        overrideField: { field: 'host.name-override', values: [] },
+        values: ['host-1'],
+      },
+    };
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions)).toEqual(
+      [
+        {
+          field: 'host.name-override',
+          description: {
+            field: 'host.name-override',
+            originalField: 'host.name',
+            values: ['host-1'],
+            scopeId: 'scopeId',
+            showCellActions,
+          },
+        },
+      ]
+    );
+  });
+
+  it('should convert take override name over default name and use provided values', () => {
+    const highlightedFields = {
+      'host.name': {
+        overrideField: { field: 'host.name-override', values: ['value override!'] },
+        values: ['host-1'],
+      },
+    };
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions)).toEqual(
+      [
+        {
+          field: 'host.name-override',
+          description: {
+            field: 'host.name-override',
+            originalField: 'host.name',
+            values: ['value override!'],
+            scopeId: 'scopeId',
+            showCellActions,
+          },
+        },
+      ]
+    );
+  });
+});
 
 describe('convertHighlightedFieldsToPrevalenceFilters', () => {
   it('should convert highlighted fields to prevalence filters', () => {

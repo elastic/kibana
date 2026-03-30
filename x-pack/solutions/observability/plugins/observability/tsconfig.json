@@ -151,6 +151,7 @@
     "@kbn/lens-common",
     "@kbn/apm-types",
     "@kbn/apm-types-shared",
+    "@kbn/cps",
   ],
   "exclude": ["target/**/*"]
 }

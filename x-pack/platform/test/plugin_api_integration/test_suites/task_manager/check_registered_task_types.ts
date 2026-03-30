@@ -108,6 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.xsoar',
         'actions:connector_usage_reporting',
         'actions:oauth_state_cleanup',
+        'actions:user_connector_token_cleanup',
         'actions_telemetry',
         'ad_hoc_run-backfill',
         'agent-builder:run-agent',

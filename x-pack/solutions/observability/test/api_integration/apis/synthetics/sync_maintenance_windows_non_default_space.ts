@@ -31,7 +31,8 @@ export const LOCAL_LOCATION = {
 };
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('SyncMaintenanceWindowsNonDefaultSpace', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/251844
+  describe.skip('SyncMaintenanceWindowsNonDefaultSpace', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertest');
     const kServer = getService('kibanaServer');

@@ -4437,7 +4437,7 @@
             "label": "ruleMonitoringService",
             "description": [],
             "signature": [
-              "PublicMetricsSetters",
+              "PublicRuleMonitoringService",
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",

@@ -75,7 +75,8 @@ describe('stripUnmappedKeys', () => {
       ],
     };
 
-    expect(stripUnmappedKeys(dashboardState as Partial<DashboardState>)).toMatchInlineSnapshot(`
+    expect(stripUnmappedKeys(dashboardState as unknown as Partial<DashboardState>))
+      .toMatchInlineSnapshot(`
       Object {
         "data": Object {
           "panels": Array [

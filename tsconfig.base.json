@@ -2390,6 +2390,8 @@
       "@kbn/telemetry-tools/*": ["src/platform/packages/private/kbn-telemetry-tools/*"],
       "@kbn/test": ["src/platform/packages/shared/kbn-test"],
       "@kbn/test/*": ["src/platform/packages/shared/kbn-test/*"],
+      "@kbn/test-es-server": ["src/platform/packages/shared/kbn-test-es-server"],
+      "@kbn/test-es-server/*": ["src/platform/packages/shared/kbn-test-es-server/*"],
       "@kbn/test-eui-helpers": ["src/platform/packages/private/kbn-test-eui-helpers"],
       "@kbn/test-eui-helpers/*": ["src/platform/packages/private/kbn-test-eui-helpers/*"],
       "@kbn/test-feature-usage-plugin": ["x-pack/platform/test/licensing_plugin/plugins/test_feature_usage"],

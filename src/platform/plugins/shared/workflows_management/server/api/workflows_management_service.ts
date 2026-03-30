@@ -804,7 +804,8 @@ export class WorkflowsService {
     }
 
     const pageSize = 1000;
-    const MAX_PAGES = 100;
+    // theoretical MAX number of workflows we can process by minute.
+    const MAX_PAGES = 50;
     const keepAlive = '1m';
     const indexPattern = `${workflowIndexName}-*`;
     const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];

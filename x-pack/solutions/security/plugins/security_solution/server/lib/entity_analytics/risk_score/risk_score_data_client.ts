@@ -189,8 +189,36 @@ export class RiskScoreDataClient {
         indexPatterns,
       });
 
+      this.options.auditLogger?.log({
+        message: 'System installed risk engine Elasticsearch components',
+        event: {
+          action: RiskScoreAuditActions.RISK_ENGINE_INSTALL,
+          category: AUDIT_CATEGORY.DATABASE,
+          type: AUDIT_TYPE.CHANGE,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        },
+      });
+    } catch (error) {
+      this.options.logger.error(
+        `Error initializing risk engine resources: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * @deprecated This is for the legacy risk engine and will be removed when 9.4 mode is default.
+   */
+  public async initLegacyTransforms() {
+    const namespace = this.options.namespace;
+    const esClient = this.options.esClient;
+
+    try {
       await this.createOrUpdateRiskScoreLatestIndex();
 
+      const indexPatterns = getIndexPatternDataStream(namespace);
       const transformId = getLatestTransformId(namespace);
       await createTransform({
         esClient,
@@ -204,18 +232,12 @@ export class RiskScoreDataClient {
           }),
         },
       });
-
-      this.options.auditLogger?.log({
-        message: 'System installed risk engine Elasticsearch components',
-        event: {
-          action: RiskScoreAuditActions.RISK_ENGINE_INSTALL,
-          category: AUDIT_CATEGORY.DATABASE,
-          type: AUDIT_TYPE.CHANGE,
-          outcome: AUDIT_OUTCOME.SUCCESS,
-        },
-      });
     } catch (error) {
-      this.options.logger.error(`Error initializing risk engine resources: ${error.message}`);
+      this.options.logger.error(
+        `Error initializing legacy risk engine transforms: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       throw error;
     }
   }

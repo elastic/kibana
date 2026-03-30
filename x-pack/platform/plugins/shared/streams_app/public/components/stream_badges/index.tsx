@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
 import {
-  isIlmLifecycle,
-  isErrorLifecycle,
-  isDslLifecycle,
+  Streams,
   getDiscoverEsqlQuery,
+  isDslLifecycle,
+  isErrorLifecycle,
+  isIlmLifecycle,
 } from '@kbn/streams-schema';
 import React from 'react';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';

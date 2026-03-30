@@ -94,6 +94,12 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
         isOpen={isOpen}
         closePopover={() => setIsOpen(false)}
         panelPaddingSize="none"
+        aria-label={i18n.translate(
+          'indexPatternManagement.editDataView.moreActionsPopoverAriaLabel',
+          {
+            defaultMessage: 'More actions',
+          }
+        )}
         button={
           <EuiButtonIcon
             iconType="boxesVertical"

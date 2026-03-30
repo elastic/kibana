@@ -24,7 +24,7 @@ import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/component
 import { getDataProvider } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
 import { PreviewLink } from '../../../shared/components/preview_link';
-import { FlyoutMissingAlertsPrivilege } from '../../../shared/components/flyout_missing_alerts_privilege';
+import { FlyoutMissingAlertsPrivilege } from '../../../../flyout_v2/document/components/flyout_missing_alerts_privilege';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;

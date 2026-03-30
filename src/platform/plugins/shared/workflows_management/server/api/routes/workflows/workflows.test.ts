@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import AdmZip from 'adm-zip';
+import YAML from 'yaml';
 import type { IRouter } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
@@ -18,10 +20,6 @@ jest.mock('../utils/route_error_handlers', () => ({
   handleRouteError: jest.fn((response: { customError: jest.Mock }, error: Error) =>
     response.customError({ statusCode: 500, body: { message: String(error) } })
   ),
-}));
-
-jest.mock('../../lib/zip_archive', () => ({
-  generateWorkflowsArchive: jest.fn(() => Promise.resolve(Buffer.from('zip'))),
 }));
 
 const createLicensingContext = () => ({
@@ -474,6 +472,63 @@ describe('Workflow routes', () => {
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: 'None of the requested workflows were found' },
       });
+    });
+
+    it('should export workflows as a ZIP archive', async () => {
+      mockApi.getWorkflowsByIds.mockResolvedValue([
+        {
+          id: 'w-1',
+          name: 'Workflow w-1',
+          yaml: 'name: Workflow w-1\nsteps: []',
+          definition: null,
+        },
+        {
+          id: 'w-2',
+          name: 'Workflow w-2',
+          yaml: 'name: Workflow w-2\nsteps: []',
+          definition: null,
+        },
+      ]);
+
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-1', 'w-2'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+      const { body, headers } = (response.ok as jest.Mock).mock.calls[0][0];
+
+      expect(headers['Content-Type']).toBe('application/zip');
+      expect(headers['Content-Disposition']).toContain('.zip');
+
+      const zip = new AdmZip(body);
+      const entryNames = zip.getEntries().map((e) => e.entryName);
+      expect(entryNames.some((n) => n.includes('w-1.yml'))).toBe(true);
+      expect(entryNames.some((n) => n.includes('w-2.yml'))).toBe(true);
+      expect(entryNames.some((n) => n.includes('manifest.yml'))).toBe(true);
+
+      const manifestEntry = zip.getEntries().find((e) => e.entryName === 'manifest.yml');
+      expect(manifestEntry).toBeDefined();
+
+      const manifest = YAML.parse(manifestEntry!.getData().toString('utf-8'));
+      expect(manifest.exportedCount).toBe(2);
+      expect(manifest.version).toBe('1');
+      expect(manifest.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    });
+
+    it('should log a warning when some workflow IDs are missing', async () => {
+      mockApi.getWorkflowsByIds.mockResolvedValue([
+        { id: 'w-1', name: 'Found', yaml: 'name: Found', definition: null },
+      ]);
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-missing-1'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Export skipped 1 missing workflow(s): w-missing-1'
+      );
     });
   });
 

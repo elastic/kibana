@@ -1,5 +1,13 @@
 {
   "$schema": "./allowlist.schema.json",
   "description": "Approved API breaking changes that should be ignored by the contract checker",
-  "entries": []
+  "entries": [
+    {
+      "path": "/api/fleet/outputs",
+      "method": "post",
+      "reason": "POST request body uses NewOutputSchema with meta IDs, changing inline anyOf members to $ref components. Data shape is identical. Approved: https://github.com/elastic/kibana/pull/258986#discussion_r2978192160",
+      "approvedBy": "@elastic/terraform-provider",
+      "prUrl": "https://github.com/elastic/kibana/pull/258986"
+    }
+  ]
 }

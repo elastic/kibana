@@ -422,7 +422,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   <EuiButtonEmpty
                     color={hasErrors ? 'danger' : 'primary'}
                     onClick={() => setIsShowingStreams(!isShowingStreams)}
-                    iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
+                    iconType={isShowingStreams ? 'chevronSingleUp' : 'chevronSingleDown'}
                     iconSide="right"
                     aria-expanded={isShowingStreams}
                     aria-label={i18n.translate(

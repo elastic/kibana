@@ -72,11 +72,12 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
     ...(layer.metric.color
       ? { colorMode: 'palette', palette: fromColorByValueAPIToLensState(layer.metric.color) }
       : {}),
-    ticksPosition: layer.metric.ticks ?? 'auto',
-    ...(layer.metric.hide_title
+    ticksPosition:
+      layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'auto',
+    ...(layer.metric.title?.visible === false
       ? { labelMajorMode: 'none' }
-      : layer.metric.title
-      ? { labelMajorMode: 'custom', labelMajor: layer.metric.title }
+      : layer.metric.title?.text
+      ? { labelMajorMode: 'custom', labelMajor: layer.metric.title.text }
       : { labelMajorMode: 'auto' }),
     labelMinor: layer.metric.sub_title,
   };
@@ -154,10 +155,13 @@ function reverseBuildVisualizationState(
   } as GaugeState;
 
   if (props.metric) {
-    props.metric.hide_title = visualization.labelMajorMode === 'none';
+    props.metric.title = {
+      visible: visualization.labelMajorMode !== 'none',
+    };
+    const titleValue = visualization.labelMajor;
 
-    if (visualization.labelMajor) {
-      props.metric.title = visualization.labelMajor;
+    if (titleValue) {
+      props.metric.title.text = titleValue;
     }
 
     if (visualization.labelMinor) {
@@ -165,7 +169,12 @@ function reverseBuildVisualizationState(
     }
 
     if (visualization.ticksPosition) {
-      props.metric.ticks = visualization.ticksPosition;
+      props.metric.ticks =
+        visualization.ticksPosition === 'hidden'
+          ? { visible: false }
+          : visualization.ticksPosition === 'bands'
+          ? { visible: true, mode: 'bands' }
+          : { visible: true, mode: 'auto' };
     }
 
     if (visualization.colorMode === 'palette' && visualization.palette) {

@@ -1,0 +1,199 @@
+{
+  "id": "@kbn/inference-connectors",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/inference-connectors",
+        "id": "def-public.useLoadConnectors",
+        "type": "Function",
+        "tags": [],
+        "label": "useLoadConnectors",
+        "description": [],
+        "signature": [
+          "({ http, toasts, featureId, settings, }: ",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.UseLoadConnectorsProps",
+            "text": "UseLoadConnectorsProps"
+          },
+          ") => ",
+          "UseQueryResult",
+          "<",
+          {
+            "pluginId": "@kbn/inference-connectors",
+            "scope": "public",
+            "docId": "kibKbnInferenceConnectorsPluginApi",
+            "section": "def-public.AIConnector",
+            "text": "AIConnector"
+          },
+          "[], ",
+          "IHttpFetchError",
+          "<unknown>>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+        "lineNumber": 78,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.useLoadConnectors.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  toasts,\n  featureId,\n  settings,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-connectors",
+                "scope": "public",
+                "docId": "kibKbnInferenceConnectorsPluginApi",
+                "section": "def-public.UseLoadConnectorsProps",
+                "text": "UseLoadConnectorsProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+            "lineNumber": 78,
+            "columnNumber": 35,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/inference-connectors",
+        "id": "def-public.UseLoadConnectorsProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseLoadConnectorsProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.UseLoadConnectorsProps.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.UseLoadConnectorsProps.toasts",
+            "type": "Object",
+            "tags": [],
+            "label": "toasts",
+            "description": [],
+            "signature": [
+              "IToasts",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.UseLoadConnectorsProps.featureId",
+            "type": "string",
+            "tags": [],
+            "label": "featureId",
+            "description": [
+              "\nFeature identifier used to scope which inference endpoints are relevant.\nReserved for future filtering logic."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-connectors",
+            "id": "def-public.UseLoadConnectorsProps.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "SettingsStart"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/use_load_connectors.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/inference-connectors",
+        "id": "def-public.AIConnector",
+        "type": "Type",
+        "tags": [],
+        "label": "AIConnector",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.ActionConnector",
+            "text": "ActionConnector"
+          },
+          "<Record<string, unknown>, Record<string, unknown>> & { apiProvider?: ",
+          "OpenAiProviderType",
+          " | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-connectors/src/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -137,7 +137,7 @@ Accept features with confidence ≥ 30 if evidence supports them.
 
 Evidence requirements:
 - Provide 2–5 short, specific evidence strings per feature
-- Prefer stable `field.path=value` snippets when possible; otherwise short direct quotes
+- Evidence format: use `field.path=value` notation for key-value evidence (e.g. `service.name=api-service`, `resource.attributes.app=shipping`). For direct quotes from log message bodies, use the plain text without surrounding JSON escaping.
 - For `evidence_doc_ids`: include the minimal set of `_id` values that covers all evidence — one per distinct source document, not one per evidence item. If all evidence comes from the same document, use a single `_id`. If evidence is aggregate/system-wide or no `_id` is available, use `[]`.
 - Deduplicate evidence items by meaning: if the same evidence snippet (e.g. `service.name=<service>`) appears in multiple documents, DO NOT repeat it as separate evidence lines. Keep only one representative evidence line and include any relevant ids in `evidence_doc_ids`.
 - Aim for evidence diversity: use evidence lines that support different aspects of the claim (name, version, protocol, relationship, etc.) rather than repeating the same key/value.

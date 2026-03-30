@@ -397,7 +397,7 @@ export const buildDatasourceStates = (
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
   // XY charts have dataset encoded per layer not at the root level
-  const mainDataset = 'dataset' in config && config.dataset;
+  const mainDataset = ('dataset' in config && config.dataset) || undefined;
   const usedDataviews: Record<string, APIDataView | APIAdHocDataView> = {};
   // a few charts types support multiple layers
   const hasMultipleLayers = 'layers' in config;
@@ -412,6 +412,10 @@ export const buildDatasourceStates = (
     const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
 
     if (!dataset) {
+      if ('type' in layer && layer.type === 'annotation_group' && 'group_id' in layer) {
+        // by-ref annotation layers don't require a dataset
+        continue;
+      }
       throw Error('dataset must be defined');
     }
 
@@ -644,7 +648,7 @@ function extraQueryFromAPIState(state: LensApiState): { esql: string } | Query |
   if ('layers' in state && Array.isArray(state.layers)) {
     // pick only the first one for now
     const esqlLayer = state.layers.find(
-      (layer): layer is LayerTypeESQL => layer.dataset?.type === 'esql'
+      (layer): layer is LayerTypeESQL => 'dataset' in layer && layer.dataset?.type === 'esql'
     );
     if (esqlLayer && 'query' in esqlLayer.dataset) {
       return { esql: esqlLayer.dataset.query };

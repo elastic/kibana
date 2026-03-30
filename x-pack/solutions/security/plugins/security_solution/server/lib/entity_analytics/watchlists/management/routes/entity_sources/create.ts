@@ -18,6 +18,31 @@ import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
 import { getRequestSavedObjectClient } from '../../../shared/utils';
+import type { IntegrationType } from '../../../../privilege_monitoring/data_sources';
+import {
+  getStreamPatternFor,
+  INTEGRATION_TYPES,
+  integrationsSourceIndex,
+  oktaLastFullSyncMarkersIndex,
+} from '../../../../privilege_monitoring/data_sources';
+
+const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType): string => {
+  if (integration === 'entityanalytics_ad') {
+    return getStreamPatternFor(integration, namespace);
+  }
+  return oktaLastFullSyncMarkersIndex(namespace);
+};
+
+const buildIntegrationSourceAttributes = (
+  namespace: string,
+  integrationName: IntegrationType
+): WatchlistDataSources.CreateWatchlistEntitySourceRequestBody => ({
+  type: 'entity_analytics_integration',
+  name: integrationsSourceIndex(namespace, integrationName),
+  indexPattern: getStreamPatternFor(integrationName, namespace),
+  integrationName,
+  enabled: true,
+});
 
 export const createEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -52,24 +77,57 @@ export const createEntitySourceRoute = (
           const siemResponse = buildSiemResponse(response);
           const monitoringSource = request.body;
           try {
-            if (monitoringSource.type !== 'index') {
-              // currently we own the integration sources so we don't allow creation of other types
-              // we might allow this in the future if we have a way to manage the integration sources
-              return siemResponse.error({
-                statusCode: 400,
-                body: 'Cannot currently create entity source of type other than index',
-              });
-            }
-
             const secSol = await context.securitySolution;
             const core = await context.core;
+            const namespace = secSol.getSpaceId();
             const client = secSol.getMonitoringEntitySourceDataClient();
 
-            const body = await client.create(monitoringSource);
+            let body: WatchlistDataSources.CreateWatchlistEntitySourceResponse;
+
+            if (monitoringSource.type === 'entity_analytics_integration') {
+              const integrationName = monitoringSource.integrationName;
+              if (
+                !integrationName ||
+                !INTEGRATION_TYPES.includes(integrationName as IntegrationType)
+              ) {
+                return siemResponse.error({
+                  statusCode: 400,
+                  body: `integrationName is required and must be one of: ${INTEGRATION_TYPES.join(
+                    ', '
+                  )}`,
+                });
+              }
+
+              const sourceAttrs = buildIntegrationSourceAttributes(
+                namespace,
+                integrationName as IntegrationType
+              );
+              const derivedName = sourceAttrs.name;
+
+              const { sources } = await client.list({ name: derivedName, per_page: 1 });
+              const existing = sources[0];
+
+              if (existing) {
+                body = existing;
+              } else {
+                const created = await client.create({
+                  ...sourceAttrs,
+                  integrations: {
+                    syncMarkerIndex: getLastFullSyncMarkersIndex(
+                      namespace,
+                      integrationName as IntegrationType
+                    ),
+                  },
+                });
+                body = created;
+              }
+            } else {
+              body = await client.create(monitoringSource);
+            }
 
             const watchlistClient = new WatchlistConfigClient({
               logger,
-              namespace: secSol.getSpaceId(),
+              namespace,
               soClient: getRequestSavedObjectClient(core),
               esClient: core.elasticsearch.client.asCurrentUser,
             });

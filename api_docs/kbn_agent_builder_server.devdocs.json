@@ -797,6 +797,22 @@
                     "docId": "kibKbnAgentBuilderCommonPluginApi",
                     "section": "def-common.RoundCompleteEvent",
                     "text": "RoundCompleteEvent"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.CompactionStartedEvent",
+                    "text": "CompactionStartedEvent"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.CompactionCompletedEvent",
+                    "text": "CompactionCompletedEvent"
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
@@ -6027,6 +6043,22 @@
                 "docId": "kibKbnAgentBuilderCommonPluginApi",
                 "section": "def-common.RoundCompleteEvent",
                 "text": "RoundCompleteEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.CompactionStartedEvent",
+                "text": "CompactionStartedEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.CompactionCompletedEvent",
+                "text": "CompactionCompletedEvent"
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
@@ -6687,6 +6719,22 @@
                 "docId": "kibKbnAgentBuilderCommonPluginApi",
                 "section": "def-common.RoundCompleteEvent",
                 "text": "RoundCompleteEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.CompactionStartedEvent",
+                "text": "CompactionStartedEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.CompactionCompletedEvent",
+                "text": "CompactionCompletedEvent"
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/runner.ts",

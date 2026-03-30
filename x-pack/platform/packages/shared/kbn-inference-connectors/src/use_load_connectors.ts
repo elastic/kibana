@@ -5,51 +5,63 @@
  * 2.0.
  */
 
+import { useState } from 'react';
 import type { UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import type { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import { type InferenceConnector } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 import { i18n } from '@kbn/i18n';
+import { fetchConnectorsForFeature } from './fetch_connectors_for_feature';
+import { isOpenAiProviderType } from './openai_provider_type_guard';
 import type { AIConnector } from './types';
 
-const INFERENCE_CONNECTORS_PATH = '/internal/inference/connectors';
 const QUERY_KEY = ['kbn-inference-connectors', 'load-connectors'];
 
+/**
+ * Props for {@link useLoadConnectors}.
+ *
+ * The hook calls an internal HTTP route registered by the `searchInferenceEndpoints` plugin.
+ * Any Kibana plugin that uses this package must load that plugin (it is platform-shared and
+ * enabled in standard distributions).
+ */
 export interface UseLoadConnectorsProps {
   http: HttpSetup;
   toasts?: IToasts;
   /**
    * Feature identifier used to scope which inference endpoints are relevant.
-   * Reserved for future filtering logic.
+   * Passed to the search_inference_endpoints API to resolve feature-specific endpoints.
    */
   featureId: string;
   settings: SettingsStart;
 }
 
-const toAIConnector = (connector: InferenceConnector): AIConnector =>
-  ({
-    id: connector.connectorId,
-    name: connector.name,
-    actionTypeId: connector.type,
-    config: connector.config,
-    secrets: {},
-    isPreconfigured: connector.isPreconfigured,
-    isSystemAction: false,
-    isDeprecated: false,
-    isConnectorTypeDeprecated: false,
-    isMissingSecrets: false,
-    apiProvider:
-      !connector.isPreconfigured && connector.config?.apiProvider
-        ? (connector.config.apiProvider as OpenAiProviderType)
-        : undefined,
-  } as AIConnector);
+type InferenceConnectorFromApi = InferenceConnector & { isRecommended?: boolean };
+
+const toAIConnector = (connector: InferenceConnectorFromApi): AIConnector => ({
+  id: connector.connectorId,
+  name: connector.name,
+  actionTypeId: connector.type,
+  config: connector.config,
+  secrets: {},
+  isPreconfigured: connector.isPreconfigured,
+  isSystemAction: false,
+  isDeprecated: connector.isDeprecated ?? false,
+  isConnectorTypeDeprecated: connector.isConnectorTypeDeprecated ?? false,
+  isMissingSecrets: connector.isMissingSecrets ?? false,
+  isRecommended: connector.isRecommended,
+  apiProvider:
+    !connector.isPreconfigured &&
+    connector.config?.apiProvider !== undefined &&
+    isOpenAiProviderType(connector.config.apiProvider)
+      ? connector.config.apiProvider
+      : undefined,
+});
 
 const applyConnectorSettings = <T extends { id: string }>(
   allConnectors: T[],
@@ -68,11 +80,8 @@ const applyConnectorSettings = <T extends { id: string }>(
   return allConnectors;
 };
 
-const fetchAllConnectors = async (http: HttpSetup): Promise<InferenceConnector[]> => {
-  const { connectors } = await http.get<{ connectors: InferenceConnector[] }>(
-    INFERENCE_CONNECTORS_PATH
-  );
-  return connectors;
+export type UseLoadConnectorsResult = UseQueryResult<AIConnector[], IHttpFetchError> & {
+  soEntryFound: boolean;
 };
 
 export const useLoadConnectors = ({
@@ -80,12 +89,14 @@ export const useLoadConnectors = ({
   toasts,
   featureId,
   settings,
-}: UseLoadConnectorsProps): UseQueryResult<AIConnector[], IHttpFetchError> => {
-  return useQuery(
+}: UseLoadConnectorsProps): UseLoadConnectorsResult => {
+  const [soEntryFound, setSoEntryFound] = useState(false);
+  const query = useQuery(
     [...QUERY_KEY, featureId],
     async () => {
-      const connectors = await fetchAllConnectors(http);
-      return applyConnectorSettings(connectors.map(toAIConnector), settings);
+      const result = await fetchConnectorsForFeature(http, featureId);
+      setSoEntryFound(result.soEntryFound);
+      return applyConnectorSettings(result.connectors.map(toAIConnector), settings);
     },
     {
       retry: false,
@@ -106,4 +117,6 @@ export const useLoadConnectors = ({
       },
     }
   );
+
+  return { ...query, soEntryFound };
 };

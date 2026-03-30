@@ -11,15 +11,18 @@ import type {
   SeriesType,
   XYAnnotationLayerConfig,
   XYDataLayerConfig,
-  XYLayerConfig,
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedLayerConfig,
   XYReferenceLineLayerConfig,
   YConfig,
 } from '@kbn/lens-common';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { getValueColumn } from '../../columns/esql_column';
 import type {
   DataLayerType,
-  AnnotationLayerType,
   ReferenceLineLayerType,
+  AnnotationLayerByValueType,
 } from '../../../schema/charts/xy';
 import { addLayerColumn, generateLayer } from '../../utils';
 import {
@@ -101,8 +104,8 @@ function buildDataLayer(layer: DataLayerType, i: number): XYDataLayerConfig {
   };
 }
 
-function buildAnnotationLayer(
-  layer: AnnotationLayerType,
+function buildByValueAnnotationLayer(
+  layer: AnnotationLayerByValueType,
   i: number,
   dataViewId: string
 ): XYAnnotationLayerConfig {
@@ -124,7 +127,7 @@ function buildAnnotationLayer(
           outside: annotation.fill === 'outside',
           color: annotation.color?.color,
           label: annotation.label ?? 'Event',
-          ...(annotation.hidden != null ? { isHidden: annotation.hidden } : {}),
+          ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
         };
       }
       if (annotation.type === 'point') {
@@ -137,8 +140,8 @@ function buildAnnotationLayer(
           },
           color: annotation.color?.color,
           label: annotation.label ?? 'Event',
-          ...(annotation.hidden != null ? { isHidden: annotation.hidden } : {}),
-          ...(annotation.text != null ? { textVisibility: annotation.text === 'label' } : {}),
+          ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
+          ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
           ...(annotation.icon ? { icon: annotation.icon } : {}),
           ...(annotation.line?.stroke_width != null
             ? { lineWidth: annotation.line.stroke_width }
@@ -152,13 +155,11 @@ function buildAnnotationLayer(
         filter: { type: 'kibana_query', ...annotation.query },
         label: annotation.label ?? 'Event',
         color: annotation.color?.color,
-        ...(annotation.hidden != null ? { isHidden: annotation.hidden } : {}),
+        ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
         timeField: annotation.time_field,
         ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
-        ...(annotation.text != null ? { textVisibility: annotation.text === 'label' } : {}),
-        ...(typeof annotation.text !== 'string' && annotation.text?.type === 'field'
-          ? { textField: annotation.text.field }
-          : {}),
+        ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
+        ...(annotation.text?.field ? { textField: annotation.text.field } : {}),
         ...(annotation.icon ? { icon: annotation.icon } : {}),
         ...(annotation.line?.stroke_width != null
           ? { lineWidth: annotation.line.stroke_width }
@@ -181,7 +182,7 @@ function buildReferenceLineLayer(
     iconPosition: threshold.decoration_position,
     lineWidth: threshold.stroke_width,
     lineStyle: threshold.stroke_dash,
-    textVisibility: threshold.text ? threshold.text === 'label' : undefined,
+    textVisibility: threshold.text?.visible,
     fill: threshold.fill,
     color: threshold.color?.color,
     axisMode: threshold.axis,
@@ -198,15 +199,36 @@ function buildReferenceLineLayer(
 export function buildXYLayer(
   layer: unknown,
   i: number,
-  dataViewId: string
-): XYLayerConfig | undefined {
+  dataViewId: string,
+  annotationGroupReferences: SavedObjectReference[]
+): XYPersistedLayerConfig | undefined {
   if (!isAPIXYLayer(layer)) {
     return;
   }
 
-  // now enrich the layer based on its type
   if (isAPIAnnotationLayer(layer)) {
-    return buildAnnotationLayer(layer, i, dataViewId);
+    if ('group_id' in layer) {
+      // by-reference annotation layer
+      // TODO: support linked by-value annotation layers as well
+      const layerId = getIdForLayer(layer, i);
+
+      annotationGroupReferences.push({
+        name: `ref-${layerId}`,
+        type: EVENT_ANNOTATION_GROUP_TYPE,
+        id: layer.group_id,
+      });
+
+      const persistedLayer: XYPersistedByReferenceAnnotationLayerConfig = {
+        layerType: 'annotations',
+        persistanceType: 'byReference',
+        layerId,
+        annotationGroupRef: `ref-${layerId}`,
+      };
+      return persistedLayer;
+    }
+
+    // by-value annotation layer
+    return buildByValueAnnotationLayer(layer, i, dataViewId);
   }
   if (isAPIReferenceLineLayer(layer)) {
     return buildReferenceLineLayer(layer, i);

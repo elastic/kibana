@@ -261,6 +261,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               onSetColumns={noop}
               controlColumnIds={EMPTY_CONTROL_COLUMN_IDS}
               gridStyleOverride={gridStyleOverride}
+              rowHeightState={0}
               dataGridDensityState={DataGridDensity.EXPANDED}
             />
           </CellActionsProvider>

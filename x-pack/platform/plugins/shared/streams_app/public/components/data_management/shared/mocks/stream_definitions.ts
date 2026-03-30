@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
+import { emptyAssets, type Streams } from '@kbn/streams-schema';
 import type { SchemaField } from '../../schema_editor/types';
 
 // Mock stream definitions for reuse in tests
@@ -105,6 +105,21 @@ export const createMockWiredStreamDefinition = (
   dashboards: [],
   rules: [],
   queries: [],
+  ...overrides,
+});
+
+export const createMockQueryStreamDefinition = (
+  overrides: Partial<Streams.QueryStream.GetResponse> = {}
+): Streams.QueryStream.GetResponse => ({
+  stream: {
+    type: 'query',
+    name: 'logs.ecs.query',
+    description: '',
+    updated_at: '2024-01-01T00:00:00.000Z',
+    query: { view: '$.logs.ecs.query', esql: 'FROM $.logs.ecs | LIMIT 100' },
+  },
+  inherited_fields: {},
+  ...emptyAssets,
   ...overrides,
 });
 

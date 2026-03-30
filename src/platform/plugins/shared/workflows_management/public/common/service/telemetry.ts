@@ -11,6 +11,7 @@ import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import type { WorkflowTriggerTab } from '../../features/run_workflow/ui/types';
 import type { YamlValidationResult } from '../../features/validate_workflow_yaml/model/types';
 import {
+  WorkflowAiChatEventTypes,
   workflowEventNames,
   WorkflowExecutionEventTypes,
   WorkflowImportExportEventTypes,
@@ -18,6 +19,10 @@ import {
   WorkflowUIEventTypes,
   WorkflowValidationEventTypes,
 } from '../lib/telemetry/events/workflows';
+import type {
+  WorkflowAiChatEntryPoint,
+  WorkflowAiSessionType,
+} from '../lib/telemetry/events/workflows/ai_chat/types';
 import type { WorkflowExportReferenceResolution } from '../lib/telemetry/events/workflows/import_export/types';
 import type {
   WorkflowEditorType,
@@ -58,8 +63,9 @@ export class WorkflowsBaseTelemetry {
     editorType?: WorkflowEditorType;
     workflowDefinition?: Partial<WorkflowYaml> | null;
     origin?: WorkflowTelemetryOrigin;
+    aiAssisted?: boolean;
   }) => {
-    const { workflowId, error, editorType, workflowDefinition, origin } = params;
+    const { workflowId, error, editorType, workflowDefinition, origin, aiAssisted } = params;
 
     // Always extract metadata - extractWorkflowMetadata returns defaults if workflowDefinition is null/undefined
     const metadata = extractWorkflowMetadata(workflowDefinition);
@@ -69,6 +75,7 @@ export class WorkflowsBaseTelemetry {
       workflowId,
       ...(editorType && { editorType }),
       ...(origin && { origin }),
+      ...(aiAssisted !== undefined && { aiAssisted }),
       enabled: metadata.enabled,
       stepCount: metadata.stepCount,
       connectorTypes: metadata.connectorTypes,
@@ -110,6 +117,7 @@ export class WorkflowsBaseTelemetry {
     isBulkAction?: boolean;
     bulkActionCount?: number;
     origin?: WorkflowTelemetryOrigin;
+    aiAssisted?: boolean;
   }) => {
     const {
       workflowId,
@@ -123,6 +131,7 @@ export class WorkflowsBaseTelemetry {
       editorType,
       isBulkAction = false,
       origin,
+      aiAssisted,
     } = params;
 
     // Check if enabled changed (directly or via YAML update)
@@ -171,6 +180,7 @@ export class WorkflowsBaseTelemetry {
       ...(validationErrorTypes && { validationErrorTypes }),
       ...(finalEditorType && { editorType: finalEditorType }),
       ...(origin && { origin }),
+      ...(aiAssisted !== undefined && { aiAssisted }),
       ...(updatedFields.length > 0 && { updatedFields }),
       ...this.getBaseResultParams(error),
     });
@@ -479,6 +489,13 @@ export class WorkflowsBaseTelemetry {
     });
   };
 
+  reportWorkflowCreateOpened = (params: { editorType?: WorkflowEditorType }) => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowCreateOpened, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowCreateOpened],
+      ...(params.editorType && { editorType: params.editorType }),
+    });
+  };
+
   // Import/Export actions
 
   /**
@@ -542,6 +559,76 @@ export class WorkflowsBaseTelemetry {
       minTriggerCount,
       maxTriggerCount,
       ...this.getBaseResultParams(error),
+    });
+  };
+
+  // AI Chat session actions
+
+  reportWorkflowAiChatOpened = (params: {
+    entryPoint: WorkflowAiChatEntryPoint;
+    sessionType: WorkflowAiSessionType;
+    workflowId?: string;
+  }) => {
+    this.telemetryService.reportEvent(WorkflowAiChatEventTypes.WorkflowAiChatOpened, {
+      eventName: workflowEventNames[WorkflowAiChatEventTypes.WorkflowAiChatOpened],
+      entryPoint: params.entryPoint,
+      sessionType: params.sessionType,
+      ...(params.workflowId && { workflowId: params.workflowId }),
+    });
+  };
+
+  reportAiProposalReceived = (params: {
+    workflowId?: string;
+    conversationId?: string;
+    proposalId: string;
+    toolId: string;
+    sessionType: WorkflowAiSessionType;
+  }) => {
+    this.telemetryService.reportEvent(WorkflowAiChatEventTypes.WorkflowAiProposalReceived, {
+      eventName: workflowEventNames[WorkflowAiChatEventTypes.WorkflowAiProposalReceived],
+      ...(params.workflowId && { workflowId: params.workflowId }),
+      ...(params.conversationId && { conversationId: params.conversationId }),
+      proposalId: params.proposalId,
+      toolId: params.toolId,
+      sessionType: params.sessionType,
+    });
+  };
+
+  reportAiProposalResolved = (params: {
+    workflowId?: string;
+    conversationId?: string;
+    proposalId: string;
+    resolution: 'accepted' | 'rejected';
+    toolId: string;
+    isBulkAction: boolean;
+  }) => {
+    this.telemetryService.reportEvent(WorkflowAiChatEventTypes.WorkflowAiProposalResolved, {
+      eventName: workflowEventNames[WorkflowAiChatEventTypes.WorkflowAiProposalResolved],
+      ...(params.workflowId && { workflowId: params.workflowId }),
+      ...(params.conversationId && { conversationId: params.conversationId }),
+      proposalId: params.proposalId,
+      resolution: params.resolution,
+      toolId: params.toolId,
+      isBulkAction: params.isBulkAction,
+    });
+  };
+
+  reportWorkflowAiSessionCompleted = (params: {
+    sessionType: WorkflowAiSessionType;
+    workflowId?: string;
+    conversationId?: string;
+    proposalsAccepted: number;
+    proposalsDeclined: number;
+    proposalsPending: number;
+  }) => {
+    this.telemetryService.reportEvent(WorkflowAiChatEventTypes.WorkflowAiSessionCompleted, {
+      eventName: workflowEventNames[WorkflowAiChatEventTypes.WorkflowAiSessionCompleted],
+      sessionType: params.sessionType,
+      ...(params.workflowId && { workflowId: params.workflowId }),
+      ...(params.conversationId && { conversationId: params.conversationId }),
+      proposalsAccepted: params.proposalsAccepted,
+      proposalsDeclined: params.proposalsDeclined,
+      proposalsPending: params.proposalsPending,
     });
   };
 }

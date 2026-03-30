@@ -698,7 +698,7 @@
         "label": "HttpServer",
         "description": [],
         "path": "src/core/packages/http/server-internal/src/http_server.ts",
-        "lineNumber": 185,
+        "lineNumber": 189,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -714,7 +714,7 @@
               "any"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 204,
+            "lineNumber": 208,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -730,7 +730,7 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 205,
+                "lineNumber": 209,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -747,7 +747,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 206,
+                "lineNumber": 210,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -765,7 +765,7 @@
                   "<moment.Duration>"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 207,
+                "lineNumber": 211,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -785,7 +785,7 @@
               "() => boolean"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 218,
+            "lineNumber": 222,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -807,7 +807,7 @@
               ">"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 248,
+            "lineNumber": 252,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -823,7 +823,7 @@
                   "HttpServerSetupOptions"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 248,
+                "lineNumber": 252,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -843,7 +843,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 347,
+            "lineNumber": 351,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -861,7 +861,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 372,
+            "lineNumber": 376,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -887,7 +887,7 @@
               "[]; }"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 864,
+            "lineNumber": 909,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -903,7 +903,7 @@
                   "GetRoutersOptions"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 864,
+                "lineNumber": 909,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,

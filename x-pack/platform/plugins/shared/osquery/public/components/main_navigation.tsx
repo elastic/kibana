@@ -85,7 +85,7 @@ export const MainNavigation = () => {
                     href="https://ela.st/osquery-feedback"
                     target="_blank"
                     aria-label={feedbackButtonLabel}
-                    iconType="popout"
+                    iconType="external"
                     iconSide="right"
                     color="primary"
                     size="s"
@@ -187,7 +187,7 @@ export const MainNavigation = () => {
                   href="https://ela.st/osquery-feedback"
                   target="_blank"
                   aria-label={feedbackButtonLabel}
-                  iconType="popout"
+                  iconType="external"
                   iconSide="right"
                   color="primary"
                 >

@@ -386,6 +386,7 @@ export const WorkflowYAMLEditor = ({
       if (!model) {
         return;
       }
+
       // If no model, just set the mounted state
       setTimeout(() => {
         setIsEditorMounted(true);
