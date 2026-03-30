@@ -238,7 +238,7 @@ Flow Type tests check whether a flow matches Standard, Superflow A, Superflow B,
 
 TCP Flags tests check source or destination TCP flag combinations (e.g., SR, SF, FUP, SRAFU, FUPSAR78). Both source and destination TCP flags are stored in the single field \`netflow.tcp_control_bits\`. There are no separate source/destination TCP flag fields — always use \`netflow.tcp_control_bits\` regardless of whether the condition refers to source or destination flags.
 
-\`netflow.tcp_control_bits\` is a single integer field that encodes all TCP control flags simultaneously. Each flag occupies one bit position and has a fixed numeric value (FIN=1, SYN=2, RST=4, PSH=8, ACK=16, URG=32). Because multiple flags can be active at the same time, the field value is the arithmetic sum of all active flags. This means a TCP flags condition cannot be described as a range check or a simple equality — it must always be described as a bitwise AND check against a combined mask value.
+\`netflow.tcp_control_bits\` is a single integer field that encodes all TCP control flags simultaneously. Each flag occupies one bit position and has a fixed numeric value (FIN=1, SYN=2, RST=4, PSH=8, ACK=16, URG=32). Because multiple flags can be active at the same time, the field value is the arithmetic sum of all active flags. A TCP flags condition cannot be described as a range check. For a **single** named combination (one row in the table below), describe the check using that combination's numeric mask: either exact equality to that value, or a bitwise test \`(netflow.tcp_control_bits & mask) === mask\` when the intent is “all bits of this combination are present.” **Never** sum the numeric values of several different combinations into one “combined mask” and use that to mean “any of” those combinations — that changes the rule logic (for example, SR=6 would not match a bogus presence check against the sum 360). For **“any of” multiple distinct QRadar combinations**, describe a **disjunction**: either an **OR of exact equality** to each combination's encoded integer, or an **OR of per-combination predicates** \`(netflow.tcp_control_bits & mask) === mask\` for each required mask.
 
 #### TCP Flag Bit Values:
 
@@ -275,31 +275,31 @@ Every TCP flags condition description MUST contain all four of the following ele
 
 1. **Direction** — state whether it is source or destination TCP flags.
 2. **Field name** — always name the field as \`netflow.tcp_control_bits\`. Never use any other field name. The following names do not exist and must never appear: \`tcp.flags\`, \`source.tcp.flags\`, \`destination.tcp.flags\`, or any boolean subfield such as \`source.tcp.flags.syn\` or \`destination.tcp.flags.ack\`.
-3. **Arithmetic derivation** — show the step-by-step calculation that produces the combined mask value. Never state only the final number without showing how it was derived.
-4. **Check type** — state explicitly what kind of check is being performed (bitwise AND for presence, bitwise AND for absence, or exact equality), using plain English. Never describe the check as a range or boundary comparison.
+3. **Values and derivation** — for each distinct QRadar combination involved, show the step-by-step sum of bit values that yields that combination's encoded integer (one mask per combination). For “any of” multiple combinations, list each combination's mask separately — do **not** add those integers together into one number.
+4. **Check type** — state explicitly what kind of check is being performed: exact equality to a single value; **OR** of equalities or per-mask \`(field & mask) === mask\` tests for “any of”; bitwise AND for absence; or combined bitwise check only when a **single** mask describes one intended flag set. Never describe the check as a range or boundary comparison.
 
 #### Required natural language format:
 
-**For "includes any of":**
-- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` match any of [FLAG NAMES] — combined bitmask: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using a bitwise AND check for presence."
+**For "includes any of" (multiple distinct QRadar combinations):**
+- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` match any of [FLAG NAMES] — for each combination, [NAME]=[derived mask] (e.g. SR: SYN=2 + RST=4 = 6); the condition is true if **any** of: [equality or \`(netflow.tcp_control_bits & mask) === mask\` for each mask] holds."
 
 **For negated "includes any of":**
-- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` do NOT match any of [FLAG NAMES] — combined bitmask: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using a bitwise AND check for absence."
+- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` do NOT match any of [FLAG NAMES] — list each combination's mask as above; the condition is true if **none** of the per-combination checks match (negate the disjunction)."
 
-**For "includes all of":**
-- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` include ALL of [FLAG NAMES] — combined bitmask: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using a bitwise AND check that all bits are present."
+**For "includes all of" (single set of flags that must all be present):**
+- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` include ALL of [FLAG NAMES] — single mask: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using \`(netflow.tcp_control_bits & [TOTAL]) === [TOTAL]\` (or exact equality if no other flags may be set)."
 
 **For "are exactly":**
 - "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` are exactly [FLAG NAMES] — exact value: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using an exact equality check."
 
 #### Concrete example — "source TCP flags are any of SR, SF, FUP, SRAFU, FUPSAR78":
-- "Check if the source TCP flags in \`netflow.tcp_control_bits\` match any of SR, SF, FUP, SRAFU, FUPSAR78 — combined bitmask: SR=6 + SF=3 + FUP=41 + SRAFU=55 + FUPSAR78=255 = 360, using a bitwise AND check for presence."
+- "Check if the source TCP flags in \`netflow.tcp_control_bits\` match any of SR, SF, FUP, SRAFU, FUPSAR78 — per-combination masks: SR=6 (SYN+RST), SF=3 (SYN+FIN), FUP=41 (FIN+URG+PSH), SRAFU=55, FUPSAR78=255; the condition is true if **any** of: \`netflow.tcp_control_bits === 6\`, \`netflow.tcp_control_bits === 3\`, \`netflow.tcp_control_bits === 41\`, \`netflow.tcp_control_bits === 55\`, \`netflow.tcp_control_bits === 255\`, **or** equivalently if any of \`(netflow.tcp_control_bits & 6) === 6\`, \`(netflow.tcp_control_bits & 3) === 3\`, … for each mask (use equality when the rule means exact combo only). Do **not** use a single summed value such as 6+3+41+55+255."
 
 #### What a correct description must NOT say:
 
-- **Do not describe it as a range:** "where the TCP control bits value is between 360 and 360" or "greater than or equal to 360 and less than or equal to 360" — a combined bitmask value is not a range boundary.
-- **Do not describe it as a simple equality:** "where the TCP control bits value equals 360" — equality only applies when the intent is that exactly those flags and no others are set simultaneously.
-- **Do not omit the derivation:** "where the TCP control bits bitmask is 360" — stating only the final number without showing how it was calculated is incomplete.
+- **Do not describe it as a range:** "where the TCP control bits value is between X and X" — bitmask logic is not a numeric range.
+- **Do not sum multiple combination values into one number for "any of":** "where the TCP control bits value equals 360" when 360 was computed as SR+SF+FUP+… — that is not a valid encoding of "any of" those combinations; use a disjunction of per-combination tests instead.
+- **Do not omit per-combination derivation:** when several combinations are listed, show how each mask is derived, not a single bogus total.
 - **Do not use invented field names:** "where \`source.tcp.flags\` contains SR" or "where \`tcp.flags\` is SF" — these fields do not exist.
 - **Do not use boolean subfields:** "where \`source.tcp.flags.syn\` is true" — TCP flag subfields do not exist.
 
