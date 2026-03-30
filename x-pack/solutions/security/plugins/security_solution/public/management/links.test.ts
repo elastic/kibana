@@ -110,7 +110,7 @@ describe('links', () => {
             canReadTrustedApplications: true,
             canReadTrustedDevices: true,
             canReadEventFilters: true,
-            canReadHostIsolationExceptions: true,
+            showHostIsolationExceptions: true,
             canReadBlocklist: true,
           },
           experimentalDefaults
@@ -126,7 +126,7 @@ describe('links', () => {
             canReadTrustedApplications: true,
             canReadTrustedDevices: false,
             canReadEventFilters: false,
-            canReadHostIsolationExceptions: false,
+            showHostIsolationExceptions: false,
             canReadBlocklist: false,
           },
           experimentalDefaults
@@ -142,7 +142,7 @@ describe('links', () => {
             canReadTrustedApplications: false,
             canReadTrustedDevices: false,
             canReadEventFilters: true,
-            canReadHostIsolationExceptions: false,
+            showHostIsolationExceptions: false,
             canReadBlocklist: false,
           },
           experimentalDefaults
@@ -158,7 +158,7 @@ describe('links', () => {
             canReadTrustedApplications: true,
             canReadTrustedDevices: false,
             canReadEventFilters: false,
-            canReadHostIsolationExceptions: false,
+            showHostIsolationExceptions: false,
             canReadBlocklist: false,
           },
           {
@@ -177,7 +177,7 @@ describe('links', () => {
             canReadTrustedApplications: false,
             canReadTrustedDevices: false,
             canReadEventFilters: false,
-            canReadHostIsolationExceptions: false,
+            showHostIsolationExceptions: false,
             canReadBlocklist: false,
           },
           experimentalDefaults
@@ -237,6 +237,7 @@ describe('links', () => {
           canReadTrustedDevices: false,
           canReadEventFilters: false,
           canReadHostIsolationExceptions: false,
+          canAccessHostIsolationExceptions: false,
           canReadBlocklist: false,
         })
       );
@@ -254,6 +255,7 @@ describe('links', () => {
           canReadTrustedDevices: false,
           canReadEventFilters: false,
           canReadHostIsolationExceptions: false,
+          canAccessHostIsolationExceptions: false,
           canReadBlocklist: true,
         })
       );
@@ -273,6 +275,7 @@ describe('links', () => {
           canReadTrustedDevices: false,
           canReadEventFilters: true,
           canReadHostIsolationExceptions: false,
+          canAccessHostIsolationExceptions: false,
           canReadBlocklist: false,
         })
       );

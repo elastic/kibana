@@ -136,7 +136,7 @@ export const links: LinkItem = {
       title: ARTIFACTS,
       description: i18n.translate('xpack.securitySolution.appLinks.artifactsDescription', {
         defaultMessage:
-          'Manage the rules, exceptions, and trust settings that control how endpoints are protected and respond to activity.',
+          'Manage exceptions, trusted applications, and other settings that control how endpoints are protected and respond to activity.',
       }),
       landingIcon: IconArtifacts,
       path: TRUSTED_APPS_PATH,
@@ -194,13 +194,13 @@ const excludeLinks = (linkIds: SecurityPageName[]) => ({
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
 
-/** Artifact read flags used to compute first allowed artifact path (Option A RBAC fix). */
+/** Artifact read flags used to compute first allowed artifact path. */
 export interface ArtifactAuthz {
   canReadEndpointExceptions: boolean;
   canReadTrustedApplications: boolean;
   canReadTrustedDevices: boolean;
   canReadEventFilters: boolean;
-  canReadHostIsolationExceptions: boolean;
+  showHostIsolationExceptions: boolean;
   canReadBlocklist: boolean;
 }
 
@@ -222,7 +222,7 @@ export const getFirstAllowedArtifactPath = (
     canReadTrustedApplications,
     canReadTrustedDevices,
     canReadEventFilters,
-    canReadHostIsolationExceptions,
+    showHostIsolationExceptions,
     canReadBlocklist,
   } = artifactAuthz;
 
@@ -238,7 +238,7 @@ export const getFirstAllowedArtifactPath = (
   if (canReadEventFilters) {
     return getEventFiltersListPath();
   }
-  if (canReadHostIsolationExceptions) {
+  if (showHostIsolationExceptions) {
     return getHostIsolationExceptionsListPath();
   }
   if (canReadBlocklist) {
@@ -330,7 +330,7 @@ export const getManagementFilteredLinks = async (
           canReadTrustedApplications,
           canReadTrustedDevices,
           canReadEventFilters,
-          canReadHostIsolationExceptions,
+          showHostIsolationExceptions,
           canReadBlocklist,
         },
         experimentalFeatures

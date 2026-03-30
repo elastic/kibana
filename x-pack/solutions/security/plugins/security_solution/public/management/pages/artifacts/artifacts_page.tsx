@@ -47,7 +47,7 @@ const ARTIFACTS_PAGE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.artifacts.pageDescription',
   {
     defaultMessage:
-      'Manage the rules, exceptions, and trust settings that control how endpoints are protected and respond to activity.',
+      'Manage exceptions, trusted applications, and other settings that control how endpoints are protected and respond to activity.',
   }
 );
 
