@@ -20,8 +20,6 @@ export interface ObservationModuleConfig {
   readonly name: string;
   /** Execution order — higher values execute first */
   readonly priority: number;
-  /** Weight applied during scoring (0.0–1.0) */
-  readonly weight: number;
 }
 
 /** Contract every pluggable observation module must satisfy. */
