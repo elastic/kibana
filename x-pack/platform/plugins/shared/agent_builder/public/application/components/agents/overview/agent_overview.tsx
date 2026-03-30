@@ -20,6 +20,7 @@ import { hasAgentWriteAccess } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
+import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -62,6 +63,7 @@ export const AgentOverview: React.FC = () => {
   const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
 
   const { agent, isLoading } = useAgentBuilderAgentById(agentId);
+  const { skills: allSkills } = useSkillsService();
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -85,7 +87,21 @@ export const AgentOverview: React.FC = () => {
 
   const currentInstructions = instructions ?? agent?.configuration?.instructions ?? '';
   const enableElasticCapabilities = agent?.configuration?.enable_elastic_capabilities ?? false;
-  const skillsCount = agent?.configuration?.skill_ids?.length ?? 0;
+
+  const agentSkillIdSet = useMemo(
+    () => new Set(agent?.configuration?.skill_ids ?? []),
+    [agent?.configuration?.skill_ids]
+  );
+
+  const builtinSkills = useMemo(() => allSkills.filter((s) => s.readonly), [allSkills]);
+
+  const skillsCount = useMemo(() => {
+    const explicitCount = agent?.configuration?.skill_ids?.length ?? 0;
+    if (!enableElasticCapabilities) return explicitCount;
+    const builtinNotExplicit = builtinSkills.filter((s) => !agentSkillIdSet.has(s.id)).length;
+    return explicitCount + builtinNotExplicit;
+  }, [agent?.configuration?.skill_ids, enableElasticCapabilities, builtinSkills, agentSkillIdSet]);
+
   const pluginsCount = agent?.configuration?.plugin_ids?.length ?? 0;
   const connectorsCount = 0;
 
