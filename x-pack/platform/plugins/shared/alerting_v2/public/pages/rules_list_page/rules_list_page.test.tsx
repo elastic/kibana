@@ -895,9 +895,7 @@ describe('RulesListPage', () => {
     });
 
     it('escapes backslashes in tag values before escaping double quotes', () => {
-      expect(buildRulesListFilter({ tags: ['test\\'] })).toBe(
-        '(metadata.labels: "test\\\\")'
-      );
+      expect(buildRulesListFilter({ tags: ['test\\'] })).toBe('(metadata.labels: "test\\\\")');
     });
   });
 

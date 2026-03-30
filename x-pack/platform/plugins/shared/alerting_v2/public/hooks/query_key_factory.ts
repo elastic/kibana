@@ -15,8 +15,7 @@ export const ruleKeys = {
     search?: string;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
-  }) =>
-    [...ruleKeys.lists(), filters] as const,
+  }) => [...ruleKeys.lists(), filters] as const,
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
 };
