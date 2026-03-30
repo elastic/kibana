@@ -15,8 +15,8 @@ import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import {
   fleetPackageRegistryDockerImage,
   defineDockerServersConfig,
-  getDockerFileMountPath,
-} from '@kbn/test';
+} from '@kbn/test-docker-servers';
+import { getDockerFileMountPath } from '@kbn/es';
 import {
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_UIAM_ORGANIZATION_ID,

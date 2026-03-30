@@ -53,7 +53,7 @@ export async function deleteAll(
     });
 
     await attachmentService.bulkDelete({
-      attachmentIds: comments.saved_objects.map((so) => so.id),
+      savedObjectIds: comments.saved_objects.map((so) => so.id),
       refresh: true,
     });
 
@@ -90,7 +90,7 @@ export async function deleteAll(
  * Deletes an attachment
  */
 export async function deleteComment(
-  { caseID, attachmentID }: DeleteArgs,
+  { caseID, savedObjectId }: DeleteArgs,
   clientArgs: CasesClientArgs
 ) {
   const {
@@ -102,12 +102,12 @@ export async function deleteComment(
 
   try {
     const attachment = await attachmentService.getter.get({
-      attachmentId: attachmentID,
+      savedObjectId,
       mode: 'legacy',
     });
 
     if (attachment == null) {
-      throw Boom.notFound(`This comment ${attachmentID} does not exist anymore.`);
+      throw Boom.notFound(`This comment ${savedObjectId} does not exist anymore.`);
     }
 
     await authorization.ensureAuthorized({
@@ -120,11 +120,11 @@ export async function deleteComment(
 
     const caseRef = attachment.references.find((c) => c.type === type);
     if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
-      throw Boom.notFound(`This comment ${attachmentID} does not exist in ${id}.`);
+      throw Boom.notFound(`This comment ${savedObjectId} does not exist in ${id}.`);
     }
 
     await attachmentService.bulkDelete({
-      attachmentIds: [attachmentID],
+      savedObjectIds: [savedObjectId],
       refresh: true,
     });
 
@@ -145,7 +145,7 @@ export async function deleteComment(
         type: UserActionTypes.comment,
         action: UserActionActions.delete,
         caseId: id,
-        attachmentId: attachmentID,
+        savedObjectId,
         payload: { attachment: attachmentRequestAttributes },
         user,
         owner: attachment.attributes.owner,
@@ -155,7 +155,7 @@ export async function deleteComment(
     await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
   } catch (error) {
     throw createCaseError({
-      message: `Failed to delete comment: ${caseID} comment id: ${attachmentID}: ${error}`,
+      message: `Failed to delete comment: ${caseID} comment id: ${savedObjectId}: ${error}`,
       error,
       logger,
     });

@@ -23,6 +23,7 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -84,14 +85,15 @@ import { useAgentBuilderRuleCreation } from '../rule_creation/hooks/use_agent_bu
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
+  const { application, triggersActionsUi, cps } = useKibana().services;
+  const { navigateToApp } = application;
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
-  const { application, triggersActionsUi } = useKibana().services;
-  const { navigateToApp } = application;
 
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
   const canEditRule = isRulesCustomizationEnabled || !rule.immutable;

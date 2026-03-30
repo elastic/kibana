@@ -15,7 +15,7 @@ import { formatRiskScore } from '../../../common/utils';
 import { getRiskLevel } from '../../../../../common/entity_analytics/risk_engine/risk_levels';
 import type { EntityRiskLevels } from '../../../../../common/api/entity_analytics/common';
 
-const getRiskScoreColors = (
+export const getRiskScoreColors = (
   euiTheme: EuiThemeComputed,
   riskLevel: EntityRiskLevels
 ): { background: string; text: string } => {

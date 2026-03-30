@@ -16,8 +16,6 @@ import {
   EuiText,
   EuiTextColor,
   EuiLink,
-  EuiFlexGrid,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import type {
   LanguageDefinition,
@@ -34,15 +32,9 @@ import {
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { type Index } from '../../../../../../../common';
-import { formatBytes } from '../../../../../lib/format_bytes';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService, useLoadIndexMappings } from '../../../../../services';
 import { languageDefinitions, curlDefinition } from './languages';
-import { StatusDetails } from './status_details';
-import { DataStreamDetails } from './data_stream_details';
-import { StorageDetails } from './storage_details';
-import { AliasesDetails } from './aliases_details';
-import { SizeDocCountDetails } from './size_doc_count_details';
 
 import { UpdateElserMappingsModal } from '../update_elser_mappings/update_elser_mappings_modal';
 import { useMappingsState } from '../../../../../components/mappings_editor/mappings_state_context';
@@ -52,6 +44,7 @@ import { parseMappings } from '../../../../../shared/parse_mappings';
 import { useUserPrivileges } from '../../../../../services/api';
 import { useLicense } from '../../../../../../hooks/use_license';
 import { IndexDocuments } from '../index_documents/index_documents';
+import { QuickStats } from '../quick_stats/quick_stats';
 
 interface Props {
   indexDetails: Index;
@@ -66,19 +59,7 @@ export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({
   isDocumentsLoading,
   documentsError,
 }) => {
-  const {
-    name,
-    status,
-    health,
-    documents,
-    documents_deleted: documentsDeleted,
-    primary,
-    replica,
-    aliases,
-    data_stream: dataStream,
-    size,
-    primary_size: primarySize,
-  } = indexDetails;
+  const { name } = indexDetails;
   const {
     core,
     plugins: { cloud, cloudConnect, share },
@@ -96,16 +77,12 @@ export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({
   const { data } = useUserPrivileges(indexDetails.name);
   const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
 
-  const sizeFormatted = formatBytes(size);
-  const primarySizeFormatted = formatBytes(primarySize);
-
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchUrl,
     apiKey: 'your_api_key',
     indexName: name,
   };
 
-  const isLarge = useIsWithinBreakpoints(['xl']);
   const {
     isLoading: isCloudConnectStatusLoading,
     isCloudConnected,
@@ -164,27 +141,7 @@ export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({
         />
       )}
 
-      <EuiFlexGrid columns={isLarge ? 3 : 1}>
-        <StorageDetails
-          size={sizeFormatted}
-          primarySize={primarySizeFormatted}
-          primary={primary}
-          replica={replica}
-        />
-
-        <StatusDetails
-          documents={documents}
-          documentsDeleted={documentsDeleted!}
-          status={status}
-          health={health}
-        />
-
-        <SizeDocCountDetails size={sizeFormatted} documents={documents} />
-
-        <AliasesDetails aliases={aliases} />
-
-        {dataStream && <DataStreamDetails dataStreamName={dataStream} />}
-      </EuiFlexGrid>
+      <QuickStats indexDetails={indexDetails} />
 
       <EuiSpacer />
 

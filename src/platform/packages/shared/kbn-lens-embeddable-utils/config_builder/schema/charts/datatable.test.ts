@@ -770,7 +770,7 @@ describe('Datatable Schema', () => {
             operation: 'value',
             column: 'avg_bytes',
             alignment: 'left',
-            apply_color_to: 'background',
+            apply_color_to: 'badge',
             visible: true,
             summary: { type: 'avg' },
             color: {
