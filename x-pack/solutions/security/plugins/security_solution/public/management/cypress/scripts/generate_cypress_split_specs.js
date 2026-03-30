@@ -99,7 +99,7 @@ const SPLIT_CONFIGS = [
         '    env: {',
         '      ftrConfig: {',
         '        kbnServerArgs: [',
-        "          `--xpack.securitySolution.enableExperimental=${JSON.stringify([",
+        '          `--xpack.securitySolution.enableExperimental=${JSON.stringify([',
         "            'endpointExceptionsMovedUnderManagement',",
         '          ])}`,',
         '        ],',
