@@ -64,12 +64,12 @@ function getSettingData(settingCommand: ESQLAstSetHeaderCommand): {
 
 /**
  * Checks the headers commmands looking for an unmapped_fields setting and returns its strategy value.
- * Default is FAIL.
+ * Default is DEFAULT.
  */
 export function getUnmappedFieldsStrategy(
   headers: ESQLAstHeaderCommand[] = []
 ): UnmappedFieldsStrategy {
-  let unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL;
+  let unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT;
 
   headers.forEach((comand) => {
     if (comand.name.toUpperCase() === 'SET') {
