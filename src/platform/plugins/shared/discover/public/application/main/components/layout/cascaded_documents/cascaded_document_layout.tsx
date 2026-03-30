@@ -88,23 +88,14 @@ const ESQLDataCascade = React.memo(
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
     >(
-      ({
-        data: cellData,
-        cellId,
-        getScrollElement,
-        getScrollOffset,
-        getScrollMargin,
-        preventSizeChangePropagation,
-      }) => (
+      ({ data: cellData, cellId, virtualizerController, rowIndex }) => (
         <ESQLDataCascadeLeafCell
           {...props}
           dataView={dataView}
           cellData={cellData!}
           cellId={cellId}
-          getScrollElement={getScrollElement}
-          getScrollOffset={getScrollOffset}
-          getScrollMargin={getScrollMargin}
-          preventSizeChangePropagation={preventSizeChangePropagation}
+          virtualizerController={virtualizerController}
+          rowIndex={rowIndex}
         />
       ),
       [dataView, props]
@@ -161,12 +152,19 @@ export const CascadedDocumentsLayout = React.memo(
       return getStatsCommandToOperateOn(parsedQuery);
     }, [esqlQuery]);
 
+    const updateESQLQuery = useCallback(
+      (...args: Parameters<typeof onUpdateESQLQuery>) => {
+        onUpdateESQLQuery(...args);
+      },
+      [onUpdateESQLQuery]
+    );
+
     const { renderRowActionPopover, togglePopover } = useEsqlDataCascadeRowActionHelpers({
       dataView,
       esqlVariables,
       editorQuery: esqlQuery,
       statsFieldSummary: statsCommandBeingOperatedOn?.grouping,
-      updateESQLQuery: onUpdateESQLQuery,
+      updateESQLQuery,
       openInNewTab,
     });
 
