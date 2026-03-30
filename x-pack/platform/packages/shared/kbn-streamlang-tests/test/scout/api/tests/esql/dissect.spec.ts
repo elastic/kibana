@@ -28,7 +28,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
           } as DissectProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [
         {
           message: '[2025-01-01T00:00:00.000Z] [info] 127.0.0.1 - - "GET / HTTP/1.1" 200 123',
@@ -65,7 +65,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
           } as DissectProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       // Ingest a doc with all operand fields to satisfy ES|QL requirement that any field used in the query must be pre-mapped (available as a column)
       const mappingDoc = {
@@ -119,7 +119,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
           } as DissectProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const mappingDoc = { message: '[2025-01-01T00:00:00.000Z] [info] 192.168.90.9' };
       const docs = [mappingDoc, { log: { level: 'info' } }];
@@ -146,7 +146,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
           } as DissectProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const docs = [{ message: 'value1-value2' }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -176,7 +176,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
           } as DissectProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const mappingDoc = { log: { level: '' } };
       const docs = [
         mappingDoc,
@@ -229,7 +229,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
           } as DissectProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docsToDissect = [
         { message: '[info] [5] [1024] [50.55]' },
@@ -332,7 +332,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
           } as DissectProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       // Mapping doc to ensure columns exist so pre-cast EVALs don't error
       const mappingDoc = {
@@ -418,7 +418,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
           } as DissectProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const mappingDoc = {
         '@timestamp': '',
@@ -522,7 +522,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
           } as DissectProcessor,
         ],
       };
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
       const mappingDoc = { size: 0, message: '' }; // Ingest size as long type
       const docs = [
         mappingDoc,
@@ -561,7 +561,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
       };
 
       // Should throw validation error for Mustache templates
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed'
       );
     }

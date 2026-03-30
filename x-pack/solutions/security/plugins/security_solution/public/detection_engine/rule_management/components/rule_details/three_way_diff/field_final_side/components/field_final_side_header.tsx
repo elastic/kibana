@@ -44,7 +44,7 @@ export function FieldFinalSideHeader(): JSX.Element {
           <StaticHeaderContent>
             {hasConflict && (
               <EuiButton
-                iconType="checkInCircleFilled"
+                iconType="checkCircleFill"
                 size="s"
                 onClick={handleAccept}
                 data-test-subj="prebuilt-rule-upgrade-flyout-field-accept"
@@ -60,7 +60,7 @@ export function FieldFinalSideHeader(): JSX.Element {
         <FieldUpgradeSideHeader>
           <StaticHeaderContent>
             <EuiButton
-              iconType="checkInCircleFilled"
+              iconType="checkCircleFill"
               size="s"
               disabled={!form?.isValid}
               onClick={handleSave}

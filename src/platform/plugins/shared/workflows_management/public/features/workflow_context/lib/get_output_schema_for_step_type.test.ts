@@ -336,7 +336,6 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepDefinition = {
         id: 'dynamic-step',
-        inputSchema: {} as any,
         outputSchema: { def: { type: 'unknown' } } as any,
         editorHandlers: {
           dynamicSchema: {
@@ -382,7 +381,6 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepDefinition = {
         id: 'error-step',
-        inputSchema: {} as any,
         outputSchema: mockStaticSchema,
         editorHandlers: {
           dynamicSchema: {
@@ -428,7 +426,6 @@ describe('getOutputSchemaForStepType', () => {
 
       mockStepDefinition = {
         id: 'static-step',
-        inputSchema: {} as any,
         outputSchema: mockStaticSchema,
         // no getOutputSchema property
       };
@@ -448,6 +445,46 @@ describe('getOutputSchemaForStepType', () => {
       // Should return the static schema directly
       expect(result).toBe(mockStaticSchema);
       expect(result.def.type).toBe('array');
+    });
+
+    it('should resolve dynamic output schema for waitForInput with a typed schema', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'waitForInput',
+        type: 'waitForInput' as const,
+        configuration: {
+          with: {
+            schema: {
+              type: 'object',
+              properties: { approved: { type: 'boolean' } },
+              required: ['approved'],
+            },
+          },
+        },
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+
+      // Should produce a typed Zod schema, not the permissive record fallback.
+      const valid = result.safeParse({ approved: true });
+      const invalid = result.safeParse({ approved: 'not-a-boolean' });
+      expect(valid.success).toBe(true);
+      expect(invalid.success).toBe(false);
+    });
+
+    it('should return permissive record schema for waitForInput without a schema', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'waitForInput',
+        type: 'waitForInput' as const,
+        configuration: { with: { message: 'Please approve' } },
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+
+      expect(result.safeParse({ anything: true }).success).toBe(true);
     });
   });
 });

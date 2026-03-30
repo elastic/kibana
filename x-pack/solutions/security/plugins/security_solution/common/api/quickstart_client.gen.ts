@@ -81,6 +81,11 @@ import type {
   GetRuleExecutionResultsResponse,
 } from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import type {
+  ReadRuleExecutionResultsRequestParamsInput,
+  ReadRuleExecutionResultsRequestBodyInput,
+  ReadRuleExecutionResultsResponse,
+} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.gen';
+import type {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
   RulePreviewResponse,
@@ -235,7 +240,7 @@ import type {
   FindAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type {
-  InternalUploadAssetCriticalityRecordsResponse,
+  InternalUploadAssetCriticalityV2CsvResponse,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
@@ -402,6 +407,14 @@ import type {
   UpdateWatchlistRequestBodyInput,
   UpdateWatchlistResponse,
 } from './entity_analytics/watchlists/management/update.gen';
+import type {
+  SyncWatchlistRequestParamsInput,
+  SyncWatchlistResponse,
+} from './entity_analytics/watchlists/sync/sync.gen';
+import type {
+  InitializeSecuritySolutionRequestBodyInput,
+  InitializeSecuritySolutionResponse,
+} from './initialization/initialization.gen';
 import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
@@ -2363,6 +2376,19 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async initializeSecuritySolution(props: InitializeSecuritySolutionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InitializeSecuritySolution`);
+    return this.kbnClient
+      .request<InitializeSecuritySolutionResponse>({
+        path: '/api/security_solution/initialize',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async initMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API InitMonitoringEngine`);
     return this.kbnClient
@@ -2481,11 +2507,19 @@ providing you with the most current and effective threat detection capabilities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async internalUploadAssetCriticalityRecords(props: InternalUploadAssetCriticalityRecordsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InternalUploadAssetCriticalityRecords`);
+  /**
+    * Uploads a CSV file to assign asset criticality.
+
+CSV must contain header row with "type" and "criticality_level" columns, in addition to ECS fields used to match entities in the entity store (e.g. "host.name", "user.id", "user.email").
+
+Each row will match up to 10,000 entities.
+
+    */
+  async internalUploadAssetCriticalityV2Csv(props: InternalUploadAssetCriticalityV2CsvProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InternalUploadAssetCriticalityV2Csv`);
     return this.kbnClient
-      .request<InternalUploadAssetCriticalityRecordsResponse>({
-        path: '/internal/asset_criticality/upload_csv',
+      .request<InternalUploadAssetCriticalityV2CsvResponse>({
+        path: '/internal/asset_criticality/upload_csv_v2',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -2848,6 +2882,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         method: 'GET',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async readRuleExecutionResults(props: ReadRuleExecutionResultsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReadRuleExecutionResults`);
+    return this.kbnClient
+      .request<ReadRuleExecutionResultsResponse>({
+        path: replaceParams(
+          '/internal/detection_engine/rules/{ruleId}/execution/results',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3240,6 +3290,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         method: 'POST',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async syncWatchlist(props: SyncWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SyncWatchlist`);
+    return this.kbnClient
+      .request<SyncWatchlistResponse>({
+        path: replaceParams('/api/entity_analytics/watchlists/{watchlist_id}/sync', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3799,6 +3861,9 @@ export interface InitEntityEngineProps {
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
 }
+export interface InitializeSecuritySolutionProps {
+  body: InitializeSecuritySolutionRequestBodyInput;
+}
 export interface InstallMigrationDashboardsProps {
   params: InstallMigrationDashboardsRequestParamsInput;
   body: InstallMigrationDashboardsRequestBodyInput;
@@ -3810,7 +3875,7 @@ export interface InstallMigrationRulesProps {
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
 }
-export interface InternalUploadAssetCriticalityRecordsProps {
+export interface InternalUploadAssetCriticalityV2CsvProps {
   attachment: FormData;
 }
 export interface ListEntitiesProps {
@@ -3856,6 +3921,10 @@ export interface ReadAlertsMigrationStatusProps {
 }
 export interface ReadRuleProps {
   query: ReadRuleRequestQueryInput;
+}
+export interface ReadRuleExecutionResultsProps {
+  params: ReadRuleExecutionResultsRequestParamsInput;
+  body: ReadRuleExecutionResultsRequestBodyInput;
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
@@ -3920,6 +3989,9 @@ export interface StopRuleMigrationProps {
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
+}
+export interface SyncWatchlistProps {
+  params: SyncWatchlistRequestParamsInput;
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;

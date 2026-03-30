@@ -8,10 +8,11 @@
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { buildDataTableRecord, type DataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
-import { HighlightedFields } from './highlighted_fields';
+import { HighlightedFields } from '../../../../flyout_v2/document/components/highlighted_fields';
 import {
   INVESTIGATION_SECTION_TEST_ID,
   INVESTIGATION_SECTION_TITLE,
@@ -74,8 +75,8 @@ export const InvestigationSection = memo(() => {
         hit={hit}
         investigationFields={investigationFields}
         scopeId={scopeId}
-        showCellActions={true}
-        showEditButton={true}
+        renderCellActions={cellActionRenderer}
+        showPreview={true}
         ancestorsIndexName={ancestorIndex}
       />
     </ExpandableSection>

@@ -16,6 +16,7 @@ import { HostPanelKey } from '../../shared/constants';
 
 interface UseNavigateToHostDetailsParams {
   hostName: string;
+  entityId?: string;
   scopeId: string;
   isRiskScoreExist: boolean;
   hasMisconfigurationFindings: boolean;
@@ -28,6 +29,7 @@ interface UseNavigateToHostDetailsParams {
 
 export const useNavigateToHostDetails = ({
   hostName,
+  entityId,
   scopeId,
   isRiskScoreExist,
   hasMisconfigurationFindings,
@@ -49,7 +51,8 @@ export const useNavigateToHostDetails = ({
       const left = {
         id: HostDetailsPanelKey,
         params: {
-          name: hostName,
+          entityId,
+          hostName,
           scopeId,
           isRiskScoreExist,
           path,
@@ -66,6 +69,7 @@ export const useNavigateToHostDetails = ({
           contextID,
           scopeId,
           hostName,
+          entityId,
         },
       };
 
@@ -81,6 +85,7 @@ export const useNavigateToHostDetails = ({
       openFlyout,
       openLeftPanel,
       hostName,
+      entityId,
       scopeId,
       isRiskScoreExist,
       hasMisconfigurationFindings,

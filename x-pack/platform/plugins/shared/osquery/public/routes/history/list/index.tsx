@@ -6,22 +6,15 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { ActionsTable } from '../../../actions/actions_table';
 import { UnifiedHistoryTable } from '../../../actions/unified_history_table';
-import { WithHeaderLayout, WithoutHeaderLayout } from '../../../components/layouts';
+import { WithHeaderLayout, fullWidthContentCss } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
-
-const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
-  padding: `0 ${euiTheme.size.l}`,
-  flex: 1,
-  minWidth: 0,
-});
 
 const HistoryPageComponent = () => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
@@ -44,11 +37,9 @@ const HistoryPageComponent = () => {
 
   if (isHistoryEnabled) {
     return (
-      <WithoutHeaderLayout restrictWidth={false}>
-        <div css={fullWidthContentCss}>
-          <UnifiedHistoryTable />
-        </div>
-      </WithoutHeaderLayout>
+      <div css={fullWidthContentCss}>
+        <UnifiedHistoryTable />
+      </div>
     );
   }
 
@@ -74,7 +65,7 @@ const NewLiveQueryButton = React.memo(() => {
     <EuiButton
       fill
       {...newQueryLinkProps}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       isDisabled={
         !(
           permissions.writeLiveQueries ||

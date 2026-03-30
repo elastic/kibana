@@ -8,6 +8,7 @@
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiConfirmModal,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiSkeletonText,
@@ -141,6 +142,17 @@ const usePluginsTableColumns = ({
 
   return useMemo(
     (): Array<EuiBasicTableColumn<PluginDefinition>> => [
+      {
+        field: 'readonly',
+        name: '',
+        width: '30px',
+        render: (readonly: boolean) => {
+          if (readonly) {
+            return <EuiIconTip type="lock" content={labels.plugins.readOnly} />;
+          }
+          return null;
+        },
+      },
       {
         field: 'name',
         name: labels.plugins.nameLabel,

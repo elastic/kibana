@@ -30,7 +30,7 @@ import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_ext
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
 import { useClassicBreadcrumbs, useHasAppMenuConfig } from '../shared/chrome_hooks';
 
-export function ClassicHeader() {
+export const ClassicHeader = React.memo(() => {
   const breadcrumbs = useClassicBreadcrumbs();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
@@ -112,4 +112,4 @@ export function ClassicHeader() {
       </header>
     </>
   );
-}
+});

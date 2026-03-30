@@ -25,5 +25,5 @@ export {
   createResultTransformer,
   type ToolCallResultTransformer,
   type CreateResultTransformerOptions,
-  FILE_REFERENCE_TOKEN_THRESHOLD,
+  FS_TOOL_CALL_TOKEN_THRESHOLD,
 } from './create_result_transformer';

@@ -92,7 +92,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
                   />
                 }
                 color="warning"
-                iconType="alert"
+                iconType="warning"
                 size="s"
               >
                 <p>

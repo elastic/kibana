@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/task_manager
 dependsOn:
   - '@kbn/core'
+  - '@kbn/tracing-utils'
   - '@kbn/usage-collection-plugin'
   - '@kbn/config-schema'
   - '@kbn/config'
@@ -66,26 +67,6 @@ fileGroups:
     - server/**/*.json
     - common/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

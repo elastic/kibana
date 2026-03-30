@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   getRiskInputTab,
   getInsightsInputTab,
@@ -52,7 +52,8 @@ export const useSelectedTab = (params: HostDetailsPanelProps, tabs: LeftPanelTab
 
 export const useTabs = ({
   isRiskScoreExist,
-  name,
+  hostName,
+  entityId,
   scopeId,
   hasMisconfigurationFindings,
   hasVulnerabilitiesFindings,
@@ -60,15 +61,23 @@ export const useTabs = ({
   hasVulnerabilityPostureAlerts,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   return useMemo(() => {
-    const isRiskScoreTabAvailable = isRiskScoreExist && name;
+    const isRiskScoreTabAvailable = isRiskScoreExist && hostName;
     const riskScoreTab = isRiskScoreTabAvailable
-      ? [getRiskInputTab({ entityName: name, entityType: EntityType.host, scopeId })]
+      ? [getRiskInputTab({ entityName: hostName ?? '', entityType: EntityType.host, scopeId })]
       : [];
 
     // Determine if the Insights tab should be included
     const insightsTab =
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
-        ? [getInsightsInputTab({ name, fieldName: EntityIdentifierFields.hostName, scopeId })]
+        ? [
+            getInsightsInputTab({
+              field: 'host.name',
+              value: hostName,
+              entityId,
+              scopeId,
+              entityType: EntityType.host,
+            }),
+          ]
         : [];
 
     const vulnPostureTab =
@@ -77,7 +86,8 @@ export const useTabs = ({
     return [...riskScoreTab, ...insightsTab, ...vulnPostureTab];
   }, [
     isRiskScoreExist,
-    name,
+    hostName,
+    entityId,
     scopeId,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,

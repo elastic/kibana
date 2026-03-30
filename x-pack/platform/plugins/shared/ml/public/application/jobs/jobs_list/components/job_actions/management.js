@@ -167,7 +167,7 @@ export function actionsMenuContent(
           defaultMessage: 'View datafeed counts',
         }
       ),
-      icon: 'visAreaStacked',
+      icon: 'chartAreaStack',
       enabled: () => canGetDatafeeds,
       available: () => canGetDatafeeds,
       onClick: (item) => {

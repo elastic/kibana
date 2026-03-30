@@ -99,11 +99,13 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/conversations/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_score_maintainer/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/monitoring/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/monitoring/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_details/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/watchlists/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists/lists_items/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/explore/hosts/trial_license_complete_tier/configs/ess.config.ts
@@ -140,6 +142,8 @@ enabled:
   - x-pack/solutions/security/test/cloud_security_posture_functional/group1/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/group2/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/group3/config.ts
+  - x-pack/solutions/security/test/cloud_security_posture_functional/group4/config.ts
+  - x-pack/solutions/security/test/cloud_security_posture_functional/group5/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/config.agentless.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/spaces_only/config.ts

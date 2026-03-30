@@ -18,16 +18,15 @@ import {
   replaySignificantEventsSnapshot,
 } from '../../../src/data_generators/replay';
 import { evaluate } from '../../../src/evaluate';
-import { createKIFeatureExtractionEvaluators } from '../../../src/evaluators/ki_feature_extraction_evaluators';
+import { createKIFeatureExtractionEvaluators } from '../../../src/evaluators/ki_feature_extraction/evaluators';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
+  snapshotCatalogKey,
 } from '../datasets';
 import { collectSampleDocuments } from './collect_sample_documents';
-
-const snapshotCatalogKey = (gcs: GcsConfig): string => `${gcs.bucket}/${gcs.basePathPrefix}`;
 
 evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
