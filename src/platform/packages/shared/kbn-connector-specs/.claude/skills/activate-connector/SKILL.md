@@ -109,12 +109,19 @@ Once the user confirms the credentials file is ready, run:
 src/platform/packages/shared/kbn-connector-specs/.claude/skills/activate-connector/scripts/create_connector.sh \
   --type "<connector_type_id>" \
   --name "<display_name>" \
+  --auth-type "<auth_type>" \
   --credentials-file /tmp/connector_credentials
 ```
 
 Where:
 - `<connector_type_id>` is the type ID from Step 1 (e.g., `.github`, `.notion`)
 - `<display_name>` is a human-readable name for the connector instance
+- `<auth_type>` is `bearer`, `api_key_header`, or `basic` — look up the connector spec's auth type from Step 3's Credential Reference. If omitted, the script auto-detects (colon in credential → basic, else bearer), but **always pass it explicitly for `api_key_header` connectors** since auto-detection can't distinguish them from bearer tokens.
+
+For `api_key_header` connectors, you **must also pass `--header-field`** with the header field name from the connector spec's `auth.types[].defaults.headerField`:
+```bash
+  --auth-type api_key_header --header-field "X-Api-Key"
+```
 
 If the connector requires additional config (e.g., `serverUrl` for MCP-native connectors), add:
 ```bash

@@ -5,8 +5,10 @@ Instructions for setting up a connector backed by an MCP server. MCP-native conn
 ## Run the Scaffold Generator
 
 ```bash
-node scripts/generate connector <name> --id ".<id>" --owner "@elastic/response-ops"
+node scripts/generate connector <name> --id ".<id>" --owner "<team>"
 ```
+
+Replace `<team>` with the GitHub team that will own this connector (e.g., `@elastic/response-ops`, `@elastic/workchat-eng`, `@elastic/workflows-eng`). If unsure, ask the user which team should own the connector in CODEOWNERS.
 
 This creates the standard scaffold. Then modify the spec to use the MCP-native pattern.
 

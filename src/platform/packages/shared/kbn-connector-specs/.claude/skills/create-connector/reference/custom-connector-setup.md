@@ -5,8 +5,10 @@ Instructions for setting up a new custom connector spec (not MCP-backed).
 ## Run the Scaffold Generator
 
 ```bash
-node scripts/generate connector <name> --id ".<id>" --owner "@elastic/response-ops"
+node scripts/generate connector <name> --id ".<id>" --owner "<team>"
 ```
+
+Replace `<team>` with the GitHub team that will own this connector (e.g., `@elastic/response-ops`, `@elastic/workchat-eng`, `@elastic/workflows-eng`). If unsure, ask the user which team should own the connector in CODEOWNERS.
 
 The generator creates:
 - `src/platform/packages/shared/kbn-connector-specs/src/specs/<name>/<name>.ts` — connector spec stub

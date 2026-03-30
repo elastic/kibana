@@ -43,8 +43,10 @@ kbn-connector-specs/src/specs/
 For new connectors, run:
 
 ```bash
-node scripts/generate connector <name> --id ".<id>" --owner "@elastic/response-ops"
+node scripts/generate connector <name> --id ".<id>" --owner "<team>"
 ```
+
+Replace `<team>` with the owning GitHub team. Ask the user if unsure.
 
 The generator creates:
 - Connector spec stub, test stub, icon placeholder
