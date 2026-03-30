@@ -17,7 +17,7 @@ import {
   type TabsInternalStatePayload,
 } from './tabs_storage_manager';
 import type { RecentlyClosedTabState, TabState } from './redux';
-import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
+import { NEW_TAB_ID, TAB_STATE_URL_KEY, TABS_MULTI_URL_KEY } from '../../../../common/constants';
 import { DEFAULT_TAB_STATE, fromSavedSearchToSavedObjectTab } from './redux';
 import {
   getRecentlyClosedTabStateMock,
@@ -1057,6 +1057,92 @@ describe('TabsStorageManager', () => {
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
     expect(urlStateStorage.set).not.toHaveBeenCalled();
     expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it('should create multiple tabs from _tabs URL param', () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+    jest.spyOn(urlStateStorage, 'get');
+    jest.spyOn(storage, 'get');
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [toStoredTab(mockTab1)],
+      closedTabs: [],
+    });
+
+    urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: NEW_TAB_ID });
+    urlStateStorage.set(TABS_MULTI_URL_KEY, {
+      tabs: [
+        { label: 'Rule events', query: { esql: 'FROM .rule-events' } },
+        { label: 'Alert episodes', query: { esql: 'FROM .alert-episodes' } },
+        { label: 'Notifications', query: { esql: 'FROM .alert-actions' } },
+      ],
+    });
+
+    jest.spyOn(urlStateStorage, 'set');
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(loadedProps.allTabs).toHaveLength(3);
+    expect(loadedProps.allTabs[0].label).toBe('Rule events');
+    expect(loadedProps.allTabs[0].appState).toEqual(
+      expect.objectContaining({
+        query: { esql: 'FROM .rule-events' },
+      })
+    );
+    expect(loadedProps.allTabs[1].label).toBe('Alert episodes');
+    expect(loadedProps.allTabs[1].appState).toEqual(
+      expect.objectContaining({
+        query: { esql: 'FROM .alert-episodes' },
+      })
+    );
+    expect(loadedProps.allTabs[2].label).toBe('Notifications');
+    expect(loadedProps.selectedTabId).toBe(loadedProps.allTabs[0].id);
+
+    // should clean up _tabs from URL
+    expect(urlStateStorage.set).toHaveBeenCalledWith(TABS_MULTI_URL_KEY, null, { replace: true });
+  });
+
+  it('should select the correct tab from _tabs selectedIndex', () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [],
+      closedTabs: [],
+    });
+
+    urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: NEW_TAB_ID });
+    urlStateStorage.set(TABS_MULTI_URL_KEY, {
+      tabs: [
+        { label: 'Tab A', query: { esql: 'FROM index_a' } },
+        { label: 'Tab B', query: { esql: 'FROM index_b' } },
+      ],
+      selectedIndex: 1,
+    });
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(loadedProps.allTabs).toHaveLength(2);
+    expect(loadedProps.selectedTabId).toBe(loadedProps.allTabs[1].id);
   });
 
   it('should open the shared link and clear previous temporary tabs', () => {

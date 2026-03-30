@@ -47,6 +47,7 @@ const defaultProps: RulesListTableProps = {
   onBulkEnable: jest.fn(),
   onBulkDisable: jest.fn(),
   onBulkDelete: jest.fn(),
+  getDetailUrl: (ruleId: string) => `/app/management/insightsAndAlerting/alerting_v2/${ruleId}`,
   onEdit: jest.fn(),
   onClone: jest.fn(),
   onDelete: jest.fn(),

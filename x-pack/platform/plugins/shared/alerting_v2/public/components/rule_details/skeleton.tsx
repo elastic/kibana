@@ -59,25 +59,55 @@ export const Skeleton: React.FunctionComponent = () => {
         }
       />
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
-      <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
-        <EuiSkeletonTitle size="s" />
-        <EuiSpacer size="m" />
-        <EuiSkeletonText lines={4} />
-      </EuiPanel>
+      <EuiFlexGroup gutterSize="l">
+        <EuiFlexItem grow={7}>
+          {/* Tab bar skeleton */}
+          <EuiFlexGroup gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiSkeletonRectangle width={80} height={32} borderRadius="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSkeletonRectangle width={80} height={32} borderRadius="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSkeletonRectangle width={80} height={32} borderRadius="s" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
+          <EuiSpacer size="l" />
 
-      <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
-        <EuiSkeletonTitle size="s" />
-        <EuiSpacer size="s" />
-        <EuiPanel hasBorder paddingSize="none" css={{ width: '100%' }}>
-          <EuiSkeletonText lines={8} />
-        </EuiPanel>
-      </EuiPanel>
+          {/* KPI cards skeleton */}
+          <EuiFlexGroup gutterSize="l">
+            {[1, 2, 3, 4].map((n) => (
+              <EuiFlexItem key={n}>
+                <EuiPanel hasBorder paddingSize="s">
+                  <EuiSkeletonRectangle width="100%" height={80} borderRadius="s" />
+                </EuiPanel>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
 
-      <EuiSpacer size="m" />
+        <EuiFlexItem grow={3}>
+          {/* Rule conditions skeleton */}
+          <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
+            <EuiSkeletonTitle size="s" />
+            <EuiSpacer size="m" />
+            <EuiSkeletonText lines={4} />
+          </EuiPanel>
+
+          <EuiSpacer size="l" />
+
+          {/* Metadata skeleton */}
+          <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
+            <EuiSkeletonTitle size="s" />
+            <EuiSpacer size="s" />
+            <EuiSkeletonText lines={4} />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };

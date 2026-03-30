@@ -335,6 +335,82 @@ describe('Discover url generator', () => {
     });
   });
 
+  describe('multi-tab support', () => {
+    test('can specify multiple tabs with ES|QL queries', async () => {
+      const { locator } = await setup();
+      const { path } = await locator.getLocation({
+        tabs: [
+          { label: 'Rule events', query: { esql: 'FROM .rule-events' } },
+          { label: 'Alert episodes', query: { esql: 'FROM .alert-episodes' } },
+        ],
+      });
+      const { _a, _tab, _tabs } = getStatesFromKbnUrl(path, ['_a', '_tab', '_tabs']);
+
+      expect(_a).toEqual({
+        dataSource: createEsqlDataSource(),
+        query: { esql: 'FROM .rule-events' },
+      });
+      expect(_tab).toEqual({ tabId: NEW_TAB_ID });
+      expect(_tabs).toEqual({
+        tabs: [
+          { label: 'Rule events', query: { esql: 'FROM .rule-events' } },
+          { label: 'Alert episodes', query: { esql: 'FROM .alert-episodes' } },
+        ],
+      });
+    });
+
+    test('uses the selected index for the active tab query in _a', async () => {
+      const { locator } = await setup();
+      const { path } = await locator.getLocation({
+        tabs: [
+          { label: 'Tab A', query: { esql: 'FROM index_a' } },
+          { label: 'Tab B', query: { esql: 'FROM index_b' } },
+        ],
+        tabsSelectedIndex: 1,
+      });
+      const { _a, _tabs } = getStatesFromKbnUrl(path, ['_a', '_tabs']);
+
+      expect(_a).toEqual({
+        dataSource: createEsqlDataSource(),
+        query: { esql: 'FROM index_b' },
+      });
+      expect(_tabs).toEqual({
+        tabs: [
+          { label: 'Tab A', query: { esql: 'FROM index_a' } },
+          { label: 'Tab B', query: { esql: 'FROM index_b' } },
+        ],
+        selectedIndex: 1,
+      });
+    });
+
+    test('tabs param overrides single query and tab params', async () => {
+      const { locator } = await setup();
+      const { path } = await locator.getLocation({
+        query: { esql: 'FROM ignored' },
+        tab: { id: 'ignored-tab' },
+        tabs: [{ label: 'Active tab', query: { esql: 'FROM used' } }],
+      });
+      const { _a, _tab } = getStatesFromKbnUrl(path, ['_a', '_tab']);
+
+      expect(_a).toEqual({
+        dataSource: createEsqlDataSource(),
+        query: { esql: 'FROM used' },
+      });
+      expect(_tab).toEqual({ tabId: NEW_TAB_ID });
+    });
+
+    test('includes time range with multiple tabs', async () => {
+      const { locator } = await setup();
+      const { path } = await locator.getLocation({
+        timeRange: { from: 'now-7d', to: 'now' },
+        tabs: [{ label: 'Events', query: { esql: 'FROM events' } }],
+      });
+      const { _g } = getStatesFromKbnUrl(path, ['_g']);
+
+      expect(_g).toEqual({ time: { from: 'now-7d', to: 'now' } });
+    });
+  });
+
   describe('useHash property', () => {
     describe('when default useHash is set to false', () => {
       test('when using default, sets data view ID in the generated URL', async () => {

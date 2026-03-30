@@ -16,7 +16,8 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { NEW_TAB_ID, TAB_STATE_URL_KEY, TABS_MULTI_URL_KEY } from '../../../../common/constants';
 import {
   createTabItem,
   extractEsqlVariables,
@@ -26,7 +27,8 @@ import {
   type RecentlyClosedTabState,
   type TabState,
 } from './redux';
-import type { TabsUrlState } from '../../../../common/types';
+import type { TabsMultiUrlState, TabsUrlState } from '../../../../common/types';
+import { createEsqlDataSource } from '../../../../common/data_sources';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
@@ -155,6 +157,14 @@ export const createTabsStorageManager = ({
 
   const getTabsStateFromURL = () => {
     return urlStateStorage.get<TabsUrlState>(TAB_STATE_URL_KEY);
+  };
+
+  const getMultiTabsStateFromURL = () => {
+    return urlStateStorage.get<TabsMultiUrlState>(TABS_MULTI_URL_KEY);
+  };
+
+  const clearMultiTabsFromURL = async () => {
+    await urlStateStorage.set(TABS_MULTI_URL_KEY, null, { replace: true });
   };
 
   const pushSelectedTabIdToUrl: TabsStorageManager['pushSelectedTabIdToUrl'] = async (
@@ -427,6 +437,39 @@ export const createTabsStorageManager = ({
     const closedTabs = storedTabsState.closedTabs.map((tab) =>
       toRecentlyClosedTabState(tab, defaultTabState)
     );
+
+    // Multi-tab mode: create all tabs from the `_tabs` URL param
+    const multiTabState = getMultiTabsStateFromURL();
+    if (enabled && multiTabState?.tabs?.length) {
+      const selectedIndex = multiTabState.selectedIndex ?? 0;
+      const newTabs: TabState[] = [];
+      for (const tabDef of multiTabState.tabs) {
+        const tabItem = createTabItem(newTabs);
+        const appState: DiscoverAppState = {
+          query: tabDef.query,
+          ...(isOfAggregateQueryType(tabDef.query) ? { dataSource: createEsqlDataSource() } : {}),
+        };
+        newTabs.push({
+          ...defaultTabState,
+          ...tabItem,
+          label: tabDef.label,
+          appState,
+        });
+      }
+
+      // Clean up the one-shot _tabs param
+      void clearMultiTabsFromURL();
+
+      return {
+        allTabs: newTabs,
+        selectedTabId: newTabs[selectedIndex]?.id ?? newTabs[0].id,
+        recentlyClosedTabs: getNRecentlyClosedTabs({
+          previousOpenTabs,
+          previousRecentlyClosedTabs: closedTabs,
+          nextOpenTabs: newTabs,
+        }),
+      };
+    }
 
     // restore previously opened tabs
     if (enabled) {

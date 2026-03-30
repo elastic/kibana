@@ -76,6 +76,18 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   tab?: { id: typeof NEW_TAB_ID | string; label?: string };
 
   /**
+   * Optionally open multiple Discover tabs at once, each with its own query and label.
+   * The first tab in the array (or the one at `selectedIndex`) will be selected.
+   * When provided, the `query` and `tab` params are ignored in favor of `tabs`.
+   */
+  tabs?: Array<{ label: string; query: Query | AggregateQuery }>;
+
+  /**
+   * When used with `tabs`, selects which tab index to activate. Defaults to 0.
+   */
+  tabsSelectedIndex?: number;
+
+  /**
    * Columns displayed in the table
    */
   columns?: string[];

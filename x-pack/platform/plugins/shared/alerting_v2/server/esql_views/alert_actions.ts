@@ -6,9 +6,10 @@
  */
 
 import type { EsqlViewDefinition } from '../lib/services/esql_views_service/types';
+import { ALERT_ACTIONS_ESQL } from '../../common/esql_queries';
 
 export const getAlertActionsViewDefinition = (): EsqlViewDefinition => ({
   key: 'view:alert-actions',
   name: '$.alert-actions',
-  query: 'FROM .alert-actions',
+  query: ALERT_ACTIONS_ESQL,
 });

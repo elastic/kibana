@@ -17,7 +17,14 @@ import type {
 } from './app_locator';
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
-import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY, TAB_STATE_URL_KEY } from './constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  NEW_TAB_ID,
+  TAB_STATE_URL_KEY,
+  TABS_MULTI_URL_KEY,
+} from './constants';
+import type { TabsMultiUrlState } from './types';
 
 export const appLocatorGetLocationCommon = async (
   {
@@ -29,7 +36,14 @@ export const appLocatorGetLocationCommon = async (
   },
   ...[params]: Parameters<DiscoverAppLocatorGetLocation>
 ): ReturnType<DiscoverAppLocatorGetLocation> => {
-  const { useHash = useHashOriginal, savedSearchId, searchSessionId, tab } = params;
+  const {
+    useHash = useHashOriginal,
+    savedSearchId,
+    searchSessionId,
+    tab,
+    tabs,
+    tabsSelectedIndex,
+  } = params;
   const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
 
   let path = `#/${savedSearchPath}`;
@@ -38,7 +52,12 @@ export const appLocatorGetLocationCommon = async (
     path = `${path}?searchSessionId=${searchSessionId}`;
   }
 
-  const { appState, globalState, state } = parseAppLocatorParams(params);
+  // When multi-tab `tabs` is provided, override the selected tab's query
+  // into `_a` so `initializeSingleTab` picks it up for the active tab.
+  const effectiveParams =
+    tabs && tabs.length > 0 ? { ...params, query: tabs[tabsSelectedIndex ?? 0].query } : params;
+
+  const { appState, globalState, state } = parseAppLocatorParams(effectiveParams);
 
   if (Object.keys(globalState).length) {
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>(
@@ -53,7 +72,15 @@ export const appLocatorGetLocationCommon = async (
     path = setStateToKbnUrl(APP_STATE_URL_KEY, appState, { useHash }, path);
   }
 
-  if (tab?.id) {
+  if (tabs && tabs.length > 0) {
+    // Multi-tab mode: encode all tabs into `_tabs` and set `_tab` to NEW_TAB_ID
+    const multiTabState: TabsMultiUrlState = {
+      tabs: tabs.map(({ label, query }) => ({ label, query })),
+      selectedIndex: tabsSelectedIndex,
+    };
+    path = setStateToKbnUrl(TABS_MULTI_URL_KEY, multiTabState, { useHash }, path);
+    path = setStateToKbnUrl(TAB_STATE_URL_KEY, { tabId: NEW_TAB_ID }, { useHash }, path);
+  } else if (tab?.id) {
     path = setStateToKbnUrl(
       TAB_STATE_URL_KEY,
       { tabId: tab.id, tabLabel: 'label' in tab ? tab.label : undefined },

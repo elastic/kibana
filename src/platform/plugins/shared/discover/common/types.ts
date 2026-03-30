@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { NEW_TAB_ID } from './constants';
 
 export interface TabsUrlState {
@@ -18,4 +19,9 @@ export interface TabsUrlState {
    * (Optional) Label for the tab, used when creating a new tab via locator URL or opening a shared link.
    */
   tabLabel?: string;
+}
+
+export interface TabsMultiUrlState {
+  tabs: Array<{ label: string; query: Query | AggregateQuery }>;
+  selectedIndex?: number;
 }

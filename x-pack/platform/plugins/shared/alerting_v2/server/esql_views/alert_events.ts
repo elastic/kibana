@@ -6,9 +6,10 @@
  */
 
 import type { EsqlViewDefinition } from '../lib/services/esql_views_service/types';
+import { RULE_EVENTS_ESQL } from '../../common/esql_queries';
 
 export const getAlertEventsViewDefinition = (): EsqlViewDefinition => ({
   key: 'view:rule-events',
   name: '$.rule-events',
-  query: 'FROM .rule-events',
+  query: RULE_EVENTS_ESQL,
 });

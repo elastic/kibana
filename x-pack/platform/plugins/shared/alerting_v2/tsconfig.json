@@ -5,6 +5,7 @@
     "outDir": "target/types"
   },
   "include": [
+    "common/**/*",
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
@@ -67,14 +68,18 @@
     "@kbn/eval-kql",
     "@kbn/react-query",
     "@kbn/react-hooks",
-    "@kbn/core-http-browser-mocks",
-    "@kbn/core-notifications-browser-mocks",
-    "@kbn/es-query",
+    "@kbn/alerting-v2-rule-apis",
     "@kbn/deeplinks-workflows",
     "@kbn/lens-plugin",
     "@kbn/core-security-server-mocks",
+    "@kbn/scout",
+    "@kbn/share-plugin",
+    "@kbn/deeplinks-alerting-v2",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/es-query",
     "@kbn/kql",
-    "@kbn/scout"
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }
