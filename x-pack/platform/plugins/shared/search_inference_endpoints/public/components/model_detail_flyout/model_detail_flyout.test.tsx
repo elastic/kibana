@@ -9,8 +9,9 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
-import type { GroupedInferenceEndpointsData } from '../../types';
 import { ModelDetailFlyout } from './model_detail_flyout';
+
+const MODEL_ID = 'test-model';
 
 const createEndpoint = (
   overrides: Partial<InferenceAPIConfigResponse> = {}
@@ -18,64 +19,69 @@ const createEndpoint = (
   inference_id: 'my-endpoint',
   task_type: 'text_embedding',
   service: 'elastic',
-  service_settings: {},
+  service_settings: { model_id: MODEL_ID },
   ...overrides,
-});
-
-const createModelGroup = (
-  endpoints: InferenceAPIConfigResponse[] = [createEndpoint()]
-): GroupedInferenceEndpointsData => ({
-  groupId: 'test-model',
-  groupLabel: 'Test Model',
-  endpoints,
 });
 
 describe('ModelDetailFlyout', () => {
   const onClose = jest.fn();
-  const onAddEndpoint = jest.fn();
-  const onViewEndpoint = jest.fn();
+  const onSaveEndpoint = jest.fn();
+  const onDeleteEndpoint = jest.fn();
   const onCopyEndpointId = jest.fn();
 
   beforeEach(() => jest.clearAllMocks());
 
-  const renderFlyout = (group = createModelGroup()) =>
+  const renderFlyout = (
+    modelId = MODEL_ID,
+    allEndpoints: InferenceAPIConfigResponse[] = [createEndpoint()]
+  ) =>
     render(
       <ModelDetailFlyout
-        modelGroup={group}
+        modelId={modelId}
+        allEndpoints={allEndpoints}
         onClose={onClose}
-        onAddEndpoint={onAddEndpoint}
-        onViewEndpoint={onViewEndpoint}
+        onSaveEndpoint={onSaveEndpoint}
+        onDeleteEndpoint={onDeleteEndpoint}
         onCopyEndpointId={onCopyEndpointId}
       />
     );
 
   it('renders flyout with model name in header', () => {
     renderFlyout();
-    expect(screen.getByText('Test Model')).toBeInTheDocument();
+    expect(screen.getByText(MODEL_ID)).toBeInTheDocument();
   });
 
   it('renders task type badges in header', () => {
-    const group = createModelGroup([
+    const endpoints = [
       createEndpoint({ inference_id: 'ep-1', task_type: 'text_embedding' }),
       createEndpoint({ inference_id: 'ep-2', task_type: 'completion' }),
-    ]);
-    renderFlyout(group);
+    ];
+    renderFlyout(MODEL_ID, endpoints);
 
     expect(screen.getAllByText('text_embedding').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('completion').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('renders service display name as model author', () => {
-    renderFlyout(createModelGroup([createEndpoint({ service: 'anthropic' })]));
-    expect(screen.getByText('Anthropic')).toBeInTheDocument();
+  it('filters endpoints by modelId', () => {
+    const endpoints = [
+      createEndpoint({ inference_id: 'ep-match', service_settings: { model_id: MODEL_ID } }),
+      createEndpoint({
+        inference_id: 'ep-other',
+        service_settings: { model_id: 'other-model' },
+      }),
+    ];
+    renderFlyout(MODEL_ID, endpoints);
+
+    expect(screen.getByText('ep-match')).toBeInTheDocument();
+    expect(screen.queryByText('ep-other')).not.toBeInTheDocument();
   });
 
-  it('renders all endpoints', () => {
-    const group = createModelGroup([
+  it('renders all matching endpoints', () => {
+    const endpoints = [
       createEndpoint({ inference_id: 'endpoint-a' }),
       createEndpoint({ inference_id: 'endpoint-b' }),
-    ]);
-    renderFlyout(group);
+    ];
+    renderFlyout(MODEL_ID, endpoints);
 
     expect(screen.getByText('endpoint-a')).toBeInTheDocument();
     expect(screen.getByText('endpoint-b')).toBeInTheDocument();
@@ -85,12 +91,6 @@ describe('ModelDetailFlyout', () => {
     renderFlyout();
     fireEvent.click(screen.getByTestId('modelDetailFlyoutCloseButton'));
     expect(onClose).toHaveBeenCalled();
-  });
-
-  it('calls onAddEndpoint when add endpoint button is clicked', () => {
-    renderFlyout();
-    fireEvent.click(screen.getByTestId('modelDetailFlyoutAddEndpointButton'));
-    expect(onAddEndpoint).toHaveBeenCalled();
   });
 
   it('renders documentation link', () => {

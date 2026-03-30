@@ -35,15 +35,10 @@ import {
 
 import { useKibana } from '../../hooks/use_kibana';
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
-import {
-  type FilterOptions,
-  GroupByOptions,
-  type GroupedInferenceEndpointsData,
-} from '../../types';
+import { type FilterOptions, GroupByOptions } from '../../types';
 import { getModelId } from '../../utils/get_model_id';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
 import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_flyout';
-import { ModelDetailFlyout } from '../model_detail_flyout/model_detail_flyout';
 
 import { DEFAULT_FILTER_OPTIONS } from './constants';
 import { ServiceProviderFilter } from './filter/service_provider_filter';
@@ -83,10 +78,9 @@ const initializeGroupBy = (): GroupByOptions => {
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
-  onAddEndpoint?: () => void;
 }
 
-export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints, onAddEndpoint }) => {
+export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
   const {
     services: { cloud, cloudConnect, application },
   } = useKibana();
@@ -96,9 +90,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints, on
   const [searchKey, setSearchKey] = useState('');
   const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
-  const [selectedModelGroup, setSelectedModelGroup] = useState<
-    GroupedInferenceEndpointsData | undefined
-  >(undefined);
 
   const {
     showDeleteAction,
@@ -127,14 +118,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints, on
 
   const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
     setFilterOptions((prev) => ({ ...prev, ...newFilterOptions }));
-  }, []);
-
-  const onModelGroupClick = useCallback((group: GroupedInferenceEndpointsData) => {
-    setSelectedModelGroup(group);
-  }, []);
-
-  const onModelDetailFlyoutClose = useCallback(() => {
-    setSelectedModelGroup(undefined);
   }, []);
 
   const tableColumns = useMemo<Array<EuiBasicTableColumn<InferenceInferenceEndpointInfo>>>(
@@ -280,7 +263,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints, on
               filterOptions={filterOptions}
               searchKey={searchKey}
               columns={tableColumns}
-              onModelClick={onModelGroupClick}
             />
           </EuiFlexItem>
         )}
@@ -296,21 +278,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints, on
         <EditInferenceFlyout
           onFlyoutClose={onCloseInferenceFlyout}
           selectedInferenceEndpoint={selectedInferenceEndpoint}
-        />
-      )}
-      {selectedModelGroup && (
-        <ModelDetailFlyout
-          modelGroup={selectedModelGroup}
-          onClose={onModelDetailFlyoutClose}
-          onAddEndpoint={() => {
-            onModelDetailFlyoutClose();
-            onAddEndpoint?.();
-          }}
-          onViewEndpoint={(endpoint) => {
-            onModelDetailFlyoutClose();
-            displayInferenceFlyout(endpoint);
-          }}
-          onCopyEndpointId={copyContent}
         />
       )}
     </>

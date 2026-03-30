@@ -9,14 +9,12 @@ import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiButtonEmpty,
-  EuiButtonIcon,
   type EuiBasicTableColumn,
   EuiFlexGroup,
   EuiInMemoryTable,
   EuiPanel,
   EuiEmptyPrompt,
   EuiSpacer,
-  EuiToolTip,
   type EuiTableFieldDataColumnType,
   type EuiTableComputedColumnType,
 } from '@elastic/eui';
@@ -28,12 +26,7 @@ import {
   useGroupsAccordionToggleState,
 } from '../../../hooks/use_groups_accordion_toggle_state';
 import { useGroupedData } from '../../../hooks/use_grouped_data';
-import {
-  GroupByOptions,
-  type FilterOptions,
-  type GroupByViewOptions,
-  type GroupedInferenceEndpointsData,
-} from '../../../types';
+import { GroupByOptions, type FilterOptions, type GroupByViewOptions } from '../../../types';
 import { GroupPanelStyle } from './styles';
 import { GroupByHeaderButton } from './group_header_button';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from '../types';
@@ -46,7 +39,6 @@ export interface GroupedEndpointsTablesProps {
   filterOptions: FilterOptions;
   searchKey: string;
   columns: EuiBasicTableColumn<InferenceAPIConfigResponse>[];
-  onModelClick?: (group: GroupedInferenceEndpointsData) => void;
 }
 
 function isColumnWithId(
@@ -63,7 +55,6 @@ export const GroupedEndpointsTables = ({
   filterOptions,
   searchKey,
   columns,
-  onModelClick,
 }: GroupedEndpointsTablesProps) => {
   const { groupedEndpoints, filteredEndpoints } = useGroupedData(
     inferenceEndpoints,
@@ -141,27 +132,6 @@ export const GroupedEndpointsTables = ({
               extraAction={
                 groupBy === GroupByOptions.Service ? (
                   <ServiceDescription service={groupedData.groupId} />
-                ) : groupBy === GroupByOptions.Model && onModelClick ? (
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.searchInferenceEndpoints.groupedEndpoints.viewModelDetailsTooltip',
-                      { defaultMessage: 'View model details' }
-                    )}
-                  >
-                    <EuiButtonIcon
-                      iconType="eye"
-                      size="s"
-                      aria-label={i18n.translate(
-                        'xpack.searchInferenceEndpoints.groupedEndpoints.viewModelDetailsAriaLabel',
-                        { defaultMessage: 'View model details' }
-                      )}
-                      onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
-                        onModelClick(groupedData);
-                      }}
-                      data-test-subj={`modelDetailButton-${groupedData.groupId}`}
-                    />
-                  </EuiToolTip>
                 ) : undefined
               }
               data-test-subj={`${groupedData.groupId}-accordion`}

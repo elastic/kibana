@@ -24,9 +24,15 @@ export interface ModelEndpointRowProps {
   endpoint: InferenceAPIConfigResponse;
   onView: (endpoint: InferenceAPIConfigResponse) => void;
   onCopy: (id: string) => void;
+  onDelete?: (endpoint: InferenceAPIConfigResponse) => void;
 }
 
-export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({ endpoint, onView, onCopy }) => {
+export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
+  endpoint,
+  onView,
+  onCopy,
+  onDelete,
+}) => {
   const preconfigured = isEndpointPreconfigured(endpoint.inference_id);
 
   return (
@@ -81,7 +87,7 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({ endpoint, on
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ minWidth: 24 }}>
-          {preconfigured && (
+          {preconfigured ? (
             <EuiToolTip
               content={i18n.translate(
                 'xpack.searchInferenceEndpoints.modelDetailFlyout.preconfiguredTooltip',
@@ -103,7 +109,26 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({ endpoint, on
                 />
               </span>
             </EuiToolTip>
-          )}
+          ) : onDelete ? (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.searchInferenceEndpoints.modelDetailFlyout.deleteEndpointTooltip',
+                { defaultMessage: 'Delete endpoint' }
+              )}
+            >
+              <EuiButtonIcon
+                iconType="trash"
+                size="xs"
+                color="danger"
+                aria-label={i18n.translate(
+                  'xpack.searchInferenceEndpoints.modelDetailFlyout.deleteEndpointAriaLabel',
+                  { defaultMessage: 'Delete endpoint' }
+                )}
+                onClick={() => onDelete(endpoint)}
+                data-test-subj={`deleteEndpointButton-${endpoint.inference_id}`}
+              />
+            </EuiToolTip>
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiSplitPanel.Inner>

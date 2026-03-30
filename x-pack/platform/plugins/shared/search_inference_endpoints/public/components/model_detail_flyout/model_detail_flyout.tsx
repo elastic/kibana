@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -27,14 +27,18 @@ import { i18n } from '@kbn/i18n';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { docLinks } from '../../../common/doc_links';
-import type { GroupedInferenceEndpointsData } from '../../types';
+import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
+import { TASK_TYPE_TOOLTIPS } from '../all_inference_endpoints/render_table_columns/render_endpoint/translations';
+import { getModelId } from '../../utils/get_model_id';
+import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
 
 export interface ModelDetailFlyoutProps {
-  modelGroup: GroupedInferenceEndpointsData;
+  modelId: string;
+  allEndpoints: InferenceAPIConfigResponse[];
   onClose: () => void;
-  onAddEndpoint: () => void;
-  onViewEndpoint: (endpoint: InferenceAPIConfigResponse) => void;
+  onSaveEndpoint: () => void;
+  onDeleteEndpoint: (endpoint: InferenceAPIConfigResponse) => void;
   onCopyEndpointId: (id: string) => void;
 }
 
@@ -56,17 +60,51 @@ function getServiceDisplayName(service: string): string {
 }
 
 export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
-  modelGroup,
+  modelId,
+  allEndpoints,
   onClose,
-  onAddEndpoint,
-  onViewEndpoint,
+  onSaveEndpoint,
+  onDeleteEndpoint,
   onCopyEndpointId,
 }) => {
   const flyoutTitleId = useGeneratedHtmlId();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEndpoint, setEditingEndpoint] = useState<InferenceAPIConfigResponse | undefined>();
 
-  const firstEndpoint = modelGroup.endpoints[0];
+  const endpoints = useMemo(
+    () => allEndpoints.filter((ep) => getModelId(ep) === modelId),
+    [allEndpoints, modelId]
+  );
+
+  const firstEndpoint = endpoints[0];
   const serviceDisplayName = firstEndpoint ? getServiceDisplayName(firstEndpoint.service) : '';
-  const uniqueTaskTypes = [...new Set(modelGroup.endpoints.map((e) => e.task_type))];
+
+  const { taskTypeOptions, uniqueTaskTypes } = useMemo(() => {
+    const taskTypes = [...new Set(endpoints.map((e) => e.task_type))];
+    return {
+      uniqueTaskTypes: taskTypes,
+      taskTypeOptions: taskTypes.map((tt) => ({
+        value: tt,
+        label: tt,
+        description: TASK_TYPE_TOOLTIPS[tt] ?? '',
+      })),
+    };
+  }, [endpoints]);
+
+  const handleOpenAddModal = useCallback(() => {
+    setEditingEndpoint(undefined);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleOpenEditModal = useCallback((endpoint: InferenceAPIConfigResponse) => {
+    setEditingEndpoint(endpoint);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    setEditingEndpoint(undefined);
+  }, []);
 
   const descriptionListItems = [
     {
@@ -99,7 +137,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>{modelGroup.groupLabel}</h2>
+          <h2 id={flyoutTitleId}>{modelId}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
         {uniqueTaskTypes.map((taskType) => (
@@ -135,7 +173,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                   size="s"
                   iconType="plusInCircle"
                   color="text"
-                  onClick={onAddEndpoint}
+                  onClick={handleOpenAddModal}
                   data-test-subj="modelDetailFlyoutAddEndpointButton"
                 >
                   {i18n.translate(
@@ -149,14 +187,15 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
 
           <EuiFlexItem>
             <EuiSplitPanel.Outer hasBorder>
-              {modelGroup.endpoints.map((endpoint, index) => (
+              {endpoints.map((endpoint, index) => (
                 <React.Fragment key={endpoint.inference_id}>
                   <ModelEndpointRow
                     endpoint={endpoint}
-                    onView={onViewEndpoint}
+                    onView={handleOpenEditModal}
                     onCopy={onCopyEndpointId}
+                    onDelete={onDeleteEndpoint}
                   />
-                  {index !== modelGroup.endpoints.length - 1 && <EuiHorizontalRule margin="none" />}
+                  {index !== endpoints.length - 1 && <EuiHorizontalRule margin="none" />}
                 </React.Fragment>
               ))}
             </EuiSplitPanel.Outer>
@@ -175,6 +214,20 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
+      {isModalOpen && (
+        <AddEndpointModal
+          mode={editingEndpoint ? 'edit' : 'add'}
+          modelId={modelId}
+          taskTypes={taskTypeOptions}
+          initialEndpointId={editingEndpoint?.inference_id}
+          initialTaskType={editingEndpoint?.task_type}
+          isPreconfigured={
+            editingEndpoint ? isEndpointPreconfigured(editingEndpoint.inference_id) : false
+          }
+          onSave={onSaveEndpoint}
+          onCancel={handleCloseModal}
+        />
+      )}
     </EuiFlyout>
   );
 };

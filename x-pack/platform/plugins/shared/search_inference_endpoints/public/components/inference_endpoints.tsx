@@ -36,7 +36,7 @@ export const InferenceEndpoints: React.FC = () => {
     <>
       <InferenceEndpointsHeader onFlyoutOpen={onFlyoutOpen} />
       <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
-        <TabularPage inferenceEndpoints={inferenceEndpoints} onAddEndpoint={onFlyoutOpen} />
+        <TabularPage inferenceEndpoints={inferenceEndpoints} />
       </EuiPageTemplate.Section>
       {isAddInferenceFlyoutOpen && (
         <AddInferenceFlyoutWrapper onFlyoutClose={onFlyoutClose} reloadFn={reload} />
