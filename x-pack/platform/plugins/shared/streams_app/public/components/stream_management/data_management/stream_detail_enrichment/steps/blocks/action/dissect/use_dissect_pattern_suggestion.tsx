@@ -106,7 +106,7 @@ export function useDissectPatternSuggestion(
         );
 
         const parsedRate =
-          simulationResult.processors_metrics[SUGGESTED_DISSECT_PROCESSOR_ID].parsed_rate;
+          simulationResult.processors_metrics[SUGGESTED_DISSECT_PROCESSOR_ID]?.parsed_rate ?? 0;
 
         finishTrackingAndReport(1, [parsedRate]);
 
