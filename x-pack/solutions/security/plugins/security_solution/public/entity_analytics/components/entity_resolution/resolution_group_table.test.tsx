@@ -101,9 +101,8 @@ describe('ResolutionGroupTable', () => {
     const removeButtons = getAllByLabelText(/remove from resolution group/i);
     // The second button is for the alias row (first is target, which is disabled)
     const aliasButton = removeButtons.find((btn) => !btn.hasAttribute('disabled'));
-    if (aliasButton) {
-      fireEvent.click(aliasButton);
-      expect(onRemove).toHaveBeenCalledWith('alice-azure-id');
-    }
+    expect(aliasButton).toBeDefined();
+    fireEvent.click(aliasButton!);
+    expect(onRemove).toHaveBeenCalledWith('alice-azure-id');
   });
 });

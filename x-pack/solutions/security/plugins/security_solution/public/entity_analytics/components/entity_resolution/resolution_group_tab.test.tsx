@@ -156,13 +156,12 @@ describe('ResolutionGroupTab', () => {
     const removeButtons = getAllByLabelText(/remove from resolution group/i);
     // Find the non-disabled remove button (alias row)
     const aliasButton = removeButtons.find((btn) => !btn.hasAttribute('disabled'));
-    if (aliasButton) {
-      fireEvent.click(aliasButton);
-      expect(mockUnlinkMutate).toHaveBeenCalledWith(
-        { entity_ids: ['alice-azure-id'] },
-        expect.objectContaining({ onSettled: expect.any(Function) })
-      );
-    }
+    expect(aliasButton).toBeDefined();
+    fireEvent.click(aliasButton!);
+    expect(mockUnlinkMutate).toHaveBeenCalledWith(
+      { entity_ids: ['alice-azure-id'] },
+      expect.objectContaining({ onSettled: expect.any(Function) })
+    );
   });
 
   it('confirm modal submit calls link mutation', async () => {
