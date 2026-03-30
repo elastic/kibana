@@ -151,7 +151,7 @@ export const Overview = () => {
                   {directUpgradeableVersionRange.min === directUpgradeableVersionRange.max ? (
                     <FormattedMessage
                       id="xpack.upgradeAssistant.overview.directUpgradeSingle"
-                      defaultMessage="From your current version, you can update to version {version}."
+                      defaultMessage="From your current version, you can upgrade to version {version}."
                       values={{
                         version: directUpgradeableVersionRange.min,
                       }}
@@ -159,7 +159,7 @@ export const Overview = () => {
                   ) : (
                     <FormattedMessage
                       id="xpack.upgradeAssistant.overview.directUpgradeRange"
-                      defaultMessage="From your current version, you can update to versions {minVersion} - {maxVersion}."
+                      defaultMessage="From your current version, you can upgrade to versions {minVersion} - {maxVersion}."
                       values={{
                         minVersion: directUpgradeableVersionRange.min,
                         maxVersion: directUpgradeableVersionRange.max,
@@ -184,7 +184,7 @@ export const Overview = () => {
                   >
                     <FormattedMessage
                       id="xpack.upgradeAssistant.overview.releaseHighlightsLinkText"
-                      defaultMessage="What's new in the Elastic releases"
+                      defaultMessage="Elastic release notes"
                     />
                   </EuiLink>
                 ),
