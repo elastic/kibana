@@ -1758,6 +1758,8 @@
       "@kbn/otel-demo/*": ["src/platform/packages/shared/kbn-otel-demo/*"],
       "@kbn/otel-semantic-conventions": ["src/platform/packages/shared/kbn-otel-semantic-conventions"],
       "@kbn/otel-semantic-conventions/*": ["src/platform/packages/shared/kbn-otel-semantic-conventions/*"],
+      "@kbn/otel-telemetry-collection-plugin": ["x-pack/platform/plugins/private/otel_telemetry_collection"],
+      "@kbn/otel-telemetry-collection-plugin/*": ["x-pack/platform/plugins/private/otel_telemetry_collection/*"],
       "@kbn/paertial-results-example-plugin": ["examples/partial_results_example"],
       "@kbn/paertial-results-example-plugin/*": ["examples/partial_results_example/*"],
       "@kbn/painless-lab-plugin": ["x-pack/platform/plugins/private/painless_lab"],

@@ -8059,6 +8059,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/otel-telemetry-collection-plugin@link:x-pack/platform/plugins/private/otel_telemetry_collection":
+  version "0.0.0"
+  uid ""
+
 "@kbn/paertial-results-example-plugin@link:examples/partial_results_example":
   version "0.0.0"
   uid ""
