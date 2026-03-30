@@ -130,10 +130,7 @@ export async function autocomplete(
         emptySuggestions: [
           ...(!isNewMultipleExpression && !isInlineStats
             ? [
-                {
-                  ...byCompleteItem,
-                  sortText: 'D',
-                },
+                byCompleteItem,
               ]
             : []),
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),

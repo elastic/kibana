@@ -81,7 +81,6 @@ export const byCompleteItem: ISuggestionItem = withAutoSuggest({
   text: 'BY ',
   kind: 'Reference',
   detail: 'By',
-  sortText: '1',
 });
 
 export const whereCompleteItem: ISuggestionItem = withAutoSuggest({
@@ -89,7 +88,6 @@ export const whereCompleteItem: ISuggestionItem = withAutoSuggest({
   text: 'WHERE ',
   kind: 'Reference',
   detail: 'Where',
-  sortText: '1',
 });
 
 function isAggregation(arg: ESQLAstItem): arg is ESQLFunction {

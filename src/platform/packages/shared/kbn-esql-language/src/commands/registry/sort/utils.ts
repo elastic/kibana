@@ -60,28 +60,24 @@ export const sortModifierSuggestions = {
     text: 'ASC',
     detail: '',
     kind: 'Keyword',
-    sortText: '1-ASC',
   }),
   DESC: withAutoSuggest({
     label: 'DESC',
     text: 'DESC',
     detail: '',
     kind: 'Keyword',
-    sortText: '1-DESC',
   }),
   NULLS_FIRST: withAutoSuggest({
     label: 'NULLS FIRST',
     text: 'NULLS FIRST',
     detail: '',
     kind: 'Keyword',
-    sortText: '2-NULLS FIRST',
   }),
   NULLS_LAST: withAutoSuggest({
     label: 'NULLS LAST',
     text: 'NULLS LAST',
     detail: '',
     kind: 'Keyword',
-    sortText: '2-NULLS LAST',
   }),
 };
 
