@@ -21,6 +21,9 @@ import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin
 import { DEPRECATED_ALERTING_CONSUMERS, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
+import { registerOverviewEmbeddableTransforms } from './lib/embeddables/register_overview_embeddable_transforms';
+import { registerErrorBudgetEmbeddableTransforms } from './lib/embeddables/register_error_budget_embeddable_transforms';
+import { registerBurnRateEmbeddableTransforms } from './lib/embeddables/register_burn_rate_embeddable_transforms';
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
@@ -29,7 +32,9 @@ import { registerServerRoutes } from './routes/register_routes';
 import type { SLORoutesDependencies } from './routes/types';
 import {
   slo,
+  sloComposite,
   sloSettings,
+  SO_SLO_COMPOSITE_TYPE,
   SO_SLO_SETTINGS_TYPE,
   SO_SLO_TEMPLATE_TYPE,
   SO_SLO_TYPE,
@@ -85,8 +90,14 @@ export class SLOPlugin
   ): SLOServerSetup {
     const lockManager = new LockManagerService(core, this.logger);
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
+    const isCompositeSloEnabled = this.config.experimental?.compositeSlo?.enabled === true;
 
-    const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE, SO_SLO_TEMPLATE_TYPE];
+    const savedObjectTypes = [
+      SO_SLO_TYPE,
+      SO_SLO_SETTINGS_TYPE,
+      SO_SLO_TEMPLATE_TYPE,
+      ...(isCompositeSloEnabled ? [SO_SLO_COMPOSITE_TYPE] : []),
+    ];
 
     const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
       ruleTypeId,
@@ -115,6 +126,9 @@ export class SLOPlugin
           alerting: {
             rule: {
               all: alertingFeatures,
+              enable: alertingFeatures,
+              manual_run: alertingFeatures,
+              manage_rule_settings: alertingFeatures,
             },
             alert: {
               all: alertingFeatures,
@@ -147,6 +161,9 @@ export class SLOPlugin
 
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
+    if (isCompositeSloEnabled) {
+      core.savedObjects.registerType(sloComposite);
+    }
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.logger, ruleDataService, {
       alertsLocator,
@@ -182,7 +199,10 @@ export class SLOPlugin
           );
 
           const soClient = coreStart.savedObjects.getScopedClient(request, {
-            includedHiddenTypes: [SO_SLO_TEMPLATE_TYPE],
+            includedHiddenTypes: [
+              SO_SLO_TEMPLATE_TYPE,
+              ...(isCompositeSloEnabled ? [SO_SLO_COMPOSITE_TYPE] : []),
+            ],
           });
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
@@ -228,7 +248,10 @@ export class SLOPlugin
         },
       },
       logger: this.logger,
-      repository: getSloServerRouteRepository({ isServerless: this.isServerless }),
+      repository: getSloServerRouteRepository({
+        isServerless: this.isServerless,
+        isCompositeSloEnabled,
+      }),
       isDev: this.isDev,
     });
 
@@ -280,6 +303,10 @@ export class SLOPlugin
       logFactory: this.initContext.logger,
       config: this.config,
     });
+
+    registerOverviewEmbeddableTransforms(plugins.embeddable);
+    registerErrorBudgetEmbeddableTransforms(plugins.embeddable);
+    registerBurnRateEmbeddableTransforms(plugins.embeddable);
 
     return {};
   }

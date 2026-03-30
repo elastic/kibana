@@ -441,12 +441,12 @@
         "label": "RuleTypeModalComponent",
         "description": [],
         "signature": [
-          "({ http, toasts, filteredRuleTypes, registeredRuleTypes, ...rest }: ",
+          "({ http, toasts, cps, filteredRuleTypes, registeredRuleTypes, ...rest }: ",
           "RuleTypeModalComponentProps",
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_type_modal/components/index.tsx",
-        "lineNumber": 32,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -456,13 +456,13 @@
             "id": "def-public.RuleTypeModalComponent.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  filteredRuleTypes = EMPTY_ARRAY,\n  registeredRuleTypes,\n  ...rest\n}",
+            "label": "{\n  http,\n  toasts,\n  cps,\n  filteredRuleTypes = EMPTY_ARRAY,\n  registeredRuleTypes,\n  ...rest\n}",
             "description": [],
             "signature": [
               "RuleTypeModalComponentProps"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_type_modal/components/index.tsx",
-            "lineNumber": 32,
+            "lineNumber": 34,
             "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
@@ -3232,7 +3232,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"enabled\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"uiamApiKey\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"enabled\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"uiamApiKey\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"lastEnabledAt\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",

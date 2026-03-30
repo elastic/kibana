@@ -31,7 +31,7 @@ import {
   getConfigFromPalette,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
-import type { KbnPalettes } from '@kbn/palettes';
+import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SerializedValue } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -72,7 +72,7 @@ export function ColorMappingByTerms({
   allowCustomMatch,
 }: ColorMappingByTermsProps) {
   const { euiTheme } = useEuiTheme();
-  const [useLegacyPalettes, setUseLegacyPalettes] = useState(!colorMapping);
+  const [useLegacyPalettes, setUseLegacyPalettes] = useState(Boolean(!colorMapping && palette));
 
   return (
     <EuiFormRow
@@ -155,11 +155,22 @@ export function ColorMappingByTerms({
                   const newColorMapping = isLegacy
                     ? undefined
                     : palette
-                    ? getConfigFromPalette(palettes, palette.name)
+                    ? getConfigFromPalette(palettes, palette.name as KbnPaletteId)
                     : { ...DEFAULT_COLOR_MAPPING_CONFIG };
 
                   trackUiCounterEvents(`color_mapping_switch_${isLegacy ? 'disabled' : 'enabled'}`);
-                  setColorMapping(newColorMapping);
+
+                  if (isLegacy) {
+                    if (!palette) {
+                      // `setPalette` (in the table dimension editor) also clears `colorMapping`,
+                      // so this must be a single state update to avoid debounced update races.
+                      setPalette({ type: 'palette', name: 'default' });
+                    } else {
+                      setColorMapping(undefined);
+                    }
+                  } else {
+                    setColorMapping(newColorMapping);
+                  }
                   setUseLegacyPalettes(isLegacy);
                   onModeChange?.(isLegacy);
                 }}

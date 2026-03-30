@@ -39,6 +39,7 @@
       "{index}/_mvt/{field}/{zoom}/{x}/{y}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-mvt",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-search-mvt",
     "availability": {
       "stack": true,
       "serverless": true

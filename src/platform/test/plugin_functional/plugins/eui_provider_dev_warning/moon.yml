@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/eui-provider-dev-warning'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/eui-provider-dev-warning'
+  title: '@kbn/eui-provider-dev-warning'
   description: Moon project for @kbn/eui-provider-dev-warning
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/eui_provider_dev_warning
+  sourceRoot: src/platform/test/plugin_functional/plugins/eui_provider_dev_warning
 dependsOn:
   - '@kbn/core'
 tags:

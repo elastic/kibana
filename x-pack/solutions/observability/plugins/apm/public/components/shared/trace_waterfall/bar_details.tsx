@@ -38,7 +38,7 @@ const ORPHAN_CONTENT = i18n.translate(
 
 export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: number }) {
   const theme = useEuiTheme();
-  const { getRelatedErrorsHref, onErrorClick } = useTraceWaterfallContext();
+  const { getRelatedErrorsHref, onErrorClick, onClick } = useTraceWaterfallContext();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
   const errorCount = item.errors.length;
 
@@ -87,6 +87,11 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
             <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" aria-hidden={true} />
           </EuiFlexItem>
         )}
+        {item.result && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">{item.result}</EuiText>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiText css={{ overflow: 'hidden', whiteSpace: 'nowrap' }} size="s">
             <TruncateWithTooltip content={displayName} text={displayName} />
@@ -132,7 +137,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiBadge
                 color={theme.euiTheme.colors.danger}
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 href={getRelatedErrorsHref?.(item.id) as any}
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
                   if (onErrorClick) {
@@ -157,7 +162,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               </EuiBadge>
             ) : (
               <EuiIcon
-                type="errorFilled"
+                type="errorFill"
                 color={theme.euiTheme.colors.danger}
                 size="s"
                 data-test-subj="apmBarDetailsErrorIcon"
@@ -186,6 +191,9 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           outgoingCount={item.spanLinksCount.outgoing}
           incomingCount={item.spanLinksCount.incoming}
           id={item.id}
+          onClick={
+            onClick ? (flyoutTab) => onClick(item.id, { flyoutDetailTab: flyoutTab }) : undefined
+          }
         />
         {item.coldstart && <ColdStartBadge />}
       </EuiFlexGroup>

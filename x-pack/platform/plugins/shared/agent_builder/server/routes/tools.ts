@@ -21,8 +21,8 @@ import type {
   CreateToolResponse,
   UpdateToolResponse,
 } from '../../common/http_api/tools';
-import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
+import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from './route_security';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import { asError } from '../utils/as_error';
 
@@ -38,9 +38,7 @@ export function registerToolsRoutes({
   router.versioned
     .get({
       path: `${publicApiPath}/tools`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'List tools',
       description:
@@ -76,9 +74,7 @@ export function registerToolsRoutes({
   router.versioned
     .get({
       path: `${publicApiPath}/tools/{toolId}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Get a tool by id',
       description:
@@ -121,9 +117,7 @@ export function registerToolsRoutes({
   router.versioned
     .post({
       path: `${publicApiPath}/tools`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: TOOLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Create a tool',
       description:
@@ -209,9 +203,7 @@ export function registerToolsRoutes({
   router.versioned
     .put({
       path: `${publicApiPath}/tools/{toolId}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: TOOLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Update a tool',
       description:
@@ -293,9 +285,7 @@ export function registerToolsRoutes({
   router.versioned
     .delete({
       path: `${publicApiPath}/tools/{toolId}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: TOOLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Delete a tool',
       description:
@@ -393,9 +383,7 @@ export function registerToolsRoutes({
   router.versioned
     .post({
       path: `${publicApiPath}/tools/_execute`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Run a tool',
       description:

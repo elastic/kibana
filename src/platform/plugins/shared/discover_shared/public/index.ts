@@ -22,7 +22,6 @@ export type {
   ObservabilityStreamsFeatureRenderDeps,
   ObservabilityStreamsFeature,
   SecuritySolutionCellRendererFeature,
-  SecuritySolutionAppWrapperFeature,
   SecuritySolutionAlertFlyoutOverviewTabFeature,
   DiscoverFeature,
   DiscoverFeaturesServiceSetup,

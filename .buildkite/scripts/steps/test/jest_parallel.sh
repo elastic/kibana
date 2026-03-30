@@ -54,7 +54,7 @@ echo "--- Running combined jest_all for configs ($TEST_TYPE)"
 echo "$configs"
 echo "JEST_MAX_PARALLEL is set to: $JEST_MAX_PARALLEL"
 
-node_opts="--max-old-space-size=${JEST_MAX_OLD_SPACE_MB} --trace-warnings --no-experimental-require-module"
+node_opts="--max-old-space-size=${JEST_MAX_OLD_SPACE_MB} --trace-warnings"
 if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-3" ]] ; then
   node_opts="$node_opts --enable-fips --openssl-config=$HOME/nodejs.cnf"
 fi

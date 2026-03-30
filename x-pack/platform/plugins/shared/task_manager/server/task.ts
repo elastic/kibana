@@ -123,8 +123,9 @@ export interface FailedTaskResult {
   status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
-export type RunFunction = () => Promise<RunResult | undefined | void>;
-export type CancelFunction = () => Promise<RunResult | undefined | void>;
+export type AnyRunResult = RunResult | undefined | void;
+export type RunFunction = () => Promise<AnyRunResult>;
+export type CancelFunction = () => Promise<AnyRunResult>;
 export interface CancellableTask<T = never> {
   run: RunFunction;
   cancel?: CancelFunction;
@@ -528,3 +529,8 @@ export interface ApiKeyOptions {
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;
+
+// Local event log interface to avoid a circular dependency with @kbn/event-log-plugin in .tsconfig
+export interface TaskEventLogger {
+  logEvent(properties: object, id?: string): void;
+}

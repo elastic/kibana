@@ -30,7 +30,7 @@
           "({ productName, productVersion, excludeExtension, inferenceId, }: { productName: \"security\" | \"kibana\" | \"observability\" | \"elasticsearch\"; productVersion: string; excludeExtension?: boolean | undefined; inferenceId?: string | undefined; }) => string"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-        "lineNumber": 21,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -43,7 +43,7 @@
             "label": "{\n  productName,\n  productVersion,\n  excludeExtension = false,\n  inferenceId,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-            "lineNumber": 26,
+            "lineNumber": 29,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -59,7 +59,7 @@
                   "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-                "lineNumber": 27,
+                "lineNumber": 30,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -72,7 +72,7 @@
                 "label": "productVersion",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-                "lineNumber": 28,
+                "lineNumber": 31,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -88,7 +88,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-                "lineNumber": 29,
+                "lineNumber": 32,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -104,12 +104,51 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-                "lineNumber": 30,
+                "lineNumber": 33,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.getOpenApiSpecIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "getOpenApiSpecIndexName",
+        "description": [
+          "\nReturns the index name for OpenAPI Spec content.\nFormat: .kibana_ai_openapi_spec[-{inferenceId}]"
+        ],
+        "signature": [
+          "(inferenceId?: string | undefined) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.getOpenApiSpecIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+            "lineNumber": 54,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -190,7 +229,7 @@
           " | undefined"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-        "lineNumber": 125,
+        "lineNumber": 128,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -206,7 +245,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-            "lineNumber": 125,
+            "lineNumber": 128,
             "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
@@ -229,7 +268,7 @@
           "({ version, excludeExtension, inferenceId, }: { version: string; excludeExtension?: boolean | undefined; inferenceId?: string | undefined; }) => string"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-        "lineNumber": 71,
+        "lineNumber": 74,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -242,7 +281,7 @@
             "label": "{\n  version,\n  excludeExtension = false,\n  inferenceId,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-            "lineNumber": 75,
+            "lineNumber": 78,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -255,7 +294,7 @@
                 "label": "version",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-                "lineNumber": 76,
+                "lineNumber": 79,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -271,7 +310,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-                "lineNumber": 77,
+                "lineNumber": 80,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -287,7 +326,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-                "lineNumber": 78,
+                "lineNumber": 81,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -387,7 +426,7 @@
           "(version: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-        "lineNumber": 138,
+        "lineNumber": 141,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -403,7 +442,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-            "lineNumber": 138,
+            "lineNumber": 141,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
@@ -424,7 +463,7 @@
           "(artifactName: string) => { inferenceId?: string | undefined; productName: \"security\" | \"kibana\" | \"observability\" | \"elasticsearch\"; productVersion: string; } | undefined"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-        "lineNumber": 38,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -440,7 +479,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-            "lineNumber": 38,
+            "lineNumber": 41,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
@@ -463,7 +502,7 @@
           "(artifactName: string) => { version: string; inferenceId?: string | undefined; resourceType: \"security_labs\"; } | undefined"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-        "lineNumber": 89,
+        "lineNumber": 92,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -479,7 +518,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
-            "lineNumber": 90,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -542,6 +581,24 @@
             "description": [],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/manifest.ts",
             "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ArtifactManifest.ts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ts",
+            "description": [
+              "Timestamp of the artifact creation"
+            ],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/manifest.ts",
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -760,6 +817,41 @@
       },
       {
         "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.openApiSpecIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "openApiSpecIndexPattern",
+        "description": [
+          "\nIndex pattern for OpenAPI Spec content."
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.openApiSpecIndexPrefix",
+        "type": "string",
+        "tags": [],
+        "label": "openApiSpecIndexPrefix",
+        "description": [
+          "\nIndex name prefix for OpenAPI Spec content."
+        ],
+        "signature": [
+          "\".kibana_ai_openapi_spec\""
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
         "id": "def-common.productDocIndexPattern",
         "type": "string",
         "tags": [],
@@ -816,7 +908,7 @@
           "\nResource types for knowledge base artifacts.\n- `product_doc`: Elastic product documentation (Kibana, Elasticsearch, etc.)\n- `security_labs`: Elastic Security Labs content"
         ],
         "signature": [
-          "\"product_doc\" | \"security_labs\""
+          "\"product_doc\" | \"security_labs\" | \"openapi_spec\""
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/resource_type.ts",
         "lineNumber": 8,
@@ -870,7 +962,7 @@
         "label": "ResourceTypes",
         "description": [],
         "signature": [
-          "{ readonly productDoc: \"product_doc\"; readonly securityLabs: \"security_labs\"; }"
+          "{ readonly productDoc: \"product_doc\"; readonly securityLabs: \"security_labs\"; readonly openapiSpec: \"openapi_spec\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/resource_type.ts",
         "lineNumber": 15,

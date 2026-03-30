@@ -11,11 +11,12 @@ import type {
   ESQLAstBaseItem,
   ESQLColumn,
   ESQLFunction,
+  ESQLIdentifier,
   ESQLLiteral,
   ESQLParamLiteral,
-} from '@kbn/esql-language';
-import { Builder, isColumn, isFunctionExpression, isParamLiteral } from '@kbn/esql-language';
-import type { ESQLIdentifier, ESQLProperNode } from '@kbn/esql-language/src/types';
+  ESQLProperNode,
+} from '@elastic/esql/types';
+import { Builder, isColumn, isFunctionExpression, isParamLiteral } from '@elastic/esql';
 import type { FieldValue, Params } from '../types';
 
 type ReplaceableNodes = ESQLParamLiteral | ESQLLiteral | ESQLColumn | ESQLFunction;

@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type {
-  LegacyStoredESQLControlExplicitInput,
-  OptionsListESQLControlState,
+import { DEFAULT_ESQL_OPTIONS_LIST_STATE, ESQL_CONTROL } from '@kbn/controls-constants';
+import {
+  type LegacyStoredESQLControlExplicitInput,
+  type OptionsListESQLControlState,
+  optionsListESQLControlSchema,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
 export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(ESQL_CONTROL, {
+    getSchema: () => optionsListESQLControlSchema,
     getTransforms: () => ({
       transformOut: <
         StoredStateType extends Partial<
@@ -45,8 +47,8 @@ export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
           control_type: control_type as OptionsListESQLControlState['control_type'],
           display_settings,
           esql_query: esql_query ?? '',
-          selected_options: selected_options ?? [],
-          single_select,
+          selected_options: selected_options ?? DEFAULT_ESQL_OPTIONS_LIST_STATE.selected_options,
+          single_select: single_select ?? DEFAULT_ESQL_OPTIONS_LIST_STATE.single_select,
           variable_name: variable_name ?? '',
           variable_type: variable_type as OptionsListESQLControlState['variable_type'],
         };

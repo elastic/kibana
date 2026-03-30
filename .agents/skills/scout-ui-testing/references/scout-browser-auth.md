@@ -19,7 +19,7 @@ import { tags } from '@kbn/scout'; // or the module's Scout package (e.g. @kbn/s
 import { expect } from '@kbn/scout/ui'; // or '@kbn/scout-search/ui', etc.
 import { test } from '../fixtures';
 
-test.describe('my suite', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('my suite', { tag: tags.deploymentAgnostic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsViewer();
   });

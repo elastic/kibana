@@ -11,7 +11,7 @@ import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
 import type { ICommandCallbacks } from '../types';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '@elastic/esql';
 import { METADATA_FIELDS } from '../options/metadata';
 import { getRecommendedQueriesTemplatesFromExtensions } from '../options/recommended_queries';
 
@@ -150,6 +150,46 @@ describe('TS Autocomplete', () => {
 
     test('filters out already used metadata fields', async () => {
       await tsExpectSuggestions('ts time_series_index metadata _index, ', metadataFieldsAndIndex);
+    });
+  });
+
+  describe('standalone (isStandalone) queries', () => {
+    const standaloneExtensions = {
+      recommendedQueries: [
+        {
+          name: 'Search all metrics',
+          query: 'TS metrics-*',
+          description: 'Searches all available metrics',
+          isStandalone: true,
+        },
+        {
+          name: 'Timeseries rate',
+          query: 'TS logs* | STATS SUM(RATE(bytes)',
+        },
+      ],
+      recommendedFields: [],
+    };
+
+    const contextWithStandalone = {
+      ...mockContext,
+      editorExtensions: standaloneExtensions,
+    };
+
+    const extensionSuggestions = getRecommendedQueriesTemplatesFromExtensions(
+      standaloneExtensions.recommendedQueries
+    );
+
+    test('standalone suggestion appears after space alongside other suggestions', async () => {
+      const expected = ['METADATA ', ',', '| ', ...extensionSuggestions.map((s) => s.text)].sort();
+
+      await expectSuggestions(
+        'ts timeseries_index ',
+        expected,
+        contextWithStandalone,
+        'ts',
+        mockCallbacks,
+        autocomplete
+      );
     });
   });
 });

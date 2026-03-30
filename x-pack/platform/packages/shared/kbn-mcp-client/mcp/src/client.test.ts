@@ -198,6 +198,25 @@ describe('McpClient', () => {
       );
     });
 
+    it('creates transport with custom fetch when provided', () => {
+      const customFetch = jest.fn();
+      new McpClient(mockLogger, clientDetails, { fetch: customFetch });
+
+      expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
+        expect.objectContaining({ href: 'https://example.com/mcp' }),
+        expect.objectContaining({
+          fetch: customFetch,
+        })
+      );
+    });
+
+    it('does not include fetch in transport options when not provided', () => {
+      new McpClient(mockLogger, clientDetails);
+
+      const transportCallArgs = (StreamableHTTPClientTransport as jest.Mock).mock.calls[0][1];
+      expect(transportCallArgs).not.toHaveProperty('fetch');
+    });
+
     it('creates client with correct name and version', () => {
       new McpClient(mockLogger, clientDetails);
 
@@ -306,6 +325,17 @@ describe('McpClient', () => {
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Error connecting to MCP server test-client, 1.0.0: Generic error'
+      );
+    });
+
+    it('includes error cause in the message when available', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      const cause = new Error('unable to get local issuer certificate');
+      const error = new TypeError('fetch failed', { cause });
+      mockClient.connect.mockRejectedValue(error);
+
+      await expect(client.connect()).rejects.toThrow(
+        'Error connecting to MCP server: fetch failed (cause: unable to get local issuer certificate)'
       );
     });
 
@@ -593,7 +623,7 @@ describe('McpClient', () => {
       expect(result.content).toEqual([{ type: 'text', text: 'Text result' }]);
     });
 
-    it('filters out resource_link content parts', async () => {
+    it('preserves resource_link content parts', async () => {
       const client = await createConnectedClient();
 
       mockClient.callTool.mockResolvedValue({
@@ -609,7 +639,46 @@ describe('McpClient', () => {
         arguments: {},
       });
 
-      expect(result.content).toEqual([{ type: 'text', text: 'Text result' }]);
+      expect(result.content).toEqual([
+        { type: 'text', text: 'Text result' },
+        { type: 'resource_link', uri: 'https://example.com', name: 'Resource' },
+      ]);
+    });
+
+    it('preserves embedded resource content parts', async () => {
+      const client = await createConnectedClient();
+
+      mockClient.callTool.mockResolvedValue({
+        isError: false,
+        content: [
+          { type: 'text', text: 'Text result' },
+          {
+            type: 'resource',
+            resource: {
+              uri: 'file:///project/src/main.rs',
+              mimeType: 'text/x-rust',
+              text: 'fn main() {\\n  println!("Hello world!");\\n}',
+            },
+          },
+        ],
+      });
+
+      const result = await client.callTool({
+        name: 'test-tool',
+        arguments: {},
+      });
+
+      expect(result.content).toEqual([
+        { type: 'text', text: 'Text result' },
+        {
+          type: 'resource',
+          resource: {
+            uri: 'file:///project/src/main.rs',
+            mimeType: 'text/x-rust',
+            text: 'fn main() {\\n  println!("Hello world!");\\n}',
+          },
+        },
+      ]);
     });
 
     it('handles empty content array', async () => {
@@ -738,7 +807,7 @@ describe('McpClient', () => {
       );
     });
 
-    it('throws error with empty message when no text content parts', async () => {
+    it('throws error with default message when no text content parts', async () => {
       const client = await createConnectedClient();
 
       mockClient.callTool.mockResolvedValue({
@@ -747,7 +816,7 @@ describe('McpClient', () => {
       });
 
       await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
-        `Error calling tool 'test-tool' with arguments '{}': `
+        `Error calling tool 'test-tool' with arguments '{}': Unknown tool error`
       );
     });
 

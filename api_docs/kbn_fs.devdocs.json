@@ -687,7 +687,7 @@
           "(svgContent: Buffer) => Buffer"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/sanitizations/svg.ts",
-        "lineNumber": 26,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -703,7 +703,7 @@
               "Buffer"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/sanitizations/svg.ts",
-            "lineNumber": 26,
+            "lineNumber": 23,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,

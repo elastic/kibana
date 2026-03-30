@@ -8,7 +8,10 @@
  */
 
 import * as settings from '@kbn/management-settings-ids';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOWS_AI_AGENT_SETTING_ID,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 
 export const OBSERVABILITY_PROJECT_SETTINGS = [
   settings.DEFAULT_ROUTE_ID,
@@ -30,13 +33,18 @@ export const OBSERVABILITY_PROJECT_SETTINGS = [
   settings.OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   settings.OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
   settings.OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
+  settings.OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+  settings.OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
+  settings.ELASTIC_CONSOLE_ENABLED_SETTING_ID,
 ];
 
 export const OBSERVABILITY_STREAMS_TIERED_PROJECT_SETTINGS = [
   settings.OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   settings.OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
-  // This setting is only registered in complete tier. It's temporary, will be removed on 9.4.0 release.
+  // These settings are only registered in complete tier. They're temporary, will be removed on 9.4.0 release.
+  // WORKFLOWS_AI_AGENT_SETTING_ID only works when WORKFLOWS_UI_SETTING_ID is enabled.
   WORKFLOWS_UI_SETTING_ID,
+  WORKFLOWS_AI_AGENT_SETTING_ID,
 ];
 
 export const OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS = [
@@ -45,6 +53,7 @@ export const OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS = [
   settings.AI_ANONYMIZATION_SETTINGS,
   settings.GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   settings.GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  settings.AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   settings.AI_CHAT_EXPERIENCE_TYPE,
   settings.AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
 ];

@@ -35,7 +35,7 @@ import type {
 import type { IndexRefresh } from '../types';
 import type { PatchCasesArgs } from '../cases/types';
 import type {
-  AttachmentRequest,
+  AttachmentRequestV2,
   CasePostRequest,
   UserActionFindRequest,
 } from '../../../common/types/api';
@@ -103,6 +103,9 @@ export interface BuilderParameters {
       };
     };
   };
+  extended_fields: {
+    parameters: { payload: { extended_fields: Record<string, string> } };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {
@@ -117,7 +120,7 @@ export interface CommonArguments {
   user: User;
   caseId: string;
   owner: string;
-  attachmentId?: string;
+  savedObjectId?: string;
   connectorId?: string;
   action?: UserActionAction;
 }
@@ -166,6 +169,7 @@ export interface ServiceContext {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
+  isCasesAttachmentsEnabled?: boolean;
 }
 
 export interface PushTimeFrameInfo {
@@ -366,7 +370,7 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
+  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequestV2 }>;
 }
 
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {

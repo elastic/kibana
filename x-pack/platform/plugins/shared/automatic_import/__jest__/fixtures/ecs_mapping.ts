@@ -467,7 +467,7 @@ export const ecsTestState = {
   finalMapping: { test: 'testmapping' },
   sampleChunks: [''],
   results: { test: 'testresults' },
-  samplesFormat: { name: SamplesFormatName.Values.json },
+  samplesFormat: { name: SamplesFormatName.enum.json },
   ecsVersion: 'testversion',
   chunkMapping: { test1: 'test1' },
   useFinalMapping: false,

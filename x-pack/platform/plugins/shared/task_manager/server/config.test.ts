@@ -13,6 +13,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
         "claim_strategy": "mget",
         "discovery": Object {
@@ -75,6 +76,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
         "claim_strategy": "mget",
         "discovery": Object {
@@ -135,6 +137,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
         "claim_strategy": "mget",
         "discovery": Object {

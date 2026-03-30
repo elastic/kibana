@@ -25,7 +25,7 @@ const COMMON_HEADERS = {
   'elastic-api-version': '2023-10-31', // include for versioned public APIs
 };
 
-apiTest.describe('GET /api/my_plugin/foo', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+apiTest.describe('GET /api/my_plugin/foo', { tag: tags.deploymentAgnostic }, () => {
   let viewer: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
@@ -55,7 +55,7 @@ const INTERNAL_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
 };
 
-apiTest.describe('GET /internal/my_plugin/foo', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+apiTest.describe('GET /internal/my_plugin/foo', { tag: tags.deploymentAgnostic }, () => {
   apiTest('calls internal endpoint', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 

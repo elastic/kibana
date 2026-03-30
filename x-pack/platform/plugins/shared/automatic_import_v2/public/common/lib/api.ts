@@ -110,7 +110,8 @@ export const getAllIntegrations = async ({
 export interface UploadSamplesRequest {
   integrationId: string;
   dataStreamId: string;
-  samples: string[];
+  samples?: string[];
+  sourceIndex?: string;
   originalSource: OriginalSource;
 }
 
@@ -120,6 +121,7 @@ export const uploadSamplesToDataStream = async ({
   integrationId,
   dataStreamId,
   samples,
+  sourceIndex,
   originalSource,
 }: RequestDeps & UploadSamplesRequest): Promise<UploadSamplesToDataStreamResponse> =>
   http.post<UploadSamplesToDataStreamResponse>(
@@ -128,7 +130,11 @@ export const uploadSamplesToDataStream = async ({
     )}/data_streams/${encodeURIComponent(dataStreamId)}/upload`,
     {
       version: '1',
-      body: JSON.stringify({ samples, originalSource }),
+      body: JSON.stringify({
+        ...(samples ? { samples } : {}),
+        ...(sourceIndex ? { sourceIndex } : {}),
+        originalSource,
+      }),
       signal: abortSignal,
     }
   );
@@ -202,6 +208,30 @@ export const getDataStreamResults = async ({
     )}/data_streams/${encodeURIComponent(dataStreamId)}/results`,
     {
       version: '1',
+      signal: abortSignal,
+    }
+  );
+
+export interface UpdateDataStreamPipelineRequest {
+  integrationId: string;
+  dataStreamId: string;
+  ingestPipeline: string;
+}
+
+export const updateDataStreamPipeline = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  ingestPipeline,
+}: RequestDeps & UpdateDataStreamPipelineRequest): Promise<GetDataStreamResultsResponse> =>
+  http.patch<GetDataStreamResultsResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}`,
+    {
+      version: '1',
+      body: JSON.stringify({ ingest_pipeline: ingestPipeline }),
       signal: abortSignal,
     }
   );

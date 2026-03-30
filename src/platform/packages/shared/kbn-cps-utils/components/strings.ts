@@ -65,4 +65,8 @@ export const strings = {
     i18n.translate('cpsUtils.projectPicker.readonlyLensCallout', {
       defaultMessage: 'Please adjust project scope for each layer in the Lens editor.',
     }),
+  getProjectPickerFetchError: () =>
+    i18n.translate('cpsUtils.projectPicker.fetchError', {
+      defaultMessage: 'Failed to load projects. Try refreshing the page.',
+    }),
 };

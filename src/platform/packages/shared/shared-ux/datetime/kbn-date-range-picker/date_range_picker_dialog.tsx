@@ -7,21 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type KeyboardEvent, type PropsWithChildren, useCallback } from 'react';
+import React, { type KeyboardEvent, type PropsWithChildren, useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
 
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, keys, useEuiTheme } from '@elastic/eui';
 
-import { FOCUSABLE_SELECTOR } from './constants';
+import { CALENDAR_SCROLLER_SELECTOR, FOCUSABLE_SELECTOR } from './constants';
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { DateRangePickerControl } from './date_range_picker_control';
+import { dialogTexts } from './translations';
 
 /**
  * Dialog popover for the DateRangePicker.
  * Opens when the control enters editing mode.
  */
 export function DateRangePickerDialog({ children }: PropsWithChildren) {
-  const { isEditing, setIsEditing, maxWidth, panelRef, panelId } = useDateRangePickerContext();
+  const { isEditing, setIsEditing, panelRef, panelId, width } = useDateRangePickerContext();
+  const { euiTheme } = useEuiTheme();
+  const maxWidth = euiTheme.components.forms.maxWidth;
+
+  // Remembers the last day button that had focus before Tab exited the calendar,
+  // so Tab re-entry lands on the same day rather than the first react-day-picker instance.
+  const lastFocusedCalendarDayRef = useRef<HTMLElement | null>(null);
 
   const closePopover = useCallback(() => {
     setIsEditing(false);
@@ -38,14 +45,14 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
    */
   const onPanelKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === 'Escape') {
+      if (event.key === keys.ESCAPE) {
         event.preventDefault();
         event.stopPropagation();
         setIsEditing(false);
         return;
       }
 
-      if (event.key === 'Tab') {
+      if (event.key === keys.TAB) {
         const panel = panelRef.current;
         if (!panel) return;
 
@@ -54,6 +61,63 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
 
         const first = tabbables[0];
         const last = tabbables[tabbables.length - 1];
+
+        // The calendar scroller is a composite widget: arrow keys navigate dates,
+        // Tab should exit/enter it cleanly rather than stepping through each
+        // month's day buttons (which would be endless with infinite scroll).
+        const calendarScroller = panel.querySelector<HTMLElement>(CALENDAR_SCROLLER_SELECTOR);
+
+        if (calendarScroller) {
+          const calendarTabbables = Array.from(
+            calendarScroller.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+          );
+
+          if (calendarTabbables.length > 0) {
+            const firstCalIdx = tabbables.indexOf(calendarTabbables[0]);
+            const lastCalIdx = tabbables.indexOf(calendarTabbables[calendarTabbables.length - 1]);
+
+            if (firstCalIdx < 0 || lastCalIdx < 0) return;
+
+            // Tab OUT: save the focused day so re-entry can restore it, then jump
+            // to the element before/after the calendar.
+            if (calendarScroller.contains(document.activeElement)) {
+              if (document.activeElement instanceof HTMLElement) {
+                lastFocusedCalendarDayRef.current = document.activeElement;
+              }
+
+              const target = event.shiftKey
+                ? tabbables[firstCalIdx - 1]
+                : tabbables[lastCalIdx + 1];
+
+              if (target) {
+                event.preventDefault();
+                target.focus();
+                return;
+              }
+            }
+
+            // Tab INTO calendar: restore the saved day so the user lands where
+            // they left off. Falls back to the first `tabIndex={0}` day in the scroller
+            // (react-day-picker's focused day) if the calendar hasn't been visited yet.
+            const justBefore = firstCalIdx > 0 ? tabbables[firstCalIdx - 1] : null;
+            const justAfter = lastCalIdx < tabbables.length - 1 ? tabbables[lastCalIdx + 1] : null;
+
+            if (
+              (!event.shiftKey && document.activeElement === justBefore) ||
+              (event.shiftKey && document.activeElement === justAfter)
+            ) {
+              const saved = lastFocusedCalendarDayRef.current;
+              const target =
+                (saved && document.body.contains(saved) ? saved : null) ??
+                calendarScroller.querySelector<HTMLElement>('[tabindex="0"]');
+              if (target) {
+                event.preventDefault();
+                target.focus();
+                return;
+              }
+            }
+          }
+        }
 
         if (event.shiftKey && document.activeElement === first) {
           event.preventDefault();
@@ -67,31 +131,39 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
     [panelRef, setIsEditing]
   );
 
+  const popoverWrapperFullWidthStyles = css`
+    inline-size: 100%;
+  `;
+
   return (
     <EuiPopover
-      css={css({ maxInlineSize: maxWidth })}
+      css={width === 'full' && popoverWrapperFullWidthStyles}
       button={<DateRangePickerControl />}
       isOpen={isEditing}
       closePopover={closePopover}
       anchorPosition="downLeft"
       attachToAnchor={true}
       repositionToCrossAxis={false}
-      display="block"
+      display={width === 'auto' ? 'inline' : 'block'}
       ownFocus={false}
+      data-test-subj="dateRangePickerDialogTriggerWrapper"
       panelPaddingSize="none"
+      panelRef={(node) => {
+        panelRef.current = node;
+      }}
+      panelProps={{
+        id: panelId,
+        'aria-label': dialogTexts.ariaLabel,
+        'aria-modal': undefined,
+        tabIndex: -1,
+        onKeyDown: onPanelKeyDown,
+        css: css({
+          inlineSize: maxWidth,
+          maxInlineSize: '100%',
+        }),
+      }}
     >
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-      <div
-        css={css({ minWidth: maxWidth })}
-        ref={panelRef}
-        id={panelId}
-        role="dialog"
-        aria-label="Date range picker dialog"
-        tabIndex={-1}
-        onKeyDown={onPanelKeyDown}
-      >
-        {children}
-      </div>
+      {children}
     </EuiPopover>
   );
 }

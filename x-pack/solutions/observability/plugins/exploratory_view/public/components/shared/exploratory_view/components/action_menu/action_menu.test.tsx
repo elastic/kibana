@@ -60,7 +60,7 @@ describe('Action Menu', function () {
       {
         id: '',
         attributes: sampleAttribute,
-        timeRange: { to: 'now', from: 'now-10m' },
+        time_range: { to: 'now', from: 'now-10m' },
       },
       {
         openInNewTab: true,

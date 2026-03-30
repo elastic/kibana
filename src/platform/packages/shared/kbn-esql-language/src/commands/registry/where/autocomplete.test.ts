@@ -27,7 +27,7 @@ import type { ICommandCallbacks } from '../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../definitions/types';
 import { getDateLiterals } from '../../definitions/utils';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '@elastic/esql';
 
 const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
@@ -353,51 +353,6 @@ describe('WHERE Autocomplete', () => {
           label: '|',
         })
       );
-    });
-
-    describe('attaches ranges', () => {
-      test('omits ranges if there is no prefix', async () => {
-        (await suggest('FROM index | WHERE ')).forEach((suggestion) => {
-          expect(suggestion.rangeToReplace).toBeUndefined();
-        });
-      });
-
-      test('uses indices of single prefix by default', async () => {
-        (await suggest('FROM index | WHERE some.prefix')).forEach((suggestion) => {
-          expect(suggestion.rangeToReplace).toEqual({
-            start: 19,
-            end: 30,
-          });
-        });
-      });
-
-      test('"IS (NOT) NULL" with a matching prefix', async () => {
-        const suggestions = await suggest('FROM index | WHERE doubleField IS N');
-
-        expect(suggestions.find((s) => s.text === 'IS NOT NULL')?.rangeToReplace).toEqual({
-          start: 31,
-          end: 35,
-        });
-
-        expect(suggestions.find((s) => s.text === 'IS NULL')?.rangeToReplace).toEqual({
-          start: 31,
-          end: 35,
-        });
-      });
-
-      test('"IS (NOT) NULL" with a matching prefix with trailing space', async () => {
-        const suggestions = await suggest('FROM index | WHERE doubleField IS ');
-
-        expect(suggestions.find((s) => s.text === 'IS NOT NULL')?.rangeToReplace).toEqual({
-          start: 31,
-          end: 34,
-        });
-
-        expect(suggestions.find((s) => s.text === 'IS NULL')?.rangeToReplace).toEqual({
-          start: 31,
-          end: 34,
-        });
-      });
     });
   });
 

@@ -116,6 +116,7 @@ export class ToolsService {
         uiSettings,
         savedObjects,
         healthClient,
+        logger,
         healthTrackedToolTypes,
       });
     };

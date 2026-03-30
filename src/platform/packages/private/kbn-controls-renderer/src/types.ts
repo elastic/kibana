@@ -11,11 +11,13 @@ import type { BehaviorSubject } from 'rxjs';
 
 import type { ControlsGroupState, PinnedControlLayoutState } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-publishing';
 import type {
+  HasSerializedChildState,
+  PresentationContainer,
   PublishesDisabledActionIds,
   PublishesUnifiedSearch,
   PublishesViewMode,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
@@ -46,4 +48,8 @@ export type ControlsRendererParentApi = Pick<
 
 export interface PublishesFocusedPanelId {
   focusedPanelId$: BehaviorSubject<string | undefined>;
+}
+
+export interface PublishesLabel {
+  label$: PublishingSubject<string | undefined>;
 }

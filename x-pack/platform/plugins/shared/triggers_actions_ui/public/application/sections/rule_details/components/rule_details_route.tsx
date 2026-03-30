@@ -10,6 +10,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { ToastsApi } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { useCpsPickerAccess } from '../../../hooks/use_cps_picker_access';
 import type { RuleType, ActionType, ResolvedRule } from '../../../../types';
 import { RuleDetailsWithApi as RuleDetails } from './rule_details';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
@@ -19,6 +21,8 @@ import type { ComponentOpts as ActionApis } from '../../common/components/with_a
 import { withActionOperations } from '../../common/components/with_actions_api_operations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { getRulesBreadcrumbWithHref } from '../../../lib/breadcrumb';
+import { useSetBreadcrumbs } from '../../../hooks/use_set_breadcrumbs';
 
 type RuleDetailsRouteProps = RouteComponentProps<{
   ruleId: string;
@@ -38,9 +42,16 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
     http,
     notifications: { toasts },
     spaces: spacesApi,
+    application: { getUrlForApp },
   } = useKibana().services;
 
   const { basePath } = http;
+
+  // sets a baseline breadcrumb regardless of the outcome of loading the rule
+  const setBreadcrumbs = useSetBreadcrumbs();
+  useEffect(() => {
+    setBreadcrumbs([getRulesBreadcrumbWithHref(getUrlForApp)]);
+  }, [getUrlForApp, setBreadcrumbs]);
 
   const [rule, setRule] = useState<ResolvedRule | null>(null);
   const [ruleType, setRuleType] = useState<RuleType | null>(null);
@@ -78,6 +89,8 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
 
     loadData();
   }, [ruleId, http, loadActionTypes, loadRuleTypes, resolveRule, toasts, refreshToken]);
+
+  useCpsPickerAccess(ProjectRoutingAccess.READONLY);
 
   useEffect(() => {
     if (rule) {

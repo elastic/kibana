@@ -128,7 +128,11 @@ export const attackDiscoveryScheduleExecutor = async ({
 
     const alertsParams = {
       alertsContextCount: anonymizedAlerts.length,
-      anonymizedAlerts,
+      anonymizedAlerts: anonymizedAlerts as Array<{
+        id?: string;
+        metadata: Record<string, never>;
+        pageContent: string;
+      }>, // TODO: remove this when the generator returns metadata: z.record(z.string(), z.unknown()) instead of metadata: z.object({}),
       apiConfig: params.apiConfig,
       connectorName: params.apiConfig.name,
       enableFieldRendering: true, // Always enable field rendering for scheduled discoveries. It's still possible for clients who read the generated discoveries to specify false when retrieving them.

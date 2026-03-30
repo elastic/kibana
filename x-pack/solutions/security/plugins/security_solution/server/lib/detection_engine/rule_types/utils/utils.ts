@@ -7,12 +7,11 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isArray, isEmpty, merge, partition } from 'lodash';
+import { get, invert, isArray, isEmpty, merge } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import {
   ALERT_UUID,
@@ -31,20 +30,16 @@ import type {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type {
-  DocLinksServiceSetup,
-  ElasticsearchClient,
-  IUiSettingsClient,
-} from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleAction, GapReason } from '@kbn/alerting-plugin/common';
+import { gapReasonType } from '@kbn/alerting-plugin/common';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSearchResponse,
@@ -75,7 +70,6 @@ import type {
   EqlShellAlertLatest,
   WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
 import type {
   ExtraFieldsForShellAlert,
@@ -84,85 +78,21 @@ import type {
 import type { BuildReasonMessage } from './reason_formatters';
 import { getSuppressionTerms } from './suppression_utils';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
-import {
-  SECURITY_NUM_EXCEPTION_ITEMS,
-  SECURITY_NUM_INDICES_MATCHING_PATTERN,
-  SECURITY_QUERY_SPAN_S,
-} from './apm_field_names';
+import { SECURITY_NUM_EXCEPTION_ITEMS, SECURITY_QUERY_SPAN_S } from './apm_field_names';
 import { buildTimeRangeFilter } from './build_events_query';
 export const MAX_RULE_GAP_RATIO = 4;
 
-export const hasReadIndexPrivileges = async (args: {
-  privileges: Privilege;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  uiSettingsClient: IUiSettingsClient;
-  docLinks: DocLinksServiceSetup;
-}): Promise<string | undefined> => {
-  const { privileges, ruleExecutionLogger, uiSettingsClient, docLinks } = args;
-  const apiKeyDocs = docLinks.links.alerting.authorization;
-  const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
-  const indexNames = Object.keys(privileges.index);
-  const filteredIndexNames = isCcsPermissionWarningEnabled
-    ? indexNames
-    : indexNames.filter((indexName) => {
-        return !isCCSRemoteIndexName(indexName);
-      });
-  const [, indexesWithNoReadPrivileges] = partition(
-    filteredIndexNames,
-    (indexName) => privileges.index[indexName].read
-  );
-  let warningStatusMessage;
-
-  // Some indices have read privileges others do not.
-  if (indexesWithNoReadPrivileges.length > 0) {
-    const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
-    warningStatusMessage = `This rule's API key is unable to access all indices that match the ${indexesString} pattern. To learn how to update and manage API keys, refer to ${apiKeyDocs}.`;
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: warningStatusMessage,
-    });
-  }
-  return warningStatusMessage;
-};
-
 export const hasTimestampFields = async (args: {
   timestampField: string;
-  // any is derived from here
-  // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
-  inputIndices: string[];
+  timestampFieldCapsResponse: TransportResult<estypes.FieldCapsResponse, unknown>;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<{
   foundNoIndices: boolean;
   warningMessage: string | undefined;
 }> => {
-  const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
-  const { ruleName } = ruleExecutionLogger.context;
+  const { timestampField, timestampFieldCapsResponse, ruleExecutionLogger } = args;
 
-  agent.setCustomContext({
-    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: timestampFieldCapsResponse.body.indices?.length,
-  });
-
-  if (isEmpty(timestampFieldCapsResponse.body.indices)) {
-    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ${JSON.stringify(
-      inputIndices
-    )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
-      ruleName === 'Endpoint Security'
-        ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
-        : ''
-    }`;
-
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: errorString.trimEnd(),
-    });
-
-    return {
-      foundNoIndices: true,
-      warningMessage: errorString.trimEnd(),
-    };
-  } else if (
+  if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
     timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null
@@ -180,10 +110,7 @@ export const hasTimestampFields = async (args: {
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
 
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: errorString,
-    });
+    ruleExecutionLogger.warn(errorString);
 
     return { foundNoIndices: false, warningMessage: errorString };
   }
@@ -384,6 +311,55 @@ export const getGapBetweenRuns = ({
   return currentDuration.subtract(driftTolerance);
 };
 
+export { type GapReason } from '@kbn/alerting-plugin/common';
+
+/**
+ * Determines why a gap occurred between rule executions.
+ *
+ * Returns `rule_disabled` only when the rule was re-enabled during the gap
+ * and fired promptly after (within the lookback window). Defaults to
+ * `rule_did_not_run` in all other cases (outages, missing data, etc).
+ *
+ * Known limitation: a brief toggle during an unrelated outage can be
+ * misclassified as rule_disabled.
+ */
+export const getGapReason = ({
+  previousStartedAt,
+  startedAt,
+  lastEnabledAt,
+  originalFrom,
+  originalTo,
+}: {
+  previousStartedAt: Date | null | undefined;
+  startedAt: Date;
+  lastEnabledAt: Date | null | undefined;
+  originalFrom: moment.Moment;
+  originalTo: moment.Moment;
+}): GapReason => {
+  if (previousStartedAt == null || lastEnabledAt == null) {
+    return { type: gapReasonType.RULE_DID_NOT_RUN };
+  }
+
+  const lastEnabledAtMs = lastEnabledAt.getTime();
+  const previousStartedAtMs = previousStartedAt.getTime();
+  const startedAtMs = startedAt.getTime();
+
+  const isInGapWindow = lastEnabledAtMs > previousStartedAtMs && lastEnabledAtMs <= startedAtMs;
+
+  if (!isInGapWindow) {
+    return { type: gapReasonType.RULE_DID_NOT_RUN };
+  }
+
+  const driftToleranceMs = originalTo.diff(originalFrom);
+  const postEnableDelayMs = startedAtMs - lastEnabledAtMs;
+
+  if (postEnableDelayMs <= driftToleranceMs) {
+    return { type: gapReasonType.RULE_DISABLED };
+  }
+
+  return { type: gapReasonType.RULE_DID_NOT_RUN };
+};
+
 export const makeFloatString = (num: number): string => Number(num).toFixed(2);
 
 export const getRuleRangeTuples = async ({
@@ -395,6 +371,7 @@ export const getRuleRangeTuples = async ({
   maxSignals,
   ruleExecutionLogger,
   alerting,
+  lastEnabledAt,
 }: {
   startedAt: Date;
   previousStartedAt: Date | null | undefined;
@@ -404,6 +381,7 @@ export const getRuleRangeTuples = async ({
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   alerting: AlertingServerSetup;
+  lastEnabledAt: Date | null | undefined;
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
@@ -417,10 +395,7 @@ export const getRuleRangeTuples = async ({
   if (maxSignals > maxAlertsAllowed) {
     maxSignalsToUse = maxAlertsAllowed;
     warningStatusMessage = `The rule's max alerts per run setting (${maxSignals}) is greater than the Kibana alerting limit (${maxAlertsAllowed}). The rule will only write a maximum of ${maxAlertsAllowed} alerts per rule run.`;
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: warningStatusMessage,
-    });
+    ruleExecutionLogger.warn(warningStatusMessage);
   }
 
   const tuples = [
@@ -474,11 +449,19 @@ export const getRuleRangeTuples = async ({
   );
 
   let gapRange;
+  let detectedGapReason: GapReason | undefined;
   if (remainingGapMilliseconds > 0 && previousStartedAt != null) {
     gapRange = {
       gte: previousStartedAt.toISOString(),
       lte: moment(previousStartedAt).add(remainingGapMilliseconds).toDate().toISOString(),
     };
+    detectedGapReason = getGapReason({
+      previousStartedAt,
+      startedAt,
+      lastEnabledAt,
+      originalFrom,
+      originalTo,
+    });
   }
 
   return {
@@ -486,6 +469,7 @@ export const getRuleRangeTuples = async ({
     remainingGap: moment.duration(remainingGapMilliseconds),
     warningStatusMessage,
     gap: gapRange,
+    gapReason: detectedGapReason,
     originalFrom,
     originalTo,
   };
@@ -891,6 +875,14 @@ export const getMaxSignalsWarning = (): string => {
 
 export const getSuppressionMaxSignalsWarning = (): string => {
   return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created or suppressed.`;
+};
+
+export const getMissingIdFieldWarning = (): string => {
+  return `ES|QL query does not return _id metadata field for a non-aggregating query. This may result in duplicate alerts. Consider adding "METADATA _id" to the FROM command and make sure _id is not excluded by KEEP or DROP commands.`;
+};
+
+export const getMetadataIdInjectionFailedWarning = (reason: string): string => {
+  return `Failed to automatically inject METADATA _id into ES|QL query: ${reason}. This may result in duplicate alerts. Try manually adding "METADATA _id" to the FROM command and ensure _id is returned in the query results.`;
 };
 
 export const getDisabledActionsWarningText = ({

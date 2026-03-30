@@ -20,6 +20,7 @@ export type AiButtonDefaultProps = Extract<
 
 /**
  * Renders the default text AI button variants (`base` and `accent`).
+ * Default variant is `'base'` when omitted.
  * @param props - Props accepted by the default AI button variant.
  */
 export const AiButtonDefault = (props: AiButtonDefaultProps) => {

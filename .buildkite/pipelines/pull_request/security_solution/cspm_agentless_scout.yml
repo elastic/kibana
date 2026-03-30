@@ -1,7 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/test/cspm_agentless_scout.sh
-    cancel_on_build_failing: true
     label: 'CSPM Agentless Scout E2E Tests'
+    key: cspm-agentless-scout
     agents:
       machineType: n2-standard-8
       preemptible: true
@@ -12,5 +12,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 

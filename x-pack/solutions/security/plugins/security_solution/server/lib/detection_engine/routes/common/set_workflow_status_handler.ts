@@ -15,13 +15,17 @@ import {
   ALERT_WORKFLOW_REASON,
 } from '@kbn/rule-data-utils';
 
+import { DEFAULT_ALERT_CLOSE_REASONS_KEY } from '../../../../../common/constants';
 import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import {
-  SetAlertsStatusByIds,
-  type SetAlertsStatusRequestBody,
+import type {
+  Reason,
+  SetAlertsStatusRequestBody,
 } from '../../../../../common/api/detection_engine/signals';
+import { SetAlertsStatusByIds } from '../../../../../common/api/detection_engine/signals';
 import { buildSiemResponse } from '../utils';
+import { DefaultClosingReasonSchema } from '../../../../../common/types';
+import { ALERT_CLOSING_REASON_VALIDATION_ERROR } from '../signals/translations';
 
 interface SetWorkflowStatusProps {
   context: SecuritySolutionRequestHandlerContext;
@@ -36,19 +40,29 @@ export const setWorkflowStatusHandler = async ({
   response,
   getIndexPattern,
 }: SetWorkflowStatusProps) => {
-  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
   const siemResponse = buildSiemResponse(response);
 
   const body = SetAlertsStatusByIds.parse(request.body);
   const { status, signal_ids: signalIds } = body;
   let reason: string | undefined;
 
-  if (status === AlertStatusEnum.closed && 'reason' in body) {
-    reason = body.reason;
-  }
-
   const core = await context.core;
   const user = core.security.authc.getCurrentUser();
+  const esClient = core.elasticsearch.client.asCurrentUser;
+
+  if (status === AlertStatusEnum.closed) {
+    const customReasons =
+      (await core.uiSettings.client.get<Reason[]>(DEFAULT_ALERT_CLOSE_REASONS_KEY)) ?? [];
+    const validReasons = new Set([...DefaultClosingReasonSchema.options, ...customReasons]);
+    if (body.reason === undefined || validReasons.has(body.reason)) {
+      reason = body.reason;
+    } else {
+      return siemResponse.error({
+        body: ALERT_CLOSING_REASON_VALIDATION_ERROR(body.reason),
+        statusCode: 400,
+      });
+    }
+  }
 
   try {
     const indexPattern = await getIndexPattern();
@@ -81,21 +95,25 @@ export const getUpdateSignalStatusScript = (
   reason?: string
 ) => ({
   source: `
-    if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null && ctx._source['${ALERT_WORKFLOW_STATUS}'] != '${status}') {
-      ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}';
-      ctx._source['${ALERT_WORKFLOW_USER}'] = ${
-    user?.profile_uid ? `'${user.profile_uid}'` : 'null'
-  };
-      ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = '${new Date().toISOString()}';
+    if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null && ctx._source['${ALERT_WORKFLOW_STATUS}'] != params.status) {
+      ctx._source['${ALERT_WORKFLOW_STATUS}'] = params.status;
+      ctx._source['${ALERT_WORKFLOW_USER}'] = params.workflowUser;
+      ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = params.updatedAt;
 
-      ${
-        reason
-          ? `ctx._source['${ALERT_WORKFLOW_REASON}'] = '${reason}';`
-          : `ctx._source.remove('${ALERT_WORKFLOW_REASON}')`
+      if (params.reason != null) {
+        ctx._source['${ALERT_WORKFLOW_REASON}'] = params.reason;
+      } else {
+        ctx._source.remove('${ALERT_WORKFLOW_REASON}');
       }
     }
     if (ctx._source.signal != null && ctx._source.signal.status != null) {
-      ctx._source.signal.status = '${status}'
+      ctx._source.signal.status = params.status
     }`,
   lang: 'painless',
+  params: {
+    status,
+    workflowUser: user?.profile_uid ?? null,
+    updatedAt: new Date().toISOString(),
+    reason: reason ?? null,
+  },
 });

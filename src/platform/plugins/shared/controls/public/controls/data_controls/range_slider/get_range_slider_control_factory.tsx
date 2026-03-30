@@ -11,16 +11,17 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } from 'rxjs';
 
 import {
+  apiHasPinnedPanels,
+  apiHasSections,
   apiPublishesViewMode,
   fetch$,
-  useBatchedPublishingSubjects,
-  apiHasSections,
   initializeUnsavedChanges,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-
+import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
+
 import { isCompressed } from '../../../control_group/utils/is_compressed';
 import {
   defaultDataControlComparators,
@@ -129,7 +130,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       ])
         .pipe(skip(1))
         .subscribe(() => {
-          editorStateManager.api.setStep(1);
+          editorStateManager.api.setStep(DEFAULT_RANGE_SLIDER_STATE.step);
           selections.setValue(undefined);
         });
 
@@ -209,6 +210,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         ? parentApi.viewMode$
         : new BehaviorSubject<boolean>(true);
 
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+
       return {
         api,
         Component: () => {
@@ -222,6 +225,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             value,
             fieldName,
             viewMode,
+            label,
           ] = useBatchedPublishingSubjects(
             dataLoading$,
             dataControlManager.api.fieldFormatter,
@@ -231,7 +235,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             editorStateManager.api.step$,
             selections.value$,
             dataControlManager.api.fieldName$,
-            viewMode$
+            viewMode$,
+            dataControlManager.api.label$
           );
 
           useEffect(() => {
@@ -241,6 +246,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               hasNotResultsSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
               outputFilterSubscription.unsubscribe();
+
+              dataControlManager.cleanup();
             };
           }, []);
 
@@ -254,10 +261,12 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               max={max}
               min={min}
               onChange={selections.setValue}
-              step={step ?? 1}
+              step={step}
               value={value}
               uuid={uuid}
               compressed={isCompressed(api)}
+              isPinned={isPinned}
+              label={label}
             />
           );
         },

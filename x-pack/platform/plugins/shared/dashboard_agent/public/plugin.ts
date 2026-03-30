@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
@@ -34,15 +35,18 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    core: CoreStart,
+    _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
+    // TODO this causes async imports when plugin starts
+    // Please avoid this practice as it hides plugin size but impacts kibana load performance
+    // Please remove async import.
     import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
       this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
-        attachments: plugins.agentBuilder.attachments,
-        chat$: plugins.agentBuilder.events.chat$,
-        share: plugins.share,
-        core,
+        agentBuilder: plugins.agentBuilder,
+        dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
+        unifiedSearch: plugins.unifiedSearch,
+        dashboardPlugin: plugins.dashboard,
       });
     });
 

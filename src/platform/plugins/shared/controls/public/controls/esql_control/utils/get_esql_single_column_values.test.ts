@@ -39,6 +39,7 @@ describe('getESQLSingleColumnValues', () => {
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(true);
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "columnType": undefined,
         "values": Array [
           "option1",
           "option2",

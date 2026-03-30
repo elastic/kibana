@@ -79,6 +79,9 @@ export const QueryFieldsPanel = ({
             <h5>{index}</h5>
           </EuiText>
         }
+        buttonProps={{
+          css: { overflow: 'hidden' },
+        }}
         initialIsOpen
         data-test-subj={`${index}-fieldsAccordion`}
       >

@@ -26,6 +26,7 @@ export class ServiceMapPage {
   public serviceMapServiceDetailsButton: Locator;
   public serviceMapFocusMapButton: Locator;
   public serviceMapDependencyDetailsButton: Locator;
+  public serviceMapEdgeExploreTracesButton: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.serviceMap = page.testSubj.locator('serviceMap');
@@ -47,6 +48,9 @@ export class ServiceMapPage {
     this.serviceMapFocusMapButton = page.testSubj.locator('apmServiceContentsFocusMapButton');
     this.serviceMapDependencyDetailsButton = page.testSubj.locator(
       'apmDependencyContentsDependencyDetailsButton'
+    );
+    this.serviceMapEdgeExploreTracesButton = page.testSubj.locator(
+      'apmEdgeContentsOpenInDiscoverButton'
     );
   }
 

@@ -10,23 +10,43 @@ import { EuiCallOut, EuiSpacer, EuiLink, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import semverLt from 'semver/functions/lt';
+
+import semverValid from 'semver/functions/valid';
+
 import { getNormalizedInputs } from '../../../../../../../../common/services';
 import { doesPackageHaveIntegrations } from '../../../../../../../../common/services/packages_with_integrations';
 import { useLink } from '../../../../../../../hooks';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
+import type { DeprecationInfo } from '../../../../../../../../common/types';
+
+export const isUpcomingDeprecation = (version: string, deprecated?: DeprecationInfo): boolean =>
+  !!deprecated?.since && !!semverValid(version) && semverLt(version, deprecated.since) === true;
+
+/**
+ * Resolves the effective deprecation info for a package/integration from all sources,
+ * in priority order: conditions.deprecated → package.deprecated → integrationInfo.deprecated.
+ */
+export const getPackageDeprecationInfo = (
+  packageInfo: PackageInfo,
+  integrationInfo?: RegistryPolicyTemplate
+): DeprecationInfo | undefined => {
+  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
+  return (
+    packageInfo?.conditions?.deprecated ||
+    packageInfo?.deprecated ||
+    (hasIntegrations && integrationInfo?.deprecated ? integrationInfo.deprecated : undefined)
+  );
+};
 
 export const DeprecationCallout: React.FC<{
   packageInfo: PackageInfo;
   integrationInfo?: RegistryPolicyTemplate;
 }> = ({ packageInfo, integrationInfo }) => {
+  const deprecated = getPackageDeprecationInfo(packageInfo, integrationInfo);
   const { getHref } = useLink();
-  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
-  const deprecated =
-    packageInfo?.conditions?.deprecated ||
-    packageInfo?.deprecated ||
-    (hasIntegrations && integrationInfo?.deprecated ? integrationInfo.deprecated : undefined);
-
-  return (
+  const isUpcoming = isUpcomingDeprecation(packageInfo.version, deprecated);
+  return deprecated ? (
     <>
       {' '}
       {deprecated ? (
@@ -34,14 +54,26 @@ export const DeprecationCallout: React.FC<{
           <EuiCallOut
             announceOnMount
             data-test-subj="deprecationCallout"
-            title={i18n.translate('xpack.fleet.epm.deprecatedIntegrationTitle', {
-              defaultMessage: 'This integration is deprecated',
-            })}
+            title={
+              isUpcoming && deprecated?.since
+                ? i18n.translate('xpack.fleet.epm.upcomingDeprecatedIntegrationTitle', {
+                    defaultMessage:
+                      'This integration will be deprecated starting from version {version}',
+                    values: { version: deprecated.since },
+                  })
+                : isUpcoming
+                ? i18n.translate('xpack.fleet.epm.futureDeprecatedIntegrationTitle', {
+                    defaultMessage: 'This integration will be deprecated in a future version',
+                  })
+                : i18n.translate('xpack.fleet.epm.deprecatedIntegrationTitle', {
+                    defaultMessage: 'This integration is deprecated',
+                  })
+            }
             color="warning"
             iconType="warning"
           >
             <p>{deprecated?.description}</p>
-            {deprecated?.since && (
+            {deprecated?.since && !isUpcomingDeprecation(packageInfo.version, deprecated) && (
               <p>
                 <FormattedMessage
                   id="xpack.fleet.epm.deprecatedSinceVersion"
@@ -74,32 +106,30 @@ export const DeprecationCallout: React.FC<{
         </>
       ) : null}
     </>
-  );
+  ) : null;
 };
 
-export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> = ({
-  packageInfo,
-}) => {
-  interface DeprecatedFeature {
-    type: 'input' | 'variable' | 'data stream' | 'policy template';
-    name: string;
-    description: string;
-  }
+interface DeprecatedFeature {
+  type: 'input' | 'variable' | 'data stream' | 'policy template';
+  name: string;
+  description: string;
+}
 
+const deprecatedVars = (
+  vars: Array<{ deprecated?: { description: string }; title?: string; name: string }>
+): DeprecatedFeature[] =>
+  vars
+    .filter((v): v is typeof v & { deprecated: { description: string } } => !!v.deprecated)
+    .map(
+      (v): DeprecatedFeature => ({
+        type: 'variable',
+        name: v.title || v.name,
+        description: v.deprecated.description,
+      })
+    );
+
+const getDeprecatedFeatures = (packageInfo: PackageInfo): DeprecatedFeature[] => {
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
-
-  const deprecatedVars = (
-    vars: Array<{ deprecated?: { description: string }; title?: string; name: string }>
-  ) =>
-    vars
-      .filter((v): v is typeof v & { deprecated: { description: string } } => !!v.deprecated)
-      .map(
-        (v): DeprecatedFeature => ({
-          type: 'variable',
-          name: v.title || v.name,
-          description: v.deprecated.description,
-        })
-      );
 
   const deprecatedPolicyTemplateFeatures = hasIntegrations
     ? []
@@ -146,14 +176,54 @@ export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> =
 
   const deprecatedPackageVars = deprecatedVars(packageInfo.vars || []);
 
-  const deprecatedFeatures = [
+  return [
     ...deprecatedPolicyTemplateFeatures,
     ...deprecatedInputFeatures,
     ...deprecatedStreamFeatures,
     ...deprecatedPackageVars,
   ];
+};
+
+const hasDeprecatedFeatures = (packageInfo: PackageInfo): boolean =>
+  getDeprecatedFeatures(packageInfo).length > 0;
+
+export const DeprecatedFeaturesList: React.FC<{ packageInfo: PackageInfo }> = ({ packageInfo }) => {
+  const deprecatedFeatures = getDeprecatedFeatures(packageInfo);
 
   if (deprecatedFeatures.length === 0) {
+    return null;
+  }
+
+  return deprecatedFeatures.length < 3 ? (
+    <ul>
+      {deprecatedFeatures.map(({ type, name, description }) => (
+        <li key={`${type}-${name}`}>
+          <strong>{name}</strong> ({type}): {description}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <EuiAccordion
+      id="deprecatedFeaturesAccordion"
+      buttonContent={i18n.translate('xpack.fleet.epm.deprecatedFeaturesAccordionButtonContent', {
+        defaultMessage: 'Expand to show all the deprecated features',
+      })}
+    >
+      <ul>
+        {deprecatedFeatures.map(({ type, name, description }) => (
+          <li key={`${type}-${name}`}>
+            <strong>{name}</strong> ({type}): {description}
+          </li>
+        ))}
+      </ul>
+    </EuiAccordion>
+  );
+};
+
+export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> = ({
+  packageInfo,
+}) => {
+  if (!hasDeprecatedFeatures(packageInfo)) {
     return null;
   }
 
@@ -167,23 +237,7 @@ export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> =
         color="warning"
         iconType="warning"
       >
-        <EuiAccordion
-          id="deprecatedFeaturesAccordion"
-          buttonContent={i18n.translate(
-            'xpack.fleet.epm.deprecatedFeaturesAccordionButtonContent',
-            {
-              defaultMessage: 'Expand to show all the deprecated features',
-            }
-          )}
-        >
-          <ul>
-            {deprecatedFeatures.map(({ type, name, description }) => (
-              <li key={`${type}-${name}`}>
-                <strong>{name}</strong> ({type}): {description}
-              </li>
-            ))}
-          </ul>
-        </EuiAccordion>
+        <DeprecatedFeaturesList packageInfo={packageInfo} />
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

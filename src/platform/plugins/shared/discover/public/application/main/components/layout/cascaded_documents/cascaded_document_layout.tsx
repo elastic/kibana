@@ -17,7 +17,7 @@ import {
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
-import { EsqlQuery } from '@kbn/esql-language';
+import { EsqlQuery } from '@elastic/esql';
 import { type ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -59,7 +59,7 @@ const ESQLDataCascade = React.memo(
       cascadeGroupingChangeHandler,
     } = useCascadedDocumentsContext();
 
-    const cascadeGroupData = useGroupedCascadeData({
+    const { data: cascadeGroupData, columnTypes } = useGroupedCascadeData({
       selectedCascadeGroups,
       rows,
       queryMeta,
@@ -81,29 +81,21 @@ const ESQLDataCascade = React.memo(
     const { rowActions, rowHeaderMeta, rowHeaderTitle } = useEsqlDataCascadeRowHeaderComponents(
       queryMeta,
       columns,
-      togglePopover
+      togglePopover,
+      columnTypes
     );
 
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
     >(
-      ({
-        data: cellData,
-        cellId,
-        getScrollElement,
-        getScrollOffset,
-        getScrollMargin,
-        preventSizeChangePropagation,
-      }) => (
+      ({ data: cellData, cellId, virtualizerController, rowIndex }) => (
         <ESQLDataCascadeLeafCell
           {...props}
           dataView={dataView}
           cellData={cellData!}
           cellId={cellId}
-          getScrollElement={getScrollElement}
-          getScrollOffset={getScrollOffset}
-          getScrollMargin={getScrollMargin}
-          preventSizeChangePropagation={preventSizeChangePropagation}
+          virtualizerController={virtualizerController}
+          rowIndex={rowIndex}
         />
       ),
       [dataView, props]
@@ -160,12 +152,19 @@ export const CascadedDocumentsLayout = React.memo(
       return getStatsCommandToOperateOn(parsedQuery);
     }, [esqlQuery]);
 
+    const updateESQLQuery = useCallback(
+      (...args: Parameters<typeof onUpdateESQLQuery>) => {
+        onUpdateESQLQuery(...args);
+      },
+      [onUpdateESQLQuery]
+    );
+
     const { renderRowActionPopover, togglePopover } = useEsqlDataCascadeRowActionHelpers({
       dataView,
       esqlVariables,
       editorQuery: esqlQuery,
       statsFieldSummary: statsCommandBeingOperatedOn?.grouping,
-      updateESQLQuery: onUpdateESQLQuery,
+      updateESQLQuery,
       openInNewTab,
     });
 

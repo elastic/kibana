@@ -41,6 +41,7 @@ import {
   isCloudAdvancedOptionsEnabled,
 } from './validators';
 import { ActionButtons, SaveError } from '../components';
+import type { RequestError } from '../../../../../types';
 const defaultClusterValues: ClusterPayload = {
   name: '',
   seeds: [],
@@ -56,7 +57,7 @@ interface Props {
   confirmFormAction: (cluster: ClusterPayload) => void;
   onBack?: () => void;
   isSaving?: boolean;
-  saveError?: any;
+  saveError?: RequestError;
   cluster?: Cluster;
   onConfigChange?: (cluster: ClusterPayload, hasErrors: boolean) => void;
   confirmFormText: ReactNode;

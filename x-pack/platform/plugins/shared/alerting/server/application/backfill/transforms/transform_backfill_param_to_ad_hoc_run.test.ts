@@ -70,7 +70,14 @@ describe('transformBackfillParamToAdHocRun', () => {
   });
 
   test('should transform backfill param with start and end', () => {
-    expect(transformBackfillParamToAdHocRun(getMockData(), getMockRule(), [], 'default')).toEqual({
+    const { adHocRunSO, truncated } = transformBackfillParamToAdHocRun(
+      getMockData(),
+      getMockRule(),
+      [],
+      'default'
+    );
+    expect(truncated).toBe(false);
+    expect(adHocRunSO).toEqual({
       apiKeyId: '123',
       apiKeyToUse: 'MTIzOmFiYw==',
       createdAt: '2024-01-30T00:00:00.000Z',
@@ -115,9 +122,14 @@ describe('transformBackfillParamToAdHocRun', () => {
     const actions = [
       { uuid: '123abc', group: 'default', actionRef: 'action_0', actionTypeId: 'test', params: {} },
     ];
-    expect(
-      transformBackfillParamToAdHocRun(getMockData(), getMockRule(), actions, 'default')
-    ).toEqual({
+    const { adHocRunSO, truncated } = transformBackfillParamToAdHocRun(
+      getMockData(),
+      getMockRule(),
+      actions,
+      'default'
+    );
+    expect(truncated).toBe(false);
+    expect(adHocRunSO).toEqual({
       apiKeyId: '123',
       apiKeyToUse: 'MTIzOmFiYw==',
       createdAt: '2024-01-30T00:00:00.000Z',
@@ -163,14 +175,14 @@ describe('transformBackfillParamToAdHocRun', () => {
     const actions = [
       { uuid: '123abc', group: 'default', actionRef: 'action_0', actionTypeId: 'test', params: {} },
     ];
-    expect(
-      transformBackfillParamToAdHocRun(
-        getMockData({ runActions: false }),
-        getMockRule(),
-        actions,
-        'default'
-      )
-    ).toEqual({
+    const { adHocRunSO, truncated } = transformBackfillParamToAdHocRun(
+      getMockData({ runActions: false }),
+      getMockRule(),
+      actions,
+      'default'
+    );
+    expect(truncated).toBe(false);
+    expect(adHocRunSO).toEqual({
       apiKeyId: '123',
       apiKeyToUse: 'MTIzOmFiYw==',
       createdAt: '2024-01-30T00:00:00.000Z',

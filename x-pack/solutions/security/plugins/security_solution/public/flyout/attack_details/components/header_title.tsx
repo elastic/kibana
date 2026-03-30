@@ -10,10 +10,11 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { Status } from './status';
 import { Assignees } from './assignees';
+import { Notes } from './notes';
 import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
 import {
   HEADER_ALERTS_BLOCK_TEST_ID,
@@ -93,6 +94,9 @@ export const HeaderTitle = memo(() => {
               >
                 <Assignees />
               </AlertHeaderBlock>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Notes />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

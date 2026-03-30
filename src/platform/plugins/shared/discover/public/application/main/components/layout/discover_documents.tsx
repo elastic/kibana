@@ -61,14 +61,12 @@ import {
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
 import { useFetchMoreRecords } from './use_fetch_more_records';
-import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
@@ -82,6 +80,7 @@ import {
   internalStateActions,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
@@ -106,13 +105,11 @@ function DiscoverDocumentsComponent({
   viewModeToggle,
   dataView,
   onAddFilter,
-  stateContainer,
   onFieldEdited,
 }: {
   viewModeToggle: React.ReactElement | undefined;
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
-  stateContainer: DiscoverStateContainer;
   onFieldEdited?: (options: { editedDataView: DataView }) => void;
 }) {
   const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
@@ -154,7 +151,8 @@ function DiscoverDocumentsComponent({
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
   const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
   const isEsqlMode = useIsEsqlMode();
-  const documentState = useDataState(stateContainer.dataState.data$.documents$);
+  const dataStateContainer = useCurrentTabDataStateContainer();
+  const documentState = useDataState(dataStateContainer.data$.documents$);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
@@ -173,9 +171,7 @@ function DiscoverDocumentsComponent({
   const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
-  const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
-    stateContainer,
-  });
+  const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords();
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
@@ -448,17 +444,8 @@ function DiscoverDocumentsComponent({
   }, [cellRendererParams, getCellRenderersAccessor]);
 
   const callouts = useMemo(
-    () => (
-      <>
-        <SelectedVSAvailableCallout
-          esqlQueryColumns={documentState.esqlQueryColumns}
-          // If `_source` is in the columns, we should exclude it from the callout
-          selectedColumns={currentColumns.filter((col) => col !== '_source')}
-        />
-        <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />
-      </>
-    ),
-    [currentColumns, documentState.esqlQueryColumns, documentState.interceptedWarnings]
+    () => <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />,
+    [documentState.interceptedWarnings]
   );
 
   const loadingIndicator = useMemo(
@@ -490,7 +477,6 @@ function DiscoverDocumentsComponent({
   );
 
   const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
-    stateContainer.runtimeStateManager,
     (runtimeState) => runtimeState.cascadedDocumentsFetcher$
   );
   const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
@@ -549,8 +535,11 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    // class is used in tests
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={styles.container}>
+    <EuiFlexItem
+      data-test-subj="discoverDocumentsTable"
+      aria-labelledby="documentsAriaLabel"
+      css={styles.container}
+    >
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />

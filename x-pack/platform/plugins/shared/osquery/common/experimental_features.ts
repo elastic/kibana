@@ -16,8 +16,15 @@ export const allowedExperimentalValues = Object.freeze({
    *     and the kebab row-action menus in list tables.
    *   - Renames "Live queries" tab to "History" and "Saved queries" to "Queries"
    *   - Introduces /history and /new routes, redirects legacy /live_queries paths
+   *   - Introduces search input and users filter
+   *   - Introduces scheduled responses support
    */
   queryHistoryRework: false,
+  /**
+   * Replaces the legacy EuiDataGrid results table with UnifiedDataTable,
+   * adding KQL search, document flyout, per-row actions, and column curation.
+   */
+  unifiedDataTable: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

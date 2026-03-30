@@ -49,6 +49,7 @@ describe('MCP Schema', () => {
           hasAuth: true,
           authType: 'bearer',
           apiKeyHeaderName: 'X-Custom-API-Key',
+          apiKeyHeaderValue: 'Token token={{apiKey}}',
           headers: { 'Content-Type': 'application/json' },
         })
       ).not.toThrow();
@@ -64,6 +65,17 @@ describe('MCP Schema', () => {
           })
         ).not.toThrow();
       });
+    });
+
+    it('validates apiKeyHeaderName and apiKeyHeaderValue', () => {
+      expect(() =>
+        MCPConnectorConfigSchema.parse({
+          serverUrl: 'https://mcp.example.com',
+          authType: 'apiKey',
+          apiKeyHeaderName: 'Authorization',
+          apiKeyHeaderValue: 'Token token={{apiKey}}',
+        })
+      ).not.toThrow();
     });
 
     it('throws on invalid auth type', () => {
