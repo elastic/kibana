@@ -136,6 +136,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
       const handleFirstDrag = () => {
         collapseSectionOnDrag();
+        setIsActive(true);
 
         hasBeenDragged.current = true;
         const width = headerRef.getBoundingClientRect().width;
