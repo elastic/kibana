@@ -43,7 +43,7 @@ export const buildIndexSourceSearchBody = (
   }
 
   return {
-    size: 1000,
+    size: 0,
     query: { bool: { must } },
     aggs: {
       identifiers: {
@@ -83,7 +83,7 @@ export const buildEntitiesSearchBody = (
   };
 
   return {
-    size: 1000,
+    size: 0,
     query: { bool: { must } },
     runtime_mappings: {
       [EUID_RUNTIME_FIELD]: euid.painless.getEuidRuntimeMapping(entityType),

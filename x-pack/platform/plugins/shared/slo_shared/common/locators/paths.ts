@@ -15,12 +15,14 @@ export const SLO_CREATE_PATH = '/create' as const;
 export const SLO_EDIT_PATH = '/edit/:sloId' as const;
 export const SLO_SETTINGS_PATH = '/settings' as const;
 export const SLOS_MANAGEMENT_PATH = '/management' as const;
+export const SLOS_MANAGEMENT_TEMPLATES_PATH = '/management/templates' as const;
 
 export const paths = {
   slos: `${SLOS_BASE_PATH}${SLOS_PATH}`,
   slosSettings: `${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`,
   slosWelcome: `${SLOS_BASE_PATH}${SLOS_WELCOME_PATH}`,
   slosManagement: `${SLOS_BASE_PATH}${SLOS_MANAGEMENT_PATH}`,
+  slosManagementTemplates: `${SLOS_BASE_PATH}${SLOS_MANAGEMENT_TEMPLATES_PATH}`,
   sloCreate: `${SLOS_BASE_PATH}${SLO_CREATE_PATH}`,
   sloCreateWithEncodedForm: (encodedParams: string) =>
     `${SLOS_BASE_PATH}${SLO_CREATE_PATH}?_a=${encodedParams}`,

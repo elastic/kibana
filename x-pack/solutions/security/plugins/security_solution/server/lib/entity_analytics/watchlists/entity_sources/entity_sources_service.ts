@@ -72,7 +72,36 @@ export const createEntitySourcesService = ({
             type: 'integration',
             name: source.integrationName as IntegrationType,
           };
+          if (source.type === 'index') {
+            const identity: IdentityProvider = {
+              type: 'index',
+              field: source.identifierField || '',
+            };
+            const { correlationMap, entityIdsByType } =
+              await watchlistEntitiesService.listEntityStoreEntities(identity);
+            return {
+              sourceId: source.id,
+              entityStoreEntityIdsByType: entityIdsByType,
+              correlationMap,
+            };
+          }
+
+          if (source.type === 'store') {
+            const identity: IdentityProvider = {
+              type: 'store',
+              queryRule: source.queryRule || '',
+            };
+            const entityStoreEntityIdsByType =
+              await watchlistEntitiesService.listEntityStoreEntities(identity);
+            return { sourceId: source.id, entityStoreEntityIdsByType };
+          }
+
+          const identity: IdentityProvider = {
+            type: 'integration',
+            name: source.integrationName as IntegrationType,
+          };
           const entityStoreEntityIdsByType = await watchlistEntitiesService.listEntityStoreEntities(
+            identity
             identity
           );
           return { sourceId: source.id, entityStoreEntityIdsByType };

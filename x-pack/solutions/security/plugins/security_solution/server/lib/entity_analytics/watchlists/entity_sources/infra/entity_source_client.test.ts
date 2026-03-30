@@ -124,7 +124,7 @@ describe('WatchlistEntitySourceClient', () => {
       expect(soClient.update).toHaveBeenCalledWith(
         watchlistEntitySourceTypeName,
         'source-id',
-        { id: 'source-id', name: 'Updated' },
+        { name: 'Updated' },
         { refresh: 'wait_for' }
       );
     });
