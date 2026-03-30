@@ -25,7 +25,7 @@ import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { useFetchSloDefinitionsWithRemote } from '../../../hooks/use_fetch_slo_definitions_with_remote';
 import { useFetchSloInstances } from '../../../hooks/use_fetch_slo_instances';
 import { MAX_COMPOSITE_MEMBERS, MAX_WIDTH } from '../constants';
-import type { CompositeSLOMember, CreateCompositeSLOForm } from '../types';
+import type { CreateCompositeSLOForm } from '../types';
 
 export function CompositeSloMembersSection() {
   const { control, watch } = useFormContext<CreateCompositeSLOForm>();
@@ -53,13 +53,7 @@ export function CompositeSloMembersSection() {
       const sloId = String(value);
       const sloDefinition = sloDefinitions?.results.find((slo) => slo.id === sloId);
       const groupBy = sloDefinition?.groupBy ?? ALL_VALUE;
-      const isGrouped = [groupBy].flat().some((g) => g !== ALL_VALUE);
-      // For non-grouped SLOs there is no instance selector, so a second ALL_VALUE entry
-      // would be an unresolvable duplicate. For grouped SLOs the selector lets the user
-      // pick a specific instance after adding, so re-adding is allowed.
-      const wouldDuplicate =
-        !isGrouped && members.some((m) => m.sloId === sloId && m.instanceId === ALL_VALUE);
-      if (!wouldDuplicate && members.length < MAX_COMPOSITE_MEMBERS) {
+      if (members.length < MAX_COMPOSITE_MEMBERS) {
         append({ sloId, sloName: label, groupBy, instanceId: ALL_VALUE, weight: 1 });
       }
       setSloSearch('');
@@ -103,16 +97,7 @@ export function CompositeSloMembersSection() {
             fullWidth
             isDisabled={atMax}
             isLoading={isLoadingSlos}
-            options={sloOptions.filter((opt) => {
-              const sloId = String(opt.value);
-              const sloDefinition = sloDefinitions?.results.find((slo) => slo.id === sloId);
-              const groupBy = sloDefinition?.groupBy ?? ALL_VALUE;
-              const isGrouped = [groupBy].flat().some((g) => g !== ALL_VALUE);
-              return (
-                isGrouped ||
-                !members.some((m) => m.sloId === sloId && m.instanceId === ALL_VALUE)
-              );
-            })}
+            options={sloOptions}
             selectedOptions={[]}
             onSearchChange={setSloSearch}
             onChange={handleAddMember}
@@ -160,12 +145,7 @@ export function CompositeSloMembersSection() {
             </EuiFlexGroup>
 
             {fields.map((field, index) => (
-              <MemberRow
-                key={field.id}
-                index={index}
-                members={members}
-                onRemove={() => remove(index)}
-              />
+              <MemberRow key={field.id} index={index} onRemove={() => remove(index)} />
             ))}
           </>
         )}
@@ -176,27 +156,26 @@ export function CompositeSloMembersSection() {
 
 interface MemberRowProps {
   index: number;
-  members: CompositeSLOMember[];
   onRemove: () => void;
 }
 
-function MemberRow({ index, members, onRemove }: MemberRowProps) {
+function MemberRow({ index, onRemove }: MemberRowProps) {
   const { control, watch, setValue } = useFormContext<CreateCompositeSLOForm>();
   const sloId = watch(`members.${index}.sloId`);
   const sloName = watch(`members.${index}.sloName`);
   const groupBy = watch(`members.${index}.groupBy`);
+  const instanceId = watch(`members.${index}.instanceId`);
 
   const isGrouped = [groupBy].flat().some((g) => g !== ALL_VALUE);
 
   // If the member SLO's groupBy was removed after the composite was created, reset
   // the stale instanceId so it is not silently sent to the API while the UI shows
-  // "All instances". Duplicate (sloId, ALL_VALUE) pairs that result from this are
-  // left for the user to resolve manually — removing members silently would be worse.
+  // "All instances".
   useEffect(() => {
-    if (!isGrouped && members[index]?.instanceId !== ALL_VALUE) {
+    if (!isGrouped && instanceId !== ALL_VALUE) {
       setValue(`members.${index}.instanceId`, ALL_VALUE);
     }
-  }, [isGrouped, index, members, setValue]);
+  }, [isGrouped, instanceId, index, setValue]);
 
   const { data: instances, isLoading: isLoadingInstances } = useFetchSloInstances({
     sloId,
@@ -204,18 +183,10 @@ function MemberRow({ index, members, onRemove }: MemberRowProps) {
     enabled: isGrouped,
   });
 
-  const usedInstanceIds = members
-    .filter((m, i) => i !== index && m.sloId === sloId && m.instanceId !== ALL_VALUE)
-    .map((m) => m.instanceId);
-
   const instanceOptions: EuiComboBoxOptionOption[] = (instances?.results ?? []).map((inst) => ({
     label: inst.instanceId,
     value: inst.instanceId,
   }));
-
-  const availableInstanceOptions = instanceOptions.filter(
-    (opt) => !usedInstanceIds.includes(String(opt.value))
-  );
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart">
@@ -237,7 +208,7 @@ function MemberRow({ index, members, onRemove }: MemberRowProps) {
                   fullWidth
                   singleSelection={{ asPlainText: true }}
                   isLoading={isLoadingInstances}
-                  options={availableInstanceOptions}
+                  options={instanceOptions}
                   selectedOptions={selected}
                   onChange={(opts) => onChange(opts[0]?.value ?? ALL_VALUE)}
                   isClearable={true}
