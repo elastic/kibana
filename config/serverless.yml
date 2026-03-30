@@ -296,7 +296,7 @@ xpack.genAiSettings:
   showAiAssistantsVisibilitySetting: false
 
 # Search-related configurations
-server.socketTimeout: 2m # making this explicit
+server.socketTimeout: 120000 # making this explicit
 elasticsearch.idleSocketTimeout: 2m
 data.search.asyncSearch:
   waitForCompletion: 1s
