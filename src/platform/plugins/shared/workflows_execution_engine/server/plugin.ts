@@ -16,7 +16,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, WorkflowRepository } from '@kbn/workflows';
 import type {
   ConcurrencySettings,
   EsWorkflowExecution,
@@ -57,11 +57,6 @@ import { generateExecutionTaskScope } from './utils';
 import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
-import { runWorkflowRecoveryScan } from './workflow_recovery/run_workflow_recovery_scan';
-import {
-  WORKFLOW_RECOVERY_SCAN_TASK_TYPE,
-  WORKFLOW_RECOVERY_TASK_ID,
-} from './workflow_recovery/workflow_recovery_constants';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
@@ -69,6 +64,9 @@ import type {
 import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
+
+/** Must match `maxAttempts` on the `workflow:run` task definition (Task Manager increments attempts when a run starts). */
+const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -137,7 +135,8 @@ export class WorkflowsExecutionEnginePlugin
         // This is high value to allow long-running workflows.
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
-        maxAttempts: 1,
+        // Align with `workflow:scheduled`: Task Manager retries after Kibana/interrupt so `runWorkflow` can resume.
+        maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a workflow without Kibana Request');
@@ -183,19 +182,54 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              await runWorkflow({
-                workflowRunId,
-                spaceId,
-                taskAbortController,
-                config,
-                logger,
-                fakeRequest,
-                dependencies,
-                workflowsExecutionEngine,
-                meteringService: this.meteringService,
-                isEventDrivenExecutionEnabled:
-                  workflowsExecutionEngine.isEventDrivenExecutionEnabled,
-              });
+              try {
+                await runWorkflow({
+                  workflowRunId,
+                  spaceId,
+                  taskAbortController,
+                  config,
+                  logger,
+                  fakeRequest,
+                  dependencies,
+                  workflowsExecutionEngine,
+                  meteringService: this.meteringService,
+                  isEventDrivenExecutionEnabled:
+                    workflowsExecutionEngine.isEventDrivenExecutionEnabled,
+                  taskAttempt: taskInstance.attempts,
+                });
+              } catch (error) {
+                if (taskInstance.attempts >= WORKFLOW_RUN_TASK_MAX_ATTEMPTS) {
+                  try {
+                    const workflowExecutionRepository = new WorkflowExecutionRepository(
+                      coreStart.elasticsearch.client.asInternalUser
+                    );
+                    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+                      workflowRunId,
+                      spaceId
+                    );
+                    if (execution && !isTerminalStatus(execution.status)) {
+                      const message = error instanceof Error ? error.message : String(error);
+                      await workflowExecutionRepository.updateWorkflowExecution({
+                        id: workflowRunId,
+                        status: ExecutionStatus.FAILED,
+                        error: {
+                          type: 'TaskAttemptsExhaustedError',
+                          message: `Task Manager exhausted all attempts (${WORKFLOW_RUN_TASK_MAX_ATTEMPTS}) for this run. Last error: ${message}`,
+                        },
+                      });
+                    }
+                  } catch (markFailedErr) {
+                    logger.error(
+                      `Failed to mark workflow execution ${workflowRunId} as FAILED after task attempts exhausted: ${
+                        markFailedErr instanceof Error
+                          ? markFailedErr.message
+                          : String(markFailedErr)
+                      }`
+                    );
+                  }
+                }
+                throw error;
+              }
             },
             cancel: async () => {
               taskAbortController.abort();
@@ -353,6 +387,7 @@ export class WorkflowsExecutionEnginePlugin
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const workflowTaskManager = new WorkflowTaskManager(pluginsStart.taskManager);
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
               if (!workflow) {
@@ -369,7 +404,8 @@ export class WorkflowsExecutionEnginePlugin
                   spaceId,
                   workflowExecutionRepository,
                   taskInstance,
-                  logger
+                  logger,
+                  { workflowTaskManager, fakeRequest }
                 );
                 if (wasSkipped) {
                   return;
@@ -480,6 +516,7 @@ export class WorkflowsExecutionEnginePlugin
                 dependencies,
                 workflowsExecutionEngine,
                 meteringService: this.meteringService,
+                taskAttempt: taskInstance.attempts,
               });
 
               const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
@@ -489,35 +526,6 @@ export class WorkflowsExecutionEnginePlugin
             },
             async cancel() {
               taskAbortController.abort();
-            },
-          };
-        },
-      },
-    });
-
-    plugins.taskManager.registerTaskDefinitions({
-      [WORKFLOW_RECOVERY_SCAN_TASK_TYPE]: {
-        title: 'Workflow execution recovery scan',
-        description:
-          'Periodically scans for interrupted workflow executions and schedules workflow:resume using credentials from the original workflow:run task.',
-        timeout: '10m',
-        maxAttempts: 3,
-        createTaskRunner: () => {
-          return {
-            run: async () => {
-              const [coreStart, pluginsStart] = await core.getStartServices();
-              await checkLicense(pluginsStart.licensing);
-
-              await this.initialize(coreStart);
-
-              await runWorkflowRecoveryScan({
-                coreStart,
-                taskManager: pluginsStart.taskManager,
-                config,
-                logger: logger.get('workflowRecovery'),
-                basePath: coreStart.http.basePath,
-                licensing: pluginsStart.licensing,
-              });
             },
           };
         },
@@ -543,27 +551,6 @@ export class WorkflowsExecutionEnginePlugin
       workflowTaskManager,
       workflowExecutionRepository
     );
-
-    if (this.config.recovery.enabled) {
-      void plugins.taskManager
-        .ensureScheduled({
-          id: WORKFLOW_RECOVERY_TASK_ID,
-          taskType: WORKFLOW_RECOVERY_SCAN_TASK_TYPE,
-          scope: ['workflows', 'workflow-recovery'],
-          schedule: {
-            interval: `${this.config.recovery.intervalMinutes}m`,
-          },
-          state: {},
-          params: {},
-        })
-        .catch((err) => {
-          this.logger.error(
-            `Failed to ensure workflow recovery scan task: ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          );
-        });
-    }
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,

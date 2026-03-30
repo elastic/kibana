@@ -8,7 +8,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -20,6 +20,7 @@ import {
 } from '@kbn/workflows';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import type { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
 
 describe('checkAndSkipIfExistingScheduledExecution', () => {
@@ -366,7 +367,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
   });
 
   describe('taskRunAt comparison logic', () => {
-    it('should mark execution as FAILED and proceed when taskRunAt matches AND attempts > 1 (stale execution from task recovery)', async () => {
+    it('should schedule workflow:resume and skip when taskRunAt matches AND attempts > 1 (stale execution from task recovery)', async () => {
       const matchingRunAt = baseRunAt.toISOString();
       const existingExecution = {
         _source: {
@@ -391,30 +392,70 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       // Use attempts > 1 to indicate this is a retry/recovery
       const retryTaskInstance = createMockTaskInstance({ attempts: 2 });
 
+      const scheduleImmediateResume = jest.fn().mockResolvedValue({ taskId: 'resume-task-1' });
+      const workflowTaskManager = { scheduleImmediateResume } as unknown as WorkflowTaskManager;
+      const fakeRequest = { isFakeRequest: true } as unknown as KibanaRequest;
+
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
         spaceId,
         workflowExecutionRepository,
         retryTaskInstance,
-        logger
+        logger,
+        { workflowTaskManager, fakeRequest }
       );
 
-      expect(result).toBe(false); // Proceed with new execution
-      expect(esClient.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: WORKFLOWS_EXECUTIONS_INDEX,
-          id: 'existing-execution-id',
-          doc: expect.objectContaining({
-            status: ExecutionStatus.FAILED,
-            error: {
-              type: 'TaskRecoveryError',
-              message: expect.stringContaining('recovery mechanism'),
-            },
-          }),
-        })
+      expect(result).toBe(true);
+      expect(scheduleImmediateResume).toHaveBeenCalledWith({
+        executionId: 'existing-execution-id',
+        spaceId,
+        fakeRequest,
+      });
+      expect(esClient.update).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('scheduling workflow:resume')
       );
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Found stale execution'));
       expect(esClient.index).not.toHaveBeenCalled(); // No SKIPPED execution created
+    });
+
+    it('should skip without auto-resume when stale execution is waiting_for_input', async () => {
+      const matchingRunAt = baseRunAt.toISOString();
+      const existingExecution = {
+        _source: {
+          id: 'existing-execution-id',
+          workflowId: workflow.id,
+          spaceId,
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          triggeredBy: 'scheduled',
+          taskRunAt: matchingRunAt,
+        },
+      };
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [existingExecution],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any);
+      (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
+
+      const retryTaskInstance = createMockTaskInstance({ attempts: 2 });
+      const scheduleImmediateResume = jest.fn().mockResolvedValue({ taskId: 'resume-task-1' });
+      const workflowTaskManager = { scheduleImmediateResume } as unknown as WorkflowTaskManager;
+      const fakeRequest = { isFakeRequest: true } as unknown as KibanaRequest;
+
+      const result = await checkAndSkipIfExistingScheduledExecution(
+        workflow,
+        spaceId,
+        workflowExecutionRepository,
+        retryTaskInstance,
+        logger,
+        { workflowTaskManager, fakeRequest }
+      );
+
+      expect(result).toBe(true);
+      expect(scheduleImmediateResume).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('waiting_for_input'));
     });
 
     it('should skip (not mark as failed) when taskRunAt matches BUT attempts = 1 (first attempt, execution from this run)', async () => {
@@ -607,22 +648,26 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       // Use attempts > 1 to indicate this is a retry/recovery
       const retryTaskInstance = createMockTaskInstance({ attempts: 2 });
 
+      const scheduleImmediateResume = jest.fn().mockResolvedValue({ taskId: 'resume-task-1' });
+      const workflowTaskManager = { scheduleImmediateResume } as unknown as WorkflowTaskManager;
+      const fakeRequest = { isFakeRequest: true } as unknown as KibanaRequest;
+
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
         spaceId,
         workflowExecutionRepository,
         retryTaskInstance,
-        logger
+        logger,
+        { workflowTaskManager, fakeRequest }
       );
 
-      expect(result).toBe(false); // Proceed - mark stale as failed
-      expect(esClient.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          doc: expect.objectContaining({
-            status: ExecutionStatus.FAILED,
-          }),
-        })
-      );
+      expect(result).toBe(true);
+      expect(scheduleImmediateResume).toHaveBeenCalledWith({
+        executionId: 'existing-execution-id',
+        spaceId,
+        fakeRequest,
+      });
+      expect(esClient.update).not.toHaveBeenCalled();
     });
   });
 });

@@ -11,60 +11,12 @@ import { v4 } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';
+import { WORKFLOW_RESUME_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams } from './types';
 import { generateExecutionTaskScope } from '../utils';
 
 export class WorkflowTaskManager {
   constructor(private taskManager: TaskManagerStartContract) {}
-
-  /**
-   * True when there is an idle, claiming, or running workflow:run or workflow:resume task for this execution.
-   * Used to avoid duplicate scheduling during recovery.
-   */
-  async hasActiveWorkflowExecutionTask(executionId: string): Promise<boolean> {
-    const { docs } = await this.taskManager.fetch({
-      size: 1,
-      query: {
-        bool: {
-          must: [
-            { term: { 'task.scope': `workflow:execution:${executionId}` } },
-            {
-              terms: {
-                'task.taskType': [WORKFLOW_RUN_TASK_TYPE, WORKFLOW_RESUME_TASK_TYPE],
-              },
-            },
-            {
-              terms: {
-                'task.status': [TaskStatus.Idle, TaskStatus.Claiming, TaskStatus.Running],
-              },
-            },
-          ],
-        },
-      },
-    });
-
-    return docs.length > 0;
-  }
-
-  /**
-   * Returns the first matching workflow:run task id for this execution (scope includes workflow:execution:{id}).
-   */
-  async findWorkflowRunTaskIdForExecution(executionId: string): Promise<string | null> {
-    const { docs } = await this.taskManager.fetch({
-      size: 1,
-      query: {
-        bool: {
-          must: [
-            { term: { 'task.taskType': WORKFLOW_RUN_TASK_TYPE } },
-            { term: { 'task.scope': `workflow:execution:${executionId}` } },
-          ],
-        },
-      },
-    });
-
-    return docs[0]?.id ?? null;
-  }
 
   async scheduleResumeTask({
     workflowExecution,

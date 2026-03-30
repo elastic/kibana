@@ -9,7 +9,11 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExecutionStatus, isEventDrivenWorkflowTriggerSource } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isEventDrivenWorkflowTriggerSource,
+  isTerminalStatus,
+} from '@kbn/workflows';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { WorkflowsMeteringService } from '../metering';
@@ -28,6 +32,7 @@ export async function runWorkflow({
   workflowsExecutionEngine,
   meteringService,
   isEventDrivenExecutionEnabled,
+  taskAttempt,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -39,6 +44,8 @@ export async function runWorkflow({
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
   isEventDrivenExecutionEnabled?: () => boolean;
+  /** Task Manager claim attempts for `workflow:run` (1 = first try). Used to resume after Kibana/interrupt retries. */
+  taskAttempt?: number;
 }): Promise<void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
@@ -100,10 +107,26 @@ export async function runWorkflow({
     }
   }
 
+  const executionForRun = await workflowExecutionRepository.getWorkflowExecutionById(
+    workflowRunId,
+    spaceId
+  );
+
+  const shouldResumeFromPriorAttempt =
+    taskAttempt != null &&
+    taskAttempt > 1 &&
+    executionForRun != null &&
+    executionForRun.status !== ExecutionStatus.PENDING &&
+    !isTerminalStatus(executionForRun.status);
+
   // Span for runtime initialization (graph building, topsort, etc.)
   const startSpan = apm.startSpan('workflow runtime start', 'workflow', 'initialization');
   try {
-    await workflowRuntime.start();
+    if (shouldResumeFromPriorAttempt) {
+      await workflowRuntime.resume();
+    } else {
+      await workflowRuntime.start();
+    }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;

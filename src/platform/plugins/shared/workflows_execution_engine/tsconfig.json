@@ -14,8 +14,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/core-http-server-utils",
-    "@kbn/spaces-utils",
     "@kbn/config-schema",
     "@kbn/actions-plugin",
     "@kbn/workflows",

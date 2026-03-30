@@ -8,12 +8,19 @@
  */
 
 import { v4 as generateUuid } from 'uuid';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+
+/** Passed from the scheduled task runner so stale executions can schedule `workflow:resume` with the task API key. */
+export interface ScheduledWorkflowStaleRecoveryDeps {
+  workflowTaskManager: WorkflowTaskManager;
+  fakeRequest: KibanaRequest;
+}
 
 /**
  * Checks if there's an existing non-terminal scheduled execution for a workflow.
@@ -27,9 +34,10 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
  * Logic:
  * - If execution's `taskRunAt` matches current task's `runAt` AND `attempts > 1`:
  *   → Execution was created for THIS scheduled run but is still PENDING/RUNNING
- *   → `attempts > 1` means this is a retry/recovery (not the first attempt)
- *   → The execution is stale from a previous attempt and will never complete
- *   → Mark execution as FAILED and proceed with new execution
+ *   → `attempts > 1` means Task Manager is retrying after an interrupt (same `runAt`)
+ *   → When `waiting_for_input`: skip this tick only (human resume via API; never auto-schedule `workflow:resume`)
+ *   → When `staleRecovery` is provided: schedule `workflow:resume` for that execution and skip this tick (no duplicate run)
+ *   → When omitted (legacy): mark execution FAILED and allow a new execution for this tick
  *
  * - If execution's `taskRunAt` differs from current task's `runAt`:
  *   → Execution is from a DIFFERENT scheduled run that's still running
@@ -45,7 +53,8 @@ export async function checkAndSkipIfExistingScheduledExecution(
   spaceId: string,
   workflowExecutionRepository: WorkflowExecutionRepository,
   currentTaskInstance: ConcreteTaskInstance,
-  logger: Logger
+  logger: Logger,
+  staleRecovery?: ScheduledWorkflowStaleRecoveryDeps
 ): Promise<boolean> {
   // Check if there's already a scheduled workflow execution in non-terminal state
   const runningExecutions = await workflowExecutionRepository.getRunningExecutionsByWorkflowId(
@@ -79,7 +88,25 @@ export async function checkAndSkipIfExistingScheduledExecution(
       currentTaskInstance.attempts > 1;
 
     if (isStaleExecution) {
-      // Stale execution from THIS scheduled run (task was interrupted/recovered) - mark it as failed and proceed
+      if (existingExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+        logger.warn(
+          `Stale scheduled retry for execution ${existingExecution.id} (taskRunAt: ${executionTaskRunAt}) is in waiting_for_input — skipping duplicate scheduled invocation (resume is human-driven only)`
+        );
+        return true;
+      }
+
+      if (staleRecovery) {
+        logger.warn(
+          `Found stale execution ${existingExecution.id} from current scheduled run (taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt}, attempts: ${currentTaskInstance.attempts}) — scheduling workflow:resume and skipping duplicate scheduled run`
+        );
+        await staleRecovery.workflowTaskManager.scheduleImmediateResume({
+          executionId: existingExecution.id,
+          spaceId,
+          fakeRequest: staleRecovery.fakeRequest,
+        });
+        return true;
+      }
+
       logger.warn(
         `Found stale execution ${existingExecution.id} from current scheduled run (taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt}, attempts: ${currentTaskInstance.attempts}) - marking as failed and proceeding`
       );
@@ -91,7 +118,6 @@ export async function checkAndSkipIfExistingScheduledExecution(
           message: `Execution abandoned due to recovery mechanism. Execution was created for this scheduled run but task was interrupted.`,
         },
       });
-      // Proceed with new execution
       return false;
     }
 

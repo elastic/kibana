@@ -12,7 +12,7 @@ import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/serve
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from './__mock__/context_dependencies';
 import { setupDependencies } from './setup_dependencies';
-import { DEFAULT_WORKFLOW_RECOVERY_CONFIG, type WorkflowsExecutionEngineConfig } from '../config';
+import type { WorkflowsExecutionEngineConfig } from '../config';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -60,7 +60,6 @@ describe('setupDependencies', () => {
     },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
     collectQueueMetrics: false,
-    recovery: DEFAULT_WORKFLOW_RECOVERY_CONFIG,
   };
 
   let mockDependencies: ReturnType<typeof mockContextDependencies>;
