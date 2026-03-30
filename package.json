@@ -2103,7 +2103,7 @@
     "mochawesome-merge": "4.3.0",
     "mock-fs": "5.5.0",
     "ms-chromium-edge-driver": "0.5.1",
-    "msw": "2.12.10",
+    "msw": "2.12.11",
     "mutation-observer": "1.0.3",
     "nock": "12.0.3",
     "node-stdlib-browser": "1.3.1",
