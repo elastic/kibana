@@ -173,7 +173,7 @@ describe('ES search strategy', () => {
         expect(request).toHaveProperty('return_intermediate_results', false);
       });
 
-      it('sets return_intermediate_results to true when retrieveIntermediateResults is true', async () => {
+      it('sets return_intermediate_results to true when returnIntermediateResults is true', async () => {
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = { index: 'logstash-*', query: {} };
@@ -184,7 +184,7 @@ describe('ES search strategy', () => {
         );
 
         await esSearch
-          .search({ id: 'foo', params }, { retrieveIntermediateResults: true }, mockDeps)
+          .search({ id: 'foo', params }, { returnIntermediateResults: true }, mockDeps)
           .toPromise();
 
         expect(mockGetCaller).toBeCalled();

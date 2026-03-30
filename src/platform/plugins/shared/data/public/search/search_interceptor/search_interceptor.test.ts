@@ -2171,7 +2171,7 @@ describe('SearchInterceptor', () => {
             "/internal/search/ese/1",
             Object {
               "asResponse": true,
-              "body": "{\\"id\\":\\"1\\",\\"params\\":{},\\"retrieveIntermediateResults\\":true,\\"stream\\":true}",
+              "body": "{\\"id\\":\\"1\\",\\"params\\":{},\\"returnIntermediateResults\\":true,\\"stream\\":true}",
               "context": undefined,
               "signal": AbortSignal {},
               "version": "1",
@@ -2206,7 +2206,7 @@ describe('SearchInterceptor', () => {
             "/internal/search/ese/1",
             Object {
               "asResponse": true,
-              "body": "{\\"id\\":\\"1\\",\\"params\\":{},\\"retrieveIntermediateResults\\":true,\\"stream\\":true}",
+              "body": "{\\"id\\":\\"1\\",\\"params\\":{},\\"returnIntermediateResults\\":true,\\"stream\\":true}",
               "context": undefined,
               "signal": AbortSignal {},
               "version": "1",

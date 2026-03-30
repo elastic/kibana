@@ -57,7 +57,7 @@ export const enhancedEsSearchStrategyProvider = (
       ...(request.params?.wait_for_completion_timeout
         ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
         : {}),
-      return_intermediate_results: options.retrieveIntermediateResults ?? false,
+      return_intermediate_results: options.returnIntermediateResults ?? false,
     };
     const { body, headers, meta } = await client.asyncSearch.get(
       { ...params, id: id! },

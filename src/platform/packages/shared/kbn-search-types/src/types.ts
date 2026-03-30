@@ -97,7 +97,7 @@ export interface ISearchOptions {
    * By default, when polling, we don't retrieve the results of the search request (until it is complete).
    * setting this to `true` will request the search results, regardless of whether or not the search is complete.
    */
-  retrieveIntermediateResults?: boolean;
+  returnIntermediateResults?: boolean;
 
   /**
    * Represents a meta-information about a Kibana entity intitating a saerch request.
@@ -143,7 +143,7 @@ export type ISearchOptionsSerializable = Pick<
   | 'isStored'
   | 'isSearchStored'
   | 'isRestore'
-  | 'retrieveIntermediateResults'
+  | 'returnIntermediateResults'
   | 'executionContext'
   | 'stream'
   | 'projectRouting'

@@ -298,8 +298,8 @@ export class SearchInterceptor {
 
     if (combined.sessionId !== undefined) serializableOptions.sessionId = combined.sessionId;
     if (combined.isRestore !== undefined) serializableOptions.isRestore = combined.isRestore;
-    if (combined.retrieveIntermediateResults !== undefined)
-      serializableOptions.retrieveIntermediateResults = combined.retrieveIntermediateResults;
+    if (combined.returnIntermediateResults !== undefined)
+      serializableOptions.returnIntermediateResults = combined.returnIntermediateResults;
     if (combined.legacyHitsTotal !== undefined)
       serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
     if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
@@ -469,7 +469,7 @@ export class SearchInterceptor {
               {
                 ...options,
                 abortSignal: new AbortController().signal,
-                retrieveIntermediateResults: true,
+                returnIntermediateResults: true,
               }
             )
           ).pipe(
