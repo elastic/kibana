@@ -12,7 +12,10 @@ import {
   getMonitorListPageStateWithDefaults,
   selectMonitorListState,
 } from '../../../state';
-import { ConfigKey, PrivateLocationHealthStatusValue } from '../../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  PrivateLocationHealthStatusValue,
+} from '../../../../../../common/runtime_types';
 import { fetchMonitorHealthAction, selectMonitorHealth } from '../../../state/monitor_health';
 import { resetMonitorAPI, resetMonitorBulkAPI } from '../../../state/monitor_management/api';
 import { useSyntheticsRefreshContext } from '../../../contexts';
@@ -43,7 +46,9 @@ interface UseMonitorIntegrationHealthReturn {
   getUnhealthyLocationStatuses: (configId: string) => MonitorIntegrationStatus[];
   getUnhealthyMonitorCountForLocation: (locationId: string) => number;
   getUnhealthyConfigIdsForLocation: (locationId: string) => string[];
-  getUnhealthyMonitorsForLocation: (locationId: string) => Array<{ configId: string; name: string }>;
+  getUnhealthyMonitorsForLocation: (
+    locationId: string
+  ) => Array<{ configId: string; name: string }>;
 }
 
 export const useMonitorIntegrationHealth = (

@@ -62,11 +62,8 @@ export const PrivateLocationsTable = ({
     resetIds: string[];
     skippedMonitors: Array<{ id: string; name: string }>;
   } | null>(null);
-  const {
-    resetMonitors,
-    getUnhealthyLocationStatuses,
-    getUnhealthyMonitorsForLocation,
-  } = useMonitorIntegrationHealth();
+  const { resetMonitors, getUnhealthyLocationStatuses, getUnhealthyMonitorsForLocation } =
+    useMonitorIntegrationHealth();
 
   const { locationMonitors, loading } = useLocationMonitors();
 

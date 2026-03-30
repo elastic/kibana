@@ -211,7 +211,9 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.errors).toEqual([{ configId: 'mon-1', message: 'Failed to fetch monitor', statusCode: 500 }]);
+      expect(result.errors).toEqual([
+        { configId: 'mon-1', message: 'Failed to fetch monitor', statusCode: 500 },
+      ]);
     });
 
     it('includes statusCode for non-404 SavedObjects errors via output.statusCode', async () => {
@@ -521,7 +523,9 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].privateLocations[0].status).toBe(PrivateLocationHealthStatusValue.Healthy);
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
+      );
       expect(result.monitors[0].privateLocations[1].status).toBe(
         PrivateLocationHealthStatusValue.MissingAgentPolicy
       );
@@ -576,7 +580,9 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].privateLocations[0].status).toBe(PrivateLocationHealthStatusValue.Healthy);
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
+      );
       expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(expectedPolicyId);
     });
   });
@@ -625,13 +631,17 @@ describe('MonitorIntegrationHealthApi', () => {
       const mon1 = result.monitors[0];
       expect(mon1.configId).toBe('mon-1');
       expect(mon1.privateLocations[0].status).toBe(PrivateLocationHealthStatusValue.Healthy);
-      expect(mon1.privateLocations[1].status).toBe(PrivateLocationHealthStatusValue.MissingPackagePolicy);
+      expect(mon1.privateLocations[1].status).toBe(
+        PrivateLocationHealthStatusValue.MissingPackagePolicy
+      );
       expect(mon1.isHealthy).toBe(false);
 
       const mon2 = result.monitors[1];
       expect(mon2.configId).toBe('mon-2');
       expect(mon2.privateLocations[0].status).toBe(PrivateLocationHealthStatusValue.Healthy);
-      expect(mon2.privateLocations[1].status).toBe(PrivateLocationHealthStatusValue.MissingLocation);
+      expect(mon2.privateLocations[1].status).toBe(
+        PrivateLocationHealthStatusValue.MissingLocation
+      );
       expect(mon2.isHealthy).toBe(false);
     });
   });
@@ -656,7 +666,9 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].privateLocations[0].status).toBe(PrivateLocationHealthStatusValue.Healthy);
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
+      );
       expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(legacyPolicyId);
       expect(result.monitors[0].isHealthy).toBe(true);
     });
@@ -685,7 +697,9 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].privateLocations[0].status).toBe(PrivateLocationHealthStatusValue.Healthy);
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
+      );
       expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(newPolicyId);
     });
 
