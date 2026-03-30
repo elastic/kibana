@@ -50,10 +50,14 @@ export async function reindexThroughPipeline({
   destIndex: string;
   isDataStream: boolean;
   pipelineName: string;
-  maxTimestamp: string;
+  maxTimestamp?: string;
   useInlineScript?: boolean;
   requestTimeoutMs?: number;
 }): Promise<ReindexJobResult> {
+  if (useInlineScript && !maxTimestamp) {
+    throw new Error(`maxTimestamp is required when using inline script for ${destIndex}`);
+  }
+
   log.debug(`Reindexing to ${destIndex}${useInlineScript ? ' (inline script)' : ''}`);
 
   try {
@@ -122,7 +126,7 @@ export async function reindexAllIndices({
   concurrency,
   pipelineName,
   maxTimestamp,
-  pipelineExcludePatterns = [],
+  shouldUseInlineScript,
 }: {
   esClient: Client;
   log: ToolingLog;
@@ -130,11 +134,10 @@ export async function reindexAllIndices({
   originalIndices: string[];
   concurrency?: number;
   pipelineName: string;
-  maxTimestamp: string;
-  pipelineExcludePatterns?: string[];
+  maxTimestamp?: string;
+  shouldUseInlineScript?: (destIndex: string) => boolean;
 }): Promise<string[]> {
   const successfullyReindexed: string[] = [];
-  const pipelineExcludePatternsSet = new Set(pipelineExcludePatterns);
 
   const jobs: ReindexJob[] = restoredIndices.map((sourceIndex, i) => {
     const { destIndex, isDataStream } = getDestinationInfo(originalIndices[i]);
@@ -156,14 +159,13 @@ export async function reindexAllIndices({
     await Promise.all(
       batch.map(async (job) => {
         try {
+          const useInlineScript = shouldUseInlineScript?.(job.destIndex) ?? false;
           await reindexThroughPipeline({
             esClient,
             log,
             pipelineName,
+            useInlineScript,
             maxTimestamp,
-            useInlineScript:
-              pipelineExcludePatternsSet.has(job.destIndex) ||
-              pipelineExcludePatterns.some((p) => job.destIndex.startsWith(`${p}.`)),
             ...job,
           });
           successfullyReindexed.push(job.destIndex);

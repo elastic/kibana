@@ -35,7 +35,7 @@ node scripts/capture_sigevents_env_snapshot.js \
 | `--run-id` | Run identifier for GCS repo name and base path. | Today's date `YYYY-MM-DD` |
 | `--logs-index` | Logs index to include in the snapshot + replay. | `logs.otel` |
 | `--alert-indices` | Alert index to include in the snapshot + replay. Can be repeated. | `.internal.alerts-streams.alerts-default-*` |
-| `--system-indices` | `.kibana` system index to capture with mapping. Can be repeated. Must start with `.kibana`. | `.kibana_streams_features-*` `.kibana_streams_assets-*` |
+| `--system-indices` | `.kibana` system index to capture with mapping. Can be repeated. Must start with `.kibana`. | `.kibana_streams_features-*` `.kibana_streams_assets-*` `.kibana_streams_insights-*` `.kibana_streams_tasks-*` |
 | `--es-url` | Elasticsearch URL | from `config/kibana.dev.yml` |
 | `--es-username` | Elasticsearch username | from `config/kibana.dev.yml` |
 | `--es-password` | Elasticsearch password | from `config/kibana.dev.yml` |
@@ -45,7 +45,6 @@ node scripts/capture_sigevents_env_snapshot.js \
 1. Resolves wildcard patterns to concrete index names via `GET _resolve/index`.
 2. For each `--system-indices` match, fetches its mapping, creates a `snapshot-*` copy, and reindexes the data. `--logs-index` and `--alert-indices` targets are included directly in the snapshot without reindexing.
 3. Registers a GCS snapshot repository and creates the snapshot containing all captured indices.
-4. During **replay**, non-system aliases (e.g. `.alerts-streams.alerts-default`) are automatically captured from restored temp indices and recreated on the final destination indices — no manual step needed.
 
 ### Naming convention
 

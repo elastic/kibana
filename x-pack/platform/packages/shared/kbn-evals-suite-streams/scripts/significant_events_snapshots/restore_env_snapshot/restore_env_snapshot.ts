@@ -6,7 +6,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { createGcsRepository, replaySnapshot, restoreSnapshot } from '@kbn/es-snapshot-loader';
 import { getConnectionConfig } from '../lib/get_connection_config';
@@ -80,6 +80,18 @@ async function deleteLogsIndexTemplate({
   esClient: Client;
   log: ToolingLog;
 }): Promise<void> {
+  try {
+    await esClient.indices.getIndexTemplate({
+      name: SIGEVENTS_INDEX_TEMPLATE,
+    });
+  } catch (err) {
+    if (err instanceof errors.ResponseError && err.statusCode === 404) {
+      log.debug(`Index template "${SIGEVENTS_INDEX_TEMPLATE}" not found`);
+      return;
+    }
+    throw err;
+  }
+
   try {
     await esClient.indices.deleteIndexTemplate({ name: SIGEVENTS_INDEX_TEMPLATE });
     log.debug(`Deleted temporary index template "${SIGEVENTS_INDEX_TEMPLATE}"`);
@@ -161,7 +173,10 @@ export const restoreEnvSnapshot = async ({
   log.info('Step 2/4 — Enabling streams...');
   await ensureStreamsEnabled(config, log);
 
-  const pipelineExcludePatterns = await getEnabledStreams(esClient, log);
+  const enabledStreams = await getEnabledStreams(esClient, log);
+  const enabledStreamsSet = new Set(enabledStreams);
+  const isManagedByStreams = (index: string) =>
+    enabledStreamsSet.has(index) || enabledStreams.some((s) => index.startsWith(`${s}.`));
 
   const dataIndexPatterns = [logsIndex, ...alertIndices];
   let replayResult;
@@ -176,12 +191,9 @@ export const restoreEnvSnapshot = async ({
       repository,
       snapshotName,
       patterns: dataIndexPatterns,
-      pipelineExcludePatterns,
+      shouldUseInlineScript: isManagedByStreams,
       async beforeReindex({ esClient: client, log: logger, restoredIndices }) {
-        const logsExcluded = pipelineExcludePatterns.some(
-          (p) => logsIndex === p || logsIndex.startsWith(`${p}.`)
-        );
-        if (logsExcluded) {
+        if (isManagedByStreams(logsIndex)) {
           return;
         }
 

@@ -18,11 +18,15 @@ const timestampTransformBody = (doc: string) => `
   }
 `;
 
+// Ingest pipeline version: nulls _id so the destination generates a fresh ID,
+// avoiding conflicts when reindexing into a regular index that enforces uniqueness.
 const TIMESTAMP_TRANSFORM_SCRIPT = `
   ctx._id = null;
   ${timestampTransformBody('ctx')}
 `;
 
+// Inline reindex script version: operates on _source only. Data streams
+// auto-generate IDs, so _id manipulation is unnecessary (and unsupported).
 export const TIMESTAMP_REINDEX_SCRIPT = timestampTransformBody('ctx._source');
 
 export async function createTimestampPipeline({

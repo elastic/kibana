@@ -59,7 +59,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     snapshotName,
     patterns,
     concurrency,
-    pipelineExcludePatterns,
+    shouldUseInlineScript,
     beforeReindex,
   } = config;
 
@@ -128,17 +128,21 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       });
     }
 
-    result.maxTimestamp = await getMaxTimestampFromData({
+    const maxTimestamp = await getMaxTimestampFromData({
       esClient,
       log,
       tempIndices: restoredIndices,
     });
+    if (!maxTimestamp) {
+      throw new Error('Failed to derive max timestamp from restored data');
+    }
+    result.maxTimestamp = maxTimestamp;
 
     await createTimestampPipeline({
       esClient,
       log,
       pipelineName,
-      maxTimestamp: result.maxTimestamp!,
+      maxTimestamp,
     });
 
     log.info('Step 4/4: Reindexing with timestamp transformation...');
@@ -149,8 +153,8 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       originalIndices: indicesToRestore,
       concurrency,
       pipelineName,
-      maxTimestamp: result.maxTimestamp!,
-      pipelineExcludePatterns,
+      maxTimestamp,
+      shouldUseInlineScript,
     });
     result.reindexedIndices = reindexedIndices;
 

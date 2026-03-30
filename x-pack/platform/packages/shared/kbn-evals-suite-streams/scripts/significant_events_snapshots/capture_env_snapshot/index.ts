@@ -13,11 +13,8 @@ run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
   description: `
     Capture the current Streams/SigEvents environment into a GCS snapshot.
 
-    .kibana system indices (--system-indices) are reindexed to snapshot-safe
-    names (snapshot-*) with mappings and aliases preserved. At restore time
-    they are renamed back (snapshot- → .).
-    All other indices (--indices) are included directly in the snapshot and
-    replayed with timestamp transformation.
+    .kibana system indices (--system-indices) are reindexed to snapshot-safe names (snapshot-*) with mappings preserved.
+    All other indices (--logs-index, --alert-indices) are included directly in the snapshot.
 
     Prerequisites:
       - Local Elasticsearch with GCS credentials in keystore

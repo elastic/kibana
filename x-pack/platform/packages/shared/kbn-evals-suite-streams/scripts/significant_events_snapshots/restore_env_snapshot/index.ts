@@ -8,7 +8,7 @@
 import { run } from '@kbn/dev-cli-runner';
 import { restoreEnvSnapshot } from './restore_env_snapshot';
 import {
-  DEFAULT_LOGS_INDEX,
+  DEFAULT_ENV_SNAPSHOT_LOGS_INDEX,
   VALID_ALERT_INDICES,
   VALID_SYSTEM_INDICES,
   GCS_BUCKET,
@@ -18,10 +18,11 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
   description: `
     Restore a Streams/SigEvents environment from a GCS snapshot.
 
-    Automates the full three-step restore workflow:
-      1. Replay data indices with timestamp transformation (replaySnapshot)
-      2. Restore system indices with rename: snapshot-* → .* (restoreSnapshot)
-      3. Recreate missing .kibana_* aliases (createMissingAliases)
+    Automates the full four-step restore workflow:
+      1. Restore system indices with rename: snapshot-* → .*
+      2. Enable streams via Kibana API
+      3. Replay data indices with timestamp transformation
+      4. Recreate system indices aliases (.kibana_streams_* and .internal.alerts-streams.alerts-default-* indices)
 
     Prerequisites:
       - Local Elasticsearch running
@@ -50,7 +51,7 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
       --snapshot-name         (required) Name of the snapshot to restore
       --gcs-bucket            GCS bucket containing the snapshot (default: ${GCS_BUCKET})
       --gcs-base-path         (required) GCS base path to the snapshot repository
-      --logs-index            Logs index to replay. (default: ${DEFAULT_LOGS_INDEX})
+      --logs-index            Logs index to replay. (default: ${DEFAULT_ENV_SNAPSHOT_LOGS_INDEX})
       --alert-indices         Alert index to replay. Valid: ${VALID_ALERT_INDICES.join(', ')}
       --system-indices        .kibana system index pattern to restore. Valid: ${VALID_SYSTEM_INDICES.join(
         ', '

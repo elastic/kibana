@@ -191,11 +191,8 @@ export const ensureKnownAliases = async ({
       });
       created++;
     } catch (err) {
-      log.warning(
-        `Failed to create alias for "${indexPattern}": ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(`Alias creation failed for "${indexPattern}": ${msg}`);
     }
   }
 
