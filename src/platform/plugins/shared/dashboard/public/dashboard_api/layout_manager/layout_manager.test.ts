@@ -85,6 +85,7 @@ describe('layout manager', () => {
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
     ...titleManager.api,
     serializeState: () => titleManager.getLatestState(),
+    applySerializedState: jest.fn(),
   };
 
   const section1 = {
