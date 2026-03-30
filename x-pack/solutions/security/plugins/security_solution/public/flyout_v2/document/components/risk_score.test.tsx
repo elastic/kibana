@@ -8,17 +8,33 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { RISK_SCORE_VALUE_TEST_ID } from './test_ids';
 import { RiskScore } from './risk_score';
-import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+
+const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
+  ({
+    id: '1',
+    raw: {},
+    flattened,
+    isAnchor: false,
+  } as DataTableRecord);
+
+const alertHit = createMockHit({
+  'event.kind': 'signal',
+  'kibana.alert.risk_score': 0,
+});
+
+const eventHit = createMockHit({
+  'event.kind': 'event',
+  'kibana.alert.risk_score': 21,
+});
 
 describe('<RiskScore />', () => {
   it('should render risk score information', () => {
-    const getFieldsData = jest.fn().mockImplementation(mockGetFieldsData);
-
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <RiskScore getFieldsData={getFieldsData} />
+        <RiskScore hit={alertHit} />
       </IntlProvider>
     );
 
@@ -27,24 +43,20 @@ describe('<RiskScore />', () => {
     expect(riskScore).toHaveTextContent('0');
   });
 
-  it('should render empty component if missing getFieldsData value', () => {
-    const getFieldsData = jest.fn();
-
+  it('should render empty component if missing risk score value', () => {
     const { container } = render(
       <IntlProvider locale="en">
-        <RiskScore getFieldsData={getFieldsData} />
+        <RiskScore hit={createMockHit({ 'event.kind': 'signal' })} />
       </IntlProvider>
     );
 
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('should render empty component if getFieldsData is invalid', () => {
-    const getFieldsData = jest.fn().mockImplementation(() => 123);
-
+  it('should render empty component for non-alert documents', () => {
     const { container } = render(
       <IntlProvider locale="en">
-        <RiskScore getFieldsData={getFieldsData} />
+        <RiskScore hit={eventHit} />
       </IntlProvider>
     );
 

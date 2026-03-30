@@ -50,6 +50,7 @@ const mockContextValue = {
   getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
   searchHit: createSearchHit({
     'event.kind': ['signal'],
+    'kibana.alert.risk_score': [0],
     'kibana.alert.rule.name': ['rule-name'],
     'kibana.alert.severity': ['low'],
   }),

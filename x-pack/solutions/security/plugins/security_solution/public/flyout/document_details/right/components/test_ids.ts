@@ -6,6 +6,11 @@
  */
 
 import { PREFIX } from '../../../shared/test_ids';
+export {
+  ALERT_SUMMARY_PANEL_TEST_ID,
+  RISK_SCORE_TITLE_TEST_ID,
+  RISK_SCORE_VALUE_TEST_ID,
+} from '../../../../flyout_v2/document/components/test_ids';
 
 const HEADER_TEST_ID = 'Header';
 const CONTENT_TEST_ID = 'Content';
@@ -32,11 +37,8 @@ export const TABLE_TAB_TOUR_TEST_ID = `${FLYOUT_TABLE_TEST_ID}Tour` as const;
 /* Header */
 
 const FLYOUT_HEADER_TEST_ID = `${PREFIX}Header` as const;
-export const ALERT_SUMMARY_PANEL_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AlertSumaryPanel` as const;
 export const STATUS_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}StatusTitle` as const;
 export const STATUS_BUTTON_TEST_ID = 'rule-status-badge' as const;
-export const RISK_SCORE_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreTitle` as const;
-export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue` as const;
 export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;
 export const CHAT_BUTTON_TEST_ID = 'newChatByTitle' as const;
 export const AGENT_ATTACHMENT_BUTTON_TEST_ID = 'newAgentBuilderAttachment' as const;
