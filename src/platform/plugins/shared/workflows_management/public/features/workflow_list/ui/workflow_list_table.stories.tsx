@@ -284,7 +284,7 @@ const mockItems: WorkflowListItemDto[] = [
           else: [{ name: 'send_email', type: 'email' }],
         },
         { name: 'wait_cooldown', type: 'wait', with: { duration: '30s' } },
-        { name: 'kibana_action', type: 'kibana' },
+        { name: 'kibana_action', type: 'kibana.createCase' },
         { name: 'run_child', type: 'workflow.execute', with: { 'workflow-id': 'child' } },
       ],
       triggers: [{ type: 'scheduled', with: { every: '5m' } }],
@@ -330,7 +330,7 @@ const mockItems: WorkflowListItemDto[] = [
       steps: [
         { name: 'step1', type: 'slack_api' },
         { name: 'step2', type: 'http' },
-        { name: 'step3', type: 'elasticsearch' },
+        { name: 'step3', type: 'elasticsearch.search' },
       ],
       triggers: [{ type: 'alert' }, { type: 'scheduled', with: { every: '1d' } }],
     },
@@ -371,7 +371,8 @@ const mockItems: WorkflowListItemDto[] = [
         { name: 'query_data', type: 'elasticsearch' },
         { name: 'aggregate', type: 'data.set' },
       ],
-      triggers: [{ type: 'scheduled', with: { every: '30d' } }],
+      // @ts-expect-error TS2322 - custom trigger type
+      triggers: [{ type: 'Example.customtrigger', with: { every: '30d' } }],
     },
   },
 ];

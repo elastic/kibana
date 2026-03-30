@@ -9,7 +9,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { capitalize } from 'lodash';
 import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Step } from '@kbn/workflows';
@@ -21,31 +20,53 @@ interface WorkflowsStepTypesListProps {
   steps: Step[];
 }
 
-const ICON_SIZE = 20;
-const ICON_GAP = 4;
+const ICON_SIZE = 16;
+const ICON_GAP = 8;
 const OVERFLOW_BADGE_WIDTH = 36;
+const MAX_VISIBLE_ICONS = 6;
+
+const stepTypesListStyles = {
+  container: css({
+    width: '100%',
+    overflow: 'hidden',
+  }),
+  iconGroup: css({
+    flexWrap: 'nowrap',
+  }),
+};
 
 const getStepTypeLabel = (stepType: string): string => {
   const definition = getBuiltInStepDefinition(stepType);
   if (definition?.label) {
     return definition.label;
   }
-  const cleaned = stepType.startsWith('.') ? stepType.slice(1) : stepType;
-  const [mainType] = cleaned.split('.');
-  return capitalize(mainType);
+  return stepType;
 };
 
 const calculateVisibleIconsCount = (containerWidth: number, totalIcons: number): number => {
-  if (containerWidth <= 0 || totalIcons === 0) return 0;
-  if (totalIcons === 1) return 1;
+  if (totalIcons === 0) {
+    return 0;
+  }
+  if (containerWidth <= 0) {
+    return 1;
+  }
 
+  const capped = Math.min(totalIcons, MAX_VISIBLE_ICONS);
   const iconSlot = ICON_SIZE + ICON_GAP;
-  const allFit = totalIcons * iconSlot - ICON_GAP;
-  if (containerWidth >= allFit) return totalIcons;
+  const needsBadge = capped < totalIcons;
+
+  if (!needsBadge) {
+    const allFit = capped * iconSlot - ICON_GAP;
+    if (containerWidth >= allFit) {
+      return totalIcons;
+    }
+  }
 
   const availableForIcons = containerWidth - OVERFLOW_BADGE_WIDTH - ICON_GAP;
-  if (availableForIcons < iconSlot) return 0;
-  return Math.floor(availableForIcons / iconSlot);
+  if (availableForIcons < iconSlot) {
+    return 1;
+  }
+  return Math.max(1, Math.min(Math.floor(availableForIcons / iconSlot), capped));
 };
 
 export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) => {
@@ -56,7 +77,9 @@ export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) =
     const allSteps = collectAllSteps(steps);
     const seen = new Set<string>();
     return allSteps.filter((step) => {
-      if (seen.has(step.type)) return false;
+      if (seen.has(step.type)) {
+        return false;
+      }
       seen.add(step.type);
       return true;
     });
@@ -64,7 +87,9 @@ export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) =
 
   useLayoutEffect(() => {
     const container = containerRef.current;
-    if (!container || uniqueStepTypes.length === 0) return;
+    if (!container || uniqueStepTypes.length === 0) {
+      return;
+    }
 
     const update = () => {
       const width = container.getBoundingClientRect().width;
@@ -92,24 +117,21 @@ export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) =
   const hasOverflow = displayCount < uniqueStepTypes.length;
 
   return (
-    <div
-      ref={containerRef}
-      css={css`
-        width: 100%;
-      `}
-    >
+    <div ref={containerRef} css={stepTypesListStyles.container}>
       <EuiFlexGroup
         alignItems="center"
-        gutterSize="xs"
+        gutterSize="s"
         responsive={false}
         wrap={false}
-        css={css`
-          flex-wrap: nowrap;
-        `}
+        css={stepTypesListStyles.iconGroup}
       >
         {visibleItems.map((step) => (
           <EuiFlexItem grow={false} key={step.type}>
-            <EuiIcon type={getStepIconType(step.type)} size="m" aria-hidden={true} />
+            <EuiIcon
+              type={getStepIconType(step.type)}
+              size="m"
+              title={getStepTypeLabel(step.type)}
+            />
           </EuiFlexItem>
         ))}
         {hasOverflow && (

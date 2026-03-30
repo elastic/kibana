@@ -155,9 +155,9 @@ export const WorkflowListTable = ({
         ),
       },
       {
-        field: 'definition',
-        name: i18n.translate('workflows.workflowList.column.worksWith', {
-          defaultMessage: 'Works with',
+        field: 'steps',
+        name: i18n.translate('workflows.workflowList.column.steps', {
+          defaultMessage: 'Steps',
         }),
         width: '12%',
         render: (value: unknown, item: WorkflowListItemDto) => (
@@ -317,6 +317,8 @@ export const WorkflowListTable = ({
       })}
       data-test-subj="workflowListTable"
       css={css`
+        container-type: inline-size;
+
         .euiBasicTableAction-showOnHover {
           opacity: 1 !important;
         }
