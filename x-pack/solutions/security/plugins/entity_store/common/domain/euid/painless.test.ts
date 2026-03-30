@@ -232,10 +232,10 @@ describe('getEuidPainlessEvaluation', () => {
     });
   });
 
-  it('emits a null literal for nullable field-evaluation fallbacks', () => {
+  it('does not include shared field evaluations in host EUID generation', () => {
     const script = getEuidPainlessEvaluation(EntityType.enum.host);
 
-    expect(script).toContain('else { entity_source = null; }');
+    expect(script).not.toContain('entity_source');
   });
 });
 

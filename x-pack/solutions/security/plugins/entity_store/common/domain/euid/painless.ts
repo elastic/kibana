@@ -342,7 +342,11 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
       stmts.push(`${prefix}(${conds}) { ${varName} = "${escapePainlessString(clause.then)}"; }`);
       first = false;
     }
-    stmts.push(`  else { ${varName} = _src; }`);
+    if (first) {
+      stmts.push(`  ${varName} = _src;`);
+    } else {
+      stmts.push(`  else { ${varName} = _src; }`);
+    }
     stmts.push(`} else { ${varName} = ${toPainlessNullableStringLiteral(ev.fallbackValue)}; }`);
     parts.push(stmts.join(' '));
   }
