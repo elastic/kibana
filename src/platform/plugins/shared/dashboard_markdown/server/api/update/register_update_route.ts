@@ -14,6 +14,7 @@ import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
 import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
+import { asCodeIdSchema } from 'src/platform/packages/shared/as-code/shared-schemas';
 
 export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const updateRoute = router.put({
@@ -28,9 +29,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
       validate: {
         request: {
           params: schema.object({
-            id: schema.string({
-              meta: { description: 'A unique identifier for the markdown panel.' },
-            }),
+            id: asCodeIdSchema,
           }),
           body: updateRequestBodySchema,
         },

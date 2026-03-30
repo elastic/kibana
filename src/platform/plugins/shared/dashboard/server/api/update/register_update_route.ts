@@ -15,6 +15,7 @@ import { getRouteConfig } from '../get_route_config';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { asCodeIdSchema } from 'src/platform/packages/shared/as-code/shared-schemas';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -40,9 +41,7 @@ export function registerUpdateRoute(
       validate: () => ({
         request: {
           params: schema.object({
-            id: schema.string({
-              meta: { description: 'A unique identifier for the dashboard.' },
-            }),
+            id: asCodeIdSchema,
           }),
           body: getUpdateRequestBodySchema(isDashboardAppRequest),
         },
