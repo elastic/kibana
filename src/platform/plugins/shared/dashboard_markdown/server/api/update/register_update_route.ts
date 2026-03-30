@@ -45,9 +45,6 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
           403: {
             description: 'Indicates that this call is forbidden.',
           },
-          404: {
-            description: 'Indicates that the markdown panel with the given ID is not found.',
-          },
         },
       },
     },
@@ -56,13 +53,6 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         const result = await update(ctx, req.params.id, req.body);
         return res.ok({ body: result });
       } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A markdown panel with ID ${req.params.id} was not found.`,
-            },
-          });
-        }
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden({ body: { message: e.message } });
         }
