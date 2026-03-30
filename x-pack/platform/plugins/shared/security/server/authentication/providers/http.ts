@@ -174,8 +174,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
   ): Promise<AuthenticationResult> {
     try {
       const ephemeralToken = await this.options.uiam!.exchangeOAuthToken(
-        authorizationHeader.credentials,
-        this.options.getServerBaseURL()
+        authorizationHeader.credentials
       );
 
       const authHeaders = this.options.uiam!.getAuthenticationHeaders(ephemeralToken);

@@ -296,7 +296,6 @@ describe('HTTPAuthenticationProvider', () => {
     it('exchanges UIAM OAuth token and authenticates successfully on tagged route.', async () => {
       const header = 'Bearer essu_oauth_access_token';
       const user = mockAuthenticatedUser();
-      const expectedAudience = mockOptionsWithUiam.getServerBaseURL();
 
       mockOptionsWithUiam.uiam!.exchangeOAuthToken.mockResolvedValue('essu_ephemeral_token');
 
@@ -326,8 +325,7 @@ describe('HTTPAuthenticationProvider', () => {
       );
 
       expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).toHaveBeenCalledWith(
-        'essu_oauth_access_token',
-        expectedAudience
+        'essu_oauth_access_token'
       );
 
       expect(mockOptionsWithUiam.client.asScoped).toHaveBeenCalledWith({

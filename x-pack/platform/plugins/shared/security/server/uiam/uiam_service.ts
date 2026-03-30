@@ -134,12 +134,11 @@ export interface UiamServicePublic {
 
   /**
    * Exchanges an OAuth access token for an ephemeral UIAM token. Validates that the audience
-   * returned by UIAM matches the expected audience and throws if there is a mismatch.
+   * returned by UIAM matches the expected Kibana server audience and throws if there is a mismatch.
    * @param accessToken The OAuth access token.
-   * @param expectedAudience The audience value Kibana expects.
    * @returns The ephemeral token.
    */
-  exchangeOAuthToken(accessToken: string, expectedAudience: string): Promise<string>;
+  exchangeOAuthToken(accessToken: string): Promise<string>;
 
   /**
    * Revokes a UIAM API key by its ID.
@@ -157,6 +156,13 @@ export interface UiamServicePublic {
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
 }
 
+interface UiamServiceOptions {
+  /** The base URL of the Kibana server. */
+  kibanaServerURL: string;
+  /** The URL of the Elasticsearch cluster. */
+  elasticsearchUrl?: string;
+}
+
 /**
  * See {@link UiamServicePublic}.
  */
@@ -164,11 +170,13 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
+  readonly #kibanaServerURL: string;
   readonly #elasticsearchUrl?: string;
 
-  constructor(logger: Logger, config: UiamConfigType, elasticsearchUrl?: string) {
+  constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
     this.#logger = logger;
-    this.#elasticsearchUrl = elasticsearchUrl;
+    this.#kibanaServerURL = options.kibanaServerURL;
+    this.#elasticsearchUrl = options.elasticsearchUrl;
 
     // Destructure existing config and re-create it again after validation to make TypeScript can infer the proper types.
     const { enabled, url, sharedSecret, ssl } = config;
@@ -266,9 +274,10 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.exchangeOAuthToken}.
    */
-  async exchangeOAuthToken(accessToken: string, expectedAudience: string): Promise<string> {
+  async exchangeOAuthToken(accessToken: string): Promise<string> {
     this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
 
+    const expectedAudience = this.#kibanaServerURL;
     const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);
