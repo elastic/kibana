@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.waitFor('url to contain default sorting', async () => {
             // url fallback default sort should have been pushed to URL
             const url = await browser.getCurrentUrl();
-            return url.includes('sort:!(!(%27@timestamp%27,desc))');
+            return decodeURIComponent(url).includes("sort:!(!('@timestamp',desc))");
           });
 
           await retry.waitFor('document table to contain the right timestamp', async () => {
