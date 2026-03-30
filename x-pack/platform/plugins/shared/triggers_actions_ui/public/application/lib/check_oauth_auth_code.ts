@@ -20,8 +20,7 @@ export function usesOAuthAuthorizationCode(connector: ActionConnector): boolean 
   }
 
   const config = connector.config as Record<string, unknown>;
-  const authType =
-    (config?.authType as string) || ((config?.auth as Record<string, unknown>)?.type as string);
+  const authType = config?.authType as string;
 
   return OAUTH_AUTH_TYPES.has(authType) || connector.authMode === 'per-user';
 }
