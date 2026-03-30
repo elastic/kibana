@@ -130,11 +130,15 @@ export const createUpdateDetectionService = ({
   logger,
   targetIndex,
   descriptorClient,
+  watchlistName,
+  namespace,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   targetIndex: string;
   descriptorClient?: WatchlistEntitySourceClient;
+  watchlistName: string;
+  namespace: string;
 }) => {
   const syncMarkersService = descriptorClient
     ? createWatchlistSyncMarkersService(descriptorClient, esClient)
@@ -315,6 +319,8 @@ export const createUpdateDetectionService = ({
       entities: allEntities,
       source,
       targetIndex,
+      watchlistName,
+      namespace,
     });
 
     logger.info(

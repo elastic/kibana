@@ -84,6 +84,8 @@ export const createEntitySourcesService = ({
       logger,
       targetIndex,
       descriptorClient,
+      watchlistName: watchlist.name,
+      namespace,
     });
 
     await indexSyncService.plainIndexSync(entitiesBySource);

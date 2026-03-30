@@ -115,6 +115,8 @@ describe('Watchlist update detection service', () => {
         esClient,
         logger,
         targetIndex,
+        watchlistName: 'test-watchlist',
+        namespace: 'default',
       });
 
       await service.updateDetection(
@@ -139,6 +141,8 @@ describe('Watchlist update detection service', () => {
         esClient,
         logger,
         targetIndex: '.watchlist-entities-default',
+        watchlistName: 'test-watchlist',
+        namespace: 'default',
       });
 
       const correlationMap: CorrelationMap = new Map();
@@ -160,6 +164,8 @@ describe('Watchlist update detection service', () => {
         esClient,
         logger,
         targetIndex: '.watchlist-entities-default',
+        watchlistName: 'test-watchlist',
+        namespace: 'default',
       });
 
       const result = await service.updateDetection(
@@ -182,6 +188,8 @@ describe('Watchlist update detection service', () => {
         esClient,
         logger,
         targetIndex: '.watchlist-entities-default',
+        watchlistName: 'test-watchlist',
+        namespace: 'default',
       });
 
       const result = await service.updateDetection(
@@ -228,6 +236,8 @@ describe('Watchlist update detection service', () => {
         logger,
         targetIndex: '.watchlist-entities-default',
         descriptorClient,
+        watchlistName: 'test-watchlist',
+        namespace: 'default',
       });
 
       await service.updateDetection(
@@ -289,6 +299,8 @@ describe('Watchlist update detection service', () => {
         logger,
         targetIndex: '.watchlist-entities-default',
         descriptorClient,
+        watchlistName: 'test-watchlist',
+        namespace: 'default',
       });
 
       await service.updateDetection(

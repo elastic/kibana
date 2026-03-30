@@ -21,11 +21,15 @@ export const createDeletionDetectionService = ({
   logger,
   targetIndex,
   descriptorClient,
+  watchlistName,
+  namespace,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   targetIndex: string;
   descriptorClient: WatchlistEntitySourceClient;
+  watchlistName: string;
+  namespace: string;
 }) => {
   const syncMarkersService = createWatchlistSyncMarkersService(descriptorClient, esClient);
 
@@ -101,6 +105,8 @@ export const createDeletionDetectionService = ({
       staleEntities,
       sourceType: source.type ?? 'index',
       targetIndex,
+      watchlistName,
+      namespace,
     });
   };
 

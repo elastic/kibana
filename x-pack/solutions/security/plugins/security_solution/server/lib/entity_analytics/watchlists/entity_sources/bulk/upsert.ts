@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { WatchlistBulkEntity } from '../types';
 import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
+import { addWatchlistAttributeToStore } from './entity_store_sync';
 
 export const UPDATE_SCRIPT_SOURCE = `
 def src = ctx._source;
@@ -91,12 +92,16 @@ export const applyBulkUpsert = async ({
   entities,
   source,
   targetIndex,
+  watchlistName,
+  namespace,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   entities: WatchlistBulkEntity[];
   source: MonitoringEntitySource;
   targetIndex: string;
+  watchlistName: string;
+  namespace: string;
 }) => {
   if (entities.length === 0) {
     return;
@@ -120,4 +125,12 @@ export const applyBulkUpsert = async ({
       }
     }
   }
+
+  await addWatchlistAttributeToStore({
+    esClient,
+    logger,
+    euids: entities.map((e) => e.euid),
+    watchlistName,
+    namespace,
+  });
 };

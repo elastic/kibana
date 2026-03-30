@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
+import { removeWatchlistAttributeFromStore } from './entity_store_sync';
 
 export interface StaleEntity {
   docId: string;
@@ -79,12 +80,16 @@ export const applyBulkRemoveSource = async ({
   staleEntities,
   sourceType,
   targetIndex,
+  watchlistName,
+  namespace,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   staleEntities: StaleEntity[];
   sourceType: string;
   targetIndex: string;
+  watchlistName: string;
+  namespace: string;
 }): Promise<void> => {
   if (staleEntities.length === 0) {
     return;
@@ -92,6 +97,7 @@ export const applyBulkRemoveSource = async ({
 
   const chunkSize = 500;
   const buildOps = bulkRemoveSourceOperationsFactory(logger);
+  const hardDeletedEuids: string[] = [];
 
   for (let start = 0; start < staleEntities.length; start += chunkSize) {
     const chunk = staleEntities.slice(start, start + chunkSize);
@@ -102,6 +108,24 @@ export const applyBulkRemoveSource = async ({
       if (errors.length > 0) {
         logger.error(`[WatchlistSync] Bulk remove-source errors: ${errorsMsg(errors)}`);
       }
+
+      for (let i = 0; i < chunk.length; i++) {
+        const item = resp.items[i];
+        const result = item?.update?.result;
+        if (result === 'deleted') {
+          hardDeletedEuids.push(chunk[i].docId);
+        }
+      }
     }
+  }
+
+  if (hardDeletedEuids.length > 0) {
+    await removeWatchlistAttributeFromStore({
+      esClient,
+      logger,
+      euids: hardDeletedEuids,
+      watchlistName,
+      namespace,
+    });
   }
 };
