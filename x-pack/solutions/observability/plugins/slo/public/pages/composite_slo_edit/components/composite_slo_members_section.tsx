@@ -183,10 +183,17 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
     enabled: isGrouped,
   });
 
-  const instanceOptions: EuiComboBoxOptionOption[] = (instances?.results ?? []).map((inst) => ({
-    label: inst.instanceId,
-    value: inst.instanceId,
-  }));
+  const allInstancesOption: EuiComboBoxOptionOption = {
+    label: i18n.translate('xpack.slo.compositeSloEdit.members.instanceId.allInstances', {
+      defaultMessage: 'All instances',
+    }),
+    value: ALL_VALUE,
+  };
+
+  const instanceOptions: EuiComboBoxOptionOption[] = [
+    allInstancesOption,
+    ...(instances?.results ?? []).map((inst) => ({ label: inst.instanceId, value: inst.instanceId })),
+  ];
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart">
@@ -211,12 +218,8 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
                   options={instanceOptions}
                   selectedOptions={selected}
                   onChange={(opts) => onChange(opts[0]?.value ?? ALL_VALUE)}
-                  isClearable={true}
+                  isClearable={false}
                   compressed
-                  placeholder={i18n.translate(
-                    'xpack.slo.compositeSloEdit.members.instanceId.allInstances',
-                    { defaultMessage: 'All instances' }
-                  )}
                   data-test-subj={`compositeSloMemberInstanceComboBox-${index}`}
                 />
               );
