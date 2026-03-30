@@ -12,7 +12,7 @@ import useAsync from 'react-use/lib/useAsync';
 
 const GET_RULES_BULK_ENDPOINT = '/internal/alerting/v2/rule/_bulk';
 
-export interface UseAlertingRulesIndexOptions {
+export interface UseAlertingRulesCacheOptions {
   ruleIds: string[];
   services: {
     http: HttpStart;
@@ -22,13 +22,13 @@ export interface UseAlertingRulesIndexOptions {
 type Rule = FindRulesResponse['items'][number];
 
 /**
- * Provides a rules index by id, fetching uncached rules
+ * Provides a rules cache by id, fetching uncached rules
  * with the minimum number of bulk requests possible.
- * Returns rulesIndex as state so consumers re-render when rules are loaded.
+ * Returns rulesCache as state so consumers re-render when rules are loaded.
  */
-export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesIndexOptions) => {
+export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCacheOptions) => {
   const cacheRef = useRef<Record<string, Rule>>({});
-  const [rulesIndex, setRulesIndex] = useState<Record<string, Rule>>({});
+  const [rulesCache, setRulesCache] = useState<Record<string, Rule>>({});
 
   const { loading, error } = useAsync(async () => {
     const uncachedIds = ruleIds.filter((id) => !cacheRef.current[id]);
@@ -43,11 +43,11 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesInd
     rulesResponse.items.forEach((rule) => {
       cacheRef.current[rule.id] = rule;
     });
-    setRulesIndex({ ...cacheRef.current });
+    setRulesCache({ ...cacheRef.current });
   }, [ruleIds, services.http]);
 
   return {
-    rulesCache: rulesIndex,
+    rulesCache,
     loading,
     error,
   };

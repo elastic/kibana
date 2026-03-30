@@ -35,7 +35,7 @@ import type {
 } from '@kbn/alerting-v2-episodes-ui/utils/build_episodes_esql_query';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { AlertingEpisodeStatusBadge } from '@kbn/alerting-v2-episodes-ui/components/alerting_episode_status_badge';
-import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_index';
+import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import useObservable from 'react-use/lib/useObservable';
 import type { InputTimeRange } from '@kbn/data-plugin/public/query';
 import type { DataTableRecord } from '@kbn/discover-utils';

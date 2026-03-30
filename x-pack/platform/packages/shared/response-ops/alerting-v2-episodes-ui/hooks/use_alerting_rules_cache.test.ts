@@ -6,7 +6,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { useAlertingRulesCache } from './use_alerting_rules_index';
+import { useAlertingRulesCache } from './use_alerting_rules_cache';
 import type { FindRulesResponse } from '@kbn/alerting-v2-plugin/public/services/rules_api';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
@@ -21,7 +21,7 @@ jest.mock('react-use/lib/useAsync', () => ({
 const mockHttp = httpServiceMock.createStartContract();
 const GET_RULES_BULK_ENDPOINT = '/internal/alerting/v2/rule/_bulk';
 
-describe('useAlertingRulesIndex', () => {
+describe('useAlertingRulesCache', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
