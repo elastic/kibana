@@ -19,7 +19,12 @@ import {
   expectedServiceEntities,
   expectedUserEntities,
 } from '../fixtures/entity_extraction_expected';
-import { forceLogExtraction, ingestDoc, searchDocById } from '../fixtures/helpers';
+import {
+  clearEntityStoreIndices,
+  forceLogExtraction,
+  ingestDoc,
+  searchDocById,
+} from '../fixtures/helpers';
 
 apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -49,13 +54,14 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     );
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest('Should extract properly extract host', async ({ apiClient, esClient }) => {
