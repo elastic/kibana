@@ -10,7 +10,23 @@
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { TriggerResolutionStats } from './resolve_workflow_subscriptions';
 import { createTriggerEventHandler } from './trigger_event_handler';
+
+function mockResolveResult(
+  workflows: WorkflowDetailDto[],
+  statsOverrides?: Partial<TriggerResolutionStats>
+) {
+  const stats: TriggerResolutionStats = {
+    subscribedCount: workflows.length,
+    disabledCount: 0,
+    kqlFalseCount: 0,
+    kqlErrorCount: 0,
+    matchedCount: workflows.length,
+    ...statsOverrides,
+  };
+  return { workflows, stats };
+}
 
 function getEngineMock(
   executionEnabled: boolean,
@@ -68,11 +84,13 @@ describe('createTriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn().mockResolvedValue(undefined);
     const resolveMatchingWorkflowSubscriptions = jest
       .fn()
-      .mockResolvedValue([createMockWorkflow({ id: 'wf-1' })]);
+      .mockResolvedValue(mockResolveResult([createMockWorkflow({ id: 'wf-1' })]));
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
 
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => null,
       getWorkflowExecutionEngine: getEngineMock(true),
       resolveMatchingWorkflowSubscriptions,
@@ -117,11 +135,13 @@ describe('createTriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn();
     const resolveMatchingWorkflowSubscriptions = jest
       .fn()
-      .mockResolvedValue([createMockWorkflow({ id: 'wf-1' })]);
+      .mockResolvedValue(mockResolveResult([createMockWorkflow({ id: 'wf-1' })]));
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
 
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => null,
       getWorkflowExecutionEngine: getEngineMock(true, true, maxEventChainDepth),
       resolveMatchingWorkflowSubscriptions,
@@ -151,11 +171,13 @@ describe('createTriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn().mockResolvedValue(undefined);
     const resolveMatchingWorkflowSubscriptions = jest
       .fn()
-      .mockResolvedValue([createMockWorkflow({ id: 'wf-1' })]);
+      .mockResolvedValue(mockResolveResult([createMockWorkflow({ id: 'wf-1' })]));
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
 
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => null,
       getWorkflowExecutionEngine: getEngineMock(true),
       resolveMatchingWorkflowSubscriptions,
@@ -184,11 +206,13 @@ describe('createTriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn().mockResolvedValue(undefined);
     const resolveMatchingWorkflowSubscriptions = jest
       .fn()
-      .mockResolvedValue([createMockWorkflow({ id: 'wf-1' })]);
+      .mockResolvedValue(mockResolveResult([createMockWorkflow({ id: 'wf-1' })]));
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
 
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => null,
       getWorkflowExecutionEngine: getEngineMock(true),
       resolveMatchingWorkflowSubscriptions,
@@ -216,12 +240,14 @@ describe('createTriggerEventHandler', () => {
   it('should not resolve or schedule when event-driven execution is disabled and logEvents is disabled', async () => {
     const resolveMatchingWorkflowSubscriptions = jest
       .fn()
-      .mockResolvedValue([createMockWorkflow({ id: 'wf-1' })]);
+      .mockResolvedValue(mockResolveResult([createMockWorkflow({ id: 'wf-1' })]));
     const scheduleWorkflow = jest.fn();
 
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => null,
       getWorkflowExecutionEngine: getEngineMock(false, false),
       resolveMatchingWorkflowSubscriptions,
@@ -241,6 +267,7 @@ describe('createTriggerEventHandler', () => {
     expect(mockLogger.debug).toHaveBeenCalledWith(
       'Event-driven execution is disabled (eventDrivenExecutionEnabled: false); skipping workflow scheduling.'
     );
+    expect(telemetryClient.reportTriggerEventDispatched).not.toHaveBeenCalled();
   });
 
   it('should resolve and write trigger event but not schedule when execution is disabled and logEvents is enabled', async () => {
@@ -253,14 +280,16 @@ describe('createTriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn();
     const resolveMatchingWorkflowSubscriptions = jest
       .fn()
-      .mockResolvedValue([createMockWorkflow({ id: 'wf-1' })]);
+      .mockResolvedValue(mockResolveResult([createMockWorkflow({ id: 'wf-1' })]));
 
     const createMock = jest.fn().mockResolvedValue(undefined);
     const mockTriggerEventsClient = { create: createMock };
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
 
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => mockTriggerEventsClient as any,
       getWorkflowExecutionEngine: getEngineMock(false, true),
       resolveMatchingWorkflowSubscriptions,
@@ -293,6 +322,18 @@ describe('createTriggerEventHandler', () => {
       ],
     });
     expect(scheduleWorkflow).not.toHaveBeenCalled();
+    expect(telemetryClient.reportTriggerEventDispatched).toHaveBeenCalledWith(
+      expect.objectContaining({
+        triggerId,
+        executionEnabled: false,
+        logEventsEnabled: true,
+        eventChainDepth: 0,
+        auditOnly: true,
+        subscriberResolutionMs: expect.any(Number),
+        matchedCount: 1,
+        scheduledAttemptCount: 0,
+      })
+    );
   });
 
   it('should schedule but not write to data stream when execution is enabled and logEvents is disabled', async () => {
@@ -303,14 +344,16 @@ describe('createTriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn().mockResolvedValue(undefined);
     const resolveMatchingWorkflowSubscriptions = jest
       .fn()
-      .mockResolvedValue([createMockWorkflow({ id: 'wf-1' })]);
+      .mockResolvedValue(mockResolveResult([createMockWorkflow({ id: 'wf-1' })]));
 
     const createMock = jest.fn().mockResolvedValue(undefined);
     const mockTriggerEventsClient = { create: createMock };
 
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => mockTriggerEventsClient as any,
       getWorkflowExecutionEngine: getEngineMock(true, false),
       resolveMatchingWorkflowSubscriptions,
@@ -332,17 +375,73 @@ describe('createTriggerEventHandler', () => {
       spaceId,
       expect.objectContaining({ event: expect.any(Object) }),
       mockRequest,
-      triggerId
+      triggerId,
+      expect.objectContaining({
+        eventDispatchTimestamp: timestamp,
+        eventTriggerId: triggerId,
+      })
+    );
+    expect(telemetryClient.reportTriggerEventDispatched).toHaveBeenCalledWith(
+      expect.objectContaining({
+        triggerId,
+        executionEnabled: true,
+        logEventsEnabled: false,
+        eventChainDepth: 0,
+        auditOnly: false,
+        subscriberResolutionMs: expect.any(Number),
+        matchedCount: 1,
+        scheduledAttemptCount: 1,
+      })
+    );
+  });
+
+  it('should include eventChainDepth from event chain context on dispatched telemetry', async () => {
+    const timestamp = '2025-01-01T12:00:00.000Z';
+    const triggerId = 'cases.updated';
+    const spaceId = 'default';
+    const payload = { caseId: 'case-1' };
+    const scheduleWorkflow = jest.fn().mockResolvedValue(undefined);
+    const resolveMatchingWorkflowSubscriptions = jest
+      .fn()
+      .mockResolvedValue(mockResolveResult([createMockWorkflow({ id: 'wf-1' })]));
+
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
+    const handler = createTriggerEventHandler({
+      api: { scheduleWorkflow } as any,
+      logger: mockLogger,
+      telemetryClient,
+      getTriggerEventsClient: () => null,
+      getWorkflowExecutionEngine: getEngineMock(true, false),
+      resolveMatchingWorkflowSubscriptions,
+    });
+
+    await handler({
+      timestamp,
+      triggerId,
+      spaceId,
+      payload,
+      request: mockRequest,
+      eventChainContext: { depth: 3, sourceWorkflowId: 'wf-parent' },
+    });
+
+    expect(telemetryClient.reportTriggerEventDispatched).toHaveBeenCalledWith(
+      expect.objectContaining({
+        triggerId,
+        eventChainDepth: 3,
+        matchedCount: 1,
+      })
     );
   });
 
   it('should not call scheduleWorkflow when no workflows are subscribed', async () => {
     const scheduleWorkflow = jest.fn();
-    const resolveMatchingWorkflowSubscriptions = jest.fn().mockResolvedValue([]);
+    const resolveMatchingWorkflowSubscriptions = jest.fn().mockResolvedValue(mockResolveResult([]));
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
 
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => null,
       getWorkflowExecutionEngine: getEngineMock(true),
       resolveMatchingWorkflowSubscriptions,
@@ -380,11 +479,15 @@ describe('createTriggerEventHandler', () => {
       return undefined;
     });
 
-    const resolveMatchingWorkflowSubscriptions = jest.fn().mockResolvedValue([wf1, wf2, wf3]);
+    const resolveMatchingWorkflowSubscriptions = jest
+      .fn()
+      .mockResolvedValue(mockResolveResult([wf1, wf2, wf3]));
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
 
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => null,
       getWorkflowExecutionEngine: getEngineMock(true),
       resolveMatchingWorkflowSubscriptions,
@@ -404,21 +507,33 @@ describe('createTriggerEventHandler', () => {
       'default',
       expect.objectContaining({ event: expect.any(Object) }),
       mockRequest,
-      'cases.updated'
+      'cases.updated',
+      expect.objectContaining({
+        eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
+        eventTriggerId: 'cases.updated',
+      })
     );
     expect(scheduleWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'wf-2' }),
       'default',
       expect.objectContaining({ event: expect.any(Object) }),
       mockRequest,
-      'cases.updated'
+      'cases.updated',
+      expect.objectContaining({
+        eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
+        eventTriggerId: 'cases.updated',
+      })
     );
     expect(scheduleWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'wf-3' }),
       'default',
       expect.objectContaining({ event: expect.any(Object) }),
       mockRequest,
-      'cases.updated'
+      'cases.updated',
+      expect.objectContaining({
+        eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
+        eventTriggerId: 'cases.updated',
+      })
     );
 
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
@@ -435,11 +550,15 @@ describe('createTriggerEventHandler', () => {
     const wf1 = createMockWorkflow({ id: 'wf-1' });
     const wf2 = createMockWorkflow({ id: 'wf-2' });
     const scheduleWorkflow = jest.fn().mockResolvedValue(undefined);
-    const resolveMatchingWorkflowSubscriptions = jest.fn().mockResolvedValue([wf1, wf2]);
+    const resolveMatchingWorkflowSubscriptions = jest
+      .fn()
+      .mockResolvedValue(mockResolveResult([wf1, wf2]));
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
 
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => null,
       getWorkflowExecutionEngine: getEngineMock(true),
       resolveMatchingWorkflowSubscriptions,
@@ -460,14 +579,22 @@ describe('createTriggerEventHandler', () => {
       'default',
       expect.objectContaining({ event: expect.any(Object) }),
       mockRequest,
-      'cases.updated'
+      'cases.updated',
+      expect.objectContaining({
+        eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
+        eventTriggerId: 'cases.updated',
+      })
     );
     expect(scheduleWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'wf-2' }),
       'default',
       expect.objectContaining({ event: expect.any(Object) }),
       mockRequest,
-      'cases.updated'
+      'cases.updated',
+      expect.objectContaining({
+        eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
+        eventTriggerId: 'cases.updated',
+      })
     );
   });
 
@@ -475,11 +602,15 @@ describe('createTriggerEventHandler', () => {
     const wf1 = createMockWorkflow({ id: 'wf-no-condition-1' });
     const wf2 = createMockWorkflow({ id: 'wf-no-condition-2' });
     const scheduleWorkflow = jest.fn().mockResolvedValue(undefined);
-    const resolveMatchingWorkflowSubscriptions = jest.fn().mockResolvedValue([wf1, wf2]);
+    const resolveMatchingWorkflowSubscriptions = jest
+      .fn()
+      .mockResolvedValue(mockResolveResult([wf1, wf2]));
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
 
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => null,
       getWorkflowExecutionEngine: getEngineMock(true),
       resolveMatchingWorkflowSubscriptions,
@@ -505,7 +636,11 @@ describe('createTriggerEventHandler', () => {
         }),
       }),
       mockRequest,
-      'cases.updated'
+      'cases.updated',
+      expect.objectContaining({
+        eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
+        eventTriggerId: 'cases.updated',
+      })
     );
     expect(scheduleWorkflow).toHaveBeenNthCalledWith(
       2,
@@ -513,7 +648,11 @@ describe('createTriggerEventHandler', () => {
       'default',
       expect.objectContaining({ event: expect.any(Object) }),
       mockRequest,
-      'cases.updated'
+      'cases.updated',
+      expect.objectContaining({
+        eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
+        eventTriggerId: 'cases.updated',
+      })
     );
   });
 
@@ -529,11 +668,13 @@ describe('createTriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn().mockResolvedValue(undefined);
     const resolveMatchingWorkflowSubscriptions = jest
       .fn()
-      .mockResolvedValue([validWf1, invalidWf, validWf2]);
+      .mockResolvedValue(mockResolveResult([validWf1, invalidWf, validWf2]));
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
 
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => null,
       getWorkflowExecutionEngine: getEngineMock(true),
       resolveMatchingWorkflowSubscriptions,
@@ -553,17 +694,26 @@ describe('createTriggerEventHandler', () => {
       'default',
       expect.objectContaining({ event: expect.any(Object) }),
       mockRequest,
-      'cases.updated'
+      'cases.updated',
+      expect.objectContaining({
+        eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
+        eventTriggerId: 'cases.updated',
+      })
     );
     expect(scheduleWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'wf-valid-2' }),
       'default',
       expect.objectContaining({ event: expect.any(Object) }),
       mockRequest,
-      'cases.updated'
+      'cases.updated',
+      expect.objectContaining({
+        eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
+        eventTriggerId: 'cases.updated',
+      })
     );
     expect(scheduleWorkflow).not.toHaveBeenCalledWith(
       expect.objectContaining({ id: 'wf-invalid' }),
+      expect.anything(),
       expect.anything(),
       expect.anything(),
       expect.anything(),
@@ -595,11 +745,15 @@ describe('createTriggerEventHandler', () => {
       });
     });
 
-    const resolveMatchingWorkflowSubscriptions = jest.fn().mockResolvedValue(workflows);
+    const resolveMatchingWorkflowSubscriptions = jest
+      .fn()
+      .mockResolvedValue(mockResolveResult(workflows));
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
 
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => null,
       getWorkflowExecutionEngine: getEngineMock(true),
       resolveMatchingWorkflowSubscriptions,
@@ -631,11 +785,15 @@ describe('createTriggerEventHandler', () => {
 
     const wf1 = createMockWorkflow({ id: 'wf-1' });
     const wf2 = createMockWorkflow({ id: 'wf-2' });
-    const resolveMatchingWorkflowSubscriptions = jest.fn().mockResolvedValue([wf1, wf2]);
+    const resolveMatchingWorkflowSubscriptions = jest
+      .fn()
+      .mockResolvedValue(mockResolveResult([wf1, wf2]));
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
 
     const handler = createTriggerEventHandler({
       api: { scheduleWorkflow } as any,
       logger: mockLogger,
+      telemetryClient,
       getTriggerEventsClient: () => null,
       getWorkflowExecutionEngine: getEngineMock(true),
       resolveMatchingWorkflowSubscriptions,
