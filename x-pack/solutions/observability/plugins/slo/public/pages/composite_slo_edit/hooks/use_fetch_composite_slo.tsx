@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { ALL_VALUE, type GetCompositeSLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, type GetCompositeSLOResponse, type GetSLOResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { CreateCompositeSLOForm } from '../types';
 
@@ -26,7 +26,21 @@ export function useFetchCompositeSlo(compositeSloId: string | undefined): Respon
         `/api/observability/slo_composites/${encodeURIComponent(compositeSloId!)}`,
         { signal }
       );
-      return toFormValues(response);
+
+      const uniqueSloIds = [...new Set(response.members.map((m) => m.sloId))];
+      const definitions = await Promise.all(
+        uniqueSloIds.map((id) =>
+          http
+            .get<GetSLOResponse>(`/api/observability/slos/${encodeURIComponent(id)}`, { signal })
+            .catch(() => null)
+        )
+      );
+
+      const defMap = new Map(
+        definitions.flatMap((d) => (d ? [[d.id, { name: d.name, groupBy: d.groupBy }]] : []))
+      );
+
+      return toFormValues(response, defMap);
     },
     enabled: Boolean(compositeSloId),
     retry: false,
@@ -36,17 +50,24 @@ export function useFetchCompositeSlo(compositeSloId: string | undefined): Respon
   return { isLoading, isError, data };
 }
 
-function toFormValues(response: GetCompositeSLOResponse): CreateCompositeSLOForm {
+function toFormValues(
+  response: GetCompositeSLOResponse,
+  defMap: Map<string, { name: string; groupBy: string | string[] }>
+): CreateCompositeSLOForm {
   return {
     name: response.name,
     description: response.description,
-    members: response.members.map(({ sloId, instanceId, weight }) => ({
-      sloId,
-      sloName: sloId,
-      groupBy: instanceId && instanceId !== ALL_VALUE ? instanceId : ALL_VALUE,
-      instanceId: instanceId ?? ALL_VALUE,
-      weight,
-    })),
+    members: response.members.map(({ sloId, instanceId, weight }) => {
+      const def = defMap.get(sloId);
+      const groupBy = def?.groupBy ?? ALL_VALUE;
+      return {
+        sloId,
+        sloName: def?.name ?? sloId,
+        groupBy,
+        instanceId: instanceId ?? ALL_VALUE,
+        weight,
+      };
+    }),
     timeWindow: response.timeWindow,
     objective: { target: response.objective.target * 100 },
     tags: response.tags ?? [],

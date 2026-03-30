@@ -38,11 +38,13 @@ export function CompositeSloMembersSection() {
     size: 50,
   });
 
-  const sloOptions: EuiComboBoxOptionOption[] = (sloDefinitions?.results ?? []).map((slo) => ({
-    label: slo.name,
-    value: slo.id,
-    key: slo.id,
-  }));
+  const sloOptions: EuiComboBoxOptionOption[] = (sloDefinitions?.results ?? [])
+    .filter((slo) => !slo.remote)
+    .map((slo) => ({
+      label: slo.name,
+      value: slo.id,
+      key: slo.id,
+    }));
 
   const handleAddMember = useCallback(
     (selected: EuiComboBoxOptionOption[]) => {
