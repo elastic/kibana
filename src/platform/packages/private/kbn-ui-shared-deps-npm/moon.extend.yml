@@ -7,7 +7,7 @@ tasks:
   extract-version-dependencies:
     command: node
     args:
-      - $workspaceRoot/scripts/extract_version_dependencies.js
+      - scripts/extract_version_dependencies.js
       - src/platform/packages/private/kbn-ui-shared-deps-npm/version_dependencies.txt
       - --collect
       - '@babel/runtime'
@@ -15,8 +15,6 @@ tasks:
       - '@elastic/apm-rum-core'
       - --collect
       - '@elastic/charts'
-      - --collect
-      - '@elastic/esql'
       - --collect
       - '@elastic/eui'
       - --collect
@@ -110,7 +108,7 @@ tasks:
     args:
       - build
     deps:
-      - extract-version-dependencies
+      - ~:extract-version-dependencies
       - '^:build-webpack'
     inputs:
       - '@group(src)'
