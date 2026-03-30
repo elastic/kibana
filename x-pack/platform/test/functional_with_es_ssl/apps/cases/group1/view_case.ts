@@ -49,10 +49,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('header-page-supplements');
         await testSubjects.existOrFail('case-action-bar-wrapper');
 
-        await testSubjects.existOrFail('case-view-tabs');
-        await testSubjects.existOrFail('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-title-activity');
-        await testSubjects.existOrFail('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-title-attachments');
         await testSubjects.existOrFail('description');
 
         await testSubjects.existOrFail('case-view-activity');
@@ -1120,6 +1118,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Files', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+      before(async () => {
+        // open attachments to have access to the files tab
+        await testSubjects.click('case-view-tab-title-attachments');
+      });
 
       it('adds a file to the case', async () => {
         // navigate to files tab
