@@ -16,6 +16,7 @@ import {
   LATEST_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 
 const DOCS_LIMIT = 2;
 const CCS_TEST_LOGS_INDEX = 'ccs-test-logs';
@@ -134,6 +135,7 @@ apiTest.describe(
           },
         },
       });
+      await clearEntityStoreIndices(esClient);
     });
 
     apiTest(

@@ -32,11 +32,13 @@ export const ContentBreakdown = ({
   formattedDoc,
   hit,
   renderFlyoutStreamProcessingLink,
+  renderCpsWarning,
 }: {
   dataView: DataView;
   formattedDoc: LogDocumentOverview;
   hit: DataTableRecord;
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
+  renderCpsWarning?: boolean;
 }) => {
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(hit.flattened, {
     includeFormattedValue: true,
@@ -76,6 +78,7 @@ export const ContentBreakdown = ({
                 hit={hit}
                 formattedDoc={formattedDoc}
                 renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+                renderCpsWarning={renderCpsWarning}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
