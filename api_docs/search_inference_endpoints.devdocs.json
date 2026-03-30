@@ -52,7 +52,7 @@
         "label": "InferenceEndpointsContract",
         "description": [],
         "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-        "lineNumber": 45,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -65,7 +65,9 @@
             "label": "getForFeature",
             "description": [],
             "signature": [
-              "(featureId: string) => Promise<",
+              "(featureId: string, request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>) => Promise<",
               {
                 "pluginId": "searchInferenceEndpoints",
                 "scope": "server",
@@ -76,7 +78,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -92,8 +94,26 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-                "lineNumber": 46,
+                "lineNumber": 49,
                 "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "searchInferenceEndpoints",
+                "id": "def-server.InferenceEndpointsContract.getForFeature.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+                "lineNumber": 49,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -112,7 +132,7 @@
         "label": "InferenceFeatureConfig",
         "description": [],
         "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-        "lineNumber": 15,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -125,7 +145,7 @@
             "label": "featureId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 16,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -141,7 +161,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 17,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -154,7 +174,7 @@
             "label": "featureName",
             "description": [],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 18,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -167,7 +187,7 @@
             "label": "featureDescription",
             "description": [],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 19,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -183,7 +203,7 @@
               "\"completion\" | \"sparse_embedding\" | \"text_embedding\" | \"rerank\" | \"chat_completion\""
             ],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 20,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -199,7 +219,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 21,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -215,7 +235,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 22,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -231,7 +251,7 @@
         "label": "InferenceFeatureRegistryContract",
         "description": [],
         "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-        "lineNumber": 27,
+        "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -262,7 +282,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 28,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -284,7 +304,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-                "lineNumber": 28,
+                "lineNumber": 30,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -321,7 +341,7 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-        "lineNumber": 31,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -345,7 +365,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 32,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -371,7 +391,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 33,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -387,7 +407,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-                "lineNumber": 33,
+                "lineNumber": 35,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -407,7 +427,7 @@
         "label": "ResolvedInferenceEndpoints",
         "description": [],
         "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-        "lineNumber": 40,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -430,7 +450,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 41,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -446,7 +466,20 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchInferenceEndpoints",
+            "id": "def-server.ResolvedInferenceEndpoints.soEntryFound",
+            "type": "boolean",
+            "tags": [],
+            "label": "soEntryFound",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -468,7 +501,7 @@
           "{ ok: true; } | { ok: false; error: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-        "lineNumber": 25,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -484,7 +517,7 @@
       "label": "SearchInferenceEndpointsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-      "lineNumber": 36,
+      "lineNumber": 38,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -506,7 +539,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-          "lineNumber": 37,
+          "lineNumber": 39,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -523,7 +556,7 @@
       "label": "SearchInferenceEndpointsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-      "lineNumber": 49,
+      "lineNumber": 52,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -545,7 +578,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-          "lineNumber": 50,
+          "lineNumber": 53,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -567,7 +600,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-          "lineNumber": 51,
+          "lineNumber": 54,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false

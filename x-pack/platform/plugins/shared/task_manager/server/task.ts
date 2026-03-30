@@ -529,3 +529,8 @@ export interface ApiKeyOptions {
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;
+
+// Local event log interface to avoid a circular dependency with @kbn/event-log-plugin in .tsconfig
+export interface TaskEventLogger {
+  logEvent(properties: object, id?: string): void;
+}

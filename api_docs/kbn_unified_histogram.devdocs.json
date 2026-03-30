@@ -1037,7 +1037,7 @@
           "\nEmitted when the histogram loading status changes"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "lineNumber": 82,
+        "lineNumber": 83,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1079,7 +1079,7 @@
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 86,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1104,7 +1104,7 @@
               "<boolean | undefined> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1793,7 +1793,7 @@
         "label": "UnifiedHistogramFetchParamsExternal",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "lineNumber": 182,
+        "lineNumber": 183,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1818,7 +1818,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 183,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1836,7 +1836,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 187,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1854,7 +1854,7 @@
               "AbortController | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 191,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1878,7 +1878,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 195,
+            "lineNumber": 196,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1911,7 +1911,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 199,
+            "lineNumber": 200,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1936,7 +1936,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 203,
+            "lineNumber": 204,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1961,7 +1961,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 207,
+            "lineNumber": 208,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1986,7 +1986,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 211,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2011,7 +2011,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 215,
+            "lineNumber": 216,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2036,7 +2036,7 @@
               "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; single_select: boolean; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 219,
+            "lineNumber": 220,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2061,7 +2061,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 223,
+            "lineNumber": 224,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2086,7 +2086,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 227,
+            "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2104,7 +2104,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 231,
+            "lineNumber": 232,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2122,7 +2122,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 235,
+            "lineNumber": 236,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2147,7 +2147,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 239,
+            "lineNumber": 240,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3673,7 +3673,7 @@
               " | undefined; }; visualization: unknown; }; }) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 243,
+            "lineNumber": 244,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4443,7 +4443,7 @@
                   " | undefined; }; visualization: unknown; }; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-                "lineNumber": 247,
+                "lineNumber": 248,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4764,6 +4764,23 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "AnalyticsServiceStart",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4947,7 +4964,7 @@
           "\nUnified Histogram type for recreating a stored Lens vis"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "lineNumber": 173,
+        "lineNumber": 174,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5717,7 +5734,7 @@
               " | undefined; }; visualization: unknown; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 177,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5733,7 +5750,7 @@
               "LensRequestData"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 178,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5749,7 +5766,7 @@
               "UnifiedHistogramSuggestionType"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 179,
+            "lineNumber": 180,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5767,7 +5784,7 @@
         "label": "UnifiedHistogramExternalVisContextStatus",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "lineNumber": 136,
+        "lineNumber": 137,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5828,7 +5845,7 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "lineNumber": 77,
+        "lineNumber": 78,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -12,12 +12,13 @@ import type {
   HttpResponsePayload,
   ResponseError,
 } from '@kbn/core/server';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import { ENTITY_ANALYTICS_V2_MODE_API_ERROR } from './translations';
 
 export const withEntityStoreV2Disabled = <P, Q, B, T extends HttpResponsePayload | ResponseError>(
-  isEntityAnalyticsEntityStoreV2Enabled: boolean,
+  isRiskScoringMaintainerEnabled: boolean,
   handler: (
     context: SecuritySolutionRequestHandlerContext,
     request: KibanaRequest<P, Q, B>,
@@ -29,7 +30,16 @@ export const withEntityStoreV2Disabled = <P, Q, B, T extends HttpResponsePayload
     request: KibanaRequest<P, Q, B>,
     response: KibanaResponseFactory
   ): Promise<IKibanaResponse<T>> => {
-    if (isEntityAnalyticsEntityStoreV2Enabled) {
+    if (isRiskScoringMaintainerEnabled) {
+      const core = await context.core;
+      const isEntityStoreV2ModeEnabled = await core.uiSettings.client.get<boolean>(
+        FF_ENABLE_ENTITY_STORE_V2
+      );
+
+      if (!isEntityStoreV2ModeEnabled) {
+        return handler(context, request, response);
+      }
+
       const siemResponse = buildSiemResponse(response);
       return siemResponse.error({
         statusCode: 400,
