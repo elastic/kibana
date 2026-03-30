@@ -510,7 +510,7 @@ export const SharepointOnline: ConnectorSpec = {
           .enum(['NAM', 'EUR', 'APC', 'LAM', 'MEA'])
           .optional()
           .describe(
-            'Search region (NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa)'
+            'Search region, only used with app-only (client credentials) auth. Ignored for delegated auth. (NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa)'
           ),
         from: z.number().optional().describe('Offset for pagination'),
         size: z.number().optional().describe('Number of results to return'),
@@ -522,7 +522,7 @@ export const SharepointOnline: ConnectorSpec = {
           entityTypes?: Array<'site' | 'list' | 'listItem' | 'drive' | 'driveItem'>;
           from?: number;
           size?: number;
-          region?: 'NAM' | 'EUR' | 'APC' | 'LAM' | 'MEA';
+          region?: 'US' | 'EUR' | 'APC' | 'LAM' | 'MEA';
         };
 
         if (!typedInput.query) {
@@ -531,6 +531,10 @@ export const SharepointOnline: ConnectorSpec = {
           );
         }
 
+        // region is only required for app-only (client credentials) auth.
+        // Sending region with delegated auth can cause a 400 error.
+        const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
+
         const searchRequest = {
           requests: [
             {
@@ -538,7 +542,7 @@ export const SharepointOnline: ConnectorSpec = {
               query: {
                 queryString: typedInput.query,
               },
-              region: typedInput.region ?? 'NAM',
+              ...(isAppOnly && { region: typedInput.region ?? 'NAM' }),
               ...(typedInput.from !== undefined && { from: typedInput.from }),
               ...(typedInput.size !== undefined && { size: typedInput.size }),
             },
