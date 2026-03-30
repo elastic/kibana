@@ -38,11 +38,13 @@ const buildFilterQuery = (excludeEntityIds: string[], searchQuery: string): stri
 
   const must: object[] = [];
   if (searchQuery) {
+    const pattern = `*${searchQuery}*`;
     must.push({
-      simple_query_string: {
-        query: `*${searchQuery}*`,
-        fields: ['entity.name', 'entity.id'],
-        default_operator: 'AND',
+      bool: {
+        should: [
+          { wildcard: { 'entity.name': { value: pattern, case_insensitive: true } } },
+          { wildcard: { 'entity.id': { value: pattern, case_insensitive: true } } },
+        ],
       },
     });
   }
