@@ -9,7 +9,7 @@ import { parseHealthDiagnosticQueries } from './health_diagnostic_query_parser';
 import {
   QueryType,
   Action,
-  type UnknownVersionQuery,
+  type ParseFailureQuery,
   type HealthDiagnosticQueryV1,
   type HealthDiagnosticQueryV2,
 } from './health_diagnostic_service.types';
@@ -71,7 +71,7 @@ describe('parseHealthDiagnosticQueries', () => {
       expect(q.filterlist).toEqual({ 'user.name': Action.KEEP });
     });
 
-    it('returns UnknownVersionQuery when v1 descriptor is missing required index field', () => {
+    it('returns ParseFailureQuery when v1 descriptor is missing required index field', () => {
       const yaml = `---
 id: bad
 name: bad
@@ -81,10 +81,23 @@ scheduleCron: 5m
 filterlist:
   user.name: keep`;
       const [q] = parseHealthDiagnosticQueries(yaml);
-      // parseV1 throws (missing index) → caught → parseUnknown
-      // version is absent in raw → parseUnknown returns version: -1
-      expect((q as UnknownVersionQuery)._raw).toBeDefined();
-      expect((q as UnknownVersionQuery).id).toBe('bad');
+      expect((q as ParseFailureQuery)._raw).toBeDefined();
+      expect((q as ParseFailureQuery).id).toBe('bad');
+    });
+
+    it('returns ParseFailureQuery when v1 descriptor is missing the enabled field', () => {
+      const yaml = `---
+id: no-enabled
+name: no-enabled
+index: logs-endpoint.*
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      expect((q as ParseFailureQuery)._raw).toBeDefined();
+      expect((q as ParseFailureQuery).id).toBe('no-enabled');
     });
   });
 
@@ -98,7 +111,7 @@ filterlist:
       expect(q.id).toBe('q2');
     });
 
-    it('returns UnknownVersionQuery when v2 descriptor is missing required integrations field', () => {
+    it('returns ParseFailureQuery when v2 descriptor is missing required integrations field', () => {
       const yaml = `---
 version: 2
 id: bad-v2
@@ -109,9 +122,7 @@ scheduleCron: 5m
 filterlist:
   user.name: keep`;
       const [q] = parseHealthDiagnosticQueries(yaml);
-      // parseV2 throws (missing integrations) → caught → parseUnknown
-      // version is present as 2 in raw → parseUnknown returns version: 2
-      expect((q as UnknownVersionQuery)._raw).toBeDefined();
+      expect((q as ParseFailureQuery)._raw).toBeDefined();
     });
   });
 
@@ -143,10 +154,10 @@ enabled: true`;
   });
 
   describe('unknown version', () => {
-    it('returns UnknownVersionQuery for an unrecognised version', () => {
+    it('returns ParseFailureQuery for an unrecognised version', () => {
       const [q] = parseHealthDiagnosticQueries(UNKNOWN_VERSION_YAML);
-      expect((q as UnknownVersionQuery)._raw).toBeDefined();
-      expect((q as UnknownVersionQuery).id).toBe('q-future');
+      expect((q as ParseFailureQuery)._raw).toBeDefined();
+      expect((q as ParseFailureQuery).id).toBe('q-future');
     });
   });
 
@@ -157,10 +168,10 @@ enabled: true`;
       expect(queries).toHaveLength(3);
       expect((queries[0] as HealthDiagnosticQueryV1).version).toBe(1);
       expect((queries[1] as HealthDiagnosticQueryV2).version).toBe(2);
-      expect((queries[2] as UnknownVersionQuery)._raw).toBeDefined();
+      expect((queries[2] as ParseFailureQuery)._raw).toBeDefined();
     });
 
-    it('a malformed document becomes UnknownVersionQuery without dropping others', () => {
+    it('a malformed document becomes ParseFailureQuery without dropping others', () => {
       const goodDoc = `---
 id: good
 name: good
@@ -183,7 +194,7 @@ filterlist:
       const queries = parseHealthDiagnosticQueries(`${goodDoc}\n${badDoc}`);
       expect(queries).toHaveLength(2);
       expect((queries[0] as HealthDiagnosticQueryV1).version).toBe(1);
-      expect((queries[1] as UnknownVersionQuery)._raw).toBeDefined();
+      expect((queries[1] as ParseFailureQuery)._raw).toBeDefined();
     });
   });
 });

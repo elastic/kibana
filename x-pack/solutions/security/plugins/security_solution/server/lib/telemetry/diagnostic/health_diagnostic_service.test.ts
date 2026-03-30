@@ -142,7 +142,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
       });
 
       describe('query attribute filtering', () => {
-        test('should filter out queries with unknown version (missing scheduleCron and enabled)', async () => {
+        test('should emit a skipped stat for queries with unrecognised versions', async () => {
           (artifactService.getArtifact as jest.Mock).mockResolvedValue({
             data: `---
 id: unknown-version-query
@@ -158,11 +158,21 @@ enabled: true`,
 
           const result = await service.runHealthDiagnosticQueries({});
 
-          expect(result).toHaveLength(0);
+          expect(result).toHaveLength(1);
+          expect(result[0]).toMatchObject({
+            name: 'unknown-version-query',
+            status: 'skipped',
+            skipReason: 'parse_failure',
+            passed: false,
+          });
           expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+          expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+            TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT.eventType,
+            expect.objectContaining({ status: 'skipped', skipReason: 'parse_failure' })
+          );
         });
 
-        test('should filter out queries missing the enabled attribute', async () => {
+        test('should emit a skipped stat for queries missing the enabled attribute', async () => {
           (artifactService.getArtifact as jest.Mock).mockResolvedValue({
             data: `---
 id: no-enabled-query
@@ -177,11 +187,16 @@ filterlist:
 
           const result = await service.runHealthDiagnosticQueries({});
 
-          expect(result).toHaveLength(0);
+          expect(result).toHaveLength(1);
+          expect(result[0]).toMatchObject({
+            status: 'skipped',
+            skipReason: 'parse_failure',
+            passed: false,
+          });
           expect(mockQueryExecutor.search).not.toHaveBeenCalled();
         });
 
-        test('should only execute valid queries when mixed with unknown-version queries', async () => {
+        test('should execute valid queries and emit skipped stats for unknown-version queries', async () => {
           (artifactService.getArtifact as jest.Mock).mockResolvedValue({
             data: `---
 id: valid-query-1
@@ -209,8 +224,15 @@ enabled: true`,
 
           const result = await service.runHealthDiagnosticQueries({});
 
-          expect(result).toHaveLength(1);
-          expect(result[0].name).toBe('valid-query-1');
+          expect(result).toHaveLength(2);
+          const validResult = result.find((r) => r.name === 'valid-query-1');
+          const unknownResult = result.find((r) => r.name === 'unknown-version-query');
+          expect(validResult).toMatchObject({ status: 'success', passed: true });
+          expect(unknownResult).toMatchObject({
+            status: 'skipped',
+            skipReason: 'parse_failure',
+            passed: false,
+          });
           expect(mockQueryExecutor.search).toHaveBeenCalledTimes(1);
         });
       });

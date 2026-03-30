@@ -10,7 +10,7 @@ import type {
   HealthDiagnosticQuery,
   HealthDiagnosticQueryV1,
   HealthDiagnosticQueryV2,
-  UnknownVersionQuery,
+  ParseFailureQuery,
 } from './health_diagnostic_service.types';
 
 export const parseHealthDiagnosticQueries = (input: unknown): HealthDiagnosticQuery[] =>
@@ -41,6 +41,7 @@ const parseV1 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV1 =
   assertRequiredString(raw, 'query');
   assertRequiredString(raw, 'scheduleCron');
   assertRequiredObject(raw, 'filterlist');
+  assertRequiredBoolean(raw, 'enabled');
 
   return { ...(raw as Record<string, unknown>), version: 1 } as HealthDiagnosticQueryV1;
 };
@@ -53,6 +54,7 @@ const parseV2 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV2 =
   assertRequiredString(raw, 'query');
   assertRequiredString(raw, 'scheduleCron');
   assertRequiredObject(raw, 'filterlist');
+  assertRequiredBoolean(raw, 'enabled');
 
   const integrations = ((raw as Record<string, unknown>).integrations as string)
     .split(',')
@@ -76,7 +78,7 @@ const parseV2 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV2 =
   } as HealthDiagnosticQueryV2;
 };
 
-const parseUnknown = (raw: unknown): UnknownVersionQuery => {
+const parseUnknown = (raw: unknown): ParseFailureQuery => {
   const obj = raw as Record<string, unknown> | null;
   return {
     id: obj?.id as string | undefined,
@@ -93,6 +95,12 @@ const assertRequiredString = (raw: Record<string, unknown> | null, field: string
 
 const assertRequiredObject = (raw: Record<string, unknown> | null, field: string): void => {
   if (!raw || typeof raw[field] !== 'object' || raw[field] === null) {
+    throw new Error(`Missing or invalid required field: ${field}`);
+  }
+};
+
+const assertRequiredBoolean = (raw: Record<string, unknown> | null, field: string): void => {
+  if (!raw || typeof raw[field] !== 'boolean') {
     throw new Error(`Missing or invalid required field: ${field}`);
   }
 };

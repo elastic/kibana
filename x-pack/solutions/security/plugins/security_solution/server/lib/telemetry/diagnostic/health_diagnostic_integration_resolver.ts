@@ -121,12 +121,11 @@ export class IntegrationResolverImpl implements IntegrationResolver {
   }
 
   private resolveUnknown(query: HealthDiagnosticQuery): SkippedQuery {
-    this.logger.warn('Skipping query with unrecognised version', {
+    this.logger.warn('Skipping query that failed to parse', {
       queryId: (query as any).id, // eslint-disable-line @typescript-eslint/no-explicit-any
       name: query.name,
-      version: (query as any).version, // eslint-disable-line @typescript-eslint/no-explicit-any
     } as LogMeta);
-    return { kind: 'skipped', query, reason: 'unknown_version' };
+    return { kind: 'skipped', query, reason: 'parse_failure' };
   }
 
   private async fetchInstalledPackages(): Promise<InstalledPackage[]> {

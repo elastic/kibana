@@ -286,14 +286,14 @@ describe('IntegrationResolverImpl', () => {
   });
 
   describe('unknown version queries', () => {
-    it('returns SkippedQuery for UnknownVersionQuery', async () => {
+    it('returns SkippedQuery for ParseFailureQuery', async () => {
       const unknown = { version: 99, id: 'future', name: 'future', _raw: {} };
       const results = await resolver.resolve([unknown]);
 
       expect(results).toHaveLength(1);
       expect(results[0].kind).toBe('skipped');
       if (results[0].kind !== 'skipped') throw new Error('type guard');
-      expect(results[0].reason).toBe('unknown_version');
+      expect(results[0].reason).toBe('parse_failure');
     });
   });
 

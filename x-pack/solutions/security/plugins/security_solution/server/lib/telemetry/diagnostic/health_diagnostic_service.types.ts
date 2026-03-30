@@ -93,7 +93,7 @@ export interface HealthDiagnosticQueryBase {
   query: string;
   scheduleCron: string;
   filterlist: Record<string, Action>;
-  enabled?: boolean;
+  enabled: boolean;
   size?: number;
   encryptionKeyId?: string;
   tiers?: string[];
@@ -119,10 +119,12 @@ export interface HealthDiagnosticQueryV2 extends HealthDiagnosticQueryBase {
 }
 
 /**
- * Produced when the parser encounters a version number it doesn't recognise.
- * Carries the raw data for logging; always results in a skipped execution.
+ * Produced when the parser fails to produce a valid V1 or V2 descriptor —
+ * either an unrecognised version number or missing required fields.
+ * Carries the raw data for logging and reporting the stats; always results in
+ * a skipped execution.
  */
-export interface UnknownVersionQuery {
+export interface ParseFailureQuery {
   id?: string;
   name?: string;
   _raw: unknown;
@@ -131,7 +133,7 @@ export interface UnknownVersionQuery {
 export type HealthDiagnosticQuery =
   | HealthDiagnosticQueryV1
   | HealthDiagnosticQueryV2
-  | UnknownVersionQuery;
+  | ParseFailureQuery;
 
 /**
  * Result of resolving a v2 query's integration patterns against Fleet.
@@ -153,7 +155,7 @@ export type ExecutableQuery =
 export type SkipReason =
   | 'datastreams_not_matched'
   | 'integration_not_installed'
-  | 'unknown_version'
+  | 'parse_failure'
   | 'fleet_unavailable'
   | 'unsupported_query';
 

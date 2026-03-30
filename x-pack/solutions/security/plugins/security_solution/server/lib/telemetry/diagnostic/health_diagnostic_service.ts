@@ -29,8 +29,7 @@ import {
   type HealthDiagnosticService,
   type HealthDiagnosticServiceSetup,
   type HealthDiagnosticServiceStart,
-  type HealthDiagnosticQueryV1,
-  type HealthDiagnosticQueryV2,
+  type ParseFailureQuery,
 } from './health_diagnostic_service.types';
 import {
   emptyStat as queryStat,
@@ -357,6 +356,10 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     }
   }
 
+  private isParseFailureQuery(query: HealthDiagnosticQuery): query is ParseFailureQuery {
+    return '_raw' in query;
+  }
+
   private async getRunnableHealthQueries(
     lastExecutionByQuery: Record<string, number>,
     now: Date
@@ -367,14 +370,13 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
         query: query.name,
       } as LogMeta);
       try {
-        if (!('scheduleCron' in query) || !('enabled' in query)) {
-          return false;
+        if (this.isParseFailureQuery(query)) {
+          // let it pass the filter to send the stats, i.e. this kind of query will be always
+          // skipped in the execution phase, but we want to report it in the stats with the
+          // parse failure reason.
+          return true;
         }
-        const {
-          name,
-          scheduleCron,
-          enabled = false,
-        } = query as HealthDiagnosticQueryV1 | HealthDiagnosticQueryV2;
+        const { name, scheduleCron, enabled } = query;
         const lastExecutedAt = new Date(lastExecutionByQuery[name] ?? 0);
         return enabled && isDueForExecution(lastExecutedAt, now, scheduleCron);
       } catch (error) {
