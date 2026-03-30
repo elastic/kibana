@@ -33,8 +33,12 @@ function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
  * Custom trigger event schemas are resolved via the triggerSchemas singleton (same pattern as stepSchemas for steps).
  * Uses shape spread instead of deprecated Zod v4 .merge().
  */
-function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.ZodType {
+function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): {
+  eventSchema: z.ZodType;
+  inputsSchema: z.ZodType | undefined;
+} {
   const triggerEventSchemas: z.ZodType[] = [];
+  let inputsSchema: z.ZodType | undefined = undefined;
 
   for (const trigger of triggers.filter((t) => typeof t.type === 'string') as Array<{
     type: string;
@@ -46,7 +50,8 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
 
       if (trigger.inputs) {
         const inputs = normalizeFieldsToJsonSchema(trigger.inputs);
-        eventShape.inputs = buildFieldsZodValidator(inputs);
+        inputsSchema = buildFieldsZodValidator(inputs);
+        eventShape.inputs = inputsSchema;
       }
 
       triggerEventSchemas.push(z.object(eventShape));
@@ -64,13 +69,19 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
   }
 
   if (triggerEventSchemas.length === 0) {
-    return z.unknown().optional();
+    return {
+      eventSchema: z.unknown().optional(),
+      inputsSchema: undefined,
+    };
   }
 
-  const schema =
+  const eventSchema =
     triggerEventSchemas.length === 1 ? triggerEventSchemas[0] : z.union(triggerEventSchemas);
 
-  return schema.optional();
+  return {
+    eventSchema,
+    inputsSchema,
+  };
 }
 
 /**
@@ -106,9 +117,9 @@ export function getWorkflowContextSchema(
 
   const normalizedOutputs = normalizeFieldsToJsonSchema(outputs);
 
-  const eventSchema = buildEventSchemaFromTriggers(definition.triggers ?? []);
+  const { eventSchema, inputsSchema } = buildEventSchemaFromTriggers(definition.triggers ?? []);
 
-  return DynamicWorkflowContextSchema.extend({
+  let workflowContext: typeof DynamicWorkflowContextSchema = DynamicWorkflowContextSchema.extend({
     output: buildFieldsZodValidator(normalizedOutputs),
     consts: z.object({
       ...Object.fromEntries(
@@ -119,5 +130,14 @@ export function getWorkflowContextSchema(
       ),
     }),
     event: eventSchema,
-  }) as typeof DynamicWorkflowContextSchema;
+  }).omit({ inputs: true }) as typeof DynamicWorkflowContextSchema;
+
+  // Ensures that inputs are only available when manual trigger is explicitly defined with inputs
+  if (inputsSchema) {
+    workflowContext = workflowContext.extend({
+      inputs: inputsSchema,
+    }) as typeof DynamicWorkflowContextSchema;
+  }
+
+  return workflowContext;
 }

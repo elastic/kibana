@@ -870,20 +870,15 @@ export const WorkflowContextSchema = z.object({
 });
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
-export const DynamicWorkflowContextSchema = WorkflowContextSchema
-  // Omit base `inputs` so autocomplete only shows typed inputs when the workflow defines them.
-  // getWorkflowContextSchema() adds a properly typed `inputs` field back when applicable.
-  // TODO(https://github.com/elastic/security-team/issues/16526): Remove this .omit() once the inputs migration to manual trigger is fully complete.
-  .omit({ inputs: true })
-  .extend({
-    // overriding record with object to avoid type mismatch when
-    // extending with actual inputs, outputs and consts of different types
-    output: z.object({}),
-    consts: z.object({}),
-    // overriding event with base event schema (spaceId only) so it can be
-    // dynamically extended with trigger-specific properties (e.g., alerts, rule)
-    event: BaseEventSchema.optional(),
-  });
+export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
+  // overriding record with object to avoid type mismatch when
+  // extending with actual inputs, outputs and consts of different types
+  output: z.object({}),
+  consts: z.object({}),
+  // overriding event with base event schema (spaceId only) so it can be
+  // dynamically extended with trigger-specific properties (e.g., alerts, rule)
+  event: BaseEventSchema.optional(),
+});
 export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
 
 export const StepDataSchema = z.object({
