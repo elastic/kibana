@@ -52,6 +52,7 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     collectValues({ source: 'event.module' }),
     collectValues({ source: 'event.dataset' }),
     collectValues({ source: 'data_stream.dataset', fieldHistoryLength: 50 }),
+    collectValues({ source: ENTITY_SOURCE_FIELD, fieldHistoryLength: 50 }),
     newestValue({ source: `${prefix}.type`, destination: 'entity.type' }),
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
