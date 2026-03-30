@@ -837,11 +837,10 @@ const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
 
 export const WorkflowContextSchema = z.object({
   /**
-   * @deprecated Workflow inputs are now defined on the manual trigger (`triggers[type=manual].inputs`),
-   * not at the workflow root. This field remains on the runtime context for backward compatibility
-   * and is populated from the trigger's input values at execution time.
+   * Alias for the inputs defined on the manual trigger (`triggers[type=manual].inputs`) or
+   * workflow call trigger (`triggers[type=workflow_call].inputs`). Populated from the trigger's
+   * event.input values at execution time.
    */
-  // TODO(https://github.com/elastic/security-team/issues/16526): Remove this "inputs" field once the inputs migration to manual trigger is fully complete.
   inputs: z.record(z.string(), z.unknown()).optional(),
   event: z.unknown().optional(),
   execution: WorkflowExecutionContextSchema,
