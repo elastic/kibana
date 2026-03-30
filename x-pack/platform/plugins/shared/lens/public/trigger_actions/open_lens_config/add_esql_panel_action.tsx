@@ -17,6 +17,7 @@ import type { LensApi } from '@kbn/lens-common-2';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
 import { generateId } from '../../id_generator';
 import { mountInlinePanel } from '../../react_embeddable/mount';
+import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 
 export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_ESQL_CHART;
@@ -55,7 +56,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
       loadContent: async ({ closeFlyout } = { closeFlyout: () => {} }) => {
         const embeddable = await api.addNewPanel<object, LensApi>({
           maybePanelId: uuid,
-          panelType: 'lens',
+          panelType: LENS_EMBEDDABLE_TYPE,
           serializedState: {
             id: uuid,
             isNewPanel: true,

@@ -350,11 +350,14 @@ export function isDataViewDataset(dataset: LensDataset): dataset is LensDataview
   return 'index' in dataset;
 }
 
+// TODO consolidate with LENS_EMBEDDABLE_TYPE from x-pack/platform/plugins/shared/lens/common/constants.ts
+const LENS_EMBEDDABLE_TYPE = 'vis';
+
 export function isLensAPIFormat(config: unknown): config is LensApiState {
   // We need to check the type is not lens because embeddable logic sometimes add it for some reason.
   // See https://github.com/elastic/kibana/issues/250115
   return (
-    typeof config === 'object' && config !== null && 'type' in config && config.type !== 'lens'
+    typeof config === 'object' && config !== null && 'type' in config && config.type !== LENS_EMBEDDABLE_TYPE
   );
 }
 
