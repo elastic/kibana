@@ -37,6 +37,15 @@ describe(
 
     beforeEach(() => {
       login();
+      // Set grouping to "none" so the flat EntitiesDataTable renders.
+      // Default "Resolution" grouping renders GroupWrapper, which doesn't
+      // contain the ENTITIES_TABLE_GRID or TIMELINE_ACTION test subjects.
+      cy.window().then((win) =>
+        win.localStorage.setItem(
+          'groups',
+          JSON.stringify({ 'entityAnalytics:grouping': { activeGroups: ['none'] } })
+        )
+      );
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
       cy.url().should('include', ENTITY_ANALYTICS_HOME_PAGE_URL);
     });
