@@ -8,17 +8,11 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { HasEmbeddableStateManager } from './has_embeddable_state_manager';
 
-export interface PublishesUnsavedChanges extends HasEmbeddableStateManager {
+export interface PublishesUnsavedChanges {
   hasUnsavedChanges$: Observable<boolean>; // Observable rather than publishingSubject because it should be derived.
 }
 
 export const apiPublishesUnsavedChanges = (api: unknown): api is PublishesUnsavedChanges => {
-  return Boolean(
-    api &&
-      (api as PublishesUnsavedChanges).hasUnsavedChanges$ &&
-      (api as PublishesUnsavedChanges).serializeState &&
-      (api as PublishesUnsavedChanges).applySerializedState
-  );
+  return Boolean(api && (api as PublishesUnsavedChanges).hasUnsavedChanges$);
 };

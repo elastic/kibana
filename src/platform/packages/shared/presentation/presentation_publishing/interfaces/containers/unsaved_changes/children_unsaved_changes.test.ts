@@ -14,14 +14,10 @@ import { waitFor } from '@testing-library/react';
 describe('childrenUnsavedChanges$', () => {
   const child1Api = {
     uuid: 'child1',
-    serializeState: () => ({}),
-    applySerializedState: () => undefined,
     hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
   };
   const child2Api = {
     uuid: 'child2',
-    serializeState: () => ({}),
-    applySerializedState: () => undefined,
     hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
   };
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
@@ -119,8 +115,6 @@ describe('childrenUnsavedChanges$', () => {
       ...children$.value,
       child3: {
         uuid: 'child3',
-        serializeState: () => ({}),
-        applySerializedState: () => undefined,
         hasUnsavedChanges$: new BehaviorSubject<boolean>(true),
       },
     });

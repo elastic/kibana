@@ -18,7 +18,6 @@ import type {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import {
-  apiCanApplySerializedState,
   apiHasSerializableState,
   apiPublishesDataLoading,
   childrenUnsavedChanges$,
@@ -168,7 +167,7 @@ export function getPageApi() {
       const existsInNextLayout = nextLayout.some(({ id }) => id === uuid);
       if (existsInNextLayout) {
         const child = currentChildren[uuid];
-        if (apiCanApplySerializedState(child)) {
+        if (apiHasSerializableState(child)) {
           void child.applySerializedState(nextChildState[uuid]);
         }
       } else {

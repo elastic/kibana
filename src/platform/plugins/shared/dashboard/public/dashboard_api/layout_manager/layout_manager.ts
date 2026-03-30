@@ -34,7 +34,6 @@ import { i18n } from '@kbn/i18n';
 import type { SerializedTitles, PanelPackage } from '@kbn/presentation-publishing';
 import {
   childrenUnsavedChanges$,
-  apiCanApplySerializedState,
   apiHasLibraryTransforms,
   apiHasSerializableState,
   apiPublishesTitle,
@@ -160,7 +159,7 @@ export function initializeLayoutManager(
       if (layoutToApply.panels[uuid] || layoutToApply.pinnedPanels[uuid]) {
         const child = currentChildren[uuid];
         const nextChildState = childStateToApply[uuid];
-        if (apiCanApplySerializedState(child)) {
+        if (apiHasSerializableState(child)) {
           child.applySerializedState(nextChildState);
         }
       } else {

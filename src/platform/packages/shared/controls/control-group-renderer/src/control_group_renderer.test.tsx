@@ -14,7 +14,7 @@ import {
   type EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Filter } from '@kbn/es-query';
-import type { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
+import type { HasSerializableState } from '@kbn/presentation-publishing';
 import { act, render, waitFor } from '@testing-library/react';
 
 import { BehaviorSubject } from 'rxjs';
@@ -100,7 +100,7 @@ describe('control group renderer', () => {
       }),
     });
     const applySpy = jest.spyOn(
-      api.children$.getValue().test as PublishesUnsavedChanges,
+      api.children$.getValue().test as HasSerializableState,
       'applySerializedState'
     );
     act(() =>
