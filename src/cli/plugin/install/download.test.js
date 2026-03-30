@@ -17,7 +17,6 @@ import globby from 'globby';
 import del from 'del';
 
 import { Logger } from '../../logger';
-import { UnsupportedProtocolError } from '../lib/errors';
 import { download, _downloadSingle, _getFilePath, _checkFilePathDeprecation } from './download';
 
 describe('kibana cli', function () {
