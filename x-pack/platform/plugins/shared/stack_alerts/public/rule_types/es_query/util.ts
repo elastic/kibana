@@ -24,9 +24,12 @@ export const isEsqlQueryRule = (
   return ruleParams.searchType === 'esqlQuery';
 };
 
-export const convertFieldSpecToFieldOption = (fieldSpec: FieldSpec[]): FieldOption[] => {
+export const convertFieldSpecToFieldOption = (
+  fieldSpec: FieldSpec[],
+  onlyMappedOrRuntime: boolean = true
+): FieldOption[] => {
   return (fieldSpec ?? [])
-    .filter((spec: FieldSpec) => spec.isMapped || spec.runtimeField)
+    .filter((spec: FieldSpec) => (onlyMappedOrRuntime ? spec.isMapped || spec.runtimeField : true))
     .map((spec: FieldSpec) => {
       const converted = {
         name: spec.name,

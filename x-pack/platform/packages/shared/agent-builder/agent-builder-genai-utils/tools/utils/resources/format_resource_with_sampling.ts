@@ -6,7 +6,7 @@
  */
 
 import { take } from 'lodash';
-import type { ResolvedResourceWithSampling } from './resolve_resource_with_sampling_stats';
+import type { ResolvedResourceWithSampling } from './resolve_resource_for_esql_with_sampling_stats';
 import type { MappingFieldWithStats } from '../sampling';
 
 /**

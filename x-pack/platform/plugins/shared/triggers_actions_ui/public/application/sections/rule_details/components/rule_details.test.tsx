@@ -540,8 +540,7 @@ describe('rule_details', () => {
     });
 
     describe('links', () => {
-      it('renders view in app button in management context', () => {
-        (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+      it('renders view in app button', () => {
         const rule = mockRule();
         expect(
           shallowWithIntl(

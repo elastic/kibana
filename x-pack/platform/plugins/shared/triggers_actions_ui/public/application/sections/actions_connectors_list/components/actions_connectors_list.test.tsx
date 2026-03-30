@@ -40,6 +40,19 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ search: '' }),
   useHistory: jest.fn().mockReturnValue({ push: jest.fn(), createHref: jest.fn() }),
 }));
+jest.mock('@kbn/response-ops-oauth-hooks', () => ({
+  ...jest.requireActual('@kbn/response-ops-oauth-hooks'),
+  useConnectorOAuthConnect: jest.fn().mockReturnValue({
+    connect: jest.fn(),
+    cancelConnect: jest.fn(),
+    isConnecting: false,
+    isAwaitingCallback: false,
+  }),
+  useConnectorOAuthDisconnect: jest.fn().mockReturnValue({
+    disconnect: jest.fn(),
+    isDisconnecting: false,
+  }),
+}));
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const actionTypeRegistry = actionTypeRegistryMock.create();

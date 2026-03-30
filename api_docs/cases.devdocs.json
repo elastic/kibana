@@ -16,7 +16,7 @@
           ") => string"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/common/navigation/paths.ts",
-        "lineNumber": 63,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,7 +32,7 @@
               "CaseViewPathParams"
             ],
             "path": "x-pack/platform/plugins/shared/cases/public/common/navigation/paths.ts",
-            "lineNumber": 63,
+            "lineNumber": 62,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
