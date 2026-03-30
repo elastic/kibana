@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './steps';
+export {
+  SavedObjectsTracker,
+  cleanupDownloadedFile,
+  installLogsSampleData,
+  removeLogsSampleData,
+} from './sample_data_lifecycle';
