@@ -249,7 +249,7 @@ function StreamNode({
               margin-right: ${euiThemeVars.euiSizeXS};
             `}
           >
-            <EuiIcon type={collapsed?.[node.name] ? 'arrowRight' : 'arrowDown'} />
+            <EuiIcon type={collapsed?.[node.name] ? 'chevronSingleRight' : 'chevronSingleDown'} />
           </button>
         )}
         <EuiLink
@@ -287,7 +287,7 @@ function StreamNode({
               aria-label={i18n.translate('xpack.streams.streamsTable.openInNewTab', {
                 defaultMessage: 'Open in new tab',
               })}
-              iconType="popout"
+              iconType="external"
               target="_blank"
               href={router.link('/{key}', { path: { key: node.name } })}
             />
