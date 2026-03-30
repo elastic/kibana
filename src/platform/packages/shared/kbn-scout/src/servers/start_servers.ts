@@ -43,6 +43,8 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       logsDir: options.logsDir,
     });
 
+    await ensureDefaultSpaceNPRE(config, log);
+
     await runKibanaServer({
       procs,
       config,
@@ -61,8 +63,6 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
 
     // Pre-create Elasticsearch Security indexes after server startup
     await preCreateSecurityIndexesViaSamlAuth(config, log);
-    // Ensure default space CPS routing expression for local CPS setups
-    await ensureDefaultSpaceNPRE(config, log);
 
     log.success(
       '\n\n' +
