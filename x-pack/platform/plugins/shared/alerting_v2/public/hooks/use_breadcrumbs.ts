@@ -9,7 +9,11 @@ import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { MouseEvent } from 'react';
 import { useEffect } from 'react';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { ALERTING_V2_RULES_MANAGEMENT_PATH, MANAGEMENT_APP_ID } from '../constants';
+import {
+  ALERTING_V2_RULES_MANAGEMENT_PATH,
+  ALERTING_V2_NOTIFICATION_POLICIES_MANAGEMENT_PATH,
+  MANAGEMENT_APP_ID,
+} from '../constants';
 import { getAlertingV2Breadcrumb, type AlertingV2BreadcrumbPage } from '../lib/breadcrumb';
 
 export interface UseBreadcrumbsOptions {
@@ -43,10 +47,21 @@ export function useBreadcrumbs(
   const application = useService(CoreStart('application'));
 
   useEffect(() => {
-    const listBreadcrumb: ChromeBreadcrumb = {
+    const rootBreadcrumb: ChromeBreadcrumb = {
+      ...getAlertingV2Breadcrumb('root'),
+    };
+
+    const rulesListBreadcrumb: ChromeBreadcrumb = {
       ...getAlertingV2Breadcrumb('rules_list'),
       href: application.getUrlForApp(MANAGEMENT_APP_ID, {
         path: ALERTING_V2_RULES_MANAGEMENT_PATH,
+      }),
+    };
+
+    const notificationPoliciesListBreadcrumb: ChromeBreadcrumb = {
+      ...getAlertingV2Breadcrumb('notification_policies_list'),
+      href: application.getUrlForApp(MANAGEMENT_APP_ID, {
+        path: ALERTING_V2_NOTIFICATION_POLICIES_MANAGEMENT_PATH,
       }),
     };
 
@@ -54,24 +69,45 @@ export function useBreadcrumbs(
 
     switch (page) {
       case 'rules_list':
-        breadcrumbs = [{ ...getAlertingV2Breadcrumb('rules_list') }];
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rules_list') }];
         break;
       case 'create':
-        breadcrumbs = [listBreadcrumb, getAlertingV2Breadcrumb('create')];
+        breadcrumbs = [rootBreadcrumb, rulesListBreadcrumb, getAlertingV2Breadcrumb('create')];
         break;
       case 'edit':
-        breadcrumbs = [listBreadcrumb, getAlertingV2Breadcrumb('edit')];
+        breadcrumbs = [rootBreadcrumb, rulesListBreadcrumb, getAlertingV2Breadcrumb('edit')];
         break;
       case 'rule_details':
         breadcrumbs = [
-          listBreadcrumb,
+          rootBreadcrumb,
+          rulesListBreadcrumb,
           getAlertingV2Breadcrumb('rule_details', {
             ruleName: options.ruleName ?? '',
           }),
         ];
         break;
+      case 'notification_policies_list':
+        breadcrumbs = [
+          rootBreadcrumb,
+          { ...getAlertingV2Breadcrumb('notification_policies_list') },
+        ];
+        break;
+      case 'notification_policy_create':
+        breadcrumbs = [
+          rootBreadcrumb,
+          notificationPoliciesListBreadcrumb,
+          getAlertingV2Breadcrumb('notification_policy_create'),
+        ];
+        break;
+      case 'notification_policy_edit':
+        breadcrumbs = [
+          rootBreadcrumb,
+          notificationPoliciesListBreadcrumb,
+          getAlertingV2Breadcrumb('notification_policy_edit'),
+        ];
+        break;
       default:
-        breadcrumbs = [{ ...getAlertingV2Breadcrumb('rules_list') }];
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rules_list') }];
     }
 
     const withClick = addClickHandlers(breadcrumbs, (url) => application.navigateToUrl(url));
