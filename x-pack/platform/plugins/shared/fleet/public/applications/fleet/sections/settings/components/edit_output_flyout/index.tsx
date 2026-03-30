@@ -559,24 +559,26 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             {...inputs.additionalYamlConfigInput.formRowProps}
             fullWidth
           >
-            <YamlCodeEditorWithPlaceholder
-              value={inputs.additionalYamlConfigInput.value}
-              onChange={(value) => {
-                if (outputYmlIncludesReservedPerformanceKey(value, load)) {
-                  inputs.presetInput.setValue('custom');
-                }
+            <div data-test-subj="settingsOutputsFlyout.yamlConfigInput">
+              <YamlCodeEditorWithPlaceholder
+                value={inputs.additionalYamlConfigInput.value}
+                onChange={(value) => {
+                  if (outputYmlIncludesReservedPerformanceKey(value, load)) {
+                    inputs.presetInput.setValue('custom');
+                  }
 
-                inputs.additionalYamlConfigInput.setValue(value);
-              }}
-              disabled={inputs.additionalYamlConfigInput.props.disabled}
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.yamlConfigInputPlaceholder',
-                {
-                  defaultMessage:
-                    '# YAML settings here will be added to the output section of each agent policy.',
-                }
-              )}
-            />
+                  inputs.additionalYamlConfigInput.setValue(value);
+                }}
+                disabled={inputs.additionalYamlConfigInput.props.disabled}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.yamlConfigInputPlaceholder',
+                  {
+                    defaultMessage:
+                      '# YAML settings here will be added to the output section of each agent policy.',
+                  }
+                )}
+              />
+            </div>
           </EuiFormRow>
           <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
           {isESOutput && (
