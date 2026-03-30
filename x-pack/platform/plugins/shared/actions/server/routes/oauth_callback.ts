@@ -93,6 +93,7 @@ interface OAuthConnectorSecrets {
 }
 
 interface OAuthConnectorConfig {
+  authType?: string;
   clientId?: string;
   tokenUrl?: string;
   useBasicAuth?: boolean;
@@ -544,7 +545,7 @@ export const oauthCallbackRoute = (
 
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
-          const authType = secrets.authType;
+          const authType = secrets.authType || config?.authType;
 
           let tokenResult;
           if (authType === 'ears') {
