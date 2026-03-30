@@ -21,7 +21,7 @@ import { MARKDOWN_API_PATH } from '../../../common/constants';
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
     path: MARKDOWN_API_PATH,
-    summary: 'Create a markdown panel',
+    summary: 'Create a markdown library item',
     ...commonRouteConfig,
   });
 
@@ -35,7 +35,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           201: {
             body: () => createResponseBodySchema,
-            description: 'Indicates that a markdown panel is created successfully.',
+            description: 'Indicates that a markdown library item is created successfully.',
           },
           400: {
             description: 'Indicates an invalid schema or parameters.',

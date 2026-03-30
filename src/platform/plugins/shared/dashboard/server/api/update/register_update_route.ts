@@ -24,7 +24,7 @@ export function registerUpdateRoute(
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const updateRoute = router.put({
     path: `${basePath}/{id}`,
-    summary: `Replace current dashboard state with the dashboard state from request body.`,
+    summary: `Upsert dashboard`,
     ...routeConfig,
   });
 
@@ -48,10 +48,10 @@ export function registerUpdateRoute(
         response: {
           200: {
             body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
-            description: 'Indicates the dashboard is updated successfully',
+            description: 'Indicates the dashboard is upserted successfully',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
+            description: 'Indicates that upsert is forbidden.',
           },
         },
       }),

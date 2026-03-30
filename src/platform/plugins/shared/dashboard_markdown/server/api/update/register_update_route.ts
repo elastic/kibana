@@ -19,7 +19,7 @@ import { MARKDOWN_API_PATH } from '../../../common/constants';
 export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const updateRoute = router.put({
     path: `${MARKDOWN_API_PATH}/{id}`,
-    summary: `Replace current markdown panel state with the markdown panel state from request body.`,
+    summary: `Upsert markdown library item`,
     ...commonRouteConfig,
   });
 
@@ -36,13 +36,13 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           200: {
             body: () => updateResponseBodySchema,
-            description: 'Indicates that the markdown panel is updated successfully.',
+            description: 'Indicates the markdown library item is upserted successfully',
           },
           400: {
             description: 'Indicates an invalid schema or parameters.',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
+            description: 'Indicates that upsert is forbidden.',
           },
         },
       },

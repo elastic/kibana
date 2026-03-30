@@ -17,7 +17,7 @@ import { MARKDOWN_API_PATH } from '../../../common/constants';
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
   const searchRoute = router.get({
     path: MARKDOWN_API_PATH,
-    summary: `List markdown panels`,
+    summary: `List markdown library items`,
     ...commonRouteConfig,
   });
 
@@ -31,7 +31,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           200: {
             body: () => searchResponseBodySchema,
-            description: 'Indicates that the markdown panels is retrieved successfully.',
+            description: 'Indicates that the search is successful.',
           },
           403: {
             description: 'Indicates that this call is forbidden.',
