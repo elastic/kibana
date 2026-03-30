@@ -157,6 +157,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 startDate,
                 endDate,
                 sortDirection,
+                activeFilters,
               })
             : undefined;
 
@@ -217,7 +218,6 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             liveHits,
             osqueryContext,
             spaceId,
-            activeFilters,
             logger,
           });
 

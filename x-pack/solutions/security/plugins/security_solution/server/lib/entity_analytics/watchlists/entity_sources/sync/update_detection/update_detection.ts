@@ -13,8 +13,8 @@ import type { MonitoringEntitySource } from '../../../../../../../common/api/ent
 import type { EntityStoreEntityIdsByType } from '../../../entities/service';
 import type { WatchlistBulkEntity } from '../../types';
 import { createWatchlistSyncMarkersService } from '../sync_markers';
-import type { MonitoringEntitySourceDescriptorClient } from '../../../../privilege_monitoring/saved_objects';
-import { isTimestampGreaterThan } from '../../../../privilege_monitoring/data_sources/sync/utils';
+import type { WatchlistEntitySourceClient } from '../../infra';
+import { isTimestampGreaterThan } from '../utils';
 import { buildEntitiesSearchBody } from './queries';
 import { applyBulkUpsert } from '../../bulk/upsert';
 import { getEntityNameFromDoc } from './entity_utils';
@@ -116,7 +116,7 @@ export const createUpdateDetectionService = ({
   esClient: ElasticsearchClient;
   logger: Logger;
   targetIndex: string;
-  descriptorClient?: MonitoringEntitySourceDescriptorClient;
+  descriptorClient?: WatchlistEntitySourceClient;
 }) => {
   const syncMarkersService = descriptorClient
     ? createWatchlistSyncMarkersService(descriptorClient)
