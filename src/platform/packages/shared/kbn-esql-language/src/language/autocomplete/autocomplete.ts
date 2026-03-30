@@ -180,11 +180,11 @@ export async function suggest(
 
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
-      return [
-        ...headerCommandsSuggestions,
-        ...sourceCommandsSuggestions,
-        ...recommendedQueriesSuggestions,
-      ];
+
+      return orderingEngine.sort(
+        [...headerCommandsSuggestions, ...sourceCommandsSuggestions, ...recommendedQueriesSuggestions],
+        { command: '' }
+      );
     }
 
     return suggestions.filter(

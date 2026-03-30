@@ -24,6 +24,7 @@ import { ESQL_STRING_TYPES } from '../../definitions/types';
 import { columnExists, findFinalWord } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import {
   extractFuseArgs,
   findCommandOptionByName,
@@ -273,6 +274,7 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
           defaultMessage: 'Linear combination of scores',
         }),
         text: 'linear ',
+        category: SuggestionCategory.VALUE,
       },
       {
         label: 'rrf',
@@ -281,6 +283,7 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
           defaultMessage: 'Reciprocal rank fusion',
         }),
         text: 'rrf ',
+        category: SuggestionCategory.VALUE,
       }
     );
   }
@@ -320,7 +323,7 @@ function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem
   }
 
   if (!withOption) {
-    suggestions.push({ ...withCompleteItem });
+    suggestions.push(withCompleteItem);
   }
 
   return suggestions.map((s) => withAutoSuggest(s));

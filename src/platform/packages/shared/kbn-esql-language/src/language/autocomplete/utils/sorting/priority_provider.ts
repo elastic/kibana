@@ -39,6 +39,8 @@ const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
   [SuggestionCategory.FUNCTION_AGG]: 500,
   [SuggestionCategory.FUNCTION_SCALAR]: 500,
 
+  [SuggestionCategory.COMMAND]: 550, // Source commands (FROM, SET)
+
   [SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY]: 590, // Search query (higher priority)
   [SuggestionCategory.RECOMMENDED_QUERY]: 600,
 

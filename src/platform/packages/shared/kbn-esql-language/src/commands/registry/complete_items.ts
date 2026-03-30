@@ -615,7 +615,7 @@ export const getCommandAutocompleteDefinitions = (commands: string[]): ISuggesti
             commandDefinition.metadata.examples
           ),
         },
-        sortText: 'A-' + label + '-' + type.name,
+        category: SuggestionCategory.COMMAND,
       });
 
       suggestions.push(suggestion);
