@@ -28,6 +28,7 @@ export interface TimelineProps {
   xMax?: number;
   margins: Margins;
   numberOfTicks?: number;
+  height?: number;
 }
 
 export function TimelineAxisContainer({
@@ -65,7 +66,7 @@ export function TimelineAxisContainer({
   );
 }
 
-export function VerticalLinesContainer({ xMax, xMin, margins, marks }: TimelineProps) {
+export function VerticalLinesContainer({ xMax, xMin, margins, marks, height }: TimelineProps) {
   const [width, setWidth] = useState(0);
   if (xMax == null) {
     return null;
@@ -77,7 +78,17 @@ export function VerticalLinesContainer({ xMax, xMin, margins, marks }: TimelineP
         const plotValues = getPlotValues({ width, xMin, xMax, margins });
         const topTraceDuration = xMax - (xMin ?? 0);
         return (
-          <div style={{ width: '100%', height: '100%' }} ref={resizeRef}>
+          <div
+            style={{
+              height: height ?? '100%',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              pointerEvents: 'none',
+            }}
+            ref={resizeRef}
+          >
             <VerticalLines
               plotValues={plotValues}
               marks={marks}

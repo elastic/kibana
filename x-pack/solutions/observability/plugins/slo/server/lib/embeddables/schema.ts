@@ -8,6 +8,7 @@
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { SLO_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../../../common/embeddables/overview/constants';
@@ -16,14 +17,13 @@ const SingleOverviewCustomSchema = schema.object({
   slo_id: schema.string({
     meta: { description: 'The ID of the SLO' },
   }),
-  slo_instance_id: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. When * is used, all instances of the specified slo_id are shown.',
-      },
-    })
-  ),
+  slo_instance_id: schema.string({
+    defaultValue: ALL_VALUE,
+    meta: {
+      description:
+        'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
+    },
+  }),
   remote_name: schema.maybe(
     schema.string({
       meta: { description: 'The name of the remote SLO' },
@@ -32,23 +32,27 @@ const SingleOverviewCustomSchema = schema.object({
   overview_mode: schema.literal('single'),
 });
 
-const groupBySchema = schema.oneOf([
-  schema.literal('slo.tags'),
-  schema.literal('status'),
-  schema.literal('slo.indicator.type'),
-  schema.literal('_index'), // remote cluster
-]);
+const groupBySchema = schema.oneOf(
+  [
+    schema.literal('slo.tags'),
+    schema.literal('status'),
+    schema.literal('slo.indicator.type'),
+    schema.literal('_index'), // remote cluster
+  ],
+  { defaultValue: 'status' }
+);
 
 const GroupOverviewCustomSchema = schema.object({
-  group_filters: schema.maybe(
-    schema.object({
-      group_by: schema.maybe(groupBySchema),
+  group_filters: schema.object(
+    {
+      group_by: groupBySchema,
       // Bounded to avoid unbounded-array warnings; 100 aligns with other embeddable list limits.
       groups: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
       // Bounded to avoid unbounded-array warnings; 500 matches dashboard filters limit.
       filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
       kql_query: schema.maybe(schema.string()),
-    })
+    },
+    { defaultValue: { group_by: 'status' } }
   ),
   overview_mode: schema.literal('groups'),
 });
@@ -102,7 +106,7 @@ export type GroupOverviewCustomState = TypeOf<typeof GroupOverviewCustomSchema>;
 export type OverviewMode =
   | SingleOverviewCustomState['overview_mode']
   | GroupOverviewCustomState['overview_mode'];
-export type GroupFilters = Required<GroupOverviewCustomState>['group_filters'];
+export type GroupFilters = GroupOverviewCustomState['group_filters'];
 export type OverviewEmbeddableState = TypeOf<ReturnType<typeof getOverviewEmbeddableSchema>>;
 export type SingleOverviewEmbeddableState = TypeOf<
   ReturnType<typeof getSingleOverviewEmbeddableSchema>

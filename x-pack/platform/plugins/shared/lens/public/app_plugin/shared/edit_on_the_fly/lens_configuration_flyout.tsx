@@ -22,7 +22,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { TypedLensSerializedState, SupportedDatasourceId } from '@kbn/lens-common';
+import type { TypedLensSerializedState, LensDatasourceId } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -83,7 +84,7 @@ export function LensEditConfigurationFlyout({
   const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   // Derive datasourceId from attributes - this updates when converting between formBased and textBased
-  const datasourceId = getActiveDatasourceIdFromDoc(attributes) as SupportedDatasourceId;
+  const datasourceId = getActiveDatasourceIdFromDoc(attributes) as LensDatasourceId;
 
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
@@ -109,19 +110,35 @@ export function LensEditConfigurationFlyout({
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
 
+    const datasource = datasourceMap[datasourceId];
+
+    const rawState = datasourceStates[datasourceId].state;
+    const currentPersistable = rawState ? datasource.getPersistableState(rawState) : null;
+
     const previousAttrs = previousAttributes.current;
+    const previousDsState = previousAttrs.state.datasourceStates[datasourceId];
+    // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison.
+    // formBased attributes are already persistable and getPersistableState expects private state.
+    let previousPersistable: typeof currentPersistable = null;
+    if (previousDsState) {
+      previousPersistable =
+        datasourceId === LENS_DATASOURCE_ID.TEXT_BASED
+          ? datasource.getPersistableState(previousDsState)
+          : {
+              state: previousDsState,
+              references: previousAttrs.references,
+            };
+    }
+
     const datasourceStatesAreSame =
-      datasourceStates[datasourceId].state && previousAttrs.state.datasourceStates[datasourceId]
-        ? datasourceMap[datasourceId].isEqual(
-            previousAttrs.state.datasourceStates[datasourceId],
-            previousAttrs.references,
-            datasourceStates[datasourceId].state,
-            // Extract references from the current state as they contain resolved data view IDs
-            // We cannot use attributes.references because they may contain stale data view IDs from when the panel was initially loaded
-            datasourceMap[datasourceId].getPersistableState(datasourceStates[datasourceId].state)
-              .references
-          )
-        : false;
+      currentPersistable != null &&
+      previousPersistable != null &&
+      datasource.isEqual(
+        previousPersistable.state,
+        previousPersistable.references,
+        currentPersistable.state,
+        currentPersistable.references
+      );
 
     if (!datasourceStatesAreSame) return true;
 
@@ -160,9 +177,7 @@ export function LensEditConfigurationFlyout({
     if (attributesChanged) {
       // Use the datasourceId from the previous attributes, not the current one
       // This is important when canceling after a datasource conversion (e.g., formBased -> textBased)
-      const previousDatasourceId = getActiveDatasourceIdFromDoc(
-        previousAttrs
-      ) as SupportedDatasourceId;
+      const previousDatasourceId = getActiveDatasourceIdFromDoc(previousAttrs) as LensDatasourceId;
       if (previousAttrs.visualizationType === visualization.activeId) {
         const currentDatasourceState = datasourceMap[previousDatasourceId].injectReferencesToLayers
           ? datasourceMap[previousDatasourceId]?.injectReferencesToLayers?.(
@@ -170,12 +185,17 @@ export function LensEditConfigurationFlyout({
               previousAttrs.references
             )
           : previousAttrs.state.datasourceStates[previousDatasourceId];
-        updatePanelState?.(currentDatasourceState, previousAttrs.state.visualization);
+        updatePanelState?.(
+          currentDatasourceState,
+          previousAttrs.state.visualization,
+          undefined,
+          previousDatasourceId
+        );
       } else {
         updateSuggestion?.(previousAttrs);
       }
       if (savedObjectId) {
-        updateByRefInput?.(savedObjectId);
+        updateByRefInput?.(savedObjectId, previousAttrs);
       }
     }
     // Remove the user's preferred chart type from localStorage
@@ -229,7 +249,7 @@ export function LensEditConfigurationFlyout({
     if (savedObjectId) {
       const serializedAttrs = serializeVisualizationToSave(attributesToSave, activeVisualization);
       saveByRef?.(serializedAttrs);
-      updateByRefInput?.(savedObjectId);
+      updateByRefInput?.(savedObjectId, attributesToSave);
     }
 
     // check if visualization type changed, if it did, don't pass the previous visualization state
@@ -385,7 +405,7 @@ export function LensEditConfigurationFlyout({
     if (!esqlConvertAttributes) return;
 
     // Update local attributes state - this triggers re-render of get_edit_lens_configuration
-    // which will derive the new datasourceId ('textBased') from the updated attributes
+    // which will derive the new datasourceId (LENS_DATASOURCE_ID.TEXT_BASED) from the updated attributes
     // and recreate the Redux store with the correct datasource
     setCurrentAttributes?.(esqlConvertAttributes);
 

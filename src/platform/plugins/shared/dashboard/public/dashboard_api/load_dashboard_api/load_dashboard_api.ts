@@ -12,7 +12,6 @@ import { dashboardClient } from '../../dashboard_client';
 import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
 import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
 import { getAccessControlClient } from '../../services/access_control_service';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getLastSavedState } from '../default_dashboard_state';
@@ -22,12 +21,18 @@ import { startQueryPerformanceTracking } from '../performance/query_performance_
 import type { DashboardCreationOptions } from '../types';
 import { getUserAccessControlData } from './get_user_access_control_data';
 import { transformPanels } from './transform_panels';
+import {
+  getDashboardBackupService,
+  initializeDashboardApiServices,
+} from '../../services/dashboard_api_services';
 
 export async function loadDashboardApi({
   getCreationOptions,
+  onApiCleanup,
   savedObjectId,
 }: {
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
+  onApiCleanup?: () => void;
   savedObjectId?: string;
 }) {
   const creationOptions = await getCreationOptions?.();
@@ -63,6 +68,7 @@ export async function loadDashboardApi({
     return;
   }
 
+  await initializeDashboardApiServices();
   const unsavedChanges = creationOptions?.useSessionStorageIntegration
     ? getDashboardBackupService().getState(savedObjectId)
     : undefined;
@@ -113,6 +119,9 @@ export async function loadDashboardApi({
     api,
     cleanup: () => {
       cleanup();
+      if (onApiCleanup) {
+        onApiCleanup();
+      }
       performanceSubscription.unsubscribe();
     },
     internalApi,

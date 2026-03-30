@@ -9,7 +9,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MARKDOWN_EMBEDDABLE_TYPE = 'DASHBOARD_MARKDOWN';
+//
+// Do not change constant value - part of public REST APIs
+//
+export const MARKDOWN_EMBEDDABLE_TYPE = 'markdown';
+
 export const MARKDOWN_SAVED_OBJECT_TYPE = 'markdown';
 export const MARKDOWN_API_PATH = `/api/markdown`;
 export const MARKDOWN_API_VERSION = '1';

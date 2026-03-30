@@ -19,8 +19,10 @@ import { previewRuleTelemetryEvents } from './preview_rule';
 import { siemMigrationsTelemetryEvents } from './siem_migrations';
 import { ruleUpgradeTelemetryEvents } from './rule_upgrade';
 import { aiValueReportTelemetryEvents } from './ai_value_report';
+import { attacksTelemetryEvents } from './attacks';
 
 export const telemetryEvents = [
+  ...attacksTelemetryEvents,
   ...alertsTelemetryEvents,
   ...previewRuleTelemetryEvents,
   ...entityTelemetryEvents,

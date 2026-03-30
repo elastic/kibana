@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useLoadConnectors } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import {
   EuiForm,
   EuiFlexGroup,
@@ -94,7 +94,7 @@ interface ConnectorStepProps {
 
 export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
   const { euiTheme } = useEuiTheme();
-  const { http, notifications, triggersActionsUi, settings } = useKibana().services;
+  const { http, triggersActionsUi, settings } = useKibana().services;
   const { setConnector, completeStep } = useActions();
 
   const [connectors, setConnectors] = useState<AIConnector[]>();
@@ -110,7 +110,11 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
     isLoading,
     data: aiConnectors,
     refetch: refetchConnectors,
-  } = useLoadConnectors({ http, toasts: notifications.toasts, inferenceEnabled, settings });
+  } = useLoadConnectors({
+    http,
+    featureId: 'automatic_import',
+    settings,
+  });
 
   useEffect(() => {
     if (aiConnectors != null) {

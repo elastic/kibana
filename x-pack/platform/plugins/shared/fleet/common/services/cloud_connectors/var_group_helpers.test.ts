@@ -8,12 +8,15 @@
 import type { NewPackagePolicy } from '../../types';
 import type { RegistryVarGroup } from '../../types/models/package_spec';
 
+import type { NewPackagePolicyInput } from '../../types';
+
 import {
   getSelectedOption,
   getCloudConnectorOption,
   getCloudConnectorVars,
   getAllCloudConnectorVarNames,
   getIacTemplateUrlFromVarGroupSelection,
+  getAccountTypeFromVarGroupOrInputs,
   detectTargetCsp,
   type VarGroupSelection,
 } from './var_group_helpers';
@@ -289,6 +292,83 @@ describe('var_group_helpers (cloud connector)', () => {
       const selections: VarGroupSelection = { auth_method: 'manual' };
       const result = getIacTemplateUrlFromVarGroupSelection(varGroups, selections);
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getAccountTypeFromVarGroupOrInputs', () => {
+    const createInputWithAccountType = (varName: string, value: string): NewPackagePolicyInput[] =>
+      [
+        {
+          type: 'aws-test',
+          enabled: true,
+          vars: { [varName]: { value } },
+        },
+      ] as unknown as NewPackagePolicyInput[];
+
+    it('should return single-account when provider is undefined', () => {
+      const result = getAccountTypeFromVarGroupOrInputs(undefined, undefined, new Set(), []);
+      expect(result).toBe('single-account');
+    });
+
+    it('should read accountType from inputs when varGroups is undefined (legacy)', () => {
+      const inputs = createInputWithAccountType('aws.account_type', 'organization-account');
+      const result = getAccountTypeFromVarGroupOrInputs('aws', undefined, new Set(), inputs);
+      expect(result).toBe('organization-account');
+    });
+
+    it('should read accountType from inputs when var is in var_group scope', () => {
+      const varGroups = createMockVarGroups();
+      const cloudConnectorVars = new Set(['role_arn', 'external_id', 'aws.account_type']);
+      const inputs = createInputWithAccountType('aws.account_type', 'organization-account');
+      const result = getAccountTypeFromVarGroupOrInputs(
+        'aws',
+        varGroups,
+        cloudConnectorVars,
+        inputs
+      );
+      expect(result).toBe('organization-account');
+    });
+
+    it('should return single-account when var_groups defined but var not in scope', () => {
+      const varGroups = createMockVarGroups();
+      const cloudConnectorVars = new Set(['role_arn', 'external_id']);
+      const inputs = createInputWithAccountType('aws.account_type', 'organization-account');
+      const result = getAccountTypeFromVarGroupOrInputs(
+        'aws',
+        varGroups,
+        cloudConnectorVars,
+        inputs
+      );
+      expect(result).toBe('single-account');
+    });
+
+    it('should return single-account when input has no matching var value', () => {
+      const result = getAccountTypeFromVarGroupOrInputs('aws', undefined, new Set(), []);
+      expect(result).toBe('single-account');
+    });
+
+    it('should handle azure account type var', () => {
+      const inputs = createInputWithAccountType('azure.account_type', 'organization-account');
+      const result = getAccountTypeFromVarGroupOrInputs('azure', undefined, new Set(), inputs);
+      expect(result).toBe('organization-account');
+    });
+
+    it('should handle gcp account type var', () => {
+      const inputs = createInputWithAccountType('gcp.account_type', 'organization-account');
+      const result = getAccountTypeFromVarGroupOrInputs('gcp', undefined, new Set(), inputs);
+      expect(result).toBe('organization-account');
+    });
+
+    it('should skip disabled inputs', () => {
+      const inputs = [
+        {
+          type: 'aws-test',
+          enabled: false,
+          vars: { 'aws.account_type': { value: 'organization-account' } },
+        },
+      ] as unknown as NewPackagePolicyInput[];
+      const result = getAccountTypeFromVarGroupOrInputs('aws', undefined, new Set(), inputs);
+      expect(result).toBe('single-account');
     });
   });
 

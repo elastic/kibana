@@ -4,25 +4,22 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-chrome-browser-mocks'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-chrome-browser-mocks'
+  title: '@kbn/core-chrome-browser-mocks'
   description: Moon project for @kbn/core-chrome-browser-mocks
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/core/packages/chrome/browser-mocks
+  sourceRoot: src/core/packages/chrome/browser-mocks
 dependsOn:
-  - '@kbn/utility-types'
   - '@kbn/utility-types-jest'
   - '@kbn/core-chrome-browser'
-  - '@kbn/core-chrome-browser-internal'
-  - '@kbn/core-chrome-browser-components'
+  - '@kbn/core-chrome-browser-internal-types'
   - '@kbn/lazy-object'
   - '@kbn/core-chrome-sidebar-mocks'
 tags:
@@ -37,16 +34,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

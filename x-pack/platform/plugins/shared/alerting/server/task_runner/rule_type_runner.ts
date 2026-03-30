@@ -75,6 +75,7 @@ export type RuleData<Params extends RuleTypeParams> = Pick<
   | 'revision'
   | 'snoozeSchedule'
   | 'alertDelay'
+  | 'lastEnabledAt'
 >;
 
 interface RunOpts<
@@ -187,6 +188,7 @@ export class RuleTypeRunner<
       revision,
       snoozeSchedule,
       alertDelay,
+      lastEnabledAt,
     } = rule;
 
     const { alertTypeState: ruleTypeState = {}, previousStartedAt } = state;
@@ -321,6 +323,7 @@ export class RuleTypeRunner<
                   muteAll,
                   snoozeSchedule,
                   alertDelay,
+                  ...(lastEnabledAt ? { lastEnabledAt } : {}),
                 },
                 logger: context.logger,
                 flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,

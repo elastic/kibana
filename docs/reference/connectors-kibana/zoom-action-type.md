@@ -2,8 +2,6 @@
 navigation_title: "Zoom"
 type: reference
 description: "Use the Zoom connector to access meetings, cloud recordings, transcripts, chat logs, and participants using the Zoom REST API."
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/zoom-action-type.html
 applies_to:
   stack: preview 9.4
   serverless: preview

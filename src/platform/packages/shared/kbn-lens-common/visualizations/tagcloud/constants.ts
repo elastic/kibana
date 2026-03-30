@@ -24,5 +24,5 @@ export const LENS_TAGCLOUD_DEFAULT_STATE = {
   maxFontSize: 72,
   minFontSize: 18,
   orientation: TAGCLOUD_ORIENTATION.SINGLE as $Values<typeof TAGCLOUD_ORIENTATION>,
-  showLabel: true,
+  showCaption: true,
 };

@@ -13,7 +13,10 @@ import type { FilterOptions, GroupedInferenceEndpointsData, GroupByViewOptions }
 import { useFilteredInferenceEndpoints } from './use_filtered_endpoints';
 import { GroupByReducer, GroupBySort } from '../utils/group_by';
 
-export type UseGroupedDataResult = GroupedInferenceEndpointsData[];
+export interface UseGroupedDataResult {
+  groupedEndpoints: GroupedInferenceEndpointsData[];
+  filteredEndpoints: InferenceAPIConfigResponse[];
+}
 
 export const useGroupedData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
@@ -36,5 +39,5 @@ export const useGroupedData = (
     return groupedEndpointList;
   }, [groupBy, filteredEndpoints]);
 
-  return groupedEndpoints;
+  return { groupedEndpoints, filteredEndpoints };
 };

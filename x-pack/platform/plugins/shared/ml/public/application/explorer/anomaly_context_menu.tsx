@@ -165,7 +165,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       // so we are not passing the time range here
       return {
         ...config,
-        ...(timeRange ? { timeRange } : {}),
+        ...(timeRange ? { time_range: timeRange } : {}),
         jobIds: mergedGroupsAndJobsIds,
         maxSeriesToPlot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
         severityThreshold: severity.val,
@@ -337,7 +337,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
                 })}
                 color="text"
                 display="base"
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                 data-test-subj="mlExplorerAnomalyPanelMenu"
                 disabled={chartsCount < 1}

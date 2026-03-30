@@ -21,7 +21,7 @@ jest.mock('../hooks/use_header_data', () => ({
   useHeaderData: jest.fn(),
 }));
 
-jest.mock('../../shared/components/flyout_title', () => ({
+jest.mock('../../../flyout_v2/shared/components/flyout_title', () => ({
   FlyoutTitle: ({ title }: { title: string }) => <div data-test-subj="flyout-title">{title}</div>,
 }));
 
@@ -37,6 +37,10 @@ jest.mock('./status', () => ({
 
 jest.mock('./assignees', () => ({
   Assignees: () => <div data-test-subj="assignees" />,
+}));
+
+jest.mock('./notes', () => ({
+  Notes: () => <div data-test-subj="notes" />,
 }));
 
 jest.mock('../../shared/components/alert_header_block', () => ({

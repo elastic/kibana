@@ -22,7 +22,6 @@ import {
   EuiText,
   EuiCallOut,
   EuiSpacer,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { useMlApi } from '../../contexts/kibana';
@@ -36,8 +35,6 @@ export interface Props {
 }
 
 export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
-  const flyoutTitleId = useGeneratedHtmlId();
-
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
   const [loading, setLoading] = useState(false);
   const [canSync, setCanSync] = useState(false);
@@ -111,11 +108,13 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
         maxWidth={600}
         onClose={onClose}
         data-test-subj="mlJobMgmtSyncFlyout"
-        aria-labelledby={flyoutTitleId}
+        aria-label={i18n.translate('xpack.ml.management.syncSavedObjectsFlyout.flyoutAriaLabel', {
+          defaultMessage: 'Synchronize saved objects',
+        })}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id={flyoutTitleId}>
+            <h2>
               <FormattedMessage
                 id="xpack.ml.management.syncSavedObjectsFlyout.headerLabel"
                 defaultMessage="Synchronize saved objects"

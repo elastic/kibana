@@ -110,7 +110,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
                   {(copy: () => void) => (
                     <EuiButtonIcon
                       onClick={copy}
-                      iconType="copyClipboard"
+                      iconType="copy"
                       aria-label={copyToClipboardDescription}
                     />
                   )}
