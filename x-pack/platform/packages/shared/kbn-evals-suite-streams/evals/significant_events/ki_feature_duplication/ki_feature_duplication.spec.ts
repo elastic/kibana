@@ -5,90 +5,85 @@
  * 2.0.
  */
 
-import kbnDatemath from '@kbn/datemath';
-import { getSampleDocuments } from '@kbn/ai-tools';
-import { tags } from '@kbn/scout';
-import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
-import { type BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import { tags } from '@kbn/scout';
+import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
+import type { BaseFeature } from '@kbn/streams-schema';
+import type { GcsConfig } from '../../../src/data_generators/replay';
+import {
+  SIGEVENTS_SNAPSHOT_RUN,
+  cleanSignificantEventsDataStreams,
+  listAvailableSnapshots,
+  replaySignificantEventsSnapshot,
+} from '../../../src/data_generators/replay';
 import { evaluate } from '../../../src/evaluate';
-import { KI_FEATURE_DUPLICATION_DATASETS } from './ki_feature_duplication_datasets';
-import { indexSynthtraceScenario } from '../../synthtrace_helpers';
 import {
   kiFeatureDuplicationEvaluator,
   createSemanticUniquenessEvaluator,
   createIdConsistencyEvaluator,
 } from '../../../src/evaluators/ki_feature_duplication/evaluators';
+import {
+  getActiveDatasets,
+  MANAGED_STREAM_NAME,
+  MANAGED_STREAM_SEARCH_PATTERN,
+  resolveScenarioSnapshotSource,
+  snapshotCatalogKey,
+} from '../datasets';
 
-evaluate.describe('KI feature duplication (harness)', () => {
-  const from = kbnDatemath.parse('now-10m')!;
-  const to = kbnDatemath.parse('now')!;
+evaluate.describe('KI feature duplication', { tag: tags.serverless.observability.complete }, () => {
+  const activeDatasets = getActiveDatasets();
+  const kiFeatureDuplicationRuns = activeDatasets.flatMap((dataset) =>
+    dataset.kiFeatureDuplication.map((scenario) => ({ dataset, scenario }))
+  );
+  const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-  async function runRepeatedKIIdentification({
-    esClient,
-    streamName,
-    runs,
-    inferenceClient,
-    logger,
-    sampleSize,
-  }: {
-    esClient: ElasticsearchClient;
-    streamName: string;
-    runs: number;
-    inferenceClient: BoundInferenceClient;
-    logger: Logger;
-    sampleSize: number;
-  }): Promise<{
-    runs: Array<{
-      features: BaseFeature[];
-    }>;
-  }> {
-    const outputs: Array<{ features: BaseFeature[] }> = [];
-
-    for (let i = 0; i < runs; i++) {
-      const { hits: sampleDocuments } = await getSampleDocuments({
-        esClient,
-        index: streamName,
-        size: sampleSize,
-        start: from.valueOf(),
-        end: to.valueOf(),
+  evaluate.beforeAll(async ({ esClient, log }) => {
+    const uniqueCatalogSources = new Map<string, GcsConfig>();
+    for (const { dataset, scenario } of kiFeatureDuplicationRuns) {
+      const source = resolveScenarioSnapshotSource({
+        scenarioId: scenario.input.scenario_id,
+        datasetGcs: dataset.gcs,
+        snapshotSource: scenario.snapshot_source,
       });
-
-      const { features } = await identifyFeatures({
-        streamName,
-        sampleDocuments,
-        systemPrompt: featuresPrompt,
-        inferenceClient,
-        logger,
-        signal: new AbortController().signal,
-      });
-
-      outputs.push({ features });
+      uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
     }
 
-    return { runs: outputs };
-  }
+    for (const [catalogSourceKey, gcs] of uniqueCatalogSources.entries()) {
+      const availableSnapshots = await listAvailableSnapshots(esClient, log, gcs);
+      availableSnapshotsBySource.set(catalogSourceKey, new Set(availableSnapshots));
+    }
+  });
 
-  KI_FEATURE_DUPLICATION_DATASETS.forEach((dataset) => {
-    evaluate.describe(dataset.name, { tag: tags.stateful.classic }, () => {
-      evaluate.beforeAll(async ({ apiServices }) => {
-        await apiServices.streams.enable();
-      });
-
-      evaluate.afterAll(async ({ apiServices, esClient }) => {
-        await apiServices.streams.disable();
-        await esClient.indices.deleteDataStream({
-          name: 'logs*',
+  for (const { dataset, scenario } of kiFeatureDuplicationRuns) {
+    evaluate.describe(`${dataset.id} / ${scenario.input.scenario_id}`, () => {
+      evaluate.beforeAll(async ({ esClient, log }) => {
+        const source = resolveScenarioSnapshotSource({
+          scenarioId: scenario.input.scenario_id,
+          datasetGcs: dataset.gcs,
+          snapshotSource: scenario.snapshot_source,
         });
+
+        const availableSnapshots =
+          availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
+
+        if (!availableSnapshots.has(source.snapshotName)) {
+          log.info(
+            `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
+              `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
+          );
+          evaluate.skip();
+          return;
+        }
+
+        await cleanSignificantEventsDataStreams(esClient, log);
+        await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
+        await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
       });
 
       evaluate(
-        dataset.name,
+        'KI feature duplication',
         async ({
-          config,
           esClient,
           inferenceClient,
           evaluationConnector,
@@ -102,37 +97,66 @@ evaluate.describe('KI feature duplication (harness)', () => {
             connectorId: evaluationConnector.id,
           });
 
-          await indexSynthtraceScenario({
-            scenario: dataset.input.scenario,
-            scenarioOpts: dataset.input.scenarioOpts,
-            config,
-            from,
-            to,
-          });
-
-          await esClient.indices.refresh({ index: dataset.input.stream_name });
-
           await executorClient.runExperiment(
             {
               dataset: {
-                name: dataset.name,
-                description: dataset.description,
-                examples: [{ input: dataset.input }],
+                name: `sigevents: KI feature duplication: ${scenario.input.scenario_id} (${dataset.id})`,
+                description: `[${dataset.id}] KI feature duplication across ${scenario.input.runs} runs on ${scenario.input.scenario_id}`,
+                examples: [
+                  {
+                    input: {
+                      stream_name: MANAGED_STREAM_NAME,
+                      runs: scenario.input.runs,
+                      sample_document_count: scenario.input.sample_document_count,
+                    },
+                  },
+                ],
               },
+              concurrency: 1,
               task: async ({
                 input,
               }: {
-                input: { stream_name: string; runs: number; sample_document_count: number };
+                input: {
+                  stream_name: string;
+                  runs: number;
+                  sample_document_count: number;
+                };
               }) => {
-                const result = await runRepeatedKIIdentification({
-                  esClient,
-                  streamName: input.stream_name,
-                  runs: input.runs,
-                  inferenceClient,
-                  logger,
-                  sampleSize: input.sample_document_count,
-                });
-                return { ...result, traceId: getCurrentTraceId() };
+                const outputs: Array<{ features: BaseFeature[] }> = [];
+
+                // Each run samples a different random subset of documents from the replayed
+                // snapshot. This measures whether the LLM identifies consistent features
+                // regardless of which documents it sees, not just whether it's deterministic
+                // on identical input.
+                for (let i = 0; i < input.runs; i++) {
+                  const { hits: sampleDocuments } = await esClient.search<Record<string, unknown>>({
+                    index: MANAGED_STREAM_SEARCH_PATTERN,
+                    size: input.sample_document_count,
+                    query: {
+                      // random_score with seed=i gives a different but deterministic
+                      // ordering per run — a failing run can be replayed by re-running
+                      // with the same run index, while each run still samples a distinct
+                      // subset of documents
+                      function_score: {
+                        query: { match_all: {} },
+                        functions: [{ random_score: { seed: i } }],
+                      },
+                    },
+                    sort: [{ _score: { order: 'desc' } }],
+                  });
+
+                  const { features } = await identifyFeatures({
+                    streamName: input.stream_name,
+                    sampleDocuments: sampleDocuments.hits,
+                    systemPrompt: featuresPrompt,
+                    inferenceClient,
+                    logger,
+                    signal: new AbortController().signal,
+                  });
+                  outputs.push({ features });
+                }
+
+                return { runs: outputs, traceId: getCurrentTraceId() };
               },
             },
             [
@@ -147,6 +171,11 @@ evaluate.describe('KI feature duplication (harness)', () => {
           );
         }
       );
+
+      evaluate.afterAll(async ({ esClient, log }) => {
+        log.debug('Cleaning replayed logs and index template');
+        await cleanSignificantEventsDataStreams(esClient, log);
+      });
     });
-  });
+  }
 });
