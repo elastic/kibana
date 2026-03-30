@@ -45,6 +45,16 @@ export const parseAppUrl = (
 
   // if the path is relative (i.e `../../to/somewhere`), we convert it to absolute
   if (!url.startsWith('/')) {
+    // Do not parse absolute URL as app URL
+    try {
+      const parsed = new URL(url);
+      if (parsed.origin) {
+        return undefined;
+      }
+    } catch {
+      // not a valid absolute URL, treat as relative
+    }
+
     const resolvedUrl = new URL(url, `${currentOrigin}${currentPath}`);
     url = `${resolvedUrl.pathname}${resolvedUrl.search}${resolvedUrl.hash}`;
   }
