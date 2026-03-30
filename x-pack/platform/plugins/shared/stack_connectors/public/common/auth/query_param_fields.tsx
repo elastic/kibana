@@ -22,9 +22,11 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 import * as i18n from './translations';
 
-const { emptyField } = fieldValidators;
+const { emptyField, maxLengthField } = fieldValidators;
 
 const MAX_QUERY_PARAMS = 20;
+const MAX_KEY_LENGTH = 256;
+const MAX_VALUE_LENGTH = 2048;
 
 interface Props {
   readOnly: boolean;
@@ -84,6 +86,12 @@ export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
                             validator: emptyField(i18n.QUERY_PARAM_MISSING_KEY_ERROR),
                           },
                           {
+                            validator: maxLengthField({
+                              length: MAX_KEY_LENGTH,
+                              message: i18n.QUERY_PARAM_KEY_TOO_LONG(MAX_KEY_LENGTH),
+                            }),
+                          },
+                          {
                             validator: ({ value, form, path }) => {
                               if (!value) return;
                               const queryParams =
@@ -117,6 +125,12 @@ export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
                         validations: [
                           {
                             validator: emptyField(i18n.QUERY_PARAM_MISSING_VALUE_ERROR),
+                          },
+                          {
+                            validator: maxLengthField({
+                              length: MAX_VALUE_LENGTH,
+                              message: i18n.QUERY_PARAM_VALUE_TOO_LONG(MAX_VALUE_LENGTH),
+                            }),
                           },
                         ],
                       }}

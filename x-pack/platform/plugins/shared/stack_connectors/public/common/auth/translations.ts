@@ -396,3 +396,15 @@ export const QUERY_PARAM_MISSING_VALUE_ERROR = i18n.translate(
     defaultMessage: 'Value is required',
   }
 );
+
+export const QUERY_PARAM_KEY_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.stackConnectors.components.auth.queryParamKeyTooLongError', {
+    values: { max },
+    defaultMessage: 'Key must be {max} characters or fewer',
+  });
+
+export const QUERY_PARAM_VALUE_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.stackConnectors.components.auth.queryParamValueTooLongError', {
+    values: { max },
+    defaultMessage: 'Value must be {max} characters or fewer',
+  });

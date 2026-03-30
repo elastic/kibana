@@ -164,4 +164,52 @@ describe('HttpActionConnectorFields', () => {
       expect(screen.getByTestId('httpProxyUrlText')).toBeInTheDocument();
     });
   });
+
+  it('renders query params toggle', async () => {
+    render(
+      <ConnectorFormTestProvider
+        connector={connector}
+        serializer={formSerializer}
+        deserializer={formDeserializer}
+      >
+        <HttpActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={jest.fn()}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('httpQueryParamsSwitch')).toBeInTheDocument();
+    });
+  });
+
+  it('shows query param fields when toggle is enabled', async () => {
+    render(
+      <ConnectorFormTestProvider
+        connector={connector}
+        serializer={formSerializer}
+        deserializer={formDeserializer}
+      >
+        <HttpActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={jest.fn()}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('httpQueryParamsSwitch')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('httpQueryParamsSwitch'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('httpQueryParamKeyInput')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('httpQueryParamValueInput')).toBeInTheDocument();
+    expect(screen.getByTestId('httpAddQueryParamButton')).toBeInTheDocument();
+  });
 });
