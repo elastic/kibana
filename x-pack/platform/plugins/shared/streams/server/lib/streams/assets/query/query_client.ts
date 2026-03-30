@@ -19,7 +19,7 @@ import {
   type QueryLinkRequest,
   type QueryUnlinkRequest,
 } from '../../../../../common/queries';
-import type { EsqlRuleParams } from '../../../rules/esql/types';
+import type { EsqlRuleParams } from '../../../sig_events/rules/esql/types';
 import { AssetNotFoundError } from '../../errors/asset_not_found_error';
 import type { QUERY_FEATURE_TYPE } from '../fields';
 import {

@@ -45,7 +45,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/fs_repository.ts",
-        "lineNumber": 15,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -67,7 +67,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/fs_repository.ts",
-            "lineNumber": 15,
+            "lineNumber": 16,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -103,7 +103,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/gcs_repository.ts",
-        "lineNumber": 16,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -125,7 +125,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/gcs_repository.ts",
-            "lineNumber": 16,
+            "lineNumber": 17,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -212,7 +212,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/url_repository.ts",
-        "lineNumber": 10,
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -228,7 +228,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/url_repository.ts",
-            "lineNumber": 10,
+            "lineNumber": 11,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -511,7 +511,7 @@
         "label": "FsRepositoryConfig",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/fs_repository.ts",
-        "lineNumber": 10,
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -524,7 +524,7 @@
             "label": "location",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/fs_repository.ts",
-            "lineNumber": 11,
+            "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -540,7 +540,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/fs_repository.ts",
-            "lineNumber": 12,
+            "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -556,7 +556,7 @@
         "label": "GcsRepositoryConfig",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/gcs_repository.ts",
-        "lineNumber": 10,
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -569,7 +569,7 @@
             "label": "bucket",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/gcs_repository.ts",
-            "lineNumber": 11,
+            "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -585,7 +585,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/gcs_repository.ts",
-            "lineNumber": 12,
+            "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -601,7 +601,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/repository/gcs_repository.ts",
-            "lineNumber": 13,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
