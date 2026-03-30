@@ -82,75 +82,6 @@ export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
   return groupedErrorsByDocId;
 }
 
-export function getTraceItemIcon({
-  spanType,
-  agentName,
-  processorEvent,
-  kind,
-}: {
-  spanType?: string;
-  agentName?: string;
-  processorEvent?: ProcessorEvent;
-  kind?: string;
-}) {
-  if (spanType?.startsWith('db')) {
-    return 'database';
-  }
-
-  if (processorEvent !== ProcessorEvent.transaction && kind !== 'Server') {
-    return undefined;
-  }
-
-  return isRumAgentName(agentName) ? 'globe' : 'merge';
-}
-
-/**
- * Resolve either an APM or OTEL duration and if OTEL, format the duration from nanoseconds to microseconds.
- */
-const resolveDuration = (apmDuration?: number, otelDuration?: number[] | string): number =>
-  apmDuration ?? parseOtelDuration(otelDuration);
-
-const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us
-
-const resolveOtelResult = (
-  attributesHttpScheme?: string,
-  attributesHttpStatusCode?: string
-): string | undefined => {
-  return attributesHttpScheme && attributesHttpStatusCode
-    ? `${attributesHttpScheme.toUpperCase()} ${attributesHttpStatusCode}`
-    : undefined;
-};
-
-export type EventStatus =
-  | { fieldName: 'event.outcome'; value: EventOutcome }
-  | { fieldName: 'status.code'; value: StatusCode }
-  | undefined;
-
-const resolveStatus = (eventOutcome?: EventOutcome, statusCode?: StatusCode): EventStatus => {
-  if (eventOutcome) {
-    return { fieldName: EVENT_OUTCOME, value: eventOutcome };
-  }
-
-  if (statusCode) {
-    return { fieldName: STATUS_CODE, value: statusCode };
-  }
-};
-
-const isCompressionStrategy = (value?: string): value is CompressionStrategy =>
-  value === 'exact_match' || value === 'same_kind';
-
-const resolveComposite = (
-  count?: number,
-  sum?: number,
-  compressionStrategy?: string
-): TraceItemComposite | undefined => {
-  if (!count || !sum || !isCompressionStrategy(compressionStrategy)) {
-    return undefined;
-  }
-
-  return { count, sum, compressionStrategy };
-};
-
 /**
  * Returns both APM documents and unprocessed OTEL spans
  */
@@ -268,3 +199,72 @@ export async function getUnifiedTraceItems({
     traceDocsTotal: unifiedTraceItems.hitLimit ? unifiedTraceItems.total : traceItems.length,
   };
 }
+
+export function getTraceItemIcon({
+  spanType,
+  agentName,
+  processorEvent,
+  kind,
+}: {
+  spanType?: string;
+  agentName?: string;
+  processorEvent?: ProcessorEvent;
+  kind?: string;
+}) {
+  if (spanType?.startsWith('db')) {
+    return 'database';
+  }
+
+  if (processorEvent !== ProcessorEvent.transaction && kind !== 'Server') {
+    return undefined;
+  }
+
+  return isRumAgentName(agentName) ? 'globe' : 'merge';
+}
+
+/**
+ * Resolve either an APM or OTEL duration and if OTEL, format the duration from nanoseconds to microseconds.
+ */
+const resolveDuration = (apmDuration?: number, otelDuration?: number[] | string): number =>
+  apmDuration ?? parseOtelDuration(otelDuration);
+
+const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us
+
+const resolveOtelResult = (
+  attributesHttpScheme?: string,
+  attributesHttpStatusCode?: string
+): string | undefined => {
+  return attributesHttpScheme && attributesHttpStatusCode
+    ? `${attributesHttpScheme.toUpperCase()} ${attributesHttpStatusCode}`
+    : undefined;
+};
+
+export type EventStatus =
+  | { fieldName: 'event.outcome'; value: EventOutcome }
+  | { fieldName: 'status.code'; value: StatusCode }
+  | undefined;
+
+const resolveStatus = (eventOutcome?: EventOutcome, statusCode?: StatusCode): EventStatus => {
+  if (eventOutcome) {
+    return { fieldName: EVENT_OUTCOME, value: eventOutcome };
+  }
+
+  if (statusCode) {
+    return { fieldName: STATUS_CODE, value: statusCode };
+  }
+};
+
+const isCompressionStrategy = (value?: string): value is CompressionStrategy =>
+  value === 'exact_match' || value === 'same_kind';
+
+const resolveComposite = (
+  count?: number,
+  sum?: number,
+  compressionStrategy?: string
+): TraceItemComposite | undefined => {
+  if (!count || !sum || !isCompressionStrategy(compressionStrategy)) {
+    return undefined;
+  }
+
+  return { count, sum, compressionStrategy };
+};
