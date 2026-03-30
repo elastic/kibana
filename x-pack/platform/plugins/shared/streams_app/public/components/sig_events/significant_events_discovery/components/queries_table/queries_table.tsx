@@ -27,7 +27,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { QUERY_TYPE_MATCH } from '@kbn/streams-schema';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
@@ -128,6 +128,15 @@ export function QueriesTable() {
     perPage: pagination.size,
     status: ['active', 'draft'],
   });
+  useEffect(() => {
+    if (!queriesData?.queries) return;
+    setSelectedQuery((prev) => {
+      if (!prev) return prev;
+      const refreshed = queriesData.queries.find((item) => item.query.id === prev.query.id);
+      return refreshed ?? prev;
+    });
+  }, [queriesData]);
+
   const { data: occurrencesData } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
   const {
     data: streamsData,

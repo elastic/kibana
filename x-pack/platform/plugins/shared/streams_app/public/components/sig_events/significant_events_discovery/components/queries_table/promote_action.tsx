@@ -27,9 +27,8 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
   const showFetchErrorToast = useFetchErrorToast();
   const promoteMutation = useMutation({
     mutationFn: promote,
-    onSuccess: (_result, variables) => {
-      const promotedQueryCount = variables.queryIds?.length ?? 0;
-      if (promotedQueryCount === 1) {
+    onSuccess: (result) => {
+      if (result.promoted > 0) {
         toasts.addSuccess(getPromoteQuerySuccessToast(item.query.title));
       }
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY });

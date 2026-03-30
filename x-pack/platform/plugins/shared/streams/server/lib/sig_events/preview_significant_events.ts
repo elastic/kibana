@@ -10,7 +10,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
-import { hasStatsCommand } from '@kbn/streams-schema';
+import { hasStatsCommand, extractBucketIntervalMs } from '@kbn/streams-schema';
 
 const ESQL_UNITS: Record<string, string> = {
   s: 'seconds',
@@ -30,6 +30,13 @@ function parseBucketSize(raw: string): { value: number; unit: string } {
   const match = raw.match(/^(\d+)([smhd])$/);
   if (!match) return { value: 60, unit: 's' };
   return { value: parseInt(match[1], 10), unit: match[2] };
+}
+
+function msToEsqlBucketSize(ms: number): string {
+  if (ms >= 86_400_000 && ms % 86_400_000 === 0) return `${ms / 86_400_000}d`;
+  if (ms >= 3_600_000 && ms % 3_600_000 === 0) return `${ms / 3_600_000}h`;
+  if (ms >= 60_000 && ms % 60_000 === 0) return `${ms / 60_000}m`;
+  return `${ms / 1000}s`;
 }
 
 /**
@@ -246,8 +253,11 @@ async function previewStatsQuery(
       .map((row) => row[bucketIdx] as string)
       .filter(Boolean);
 
+    const queryBucketMs = extractBucketIntervalMs(esqlQuery);
+    const effectiveBucketSize = queryBucketMs ? msToEsqlBucketSize(queryBucketMs) : bucketSize;
+
     const sparseOccurrences = firingDates.map((date) => ({ date, count: 1 }));
-    const occurrences = fillBucketGaps(sparseOccurrences, from, to, bucketSize);
+    const occurrences = fillBucketGaps(sparseOccurrences, from, to, effectiveBucketSize);
 
     return {
       esql: { query: esqlQuery },

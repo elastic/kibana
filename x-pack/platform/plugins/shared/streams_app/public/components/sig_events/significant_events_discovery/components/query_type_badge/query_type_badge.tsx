@@ -7,11 +7,20 @@
 
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { QUERY_TYPE_STATS, type QueryType } from '@kbn/streams-schema';
+
+const STATS_LABEL = i18n.translate('xpack.streams.queryTypeBadge.statsLabel', {
+  defaultMessage: 'Stats',
+});
+
+const MATCH_LABEL = i18n.translate('xpack.streams.queryTypeBadge.matchLabel', {
+  defaultMessage: 'Match',
+});
 
 export function QueryTypeBadge({ type }: { type: QueryType }) {
   const isStats = type === QUERY_TYPE_STATS;
   return (
-    <EuiBadge color={isStats ? 'hollow' : 'default'}>{isStats ? 'Stats' : 'Match'}</EuiBadge>
+    <EuiBadge color={isStats ? 'hollow' : 'default'}>{isStats ? STATS_LABEL : MATCH_LABEL}</EuiBadge>
   );
 }

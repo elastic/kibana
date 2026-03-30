@@ -6,7 +6,11 @@
  */
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamQuery } from '@kbn/streams-schema';
-import { streamQuerySchema, upsertStreamQueryRequestSchema, deriveQueryType } from '@kbn/streams-schema';
+import {
+  streamQuerySchema,
+  upsertStreamQueryRequestSchema,
+  deriveQueryType,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { QueryNotFoundError } from '../../../lib/streams/errors/query_not_found_error';
@@ -243,7 +247,19 @@ const bulkQueriesRoute = createServerRoute({
       });
     }
 
-    await queryClient.bulk(definition, operations);
+    const typedOperations = operations.map((operation) => {
+      if ('index' in operation && operation.index) {
+        return {
+          index: {
+            ...operation.index,
+            type: deriveQueryType(operation.index.esql.query),
+          },
+        };
+      }
+      return operation;
+    });
+
+    await queryClient.bulk(definition, typedOperations);
 
     logger
       .get('significant_events')

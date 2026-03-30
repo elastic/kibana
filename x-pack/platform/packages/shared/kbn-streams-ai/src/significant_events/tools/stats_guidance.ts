@@ -49,8 +49,10 @@ const DURATION_FIELD_CANDIDATES: DurationFieldCandidate[] = [
 const MAX_ENTITY_CARDINALITY = 50;
 const BASELINE_MULTIPLIER = 2;
 const MIN_SAMPLE_SIZE = 20;
+const COMPONENT_MIN_SAMPLE_SIZE = 10;
 const DEFAULT_ERROR_PCT = 5;
 const DEFAULT_HTTP_ERROR_RATE = 5;
+const DEFAULT_COMPONENT_ERROR_RATE = 10;
 const FIELD_SECTION_SCAN_LENGTH = 500;
 const CARDINALITY_SCAN_LENGTH = 300;
 
@@ -293,13 +295,14 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
       title: 'Component-Level Degradation',
       body: [
         cardinalityNote,
+        `  Per-component sample size is lower (${COMPONENT_MIN_SAMPLE_SIZE}) because each entity receives fewer events.`,
         `  Template:`,
         `    FROM <stream>`,
         `    | STATS errors = COUNT(*) WHERE ${severityField} IN ("ERROR", "CRITICAL"),`,
         `            total = COUNT(*)`,
         `      BY ${entityField}, bucket = BUCKET(@timestamp, 5 minutes)`,
         `    | EVAL error_rate = errors * 100.0 / total`,
-        `    | WHERE total > 10 AND error_rate > 10`,
+        `    | WHERE total > ${COMPONENT_MIN_SAMPLE_SIZE} AND error_rate > ${DEFAULT_COMPONENT_ERROR_RATE}`,
       ].join('\n'),
     });
   }

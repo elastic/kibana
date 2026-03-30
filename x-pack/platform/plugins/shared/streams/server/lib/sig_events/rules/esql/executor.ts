@@ -16,7 +16,7 @@ import { extractBucketIntervalMs } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
-import { MAX_ALERTS_PER_EXECUTION } from './common';
+import { MAX_ALERTS_PER_EXECUTION, MATCH_LOOKBACK_MINUTES, DEFAULT_STATS_LOOKBACK_MINUTES } from './common';
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
 import { buildStatsEsqlSearchRequest } from './lib/build_stats_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
@@ -50,7 +50,7 @@ async function executeMatchPath(options: ExecutorOptions) {
   const esqlRequest = buildEsqlSearchRequest({
     query: params.query,
     timestampField: params.timestampField,
-    from: now.clone().subtract(2, 'minutes').toISOString(),
+    from: now.clone().subtract(MATCH_LOOKBACK_MINUTES, 'minutes').toISOString(),
     to: now.clone().toISOString(),
     previousOriginalDocumentIds,
   });
@@ -119,11 +119,11 @@ async function executeStatsPath(options: ExecutorOptions) {
 
   if (params.lookbackMinutes == null) {
     logger.warn(
-      `STATS rule "${rule.id}" has no lookbackMinutes configured; falling back to 10 minutes. ` +
+      `STATS rule "${rule.id}" has no lookbackMinutes configured; falling back to ${DEFAULT_STATS_LOOKBACK_MINUTES} minutes. ` +
         `Re-promote or re-sync the query to set the correct lookback.`
     );
   }
-  const lookbackMs = (params.lookbackMinutes ?? 10) * 60_000;
+  const lookbackMs = (params.lookbackMinutes ?? DEFAULT_STATS_LOOKBACK_MINUTES) * 60_000;
 
   const bucketIntervalMs = extractBucketIntervalMs(params.query);
 
@@ -154,7 +154,7 @@ async function executeStatsPath(options: ExecutorOptions) {
   });
 
   if (results.length === 0) {
-    return { state: { previousFiringIds: [] } };
+    return { state: { previousFiringIds: [...previousFiringIds] } };
   }
 
   if (results.length >= MAX_ALERTS_PER_EXECUTION) {

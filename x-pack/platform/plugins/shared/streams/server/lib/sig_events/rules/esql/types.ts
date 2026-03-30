@@ -6,6 +6,7 @@
  */
 
 import type { RuleTypeParams, RuleTypeState } from '@kbn/alerting-plugin/common';
+import type { QueryType } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 
 export interface EsqlRuleInstanceState extends RuleTypeState {
@@ -18,12 +19,10 @@ export const esqlRuleInstanceState = z.object({
   previousFiringIds: z.string().array().optional(),
 }) satisfies z.Schema<EsqlRuleInstanceState>;
 
-export type EsqlRuleQueryType = 'match' | 'stats';
-
 export interface EsqlRuleParams extends RuleTypeParams {
   query: string;
   timestampField: string;
-  type?: EsqlRuleQueryType;
+  type?: QueryType;
   lookbackMinutes?: number;
 }
 
