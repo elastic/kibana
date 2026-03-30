@@ -135,6 +135,7 @@ describe('AutomaticImportSetupService', () => {
           dataStreams: [],
           authenticatedUser: { username: 'test-user' } as any,
           version: '1.0.0',
+          categories: ['security'],
         } as any)
       ).rejects.toThrow('Saved Objects service not initialized.');
     });
@@ -166,6 +167,7 @@ describe('AutomaticImportSetupService', () => {
         integrationId: 'integration-123',
         authenticatedUser: { username: 'approver-user' } as any,
         version: '1.2.3',
+        categories: ['observability'],
       });
 
       expect(mockGetIntegration).toHaveBeenCalledWith('integration-123');
@@ -178,7 +180,9 @@ describe('AutomaticImportSetupService', () => {
       expect(updateData.last_updated_by).toBe('approver-user');
       expect(updateData.last_updated_at).toEqual(expect.any(String));
       expect(updateData.status).toBe('approved');
-      expect(updateData.metadata).toEqual(expect.objectContaining({ version: '0.0.1' }));
+      expect(updateData.metadata).toEqual(
+        expect.objectContaining({ version: '0.0.1', categories: ['observability'] })
+      );
 
       expect(updateData.changelog).toEqual([
         {
@@ -219,6 +223,7 @@ describe('AutomaticImportSetupService', () => {
         integrationId: 'integration-123',
         authenticatedUser: { username: 'approver-user' } as any,
         version: '1.1.0',
+        categories: ['security'],
       });
 
       const [updateData] = mockUpdateIntegration.mock.calls[0];
@@ -251,6 +256,7 @@ describe('AutomaticImportSetupService', () => {
           integrationId: 'integration-empty',
           authenticatedUser: { username: 'approver-user' } as any,
           version: '1.2.3',
+          categories: ['security'],
         })
       ).rejects.toThrow('Cannot approve integration integration-empty with no data streams');
 
@@ -285,6 +291,7 @@ describe('AutomaticImportSetupService', () => {
           integrationId: 'integration-123',
           authenticatedUser: { username: 'approver-user' } as any,
           version: '1.2.3',
+          categories: ['security'],
         })
       ).rejects.toThrow(
         'Cannot approve integration integration-123 until all data streams are completed'
@@ -319,6 +326,7 @@ describe('AutomaticImportSetupService', () => {
           dataStreams: [],
           authenticatedUser: { username: 'approver-user' } as any,
           version: '1.2.3',
+          categories: ['security'],
         } as any)
       ).rejects.toThrow('Failed to update integration');
     });

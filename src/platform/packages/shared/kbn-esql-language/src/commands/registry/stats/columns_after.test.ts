@@ -13,7 +13,7 @@ import { columnsAfter } from './columns_after';
 import { additionalFieldsMock } from '../../../__tests__/language/helpers';
 
 describe('STATS', () => {
-  const unmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL;
+  const unmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT;
   it('adds the user defined column, when no grouping is given', () => {
     const previousCommandFields: ESQLFieldWithMetadata[] = [
       { name: 'field1', type: 'keyword', userDefined: false },

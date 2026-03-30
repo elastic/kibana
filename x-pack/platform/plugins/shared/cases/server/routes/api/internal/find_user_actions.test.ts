@@ -188,7 +188,7 @@ describe('findUserActionsRoute', () => {
     await findUserActionsRoute.handler({ context, request, response });
 
     expect(casesClientMock.attachments.bulkGet).toHaveBeenCalledWith({
-      attachmentIDs: [
+      savedObjectIds: [
         userActionsMockData.userActions[1].comment_id,
         userActionsMockData.userActions[2].comment_id,
         userActionsMockData.userActions[3].comment_id,
@@ -281,7 +281,7 @@ describe('findUserActionsRoute', () => {
     await findUserActionsRoute.handler({ context, request, response });
 
     expect(casesClientMock.attachments.bulkGet).toHaveBeenCalledWith({
-      attachmentIDs: [
+      savedObjectIds: [
         userActionsMockData.userActions[1].comment_id,
         userActionsMockData.userActions[3].comment_id,
       ],
