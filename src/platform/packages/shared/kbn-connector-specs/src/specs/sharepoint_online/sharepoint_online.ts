@@ -161,6 +161,11 @@ export const SharepointOnline: ConnectorSpec = {
         const typedInput = input as {
           siteId: string;
         };
+        if (!typedInput.siteId) {
+          throw new Error(
+            'getSitePages requires a siteId. Use getAllSites to list available sites.'
+          );
+        }
         ctx.log.debug(`SharePoint listing all pages from siteId ${typedInput.siteId}`);
         const response = await ctx.client.get(
           `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/pages/`,
@@ -186,6 +191,16 @@ export const SharepointOnline: ConnectorSpec = {
           siteId: string;
           pageId: string;
         };
+        if (!typedInput.siteId) {
+          throw new Error(
+            'getSitePageContents requires a siteId. Use getAllSites to list available sites.'
+          );
+        }
+        if (!typedInput.pageId) {
+          throw new Error(
+            'getSitePageContents requires a pageId. Use getSitePages to list available pages for a site.'
+          );
+        }
         const url = `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/pages/${typedInput.pageId}/microsoft.graph.sitePage`;
 
         ctx.log.debug(`SharePoint getting page contents from ${url}`);
@@ -208,6 +223,13 @@ export const SharepointOnline: ConnectorSpec = {
       ]),
       handler: async (ctx, input) => {
         const typedInput = input as { siteId: string } | { relativeUrl: string };
+        const hasSiteId = 'siteId' in typedInput && typedInput.siteId;
+        const hasRelativeUrl = 'relativeUrl' in typedInput && typedInput.relativeUrl;
+        if (!hasSiteId && !hasRelativeUrl) {
+          throw new Error(
+            'getSite requires either a siteId or a relativeUrl. Use getAllSites to discover sites.'
+          );
+        }
 
         let url = 'https://graph.microsoft.com/v1.0/sites/';
         if ('siteId' in typedInput) {
@@ -237,6 +259,11 @@ export const SharepointOnline: ConnectorSpec = {
           siteId: string;
         };
 
+        if (!typedInput.siteId) {
+          throw new Error(
+            'getSiteDrives requires a siteId. Use getAllSites to list available sites.'
+          );
+        }
         ctx.log.debug(`SharePoint getting all drives of site ${typedInput.siteId}`);
         const response = await ctx.client.get(
           `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/drives/`,
@@ -264,6 +291,11 @@ export const SharepointOnline: ConnectorSpec = {
           siteId: string;
         };
 
+        if (!typedInput.siteId) {
+          throw new Error(
+            'getSiteLists requires a siteId. Use getAllSites to list available sites.'
+          );
+        }
         ctx.log.debug(`SharePoint getting all lists of site ${typedInput.siteId}`);
         const response = await ctx.client.get(
           `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/lists/`,
@@ -291,6 +323,16 @@ export const SharepointOnline: ConnectorSpec = {
           listId: string;
         };
 
+        if (!typedInput.siteId) {
+          throw new Error(
+            'getSiteListItems requires a siteId. Use getAllSites to list available sites.'
+          );
+        }
+        if (!typedInput.listId) {
+          throw new Error(
+            'getSiteListItems requires a listId. Use getSiteLists to list available lists for a site.'
+          );
+        }
         ctx.log.debug(
           `SharePoint getting all items of list ${typedInput.listId} of site ${typedInput.siteId}`
         );
@@ -314,6 +356,11 @@ export const SharepointOnline: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { driveId: string; path?: string };
+        if (!typedInput.driveId) {
+          throw new Error(
+            'getDriveItems requires a driveId. Use getSiteDrives to list available drives for a site.'
+          );
+        }
         const baseUrl = `https://graph.microsoft.com/v1.0/drives/${typedInput.driveId}`;
         const url = typedInput.path
           ? `${baseUrl}/root:/${typedInput.path}:/children`
@@ -346,6 +393,16 @@ export const SharepointOnline: ConnectorSpec = {
           driveId: string;
           itemId: string;
         };
+        if (!typedInput.driveId) {
+          throw new Error(
+            'downloadDriveItem requires a driveId. Use getSiteDrives to list available drives for a site.'
+          );
+        }
+        if (!typedInput.itemId) {
+          throw new Error(
+            'downloadDriveItem requires an itemId. Use getDriveItems to list available items in a drive.'
+          );
+        }
         const baseUrl = `https://graph.microsoft.com/v1.0/drives/${typedInput.driveId}/items/${typedInput.itemId}`;
 
         const contentUrl = `${baseUrl}/content`;
@@ -375,6 +432,11 @@ export const SharepointOnline: ConnectorSpec = {
           downloadUrl: string;
         };
 
+        if (!typedInput.downloadUrl) {
+          throw new Error(
+            'downloadItemFromURL requires a downloadUrl. Use getDriveItems to find items with @microsoft.graph.downloadUrl.'
+          );
+        }
         ctx.log.debug(`SharePoint downloading item from URL ${typedInput.downloadUrl}`);
         const response = await ctx.client.get(typedInput.downloadUrl, {
           responseType: 'arraybuffer',
@@ -462,6 +524,12 @@ export const SharepointOnline: ConnectorSpec = {
           size?: number;
           region?: 'NAM' | 'EUR' | 'APC' | 'LAM' | 'MEA';
         };
+
+        if (!typedInput.query) {
+          throw new Error(
+            'search requires a query string. Provide a KQL query to search SharePoint content.'
+          );
+        }
 
         const searchRequest = {
           requests: [

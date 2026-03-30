@@ -364,6 +364,12 @@ describe('SharepointOnline', () => {
         })
       ).rejects.toThrow('Site not found');
     });
+
+    it('should throw when siteId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSitePages.handler(mockContext, { siteId: '' })
+      ).rejects.toThrow('getSitePages requires a siteId');
+    });
   });
 
   describe('getSitePageContents action', () => {
@@ -409,6 +415,24 @@ describe('SharepointOnline', () => {
           pageId: 'missing-page',
         })
       ).rejects.toThrow('Page not found');
+    });
+
+    it('should throw when siteId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSitePageContents.handler(mockContext, {
+          siteId: '',
+          pageId: 'page-123',
+        })
+      ).rejects.toThrow('getSitePageContents requires a siteId');
+    });
+
+    it('should throw when pageId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSitePageContents.handler(mockContext, {
+          siteId: 'site-123',
+          pageId: '',
+        })
+      ).rejects.toThrow('getSitePageContents requires a pageId');
     });
   });
 
@@ -501,6 +525,12 @@ describe('SharepointOnline', () => {
         })
       ).rejects.toThrow('Site not found');
     });
+
+    it('should throw when siteId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSiteDrives.handler(mockContext, { siteId: '' })
+      ).rejects.toThrow('getSiteDrives requires a siteId');
+    });
   });
 
   describe('getSiteLists action', () => {
@@ -589,6 +619,12 @@ describe('SharepointOnline', () => {
           siteId: 'nonexistent-site',
         })
       ).rejects.toThrow('Site not found');
+    });
+
+    it('should throw when siteId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSiteLists.handler(mockContext, { siteId: '' })
+      ).rejects.toThrow('getSiteLists requires a siteId');
     });
 
     it('should reject pagination params for getSiteLists', () => {
@@ -699,6 +735,24 @@ describe('SharepointOnline', () => {
         })
       ).rejects.toThrow('Site not found');
     });
+
+    it('should throw when siteId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSiteListItems.handler(mockContext, {
+          siteId: '',
+          listId: 'list-123',
+        })
+      ).rejects.toThrow('getSiteListItems requires a siteId');
+    });
+
+    it('should throw when listId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSiteListItems.handler(mockContext, {
+          siteId: 'site-123',
+          listId: '',
+        })
+      ).rejects.toThrow('getSiteListItems requires a listId');
+    });
   });
 
   describe('getDriveItems action', () => {
@@ -754,6 +808,14 @@ describe('SharepointOnline', () => {
       );
       expect(result).toEqual(mockResponse.data);
     });
+
+    it('should throw when driveId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.getDriveItems.handler(mockContext, { driveId: '' })
+      ).rejects.toThrow(
+        'getDriveItems requires a driveId. Use getSiteDrives to list available drives for a site.'
+      );
+    });
   });
 
   describe('downloadDriveItem action', () => {
@@ -782,6 +844,24 @@ describe('SharepointOnline', () => {
         text: 'Hello',
       });
     });
+
+    it('should throw when driveId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.downloadDriveItem.handler(mockContext, {
+          driveId: '',
+          itemId: 'item-456',
+        })
+      ).rejects.toThrow('downloadDriveItem requires a driveId');
+    });
+
+    it('should throw when itemId is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.downloadDriveItem.handler(mockContext, {
+          driveId: 'drive-123',
+          itemId: '',
+        })
+      ).rejects.toThrow('downloadDriveItem requires an itemId');
+    });
   });
 
   describe('downloadItemFromURL action', () => {
@@ -807,6 +887,14 @@ describe('SharepointOnline', () => {
         contentLength: '5',
         base64: 'SGVsbG8=',
       });
+    });
+
+    it('should throw when downloadUrl is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.downloadItemFromURL.handler(mockContext, {
+          downloadUrl: '',
+        })
+      ).rejects.toThrow('downloadItemFromURL requires a downloadUrl');
     });
   });
 
@@ -911,6 +999,12 @@ describe('SharepointOnline', () => {
           relativeUrl: 'invalid-path',
         })
       ).rejects.toThrow('Invalid request');
+    });
+
+    it('should throw when neither siteId nor relativeUrl is provided', async () => {
+      await expect(
+        SharepointOnline.actions.getSite.handler(mockContext, { siteId: '' })
+      ).rejects.toThrow('getSite requires either a siteId or a relativeUrl');
     });
   });
 
@@ -1085,6 +1179,12 @@ describe('SharepointOnline', () => {
           query: 'test',
         })
       ).rejects.toThrow('Invalid search query');
+    });
+
+    it('should throw when query is not provided', async () => {
+      await expect(
+        SharepointOnline.actions.search.handler(mockContext, { query: '' })
+      ).rejects.toThrow('search requires a query string');
     });
   });
 
