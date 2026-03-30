@@ -16,14 +16,7 @@ import type {
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import {
-  EisCloudConnectPromoCallout,
-  EisPromotionalCallout,
-  useCloudConnectStatus,
-} from '@kbn/search-api-panels';
-import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 
-import { docLinks } from '../../../common/doc_links';
 import {
   ENDPOINT,
   ENDPOINT_COPY_ID_ACTION_LABEL,
@@ -33,7 +26,6 @@ import {
   SERVICE_PROVIDER,
 } from '../../../common/translations';
 
-import { useKibana } from '../../hooks/use_kibana';
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
 import { type FilterOptions, GroupByOptions } from '../../types';
 import { getModelId } from '../../utils/get_model_id';
@@ -52,6 +44,7 @@ import { DeleteAction } from './render_table_columns/render_actions/actions/dele
 
 import { EndpointsTable } from './endpoints_table';
 import { GroupedEndpointsTables } from './grouped_endpoints/grouped_endpoints_tables';
+import { EisCallouts } from './eis_callouts';
 
 const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: ${euiTheme.base * 25}px;
@@ -78,15 +71,13 @@ const initializeGroupBy = (): GroupByOptions => {
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
+  isEisEnabled?: boolean;
 }
 
-export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
-  const {
-    services: { cloud, cloudConnect, application },
-  } = useKibana();
-  const { isLoading: isCloudConnectStatusLoading, isCloudConnected } = useCloudConnectStatus(
-    cloudConnect?.hooks.useCloudConnectStatus
-  );
+export const TabularPage: React.FC<TabularPageProps> = ({
+  inferenceEndpoints,
+  isEisEnabled = false,
+}) => {
   const [searchKey, setSearchKey] = useState('');
   const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
@@ -206,22 +197,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   return (
     <>
       <EuiFlexGroup direction="column">
-        <EisPromotionalCallout
-          promoId="inferenceEndpointManagement"
-          isCloudEnabled={cloud?.isCloudEnabled ?? false}
-          ctaLink={docLinks.elasticInferenceService}
-          direction="row"
-        />
-        {!isCloudConnectStatusLoading && !isCloudConnected && (
-          <EisCloudConnectPromoCallout
-            promoId="inferenceEndpointManagement"
-            isSelfManaged={!cloud?.isCloudEnabled}
-            direction="row"
-            navigateToApp={() =>
-              application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
-            }
-          />
-        )}
+        {!isEisEnabled && <EisCallouts />}
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem css={searchContainerStyles} grow={false}>
             <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
