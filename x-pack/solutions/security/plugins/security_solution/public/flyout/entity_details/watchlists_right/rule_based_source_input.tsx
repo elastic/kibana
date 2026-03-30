@@ -92,6 +92,7 @@ interface FilterQueryRowProps {
   filterManager: FilterManager;
   filters: Filter[];
   onSubmitQuery: (query: Query) => void;
+  onChangedQuery: (query: Query) => void;
   savedQuery: SavedQuery | undefined;
   onSavedQuery: (savedQuery: SavedQuery | undefined) => void;
 }
@@ -102,6 +103,7 @@ const FilterQueryRow: FC<FilterQueryRowProps> = ({
   filterManager,
   filters,
   onSubmitQuery,
+  onChangedQuery,
   savedQuery,
   onSavedQuery,
 }) => (
@@ -116,6 +118,7 @@ const FilterQueryRow: FC<FilterQueryRowProps> = ({
             filterManager={filterManager}
             filters={filters}
             onSubmitQuery={onSubmitQuery}
+            onChangedQuery={onChangedQuery}
             savedQuery={savedQuery}
             onSavedQuery={onSavedQuery}
             hideSavedQuery={false}
@@ -201,15 +204,19 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
     };
   }, [data.dataViews, sourcererDataView]);
 
-  const onSubmitQuery = useCallback(
+  const buildEntityStoreSource = useCallback(
+    (query: Query) => ({
+      type: 'store' as const,
+      name: watchlistName ? `${watchlistName}-store` : 'entity-store-filter',
+      filter: query.query ? { kuery: query.query as string } : undefined,
+    }),
+    [watchlistName]
+  );
+
+  const updateEntitySource = useCallback(
     (query: Query) => {
-      setFilterQuery(query);
       if (ruleFilter === 'entityStore') {
-        onFieldChange('entitySource', {
-          type: 'store',
-          name: watchlistName ? `${watchlistName}-store` : 'entity-store-filter',
-          filter: { kuery: query.query as string },
-        });
+        onFieldChange('entitySource', buildEntityStoreSource(query));
       } else {
         onFieldChange(
           'entitySource',
@@ -217,7 +224,30 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
         );
       }
     },
-    [ruleFilter, onFieldChange, selectedIndexPatterns, entityField, watchlistName]
+    [
+      ruleFilter,
+      onFieldChange,
+      buildEntityStoreSource,
+      watchlistName,
+      selectedIndexPatterns,
+      entityField,
+    ]
+  );
+
+  const onSubmitQuery = useCallback(
+    (query: Query) => {
+      setFilterQuery(query);
+      updateEntitySource(query);
+    },
+    [updateEntitySource]
+  );
+
+  const onChangedQuery = useCallback(
+    (query: Query) => {
+      setFilterQuery(query);
+      updateEntitySource(query);
+    },
+    [updateEntitySource]
   );
 
   const onSavedQuery = useCallback((newSavedQuery: SavedQuery | undefined) => {
@@ -227,10 +257,25 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
   const onRuleButtonChange = useCallback(
     (optionId: string) => {
       setRuleFilter(optionId);
-      // Clear entitySource when switching modes so stale data isn't sent
-      onFieldChange('entitySource', undefined);
+      if (optionId === 'entityStore') {
+        // Immediately send entity store source with current filter
+        onFieldChange('entitySource', buildEntityStoreSource(filterQuery));
+      } else {
+        // Immediately send index source with current state
+        onFieldChange(
+          'entitySource',
+          buildIndexEntitySource(watchlistName, selectedIndexPatterns, entityField, filterQuery)
+        );
+      }
     },
-    [onFieldChange]
+    [
+      onFieldChange,
+      buildEntityStoreSource,
+      filterQuery,
+      watchlistName,
+      selectedIndexPatterns,
+      entityField,
+    ]
   );
 
   const onIndexPatternsChange = useCallback(
@@ -296,6 +341,7 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
         filterManager={filterManager}
         filters={filters}
         onSubmitQuery={onSubmitQuery}
+        onChangedQuery={onChangedQuery}
         savedQuery={savedQuery}
         onSavedQuery={onSavedQuery}
       />
