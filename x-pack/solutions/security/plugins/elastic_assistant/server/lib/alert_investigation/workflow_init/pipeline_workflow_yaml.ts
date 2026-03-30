@@ -74,6 +74,8 @@ steps:
             - alert-investigation-pipeline
           owner: securitySolution
           severity: high
+          settings:
+            syncAlerts: false
       - name: attach_new_alerts
         type: cases.addAlerts
         with:
