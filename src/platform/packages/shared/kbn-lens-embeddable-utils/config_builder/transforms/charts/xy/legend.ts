@@ -206,8 +206,11 @@ function getLegendAlignment(legend: XYVisualizationState['legend']) {
   if (!legend.verticalAlignment && !legend.horizontalAlignment) {
     return {};
   }
+  const position: Extract<NonNullable<XYState['legend']>, { placement: 'inside' }>['position'] = `${
+    legend.verticalAlignment ?? 'top'
+  }_${legend.horizontalAlignment ?? 'right'}`;
   return {
-    position: `${legend.verticalAlignment ?? 'top'}_${legend.horizontalAlignment ?? 'right'}`,
+    position,
   };
 }
 
@@ -217,36 +220,56 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
   if (isLegendInside(legend)) {
     return {
       placement: 'inside' as const,
-      layout: stripUndefined({
+      layout: {
         type: 'grid' as const,
-        truncate: max_lines != null ? { max_lines } : undefined,
-      }),
+        ...(max_lines != null ? { truncate: { max_lines } } : {}),
+      },
       ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
       ...getLegendAlignment(legend),
-    };
+    } satisfies Omit<
+      Extract<NonNullable<XYState['legend']>, { placement: 'inside' }>,
+      'visibility' | 'statistics'
+    >;
   }
 
   const position = legend.position ?? DEFAULT_LEGEND_POSITON;
   const isListLayout = isOutsideListLegendLayoutState(legend);
 
-  const baseOutside = stripUndefined({
+  if (position === 'top' || position === 'bottom') {
+    return {
+      placement: 'outside' as const,
+      position,
+      layout: isListLayout
+        ? {
+            type: 'list' as const,
+            ...(max_pixels != null ? { truncate: { max_pixels } } : {}),
+          }
+        : {
+            type: 'grid' as const,
+            ...(max_lines != null ? { truncate: { max_lines } } : {}),
+          },
+    } satisfies Omit<
+      Extract<
+        NonNullable<XYState['legend']>,
+        { placement?: 'outside'; position?: 'top' | 'bottom' }
+      >,
+      'visibility' | 'statistics'
+    >;
+  }
+
+  // left/right (vertical) outside legend
+  return {
     placement: 'outside' as const,
     position,
     ...getLegendSizeAPI(legend.legendSize),
-  });
-
-  return {
-    ...baseOutside,
-    layout: isListLayout
-      ? stripUndefined({
-          type: 'list' as const,
-          truncate: max_pixels ? { max_pixels } : undefined,
-        })
-      : stripUndefined({
-          type: 'grid' as const,
-          truncate: max_lines != null ? { max_lines } : undefined,
-        }),
-  };
+    layout: {
+      type: 'grid' as const,
+      ...(max_lines != null ? { truncate: { max_lines } } : {}),
+    },
+  } satisfies Omit<
+    Extract<NonNullable<XYState['legend']>, { placement?: 'outside'; position?: 'left' | 'right' }>,
+    'visibility' | 'statistics'
+  >;
 }
 
 function getApiLegendTruncate(
