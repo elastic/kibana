@@ -15,7 +15,7 @@ import { apiTest, COMMON_HEADERS, MARKDOWN_API_PATH } from '../fixtures';
 const TEST_MARKDOWN_ID = 'test-update-markdown';
 const TEST_MARKDOWN_ID_IN_SPACE = 'test-update-markdown-in-space';
 
-apiTest.describe('markdown - update', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('markdown - upsert', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
   const spaceId = `markdown-update-space-id`;
 
@@ -51,7 +51,7 @@ apiTest.describe('markdown - update', { tag: tags.deploymentAgnostic }, () => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  apiTest('should return 200 with an updated markdown panel', async ({ apiClient }) => {
+  apiTest('should update existing markdown library item', async ({ apiClient }) => {
     const response = await apiClient.put(`${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -73,7 +73,7 @@ apiTest.describe('markdown - update', { tag: tags.deploymentAgnostic }, () => {
   });
 
   apiTest(
-    'should return 200 with an updated markdown panel in a specific space',
+    'should update existing markdown library item in a specific space',
     async ({ apiClient }) => {
       const response = await apiClient.put(
         `s/${spaceId}/${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID_IN_SPACE}`,
@@ -100,22 +100,27 @@ apiTest.describe('markdown - update', { tag: tags.deploymentAgnostic }, () => {
   );
 
   apiTest(
-    'should return 404 when updating a non-existent markdown panel',
+    'should create new markdown library item',
     async ({ apiClient }) => {
-      const response = await apiClient.put(`${MARKDOWN_API_PATH}/not-an-id`, {
+      const id = 'new-markdown';
+      const response = await apiClient.put(`${MARKDOWN_API_PATH}/${id}`, {
         headers: {
           ...COMMON_HEADERS,
           ...editorCredentials.apiKeyHeader,
         },
         body: {
-          title: 'Does not matter',
-          content: '# Does not matter',
+          title: 'New markdown',
+          content: '# hello world',
         },
         responseType: 'json',
       });
 
-      expect(response).toHaveStatusCode(404);
-      expect(response.body.message).toBe('A markdown panel with ID not-an-id was not found.');
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.id).toBe(id);
+      expect(response.body.data).toMatchObject({
+        title: 'New markdown',
+        content: '# hello world',
+      });
     }
   );
 
