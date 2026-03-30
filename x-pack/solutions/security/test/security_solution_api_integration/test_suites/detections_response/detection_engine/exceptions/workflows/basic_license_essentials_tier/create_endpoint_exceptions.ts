@@ -19,10 +19,6 @@ import {
   waitForRuleSuccess,
   waitForAlertsToBePresent,
 } from '@kbn/detections-response-ftr-services';
-import {
-  disablePerPolicyEndpointExceptions,
-  optInForPerPolicyEndpointExceptions,
-} from '@kbn/security-solution-plugin/scripts/endpoint/common/per_policy_opt_in';
 import { createRuleWithExceptionEntries } from '../../../../utils';
 import {
   createListsIndex,
@@ -84,7 +80,6 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const es = getService('es');
-  const kibanaServer = getService('kibanaServer');
 
   describe('@serverless @serverlessQA @ess @skipInServerlessMKI create_endpoint_exceptions', () => {
     before(async () => {
@@ -94,8 +89,6 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/agent'
       );
-
-      await optInForPerPolicyEndpointExceptions(kibanaServer);
     });
 
     after(async () => {
@@ -105,8 +98,6 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload(
         'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/agent'
       );
-
-      await disablePerPolicyEndpointExceptions(kibanaServer);
     });
 
     beforeEach(async () => {
