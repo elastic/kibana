@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { InsightClient } from '../../significant_events/insights/client/insight_client';
+import type { InsightClient } from '../../sig_events/insights/client/insight_client';
 import type { MemoryService } from '../types';
 
 /**

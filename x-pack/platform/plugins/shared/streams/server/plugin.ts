@@ -47,7 +47,7 @@ import type {
 } from './types';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
-import { ModelSettingsConfigClientImpl } from './lib/saved_objects/significant_events/model_settings_config_client';
+import { ModelSettingsConfigClientImpl } from './lib/sig_events/saved_objects/model_settings_config_client';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
