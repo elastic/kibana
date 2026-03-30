@@ -8,11 +8,9 @@
  */
 
 import {
-  EuiBadge,
   EuiText,
   EuiSpacer,
   EuiListGroup,
-  EuiDescriptionList,
   EuiTablePagination,
   useEuiTheme,
   EuiPanel,
@@ -24,11 +22,10 @@ import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { getUnitLabel } from '../../../common/utils';
-import { TabTitleAndDescription, MetricTypeBadge, BadgeGroup } from '../components';
+import { TabTitleAndDescription } from '../components';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
+import { OverviewTabMetadata } from './overview_tab_metadata';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
@@ -59,99 +56,6 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     (activePage + 1) * pageSize
   );
 
-  const overviewMetadataRows = useMemo(() => {
-    const labelMinWidthPx = euiTheme.base * 11.25;
-
-    const title = (text: string) => (
-      <EuiText size="xs">
-        <strong>{text}</strong>
-      </EuiText>
-    );
-
-    const rows: Array<{
-      title: NonNullable<React.ReactNode>;
-      description: NonNullable<React.ReactNode>;
-    }> = [
-      {
-        title: title(
-          i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
-            defaultMessage: 'Data stream',
-          })
-        ),
-        description: (
-          <EuiText
-            color="primary"
-            size="s"
-            css={css`
-              word-break: break-word;
-              overflow-wrap: anywhere;
-            `}
-          >
-            {metricItem.dataStream ?? ''}
-          </EuiText>
-        ),
-      },
-      {
-        title: title(
-          i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
-            defaultMessage: 'Field type',
-          })
-        ),
-        description: (
-          <BadgeGroup
-            items={metricItem.fieldTypes}
-            isNoValue={(fieldType) => fieldType === ES_FIELD_TYPES.NULL}
-            renderItem={(fieldType, index) => (
-              <EuiBadge key={`${fieldType}-${index}`}>{fieldType}</EuiBadge>
-            )}
-          />
-        ),
-      },
-      {
-        title: title(
-          i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
-            defaultMessage: 'Metric unit',
-          })
-        ),
-        description: (
-          <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel">
-            <BadgeGroup
-              items={metricItem.units}
-              renderItem={(unit, index) => (
-                <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
-              )}
-            />
-          </div>
-        ),
-      },
-      {
-        title: title(
-          i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
-            defaultMessage: 'Metric type',
-          })
-        ),
-        description: (
-          <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel">
-            <BadgeGroup
-              items={metricItem.metricTypes}
-              renderItem={(metricType, index) => (
-                <MetricTypeBadge key={`${metricType}-${index}`} instrument={metricType} />
-              )}
-            />
-          </div>
-        ),
-      },
-    ];
-
-    return { rows, labelMinWidthPx };
-  }, [
-    euiTheme.base,
-    metricItem.dataStream,
-    metricItem.fieldTypes,
-    metricItem.metricTypes,
-    metricItem.units,
-  ]);
-
   useWindowSize(); // trigger re-render on window resize to recalculate the container height
 
   const containerHeight = containerRef
@@ -178,55 +82,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     <div data-test-subj="metricsExperienceFlyoutOverviewTabContent">
       <TabTitleAndDescription metricItem={metricItem} description={description} />
 
-      <EuiPanel
-        hasShadow={false}
-        hasBorder
-        css={css`
-          padding: ${euiTheme.size.xs} ${euiTheme.size.m};
-        `}
-      >
-        <EuiDescriptionList
-          compressed
-          type="column"
-          align="left"
-          columnWidths={[`${overviewMetadataRows.labelMinWidthPx}px`, '1fr']}
-          listItems={overviewMetadataRows.rows}
-          data-test-subj="metricsExperienceFlyoutOverviewTabDescriptionList"
-          titleProps={{
-            css: css`
-              min-width: ${overviewMetadataRows.labelMinWidthPx}px;
-            `,
-          }}
-          descriptionProps={{
-            css: css`
-              min-width: 0;
-            `,
-          }}
-          // TODO: https://github.com/elastic/kibana/issues/260002
-          css={css`
-            align-items: stretch;
-            row-gap: ${euiTheme.size.xxs};
-            column-gap: 0;
-
-            & > .euiDescriptionList__title,
-            & > .euiDescriptionList__description {
-              padding: ${euiTheme.size.s} ${euiTheme.size.xs};
-            }
-
-            & > .euiDescriptionList__title {
-              display: flex;
-              align-items: center;
-            }
-
-            & > * {
-              border-bottom: ${euiTheme.border.thin};
-            }
-            & > *:nth-last-child(-n + 2) {
-              border-bottom: none;
-            }
-          `}
-        />
-      </EuiPanel>
+      <OverviewTabMetadata metricItem={metricItem} />
 
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>
