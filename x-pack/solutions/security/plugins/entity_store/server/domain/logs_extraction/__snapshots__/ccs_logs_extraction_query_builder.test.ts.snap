@@ -51,6 +51,13 @@ FROM remote:metrics-*
  host.geo.region_iso_code = MV_DEDUPE(TOP(TO_STRING(host.geo.region_iso_code), 10)) WHERE host.geo.region_iso_code IS NOT NULL,
  host.geo.region_name = MV_DEDUPE(TOP(TO_STRING(host.geo.region_name), 10)) WHERE host.geo.region_name IS NOT NULL,
  host.geo.timezone = MV_DEDUPE(TOP(TO_STRING(host.geo.timezone), 10)) WHERE host.geo.timezone IS NOT NULL,
+ cloud.provider = LAST(TO_STRING(cloud.provider), @timestamp) WHERE cloud.provider IS NOT NULL,
+ cloud.region = LAST(TO_STRING(cloud.region), @timestamp) WHERE cloud.region IS NOT NULL,
+ cloud.instance.id = LAST(TO_STRING(cloud.instance.id), @timestamp) WHERE cloud.instance.id IS NOT NULL,
+ cloud.machine.type = LAST(TO_STRING(cloud.machine.type), @timestamp) WHERE cloud.machine.type IS NOT NULL,
+ agent.id = LAST(TO_STRING(agent.id), @timestamp) WHERE agent.id IS NOT NULL,
+ agent.type = LAST(TO_STRING(agent.type), @timestamp) WHERE agent.type IS NOT NULL,
+ endpoint.id = LAST(TO_STRING(endpoint.id), @timestamp) WHERE endpoint.id IS NOT NULL,
  entity.source = LAST(TO_STRING(_index), @timestamp) WHERE _index IS NOT NULL,
  asset.id = LAST(TO_STRING(asset.id), @timestamp) WHERE asset.id IS NOT NULL,
  asset.name = LAST(TO_STRING(asset.name), @timestamp) WHERE asset.name IS NOT NULL,
@@ -91,6 +98,9 @@ FROM remote:metrics-*
     BY entity.id
 | KEEP entity*,
 host*,
+cloud*,
+agent*,
+endpoint*,
 asset*,
 @timestamp
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, entity.id ASC

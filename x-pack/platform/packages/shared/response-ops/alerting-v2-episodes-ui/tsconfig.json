@@ -1,0 +1,31 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "@kbn/ambient-ui-types",
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-http-browser",
+    "@kbn/data-views-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/i18n",
+    "@kbn/alerting-v2-plugin",
+    "@kbn/esql-types",
+    "@kbn/expressions-plugin",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/react-query",
+    "@kbn/data-plugin",
+    "@kbn/discover-utils"
+  ]
+}
