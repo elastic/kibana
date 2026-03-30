@@ -262,6 +262,56 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     expect(res.error?.message).toContain('aborted');
   });
 
+  it('returns awaiting_human_input and pending_prompt when agent hits HITL', async () => {
+    const pendingPrompt = {
+      id: 'tools.k8s.resources_scale.confirmation.call-1',
+      type: 'confirmation',
+      title: 'Tool requires confirmation',
+      message: 'k8s.resources_scale',
+      confirm_text: 'Allow',
+      cancel_text: 'Deny',
+    };
+
+    const events$ = of(
+      {
+        type: ChatEventType.conversationCreated,
+        data: { conversation_id: 'c-hitl', title: 't' },
+      },
+      {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: '' },
+            pending_prompt: pendingPrompt,
+          },
+        },
+      }
+    );
+
+    const execution = createExecutionMock(events$);
+
+    const serviceManager = {
+      internalStart: { execution },
+    } as any;
+
+    const step = getRunAgentStepDefinition(serviceManager);
+    const res = await step.handler(
+      createContext({
+        input: {
+          message: 'investigate and remediate',
+        },
+        config: {
+          'create-conversation': true,
+        },
+      })
+    );
+
+    expect(res.output?.awaiting_human_input).toBe(true);
+    expect(res.output?.pending_prompt).toEqual(pendingPrompt);
+    expect(res.output?.conversation_id).toBe('c-hitl');
+  });
+
   it('propagates attachments to execution service nextInput', async () => {
     const attachments = [
       {

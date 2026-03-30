@@ -100,6 +100,10 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             message: outputMessage,
             structured_output: round.response.structured_output,
             ...(outputConversationId && { conversation_id: outputConversationId }),
+            ...(round.pending_prompt && {
+              awaiting_human_input: true,
+              pending_prompt: round.pending_prompt,
+            }),
           },
         };
       } catch (error) {
