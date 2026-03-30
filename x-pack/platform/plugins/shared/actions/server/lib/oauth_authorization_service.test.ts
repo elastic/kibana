@@ -148,6 +148,31 @@ describe('OAuthAuthorizationService', () => {
       });
     });
 
+    it('resolves authType from secrets when config has none', async () => {
+      const service = createService();
+      const getResult = createMockConnector({ id: 'connector-1', config: {} });
+      mockActionsClient.get.mockResolvedValue(getResult);
+      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        attributes: {
+          secrets: {
+            authType: 'oauth_authorization_code',
+            authorizationUrl: 'https://provider.example.com/authorize',
+            clientId: 'client-id',
+          },
+          config: {},
+        },
+      });
+
+      const result = await service.getOAuthConfig('connector-1', undefined);
+
+      expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
+        authorizationUrl: 'https://provider.example.com/authorize',
+        clientId: 'client-id',
+        scope: undefined,
+      });
+    });
+
     it('throws when connector does not use OAuth Authorization Code flow', async () => {
       const service = createService();
       const getResult = createMockConnector({
@@ -155,6 +180,9 @@ describe('OAuthAuthorizationService', () => {
         config: { authType: 'basic' },
       });
       mockActionsClient.get.mockResolvedValue(getResult);
+      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        attributes: { secrets: {}, config: {} },
+      });
 
       await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
         'Connector does not use OAuth Authorization Code or EARS flow'
@@ -169,6 +197,9 @@ describe('OAuthAuthorizationService', () => {
         authMode: 'shared',
       });
       mockActionsClient.get.mockResolvedValue(getResult);
+      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        attributes: { secrets: {}, config: {} },
+      });
 
       await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
         'Connector does not use OAuth Authorization Code or EARS flow'

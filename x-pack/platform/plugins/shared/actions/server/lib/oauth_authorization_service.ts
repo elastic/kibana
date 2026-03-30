@@ -14,6 +14,7 @@ import { BASE_ACTION_API_PATH } from '../../common';
  * OAuth connector secrets stored in encrypted saved objects
  */
 interface OAuthConnectorSecrets {
+  authType?: string;
   provider?: string;
   authorizationUrl?: string;
   clientId?: string;
@@ -27,9 +28,6 @@ interface OAuthConnectorSecrets {
  */
 interface OAuthConnectorConfig {
   authType?: string;
-  auth?: {
-    type?: string;
-  };
   authorizationUrl?: string;
   clientId?: string;
   tokenUrl?: string;
@@ -115,9 +113,10 @@ export class OAuthAuthorizationService {
    */
   private validateOAuthConnector(
     config: OAuthConnectorConfig,
+    secrets: OAuthConnectorSecrets,
     authMode?: AuthMode
   ): 'oauth_authorization_code' | 'ears' {
-    const authType = config?.authType;
+    const authType = secrets?.authType || config?.authType;
 
     if (authType === 'oauth_authorization_code' || authType === 'ears') {
       return authType;
@@ -143,9 +142,6 @@ export class OAuthAuthorizationService {
     const connector = await this.actionsClient.get({ id: connectorId });
     const config = connector.config as OAuthConnectorConfig;
 
-    // Validate this is an OAuth connector and get the resolved auth type
-    const authTypeId = this.validateOAuthConnector(config, connector.authMode);
-
     // Fetch connector with decrypted secrets
     const rawAction =
       await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<ConnectorWithOAuth>(
@@ -153,8 +149,11 @@ export class OAuthAuthorizationService {
         connectorId,
         { namespace }
       );
-
     const secrets = rawAction.attributes.secrets;
+
+    // Validate this is an OAuth connector and get the resolved auth type
+    const authTypeId = this.validateOAuthConnector(config, secrets, connector.authMode);
+
     const scope = secrets.scope || config?.scope;
 
     if (authTypeId === 'ears') {
