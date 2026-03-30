@@ -12,13 +12,13 @@ import {
   APP_ID,
   CASES_CONFIGURE_PATH,
   CASES_CREATE_PATH,
-  CASES_CREATE_TEMPLATE_PATH,
-  CASES_TEMPLATES_PATH,
+  CASES_CONFIGURE_TEMPLATES_PATH,
+  CASES_CONFIGURE_CREATE_TEMPLATE_PATH,
 } from '../../../common/constants';
 import { useNavigation } from '../lib/kibana';
 import type { ICasesDeepLinkId } from './deep_links';
 import type { CaseViewPathParams, CaseViewPathSearchParams, TemplateViewPathParams } from './paths';
-import { generateCaseViewPath, generateTemplateEditPath } from './paths';
+import { generateCaseViewPath, generateConfigureTemplateEditPath } from './paths';
 import { stringifyToURL, parseURL } from '../../components/utils';
 import { useApplication } from '../lib/kibana/use_application';
 
@@ -75,8 +75,8 @@ const navigationMapping = {
   all: { path: '/' },
   create: { path: CASES_CREATE_PATH },
   configure: { path: CASES_CONFIGURE_PATH },
-  templates: { path: CASES_TEMPLATES_PATH },
-  createTemplate: { path: CASES_CREATE_TEMPLATE_PATH },
+  templates: { path: CASES_CONFIGURE_TEMPLATES_PATH },
+  createTemplate: { path: CASES_CONFIGURE_CREATE_TEMPLATE_PATH },
 };
 
 export const useAllCasesNavigation = () => {
@@ -135,7 +135,7 @@ export const useCasesEditTemplateNavigation = () => {
       getAppUrl({
         deepLinkId,
         absolute,
-        path: generateTemplateEditPath(pathParams),
+        path: generateConfigureTemplateEditPath(pathParams),
       }),
     [deepLinkId, getAppUrl]
   );
@@ -144,7 +144,7 @@ export const useCasesEditTemplateNavigation = () => {
     (pathParams) =>
       navigateTo({
         deepLinkId,
-        path: generateTemplateEditPath(pathParams),
+        path: generateConfigureTemplateEditPath(pathParams),
       }),
     [navigateTo, deepLinkId]
   );

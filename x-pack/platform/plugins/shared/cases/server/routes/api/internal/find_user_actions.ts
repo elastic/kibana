@@ -57,7 +57,7 @@ export const findUserActionsRoute = createCasesRoute({
       if (commentIds.length > 0) {
         attachmentRes = await casesClient.attachments.bulkGet({
           caseID: caseId,
-          attachmentIDs: commentIds,
+          savedObjectIds: commentIds,
           mode: 'unified',
         });
       }

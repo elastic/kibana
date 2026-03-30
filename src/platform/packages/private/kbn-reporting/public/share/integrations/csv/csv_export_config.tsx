@@ -142,7 +142,7 @@ export const getShareMenuItems =
       name: panelTitle,
       exportType: reportType,
       label: 'CSV',
-      icon: 'tableDensityNormal',
+      icon: 'table',
       generateAssetExport: generateReportingJobCSV,
       helpText: (
         <FormattedMessage

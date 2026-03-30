@@ -15,7 +15,7 @@ import { SOLUTION_NAME } from './translations';
 import { createNavigationTree } from './navigation_tree';
 
 export const registerSolutionNavigation = async (services: Services) => {
-  const { securitySolution, navigation, cases } = services;
+  const { securitySolution, navigation } = services;
 
   const chatExperience$ = services.settings.client.get$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
@@ -25,8 +25,7 @@ export const registerSolutionNavigation = async (services: Services) => {
   // Get initial chat experience for setting initial navigation tree
   const initialChatExperience = await firstValueFrom(chatExperience$);
 
-  const templatesEnabled = cases.config.templatesEnabled;
-  const navigationTree = createNavigationTree(services, initialChatExperience, templatesEnabled);
+  const navigationTree = createNavigationTree(services, initialChatExperience);
 
   navigation.isSolutionNavEnabled$.subscribe((isSolutionNavigationEnabled) => {
     if (isSolutionNavigationEnabled) {
