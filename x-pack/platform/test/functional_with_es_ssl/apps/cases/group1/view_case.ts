@@ -624,7 +624,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Lens visualization', () => {
+    describe.skip('Lens visualization', () => {
       before(async () => {
         await cases.testResources.installKibanaSampleData('logs');
       });

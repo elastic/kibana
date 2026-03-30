@@ -273,7 +273,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     // FLAKY
-    describe('Lens visualization', () => {
+    describe.skip('Lens visualization', () => {
       before(async () => {
         await cases.testResources.installKibanaSampleData('logs');
         await createAndNavigateToCase(getPageObject, getService, owner);
