@@ -21,9 +21,11 @@ import {
 jest.mock('../../../../common/hooks/use_has_graph_visualization_license');
 const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
 
-jest.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store');
-import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
-const mockUseEntityStoreStatus = useEntityStoreStatus as jest.Mock;
+jest.mock(
+  '../../../../entity_analytics/components/entity_store/hooks/use_is_entity_store_v2_available'
+);
+import { useIsEntityStoreV2Available } from '../../../../entity_analytics/components/entity_store/hooks/use_is_entity_store_v2_available';
+const mockUseIsEntityStoreV2Available = useIsEntityStoreV2Available as jest.Mock;
 
 // All EUID source fields (must explicitly handle to avoid mockFieldData bleed-through)
 const ALL_EUID_SOURCE_FIELDS: readonly string[] = [
@@ -79,8 +81,8 @@ describe('useGraphPreview', () => {
     jest.clearAllMocks();
     // Default mock: graph visualization feature is available
     mockUseHasGraphVisualizationLicense.mockReturnValue(true);
-    // Default mock: entity store is running
-    mockUseEntityStoreStatus.mockReturnValue({ data: { status: 'running' } });
+    // Default mock: entity store v2 entities index exists
+    mockUseIsEntityStoreV2Available.mockReturnValue({ data: { indexExists: true } });
   });
 
   it(`should return false when missing actor and target`, () => {
@@ -646,8 +648,8 @@ describe('useGraphPreview', () => {
     });
   });
 
-  it('should return false for shouldShowGraph when entity store is not running', () => {
-    mockUseEntityStoreStatus.mockReturnValue({ data: { status: 'not_installed' } });
+  it('should return false for shouldShowGraph when entity store v2 index does not exist', () => {
+    mockUseIsEntityStoreV2Available.mockReturnValue({ data: { indexExists: false } });
 
     const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
