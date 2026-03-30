@@ -111,9 +111,9 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                     );
                   } catch (persistError) {
                     taskContext.logger.error(
-                      `Failed to persist ${result.insights.length} insights: ${
-                        getErrorMessage(persistError)
-                      }`
+                      `Failed to persist ${result.insights.length} insights: ${getErrorMessage(
+                        persistError
+                      )}`
                     );
                   }
                 }
