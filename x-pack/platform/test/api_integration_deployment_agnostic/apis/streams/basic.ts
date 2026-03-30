@@ -116,146 +116,135 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         resources = await getResources();
       });
 
-      it('is not enabled', async () => {
+      it('is enabled', async () => {
         const wiredStatus = await getWiredStatus();
         expect(wiredStatus.logs).to.eql(false);
-        expect(wiredStatus['logs.otel']).to.eql(false);
-        expect(wiredStatus['logs.ecs']).to.eql(false);
+        expect(wiredStatus['logs.otel']).to.eql(true);
+        expect(wiredStatus['logs.ecs']).to.eql(true);
       });
 
-      describe('after enabling', () => {
-        before(async () => {
-          await enableStreams(apiClient);
+      it('includes create_snapshot_repository in stream privileges', async () => {
+        const stream = await getStream(apiClient, 'logs.otel');
+        const parsed = Streams.WiredStream.GetResponse.parse(stream);
+        expect(typeof parsed.privileges.create_snapshot_repository).to.eql('boolean');
+      });
+
+      // ES|QL views API is not available in all environments
+      if (!isServerless) {
+        it('creates ES|QL views for wired root streams', async () => {
+          if (!viewsApiAvailable) return;
+          for (const streamName of ['logs.otel', 'logs.ecs']) {
+            const response = await esClient.transport.request<{
+              views: Array<{ name: string; query: string }>;
+            }>({
+              method: 'GET',
+              path: `/_query/view/%24.${streamName}`,
+            });
+            expect(response.views).to.have.length(1);
+            expect(response.views[0].name).to.eql(`$.${streamName}`);
+            expect(response.views[0].query).to.eql(`FROM ${streamName}`);
+          }
+        });
+      }
+
+      // Elasticsearch doesn't support streams in serverless mode yet
+      if (!isServerless) {
+        it('reports conflict if disabled on Elasticsearch level', async () => {
+          await esClient.transport.request({
+            method: 'POST',
+            path: '/_streams/logs.otel/_disable',
+          });
+          const wiredStatus = await getWiredStatus();
+          expect(wiredStatus['logs.otel']).to.eql('conflict');
+          expect(wiredStatus['logs.ecs']).to.eql(true);
+          expect(wiredStatus.logs).to.eql(false);
         });
 
-        it('reports enabled status', async () => {
+        it('reports enabled after calling enabled again', async () => {
+          await enableStreams(apiClient);
           const wiredStatus = await getWiredStatus();
           expect(wiredStatus.logs).to.eql(false);
           expect(wiredStatus['logs.otel']).to.eql(true);
           expect(wiredStatus['logs.ecs']).to.eql(true);
         });
 
-        it('includes create_snapshot_repository in stream privileges', async () => {
-          const stream = await getStream(apiClient, 'logs.otel');
-          const parsed = Streams.WiredStream.GetResponse.parse(stream);
-          expect(typeof parsed.privileges.create_snapshot_repository).to.eql('boolean');
+        it('Elasticsearch streams is enabled too', async () => {
+          type StreamsStatusResponse = {
+            logs: { enabled: boolean } & Record<string, unknown>;
+          } & Record<string, unknown>;
+
+          const response = await esClient.transport.request<StreamsStatusResponse>({
+            method: 'GET',
+            path: '/_streams/status',
+          });
+          expect(response).to.eql({
+            logs: {
+              enabled: false,
+            },
+            'logs.otel': {
+              enabled: true,
+            },
+            'logs.ecs': {
+              enabled: true,
+            },
+          });
+        });
+      }
+
+      describe('after disabling', () => {
+        before(async () => {
+          await disableStreams(apiClient);
+        });
+
+        it('returns a 404 for logs', async () => {
+          await apiClient
+            .fetch('GET /api/streams/{name} 2023-10-31', {
+              params: {
+                path: {
+                  name: 'logs',
+                },
+              },
+            })
+            .expect(404);
+        });
+
+        it('is disabled', async () => {
+          const wiredStatus = await getWiredStatus();
+          expect(wiredStatus.logs).to.eql(false);
+          expect(wiredStatus['logs.otel']).to.eql(false);
+          expect(wiredStatus['logs.ecs']).to.eql(false);
         });
 
         // ES|QL views API is not available in all environments
         if (!isServerless) {
-          it('creates ES|QL views for wired root streams', async () => {
+          it('removes ES|QL views for wired root streams', async () => {
             if (!viewsApiAvailable) return;
             for (const streamName of ['logs.otel', 'logs.ecs']) {
-              const response = await esClient.transport.request<{
-                views: Array<{ name: string; query: string }>;
-              }>({
-                method: 'GET',
-                path: `/_query/view/%24.${streamName}`,
-              });
-              expect(response.views).to.have.length(1);
-              expect(response.views[0].name).to.eql(`$.${streamName}`);
-              expect(response.views[0].query).to.eql(`FROM ${streamName}`);
+              await esClient.transport
+                .request<{ views: Array<{ name: string; query: string }> }>({
+                  method: 'GET',
+                  path: `/_query/view/%24.${streamName}`,
+                })
+                .then(
+                  () => {
+                    throw new Error(`Expected view $.${streamName} to be deleted`);
+                  },
+                  (err: { statusCode?: number }) => {
+                    expect(err.statusCode).to.eql(404);
+                  }
+                );
             }
           });
         }
+      });
 
-        // Elasticsearch doesn't support streams in serverless mode yet
-        if (!isServerless) {
-          it('reports conflict if disabled on Elasticsearch level', async () => {
-            await esClient.transport.request({
-              method: 'POST',
-              path: '/_streams/logs.otel/_disable',
-            });
-            const wiredStatus = await getWiredStatus();
-            expect(wiredStatus['logs.otel']).to.eql('conflict');
-            expect(wiredStatus['logs.ecs']).to.eql(true);
-            expect(wiredStatus.logs).to.eql(false);
-          });
-
-          it('reports enabled after calling enabled again', async () => {
-            await enableStreams(apiClient);
-            const wiredStatus = await getWiredStatus();
-            expect(wiredStatus.logs).to.eql(false);
-            expect(wiredStatus['logs.otel']).to.eql(true);
-            expect(wiredStatus['logs.ecs']).to.eql(true);
-          });
-
-          it('Elasticsearch streams is enabled too', async () => {
-            type StreamsStatusResponse = {
-              logs: { enabled: boolean } & Record<string, unknown>;
-            } & Record<string, unknown>;
-
-            const response = await esClient.transport.request<StreamsStatusResponse>({
-              method: 'GET',
-              path: '/_streams/status',
-            });
-            expect(response).to.eql({
-              logs: {
-                enabled: false,
-              },
-              'logs.otel': {
-                enabled: true,
-              },
-              'logs.ecs': {
-                enabled: true,
-              },
-            });
-          });
-        }
-
-        it('is enabled', async () => {
-          await disableStreams(apiClient);
+      describe('after re-enabling', () => {
+        before(async () => {
+          await enableStreams(apiClient);
         });
 
-        describe('after disabling', () => {
-          before(async () => {
-            await disableStreams(apiClient);
-          });
-
-          it('cleans up all the resources', async () => {
-            expect(await getResources()).to.eql(resources);
-          });
-
-          it('returns a 404 for logs', async () => {
-            await apiClient
-              .fetch('GET /api/streams/{name} 2023-10-31', {
-                params: {
-                  path: {
-                    name: 'logs',
-                  },
-                },
-              })
-              .expect(404);
-          });
-
-          it('is disabled', async () => {
-            const wiredStatus = await getWiredStatus();
-            expect(wiredStatus.logs).to.eql(false);
-            expect(wiredStatus['logs.otel']).to.eql(false);
-            expect(wiredStatus['logs.ecs']).to.eql(false);
-          });
-
-          // ES|QL views API is not available in all environments
-          if (!isServerless) {
-            it('removes ES|QL views for wired root streams', async () => {
-              if (!viewsApiAvailable) return;
-              for (const streamName of ['logs.otel', 'logs.ecs']) {
-                await esClient.transport
-                  .request<{ views: Array<{ name: string; query: string }> }>({
-                    method: 'GET',
-                    path: `/_query/view/%24.${streamName}`,
-                  })
-                  .then(
-                    () => {
-                      throw new Error(`Expected view $.${streamName} to be deleted`);
-                    },
-                    (err: { statusCode?: number }) => {
-                      expect(err.statusCode).to.eql(404);
-                    }
-                  );
-              }
-            });
-          }
+        it('creates all the resources', async () => {
+          expect(await getResources()).to.eql(resources);
         });
       });
     });

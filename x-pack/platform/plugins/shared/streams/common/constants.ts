@@ -55,3 +55,5 @@ export const STREAMS_TIERED_FEATURES = [
 ];
 
 export const FAILURE_STORE_SELECTOR = '::failures';
+
+export const STREAMS_SETTINGS_DOCUMENT_ID = 'kibana_streams_settings';

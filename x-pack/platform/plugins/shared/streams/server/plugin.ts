@@ -22,12 +22,14 @@ import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
+import { isNotFoundError } from '@kbn/es-errors';
 import type { StreamsConfig } from '../common/config';
 import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
+  STREAMS_SETTINGS_DOCUMENT_ID,
   STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
@@ -57,6 +59,7 @@ import { InsightService } from './lib/sig_events/insights/client/insight_service
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
+import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -184,6 +187,11 @@ export class StreamsPlugin
         soClient,
       });
 
+      const streamsSettingsStorageClient = createStreamsSettingsStorageClient(
+        coreStart.elasticsearch.client.asInternalUser,
+        this.logger
+      );
+
       return {
         scopedClusterClient,
         soClient,
@@ -199,6 +207,7 @@ export class StreamsPlugin
         uiSettingsClient,
         taskClient,
         modelSettingsClient,
+        streamsSettingsStorageClient,
       };
     };
 
@@ -299,6 +308,27 @@ export class StreamsPlugin
         .getStartServices()
         .then(async ([coreStart]) => {
           const esClient = coreStart.elasticsearch.client.asInternalUser;
+
+          const streamsSettingsStorageClient = createStreamsSettingsStorageClient(
+            esClient,
+            this.logger
+          );
+
+          const streamsSettings = await streamsSettingsStorageClient
+            .get({ id: STREAMS_SETTINGS_DOCUMENT_ID })
+            .then((response) => response._source)
+            .catch((error) => {
+              if (isNotFoundError(error)) {
+                return;
+              }
+              throw error;
+            });
+
+          if (streamsSettings?.wired_streams_disabled_by_user) {
+            this.logger.info('Wired streams are disabled by user, skipping preconfiguration');
+            return;
+          }
+
           const soClient = coreStart.savedObjects.getUnsafeInternalClient();
           // Since the RulesClient cannot be unscoped, we provide a stub client that
           // will throw an error if rules or queries exist in the stream definition.
