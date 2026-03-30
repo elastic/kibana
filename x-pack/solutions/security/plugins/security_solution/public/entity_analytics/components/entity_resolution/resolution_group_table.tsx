@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiText,
+  EuiToolTip,
   EuiLoadingSpinner,
   useEuiTheme,
 } from '@elastic/eui';
@@ -36,6 +37,7 @@ import {
   ACTIONS_COLUMN,
   REMOVE_ENTITY_BUTTON,
   TARGET_ENTITY_TOOLTIP,
+  CANNOT_REMOVE_TARGET_TOOLTIP,
   RESOLUTION_EMPTY_STATE,
 } from './translations';
 import { RESOLUTION_GROUP_TABLE_TEST_ID, RESOLUTION_EMPTY_STATE_TEST_ID } from './test_ids';
@@ -155,7 +157,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
           const entityId = getEntityId(entity);
           const isTarget = entityId === targetEntityId;
           const isThisEntityRemoving = removingEntityId === entityId;
-          return (
+          const button = (
             <EuiButtonIcon
               iconType="cross"
               color="danger"
@@ -165,6 +167,12 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
               isLoading={isThisEntityRemoving}
             />
           );
+          if (isTarget) {
+            return (
+              <EuiToolTip content={CANNOT_REMOVE_TARGET_TOOLTIP}>{button}</EuiToolTip>
+            );
+          }
+          return button;
         },
       });
     }
