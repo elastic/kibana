@@ -20,14 +20,15 @@ import { ApplicationParameters, Context, CoreStart } from '@kbn/core-di-browser'
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { ALERTING_V2_APP_ID, ALERTING_V2_APP_ROUTE } from './constants';
-import { App } from './components/app';
+import { ALERTING_V2_RULES_APP_ID } from './constants';
+import { RulesApp } from './components/rules_app';
+import { NotificationPoliciesApp } from './components/notification_policies_app';
 
 @injectable()
 export class AlertingV2App {
-  public static id = ALERTING_V2_APP_ID;
-  public static title = 'Rules V2';
-  public static appRoute = ALERTING_V2_APP_ROUTE;
+  public static id = ALERTING_V2_RULES_APP_ID;
+  public static title = 'Rules';
+  public static appRoute = `/${ALERTING_V2_RULES_APP_ID}`;
   public static visibleIn: AppDeepLinkLocations[] = ['sideNav'];
   public static category = DEFAULT_APP_CATEGORIES.management;
 
@@ -59,7 +60,34 @@ export const mountAlertingV2App = ({
       <QueryClientProvider client={queryClient}>
         <I18nProvider>
           <Router history={history}>
-            <App />
+            <RulesApp />
+          </Router>
+        </I18nProvider>
+      </QueryClientProvider>
+    </Context.Provider>,
+    element
+  );
+
+  return () => ReactDOM.unmountComponentAtNode(element);
+};
+
+export const mountNotificationPoliciesApp = ({
+  params,
+  container,
+}: {
+  params: AlertingV2MountParams;
+  container: Container;
+}): AppUnmount => {
+  const { element, history } = params;
+
+  const queryClient = new QueryClient();
+
+  ReactDOM.render(
+    <Context.Provider value={container}>
+      <QueryClientProvider client={queryClient}>
+        <I18nProvider>
+          <Router history={history}>
+            <NotificationPoliciesApp />
           </Router>
         </I18nProvider>
       </QueryClientProvider>

@@ -9,7 +9,7 @@ import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { MouseEvent } from 'react';
 import { useEffect } from 'react';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { ALERTING_V2_MANAGEMENT_PATH, MANAGEMENT_APP_ID } from '../constants';
+import { ALERTING_V2_RULES_MANAGEMENT_PATH, MANAGEMENT_APP_ID } from '../constants';
 import { getAlertingV2Breadcrumb, type AlertingV2BreadcrumbPage } from '../lib/breadcrumb';
 
 export interface UseBreadcrumbsOptions {
@@ -46,7 +46,7 @@ export function useBreadcrumbs(
     const listBreadcrumb: ChromeBreadcrumb = {
       ...getAlertingV2Breadcrumb('rules_list'),
       href: application.getUrlForApp(MANAGEMENT_APP_ID, {
-        path: ALERTING_V2_MANAGEMENT_PATH,
+        path: ALERTING_V2_RULES_MANAGEMENT_PATH,
       }),
     };
 
