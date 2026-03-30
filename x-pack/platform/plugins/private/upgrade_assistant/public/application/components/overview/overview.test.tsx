@@ -84,9 +84,7 @@ describe('Overview', () => {
     renderOverview();
 
     expect(screen.getByTestId('whatsNewLink')).toBeInTheDocument();
-    expect(screen.getByTestId('whatsNewLink')).toHaveTextContent(
-      "What's new in the Elastic releases"
-    );
+    expect(screen.getByTestId('whatsNewLink')).toHaveTextContent('Elastic release notes');
   });
 
   it('shows current version and latest available version', () => {
@@ -117,7 +115,7 @@ describe('Overview', () => {
 
     const header = screen.getByTestId('overviewPageHeader');
     expect(header.querySelector('.euiToolTipAnchor')).toBeNull();
-    expect(header).not.toHaveTextContent('From your current version, you can update to');
+    expect(header).not.toHaveTextContent('From your current version, you can upgrade to');
   });
 
   it('shows direct upgrade range and tooltip explaining minimum required version', async () => {
@@ -141,7 +139,7 @@ describe('Overview', () => {
         'Latest available version: 9.3.2'
       );
       expect(screen.getByTestId('overviewPageHeader')).toHaveTextContent(
-        'From your current version, you can update to versions 8.17.1 - 8.19.13.'
+        'From your current version, you can upgrade to versions 8.17.1 - 8.19.13.'
       );
     });
 
