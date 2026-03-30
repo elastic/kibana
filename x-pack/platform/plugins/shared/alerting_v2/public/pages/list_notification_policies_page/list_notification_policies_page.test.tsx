@@ -30,6 +30,9 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'application') {
       return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
     }
+    if (token === 'chrome') {
+      return { setBreadcrumbs: jest.fn(), docTitle: { change: jest.fn() } };
+    }
     if (token === 'http') {
       return { basePath: { prepend: (path: string) => path } };
     }

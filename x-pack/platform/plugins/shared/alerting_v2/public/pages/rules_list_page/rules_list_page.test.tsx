@@ -378,7 +378,7 @@ describe('RulesListPage', () => {
 
     expect(screen.getByTestId('createRuleButton')).toHaveAttribute(
       'href',
-      '/app/management/insightsAndAlerting/alerting_v2/create'
+      '/app/management/alertingV2/rules/create'
     );
   });
 
@@ -517,7 +517,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
     expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/management/insightsAndAlerting/alerting_v2/create?cloneFrom=rule-1'
+      '/app/management/alertingV2/rules/create?cloneFrom=rule-1'
     );
   });
 
