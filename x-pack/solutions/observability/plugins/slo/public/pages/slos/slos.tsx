@@ -19,7 +19,6 @@ import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LoadingPage } from '../loading_page';
-import { CreateCompositeSloBtn } from './components/common/create_composite_slo_btn';
 import { CreateSloBtn } from './components/common/create_slo_btn';
 import { SloList } from './components/slo_list';
 import { SloListSearchBar } from './components/slo_list_search_bar';
@@ -32,7 +31,7 @@ export function SlosPage() {
     http: { basePath },
     serverless,
   } = useKibana().services;
-  const { ObservabilityPageTemplate, experimentalFeatures } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const { data: permissions } = usePermissions();
   const history = useHistory();
@@ -75,10 +74,7 @@ export function SlosPage() {
       data-test-subj="slosPage"
       pageHeader={{
         pageTitle: i18n.translate('xpack.slo.slosPage.', { defaultMessage: 'SLOs' }),
-        rightSideItems: [
-          ...(experimentalFeatures?.compositeSlo?.enabled ? [<CreateCompositeSloBtn />] : []),
-          <CreateSloBtn />,
-        ],
+        rightSideItems: [<CreateSloBtn />],
       }}
     >
       <HeaderMenu />
