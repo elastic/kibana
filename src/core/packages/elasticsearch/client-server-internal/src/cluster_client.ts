@@ -23,7 +23,7 @@ import type {
   ICustomClusterClient,
   IScopedClusterClient,
   ElasticsearchClientConfig,
-  SpaceNPRERouting,
+  AsScopedOptions,
 } from '@kbn/core-elasticsearch-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
@@ -42,10 +42,13 @@ import {
 import { createTransport, type OnRequestHandler } from './create_transport';
 import type { AgentFactoryProvider } from './agent_manager';
 
+export type { OnRequestHandler };
+
 const noop = () => undefined;
 
 interface CommonFactoryRoutingOpts {
   logger: Logger;
+  request?: ScopeableUrlRequest;
 }
 
 interface SpaceFactoryRoutingOpts extends CommonFactoryRoutingOpts {
@@ -134,15 +137,18 @@ export class ClusterClient implements ICustomClusterClient {
   }
 
   asScoped(request: ScopeableRequest): IScopedClusterClient;
-  asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
-  asScoped(request: ScopeableUrlRequest, opts?: SpaceNPRERouting): IScopedClusterClient {
+  asScoped(request: ScopeableUrlRequest, opts: AsScopedOptions): IScopedClusterClient;
+  asScoped(request: ScopeableUrlRequest, opts?: AsScopedOptions): IScopedClusterClient {
     const createScopedClient = () => {
       const scopedHeaders = this.getScopedHeaders(request);
+      const factoryOpts: FactoryRoutingOpts = opts
+        ? { ...opts, logger: this.logger, request }
+        : { logger: this.logger, request };
       const transportClass = createTransport({
         scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
-        onRequest: this.onRequestHandlerFactory({ ...opts, logger: this.logger, request }),
+        onRequest: this.onRequestHandlerFactory(factoryOpts),
         logger: this.logger,
       });
 

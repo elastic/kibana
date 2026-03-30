@@ -77,6 +77,32 @@ export interface TimeRangeTransformOptions {
   roundRelativeTime?: boolean;
 }
 
+/** Time unit for the auto-refresh interval. */
+export type AutoRefreshIntervalUnit = 's' | 'm' | 'h';
+
+/** Auto-refresh configuration stored in picker settings. */
+export interface AutoRefreshSettings {
+  /**
+   * When true, shows the play/pause button and allows the timer to run (controlled with `isPaused`).
+   * Toggled from Settings, not from the append control.
+   */
+  isEnabled: boolean;
+  /**
+   * When `isEnabled` is true, whether the refresh interval timer is running (`false`) or paused (`true`).
+   */
+  isPaused: boolean;
+  /**
+   * Refresh interval in milliseconds.
+   * @default 10000
+   */
+  interval: number;
+  /**
+   * The unit used to display the interval count in the Settings panel.
+   * Auto-determined from `interval` when absent.
+   */
+  intervalUnit?: AutoRefreshIntervalUnit;
+}
+
 /** User-facing settings exposed by the date range picker settings panel. */
 export interface DateRangePickerSettings {
   /**
@@ -85,6 +111,11 @@ export interface DateRangePickerSettings {
    * @default true
    */
   roundRelativeTime: boolean;
+  /**
+   * Auto-refresh preferences. The Settings “Refresh every” row and the toolbar play/pause control
+   * are shown only when both this and `DateRangePickerProps.onRefresh` are set.
+   */
+  autoRefresh?: AutoRefreshSettings;
 }
 
 export interface TimeRange {

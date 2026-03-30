@@ -31,6 +31,7 @@ describe('getStepIconType', () => {
     ['console', 'console'],
     ['database', 'data.set'],
     ['clock', 'wait'],
+    ['user', 'waitForInput'],
     ['branch', 'if'],
     ['tokenBoolean', 'if-branch'],
     ['refresh', 'foreach'],

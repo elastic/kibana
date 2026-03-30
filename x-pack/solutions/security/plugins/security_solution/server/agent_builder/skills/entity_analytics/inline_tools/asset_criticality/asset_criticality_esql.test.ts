@@ -135,7 +135,7 @@ describe('assetCriticalityDynamicInlineToolHandler', () => {
         index: ASSET_CRITICALITY_INDEX,
         nlQuery: 'What is the asset criticality?',
         additionalContext: expect.stringContaining(
-          `${euid.getEuidEsqlDocumentsContainsIdFilter('host')}`
+          `${euid.esql.getEuidDocumentsContainsIdFilter('host')}`
         ),
       })
     );

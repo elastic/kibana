@@ -21,12 +21,12 @@ import {
   ENTRY_LEADER_ENTITY_ID,
   ENTRY_LEADER_START,
 } from '../../../../flyout_v2/document/constants/field_names';
-import { useSessionViewConfig } from '../../../../flyout_v2/document/hooks/use_session_view_config';
+import { useSessionViewConfig } from '../../../../flyout_v2/session_view/hooks/use_session_view_config';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useLicense } from '../../../../common/hooks/use_license';
 
-jest.mock('../../../../flyout_v2/document/hooks/use_session_view_config');
+jest.mock('../../../../flyout_v2/session_view/hooks/use_session_view_config');
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../sourcerer/containers');
 

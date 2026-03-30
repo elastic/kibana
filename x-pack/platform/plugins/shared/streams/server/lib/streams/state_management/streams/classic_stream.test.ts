@@ -64,6 +64,7 @@ describe('ClassicStream', () => {
   const createBaseClassicStreamDefinition = (
     overrides: Partial<Streams.ClassicStream.Definition> = {}
   ): Streams.ClassicStream.Definition => ({
+    type: 'classic',
     name: 'logs-test-default',
     description: 'Test stream',
     updated_at: new Date().toISOString(),

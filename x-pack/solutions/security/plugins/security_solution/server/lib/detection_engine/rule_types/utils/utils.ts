@@ -35,11 +35,11 @@ import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleAction, GapReason } from '@kbn/alerting-plugin/common';
+import { gapReasonType } from '@kbn/alerting-plugin/common';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSearchResponse,
@@ -110,10 +110,7 @@ export const hasTimestampFields = async (args: {
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
 
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: errorString,
-    });
+    ruleExecutionLogger.warn(errorString);
 
     return { foundNoIndices: false, warningMessage: errorString };
   }
@@ -314,6 +311,55 @@ export const getGapBetweenRuns = ({
   return currentDuration.subtract(driftTolerance);
 };
 
+export { type GapReason } from '@kbn/alerting-plugin/common';
+
+/**
+ * Determines why a gap occurred between rule executions.
+ *
+ * Returns `rule_disabled` only when the rule was re-enabled during the gap
+ * and fired promptly after (within the lookback window). Defaults to
+ * `rule_did_not_run` in all other cases (outages, missing data, etc).
+ *
+ * Known limitation: a brief toggle during an unrelated outage can be
+ * misclassified as rule_disabled.
+ */
+export const getGapReason = ({
+  previousStartedAt,
+  startedAt,
+  lastEnabledAt,
+  originalFrom,
+  originalTo,
+}: {
+  previousStartedAt: Date | null | undefined;
+  startedAt: Date;
+  lastEnabledAt: Date | null | undefined;
+  originalFrom: moment.Moment;
+  originalTo: moment.Moment;
+}): GapReason => {
+  if (previousStartedAt == null || lastEnabledAt == null) {
+    return { type: gapReasonType.RULE_DID_NOT_RUN };
+  }
+
+  const lastEnabledAtMs = lastEnabledAt.getTime();
+  const previousStartedAtMs = previousStartedAt.getTime();
+  const startedAtMs = startedAt.getTime();
+
+  const isInGapWindow = lastEnabledAtMs > previousStartedAtMs && lastEnabledAtMs <= startedAtMs;
+
+  if (!isInGapWindow) {
+    return { type: gapReasonType.RULE_DID_NOT_RUN };
+  }
+
+  const driftToleranceMs = originalTo.diff(originalFrom);
+  const postEnableDelayMs = startedAtMs - lastEnabledAtMs;
+
+  if (postEnableDelayMs <= driftToleranceMs) {
+    return { type: gapReasonType.RULE_DISABLED };
+  }
+
+  return { type: gapReasonType.RULE_DID_NOT_RUN };
+};
+
 export const makeFloatString = (num: number): string => Number(num).toFixed(2);
 
 export const getRuleRangeTuples = async ({
@@ -325,6 +371,7 @@ export const getRuleRangeTuples = async ({
   maxSignals,
   ruleExecutionLogger,
   alerting,
+  lastEnabledAt,
 }: {
   startedAt: Date;
   previousStartedAt: Date | null | undefined;
@@ -334,6 +381,7 @@ export const getRuleRangeTuples = async ({
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   alerting: AlertingServerSetup;
+  lastEnabledAt: Date | null | undefined;
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
@@ -347,10 +395,7 @@ export const getRuleRangeTuples = async ({
   if (maxSignals > maxAlertsAllowed) {
     maxSignalsToUse = maxAlertsAllowed;
     warningStatusMessage = `The rule's max alerts per run setting (${maxSignals}) is greater than the Kibana alerting limit (${maxAlertsAllowed}). The rule will only write a maximum of ${maxAlertsAllowed} alerts per rule run.`;
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: warningStatusMessage,
-    });
+    ruleExecutionLogger.warn(warningStatusMessage);
   }
 
   const tuples = [
@@ -404,11 +449,19 @@ export const getRuleRangeTuples = async ({
   );
 
   let gapRange;
+  let detectedGapReason: GapReason | undefined;
   if (remainingGapMilliseconds > 0 && previousStartedAt != null) {
     gapRange = {
       gte: previousStartedAt.toISOString(),
       lte: moment(previousStartedAt).add(remainingGapMilliseconds).toDate().toISOString(),
     };
+    detectedGapReason = getGapReason({
+      previousStartedAt,
+      startedAt,
+      lastEnabledAt,
+      originalFrom,
+      originalTo,
+    });
   }
 
   return {
@@ -416,6 +469,7 @@ export const getRuleRangeTuples = async ({
     remainingGap: moment.duration(remainingGapMilliseconds),
     warningStatusMessage,
     gap: gapRange,
+    gapReason: detectedGapReason,
     originalFrom,
     originalTo,
   };

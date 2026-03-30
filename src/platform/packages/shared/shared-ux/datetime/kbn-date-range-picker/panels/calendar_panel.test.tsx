@@ -156,7 +156,7 @@ describe('CalendarPanel', () => {
   });
 
   describe('initialization', () => {
-    it('converts to absolute format on mount', () => {
+    it('converts to absolute format on mount, preserving existing times', () => {
       renderWithEuiTheme(<CalendarPanel />);
 
       expect(setText).toHaveBeenCalledWith(
@@ -172,8 +172,8 @@ describe('CalendarPanel', () => {
     });
   });
 
-  describe('time preservation', () => {
-    it('preserves original times when selecting new dates', () => {
+  describe('date normalization', () => {
+    it('always uses start/end of day when selecting new dates', () => {
       mockUseDateRangePickerContext.mockReturnValue(
         makeContext(
           [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
@@ -187,25 +187,19 @@ describe('CalendarPanel', () => {
       clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 14, 30, 45, 123), feb2026(15, 18, 15, 30, 456))
+        formatDateRange(feb2026(10, 0, 0, 0, 0), feb2026(15, 23, 59, 59, 999))
       );
     });
 
-    it('orders times correctly when selecting same day with start time > end time', () => {
-      mockUseDateRangePickerContext.mockReturnValue(
-        makeContext(
-          [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
-          new Date(2026, 1, 1, 20, 0, 0, 0),
-          new Date(2026, 1, 2, 8, 0, 0, 0)
-        )
-      );
+    it('uses start/end of day when selecting the same day twice', () => {
+      mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
       clickDay(10);
       clickDay(10);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 8, 0, 0, 0), feb2026(10, 20, 0, 0, 0))
+        formatDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
       );
     });
   });
@@ -244,7 +238,7 @@ describe('CalendarPanel', () => {
 
       clickDay(20);
 
-      expect(setText).toHaveBeenCalledWith(feb2026Local(20, 14, 30, 45, 123));
+      expect(setText).toHaveBeenCalledWith(feb2026Local(20, 0, 0, 0, 0));
     });
   });
 

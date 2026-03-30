@@ -60,6 +60,11 @@ export const ROUND_UNIT_MAP: Record<string, string> = {
   y: 'd',
 };
 
+/**
+ * CSS selector for the infinite-scroll calendar scroller (`data-calendar-scroller` attribute in Calendar).
+ */
+export const CALENDAR_SCROLLER_SELECTOR = '[data-calendar-scroller]';
+
 /** Selector for focusable elements */
 export const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';

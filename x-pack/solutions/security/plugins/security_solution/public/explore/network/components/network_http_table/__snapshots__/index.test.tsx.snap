@@ -34,10 +34,6 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
   opacity: 1;
 }
 
-.c4 {
-  color: #7186A8;
-}
-
 .c2 .siemSubtitle__item {
   color: #98A8C3;
   font-size: 12px;
@@ -57,7 +53,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
   display: block;
 }
 
-.c5 {
+.c4 {
   margin-top: 4px;
 }
 
@@ -378,7 +374,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <span
-                    class="c4"
+                    class="css-16x51zl-EmptyWrapper"
                   >
                     —
                   </span>
@@ -587,7 +583,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <span
-                    class="c4"
+                    class="css-16x51zl-EmptyWrapper"
                   >
                     —
                   </span>
@@ -761,7 +757,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
       </div>
     </div>
     <div
-      class="euiFlexGroup c5 emotion-euiFlexGroup-m-spaceBetween-center-row"
+      class="euiFlexGroup c4 emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
