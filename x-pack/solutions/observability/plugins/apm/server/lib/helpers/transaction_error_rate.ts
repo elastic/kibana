@@ -10,6 +10,7 @@ import {
   calculateFailedTransactionRate,
   type OutcomeAggregation,
 } from '@kbn/apm-data-access-plugin/server/utils';
+import { nullifyLeadingTrailingEmptyRedMetricPoints } from '../../../common/utils/red_metric_value_for_histogram_bucket';
 
 export function getFailedTransactionRateTimeSeries(
   buckets: AggregationResultOf<
@@ -20,10 +21,11 @@ export function getFailedTransactionRateTimeSeries(
     {}
   >['buckets']
 ) {
-  return buckets.map((dateBucket) => {
-    return {
+  return nullifyLeadingTrailingEmptyRedMetricPoints(
+    buckets.map((dateBucket) => ({
       x: dateBucket.key,
+      docCount: dateBucket.doc_count,
       y: calculateFailedTransactionRate(dateBucket),
-    };
-  });
+    }))
+  );
 }

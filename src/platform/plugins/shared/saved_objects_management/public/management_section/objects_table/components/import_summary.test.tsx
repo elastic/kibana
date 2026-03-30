@@ -206,33 +206,4 @@ describe('ImportSummary', () => {
     expect(button.prop('href')).toBe('/app/rules');
     expect(coreStart.application.isAppRegistered).toHaveBeenCalledWith('rules');
   });
-
-  it('should use original actionPath when rules app is not registered', async () => {
-    const coreStart = coreMock.createStart();
-    coreStart.application.isAppRegistered = jest.fn().mockReturnValue(false);
-    basePath.prepend = ((path: string) => path) as PrependType;
-
-    const originalActionPath = '/app/management/insightsAndAlerting/triggersActions/rules';
-    const props = getProps({
-      successfulImports: [successNew],
-      importWarnings: [
-        {
-          type: 'action_required',
-          message: 'Rules need to be enabled',
-          actionPath: originalActionPath,
-        },
-      ],
-    });
-
-    const wrapper = mountWithI18nProvider(
-      <KibanaContextProvider services={coreStart}>
-        <ImportSummary {...props} />
-      </KibanaContextProvider>
-    );
-
-    const button = wrapper.find('EuiButton[data-test-subj="warningActionButton"]');
-    expect(button).toHaveLength(1);
-    expect(button.prop('href')).toBe(originalActionPath);
-    expect(coreStart.application.isAppRegistered).toHaveBeenCalledWith('rules');
-  });
 });

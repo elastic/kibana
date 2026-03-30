@@ -10,6 +10,7 @@
 export * from './specs/abuseipdb/abuseipdb';
 export * from './specs/alienvault_otx/alienvault_otx';
 export * from './specs/atlassian/jira-cloud/jira';
+export * from './specs/atlassian/confluence_cloud/confluence';
 export * from './specs/aws_lambda/aws_lambda';
 export * from './specs/brave_search/brave_search';
 export * from './specs/figma/figma';
@@ -33,3 +34,5 @@ export * from './specs/zoom/zoom';
 export * from './specs/zendesk/zendesk';
 export * from './specs/amazon_s3/amazon_s3';
 export * from './specs/microsoft_teams/microsoft_teams';
+export * from './specs/tavily/tavily';
+export * from './specs/pagerduty/pagerduty';

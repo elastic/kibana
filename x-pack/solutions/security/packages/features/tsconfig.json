@@ -18,6 +18,7 @@
     "@kbn/securitysolution-rules",
     "@kbn/securitysolution-list-constants",
     "@kbn/elastic-assistant-common",
+    "@kbn/data-views-plugin",
   ],
   "exclude": ["target/**/*"]
 }

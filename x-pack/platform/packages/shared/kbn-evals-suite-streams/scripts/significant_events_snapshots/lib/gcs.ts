@@ -28,10 +28,11 @@ export function generateGcsRepoName({ runId }: { runId: string }): string {
 export async function registerGcsRepository(
   esClient: Client,
   log: ToolingLog,
-  runId: string
+  runId: string,
+  appNamespace?: string
 ): Promise<void> {
   const repoName = generateGcsRepoName({ runId });
-  const basePath = generateGcsBasePath({ runId });
+  const basePath = generateGcsBasePath({ runId, appNamespace });
   log.info(`Registering GCS snapshot repository "${repoName}" → ${GCS_BUCKET}/${basePath}`);
 
   await esClient.snapshot.createRepository({

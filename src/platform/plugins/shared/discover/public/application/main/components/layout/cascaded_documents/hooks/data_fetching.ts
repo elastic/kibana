@@ -40,9 +40,11 @@ export const useGroupedCascadeData = ({
   queryMeta,
   esqlVariables,
 }: UseGroupedCascadeDataProps) => {
-  return useMemo(
-    () =>
-      selectedCascadeGroups.reduce<ESQLDataGroupNode[]>((allGroups, groupColumn, groupDepth) => {
+  return useMemo(() => {
+    const columnTypes = new Map<string, 'number' | 'array'>();
+
+    const data = selectedCascadeGroups.reduce<ESQLDataGroupNode[]>(
+      (allGroups, groupColumn, groupDepth) => {
         let resolvedGroupColumn: string = groupColumn;
 
         const matchingGroupVariable = esqlVariables?.find(
@@ -82,12 +84,18 @@ export const useGroupedCascadeData = ({
                   const existingValue = allValues[identifier];
 
                   if (typeof currentValue === 'number') {
+                    if (!columnTypes.has(identifier)) {
+                      columnTypes.set(identifier, 'number');
+                    }
                     if (typeof existingValue === 'number') {
                       allValues[identifier] = existingValue + currentValue;
                     } else if (isNil(existingValue)) {
                       allValues[identifier] = currentValue;
                     }
                   } else if (Array.isArray(currentValue)) {
+                    if (!columnTypes.has(identifier)) {
+                      columnTypes.set(identifier, 'array');
+                    }
                     const valuesArray = currentValue.map(String);
 
                     if (Array.isArray(existingValue)) {
@@ -120,9 +128,12 @@ export const useGroupedCascadeData = ({
         });
 
         return allGroups;
-      }, []),
-    [esqlVariables, queryMeta.appliedFunctions, rows, selectedCascadeGroups]
-  );
+      },
+      []
+    );
+
+    return { data, columnTypes };
+  }, [esqlVariables, queryMeta.appliedFunctions, rows, selectedCascadeGroups]);
 };
 
 const useStableHandler = <T extends (...args: Parameters<T>) => ReturnType<T>>(handler: T): T => {

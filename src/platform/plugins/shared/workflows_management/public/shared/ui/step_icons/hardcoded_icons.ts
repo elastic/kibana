@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import beta from './icons/beta.svg';
 import bolt from './icons/bolt.svg';
 import branch from './icons/branch.svg';
 import clock from './icons/clock.svg';
@@ -52,5 +53,6 @@ export const HardcodedIcons: Record<string, string> = {
   'workflow.fail': fail,
   trigger: bolt,
   flask,
+  beta,
   default: plugs,
 };

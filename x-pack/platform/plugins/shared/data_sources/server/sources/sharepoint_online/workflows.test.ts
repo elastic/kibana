@@ -10,10 +10,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { sharepointOnlineDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-sharepoint-connector';
 const CONNECTOR_ID = 'fake-sp-connector-uuid';
@@ -23,9 +22,9 @@ describe('sharepoint online workflows', () => {
   let transportRequestMock: jest.Mock;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(sharepointOnlineDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.sharepoint-online', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 

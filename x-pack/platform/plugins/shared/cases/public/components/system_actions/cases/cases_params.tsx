@@ -304,7 +304,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           data-test-subj="show-time-window-warning"
           title={i18n.TIME_WINDOW_WARNING}
           color="warning"
-          iconType="alert"
+          iconType="warning"
           size="s"
         />
       )}

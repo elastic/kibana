@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 
 import { DetailsFlyout } from '.';
 
@@ -21,7 +21,7 @@ import { mockAttackDiscoverySchedule } from '../../../mock/mock_attack_discovery
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
 import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 
-jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors');
+jest.mock('@kbn/inference-connectors');
 jest.mock('../logic/use_update_schedule');
 jest.mock('../logic/use_get_schedule');
 jest.mock('../../../../../common/lib/kibana');

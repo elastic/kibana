@@ -46,7 +46,7 @@ import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/w
 import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
 import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
-import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE, WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -55,8 +55,23 @@ interface WorkflowListProps {
 }
 
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
+  const { page = 1, size = WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } = search;
   const { application, notifications } = useKibana().services;
-  const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
+
+  const searchParams = useMemo(() => {
+    if (search.enabled != null) {
+      // The stats aggs return enabled as 0 (false) and 1 (true), we need to convert the values to booleans for the search params.
+      return { ...search, enabled: search.enabled.map((enabled) => Boolean(enabled)) };
+    }
+    return search;
+  }, [search]);
+
+  const {
+    data: workflows,
+    isLoading: isLoadingWorkflows,
+    error,
+    refetch,
+  } = useWorkflows(searchParams);
   const {
     eventDrivenExecutionEnabled,
     isLoading: isLoadingEventDrivenStatus,
@@ -86,11 +101,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     if (!isLoadingWorkflows && workflows) {
       telemetry.reportWorkflowListViewed({
         workflowCount: workflows.results.length,
-        pageNumber: search.page || 1,
+        pageNumber: page || 1,
         search: { ...search },
       });
     }
-  }, [isLoadingWorkflows, workflows, search, telemetry]);
+  }, [isLoadingWorkflows, workflows, page, search, telemetry]);
 
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
   const [executeWorkflow, setExecuteWorkflow] = useState<WorkflowListItemDto | null>(null);
@@ -454,6 +469,15 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     ]
   );
 
+  const showStart = useMemo(() => (page - 1) * size + 1, [page, size]);
+  const showEnd = useMemo(() => {
+    const end = page * size;
+    if (workflows && end > (workflows.total || 0)) {
+      return workflows.total;
+    }
+    return end;
+  }, [page, size, workflows]);
+
   if (isLoadingWorkflows) {
     return (
       <EuiFlexGroup justifyContent={'center'} alignItems={'center'}>
@@ -495,12 +519,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }
-
-  const showStart = (search.page - 1) * search.size + 1;
-  let showEnd = search.page * search.size;
-  if (workflows && showEnd > (workflows.total || 0)) {
-    showEnd = workflows.total;
   }
 
   return (
@@ -554,9 +572,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         responsiveBreakpoint="xs"
         tableLayout={'fixed'}
         onChange={({
-          page: { index: pageIndex, size },
+          page: { index: pageIndex, size: pageSize },
         }: CriteriaWithPagination<WorkflowListItemDto>) =>
-          setSearch({ ...search, page: pageIndex + 1, size })
+          setSearch({ ...search, page: pageIndex + 1, size: pageSize })
         }
         selection={{
           onSelectionChange: setSelectedItems,
@@ -564,10 +582,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           selected: selectedItems,
         }}
         pagination={{
-          pageSize: search.size,
+          pageSize: size,
           pageSizeOptions: WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS,
           totalItemCount: workflows?.total ?? 0,
-          pageIndex: search.page - 1,
+          pageIndex: page - 1,
         }}
       />
       {executeWorkflow?.definition && (

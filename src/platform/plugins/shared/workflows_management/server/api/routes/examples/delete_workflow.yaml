@@ -1,0 +1,13 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true"
+  - lang: Console
+    source: |
+      DELETE kbn://api/workflows/workflow/{id}

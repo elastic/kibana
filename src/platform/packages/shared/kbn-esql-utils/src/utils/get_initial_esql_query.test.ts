@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import { getInitialESQLQuery } from './get_initial_esql_query';
 
 const getDataView = (name: string, dataViewFields: DataView['fields'], timeFieldName?: string) => {
@@ -179,6 +180,64 @@ describe('getInitialESQLQuery', () => {
     expect(getInitialESQLQuery(dataView, { language: 'unknown', query: 'error' })).toBe(
       'FROM logs*'
     );
+  });
+
+  it('should append DSL filters as WHERE clause', () => {
+    const fields = [
+      {
+        name: '@timestamp',
+        displayName: '@timestamp',
+        type: 'date',
+        scripted: false,
+        filterable: true,
+        aggregatable: true,
+        sortable: true,
+      },
+    ] as DataView['fields'];
+    const dataView = getDataView('logs*', fields, '@timestamp');
+    const filters: Filter[] = [
+      { meta: { key: 'status' }, query: { match_phrase: { status: 200 } } },
+    ];
+    expect(getInitialESQLQuery(dataView, undefined, filters)).toBe(
+      'FROM logs* | WHERE `status` : 200'
+    );
+  });
+
+  it('should combine DSL filters with time filter and query', () => {
+    const fields = [
+      {
+        name: '@custom_timestamp',
+        displayName: '@custom_timestamp',
+        type: 'date',
+        scripted: false,
+        filterable: true,
+        aggregatable: true,
+        sortable: true,
+      },
+    ] as DataView['fields'];
+    const dataView = getDataView('logs*', fields, '@custom_timestamp');
+    const filters: Filter[] = [
+      { meta: { key: 'status' }, query: { match_phrase: { status: 200 } } },
+    ];
+    expect(getInitialESQLQuery(dataView, { language: 'kuery', query: 'error' }, filters)).toBe(
+      'FROM logs* | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend AND KQL("""error""") AND `status` : 200'
+    );
+  });
+
+  it('should not add filters when array is empty', () => {
+    const fields = [
+      {
+        name: '@timestamp',
+        displayName: '@timestamp',
+        type: 'date',
+        scripted: false,
+        filterable: true,
+        aggregatable: true,
+        sortable: true,
+      },
+    ] as DataView['fields'];
+    const dataView = getDataView('logs*', fields, '@timestamp');
+    expect(getInitialESQLQuery(dataView, undefined, [])).toBe('FROM logs*');
   });
 
   it('should use TS command when dataView is in TSDB mode', () => {
