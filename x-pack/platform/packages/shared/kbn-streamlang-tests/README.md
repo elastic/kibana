@@ -11,11 +11,8 @@ One such circular dependency chain is illustrated below:
 ```mermaid
 graph TD
     A["@kbn/streamlang"] -->|_imports for co-living tests_| B["@kbn/scout"]
-<<<<<<< HEAD
     B -->|_imports_| C["@kbn/apm-synthtrace"]
-=======
     B -.->|_optional: @kbn/scout-synthtrace_| C["@kbn/synthtrace"]
->>>>>>> 5df5c02aa0a9 (add kbn/scout-synthtrace (#258961))
     C -->|_imports_| D["@kbn/streams-schema"]
     D -->|_imports_| A
     
