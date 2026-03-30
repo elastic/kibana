@@ -87,13 +87,9 @@ const ALERT_EPISODE_COMMON_SNOOZE_TIMES: Array<{
 ];
 
 export const AlertEpisodeSnoozeForm = ({
-  isSnoozed,
   onApplySnooze,
-  onCancelSnooze,
 }: {
-  isSnoozed: boolean;
   onApplySnooze: (expiry: string) => void;
-  onCancelSnooze: () => void;
 }) => {
   const [durationValue, setDurationValue] = useState(1);
   const [durationUnit, setDurationUnit] = useState<AlertEpisodeDurationUnit>('h');
@@ -165,17 +161,6 @@ export const AlertEpisodeSnoozeForm = ({
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
-
-      {isSnoozed && (
-        <>
-          <EuiHorizontalRule margin="s" />
-          <EuiButton size="s" color="danger" onClick={onCancelSnooze} fullWidth>
-            {i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.cancel', {
-              defaultMessage: 'Cancel snooze',
-            })}
-          </EuiButton>
-        </>
-      )}
     </div>
   );
 };

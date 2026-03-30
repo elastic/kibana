@@ -28,7 +28,7 @@ describe('SnoozeActionButton', () => {
     } as any);
   });
 
-  it('renders Snooze with bellSlash when not snoozed', () => {
+  it('renders Snooze with bell when not snoozed (after unsnooze)', () => {
     render(
       <SnoozeActionButton
         lastSnoozeAction={ALERT_EPISODE_ACTION_TYPE.UNSNOOZE}
@@ -39,32 +39,32 @@ describe('SnoozeActionButton', () => {
     expect(
       screen
         .getByTestId('alertEpisodeSnoozeActionButton')
-        .querySelector('[data-euiicon-type="bellSlash"]')
+        .querySelector('[data-euiicon-type="bell"]')
     ).toBeInTheDocument();
   });
 
-  it('renders Snooze with bellSlash when previous action is undefined', () => {
+  it('renders Snooze with bell when previous action is undefined', () => {
     render(<SnoozeActionButton lastSnoozeAction={undefined} http={mockServices.http} />);
     expect(screen.getByTestId('alertEpisodeSnoozeActionButton')).toHaveTextContent('Snooze');
     expect(
       screen
         .getByTestId('alertEpisodeSnoozeActionButton')
-        .querySelector('[data-euiicon-type="bellSlash"]')
+        .querySelector('[data-euiicon-type="bell"]')
     ).toBeInTheDocument();
   });
 
-  it('renders Unsnooze with bell when snoozed', () => {
+  it('renders Unsnooze with bellSlash when snoozed', () => {
     render(
       <SnoozeActionButton
         lastSnoozeAction={ALERT_EPISODE_ACTION_TYPE.SNOOZE}
         http={mockServices.http}
       />
     );
-    expect(screen.getByTestId('alertEpisodeSnoozeActionButton')).toHaveTextContent('Unsnooze');
+    expect(screen.getByTestId('alertEpisodeUnsnoozeActionButton')).toHaveTextContent('Unsnooze');
     expect(
       screen
-        .getByTestId('alertEpisodeSnoozeActionButton')
-        .querySelector('[data-euiicon-type="bell"]')
+        .getByTestId('alertEpisodeUnsnoozeActionButton')
+        .querySelector('[data-euiicon-type="bellSlash"]')
     ).toBeInTheDocument();
   });
 
@@ -95,7 +95,7 @@ describe('SnoozeActionButton', () => {
     );
   });
 
-  it('shows cancel snooze and closes popover after click when snoozed', async () => {
+  it('calls unsnooze mutation when Unsnooze is clicked', async () => {
     const user = userEvent.setup();
     render(
       <SnoozeActionButton
@@ -105,15 +105,12 @@ describe('SnoozeActionButton', () => {
       />
     );
 
-    await user.click(screen.getByTestId('alertEpisodeSnoozeActionButton'));
+    await user.click(screen.getByTestId('alertEpisodeUnsnoozeActionButton'));
 
-    const cancelButton = screen.getByRole('button', { name: 'Cancel snooze' });
-
-    await user.click(cancelButton);
-
-    await waitFor(() =>
-      expect(screen.queryByTestId('alertEpisodeSnoozeForm')).not.toBeInTheDocument()
-    );
+    expect(mutate).toHaveBeenCalledWith({
+      groupHash: 'gh-1',
+      actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
+    });
   });
 
   it('calls snooze route mutation when applying from popover', async () => {

@@ -28,15 +28,30 @@ export function SnoozeActionButton({
   const closePopover = () => setIsPopoverOpen(false);
   const { mutate: createAlertAction, isLoading } = useCreateAlertAction(http);
 
-  const label = isSnoozed
-    ? i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.unsnooze', {
+  return isSnoozed ? (
+    <EuiButton
+      size="s"
+      color="text"
+      fill={false}
+      iconType="bellSlash"
+      onClick={() => {
+        if (!groupHash) {
+          return;
+        }
+        createAlertAction({
+          groupHash,
+          actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
+        });
+      }}
+      isDisabled={!groupHash}
+      isLoading={isLoading}
+      data-test-subj="alertEpisodeUnsnoozeActionButton"
+    >
+      {i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.unsnooze', {
         defaultMessage: 'Unsnooze',
-      })
-    : i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.snooze', {
-        defaultMessage: 'Snooze',
-      });
-
-  return (
+      })}
+    </EuiButton>
+  ) : (
     <EuiPopover
       aria-label={i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.popoverAriaLabel', {
         defaultMessage: 'Snooze actions',
@@ -47,13 +62,15 @@ export function SnoozeActionButton({
           size="s"
           color="text"
           fill={false}
-          iconType={isSnoozed ? 'bell' : 'bellSlash'}
+          iconType={'bell'}
           onClick={togglePopover}
           isDisabled={!groupHash}
           isLoading={isLoading}
           data-test-subj="alertEpisodeSnoozeActionButton"
         >
-          {label}
+          {i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.snooze', {
+            defaultMessage: 'Snooze',
+          })}
         </EuiButton>
       }
       isOpen={isPopoverOpen}
@@ -63,7 +80,6 @@ export function SnoozeActionButton({
       panelStyle={{ width: 320 }}
     >
       <AlertEpisodeSnoozeForm
-        isSnoozed={isSnoozed}
         onApplySnooze={(expiry) => {
           if (!groupHash) {
             return;
@@ -72,17 +88,6 @@ export function SnoozeActionButton({
             groupHash,
             actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
             body: { expiry },
-          });
-          closePopover();
-        }}
-        onCancelSnooze={() => {
-          if (!groupHash) {
-            return;
-          }
-          createAlertAction({
-            groupHash,
-            actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
-            body: {},
           });
           closePopover();
         }}

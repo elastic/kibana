@@ -26,34 +26,11 @@ describe('AlertEpisodeSnoozeForm', () => {
     const user = userEvent.setup();
     const onApplySnooze = jest.fn();
 
-    render(
-      <AlertEpisodeSnoozeForm
-        isSnoozed={false}
-        onApplySnooze={onApplySnooze}
-        onCancelSnooze={jest.fn()}
-      />
-    );
+    render(<AlertEpisodeSnoozeForm onApplySnooze={onApplySnooze} />);
 
     await user.click(screen.getByRole('button', { name: '1 hour' }));
 
     expect(onApplySnooze).toHaveBeenCalledTimes(1);
     expect(Number.isNaN(Date.parse(onApplySnooze.mock.calls[0][0]))).toBe(false);
-  });
-
-  it('shows cancel button only when isSnoozed is true', async () => {
-    const user = userEvent.setup();
-    const onCancelSnooze = jest.fn();
-
-    render(
-      <AlertEpisodeSnoozeForm
-        isSnoozed={true}
-        onApplySnooze={jest.fn()}
-        onCancelSnooze={onCancelSnooze}
-      />
-    );
-
-    await user.click(screen.getByRole('button', { name: 'Cancel snooze' }));
-
-    expect(onCancelSnooze).toHaveBeenCalledTimes(1);
   });
 });
