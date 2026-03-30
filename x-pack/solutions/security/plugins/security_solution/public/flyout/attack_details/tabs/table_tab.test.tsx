@@ -71,6 +71,7 @@ describe('<TableTab /> (attack details)', () => {
   });
 
   it('filters the table correctly via the search input', async () => {
+    const user = userEvent.setup();
     const { getByTestId, queryByText } = render(
       <TestProviders>
         <TableTab />
@@ -82,7 +83,7 @@ describe('<TableTab /> (attack details)', () => {
     expect(queryByText('Test attack title')).toBeInTheDocument();
 
     // type some term that should filter out the row
-    await userEvent.type(getByTestId(TABLE_TAB_SEARCH_INPUT_TEST_ID), 'something-not-matching');
+    await user.type(getByTestId(TABLE_TAB_SEARCH_INPUT_TEST_ID), 'something-not-matching');
 
     expect(queryByText('title')).not.toBeInTheDocument();
     expect(queryByText('Test attack title')).not.toBeInTheDocument();
