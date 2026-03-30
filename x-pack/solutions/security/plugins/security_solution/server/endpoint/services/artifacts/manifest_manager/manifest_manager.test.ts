@@ -140,6 +140,7 @@ describe('ManifestManager', () => {
   });
 
   beforeEach(() => {
+    jest.clearAllMocks();
     mockedGetIsEndpointExceptionsPerPolicyEnabled.mockResolvedValue(false);
   });
 
@@ -1299,6 +1300,8 @@ describe('ManifestManager', () => {
             defaultFeatures
           ),
         });
+
+        expect(mockedGetIsEndpointExceptionsPerPolicyEnabled).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -1342,6 +1345,8 @@ describe('ManifestManager', () => {
             defaultFeatures
           ),
         });
+
+        expect(mockedGetIsEndpointExceptionsPerPolicyEnabled).toHaveBeenCalledTimes(1);
       });
     });
 
