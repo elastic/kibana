@@ -6,6 +6,7 @@
  */
 
 import type { Readable } from 'stream';
+import { get } from 'lodash';
 import Papa from 'papaparse';
 import type { Logger } from '@kbn/logging';
 import type { EntityStoreCRUDClient, ResolutionClient } from '@kbn/entity-store/server';
@@ -257,14 +258,5 @@ async function processRow(
 
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   // Check flat dotted key first (ES may store fields as flat keys)
-  if (path in obj) {
-    return obj[path];
-  }
-  // Fall back to nested object traversal
-  return path.split('.').reduce<unknown>((acc, part) => {
-    if (acc && typeof acc === 'object' && !Array.isArray(acc)) {
-      return (acc as Record<string, unknown>)[part];
-    }
-    return undefined;
-  }, obj);
+  return obj[path] ?? get(obj, path);
 }
