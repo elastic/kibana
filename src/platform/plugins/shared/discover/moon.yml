@@ -133,6 +133,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/scout-synthtrace'
   - '@kbn/synthtrace-client'
+  - '@kbn/alerting-v2-plugin'
   - '@kbn/cps-utils'
   - '@kbn/as-code-data-views-schema'
 tags:
@@ -149,26 +150,6 @@ fileGroups:
     - test/**/*
     - .storybook/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}
