@@ -2734,7 +2734,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 725,
+            "lineNumber": 747,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2750,7 +2750,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 726,
+                "lineNumber": 748,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2767,7 +2767,7 @@
                   "SecuritySolutionPluginStartDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 727,
+                "lineNumber": 749,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2787,7 +2787,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 1018,
+            "lineNumber": 1040,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3569,7 +3569,7 @@
       "label": "SecuritySolutionPluginSetup",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
-      "lineNumber": 107,
+      "lineNumber": 109,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3595,7 +3595,7 @@
             ") => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
-          "lineNumber": 108,
+          "lineNumber": 110,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3638,7 +3638,7 @@
             "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsEndpointAutomatedRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityAnalyticsNewHomePageEnabled: boolean; readonly leadGenerationEnabled: boolean; readonly leadGenerationDetailsEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly gapReasonDetectionEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; readonly deHealthUIEnabled: boolean; readonly ruleHealthUIEnabled: boolean; readonly automaticTroubleshootingSkill: boolean; readonly newFlyoutSystemEnabled: boolean; readonly entityAnalyticsEntityStoreV2: boolean; }"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
-          "lineNumber": 112,
+          "lineNumber": 114,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3655,7 +3655,7 @@
       "label": "SecuritySolutionPluginStart",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
-      "lineNumber": 119,
+      "lineNumber": 121,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

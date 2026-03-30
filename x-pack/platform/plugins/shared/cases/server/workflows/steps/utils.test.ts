@@ -6,7 +6,13 @@
  */
 
 import { ConnectorTypes } from '../../../common/types/domain';
-import { createCasesStepHandler, normalizeCaseStepUpdatesForBulkPatch } from './utils';
+import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
+import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../../common/bundled-types.gen';
+import {
+  createCasesStepHandler,
+  normalizeCaseStepUpdatesForBulkPatch,
+  safeParseCaseForWorkflowOutput,
+} from './utils';
 import { createStepHandlerContext } from './test_utils';
 
 describe('normalizeCaseStepUpdatesForBulkPatch', () => {
@@ -106,5 +112,93 @@ describe('createCasesStepHandler', () => {
     const result = await handler(createContext());
 
     expect(result).toEqual({ error: operationError });
+  });
+
+  it('maps errors via onError callback when provided', async () => {
+    const operationError = new Error('operation failed');
+    const operation = jest.fn().mockRejectedValue(operationError);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { push: jest.fn() },
+    });
+
+    const handler = createCasesStepHandler(getCasesClient, operation, {
+      onError: () => new Error('mapped error'),
+    });
+    const result = await handler(createContext());
+
+    expect(result).toEqual({
+      error: new Error('mapped error'),
+    });
+  });
+});
+
+describe('safeParseCaseForWorkflowOutput', () => {
+  it('preserves supported comment variants and nullable alert rule fields', () => {
+    const eventComment = {
+      id: 'event-comment-id',
+      type: 'event' as const,
+      eventId: ['event-1'],
+      index: ['.ds-logs-*'],
+      owner: createCaseResponseFixture.owner,
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: createCaseResponseFixture.created_by,
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+      version: 'WzQ3LDFc',
+    };
+
+    const alertCommentWithNullRule = {
+      id: 'alert-comment-id',
+      type: 'alert' as const,
+      alertId: ['alert-1'],
+      index: ['.alerts-security.alerts-default'],
+      owner: createCaseResponseFixture.owner,
+      rule: { id: null, name: null },
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: createCaseResponseFixture.created_by,
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+      version: 'WzQ3LDFc',
+    };
+
+    const actionsComment = {
+      id: 'actions-comment-id',
+      type: 'actions' as const,
+      comment: 'Isolated host from response action',
+      actions: {
+        targets: [{ hostname: 'host-1', endpointId: 'endpoint-1' }],
+        type: 'isolate',
+      },
+      owner: createCaseResponseFixture.owner,
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: createCaseResponseFixture.created_by,
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+      version: 'WzQ3LDFc',
+    };
+
+    const result = safeParseCaseForWorkflowOutput(CaseResponsePropertiesSchema, {
+      ...createCaseResponseFixture,
+      comments: [eventComment, actionsComment, alertCommentWithNullRule],
+    });
+
+    expect(result.comments).toEqual([eventComment, actionsComment, alertCommentWithNullRule]);
+  });
+
+  it('does not throw when output cannot be parsed', () => {
+    const invalidCasePayload = {
+      id: createCaseResponseFixture.id,
+      comments: [],
+    };
+
+    expect(() =>
+      safeParseCaseForWorkflowOutput(CaseResponsePropertiesSchema, invalidCasePayload)
+    ).not.toThrow();
   });
 });

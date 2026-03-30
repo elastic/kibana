@@ -45,8 +45,6 @@ const kbnServerArgsFromController = {
     '--coreApp.allowDynamicConfigOverrides=true',
     // defined in MKI control plane
     '--xpack.uptime.service.manifestUrl=mockDevUrl',
-    // Composite SLO API routes are gated behind this experimental flag (see xpack.slo plugin)
-    '--xpack.slo.experimental.compositeSlo.enabled=true',
   ],
   security: [
     '--coreApp.allowDynamicConfigOverrides=true',

@@ -15,7 +15,7 @@ The **pull_request** pipeline (`.buildkite/scripts/pipelines/pull_request/pipeli
 On a PR, the step:
 
 1. **Resolves a baseline commit**: It uses the PR merge-base commit (`GITHUB_PR_MERGE_BASE`). Because a snapshot may not exist for that exact SHA, the script walks the commit’s parent chain (up to a limit) until it finds a commit for which a snapshot exists in the cloud bucket (`findExistingSnapshotSha`).
-2. **Runs the check**: It calls `node scripts/check_saved_objects --baseline <resolved-sha>` (and `--fix` when auto-commit is enabled). The script fetches the baseline snapshot from the bucket, starts Kibana to build the current type registry, and runs validations comparing current state to that baseline.
+2. **Runs the check**: It calls `node scripts/check_saved_objects --baseline <resolved-sha> --algorithm both` (and `--fix` when auto-commit is enabled). The script fetches the baseline snapshot from the bucket, starts Kibana to build the current type registry, and runs validations comparing current state to that baseline.
 
 ### Where snapshots come from
 
@@ -37,7 +37,7 @@ So PRs validate against a baseline from a recent merge (or an ancestor with an e
 You can run the check from your Kibana working copy:
 
 ```bash
-node scripts/check_saved_objects --baseline <gitRev> [--fix]
+node scripts/check_saved_objects --baseline <gitRev> [--algorithm <v2|zdt|both>] [--fix]
 ```
 
 ### Parameters and behavior
@@ -45,6 +45,7 @@ node scripts/check_saved_objects --baseline <gitRev> [--fix]
 | Flag | Description |
 |------|-------------|
 | `--baseline <SHA>` | Commit SHA (or revision) to use as baseline. The script fetches the snapshot for this revision from the cloud bucket and compares the current SO types against it. |
+| `--algorithm <v2\|zdt\|both>` | Migration algorithm(s) to use for the automated rollback tests. Defaults to `v2`. Use `both` to run `v2` and then `zdt`. |
 | `--fix` | Generate templates for missing fixture files and update outdated JSON (e.g. `removed_types.json`, SO fixtures). Useful before committing. |
 | `--server` | Start Elasticsearch only and keep it running so you can run the check multiple times without restarting ES. |
 | `--client` | Do not start Elasticsearch; assume it is already running (e.g. from a previous `--server` run). Use with `--baseline` to run the validation. |
@@ -66,7 +67,7 @@ If that merge-base has no snapshot in the bucket, use an ancestor that does:
 
 ```bash
 # Example: find the parent of the MERGE_BASE
-PARENT_SHA=$(git rev-parse "$MERGE_BASE$"^)
+PARENT_SHA=$(git rev-parse "$MERGE_BASE"^)
 node scripts/check_saved_objects --baseline "$PARENT_SHA" --fix
 ```
 

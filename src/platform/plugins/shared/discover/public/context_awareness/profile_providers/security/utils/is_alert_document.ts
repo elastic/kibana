@@ -18,14 +18,30 @@ import {
 const ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID = 'attack_discovery_ad_hoc_rule_type_id' as const;
 
 /**
- * Returns true if the document is a security alert — i.e. event.kind is 'signal'
- * and the rule type is not an attack discovery rule type.
+ * Returns true if the document is not an alert or an attack (event.kind is not 'signal')
  */
-export const isAlertDocument = (record: DataTableRecord): boolean => {
-  if (getFieldValue(record, EVENT_KIND) !== 'signal') return false;
+export const isEventDocument = (record: DataTableRecord): boolean => {
+  return getFieldValue(record, EVENT_KIND) !== 'signal';
+};
+
+/**
+ * Returns true if the document is not an alert or an attack (event.kind is not 'signal')
+ */
+export const isAttackDocument = (record: DataTableRecord): boolean => {
+  const eventKind = getFieldValue(record, EVENT_KIND);
   const ruleTypeId = getFieldValue(record, ALERT_RULE_TYPE_ID);
   return (
-    ruleTypeId !== ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID &&
-    ruleTypeId !== ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID
+    eventKind === 'signal' &&
+    (ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID ||
+      ruleTypeId === ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID)
   );
+};
+
+/**
+ * Returns true if the document is a security alert (not an event and not an attack)
+ */
+export const isAlertDocument = (record: DataTableRecord): boolean => {
+  if (isEventDocument(record)) return false;
+  if (isAttackDocument(record)) return false;
+  return getFieldValue(record, EVENT_KIND) === 'signal';
 };
