@@ -47,11 +47,13 @@ interface AddEntitiesSectionProps {
   excludeEntityIds: string[];
   onAddEntity: (entity: Record<string, unknown>) => void;
   addingEntityId?: string;
+  disabled?: boolean;
 }
 
 export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
   entityType,
   excludeEntityIds,
+  disabled,
   onAddEntity,
   addingEntityId,
 }) => {
@@ -136,14 +138,14 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
               color="primary"
               aria-label={ADD_ENTITY_BUTTON}
               onClick={() => onAddEntity(entity)}
-              disabled={!!addingEntityId}
+              disabled={disabled || !!addingEntityId}
               isLoading={isThisEntityAdding}
             />
           );
         },
       },
     ],
-    [onAddEntity, addingEntityId]
+    [onAddEntity, addingEntityId, disabled]
   );
 
   const pagination = useMemo(

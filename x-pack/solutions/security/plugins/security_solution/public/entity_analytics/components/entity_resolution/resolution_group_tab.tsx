@@ -67,8 +67,11 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
     [unlinkEntities]
   );
 
+  const groupQueryReady = !isLoading && !isFetching;
+
   const handleAddEntity = useCallback(
     async (entity: Record<string, unknown>) => {
+      if (!groupQueryReady) return;
       const newEntityId = getEntityId(entity);
       setAddingEntityId(newEntityId);
       try {
@@ -104,7 +107,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
         }
       }
     },
-    [hasGroup, targetEntityId, linkEntities, http, addError]
+    [groupQueryReady, hasGroup, targetEntityId, linkEntities, http, addError]
   );
 
   const handleConfirmResolution = useCallback(
@@ -150,6 +153,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
           excludeEntityIds={excludeEntityIds}
           onAddEntity={handleAddEntity}
           addingEntityId={addingEntityId}
+          disabled={!groupQueryReady}
         />
       </div>
       {modalState.isOpen && modalState.newEntity && currentEntityForModal && (
