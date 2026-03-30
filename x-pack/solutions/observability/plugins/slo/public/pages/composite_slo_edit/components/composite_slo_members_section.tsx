@@ -25,7 +25,7 @@ import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { useFetchSloDefinitionsWithRemote } from '../../../hooks/use_fetch_slo_definitions_with_remote';
 import { useFetchSloInstances } from '../../../hooks/use_fetch_slo_instances';
 import { MAX_COMPOSITE_MEMBERS, MAX_WIDTH } from '../constants';
-import type { CreateCompositeSLOForm } from '../types';
+import type { CompositeSLOMember, CreateCompositeSLOForm } from '../types';
 
 export function CompositeSloMembersSection() {
   const { control, watch } = useFormContext<CreateCompositeSLOForm>();
@@ -50,7 +50,7 @@ export function CompositeSloMembersSection() {
       const { label, value } = selected[0];
       const sloId = String(value);
       const hasUnresolvedInstance = members.some(
-        (m) => m.sloId === sloId && (!m.instanceId || m.instanceId === ALL_VALUE)
+        (m) => m.sloId === sloId && m.instanceId === ALL_VALUE
       );
       if (!hasUnresolvedInstance && members.length < MAX_COMPOSITE_MEMBERS) {
         const sloDefinition = sloDefinitions?.results.find((slo) => slo.id === sloId);
@@ -101,7 +101,7 @@ export function CompositeSloMembersSection() {
             options={sloOptions.filter(
               (opt) =>
                 !members.some(
-                  (m) => m.sloId === String(opt.value) && (!m.instanceId || m.instanceId === ALL_VALUE)
+                  (m) => m.sloId === String(opt.value) && m.instanceId === ALL_VALUE
                 )
             )}
             selectedOptions={[]}
@@ -151,7 +151,7 @@ export function CompositeSloMembersSection() {
             </EuiFlexGroup>
 
             {fields.map((field, index) => (
-              <MemberRow key={field.id} index={index} onRemove={() => remove(index)} />
+              <MemberRow key={field.id} index={index} members={members} onRemove={() => remove(index)} />
             ))}
           </>
         )}
@@ -162,10 +162,11 @@ export function CompositeSloMembersSection() {
 
 interface MemberRowProps {
   index: number;
+  members: CompositeSLOMember[];
   onRemove: () => void;
 }
 
-function MemberRow({ index, onRemove }: MemberRowProps) {
+function MemberRow({ index, members, onRemove }: MemberRowProps) {
   const { control, watch } = useFormContext<CreateCompositeSLOForm>();
   const sloId = watch(`members.${index}.sloId`);
   const sloName = watch(`members.${index}.sloName`);
@@ -179,7 +180,6 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
     enabled: isGrouped,
   });
 
-  const members = watch('members');
   const usedInstanceIds = members
     .filter((m, i) => i !== index && m.sloId === sloId && m.instanceId !== ALL_VALUE)
     .map((m) => m.instanceId);

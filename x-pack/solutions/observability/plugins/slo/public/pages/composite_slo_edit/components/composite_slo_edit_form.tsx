@@ -36,10 +36,11 @@ export function CompositeSloEditForm({ initialValues, compositeSloId, isEditMode
 
   const isMembersSectionValid =
     members.length > 0 &&
-    members.every((m) => Number.isInteger(m.weight) && m.weight >= 1) &&
     members.every((m) => {
       const isGrouped = [m.groupBy].flat().some((g) => g !== ALL_VALUE);
-      return !isGrouped || m.instanceId !== ALL_VALUE;
+      return (
+        Number.isInteger(m.weight) && m.weight >= 1 && (!isGrouped || m.instanceId !== ALL_VALUE)
+      );
     });
   const isObjectiveSectionValid =
     formState.isValid ||
