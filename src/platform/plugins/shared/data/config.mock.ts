@@ -17,10 +17,12 @@ export const getMockSearchConfig = ({
   },
   asyncSearch: {
     waitForCompletion = moment.duration(100, 'ms'),
+    pollLength = 2000,
     keepAlive = moment.duration(1, 'm'),
     batchedReduceSize = 64,
   } = {
     waitForCompletion: moment.duration(100, 'ms'),
+    pollLength: 2000,
     keepAlive: moment.duration(1, 'm'),
     batchedReduceSize: 64,
   },
@@ -33,6 +35,7 @@ export const getMockSearchConfig = ({
       waitForCompletion,
       keepAlive,
       batchedReduceSize,
+      pollLength,
     } as SearchConfigSchema['asyncSearch'],
     sessions: {
       enabled,

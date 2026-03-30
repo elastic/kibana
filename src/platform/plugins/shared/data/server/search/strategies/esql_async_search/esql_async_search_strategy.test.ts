@@ -175,7 +175,7 @@ describe('ES|QL async search strategy', () => {
           expect.objectContaining({
             id: 'foo',
             keep_alive: '60000ms',
-            wait_for_completion_timeout: '100ms',
+            wait_for_completion_timeout: '2000ms',
           }),
           expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })
         );
