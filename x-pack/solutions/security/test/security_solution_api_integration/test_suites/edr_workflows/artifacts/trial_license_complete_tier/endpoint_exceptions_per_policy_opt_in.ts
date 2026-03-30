@@ -153,7 +153,8 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
               // Simulate upgraded deployment by ensuring the SO does not exist and creating
               // the Endpoint exceptions list as this is the base for deciding the default opt-in status
               await endpointArtifactTestResources.ensureListExists(
-                ENDPOINT_EXCEPTIONS_LIST_DEFINITION
+                ENDPOINT_EXCEPTIONS_LIST_DEFINITION,
+                { supertest: superuser }
               );
 
               const response = await superuser
@@ -169,7 +170,8 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
               await deleteEndpointExceptionsPerPolicyOptInSO(kibanaServer);
               // the Endpoint exceptions list as this is the base for deciding the default opt-in status
               await endpointArtifactTestResources.deleteList(
-                ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+                ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+                superuser
               );
 
               const response = await superuser
