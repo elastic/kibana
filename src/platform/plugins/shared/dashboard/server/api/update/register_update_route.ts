@@ -11,11 +11,11 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { getRouteConfig } from '../get_route_config';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { asCodeIdSchema } from 'src/platform/packages/shared/as-code/shared-schemas';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
