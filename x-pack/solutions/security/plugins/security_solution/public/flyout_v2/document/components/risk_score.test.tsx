@@ -9,7 +9,7 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { RISK_SCORE_VALUE_TEST_ID } from './test_ids';
+import { RISK_SCORE_VALUE_TEST_ID } from '../../shared/components/test_ids';
 import { RiskScore } from './risk_score';
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>

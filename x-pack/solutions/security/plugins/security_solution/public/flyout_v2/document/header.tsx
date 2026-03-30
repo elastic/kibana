@@ -17,7 +17,10 @@ import { HeaderTitle } from './components/header_title';
 import { DocumentSeverity } from './components/severity';
 import { RiskScore } from './components/risk_score';
 import { AlertHeaderBlock } from '../shared/components/alert_header_block';
-import { ALERT_SUMMARY_PANEL_TEST_ID, RISK_SCORE_TITLE_TEST_ID } from './components/test_ids';
+import {
+  ALERT_SUMMARY_PANEL_TEST_ID,
+  RISK_SCORE_TITLE_TEST_ID,
+} from '../shared/components/test_ids';
 import { useKibana } from '../../common/lib/kibana';
 import { getRuleDetailsUrl } from '../../common/components/link_to';
 import { PreferenceFormattedDate } from '../../common/components/formatted_date';

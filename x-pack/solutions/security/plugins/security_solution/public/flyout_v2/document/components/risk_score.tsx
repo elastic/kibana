@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { ALERT_RISK_SCORE, EVENT_KIND } from '@kbn/rule-data-utils';
-import { RISK_SCORE_VALUE_TEST_ID } from './test_ids';
+import { RISK_SCORE_VALUE_TEST_ID } from '../../shared/components/test_ids';
 
 export interface RiskScoreProps {
   /**

@@ -9,13 +9,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { DocumentDetailsContext } from '../../shared/context';
 import {
-  ALERT_SUMMARY_PANEL_TEST_ID,
   ASSIGNEES_EMPTY_TEST_ID,
   ASSIGNEES_TEST_ID,
-  ASSIGNEES_TITLE_TEST_ID,
   NOTES_TITLE_TEST_ID,
-  RISK_SCORE_TITLE_TEST_ID,
-  RISK_SCORE_VALUE_TEST_ID,
   STATUS_BUTTON_TEST_ID,
   STATUS_TITLE_TEST_ID,
 } from './test_ids';
@@ -30,6 +26,12 @@ import {
   HEADER_TITLE_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
+import {
+  ALERT_SUMMARY_PANEL_TEST_ID,
+  ASSIGNEES_TITLE_TEST_ID,
+  RISK_SCORE_TITLE_TEST_ID,
+  RISK_SCORE_VALUE_TEST_ID,
+} from '../../../../flyout_v2/shared/components/test_ids';
 
 jest.mock('../../../../common/lib/kibana');
 

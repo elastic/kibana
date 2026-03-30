@@ -16,16 +16,16 @@ import { DocumentStatus } from './status';
 import { useRefetchByScope } from '../hooks/use_refetch_by_scope';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import {
-  ALERT_SUMMARY_PANEL_TEST_ID,
-  ASSIGNEES_TITLE_TEST_ID,
-  RISK_SCORE_TITLE_TEST_ID,
-} from './test_ids';
 import { Assignees } from './assignees';
 import { RiskScore } from '../../../../flyout_v2/document/components/risk_score';
 import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
 import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
 import { AlertHeaderBlock } from '../../../../flyout_v2/shared/components/alert_header_block';
+import {
+  ALERT_SUMMARY_PANEL_TEST_ID,
+  ASSIGNEES_TITLE_TEST_ID,
+  RISK_SCORE_TITLE_TEST_ID,
+} from '../../../../flyout_v2/shared/components/test_ids';
 import { getDocumentTitle } from '../../../../flyout_v2/document/utils/get_header_title';
 import { HEADER_TITLE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
 

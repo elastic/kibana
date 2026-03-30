@@ -10,7 +10,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Header } from './header';
-import { ALERT_SUMMARY_PANEL_TEST_ID, RISK_SCORE_TITLE_TEST_ID } from './components/test_ids';
+import {
+  ALERT_SUMMARY_PANEL_TEST_ID,
+  RISK_SCORE_TITLE_TEST_ID,
+} from '../shared/components/test_ids';
 
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({

@@ -6,11 +6,6 @@
  */
 
 import { PREFIX } from '../../../shared/test_ids';
-export {
-  ALERT_SUMMARY_PANEL_TEST_ID,
-  RISK_SCORE_TITLE_TEST_ID,
-  RISK_SCORE_VALUE_TEST_ID,
-} from '../../../../flyout_v2/document/components/test_ids';
 
 const HEADER_TEST_ID = 'Header';
 const CONTENT_TEST_ID = 'Content';
@@ -54,7 +49,6 @@ export const NOTES_LOADING_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesLoading` as c
 
 export const ASSIGNEES_EMPTY_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesEmpty` as const;
 export const ASSIGNEES_TEST_ID = `${FLYOUT_HEADER_TEST_ID}Assignees` as const;
-export const ASSIGNEES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesTitle` as const;
 export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesAddButton` as const;
 
 /* About section */
