@@ -7,13 +7,12 @@
 
 import { isEmpty } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getSampleDocuments } from '@kbn/ai-tools';
 import { MANAGED_STREAM_SEARCH_PATTERN, type KIFeatureExtractionScenario } from '../datasets';
 
 const SAMPLE_DOCS_MAX = 50;
-const MAX_BACKFILL_ATTEMPTS = 5;
 
 const getAppNameFromFields = (fields: Record<string, unknown>): string | undefined => {
   const app = fields['resource.attributes.app'];
@@ -116,21 +115,17 @@ export const collectSampleDocuments = async ({
     uniqueApps,
   });
 
-  // fill remaining capacity with random documents.
-  // limit attempts to avoid infinite loops in case of small pool of documents.
-  let attempts = 0;
-  while (docs.length < SAMPLE_DOCS_MAX && attempts < MAX_BACKFILL_ATTEMPTS) {
+  if (docs.length < SAMPLE_DOCS_MAX) {
     const { hits } = await getSampleDocuments({
       esClient,
       index: MANAGED_STREAM_SEARCH_PATTERN,
       start: 0,
       end: Date.now(),
-      filter: query,
+      filter: [...query, { bool: { must_not: [{ ids: { values: [...seen] } }] } }],
       size: SAMPLE_DOCS_MAX - docs.length,
     });
 
     addUniqueHitsToSample({ hits, docs, seen, uniqueApps });
-    attempts++;
   }
 
   log.info(
