@@ -260,8 +260,6 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotSetUpError();
     }
 
-    // TODO:PT check what this returns when running locally with kibana in serverless emulation
-
     return Boolean(this.setupDependencies.cloud.isServerlessEnabled);
   }
 
@@ -306,6 +304,7 @@ export class EndpointAppContextService {
       this.getLicenseService(),
       fleetAuthz,
       userRoles,
+      this.isServerless(),
       this.startDependencies.productFeaturesService
     );
   }

@@ -63,11 +63,14 @@ export const calculateEndpointAuthz = (
   licenseService: LicenseService,
   fleetAuthz: FleetAuthz,
   userRoles: MaybeImmutable<string[]> = [],
+  isServerless: boolean,
   productFeaturesService?: ProductFeaturesService // only exists on the server side
 ): EndpointAuthz => {
   const hasAuth = hasAuthFactory(fleetAuthz, productFeaturesService);
   const hasSuperuserRole = userRoles.includes('superuser');
   const hasAdminRole = userRoles.includes('admin');
+
+  const hasSuperuserPrivileges = isServerless ? hasAdminRole : hasSuperuserRole;
 
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
@@ -103,7 +106,7 @@ export const calculateEndpointAuthz = (
 
   const canReadEndpointExceptions = hasAuth('showEndpointExceptions');
   const canWriteEndpointExceptions = hasAuth('crudEndpointExceptions');
-  const canOptInPerPolicyEndpointExceptions = hasSuperuserRole || hasAdminRole;
+  const canOptInPerPolicyEndpointExceptions = hasSuperuserPrivileges;
 
   const canManageGlobalArtifacts = hasAuth('writeGlobalArtifacts');
 
