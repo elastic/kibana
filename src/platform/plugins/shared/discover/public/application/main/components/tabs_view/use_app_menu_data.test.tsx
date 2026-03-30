@@ -90,7 +90,9 @@ describe('useAppMenuData', () => {
       })
     );
 
-    expect(items).toContainEqual(
+    const topItems = hook.result.current.getTopTabMenuItems?.(toolkit.getCurrentTab());
+
+    expect(topItems).toContainEqual(
       expect.objectContaining({
         'data-test-subj': 'unifiedTabs_tabMenuItem_inspect',
       })
@@ -137,7 +139,7 @@ describe('useAppMenuData', () => {
 
   it('adds "Inspect" menu item for the current tab', async () => {
     const { toolkit, hook } = await setup();
-    const items = hook.result.current.getAdditionalTabMenuItems?.(toolkit.getCurrentTab());
+    const items = hook.result.current.getTopTabMenuItems?.(toolkit.getCurrentTab());
 
     expect(items).toContainEqual(
       expect.objectContaining({

@@ -40,6 +40,7 @@ interface UseAppMenuDataParams {
 interface UseAppMenuDataResult {
   shouldCollapseAppMenu: boolean;
   onResize: EuiResizeObserverProps['onResize'];
+  getTopTabMenuItems: UnifiedTabsProps['getTopTabMenuItems'];
   getAdditionalTabMenuItems: UnifiedTabsProps['getAdditionalTabMenuItems'];
   topNavMenuItems: AppMenuConfig | undefined;
 }
@@ -69,9 +70,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
     setShouldCollapseAppMenu(dimensions.width < APP_MENU_COLLAPSE_THRESHOLD);
   }, []);
 
-  const getAdditionalTabMenuItems = useCallback<
-    NonNullable<UnifiedTabsProps['getAdditionalTabMenuItems']>
-  >(
+  const getTopTabMenuItems = useCallback<NonNullable<UnifiedTabsProps['getTopTabMenuItems']>>(
     (item) => {
       const tab = allTabs.find((t) => t.id === item.id);
       const isCurrentTab = tab?.id === currentTabId;
@@ -80,7 +79,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
         return [];
       }
 
-      const items: ReturnType<NonNullable<UnifiedTabsProps['getAdditionalTabMenuItems']>> = [
+      return [
         {
           'data-test-subj': 'unifiedTabs_tabMenuItem_inspect',
           name: 'inspect',
@@ -124,48 +123,6 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
           },
         },
       ];
-
-      if (services.uiSettings.get(ENABLE_ESQL)) {
-        items.push('divider');
-        if (isDataViewSource(tab.appState.dataSource)) {
-          items.push({
-            'data-test-subj': 'unifiedTabs_tabMenuItem_switchToESQL',
-            name: 'switchToESQL',
-            label: i18n.translate('discover.localMenu.switchToESQLTitle', {
-              defaultMessage: 'Switch to ES|QL',
-            }),
-            onClick: () => {
-              services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
-              dispatch(transitionFromDataViewToESQL({ dataView: currentDataView }));
-            },
-          });
-        } else {
-          items.push({
-            'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
-            name: 'switchToClassic',
-            label: i18n.translate('discover.localMenu.switchToClassicTitle', {
-              defaultMessage: 'Switch to classic',
-            }),
-            onClick: () => {
-              services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
-
-              const shouldShowESQLToDataViewTransitionModal =
-                !persistedDiscoverSession || unsavedTabIds.includes(tab.id);
-
-              if (
-                shouldShowESQLToDataViewTransitionModal &&
-                !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
-              ) {
-                dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
-              } else {
-                dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView.id ?? '' }));
-              }
-            },
-          });
-        }
-      }
-
-      return items;
     },
     [
       allTabs,
@@ -175,9 +132,76 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
       persistedDiscoverSession,
       runtimeStateManager,
       services,
+      setExpandedDoc,
+    ]
+  );
+
+  // Provide "Switch to ES|QL" and "Switch to Classic" menu items for the selected tab
+  const getAdditionalTabMenuItems = useCallback<
+    NonNullable<UnifiedTabsProps['getAdditionalTabMenuItems']>
+  >(
+    (item) => {
+      if (!services.uiSettings.get(ENABLE_ESQL)) {
+        return [];
+      }
+
+      const tab = allTabs.find((t) => t.id === item.id);
+      const isCurrentTab = tab?.id === currentTabId;
+
+      if (!isCurrentTab || !currentDataView) {
+        return [];
+      }
+
+      if (isDataViewSource(tab.appState.dataSource)) {
+        return [
+          {
+            'data-test-subj': 'unifiedTabs_tabMenuItem_switchToESQL',
+            name: 'switchToESQL',
+            label: i18n.translate('discover.localMenu.switchToESQLTitle', {
+              defaultMessage: 'Switch to ES|QL',
+            }),
+            onClick: () => {
+              services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
+              dispatch(transitionFromDataViewToESQL({ dataView: currentDataView }));
+            },
+          },
+        ];
+      }
+
+      return [
+        {
+          'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
+          name: 'switchToClassic',
+          label: i18n.translate('discover.localMenu.switchToClassicTitle', {
+            defaultMessage: 'Switch to classic',
+          }),
+          onClick: () => {
+            services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
+
+            const shouldShowESQLToDataViewTransitionModal =
+              !persistedDiscoverSession || unsavedTabIds.includes(tab.id);
+
+            if (
+              shouldShowESQLToDataViewTransitionModal &&
+              !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
+            ) {
+              dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
+            } else {
+              dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView.id ?? '' }));
+            }
+          },
+        },
+      ];
+    },
+    [
+      allTabs,
+      currentDataView,
+      currentTabId,
+      dispatch,
+      persistedDiscoverSession,
+      services,
       transitionFromDataViewToESQL,
       transitionFromESQLToDataView,
-      setExpandedDoc,
       unsavedTabIds,
     ]
   );
@@ -187,6 +211,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
   return {
     shouldCollapseAppMenu,
     onResize,
+    getTopTabMenuItems,
     getAdditionalTabMenuItems,
     topNavMenuItems,
   };
