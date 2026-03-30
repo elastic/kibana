@@ -147,7 +147,7 @@ export const getAlertsAppMenuItem = ({
       }),
       iconType: 'tableOfContents',
       testId: 'discoverManageAlertsButton',
-      href: services.application.getUrlForApp('rules'),
+      href: getManageRulesUrl(services),
     });
 
     if (discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)) {
@@ -196,4 +196,12 @@ export const getAlertsAppMenuItem = ({
 function getTimeField(dataView: DataView | undefined) {
   const dateFields = dataView?.fields.getByType('date');
   return dataView?.timeFieldName || dateFields?.[0]?.name;
+}
+
+function getManageRulesUrl(services: DiscoverServices) {
+  return services.application.getUrlForApp(
+    services.application.isAppRegistered('rules')
+      ? 'rules'
+      : 'management/insightsAndAlerting/triggersActions/rules'
+  );
 }

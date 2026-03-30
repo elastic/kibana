@@ -25,6 +25,7 @@ import { getColorMappingDefaults } from '../../utils';
 import type { XYVisualizationState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import { visualizationSubtypes, defaultSeriesType } from './types';
 import { flipSeriesType, getIconForSeries } from './state_helpers';
+import { getDefaultPalette } from './default_palette';
 import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
 
 const COLUMN_SORT_ORDER = {
@@ -602,7 +603,7 @@ function buildSuggestion({
         : undefined,
     layerType: LayerTypes.DATA,
     colorMapping: !mainPalette
-      ? getColorMappingDefaults()
+      ? getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(seriesType) })
       : mainPalette?.type === 'colorMapping'
       ? mainPalette.value
       : undefined,
