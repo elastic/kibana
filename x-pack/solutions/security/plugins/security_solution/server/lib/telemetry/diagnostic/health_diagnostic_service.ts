@@ -7,7 +7,7 @@
 
 import { randomUUID } from 'crypto';
 import { schema } from '@kbn/config-schema';
-import { bufferCount, defaultIfEmpty, from, mergeMap, take, tap } from 'rxjs';
+import { bufferCount, defaultIfEmpty, defer, from, mergeMap, take, tap } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import type {
   TaskManagerSetupContract,
@@ -175,7 +175,8 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     if (!this.queryExecutor) {
       throw new Error('queryExecutor is unavailable');
     }
-    const query$ = this.queryExecutor.search(options);
+    const executor = this.queryExecutor;
+    const query$ = defer(() => executor.search(options));
 
     return new Promise<HealthDiagnosticQueryStats>((resolve) => {
       const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now, query.version);

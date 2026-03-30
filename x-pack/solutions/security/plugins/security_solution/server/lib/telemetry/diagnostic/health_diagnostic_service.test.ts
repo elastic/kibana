@@ -261,6 +261,27 @@ enabled: true`,
         );
       });
 
+      test('should return failed stat when search() throws synchronously instead of rejecting the batch', async () => {
+        await startService();
+
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        const error = new Error('Unhandled QueryType: UNKNOWN');
+        mockQueryExecutor.search.mockImplementation(() => {
+          throw error;
+        });
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+          name: 'test-query',
+          passed: false,
+          status: 'failed',
+          failure: { message: 'Unhandled QueryType: UNKNOWN' },
+        });
+        expect(mockLogger.error).toHaveBeenCalledWith('Error running query', expect.any(Object));
+      });
+
       test('should handle query execution errors', async () => {
         await startService();
 
