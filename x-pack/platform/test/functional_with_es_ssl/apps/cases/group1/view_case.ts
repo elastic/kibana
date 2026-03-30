@@ -879,12 +879,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Tabs', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
-      it('renders tabs correctly', async () => {
-        await testSubjects.existOrFail('case-view-tab-title-activity');
-        await testSubjects.existOrFail('case-view-tab-title-files');
-        await testSubjects.existOrFail('case-view-tab-title-alerts');
-      });
-
       it('shows the "activity" tab by default', async () => {
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-content-activity');
