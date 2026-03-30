@@ -34,7 +34,7 @@ export class QueryColumns {
    * LOAD, not mapped columns are loaded from _source as a keyword field if possible.
    * NULLIFY, not mapped columns are treated as null.
    */
-  private unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL;
+  private unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT;
 
   /**
    * Retrieves from cache the columns for a given query, ignoring case.
