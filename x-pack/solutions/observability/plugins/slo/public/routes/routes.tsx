@@ -7,6 +7,7 @@
 
 import {
   SLOS_MANAGEMENT_PATH,
+  SLOS_MANAGEMENT_TEMPLATES_PATH,
   SLOS_PATH,
   SLOS_WELCOME_PATH,
   SLO_COMPOSITE_CREATE_PATH,
@@ -69,6 +70,13 @@ export const getRoutes = (
     [SLO_SETTINGS_PATH]: {
       handler: () => {
         return <SloSettingsPage />;
+      },
+      params: {},
+      exact: true,
+    },
+    [SLOS_MANAGEMENT_TEMPLATES_PATH]: {
+      handler: () => {
+        return <SloManagementPage />;
       },
       params: {},
       exact: true,
