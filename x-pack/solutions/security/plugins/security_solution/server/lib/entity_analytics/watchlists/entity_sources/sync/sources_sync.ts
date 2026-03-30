@@ -6,8 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
-import type { MonitoringEntitySourceDescriptorClient } from '../../../privilege_monitoring/saved_objects';
+import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
+import type { WatchlistEntitySourceClient } from '../infra';
 import type { EntityStoreEntityIdsByType } from '../../entities/service';
 
 export type SourceProcessor = (
@@ -21,7 +21,7 @@ export const createSourcesSyncService = ({ logger }: { logger: Logger }) => {
     sources,
     process,
   }: {
-    descriptorClient: MonitoringEntitySourceDescriptorClient;
+    descriptorClient: WatchlistEntitySourceClient;
     sources: { sourceId: string; entityStoreEntityIdsByType: EntityStoreEntityIdsByType }[];
     process: SourceProcessor;
   }): Promise<void> => {
