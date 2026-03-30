@@ -398,7 +398,6 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const existingFeatures = allExistingFeatures.filter((f) => !isComputedFeature(f));
 
-                taskLogger.info(`--------------- Starting feature identification -------------`);
                 const [{ features: inferredFeatures }, computedFeatures] = await Promise.all([
                   identifyStreamFeatures({
                     streamName: stream.name,
@@ -412,8 +411,6 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     signal: runContext.abortController.signal,
                     systemPrompt: featurePromptOverride,
                     onIterationComplete: async (it, changedFeatures) => {
-                      taskLogger.info(`${JSON.stringify(changedFeatures)}`);
-
                       if (changedFeatures.length > 0) {
                         await featureClient.bulk(
                           stream.name,
