@@ -118,7 +118,7 @@ const FilterQueryRow: FC<FilterQueryRowProps> = ({
             filterManager={filterManager}
             filters={filters}
             onSubmitQuery={onSubmitQuery}
-            onChangedQuery={onChangedQuery}
+            onChangedQuery={onSubmitQuery}
             savedQuery={savedQuery}
             onSavedQuery={onSavedQuery}
             hideSavedQuery={false}
@@ -234,15 +234,9 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
     ]
   );
 
+  // onSubmitQuery is required by QueryBarComponent and fires on explicit submit (Enter/refresh).
+  // We also pass it as onChangedQuery so the entity source updates in real-time as the user types.
   const onSubmitQuery = useCallback(
-    (query: Query) => {
-      setFilterQuery(query);
-      updateEntitySource(query);
-    },
-    [updateEntitySource]
-  );
-
-  const onChangedQuery = useCallback(
     (query: Query) => {
       setFilterQuery(query);
       updateEntitySource(query);
@@ -341,7 +335,7 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
         filterManager={filterManager}
         filters={filters}
         onSubmitQuery={onSubmitQuery}
-        onChangedQuery={onChangedQuery}
+        onChangedQuery={onSubmitQuery}
         savedQuery={savedQuery}
         onSavedQuery={onSavedQuery}
       />
