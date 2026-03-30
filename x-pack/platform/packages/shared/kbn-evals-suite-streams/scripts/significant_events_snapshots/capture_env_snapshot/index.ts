@@ -7,7 +7,11 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { captureEnvSnapshot } from './capture_env_snapshot';
-import { DEFAULT_LOGS_INDEX, VALID_ALERT_INDICES, VALID_SYSTEM_INDICES } from '../lib/constants';
+import {
+  DEFAULT_ENV_SNAPSHOT_LOGS_INDEX,
+  VALID_ALERT_INDICES,
+  VALID_SYSTEM_INDICES,
+} from '../lib/constants';
 
 run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
   description: `
@@ -36,7 +40,7 @@ run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
     help: `
       --snapshot-name         (required) Name for the snapshot
       --run-id                Run identifier for GCS repo name and base path (default: today's date YYYY-MM-DD)
-      --logs-index            Logs index to include in snapshot + replay. (default: ${DEFAULT_LOGS_INDEX})
+      --logs-index            Logs index to include in snapshot + replay. (default: ${DEFAULT_ENV_SNAPSHOT_LOGS_INDEX})
       --alert-indices         Alert index to include in snapshot + replay. Valid: ${VALID_ALERT_INDICES.join(
         ', '
       )}
