@@ -235,41 +235,38 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
   const position = legend.position ?? DEFAULT_LEGEND_POSITON;
   const isListLayout = isOutsideListLegendLayoutState(legend);
 
-  if (position === 'top' || position === 'bottom') {
-    return {
-      placement: 'outside' as const,
-      position,
-      layout: isListLayout
-        ? {
-            type: 'list' as const,
-            ...(max_pixels != null ? { truncate: { max_pixels } } : {}),
-          }
-        : {
-            type: 'grid' as const,
-            ...(max_lines != null ? { truncate: { max_lines } } : {}),
-          },
-    } satisfies Omit<
-      Extract<
-        NonNullable<XYState['legend']>,
-        { placement?: 'outside'; position?: 'top' | 'bottom' }
-      >,
-      'visibility' | 'statistics'
-    >;
-  }
-
-  // left/right (vertical) outside legend
-  return {
+  const baseOutside = stripUndefined({
     placement: 'outside' as const,
     position,
     ...getLegendSizeAPI(legend.legendSize),
-    layout: {
-      type: 'grid' as const,
-      ...(max_lines != null ? { truncate: { max_lines } } : {}),
-    },
-  } satisfies Omit<
-    Extract<NonNullable<XYState['legend']>, { placement?: 'outside'; position?: 'left' | 'right' }>,
-    'visibility' | 'statistics'
-  >;
+  });
+
+  return {
+    ...baseOutside,
+    layout: isListLayout
+      ? {
+          type: 'list' as const,
+          ...(max_pixels != null ? { truncate: { max_pixels } } : {}),
+        }
+      : {
+          type: 'grid' as const,
+          ...(max_lines != null ? { truncate: { max_lines } } : {}),
+        },
+  } satisfies
+    | Omit<
+        Extract<
+          NonNullable<XYState['legend']>,
+          { placement?: 'outside'; position?: 'top' | 'bottom' }
+        >,
+        'visibility' | 'statistics'
+      >
+    | Omit<
+        Extract<
+          NonNullable<XYState['legend']>,
+          { placement?: 'outside'; position?: 'left' | 'right' }
+        >,
+        'visibility' | 'statistics'
+      >;
 }
 
 function getApiLegendTruncate(
