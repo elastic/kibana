@@ -33,11 +33,11 @@ import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
   getFeaturesIdentificationTaskId,
 } from './features_identification';
-import type { SignificantEventsQueriesGenerationTaskParams } from './significant_events_queries_generation';
+import type { SignificantEventsQueriesGenerationTaskParams } from '../../sig_events/tasks/significant_events_queries_generation';
 import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
-} from './significant_events_queries_generation';
+} from '../../sig_events/tasks/significant_events_queries_generation';
 
 export interface OnboardingTaskParams {
   streamName: string;

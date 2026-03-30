@@ -7,7 +7,8 @@
 
 jest.mock('../epm/packages');
 
-import type { PackagePolicy, RegistryDataStream } from '../../types';
+import type { PackagePolicy } from '../../types';
+import { PackagePolicyValidationError } from '../../errors';
 
 import type { DataStreamMeta } from './package_policies_to_agent_permissions';
 import {
@@ -381,6 +382,30 @@ packageInfoCache.set('elastic_connectors-1.0.0', {
       ml_model: [],
     },
   },
+});
+
+packageInfoCache.set('non_dynamic_pkg-1.0.0', {
+  format_version: '2.7.0',
+  name: 'non_dynamic_pkg',
+  title: 'Non Dynamic Package',
+  version: '1.0.0',
+  type: 'integration',
+  release: 'ga',
+  policy_templates: [],
+  data_streams: [
+    {
+      type: 'logs',
+      dataset: 'non_dynamic_pkg.logs',
+      title: 'Logs',
+      release: 'ga',
+      package: 'non_dynamic_pkg',
+      path: 'logs',
+      streams: [],
+    },
+  ],
+  latestVersion: '1.0.0',
+  status: 'not_installed',
+  assets: { kibana: {}, elasticsearch: {} },
 });
 
 describe('storedPackagePoliciesToAgentPermissions()', () => {
@@ -1218,11 +1243,90 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       });
     });
   });
+
+  describe('data_stream.type undefined handling', () => {
+    it('throws for non-dynamic package stream with undefined data_stream.type', () => {
+      const packagePolicies: PackagePolicy[] = [
+        {
+          id: 'policy-undefined-type',
+          name: 'non-dynamic-policy',
+          namespace: 'default',
+          enabled: true,
+          package: { name: 'non_dynamic_pkg', version: '1.0.0', title: 'Non Dynamic Package' },
+          inputs: [
+            {
+              type: 'logfile',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stream-1',
+                  enabled: true,
+                  data_stream: { dataset: 'non_dynamic_pkg.logs' },
+                } as any,
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+      ];
+
+      const invoke = () =>
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'default', packagePolicies);
+      expect(invoke).toThrow(PackagePolicyValidationError);
+      expect(invoke).toThrow(
+        '[data_stream.type]: unexpected undefined stream type for non-dynamic package "non_dynamic_pkg"'
+      );
+    });
+
+    it('does not throw for dynamic_signal_types package stream with undefined data_stream.type', () => {
+      const packagePolicies: PackagePolicy[] = [
+        {
+          id: 'policy-dynamic-no-type',
+          name: 'dynamic-no-type-policy',
+          namespace: 'default',
+          enabled: true,
+          package: { name: 'input_otel', version: '1.0.0', title: 'Input OTel' },
+          inputs: [
+            {
+              type: 'otelcol',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stream-1',
+                  enabled: true,
+                  data_stream: { dataset: 'otel.dataset' },
+                  vars: {},
+                } as any,
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+      ];
+
+      // dynamic_signal_types packages are handled separately and do not reach the DataStreamMeta guard
+      expect(() =>
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'default', packagePolicies)
+      ).not.toThrow();
+    });
+  });
 });
 
 describe('getDataStreamPrivileges()', () => {
   it('returns defaults for a datastream with no privileges', () => {
-    const dataStream = { type: 'logs', dataset: 'test' } as RegistryDataStream;
+    const dataStream = { type: 'logs', dataset: 'test' } as DataStreamMeta;
     const privileges = getDataStreamPrivileges(dataStream);
 
     expect(privileges).toMatchObject({
@@ -1232,7 +1336,7 @@ describe('getDataStreamPrivileges()', () => {
   });
 
   it('adds the namespace to the index name', () => {
-    const dataStream = { type: 'logs', dataset: 'test' } as RegistryDataStream;
+    const dataStream = { type: 'logs', dataset: 'test' } as DataStreamMeta;
     const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
     expect(privileges).toMatchObject({
@@ -1246,7 +1350,7 @@ describe('getDataStreamPrivileges()', () => {
       type: 'logs',
       dataset: 'test',
       dataset_is_prefix: true,
-    } as RegistryDataStream;
+    } as DataStreamMeta;
     const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
     expect(privileges).toMatchObject({
