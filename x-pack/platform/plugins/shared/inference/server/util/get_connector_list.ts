@@ -75,6 +75,7 @@ export const getConnectorList = async ({
     capabilities: {},
     isInferenceEndpoint: true,
     isPreconfigured: !!ep.metadata.display?.name,
+    isEis: ep.service === 'elastic',
   }));
 
   // Exclude .inference stack connectors that have a corresponding ES inference endpoint,

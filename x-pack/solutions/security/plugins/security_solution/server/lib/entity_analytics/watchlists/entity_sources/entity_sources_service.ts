@@ -40,25 +40,30 @@ export const createEntitySourcesService = ({
     const targetIndex = getIndexForWatchlist(watchlist.name, namespace);
 
     const { sources } = await descriptorClient.list({});
-    const idp = (source: (typeof sources)[number]): IdentityProvider => {
-      if (source.type === 'index') {
-        return {
-          type: 'index' as const,
-          field: source.identifierField || '',
-        };
-      }
-
-      return {
-        type: 'integration' as const,
-        name: source.integrationName as IntegrationType,
-      };
-    };
     const entitiesBySource = await Promise.all(
       sources
         .filter((s) => sourceIds.includes(s.id))
         .map(async (source) => {
+          if (source.type === 'index') {
+            const identity: IdentityProvider = {
+              type: 'index',
+              field: source.identifierField || '',
+            };
+            const { correlationMap, entityIdsByType } =
+              await watchlistEntitiesService.listEntityStoreEntities(identity);
+            return {
+              sourceId: source.id,
+              entityStoreEntityIdsByType: entityIdsByType,
+              correlationMap,
+            };
+          }
+
+          const identity: IdentityProvider = {
+            type: 'integration',
+            name: source.integrationName as IntegrationType,
+          };
           const entityStoreEntityIdsByType = await watchlistEntitiesService.listEntityStoreEntities(
-            idp(source)
+            identity
           );
           return { sourceId: source.id, entityStoreEntityIdsByType };
         })
