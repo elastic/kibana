@@ -14,6 +14,7 @@ import type Vis from '../../vis';
 
 export type HasVisualizeConfig = HasType<typeof VISUALIZE_EMBEDDABLE_TYPE> & {
   getVis: () => Vis<VisParams>;
+  getExpressionVariables?: () => Record<string, unknown> | undefined;
 };
 
 export const apiHasVisualizeConfig = (api: unknown): api is HasVisualizeConfig => {
