@@ -3,19 +3,6 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-<<<<<<< HEAD
-  "include": [
-    "**/*"
-  ],
-  "kbn_references": [
-    "@kbn/synthtrace-client",
-    "@kbn/scout-oblt",
-    "@kbn/apm-types",
-  ],
-  "exclude": [
-    "target/**/*"
-  ]
-=======
   "include": ["**/*"],
   "kbn_references": [
     "@kbn/synthtrace-client",
@@ -24,5 +11,4 @@
     "@kbn/apm-types"
   ],
   "exclude": ["target/**/*"]
->>>>>>> 5df5c02aa0a9 (add kbn/scout-synthtrace (#258961))
 }
