@@ -33,7 +33,7 @@ const EMPTY_ESQL_RESPONSE: SavedObjectsEsqlResponse = {
   values: [],
 };
 
-const SOURCE_COMMAND_PATTERN = /^\s*(FROM|ROW|SHOW|METRICS)\b/i;
+const SOURCE_COMMAND_PATTERN = /^\s*(FROM|ROW|SHOW|METRICS|TS)\b/i;
 
 export async function performEsql(
   { options, rawClient }: PerformEsqlParams,
@@ -50,7 +50,7 @@ export async function performEsql(
 
   if (SOURCE_COMMAND_PATTERN.test(pipeline)) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
-      'options.pipeline must not start with a source command (FROM, ROW, SHOW, METRICS). ' +
+      'options.pipeline must not start with a source command (FROM, ROW, SHOW, METRICS, TS). ' +
         'The FROM clause is auto-generated from the type parameter.'
     );
   }
