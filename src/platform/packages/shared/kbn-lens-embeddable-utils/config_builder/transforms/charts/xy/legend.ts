@@ -11,13 +11,15 @@ import { LegendLayout, LegendSize, type XYLegendValue } from '@kbn/chart-express
 import type { XYVisualizationState } from '@kbn/lens-common';
 import type { XYState } from '../../../schema';
 import { stripUndefined } from '../utils';
-
-type OutsideLegendType = Extract<
-  Required<XYState['legend']>,
-  { placement: 'outside'; layout: { type: 'grid' } }
->;
-
-type StatisticsType = OutsideLegendType['statistics'][number];
+import type {
+  HorizontalOutsideLayoutLegend,
+  LegendSizeObject,
+  LegendStatistic,
+  VerticalOutsideLayoutLegend,
+  LegendSize as LegendSizeType,
+  InsidePosition,
+  InsideLayoutLegend,
+} from './types';
 
 const StatsAPIToOldState = {
   avg: 'average',
@@ -31,11 +33,11 @@ const StatsAPIToOldState = {
   distinct_count: 'distinctCount',
 } as const;
 
-function isAPIMappedStatistic(stat: StatisticsType): stat is keyof typeof StatsAPIToOldState {
+function isAPIMappedStatistic(stat: LegendStatistic): stat is keyof typeof StatsAPIToOldState {
   return stat in StatsAPIToOldState;
 }
 
-function mapStatToCamelCase(stat: StatisticsType): XYLegendValue {
+function mapStatToCamelCase(stat: LegendStatistic): XYLegendValue {
   if (isAPIMappedStatistic(stat)) {
     return StatsAPIToOldState[stat];
   }
@@ -58,7 +60,7 @@ function isStateMappedStatistic(stat: XYLegendValue): stat is keyof typeof Stats
   return stat in StatsStateToAPI;
 }
 
-function mapStatToSnakeCase(stat: XYLegendValue): StatisticsType {
+function mapStatToSnakeCase(stat: XYLegendValue): LegendStatistic {
   if (isStateMappedStatistic(stat)) {
     return StatsStateToAPI[stat];
   }
@@ -84,7 +86,7 @@ function extractAlignment(legend: XYState['legend']):
 }
 
 function getLegendSize(
-  size: OutsideLegendType['size'] | undefined
+  size: LegendSizeType | undefined
 ): XYVisualizationState['legend']['legendSize'] {
   switch (size) {
     case 'small':
@@ -125,9 +127,7 @@ function getLegendTruncation(legend: XYState['legend']): {
   return legend && 'layout' in legend && legend.layout?.truncate ? legend.layout.truncate : null;
 }
 
-function getOutsideLegendSize(
-  legend: XYState['legend']
-): 'small' | 'medium' | 'large' | 'xlarge' | undefined {
+function getOutsideLegendSize(legend: XYState['legend']): LegendSizeType | undefined {
   return legend && 'size' in legend ? legend.size : undefined;
 }
 
@@ -174,7 +174,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
 
 function getLegendSizeAPI(
   size: XYVisualizationState['legend']['legendSize'] | undefined
-): Pick<OutsideLegendType, 'size'> | {} {
+): LegendSizeObject | {} {
   switch (size) {
     case LegendSize.SMALL:
       return { size: 'small' };
@@ -206,9 +206,9 @@ function getLegendAlignment(legend: XYVisualizationState['legend']) {
   if (!legend.verticalAlignment && !legend.horizontalAlignment) {
     return {};
   }
-  const position: Extract<NonNullable<XYState['legend']>, { placement: 'inside' }>['position'] = `${
-    legend.verticalAlignment ?? 'top'
-  }_${legend.horizontalAlignment ?? 'right'}`;
+  const position: InsidePosition = `${legend.verticalAlignment ?? 'top'}_${
+    legend.horizontalAlignment ?? 'right'
+  }`;
   return {
     position,
   };
@@ -226,10 +226,7 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
       },
       ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
       ...getLegendAlignment(legend),
-    } satisfies Omit<
-      Extract<NonNullable<XYState['legend']>, { placement: 'inside' }>,
-      'visibility' | 'statistics'
-    >;
+    } satisfies InsideLayoutLegend;
   }
 
   const position = legend.position ?? DEFAULT_LEGEND_POSITON;
@@ -252,21 +249,7 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
           type: 'grid' as const,
           ...(max_lines != null ? { truncate: { max_lines } } : {}),
         },
-  } satisfies
-    | Omit<
-        Extract<
-          NonNullable<XYState['legend']>,
-          { placement?: 'outside'; position?: 'top' | 'bottom' }
-        >,
-        'visibility' | 'statistics'
-      >
-    | Omit<
-        Extract<
-          NonNullable<XYState['legend']>,
-          { placement?: 'outside'; position?: 'left' | 'right' }
-        >,
-        'visibility' | 'statistics'
-      >;
+  } satisfies HorizontalOutsideLayoutLegend | VerticalOutsideLayoutLegend;
 }
 
 function getApiLegendTruncate(
