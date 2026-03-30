@@ -137,7 +137,7 @@ export const createUpdateDetectionService = ({
   descriptorClient?: WatchlistEntitySourceClient;
 }) => {
   const syncMarkersService = descriptorClient
-    ? createWatchlistSyncMarkersService(descriptorClient)
+    ? createWatchlistSyncMarkersService(descriptorClient, esClient)
     : undefined;
 
   const detectForIntegrationEntityType = async (
@@ -231,6 +231,36 @@ export const createUpdateDetectionService = ({
     return paginatedDetection(esClient, targetIndex, search, mapBucket);
   };
 
+  const detectForStoreSource = async (
+    source: WatchlistDataSources.MonitoringEntitySource,
+    entityStoreEntityIdsByType: EntityStoreEntityIdsByType
+  ) => {
+    const allEntities: WatchlistBulkEntity[] = [];
+    for (const entityType of ALL_ENTITY_TYPES) {
+      const euids = getAllowedEntityIds(entityStoreEntityIdsByType, entityType);
+      for (const euid of euids) {
+        allEntities.push({ euid, type: entityType, sourceId: source.id });
+      }
+    }
+
+    if (allEntities.length === 0) {
+      return { entities: [] as WatchlistBulkEntity[] };
+    }
+
+    // Check which entities already exist in the target index
+    const pageSize = 100;
+    for (let start = 0; start < allEntities.length; start += pageSize) {
+      const batch = allEntities.slice(start, start + pageSize);
+      const batchEuids = batch.map((e) => e.euid);
+      const existingMap = await getExistingEntitiesMap(esClient, targetIndex, batchEuids);
+      for (const entity of batch) {
+        entity.existingEntityId = existingMap.get(entity.euid);
+      }
+    }
+
+    return { entities: allEntities };
+  };
+
   const updateDetection: UpdateDetection = async (
     source: WatchlistDataSources.MonitoringEntitySource,
     entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
@@ -264,6 +294,9 @@ export const createUpdateDetectionService = ({
       if (maxProcessedTimestamp) {
         await syncMarkersService.updateLastProcessedMarker(source, maxProcessedTimestamp);
       }
+    } else if (source.type === 'store') {
+      const { entities } = await detectForStoreSource(source, entityStoreEntityIdsByType);
+      allEntities.push(...entities);
     } else {
       if (!correlationMap) {
         logger.warn(
