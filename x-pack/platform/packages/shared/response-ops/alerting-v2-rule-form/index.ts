@@ -16,7 +16,7 @@ export {
 } from './flyout';
 
 // Constants
-export { RULE_FORM_ID } from './form/constants';
+export { RULE_FORM_ID, DEFAULT_RULE_NAME } from './form/constants';
 
 // Form components (lazy loaded) - for embedding in custom forms
 export { DynamicRuleForm, StandaloneRuleForm } from './form';

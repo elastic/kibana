@@ -147,5 +147,25 @@ describe('ErrorCallOut', () => {
       const callout = container.querySelector('.euiCallOut');
       expect(callout).toHaveClass('euiCallOut--danger');
     });
+
+    it('scrolls the callout into view when errors are shown', () => {
+      const scrollIntoViewMock = jest.fn();
+      Element.prototype.scrollIntoView = scrollIntoViewMock;
+
+      const errors = createErrors({
+        metadata: { message: 'Name is required' },
+      });
+
+      render(
+        <TestWrapper errors={errors} isSubmitted={true}>
+          <ErrorCallOut />
+        </TestWrapper>
+      );
+
+      expect(scrollIntoViewMock).toHaveBeenCalledWith({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    });
   });
 });
