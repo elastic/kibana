@@ -70,11 +70,11 @@ Workplace AI is excluded because it has no stateful counterpart.
 
 ### Stateful [scout-deployment-tags-stateful]
 
-| Helper                        | Target solution view                     |
+| Helper                        | Compatible with solution view            |
 | ----------------------------- | ---------------------------------------- |
-| `tags.stateful.all`           | All stateful targets                     |
-| `tags.stateful.classic`       | Classic                                  |
-| `tags.stateful.search`        | {icon}`logo_elasticsearch` Search        |
+| `tags.stateful.all`           | All space solution views                 |
+| `tags.stateful.classic`       | {icon}`logo_elastic_stack` Classic       |
+| `tags.stateful.search`        | {icon}`logo_elasticsearch` Elasticsearch |
 | `tags.stateful.observability` | {icon}`logo_observability` Observability |
 | `tags.stateful.security`      | {icon}`logo_security` Security           |
 
