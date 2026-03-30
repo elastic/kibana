@@ -8,6 +8,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { registerWorkflowYamlAttachment } from './attachments/workflow_yaml_attachment';
+import { registerWorkflowYamlDiffAttachment } from './attachments/workflow_yaml_diff_attachment';
 import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
 import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
@@ -16,19 +18,23 @@ import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitio
 import { registerGetWorkflowTool } from './tools/get_workflow_tool';
 import { registerListWorkflowsTool } from './tools/list_workflows_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
+import { registerWorkflowEditTools } from './tools/workflow_edit_tools';
+import type { WorkflowsManagementApi } from '../api/workflows_management_api';
+import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
 import type { AgentBuilderPluginSetupContract } from '../types';
-import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
 
 interface RegisterWorkflowAgentBuilderIntegrationParams {
   agentBuilder: AgentBuilderPluginSetupContract;
   logger: Logger;
   api: WorkflowsManagementApi;
+  aiTelemetryClient: WorkflowsAiTelemetryClient;
 }
 
 export function registerWorkflowAgentBuilderIntegration({
   agentBuilder,
   logger,
   api,
+  aiTelemetryClient,
 }: RegisterWorkflowAgentBuilderIntegrationParams): void {
   logger.debug('Registering workflow Agent Builder integration components');
 
@@ -39,6 +45,11 @@ export function registerWorkflowAgentBuilderIntegration({
   registerListWorkflowsTool(agentBuilder, api);
   registerGetWorkflowTool(agentBuilder, api);
   registerGetExamplesTool(agentBuilder);
+
+  registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
+
+  registerWorkflowYamlAttachment(agentBuilder, api);
+  registerWorkflowYamlDiffAttachment(agentBuilder);
 
   agentBuilder.skills.register(workflowAuthoringSkill);
 

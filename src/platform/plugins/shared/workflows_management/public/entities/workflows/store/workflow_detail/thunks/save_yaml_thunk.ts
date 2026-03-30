@@ -9,7 +9,7 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowDetailDto } from '@kbn/workflows/types/latest';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { PLUGIN_ID } from '../../../../../../common';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
@@ -17,6 +17,7 @@ import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import {
+  selectAiAssisted,
   selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
@@ -35,6 +36,7 @@ export const saveYamlThunk = createAsyncThunk<
   'detail/saveYamlThunk',
   async (_, { getState, dispatch, rejectWithValue, extra: { services } }) => {
     const { http, notifications, application } = services;
+    const workflowApi = new WorkflowApi(http);
 
     // Initialize telemetry
     const workflowsManagement = services.workflowsManagement;
@@ -48,6 +50,8 @@ export const saveYamlThunk = createAsyncThunk<
           },
         });
 
+    const isAiAssisted = selectAiAssisted(getState());
+
     try {
       const state = getState();
       const yamlString = selectYamlString(state);
@@ -59,10 +63,7 @@ export const saveYamlThunk = createAsyncThunk<
       }
 
       if (id) {
-        // Update the workflow in the API if the id is provided
-        await http.put<void>(`/api/workflows/${id}`, {
-          body: JSON.stringify({ yaml: yamlString }),
-        });
+        await workflowApi.updateWorkflow(id, { yaml: yamlString });
 
         // Get original workflow state for comparison
         const originalWorkflow = selectWorkflow(state);
@@ -79,15 +80,13 @@ export const saveYamlThunk = createAsyncThunk<
           isBulkAction: false,
           error: undefined,
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
 
         // For consistency, dispatch the loadWorkflow thunk to update the workflow in the store to the latest version from the API
         await dispatch(loadWorkflowThunk({ id }));
       } else {
-        // Create the workflow in the API if the id is not provided
-        const workflow: WorkflowDetailDto = await http.post<WorkflowDetailDto>('/api/workflows', {
-          body: JSON.stringify({ yaml: yamlString }),
-        });
+        const workflow = await workflowApi.createWorkflow({ yaml: yamlString });
 
         // Report telemetry for workflow creation
         // Use workflow.definition from the created workflow if available, otherwise fall back to workflowDefinition from state
@@ -97,6 +96,7 @@ export const saveYamlThunk = createAsyncThunk<
           error: undefined,
           editorType: 'yaml', // Saving YAML always comes from YAML editor
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
 
         // Update the workflow in the store
@@ -138,12 +138,14 @@ export const saveYamlThunk = createAsyncThunk<
           isBulkAction: false,
           error: errorObj,
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
       } else {
         telemetry.reportWorkflowCreated({
           workflowDefinition: errorWorkflowDefinition || undefined,
           error: errorObj,
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
       }
 

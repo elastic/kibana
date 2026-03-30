@@ -15,17 +15,21 @@ import type { SidebarRegistryService } from './sidebar_registry_service';
 import type { StorageHelper } from './storage_helper';
 import { bind, memoize } from './utils';
 
-const DEFAULT_WIDTH = 460;
 const MIN_WIDTH = 320;
+const DEFAULT_WIDTH_PERCENT = 0.3;
 const MAX_WIDTH_PERCENT = 0.5;
 
 function getMaxWidth(): number {
-  return Math.floor(window.innerWidth * MAX_WIDTH_PERCENT);
+  return Math.max(MIN_WIDTH, Math.floor(window.innerWidth * MAX_WIDTH_PERCENT));
+}
+
+function getDefaultWidth(): number {
+  return Math.max(MIN_WIDTH, Math.floor(window.innerWidth * DEFAULT_WIDTH_PERCENT));
 }
 
 export class SidebarStateService {
   private readonly currentAppId$ = new BehaviorSubject<SidebarAppId | null>(null);
-  private readonly width$ = new BehaviorSubject<number>(DEFAULT_WIDTH);
+  private readonly width$ = new BehaviorSubject<number>(getDefaultWidth());
 
   constructor(
     private readonly registry: SidebarRegistryService,

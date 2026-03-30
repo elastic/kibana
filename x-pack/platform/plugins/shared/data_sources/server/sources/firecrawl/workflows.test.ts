@@ -10,10 +10,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { firecrawlDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-firecrawl-connector';
 const CONNECTOR_ID = 'fake-firecrawl-connector-uuid';
@@ -22,9 +21,9 @@ describe('firecrawl workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(firecrawlDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.firecrawl', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 

@@ -53,6 +53,7 @@ const toggleButtonsIcons = [
       defaultMessage: 'Right',
     }),
     iconType: 'sortRight',
+    'data-test-subj': 'lens-legend-position-btn-right',
   },
   {
     id: Position.Left,
@@ -60,6 +61,7 @@ const toggleButtonsIcons = [
       defaultMessage: 'Left',
     }),
     iconType: 'sortLeft',
+    'data-test-subj': 'lens-legend-position-btn-left',
   },
   {
     id: Position.Top,
@@ -67,6 +69,7 @@ const toggleButtonsIcons = [
       defaultMessage: 'Top',
     }),
     iconType: 'sortUp',
+    'data-test-subj': 'lens-legend-position-btn-top',
   },
   {
     id: Position.Bottom,
@@ -74,6 +77,7 @@ const toggleButtonsIcons = [
       defaultMessage: 'Bottom',
     }),
     iconType: 'sortDown',
+    'data-test-subj': 'lens-legend-position-btn-bottom',
   },
 ];
 

@@ -64,6 +64,16 @@ import { expect } from '@kbn/scout-security/ui';`,
       filename: PLATFORM_SRC_TEST,
       code: `import { test } from '@kbn/scout';`,
     },
+
+    {
+      filename: PLATFORM_SRC_TEST,
+      code: `import { synthtraceFixture } from '@kbn/scout-synthtrace';`,
+    },
+
+    {
+      filename: SECURITY_TEST,
+      code: `import { getSynthtraceClient } from '@kbn/scout-synthtrace';`,
+    },
   ],
 
   invalid: [

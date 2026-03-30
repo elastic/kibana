@@ -13,6 +13,7 @@ import { registerEntityStoreRoutes } from './entity_store/routes';
 import { registerPrivilegeMonitoringRoutes } from './privilege_monitoring/routes/register_privilege_monitoring_routes';
 import { registerMigrationsRoutes } from './migrations/routes';
 import { registerEntityDetailsRoutes } from './entity_details/routes';
+import { registerLeadGenerationRoutes } from './lead_generation/routes/register_lead_generation_routes';
 import { registerWatchlistRoutes } from './watchlists/register_watchlist_routes';
 
 export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDeps) => {
@@ -29,6 +30,9 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
     registerEntityDetailsRoutes(routeDeps);
   }
 
+  if (routeDeps.config.experimentalFeatures.leadGenerationEnabled) {
+    registerLeadGenerationRoutes(routeDeps);
+  }
   if (routeDeps.config.experimentalFeatures.entityAnalyticsWatchlistEnabled) {
     registerWatchlistRoutes(routeDeps);
   }

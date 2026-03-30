@@ -107,7 +107,7 @@ export const CategoryTable: FC<Props> = ({
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.key] ? 'arrowDown' : 'arrowRight'}
+          iconType={itemIdToExpandedRowMap[item.key] ? 'chevronSingleDown' : 'chevronSingleRight'}
         />
       ),
       'data-test-subj': 'aiopsLogPatternsExpandRowToggle',

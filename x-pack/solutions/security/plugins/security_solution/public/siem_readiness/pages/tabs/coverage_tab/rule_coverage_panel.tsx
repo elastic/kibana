@@ -116,6 +116,8 @@ export const RuleCoveragePanel: React.FC = () => {
     enabledIntegrationRules.ruleIntegrationCoverage?.missingIntegrations?.length
   );
 
+  const hasNoEnabledRules = (getDetectionRules.data?.data?.length || 0) === 0;
+
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -151,7 +153,7 @@ export const RuleCoveragePanel: React.FC = () => {
                   <EuiButtonEmpty
                     iconSide="right"
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     onClick={handleCreateCase}
                     data-test-subj="createNewCaseButton"
                   >
@@ -192,6 +194,41 @@ export const RuleCoveragePanel: React.FC = () => {
                       <EuiLink href={ELASTIC_INTEGRATIONS_DOCS_URL} target="_blank" external>
                         {i18n.translate(
                           'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.docsLink',
+                          {
+                            defaultMessage: 'docs',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        )}
+        {hasNoEnabledRules && (
+          <EuiFlexItem>
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate(
+                'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.noEnabledRulesTitle',
+                {
+                  defaultMessage: 'No rules are currently enabled',
+                }
+              )}
+              color="primary"
+              iconType="info"
+              size="s"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.noEnabledRulesDescription"
+                  defaultMessage="Learn more about installing and enabling rules in our {docs}."
+                  values={{
+                    docs: (
+                      <EuiLink href={ELASTIC_INTEGRATIONS_DOCS_URL} target="_blank" external>
+                        {i18n.translate(
+                          'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.noEnabledRulesDocsLink',
                           {
                             defaultMessage: 'docs',
                           }

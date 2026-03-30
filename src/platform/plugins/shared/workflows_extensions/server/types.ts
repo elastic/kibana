@@ -12,6 +12,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { z } from '@kbn/zod/v4';
+import type { EventChainContext } from './event_chain_context';
 import type { ServerStepDefinition } from './step_registry/types';
 import type { CommonTriggerDefinition } from '../common';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
@@ -19,6 +20,8 @@ import type { WorkflowsExtensionsStartContract } from '../common/types';
 /** Server-side alias: same as CommonTriggerDefinition (used when registering on the server). */
 export type ServerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> =
   CommonTriggerDefinition<EventSchema>;
+
+export type { EventChainContext };
 
 /**
  * Parameters passed to the trigger event handler when an event is emitted.
@@ -29,6 +32,7 @@ export interface TriggerEventHandlerParams {
   spaceId: string;
   payload: Record<string, unknown>;
   request: KibanaRequest;
+  eventChainContext?: EventChainContext;
 }
 
 /**

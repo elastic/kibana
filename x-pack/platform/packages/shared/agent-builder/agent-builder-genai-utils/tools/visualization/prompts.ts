@@ -71,3 +71,20 @@ ${additionalContext ?? ''}`,
     ['human', 'Generate the visualization configuration.'],
   ];
 };
+
+export const esqlAdditionalInstructions = `
+
+## Human-readable column aliases
+
+Use human-readable column aliases in STATS/EVAL (e.g. \`Unique Visitors\` not \`unique_visitors\`). Wrap multi-word aliases in backticks.
+
+## Time Bucketing
+
+For time series charts, use the \`BUCKET\` function to create "auto" buckets that automatically scale with the time range.
+Always use \`BUCKET(@timestamp, 75, ?_tstart, ?_tend)\` instead of hardcoded intervals like
+\`DATE_TRUNC(1 hour, @timestamp)\`:
+
+FROM logs | STATS count = COUNT() BY bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+
+When generating or passing "esql" for time-based XY charts, prefer this pattern (adjust the aggregation and timestamp field as needed) so the chart responds correctly to the dashboard or lens time range.
+`;

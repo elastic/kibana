@@ -290,7 +290,8 @@ export const functions = {
           defaultMessage: `
   ### CASE
   Accepts pairs of conditions and values. The function returns the value that
-  belongs to the first condition that evaluates to \`true\`.
+  belongs to the first condition that evaluates to \`true\`. Both the conditions
+  and the returned values can be any expression, including column references.
 
   If the number of arguments is odd, the last argument is the default value which
   is returned when no condition matches. If the number of arguments is even, and
@@ -1790,7 +1791,7 @@ export const functions = {
           {
             defaultMessage: `
   ### MV MEDIAN
-  Converts a multivalued field into a single valued field containing the median value.
+  Converts a multivalued field into a single valued field containing the [median](https://en.wikipedia.org/wiki/Median) value.
 
   \`\`\`esql
   ROW a=[3, 5, 1]
@@ -1930,7 +1931,7 @@ export const functions = {
           {
             defaultMessage: `
   ### MV SLICE
-  Returns a subset of the multivalued field using the start and end index values.
+  Returns a subset of the multivalued field using the start and end index values. Indexes are 0-based.
   This is most useful when reading from a function that emits multivalued columns
   in a known order like [\`SPLIT\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/string-functions/split) or [\`MV_SORT\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/mv-functions/mv_sort).
 

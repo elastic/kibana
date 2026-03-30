@@ -56,6 +56,31 @@ export interface VersionedAttachment<
    * Undefined for by-value attachments.
    */
   origin?: string;
+  /**
+   * When this attachment's content was last captured from the origin (for by-reference attachments),
+   * or when the attachment was stored.
+   */
+  origin_snapshot_at?: string;
+}
+
+/**
+ * A versioned attachment with a defined `origin` (by-reference).
+ */
+export type VersionedAttachmentWithOrigin<
+  Type extends string = string,
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
+> = VersionedAttachment<Type, DataType> & { origin: string };
+
+/**
+ * Returns true when `origin` is defined. Narrows `attachment` to {@link VersionedAttachmentWithOrigin}.
+ */
+export function isVersionedAttachmentWithOrigin<
+  Type extends string = string,
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
+>(
+  attachment: VersionedAttachment<Type, DataType>
+): attachment is VersionedAttachmentWithOrigin<Type, DataType> {
+  return attachment.origin !== undefined;
 }
 
 /**
@@ -172,6 +197,7 @@ export const versionedAttachmentSchema = z.object({
   readonly: z.boolean().optional(),
   client_id: z.string().optional(),
   origin: z.string().optional(),
+  origin_snapshot_at: z.string().optional(),
 });
 
 export const versionedAttachmentInputSchema = z.object({

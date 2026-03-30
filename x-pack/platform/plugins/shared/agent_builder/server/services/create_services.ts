@@ -20,9 +20,15 @@ import { ConversationServiceImpl } from './conversation';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
+import { createSmlService, type SmlServiceInstance } from './sml';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
-import { createMeteringService, type MeteringService } from './metering';
+import {
+  createMeteringService,
+  type MeteringService,
+  createConsumptionService,
+  type ConsumptionService,
+} from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
 
 interface ServiceInstances {
@@ -33,6 +39,8 @@ interface ServiceInstances {
   skills: SkillService;
   plugins: PluginsService;
   metering: MeteringService;
+  sml: SmlServiceInstance;
+  consumption: ConsumptionService;
 }
 
 export class ServiceManager {
@@ -59,16 +67,21 @@ export class ServiceManager {
       skills: createSkillService(),
       plugins: createPluginsService(),
       metering: createMeteringService({ cloud, usageApi, logger: logger.get('metering') }),
+      sml: createSmlService(),
+      consumption: createConsumptionService(),
     };
+
+    const skillsSetup = this.services.skills.setup();
 
     this.internalSetup = {
       tools: this.services.tools.setup({ logger: logger.get('tools'), workflowsManagement }),
       agents: this.services.agents.setup({ logger: logger.get('agents') }),
       attachments: this.services.attachments.setup(),
       hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
-      skills: this.services.skills.setup(),
-      plugins: this.services.plugins.setup(),
+      skills: skillsSetup,
+      plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
+      sml: this.services.sml.setup({ logger: logger.get('sml') }),
     };
 
     return this.internalSetup;
@@ -85,6 +98,7 @@ export class ServiceManager {
     featureFlags,
     actions,
     taskManager,
+    securityPlugin,
     trackingService,
     analyticsService,
   }: ServicesStartDeps): InternalStartServices {
@@ -102,6 +116,10 @@ export class ServiceManager {
     };
 
     const attachments = this.services.attachments.start();
+    const sml = this.services.sml.start({
+      logger: logger.get('sml'),
+      securityAuthz: securityPlugin?.authz,
+    });
 
     const tools = this.services.tools.start({
       getRunner,
@@ -117,6 +135,8 @@ export class ServiceManager {
       spaces,
       logger: logger.get('skills'),
       getToolRegistry: tools.getRegistry,
+      uiSettings,
+      savedObjects,
     });
 
     const agents = this.services.agents.start({
@@ -129,6 +149,13 @@ export class ServiceManager {
     });
 
     const hooks = this.services.hooks.start();
+
+    const plugins = this.services.plugins.start({
+      logger: logger.get('plugins'),
+      elasticsearch,
+      spaces,
+      config: this.config,
+    });
 
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
@@ -143,6 +170,7 @@ export class ServiceManager {
       agentsService: agents,
       attachmentsService: attachments,
       skillServiceStart: skillsServiceStart,
+      pluginsServiceStart: plugins,
       trackingService,
       analyticsService,
       hooks,
@@ -193,12 +221,7 @@ export class ServiceManager {
       meteringService: this.services.metering,
     });
 
-    const plugins = this.services.plugins.start({
-      logger: logger.get('plugins'),
-      elasticsearch,
-      spaces,
-      config: this.config,
-    });
+    const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
     this.internalStart = {
       tools,
@@ -215,7 +238,9 @@ export class ServiceManager {
       featureFlags,
       uiSettings,
       savedObjects,
+      sml,
       plugins,
+      consumption,
     };
 
     return this.internalStart;

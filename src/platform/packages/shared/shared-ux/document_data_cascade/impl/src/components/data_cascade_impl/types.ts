@@ -101,6 +101,7 @@ type OnCascadeGroupNodeExpandedArgs<G extends GroupNode> = CascadeGroupNodeUIInt
 type OnCascadeGroupNodeCollapsedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
 
 export interface CascadeRowActionProps {
+  isMobile: boolean;
   maxActionCount?: number;
   headerRowActions: Array<
     Pick<EuiButtonIconProps, 'iconType' | 'aria-label' | 'data-test-subj'> & {
@@ -118,6 +119,10 @@ export interface CascadeRowActionProps {
 }
 
 export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends LeafNode> {
+  /**
+   * Denotes if the device viewport matches the mobile screen media query.
+   */
+  isMobile: boolean;
   /**
    * Whether to enable row selection. Default is false.
    */
@@ -177,6 +182,10 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    * Ref that provides a reference to the DOM element that will be used to portal the active sticky header.
    */
   activeStickyRenderSlotRef: React.RefObject<HTMLDivElement | null>;
+  /**
+   * Denotes if the device viewport matches the mobile screen media query.
+   */
+  isMobile: boolean;
   /**
    * Denotes if the row is sticky.
    */

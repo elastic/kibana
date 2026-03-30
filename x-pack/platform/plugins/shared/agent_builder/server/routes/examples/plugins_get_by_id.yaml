@@ -23,7 +23,6 @@ responses:
               skill_ids:
               - financial-analysis-analyze-portfolio
               unmanaged_assets:
-                commands: []
                 agents: []
                 hooks: []
                 mcp_servers: []

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
@@ -44,6 +45,21 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       technicalPreview: true,
       requiresPageReload: false,
       readonly: false,
+    },
+    [AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID]: {
+      description: i18n.translate('xpack.agentBuilder.uiSettings.connectorsEnabled.description', {
+        defaultMessage:
+          'Enables connectors management in Agent Builder, including automatic workflow and tool creation when connectors are added.',
+      }),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.connectorsEnabled.name', {
+        defaultMessage: 'Elastic Agent Builder: Connectors',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      technicalPreview: true,
+      requiresPageReload: false,
+      readonly: true,
+      readonlyMode: 'ui',
     },
   });
 };

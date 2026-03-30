@@ -21,6 +21,7 @@ describe('SkillsStore', () => {
     readonly: true,
     getRegistryTools: () => [],
     referencedContentCount: 0,
+    experimental: false,
     ...overrides,
   });
 
@@ -293,6 +294,7 @@ describe('SkillsStore', () => {
       readonly: false,
       getRegistryTools: () => ['tool-1'],
       referencedContentCount: 0,
+      experimental: false,
       ...overrides,
     });
 

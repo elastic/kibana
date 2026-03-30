@@ -27,6 +27,8 @@ import type { OwnershipClaimingOpts, TaskClaimingOpts } from '../queries/task_cl
 import { TaskClaiming, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
+import { SpanStatusCode, trace } from '@opentelemetry/api';
+import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import type { ClaimOwnershipResult } from '.';
 import type { FillPoolResult } from '../lib/fill_pool';
@@ -87,9 +89,25 @@ const mockApmTrans = {
   end: jest.fn(),
 };
 
+let otelExporter: tracing.InMemorySpanExporter;
+let otelProvider: tracing.BasicTracerProvider;
+
+beforeAll(() => {
+  otelExporter = new tracing.InMemorySpanExporter();
+  otelProvider = new tracing.BasicTracerProvider({
+    spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
+  });
+  trace.setGlobalTracerProvider(otelProvider);
+});
+
+afterAll(async () => {
+  await otelProvider.shutdown();
+});
+
 describe('TaskClaiming', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    otelExporter?.reset();
     jest
       .spyOn(apm, 'startTransaction')
 
@@ -185,6 +203,12 @@ describe('TaskClaiming', () => {
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
+      const spans = otelExporter.getFinishedSpans();
+      const span = spans.find((s) => s.name === 'mark-task-as-claimed');
+      expect(span).toBeDefined();
+      expect(span!.attributes['transaction.type']).toBe(TASK_MANAGER_TRANSACTION_TYPE);
+      expect(span!.status.code).not.toBe(SpanStatusCode.ERROR);
+
       expect(store.updateByQuery.mock.calls[0][1]).toMatchObject({
         max_docs: getCapacity(),
       });
@@ -243,6 +267,11 @@ describe('TaskClaiming', () => {
         TASK_MANAGER_TRANSACTION_TYPE
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+
+      const spans = otelExporter.getFinishedSpans();
+      const span = spans.find((s) => s.name === 'mark-task-as-claimed');
+      expect(span).toBeDefined();
+      expect(span!.status.code).toBe(SpanStatusCode.ERROR);
     });
 
     test('it filters claimed tasks down by supported types, maxAttempts, status, and runAt', async () => {

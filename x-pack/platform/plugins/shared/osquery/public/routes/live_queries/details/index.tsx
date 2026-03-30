@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { useGoBack } from '../../../common/use_go_back';
-import { WithHeaderLayout } from '../../../components/layouts';
+import {
+  fullWidthContentCss,
+  WithHeaderLayout,
+  WithoutHeaderLayout,
+} from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
@@ -38,7 +42,12 @@ const LiveQueryDetailsPageComponent = () => {
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...liveQueryListProps} flush="left" size="xs">
+          <EuiButtonEmpty
+            iconType="chevronSingleLeft"
+            {...liveQueryListProps}
+            flush="left"
+            size="xs"
+          >
             {isHistoryEnabled ? (
               <FormattedMessage
                 id="xpack.osquery.liveQueryDetails.viewHistoryTitle"
@@ -52,16 +61,18 @@ const LiveQueryDetailsPageComponent = () => {
             )}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage
-                id="xpack.osquery.liveQueryDetails.pageTitle"
-                defaultMessage="Live query details"
-              />
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
+        {!isHistoryEnabled && (
+          <EuiFlexItem>
+            <EuiText>
+              <h1>
+                <FormattedMessage
+                  id="xpack.osquery.liveQueryDetails.pageTitle"
+                  defaultMessage="Live query details"
+                />
+              </h1>
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     ),
     [liveQueryListProps, isHistoryEnabled]
@@ -70,6 +81,32 @@ const LiveQueryDetailsPageComponent = () => {
   useLayoutEffect(() => {
     setIsLive(() => !(data?.status === 'completed'));
   }, [data?.status]);
+
+  const tableBlock = (
+    <div css={tableWrapperCss}>
+      <PackQueriesStatusTable
+        actionId={actionId}
+        data={data?.queries}
+        startDate={data?.['@timestamp']}
+        expirationDate={data?.expiration}
+        agentIds={data?.agents}
+        showResultsHeader
+        tags={data?.tags}
+      />
+    </div>
+  );
+
+  if (isHistoryEnabled) {
+    return (
+      <WithoutHeaderLayout restrictWidth={false}>
+        <div css={fullWidthContentCss}>
+          {LeftColumn}
+          <EuiSpacer size="m" />
+          {tableBlock}
+        </div>
+      </WithoutHeaderLayout>
+    );
+  }
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
@@ -81,6 +118,7 @@ const LiveQueryDetailsPageComponent = () => {
           expirationDate={data?.expiration}
           agentIds={data?.agents}
           showResultsHeader
+          tags={data?.tags}
         />
       </EuiFlexItem>
     </WithHeaderLayout>

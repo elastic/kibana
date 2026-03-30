@@ -6,14 +6,23 @@
  */
 
 import pMap from 'p-map';
+import { isEmpty } from 'lodash';
 import semverSatisfies from 'semver/functions/satisfies';
 import semverRcompare from 'semver/functions/rcompare';
 import semverGt from 'semver/functions/gt';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import pRetry from 'p-retry';
+
+import { LockAcquisitionError } from '@kbn/lock-manager';
+
 import { appContextService } from '../../../../app_context';
 
-import { type InstallablePackage, SO_SEARCH_LIMIT } from '../../../../../../common';
+import {
+  type InstallablePackage,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../../../../common';
 import { getInstallation, getInstalledPackageSavedObjects } from '../../get';
 import { installPackage } from '../../install';
 import { removeInstallation } from '../../remove';
@@ -21,6 +30,10 @@ import type { InstallContext } from '../_state_machine_package_install';
 import { fetchList, pkgToPkgKey } from '../../../registry';
 import { withPackageSpan } from '../../utils';
 import { PackageDependencyError } from '../../../../../../common/errors';
+import { mergeIsDependencyOf } from '../../dependencies';
+import { auditLoggingService } from '../../../../audit_logging';
+
+const FLEET_RESOLVE_DEPENDENCIES_LOCK_ID = 'fleet-resolve-package-dependencies';
 
 export async function stepResolveDependencies(context: InstallContext) {
   const { logger } = context;
@@ -57,10 +70,35 @@ export async function stepResolveDependencies(context: InstallContext) {
         await pMap(
           resolvedDependencies,
           async (dependency) => {
+            const parentRef = {
+              name: context.packageInstallContext.packageInfo.name,
+              version: context.packageInstallContext.packageInfo.version,
+            };
             if (dependency.status === 'installed') {
               logger.info(
                 `stepResolveDependencies: dependency ${dependency.name}@${dependency.resolvedVersion} is already installed`
               );
+              const updatedIsDependencyOf = mergeIsDependencyOf(
+                parentRef,
+                dependency.existingIsDependencyOf
+              );
+              if (
+                updatedIsDependencyOf.length !== (dependency.existingIsDependencyOf?.length ?? 0)
+              ) {
+                auditLoggingService.writeCustomSoAuditLog({
+                  action: 'update',
+                  id: dependency.name,
+                  name: dependency.name,
+                  savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+                });
+                await context.savedObjectsClient.update(
+                  PACKAGES_SAVED_OBJECT_TYPE,
+                  dependency.name,
+                  {
+                    is_dependency_of: updatedIsDependencyOf,
+                  }
+                );
+              }
               return;
             }
             if (dependency.status === 'to_install') {
@@ -85,6 +123,7 @@ export async function stepResolveDependencies(context: InstallContext) {
                 // install dependency even if it's not the latest in the registry
                 force: true,
                 prerelease: isPrerelease,
+                installedAsDependencyOf: parentRef,
               });
               completed.push({ dependency });
             }
@@ -100,7 +139,29 @@ export async function stepResolveDependencies(context: InstallContext) {
     });
   };
 
-  await stepBody();
+  // using lock when resolving dependencies of a package
+  if (!isEmpty(context.packageInstallContext.packageInfo.requires?.content)) {
+    await _runWithLock(stepBody);
+  } else {
+    await stepBody();
+  }
+}
+
+export async function _runWithLock(stepFn: () => Promise<void>) {
+  return await pRetry(
+    () =>
+      appContextService
+        .getLockManagerService()!
+        .withLock(FLEET_RESOLVE_DEPENDENCIES_LOCK_ID, () => stepFn()),
+    {
+      onFailedAttempt: async (error) => {
+        if (!(error instanceof LockAcquisitionError)) {
+          throw error;
+        }
+      },
+      maxRetryTime: 30 * 1000,
+    }
+  );
 }
 
 async function rollbackDependencyInstalls(
@@ -187,6 +248,7 @@ interface ResolvedDependency {
   status: 'installed' | 'to_update' | 'to_install';
   /** Set when status is 'to_update'; used for rollback to re-install previous version */
   previousVersion?: string;
+  existingIsDependencyOf?: { name: string; version: string }[];
 }
 
 async function buildDependencies(
@@ -271,6 +333,7 @@ async function buildDependencies(
         requiredVersion,
         resolvedVersion: installation.version,
         status: 'installed',
+        existingIsDependencyOf: installation.is_dependency_of ?? [],
       });
     }
   }

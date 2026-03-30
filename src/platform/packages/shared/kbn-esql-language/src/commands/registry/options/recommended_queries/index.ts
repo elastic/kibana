@@ -37,6 +37,15 @@ export const getRecommendedQueriesTemplates = ({
   timeField?: string;
   categorizationField?: string;
 }): QueryTemplate[] => {
+  // Recommend TBUCKET for @timestamp fields as it is smarter and has easier to understand syntax
+  const bucketExpression =
+    timeField === '@timestamp' ? 'TBUCKET(50)' : `BUCKET(${timeField}, 50, ?_tstart, ?_tend)`;
+
+  const commentDescription =
+    timeField !== '@timestamp'
+      ? ' /* ?_tstart and ?_tend take the values of the time picker */'
+      : '';
+
   const queries: QueryTemplate[] = [
     {
       label: i18n.translate('kbn-esql-language.recommendedQueries.searchExample.label', {
@@ -113,7 +122,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Count aggregation over time',
               }
             ),
-            queryString: `${fromCommand}| WHERE ${timeField} <=?_tend and ${timeField} >?_tstart| STATS count = COUNT(*) BY \`Over time\` = BUCKET(${timeField}, 50, ?_tstart, ?_tend) /* ?_tstart and ?_tend take the values of the time picker */`,
+            queryString: `${fromCommand}| WHERE ${timeField} <=?_tend and ${timeField} >?_tstart| STATS count = COUNT(*) BY \`Over time\` = ${bucketExpression}${commentDescription}`,
           },
           {
             label: i18n.translate('kbn-esql-language.recommendedQueries.eventRate.label', {
@@ -139,7 +148,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Change point on count aggregation',
               }
             ),
-            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = BUCKET(${timeField}, 50, ?_tstart, ?_tend)  | CHANGE_POINT count ON buckets `,
+            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = ${bucketExpression}  | CHANGE_POINT count ON buckets `,
           },
           {
             label: i18n.translate('kbn-esql-language.recommendedQueries.lastHour.label', {

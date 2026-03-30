@@ -6,7 +6,7 @@
  */
 
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { InferenceConnector } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { Client } from 'langsmith';
@@ -32,7 +32,7 @@ export const runDefendInsightsEvaluations = async ({
   evaluatorConnectorId: string | undefined;
   datasetName: string;
   graphs: Array<{
-    connector: Connector;
+    connector: InferenceConnector;
     graph: DefaultDefendInsightsGraph;
     llmType: string | undefined;
     name: string;

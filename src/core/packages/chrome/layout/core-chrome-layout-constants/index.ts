@@ -30,6 +30,12 @@ export const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll';
 export const APP_FIXED_VIEWPORT_ID = 'app-fixed-viewport';
 
 /**
+ * Selector for an open EuiFlyout. All flyouts (core overlay service, system flyouts,
+ * and inline plugin flyouts) render through EuiFlyout which applies this class and role.
+ */
+export const FLYOUT_SELECTOR = '.euiFlyout[role="dialog"]';
+
+/**
  * The ID of the main content container in the application, regardless of the type of the layout used.
  * `document.querySelector(MAIN_CONTENT_SELECTORS.join(','))` can be used to find the main content container.
  *
