@@ -23,17 +23,23 @@ export class ExportPageObject extends FtrService {
     await this.testSubjects.missingOrFail('exportTopNavButton', { timeout: 1000 });
   }
 
-  async clickExportTopNavButton() {
+  async clickExportTopNavButton(): Promise<boolean> {
     // First check if export button is directly visible
     if (await this.testSubjects.exists('exportTopNavButton')) {
-      return await this.testSubjects.click('exportTopNavButton');
+      await this.testSubjects.click('exportTopNavButton');
+      return true;
     }
 
     // If not visible, try the overflow menu
     if (await this.testSubjects.exists('app-menu-overflow-button')) {
       await this.testSubjects.click('app-menu-overflow-button');
-      return await this.testSubjects.click('exportTopNavButton');
+      if (await this.testSubjects.exists('exportTopNavButton')) {
+        await this.testSubjects.click('exportTopNavButton');
+        return true;
+      }
     }
+
+    return false;
   }
 
   async isExportPopoverOpen() {
