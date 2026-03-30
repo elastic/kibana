@@ -10,7 +10,6 @@ import moment from 'moment';
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import {
   CASE_RULES_SAVED_OBJECT,
-  MAX_OPEN_CASES_DEFAULT_MAXIMUM_DEFAULT_MAXIMUM,
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
@@ -2810,11 +2809,13 @@ describe('CasesConnectorExecutor', () => {
     });
 
     describe('effective maximum', () => {
-      const allAlerts = Array.from({ length: MAX_OPEN_CASES_DEFAULT_MAXIMUM + 1 }).map((_, index) => ({
-        _id: `alert-id-${index}`,
-        _index: `alert-index-${index}`,
-        'host.name': `host-${index}`,
-      }));
+      const allAlerts = Array.from({ length: MAX_OPEN_CASES_DEFAULT_MAXIMUM + 1 }).map(
+        (_, index) => ({
+          _id: `alert-id-${index}`,
+          _index: `alert-index-${index}`,
+          'host.name': `host-${index}`,
+        })
+      );
 
       it('generates the oracle keys correctly when the total cases to be open is more than the effective maximum', async () => {
         await connectorExecutor.execute({

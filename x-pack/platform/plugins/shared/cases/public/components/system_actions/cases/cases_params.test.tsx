@@ -205,7 +205,9 @@ describe('CasesParamsFields renders', () => {
 
     render(<CasesParamsFields {...defaultProps} />);
 
-    expect(await screen.findByText('Set the maximum amount of cases to be opened. (Max 30)')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Set the maximum amount of cases to be opened. (Max 30)')
+    ).toBeInTheDocument();
 
     const maximumCasesInput = await screen.findByTestId('maximum-case-to-open-input');
     fireEvent.change(maximumCasesInput, { target: { value: '30' } });
