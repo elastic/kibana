@@ -21,8 +21,8 @@ import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALERTING_V2_RULES_APP_ID } from './constants';
-import { RulesApp } from './components/rules_app';
-import { NotificationPoliciesApp } from './components/notification_policies_app';
+import { RulesApp } from './application/rules_app';
+import { NotificationPoliciesApp } from './application/notification_policies_app';
 
 @injectable()
 export class AlertingV2App {
