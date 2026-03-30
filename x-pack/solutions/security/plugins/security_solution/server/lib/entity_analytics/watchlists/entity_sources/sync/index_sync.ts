@@ -10,6 +10,7 @@ import type { WatchlistEntitySourceClient } from '../infra';
 import { createSourcesSyncService } from './sources_sync';
 import type { SyncSourceEntry } from './sources_sync';
 import { createUpdateDetectionService } from './update_detection/update_detection';
+import { createDeletionDetectionService } from './deletion_detection/deletion_detection';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
@@ -30,6 +31,12 @@ export const createIndexSyncService = ({
     targetIndex,
     descriptorClient,
   });
+  const deletionDetectionService = createDeletionDetectionService({
+    esClient,
+    logger,
+    targetIndex,
+    descriptorClient,
+  });
   const sourcesSyncService = createSourcesSyncService({ logger });
 
   const plainIndexSync = async (sources: SyncSourceEntry[]) => {
@@ -37,11 +44,13 @@ export const createIndexSyncService = ({
       descriptorClient,
       sources,
       process: async (source, entityStoreEntityIdsByType, correlationMap) => {
-        await updateDetectionService.updateDetection(
+        const entities = await updateDetectionService.updateDetection(
           source,
           entityStoreEntityIdsByType,
           correlationMap
         );
+        const currentEuids = entities.map((e) => e.euid);
+        await deletionDetectionService.deletionDetection(source, currentEuids);
       },
     });
   };
