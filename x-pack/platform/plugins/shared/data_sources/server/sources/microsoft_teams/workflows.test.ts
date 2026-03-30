@@ -10,11 +10,10 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   registerExtensionSteps,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { microsoftTeamsDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-microsoft-teams-connector';
 const CONNECTOR_ID = 'fake-ms-teams-connector-uuid';
@@ -96,9 +95,9 @@ describe('microsoft teams workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(microsoftTeamsDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.microsoft-teams', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 

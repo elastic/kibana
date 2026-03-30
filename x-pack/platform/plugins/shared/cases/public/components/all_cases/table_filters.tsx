@@ -126,7 +126,7 @@ const CasesTableFiltersComponent = ({
           <EuiButton
             fill
             onClick={handleOnCreateCasePressed}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="cases-table-add-case-filter-bar"
           >
             {i18n.CREATE_CASE_TITLE}
