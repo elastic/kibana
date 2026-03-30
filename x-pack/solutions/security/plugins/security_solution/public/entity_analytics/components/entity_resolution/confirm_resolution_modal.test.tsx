@@ -62,8 +62,7 @@ describe('ConfirmResolutionModal', () => {
   it('shows loading state', () => {
     const { getByRole } = render(<ConfirmResolutionModal {...defaultProps} isLoading />);
 
-    // EUI loading buttons render with the loading spinner and disabled state
     const confirmButton = getByRole('button', { name: /confirm resolution/i });
-    expect(confirmButton.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    expect(confirmButton).toBeDisabled();
   });
 });

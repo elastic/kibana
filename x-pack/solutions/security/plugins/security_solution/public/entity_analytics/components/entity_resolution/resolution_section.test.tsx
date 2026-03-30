@@ -53,7 +53,7 @@ describe('ResolutionSection', () => {
       </TestProviders>
     );
 
-    expect(container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    expect(container.querySelector('[role="progressbar"]')).toBeInTheDocument();
   });
 
   it('shows empty state when no resolution group', () => {

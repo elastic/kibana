@@ -62,7 +62,7 @@ describe('ResolutionGroupTable', () => {
       </TestProviders>
     );
 
-    expect(container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    expect(container.querySelector('[role="progressbar"]')).toBeInTheDocument();
   });
 
   it('shows remove buttons when showActions is true', () => {
