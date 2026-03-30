@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiLink, EuiSpacer } from '@elastic/eui';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 export interface EndpointExceptionsPerPolicyOptInCalloutProps {
   onDismiss: () => void;
@@ -18,6 +19,8 @@ export interface EndpointExceptionsPerPolicyOptInCalloutProps {
 
 export const EndpointExceptionsPerPolicyOptInCallout: React.FC<EndpointExceptionsPerPolicyOptInCalloutProps> =
   memo(({ onDismiss, onClickUpdateDetails, canOptIn }) => {
+    const { docLinks } = useKibana().services;
+
     return (
       <EuiCallOut
         title={i18n.translate(
@@ -60,12 +63,14 @@ export const EndpointExceptionsPerPolicyOptInCallout: React.FC<EndpointException
               size="s"
               data-test-subj="learnMoreEndpointExceptionsPerPolicyOptInButton"
             >
-              {i18n.translate(
-                'xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutLearnMore',
-                {
-                  defaultMessage: 'Learn more', // TODO: Update with actual link to docs once available
-                }
-              )}
+              <EuiLink href={docLinks.links.securitySolution.endpointExceptions} target="_blank">
+                {i18n.translate(
+                  'xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutLearnMore',
+                  {
+                    defaultMessage: 'Learn more',
+                  }
+                )}
+              </EuiLink>
             </EuiButton>
           </EuiFlexGroup>
         ) : (
