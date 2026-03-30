@@ -56,8 +56,7 @@ export const StopQueryConfirmationModal: React.FC<StopQueryConfirmationModalProp
             </p>
             <p>
               {i18n.translate('xpack.queryActivity.stopQueryConfirmationModal.bodyFooter', {
-                defaultMessage:
-                  'Are you sure you want to proceed?',
+                defaultMessage: 'Are you sure you want to proceed?',
               })}
             </p>
           </EuiText>
