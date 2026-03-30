@@ -116,7 +116,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/247002
   issues:
-  - https://github.com/elastic/security-team/issues/15065
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/15065'
 - file:
     name: 246150.yaml
     checksum: 55ade1423ed3d098b40e93314aceeaed27cf2d05
@@ -789,7 +789,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/244924
   issues:
-  - https://github.com/elastic/security-team/issues/14588
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/14588'
 - file:
     name: 247060.yaml
     checksum: 9505f8082df3d02ba297f8163d36b278663bc7f1
@@ -835,7 +835,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/246978
   issues:
-  - https://github.com/elastic/security-team/issues/15098
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/15098'
 - file:
     name: 242595.yaml
     checksum: 0e118597831b396b67b44eaa9a513d5d830a9a3f

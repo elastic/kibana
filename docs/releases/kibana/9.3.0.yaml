@@ -367,10 +367,10 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/245439
   issues:
-  - https://github.com/elastic/observability-error-backlog/issues/314
-  - https://github.com/elastic/observability-error-backlog/issues/315
-  - https://github.com/elastic/observability-error-backlog/issues/317
-  - https://github.com/elastic/observability-error-backlog/issues/320
+  - '# PRIVATE: https://github.com/elastic/observability-error-backlog/issues/314'
+  - '# PRIVATE: https://github.com/elastic/observability-error-backlog/issues/315'
+  - '# PRIVATE: https://github.com/elastic/observability-error-backlog/issues/317'
+  - '# PRIVATE: https://github.com/elastic/observability-error-backlog/issues/320'
 - file:
     name: 239431.yaml
     checksum: cb0f921dde43e0b2ae7f5b8b08794fe3f123c861
@@ -451,9 +451,9 @@ entries:
   - https://github.com/elastic/kibana/pull/242581
   issues:
   - https://github.com/elastic/kibana/issues/243566
-  - https://github.com/elastic/streams-program/issues/623
-  - https://github.com/elastic/observability-error-backlog/issues/318
-  - https://github.com/elastic/observability-error-backlog/issues/319
+  - '# PRIVATE: https://github.com/elastic/streams-program/issues/623'
+  - '# PRIVATE: https://github.com/elastic/observability-error-backlog/issues/318'
+  - '# PRIVATE: https://github.com/elastic/observability-error-backlog/issues/319'
   - https://github.com/elastic/kibana/issues/242254
 - file:
     name: 250047.yaml
@@ -538,7 +538,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/241928
   issues:
-  - https://github.com/elastic/kibana-team/issues/2083
+  - '# PRIVATE: https://github.com/elastic/kibana-team/issues/2083'
 - file:
     name: 245253.yaml
     checksum: 65036cbf79676419e3847c77731147812bd99b94
@@ -658,7 +658,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/242847
   issues:
-  - https://github.com/elastic/response-ops-team/issues/472
+  - '# PRIVATE: https://github.com/elastic/response-ops-team/issues/472'
 - file:
     name: 246941.yaml
     checksum: 649990c3b91801a8798e4449223ac00c43247e3e
@@ -732,7 +732,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/242922
   issues:
-  - https://github.com/elastic/kibana-team/issues/2084
+  - '# PRIVATE: https://github.com/elastic/kibana-team/issues/2084'
 - file:
     name: 242467.yaml
     checksum: 229d5aa26a318cb0522121ef96744e7d5ae2011d
@@ -949,7 +949,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/244202
   issues:
-  - https://github.com/elastic/kibana-team/issues/2082
+  - '# PRIVATE: https://github.com/elastic/kibana-team/issues/2082'
 - file:
     name: 241779.yaml
     checksum: baaa1d49d8eee88b78c8fdc773cbe6cde9f94731
@@ -1019,8 +1019,8 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/243841
   issues:
-  - https://github.com/elastic/kibana-team/issues/2235
-  - https://github.com/elastic/kibana-team/issues/2234
+  - '# PRIVATE: https://github.com/elastic/kibana-team/issues/2235'
+  - '# PRIVATE: https://github.com/elastic/kibana-team/issues/2234'
 - file:
     name: 246069.yaml
     checksum: 7b61fd51225462b61793749f3ca6786167ad2f18
@@ -1391,7 +1391,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/248943
   issues:
-  - https://github.com/elastic/search-team/issues/12401
+  - '# PRIVATE: https://github.com/elastic/search-team/issues/12401'
 - file:
     name: 243572.yaml
     checksum: 2a2f7274702a4afe4db02de34531b47beb0df115
@@ -1570,7 +1570,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/241369
   issues:
-  - https://github.com/elastic/streams-program/issues/583
+  - '# PRIVATE: https://github.com/elastic/streams-program/issues/583'
 - file:
     name: 237500.yaml
     checksum: a53d44e6e59ecd078591c93e19b0c6458f5e1722
@@ -1741,7 +1741,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/224552
   issues:
-  - https://github.com/elastic/kibana-team/issues/808
+  - '# PRIVATE: https://github.com/elastic/kibana-team/issues/808'
 - file:
     name: 245554.yaml
     checksum: 31f9ae2585ae9eed1569c3b21db2b4ba933f439d
@@ -1835,7 +1835,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/242161
   issues:
-  - https://github.com/elastic/streams-program/issues/497
+  - '# PRIVATE: https://github.com/elastic/streams-program/issues/497'
 - file:
     name: 239993.yaml
     checksum: 06f857c5db4dbdaf99c6c546a6864b808a0419af
@@ -1970,7 +1970,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/240023
   issues:
-  - https://github.com/elastic/streams-program/issues/498
+  - '# PRIVATE: https://github.com/elastic/streams-program/issues/498'
 - file:
     name: 240189.yaml
     checksum: fb77fc6ca87dc8cb9884297f2700b4709b9ae6ab
@@ -2232,7 +2232,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/244221
   issues:
-  - https://github.com/elastic/streams-program/issues/454
+  - '# PRIVATE: https://github.com/elastic/streams-program/issues/454'
 - file:
     name: 246123.yaml
     checksum: 48a9404335015efad39acd601990d47521fd264a
@@ -2245,7 +2245,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/246123
   issues:
-  - https://github.com/elastic/response-ops-team/issues/339
+  - '# PRIVATE: https://github.com/elastic/response-ops-team/issues/339'
 - file:
     name: 237575.yaml
     checksum: d293871ebc7b8b47da531fddf5c11e3389e7d897
@@ -2384,7 +2384,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/244893
   issues:
-  - https://github.com/elastic/streams-program/issues/621
+  - '# PRIVATE: https://github.com/elastic/streams-program/issues/621'
 - file:
     name: 246841.yaml
     checksum: 0aa007198ee95332c84c9cbaba18000a0a1c8821
@@ -2496,7 +2496,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/243950
   issues:
-  - https://github.com/elastic/streams-program/issues/256
+  - '# PRIVATE: https://github.com/elastic/streams-program/issues/256'
 - file:
     name: 244903.yaml
     checksum: aa8a0032daf0fb0e85135333170a12d197e6665f
@@ -2575,7 +2575,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/243131
   issues:
-  - https://github.com/elastic/streams-program/issues/613
+  - '# PRIVATE: https://github.com/elastic/streams-program/issues/613'
 - file:
     name: 243998.yaml
     checksum: e121ef448dab2e5cac24dec35d383be5810c20e7

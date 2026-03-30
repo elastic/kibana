@@ -29,7 +29,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/243298
   issues:
-  - https://github.com/elastic/obs-ai-assistant-team/issues/314
+  - '# PRIVATE: https://github.com/elastic/obs-ai-assistant-team/issues/314'
 - file:
     name: 237970.yaml
     checksum: 6b9a363171a958a41aa2f309d4dcebf9374f845e
@@ -373,7 +373,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/249776
   issues:
-  - https://github.com/elastic/obs-ai-team/issues/469
+  - '# PRIVATE: https://github.com/elastic/obs-ai-team/issues/469'
 - file:
     name: 248167.yaml
     checksum: e533806a77dc70ee026e5c5b417fe21d43dfd03c
@@ -424,7 +424,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/248761
   issues:
-  - https://github.com/elastic/sdh-synthetics/issues/254
+  - '# PRIVATE: https://github.com/elastic/sdh-synthetics/issues/254'
   - https://github.com/elastic/kibana/issues/248754
 - file:
     name: 246440.yaml
@@ -467,8 +467,8 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/242423
   issues:
-  - https://github.com/elastic/obs-ai-assistant-team/issues/384
-  - https://github.com/elastic/obs-ai-team/issues/449
+  - '# PRIVATE: https://github.com/elastic/obs-ai-assistant-team/issues/384'
+  - '# PRIVATE: https://github.com/elastic/obs-ai-team/issues/449'
 - file:
     name: 246088.yaml
     checksum: ca3248bb3684507e25e315a3e099b4ded087365b
@@ -532,8 +532,8 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/245373
   issues:
-  - https://github.com/elastic/kibana-team/issues/2417
-  - https://github.com/elastic/kibana-team/issues/2104
+  - '# PRIVATE: https://github.com/elastic/kibana-team/issues/2417'
+  - '# PRIVATE: https://github.com/elastic/kibana-team/issues/2104'
 - file:
     name: 247564.yaml
     checksum: 558886a5a035027cd0f1a6d144bbe0f586b6abd4
@@ -717,7 +717,7 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/237085
   issues:
-  - https://github.com/elastic/obs-ai-assistant-team/issues/357
+  - '# PRIVATE: https://github.com/elastic/obs-ai-assistant-team/issues/357'
 - file:
     name: 244134.yaml
     checksum: 5fae212cb960885570ce0800b272aa324df92559

@@ -369,6 +369,9 @@ bundle:
   output_directory: docs/releases
   # Whether to resolve (copy contents) by default
   resolve: true
+  # When true, PR/issue links to repos marked private in assembler.yml are rewritten in bundle output
+  # (requires resolve: true). Option-based: --sanitize-private-links / --no-sanitize-private-links.
+  sanitize_private_links: true
   repo: kibana
   owner: elastic
 
