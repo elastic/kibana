@@ -67,7 +67,7 @@ describe('useDashboardMenuItems', () => {
         if (groupId === 'exportDerivatives') {
           return [
             {
-              id: 'exportSourceDashboard',
+              id: 'exportJson',
               shareType: 'integration',
               groupId: 'exportDerivatives',
               config: async () => ({}),
@@ -135,7 +135,7 @@ describe('useDashboardMenuItems', () => {
         if (groupId === 'exportDerivatives') {
           return [
             {
-              id: 'exportSourceDashboard',
+              id: 'exportJson',
               shareType: 'integration',
               groupId: 'exportDerivatives',
               config: async () => ({}),
@@ -168,7 +168,7 @@ describe('useDashboardMenuItems', () => {
 
     const viewModeExportItemIds = viewModeExportMenuItem.items!.map((item) => item.id);
     expect(viewModeExportItemIds).toEqual(
-      expect.arrayContaining(['exportSourceDashboard', 'pdfReports', 'imageReports'])
+      expect.arrayContaining(['exportJson', 'pdfReports', 'imageReports'])
     );
 
     const editModeExportMenuItem = result.current.editModeTopNavConfig.items!.find(
@@ -177,7 +177,7 @@ describe('useDashboardMenuItems', () => {
 
     const editModeExportItemIds = editModeExportMenuItem.items!.map((item) => item.id);
     expect(editModeExportItemIds).toEqual(
-      expect.arrayContaining(['exportSourceDashboard', 'pdfReports', 'imageReports'])
+      expect.arrayContaining(['exportJson', 'pdfReports', 'imageReports'])
     );
   });
 });

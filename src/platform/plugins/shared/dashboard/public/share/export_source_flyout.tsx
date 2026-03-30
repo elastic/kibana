@@ -29,7 +29,7 @@ import { downloadFileAs, useShareTypeContext } from '@kbn/share-plugin/public';
 import type { ExportSourceLoadState } from './export_source_asset_panel';
 import { ExportSourceAssetPanel } from './export_source_asset_panel';
 import { buildExportSourceFilename } from './export_source_share_utils';
-import type { ExportSourceSharingData } from './json_export_config';
+import type { buildExportSharingData } from '../dashboard_app/top_nav/share/share_options_utils';
 
 const flyoutBodyCss = css`
   ${euiFullHeight()}
@@ -50,7 +50,7 @@ export const ExportSourceFlyout = ({ closeFlyout }: { closeFlyout: () => void })
     'exportDerivatives'
   );
 
-  const typedSharingData = sharingData as unknown as ExportSourceSharingData;
+  const typedSharingData = sharingData as unknown as ReturnType<typeof buildExportSharingData>;
 
   const [dashboardState] = useState(() => typedSharingData.exportSource());
   const [loadState, setLoadState] = useState<ExportSourceLoadState>({ status: 'loading' });

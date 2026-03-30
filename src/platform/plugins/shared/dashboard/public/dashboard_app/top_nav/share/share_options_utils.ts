@@ -102,7 +102,7 @@ export function getExportObjectTypeMeta() {
     config: {
       integration: {
         export: {
-          exportSourceDashboard: {},
+          exportJson: {},
           pdfReports: { draftModeCallOut: true },
           imageReports: { draftModeCallOut: true },
         },
@@ -143,7 +143,7 @@ export function buildShareableUrlLocatorParams(locatorParams: DashboardLocatorPa
 
 export const mapExportIntegrationToMetaData = (intgrationId: string) => {
   switch (intgrationId) {
-    case 'exportSourceDashboard':
+    case 'exportJson':
       return {
         label: topNavStrings.export.jsonLabel,
         testId: 'exportMenuItem-JSON',
