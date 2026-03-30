@@ -5,21 +5,16 @@
  * 2.0.
  */
 
-import { asyncForEach } from '@kbn/std';
-import { first } from 'lodash/fp';
+import type { Logger } from '@kbn/core/server';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
-
-// V2 entity store (the @kbn/entity-store plugin) uses 'entity-engine-descriptor-v2' for engine
-// descriptors, distinct from V1's 'entity-engine-status'. The constant isn't exported publicly
-// from @kbn/entity-store so we reference the literal here.
-const ENTITY_ENGINE_DESCRIPTOR_V2_TYPE = 'entity-engine-descriptor-v2';
 import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
 import { PRIVILEGED_USER_WATCHLIST_ID } from '../../../../../common/entity_analytics/watchlists/constants';
-import { WatchlistConfigClient } from '../management/watchlist_config';
+import type { WatchlistConfigClient } from '../management/watchlist_config';
+import { WatchlistConfigClient as WatchlistConfigClientClass } from '../management/watchlist_config';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
-const PREBUILT_WATCHLISTS_VERSION = 1;
+export const PREBUILT_WATCHLISTS_VERSION = 1;
 
 const PREBUILT_WATCHLISTS = [
   {
@@ -31,64 +26,66 @@ const PREBUILT_WATCHLISTS = [
   },
 ];
 
+/**
+ * Ensures all prebuilt watchlists exist for the given namespace.
+ * Idempotent: skips creation if the watchlist already exists.
+ */
+export const ensurePrebuiltWatchlists = async ({
+  watchlistClient,
+  logger,
+}: {
+  watchlistClient: WatchlistConfigClient;
+  logger: Logger;
+}) => {
+  for (const watchlist of PREBUILT_WATCHLISTS) {
+    try {
+      await watchlistClient.get(watchlist.id);
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      if (errorMessage.includes('not found')) {
+        logger.info(`Prebuilt watchlist '${watchlist.name}' not found, initializing...`);
+        const { id, ...attrs } = watchlist;
+        await watchlistClient.create(attrs, { id });
+        logger.info(`Prebuilt watchlist '${watchlist.name}' initialized.`);
+      } else {
+        logger.error(`Error checking prebuilt watchlist '${watchlist.name}': ${errorMessage}`);
+      }
+    }
+  }
+};
+
+/**
+ * Startup migration: discovers all Kibana spaces and ensures prebuilt
+ * watchlists exist in every one of them.
+ */
 export const installPrebuiltWatchlists = async ({
   logger,
   getStartServices,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
-  const soClientInternal = coreStart.savedObjects.createInternalRepository();
-
-  const savedObjectsResponse = await soClientInternal.find({
-    type: ENTITY_ENGINE_DESCRIPTOR_V2_TYPE,
-    perPage: 100,
-    namespaces: ['*'],
-  });
-
-  if (savedObjectsResponse.total === 0) {
-    logger.debug('No entity engine descriptors found. Skipping prebuilt watchlist installation.');
-    return;
-  }
-
+  const internalRepo = coreStart.savedObjects.createInternalRepository();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-  await asyncForEach(savedObjectsResponse.saved_objects, async (savedObject) => {
-    const namespace = first(savedObject.namespaces);
+  const spacesResponse = await internalRepo.find({
+    type: 'space',
+    perPage: 1000,
+  });
 
-    if (!namespace) {
-      logger.error(
-        'Unexpected saved object. Entity engine descriptor saved objects must have a namespace'
-      );
-      return;
-    }
+  // Always include 'default' — it may not have an explicit saved object
+  const namespaces = new Set<string>(['default']);
+  for (const so of spacesResponse.saved_objects) {
+    namespaces.add(so.id);
+  }
 
+  for (const namespace of namespaces) {
     const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
-    const watchlistClient = new WatchlistConfigClient({
+    const watchlistClient = new WatchlistConfigClientClass({
       soClient,
       esClient,
       namespace,
       logger,
     });
 
-    for (const watchlist of PREBUILT_WATCHLISTS) {
-      try {
-        await watchlistClient.get(watchlist.id);
-      } catch (e) {
-        const errorMessage = e instanceof Error ? e.message : String(e);
-        if (errorMessage.includes('not found')) {
-          logger.info(
-            `Prebuilt watchlist '${watchlist.name}' not found in namespace "${namespace}", initializing...`
-          );
-          const { id, ...attrs } = watchlist;
-          await watchlistClient.create(attrs, { id });
-          logger.info(
-            `Prebuilt watchlist '${watchlist.name}' initialized in namespace "${namespace}".`
-          );
-        } else {
-          logger.error(
-            `Error checking prebuilt watchlist '${watchlist.name}' in namespace "${namespace}": ${errorMessage}`
-          );
-        }
-      }
-    }
-  });
+    await ensurePrebuiltWatchlists({ watchlistClient, logger });
+  }
 };
