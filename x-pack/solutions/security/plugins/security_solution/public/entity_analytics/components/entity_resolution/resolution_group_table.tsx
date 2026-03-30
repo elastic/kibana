@@ -39,12 +39,14 @@ import {
   TARGET_ENTITY_TOOLTIP,
   CANNOT_REMOVE_TARGET_TOOLTIP,
   RESOLUTION_EMPTY_STATE,
+  RESOLUTION_FETCH_ERROR,
 } from './translations';
 import { RESOLUTION_GROUP_TABLE_TEST_ID, RESOLUTION_EMPTY_STATE_TEST_ID } from './test_ids';
 
 export interface ResolutionGroupTableProps {
   group: ResolutionGroup | null;
   isLoading: boolean;
+  isError?: boolean;
   showActions?: boolean;
   onRemoveEntity?: (entityId: string) => void;
   targetEntityId?: string;
@@ -54,6 +56,7 @@ export interface ResolutionGroupTableProps {
 export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   group,
   isLoading,
+  isError = false,
   showActions = false,
   onRemoveEntity,
   targetEntityId,
@@ -199,6 +202,14 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
 
   if (isLoading) {
     return <EuiLoadingSpinner size="m" />;
+  }
+
+  if (isError) {
+    return (
+      <EuiText size="s" color="danger">
+        {RESOLUTION_FETCH_ERROR}
+      </EuiText>
+    );
   }
 
   if (!hasGroup) {

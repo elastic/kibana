@@ -33,7 +33,7 @@ interface ResolutionGroupTabProps {
 export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId, entityType }) => {
   const { http } = useKibana().services;
   const { addError } = useAppToasts();
-  const { data: group, isLoading, isFetching } = useResolutionGroup(entityId);
+  const { data: group, isLoading, isFetching, isError } = useResolutionGroup(entityId);
   const linkEntities = useLinkEntities();
   const unlinkEntities = useUnlinkEntities();
 
@@ -142,6 +142,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
         <ResolutionGroupTable
           group={group ?? null}
           isLoading={isLoading || isFetching}
+          isError={isError}
           showActions
           onRemoveEntity={handleRemoveEntity}
           targetEntityId={targetEntityId}

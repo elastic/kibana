@@ -112,6 +112,11 @@ export const RESOLUTION_ERROR_TITLE = i18n.translate(
   { defaultMessage: 'Resolution error' }
 );
 
+export const RESOLUTION_FETCH_ERROR = i18n.translate(
+  'xpack.securitySolution.entityResolution.fetchError',
+  { defaultMessage: 'Unable to load resolution group' }
+);
+
 export const ENTITY_HAS_ALIASES_ERROR = i18n.translate(
   'xpack.securitySolution.entityResolution.entityHasAliasesError',
   {
