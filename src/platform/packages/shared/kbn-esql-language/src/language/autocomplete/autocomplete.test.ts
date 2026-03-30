@@ -263,6 +263,17 @@ describe('autocomplete', () => {
         'doubleField'
       );
     });
+
+    it('suggests generated STATS columns after inline WHERE filters', async () => {
+      const { suggest: suggestTest } = await setup();
+      const suggestions = await suggestTest(
+        `FROM index | STATS COUNT() WHERE integerField > 0 | ${command} /`
+      );
+      const suggestionTexts = suggestions.map((value) => value.text);
+
+      expect(suggestionTexts).toContain('`COUNT()`');
+      expect(suggestionTexts).not.toContain('integerField');
+    });
   });
 
   // @TODO: get updated eval block from main
