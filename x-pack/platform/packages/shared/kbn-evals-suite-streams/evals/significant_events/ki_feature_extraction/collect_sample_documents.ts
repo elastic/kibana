@@ -70,7 +70,7 @@ const addUniqueHitsToSample = ({
     docs.push(hit);
 
     const app = getAppNameFromFields(hit.fields);
-    if (app && !uniqueApps.has(app)) {
+    if (app) {
       uniqueApps.add(app);
     }
 
