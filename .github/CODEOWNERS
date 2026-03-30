@@ -424,6 +424,7 @@ src/platform/packages/shared/as-code/data-views-transforms @elastic/kibana-data-
 src/platform/packages/shared/as-code/filters-constants @elastic/kibana-presentation
 src/platform/packages/shared/as-code/filters-schema @elastic/kibana-presentation
 src/platform/packages/shared/as-code/filters-transforms @elastic/kibana-presentation
+src/platform/packages/shared/as-code/shared-schemas @elastic/kibana-presentation
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/chart-test-jest-helpers @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
@@ -1037,6 +1038,9 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
+x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form @elastic/rna-project-team
+x-pack/platform/packages/shared/response-ops/alerting-v2-schemas @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
@@ -1050,6 +1054,7 @@ x-pack/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/rule_params @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/rules-apis @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/scheduling-types @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/yaml-rule-editor @elastic/response-ops
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
@@ -1104,6 +1109,7 @@ x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
+x-pack/platform/plugins/shared/alerting_v2 @elastic/rna-project-team
 x-pack/platform/plugins/shared/anonymization @elastic/workchat-eng @elastic/security-generative-ai @elastic/security-threat-hunting
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-presentation-team
 x-pack/platform/plugins/shared/automatic_import @elastic/integration-experience
@@ -1270,6 +1276,7 @@ x-pack/solutions/security/packages/index-adapter @elastic/security-threat-huntin
 x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
+x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engine
@@ -1713,10 +1720,17 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/common/utils/server_route_repository @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 
 ## Streams parts owned by Logs UX
-/x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management @elastic/obs-onboarding-team
 
 # Streams parts owned by Kibana Management
-x-pack/platform/plugins/shared/streams_app/public/components/data_management/stream_detail_lifecycle/downsampling @elastic/kibana-management
+x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management/stream_detail_lifecycle/downsampling @elastic/kibana-management
+
+# Streams — sig events overrides (obs-sig-events-team owns these subtrees)
+x-pack/platform/plugins/shared/streams_app/public/components/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/lib/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/routes/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elastic/obs-sig-events-team
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
@@ -1833,7 +1847,6 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/solutions/observability/test/functional/apps/dataset_quality @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality @elastic/obs-onboarding-team
 /x-pack/solutions/observability/plugins/observability/public/pages/landing @elastic/obs-onboarding-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/onboarding/ @elastic/obs-onboarding-team
 
 # Observability-ui
 /x-pack/solutions/observability/test/serverless/api_integration/configs/index.ts @elastic/observability-ui
@@ -1856,6 +1869,9 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /.buildkite/pipelines/performance/streams_weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-streams-performance-weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 
+
+# Alerting alerting_v2
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/alerting_v2 @elastic/rna-project-team
 
 ### END Observability Plugins
 
