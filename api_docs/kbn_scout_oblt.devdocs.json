@@ -2964,7 +2964,7 @@
           "; }>"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/single_thread_fixtures.ts",
-        "lineNumber": 62,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3959,7 +3959,7 @@
           "; }>"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/worker/slo_data.ts",
-        "lineNumber": 17,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4188,7 +4188,7 @@
           "; }>"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/parallel_run_fixtures.ts",
-        "lineNumber": 51,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4379,7 +4379,7 @@
           "; }>"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/single_thread_fixtures.ts",
-        "lineNumber": 61,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4553,6 +4553,370 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/scout-oblt",
+        "id": "def-common.ApiClientFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiClientFixture",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ApiClientFixture.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(url: string, options?: ",
+              "ApiClientOptions",
+              " | undefined) => Promise<",
+              "ApiClientResponse",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ApiClientFixture.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+                "lineNumber": 36,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ApiClientFixture.get.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ApiClientOptions",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+                "lineNumber": 36,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ApiClientFixture.post",
+            "type": "Function",
+            "tags": [],
+            "label": "post",
+            "description": [],
+            "signature": [
+              "(url: string, options?: ",
+              "ApiClientOptions",
+              " | undefined) => Promise<",
+              "ApiClientResponse",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ApiClientFixture.post.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+                "lineNumber": 37,
+                "columnNumber": 8,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ApiClientFixture.post.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ApiClientOptions",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+                "lineNumber": 37,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ApiClientFixture.put",
+            "type": "Function",
+            "tags": [],
+            "label": "put",
+            "description": [],
+            "signature": [
+              "(url: string, options?: ",
+              "ApiClientOptions",
+              " | undefined) => Promise<",
+              "ApiClientResponse",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ApiClientFixture.put.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+                "lineNumber": 38,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ApiClientFixture.put.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ApiClientOptions",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+                "lineNumber": 38,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ApiClientFixture.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "(url: string, options?: ",
+              "ApiClientOptions",
+              " | undefined) => Promise<",
+              "ApiClientResponse",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ApiClientFixture.delete.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+                "lineNumber": 39,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ApiClientFixture.delete.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ApiClientOptions",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+                "lineNumber": 39,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ApiClientFixture.patch",
+            "type": "Function",
+            "tags": [],
+            "label": "patch",
+            "description": [],
+            "signature": [
+              "(url: string, options?: ",
+              "ApiClientOptions",
+              " | undefined) => Promise<",
+              "ApiClientResponse",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ApiClientFixture.patch.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+                "lineNumber": 40,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ApiClientFixture.patch.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ApiClientOptions",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+                "lineNumber": 40,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ApiClientFixture.head",
+            "type": "Function",
+            "tags": [],
+            "label": "head",
+            "description": [],
+            "signature": [
+              "(url: string, options?: ",
+              "ApiClientOptions",
+              " | undefined) => Promise<",
+              "ApiClientResponse",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ApiClientFixture.head.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+                "lineNumber": 41,
+                "columnNumber": 8,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.ApiClientFixture.head.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ApiClientOptions",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_client.ts",
+                "lineNumber": 41,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/scout-oblt",
         "id": "def-common.ApiServicesFixture",
@@ -11105,6 +11469,232 @@
       },
       {
         "parentPluginId": "@kbn/scout-oblt",
+        "id": "def-common.RequestAuthFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "RequestAuthFixture",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.RequestAuthFixture.getApiKey",
+            "type": "Function",
+            "tags": [],
+            "label": "getApiKey",
+            "description": [
+              "\nCreates an API key for a predefined role (e.g. 'admin', 'viewer', 'editor').\nRole privileges are resolved from the corresponding roles.yml file."
+            ],
+            "signature": [
+              "(role: string) => Promise<",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.RoleApiCredentials",
+                "text": "RoleApiCredentials"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.RequestAuthFixture.getApiKey.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [
+                  "- The predefined role name."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+                "lineNumber": 42,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.RequestAuthFixture.getApiKeyForCustomRole",
+            "type": "Function",
+            "tags": [],
+            "label": "getApiKeyForCustomRole",
+            "description": [
+              "\nCreates an API key for a custom role defined inline via a Kibana or Elasticsearch\nrole descriptor. The role is created on-the-fly and cleaned up after the worker completes."
+            ],
+            "signature": [
+              "(role: ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.KibanaRole",
+                "text": "KibanaRole"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ElasticsearchRoleDescriptor",
+                "text": "ElasticsearchRoleDescriptor"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.RoleApiCredentials",
+                "text": "RoleApiCredentials"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.RequestAuthFixture.getApiKeyForCustomRole.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "role",
+                "description": [
+                  "- A Kibana or Elasticsearch role descriptor with specific permissions."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.KibanaRole",
+                    "text": "KibanaRole"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.ElasticsearchRoleDescriptor",
+                    "text": "ElasticsearchRoleDescriptor"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+                "lineNumber": 49,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.RequestAuthFixture.getApiKeyForAdmin",
+            "type": "Function",
+            "tags": [],
+            "label": "getApiKeyForAdmin",
+            "description": [
+              "\nShorthand for `getApiKey('admin')`.\nCreates an API key with administrative privileges."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.RoleApiCredentials",
+                "text": "RoleApiCredentials"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.RequestAuthFixture.getApiKeyForViewer",
+            "type": "Function",
+            "tags": [],
+            "label": "getApiKeyForViewer",
+            "description": [
+              "\nShorthand for `getApiKey('viewer')`.\nCreates an API key with viewer-only permissions."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.RoleApiCredentials",
+                "text": "RoleApiCredentials"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.RequestAuthFixture.getApiKeyForPrivilegedUser",
+            "type": "Function",
+            "tags": [],
+            "label": "getApiKeyForPrivilegedUser",
+            "description": [
+              "\nCreates an API key for a non-admin user with elevated privileges.\nResolves the role based on the environment: `developer` for serverless\nElasticsearch projects, `editor` for all other deployments and project types."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.RoleApiCredentials",
+                "text": "RoleApiCredentials"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-oblt",
         "id": "def-common.RoleApiCredentials",
         "type": "Interface",
         "tags": [],
@@ -11173,9 +11763,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-saml-auth",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestSamlAuthPluginApi",
                 "section": "def-common.SamlSessionManager",
                 "text": "SamlSessionManager"
               }
@@ -11713,37 +12303,13 @@
             "description": [],
             "signature": [
               "{ kibana: ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "common",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-common.UrlParts",
-                "text": "UrlParts"
-              },
+              "UrlParts",
               "; elasticsearch: ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "common",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-common.UrlParts",
-                "text": "UrlParts"
-              },
+              "UrlParts",
               "; linkedElasticsearch?: ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "common",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-common.UrlParts",
-                "text": "UrlParts"
-              },
+              "UrlParts",
               " | undefined; fleet?: ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "common",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-common.UrlParts",
-                "text": "UrlParts"
-              },
+              "UrlParts",
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
@@ -12421,7 +12987,7 @@
         "label": "SloDataFixture",
         "description": [],
         "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/worker/slo_data.ts",
-        "lineNumber": 12,
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12437,7 +13003,7 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/worker/slo_data.ts",
-            "lineNumber": 13,
+            "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12455,7 +13021,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/worker/slo_data.ts",
-            "lineNumber": 14,
+            "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

@@ -13,7 +13,8 @@ import type {
   CompactionStructuredData,
   CompactionToolCallSummary,
 } from '@kbn/agent-builder-common';
-import { isToolCallStep } from '@kbn/agent-builder-common';
+import { ChatEventType, isToolCallStep } from '@kbn/agent-builder-common';
+import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ContextBudget } from './context_budget';
@@ -42,6 +43,7 @@ export interface CompactConversationOptions {
   existingSummary?: CompactionSummary;
   logger: Logger;
   abortSignal?: AbortSignal;
+  eventEmitter?: AgentEventEmitterFn;
 }
 
 export interface CompactedConversation {
@@ -184,6 +186,7 @@ export const compactConversation = async ({
   existingSummary,
   logger,
   abortSignal,
+  eventEmitter,
 }: CompactConversationOptions): Promise<CompactedConversation> => {
   const { previousRounds } = processedConversation;
 
@@ -210,6 +213,12 @@ export const compactConversation = async ({
     `Compaction triggered: ${effectiveTokens} effective tokens (${rawTokens} raw) exceeds threshold of ${contextBudget.triggerThreshold}`
   );
 
+  // Emit compactionStarted before the LLM summarization call
+  eventEmitter?.({
+    type: ChatEventType.compactionStarted,
+    data: { token_count_before: rawTokens },
+  });
+
   // Generate a new summary covering all older rounds via LLM + programmatic extraction
   const summarizationResult = await summarizeOlderRounds(
     processedConversation,
@@ -228,6 +237,15 @@ export const compactConversation = async ({
       logger.debug(
         `Summarization sufficient: ${afterTokens} tokens (budget: ${contextBudget.historyBudget})`
       );
+
+      eventEmitter?.({
+        type: ChatEventType.compactionCompleted,
+        data: {
+          token_count_after: afterTokens,
+          summarized_round_count: summarizationResult.summary.summarized_round_count,
+        },
+      });
+
       return {
         ...summarizationResult,
         compactionTriggered: true,
@@ -245,6 +263,15 @@ export const compactConversation = async ({
     estimateConversationTokens(truncated.previousRounds) +
     (summarizationResult.summary?.token_count ?? 0);
   logger.debug('Applied hard truncation fallback');
+
+  eventEmitter?.({
+    type: ChatEventType.compactionCompleted,
+    data: {
+      token_count_after: truncatedTokens,
+      summarized_round_count: summarizationResult.summary?.summarized_round_count ?? 0,
+    },
+  });
+
   return {
     processedConversation: truncated,
     summary: summarizationResult.summary,

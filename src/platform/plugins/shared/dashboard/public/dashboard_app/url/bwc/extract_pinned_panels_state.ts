@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_IGNORE_VALIDATIONS,
-  DEFAULT_USE_GLOBAL_FILTERS,
-} from '@kbn/controls-constants';
+import { DEFAULT_AUTO_APPLY_SELECTIONS, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import { get } from 'lodash';
 import type { DashboardState } from '../../../../common';
@@ -80,7 +76,7 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
             config,
           };
         }
-      }) as Required<DashboardState>['pinned_panels'];
+      }) as DashboardState['pinned_panels'];
   }
 
   function transformControlType(type: string) {
@@ -111,8 +107,8 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
   const controlState = pathToState ? get(state, pathToState) : null;
   let autoApplySelections: boolean | undefined;
   if (controlState !== null && typeof controlState === 'object') {
-    let useGlobalFilters = DEFAULT_USE_GLOBAL_FILTERS;
-    let ignoreValidations = DEFAULT_IGNORE_VALIDATIONS;
+    let useGlobalFilters = DEFAULT_DATA_CONTROL_STATE.use_global_filters;
+    let ignoreValidations = DEFAULT_DATA_CONTROL_STATE.ignore_validations;
     // >9.4 control group `ignoreParentSettings` gets translated to individual control settings
     if (
       'ignoreParentSettings' in controlState &&
@@ -139,8 +135,8 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
     }
 
     if (
-      useGlobalFilters !== DEFAULT_USE_GLOBAL_FILTERS ||
-      ignoreValidations !== DEFAULT_IGNORE_VALIDATIONS
+      useGlobalFilters !== DEFAULT_DATA_CONTROL_STATE.use_global_filters ||
+      ignoreValidations !== DEFAULT_DATA_CONTROL_STATE.ignore_validations
     ) {
       standardizedPinnedPanels = standardizedPinnedPanels.map((control) => {
         if (control.type === 'time_slider_control' || control.type === 'esql_control')
@@ -149,11 +145,11 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
         return {
           ...control,
           config: {
-            useGlobalFilters,
-            ignoreValidations,
             ...control.config,
+            use_global_filters: useGlobalFilters,
+            ignore_validations: ignoreValidations,
           },
-        };
+        } as DashboardState['pinned_panels'][number];
       });
     }
 
@@ -174,7 +170,7 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
 
   // <9.4 convert camel cased control state to snake case
   standardizedPinnedPanels = standardizedPinnedPanels.map((panel) =>
-    convertCamelCasedKeysToSnakeCase<Required<DashboardState>['pinned_panels'][number]>(panel)
+    convertCamelCasedKeysToSnakeCase<DashboardState['pinned_panels'][number]>(panel)
   );
 
   const hasExplicitPinnedPanels =

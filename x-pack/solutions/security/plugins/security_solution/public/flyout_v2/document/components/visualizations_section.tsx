@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
@@ -19,7 +20,6 @@ import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../analyzer';
-import type { ResolverCellActionRenderer } from '../../../resolver/types';
 import { useSessionViewConfig } from '../../session_view/hooks/use_session_view_config';
 import { SessionView } from '../../session_view';
 
@@ -42,7 +42,7 @@ export interface VisualizationsSectionProps {
   /**
    * Optional prop to pass cell action renderer to the analyzer graph.
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 /**

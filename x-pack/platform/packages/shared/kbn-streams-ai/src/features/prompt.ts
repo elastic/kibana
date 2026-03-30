@@ -57,7 +57,7 @@ const featuresSchema = {
               type: 'string',
             },
             description:
-              'The evidences that support the feature. Can be a short sentence or a `key: value` string.',
+              'Supporting evidence from logs. Use `field.path=value` format for key-value pairs. For direct quotes, use plain unescaped text.',
           },
           evidence_doc_ids: {
             type: 'array',
@@ -168,6 +168,7 @@ export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: s
     name: 'identify_features',
     input: z.object({
       sample_documents: z.string(),
+      previously_identified_features: z.string(),
       excluded_features: z.string(),
     }),
   })
