@@ -6,7 +6,11 @@
  */
 
 /**
- * Returns intersection of two sorted index arrays.
+ * Returns the intersection of two sorted item set index arrays.
+ *
+ * We use a small custom helper here because these index arrays are already
+ * sorted. That lets us walk both arrays once and find the shared indexes
+ * efficiently during tree traversal.
  */
 export function getItemSetIndexesIntersection(left: number[], right: number[]): number[] {
   const intersection: number[] = [];

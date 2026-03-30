@@ -44,7 +44,8 @@ export function getSimpleHierarchicalTreeLeaves(
   const sortedLeaves = orderBy(leaves, [(d) => d.group.length], ['desc']);
 
   // Checks if a group is a subset of items already present in a larger group.
-  // Uses postings over accepted leaves to avoid nested group scans.
+  // `acceptedLeafIndexesByPairKey` lets us look up which accepted leaves contain
+  // each field/value pair, avoiding nested scans across all accepted groups.
   const acceptedLeafIndexesByPairKey = new Map<string, number[]>();
   const filteredLeaves = sortedLeaves.reduce<SignificantItemGroup[]>(
     (acceptedLeaves, candidateLeaf) => {
