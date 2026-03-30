@@ -33,7 +33,7 @@ export interface SmlRuleService {
     body: {
       name: string;
       index_pattern: string;
-      prompt?: string;
+      prompt: string;
       inference_id: string;
       variables?: Record<string, SmlRuleVariable>;
     };

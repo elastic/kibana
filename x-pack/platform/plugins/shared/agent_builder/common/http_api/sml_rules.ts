@@ -29,7 +29,7 @@ export interface SmlRule {
   name: string;
   type: SmlRuleType;
   index_pattern: string;
-  prompt?: string;
+  prompt: string;
   inference_id: string;
   variables?: Record<string, SmlRuleVariable>;
   created_at: string;

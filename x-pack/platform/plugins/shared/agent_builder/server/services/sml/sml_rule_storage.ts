@@ -13,7 +13,7 @@ import type { SmlRuleType, SmlRuleVariable } from '../../../common/http_api/sml_
 
 export const smlRuleIndexName = chatSystemIndex('sml-rules');
 
-const SEMANTIC_TEXT_INFERENCE_ID = '.jina-embeddings-v5-small';
+const SEMANTIC_TEXT_INFERENCE_ID = '.jina-embeddings-v5-text-small';
 
 const smlRuleStorageSchemaProperties = {
   id: types.keyword({}),
@@ -44,7 +44,7 @@ export interface SmlRuleDocument {
   name: string;
   type: SmlRuleType;
   index_pattern: string;
-  prompt?: string;
+  prompt: string;
   inference_id: string;
   variables?: Record<string, SmlRuleVariable>;
   space: string;

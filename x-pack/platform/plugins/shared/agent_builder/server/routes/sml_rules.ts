@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { SML_RULE_TYPES } from '../../common/http_api/sml_rules';
+import { schema, type ObjectType } from '@kbn/config-schema';
+import { SML_RULE_TYPES, type SmlRuleType } from '../../common/http_api/sml_rules';
 import type {
+  SmlRule,
   GetSmlRuleResponse,
   ListSmlRulesResponse,
   CreateOrUpdateSmlRuleResponse,
@@ -17,7 +18,17 @@ import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, AGENT_BUILDER_WRITE_SECURITY } from './route_security';
 import { getHandlerWrapper } from './wrap_handler';
 import { SmlRuleNotFoundError } from '../services/sml/sml_rule_service';
+import type { SmlRuleDocument } from '../services/sml/sml_rule_storage';
 import type { RouteDependencies } from './types';
+
+/**
+ * Strip internal storage fields (e.g. `space`) from a rule document
+ * before returning it in an API response.
+ */
+const toApiResponse = (doc: SmlRuleDocument): SmlRule => {
+  const { space: _space, ...rule } = doc;
+  return rule;
+};
 
 const smlRuleTypeSchema = schema.oneOf(
   SML_RULE_TYPES.map((t) => schema.literal(t)),
@@ -43,6 +54,44 @@ const smlRuleVariableSchema = schema.object(
   },
   { meta: { description: 'An ES|QL query-based variable definition.' } }
 );
+
+// ---------------------------------------------------------------------------
+// Per-type body schemas for the upsert (PUT) endpoint.
+// Each type defines its own required/optional fields.
+// To add a new type, add an entry here and to SML_RULE_TYPES.
+// ---------------------------------------------------------------------------
+const upsertBodySchemas: Record<SmlRuleType, ObjectType> = {
+  index: schema.object({
+    name: schema.string({
+      meta: { description: 'Human-readable name for the rule.' },
+    }),
+    index_pattern: schema.string({
+      meta: {
+        description: 'Index pattern this rule applies to (e.g. `search-confluence-*` or `*`).',
+      },
+    }),
+    prompt: schema.string({
+      meta: {
+        description:
+          'Prompt template. Supports `${index_pattern}`, `${mappings}`, `${settings}`, `${field_caps}`, and `${variables.<name>}` substitutions.',
+      },
+    }),
+    inference_id: schema.string({
+      meta: {
+        description:
+          'The inference endpoint ID to use for chat completion (e.g. `my-llm-endpoint`).',
+      },
+    }),
+    variables: schema.maybe(
+      schema.recordOf(schema.string(), smlRuleVariableSchema, {
+        meta: {
+          description:
+            'Optional named variables whose ES|QL query results are injected into the prompt template.',
+        },
+      })
+    ),
+  }),
+};
 
 export function registerSmlRuleRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -80,7 +129,9 @@ export function registerSmlRuleRoutes({ router, getInternalServices, logger }: R
           type: request.params.type,
           request,
         });
-        return response.ok<ListSmlRulesResponse>({ body: { results: rules } });
+        return response.ok<ListSmlRulesResponse>({
+          body: { results: rules.map(toApiResponse) },
+        });
       })
     );
 
@@ -121,7 +172,7 @@ export function registerSmlRuleRoutes({ router, getInternalServices, logger }: R
             ruleId: request.params.ruleId,
             request,
           });
-          return response.ok<GetSmlRuleResponse>({ body: rule });
+          return response.ok<GetSmlRuleResponse>({ body: toApiResponse(rule) });
         } catch (error) {
           if (error instanceof SmlRuleNotFoundError) {
             return response.notFound({ body: { message: error.message } });
@@ -139,7 +190,7 @@ export function registerSmlRuleRoutes({ router, getInternalServices, logger }: R
       access: 'public',
       summary: 'Create or update an SML rule',
       description:
-        'Create or update an SML rule that defines how indices matching a pattern are summarized. The rule specifies the prompt template, inference endpoint, and optional ES|QL-based variables.',
+        'Create or update an SML rule that defines how content matching a pattern is summarized. The required body fields depend on the content type.',
       options: {
         tags: ['sml', 'oas-tag:agent builder'],
         availability: {
@@ -158,51 +209,23 @@ export function registerSmlRuleRoutes({ router, getInternalServices, logger }: R
                 meta: { description: 'The unique identifier for the SML rule.' },
               }),
             }),
-            body: schema.object({
-              name: schema.string({
-                meta: { description: 'Human-readable name for the rule.' },
-              }),
-              index_pattern: schema.string({
-                meta: {
-                  description:
-                    'Index pattern this rule applies to (e.g. `search-confluence-*` or `*`).',
-                },
-              }),
-              prompt: schema.maybe(
-                schema.string({
-                  meta: {
-                    description:
-                      'Custom prompt template. Supports `${index_pattern}`, `${mappings}`, `${settings}`, `${field_caps}`, and `${variables.<name>}` substitutions.',
-                  },
-                })
-              ),
-              inference_id: schema.string({
-                meta: {
-                  description:
-                    'The inference endpoint ID to use for chat completion (e.g. `my-llm-endpoint`).',
-                },
-              }),
-              variables: schema.maybe(
-                schema.recordOf(schema.string(), smlRuleVariableSchema, {
-                  meta: {
-                    description:
-                      'Optional named variables whose ES|QL query results are injected into the prompt template.',
-                  },
-                })
-              ),
-            }),
+            body: schema.any(),
           },
         },
       },
       wrapHandler(async (ctx, request, response) => {
+        const type = request.params.type as SmlRuleType;
+        const bodySchema = upsertBodySchemas[type];
+        const body = bodySchema.validate(request.body);
+
         const { smlRules } = getInternalServices();
         const rule = await smlRules.createOrUpdate({
-          type: request.params.type,
+          type,
           ruleId: request.params.ruleId,
-          body: request.body,
+          body,
           request,
         });
-        return response.ok<CreateOrUpdateSmlRuleResponse>({ body: rule });
+        return response.ok<CreateOrUpdateSmlRuleResponse>({ body: toApiResponse(rule) });
       })
     );
 
