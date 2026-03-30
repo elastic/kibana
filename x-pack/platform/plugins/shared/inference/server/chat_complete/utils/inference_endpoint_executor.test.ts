@@ -37,9 +37,59 @@ describe('createInferenceEndpointExecutor', () => {
       {
         method: 'POST',
         path: `/_inference/chat_completion/${inferenceId}/_stream`,
+        querystring: { timeout: '3m' },
         body,
       },
       { asStream: true }
+    );
+  });
+
+  it('sets the inference timeout to 3m when no timeout is provided', async () => {
+    const stream = new PassThrough();
+    mockTransportRequest.mockResolvedValue(stream);
+
+    await executor.invoke({ body: {} });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ querystring: { timeout: '3m' } }),
+      expect.anything()
+    );
+  });
+
+  it('sets the inference timeout to the next minute when timeout is provided', async () => {
+    const stream = new PassThrough();
+    mockTransportRequest.mockResolvedValue(stream);
+
+    // 95s -> next minute = 2m
+    await executor.invoke({ body: {}, timeout: 95_000 });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ querystring: { timeout: '2m' } }),
+      expect.anything()
+    );
+  });
+
+  it('sets the inference timeout to 1m for a timeout under 60s', async () => {
+    const stream = new PassThrough();
+    mockTransportRequest.mockResolvedValue(stream);
+
+    await executor.invoke({ body: {}, timeout: 30_000 });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ querystring: { timeout: '1m' } }),
+      expect.anything()
+    );
+  });
+
+  it('sets the inference timeout to exact minute when timeout is an exact multiple', async () => {
+    const stream = new PassThrough();
+    mockTransportRequest.mockResolvedValue(stream);
+
+    await executor.invoke({ body: {}, timeout: 120_000 });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ querystring: { timeout: '2m' } }),
+      expect.anything()
     );
   });
 
