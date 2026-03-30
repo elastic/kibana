@@ -55114,6 +55114,7 @@ paths:
         - content: Kibana
           name: product_name
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -70475,6 +70476,7 @@ components:
         title: Case title 1
         totalAlerts: 0
         totalComment: 1
+        totalEvents: 0
         updated_at: '2022-06-03T00:49:47.716Z'
         updated_by:
           email: null
@@ -70548,6 +70550,7 @@ components:
         title: Case title 1
         totalAlerts: 0
         totalComment: 0
+        totalEvents: 0
         updated_at: null
         updated_by: null
         version: WzUzMiwxXQ==
@@ -70690,6 +70693,7 @@ components:
             title: Case title
             totalAlerts: 0
             totalComment: 1
+            totalEvents: 0
             updated_at: '2023-10-12T00:27:58.162Z'
             updated_by:
               email: null
@@ -70809,6 +70813,7 @@ components:
         title: Observability case title 1
         totalAlerts: 1
         totalComment: 1
+        totalEvents: 0
         updated_at: '2023-11-06T19:47:55.662Z'
         updated_by:
           email: null
@@ -70857,6 +70862,7 @@ components:
         title: Case title 1
         totalAlerts: 1
         totalComment: 1
+        totalEvents: 0
         updated_at: '2023-10-13T15:40:32.335Z'
         updated_by:
           email: null
@@ -70944,6 +70950,7 @@ components:
         title: Case title 1
         totalAlerts: 0
         totalComment: 0
+        totalEvents: 0
         updated_at: '2022-07-29T01:20:58.436Z'
         updated_by:
           email: null
@@ -71192,6 +71199,7 @@ components:
           title: Case title 1
           totalAlerts: 0
           totalComment: 0
+          totalEvents: 0
           updated_at: '2023-10-13T09:48:33.043Z'
           updated_by:
             email: null
@@ -71266,6 +71274,7 @@ components:
         title: Case title 1
         totalAlerts: 0
         totalComment: 1
+        totalEvents: 0
         updated_at: '2023-10-24T01:27:06.210Z'
         updated_by:
           email: null
@@ -75861,6 +75870,65 @@ components:
         - update
       example: create
       type: string
+    Cases_actions_comment_response_properties:
+      title: Case response properties for actions comments
+      type: object
+      properties:
+        actions:
+          type: object
+          properties:
+            targets:
+              items:
+                type: object
+                properties:
+                  endpointId:
+                    example: 1
+                    type: string
+                  hostname:
+                    example: host-01
+                    type: string
+              type: array
+            type:
+              example: isolate
+              type: string
+        comment:
+          example: Isolating the host from the case UI.
+          type: string
+        created_at:
+          example: '2022-05-13T09:16:17.416Z'
+          format: date-time
+          type: string
+        created_by:
+          $ref: '#/components/schemas/Cases_case_response_created_by_properties'
+        id:
+          example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+          type: string
+        owner:
+          $ref: '#/components/schemas/Cases_owner'
+        pushed_at:
+          example: null
+          format: date-time
+          nullable: true
+          type: string
+        pushed_by:
+          $ref: '#/components/schemas/Cases_case_response_pushed_by_properties'
+        type:
+          enum:
+            - actions
+          example: actions
+          type: string
+        updated_at:
+          example: null
+          format: date-time
+          nullable: true
+          type: string
+        updated_by:
+          $ref: '#/components/schemas/Cases_case_response_updated_by_properties'
+        version:
+          example: WzIwNDMxLDFd
+          type: string
+      required:
+        - type
     Cases_add_alert_comment_request_properties:
       description: Defines properties for case comment requests when type is alert.
       type: object
@@ -76012,10 +76080,12 @@ components:
             id:
               description: The rule identifier.
               example: 94d80550-aaf4-11ec-985f-97e55adae8b9
+              nullable: true
               type: string
             name:
               description: The rule name.
               example: security_rule
+              nullable: true
               type: string
         type:
           enum:
@@ -76269,6 +76339,10 @@ components:
           description: The number of user comments on the case. Use the find case comments API to retrieve comment content.
           example: 1
           type: integer
+        totalEvents:
+          description: The number of events attached to the case.
+          example: 0
+          type: integer
         updated_at:
           format: date-time
           nullable: true
@@ -76322,11 +76396,15 @@ components:
           items:
             discriminator:
               mapping:
+                actions: '#/components/schemas/Cases_actions_comment_response_properties'
                 alert: '#/components/schemas/Cases_alert_comment_response_properties'
+                event: '#/components/schemas/Cases_event_comment_response_properties'
                 user: '#/components/schemas/Cases_user_comment_response_properties'
               propertyName: type
             oneOf:
+              - $ref: '#/components/schemas/Cases_actions_comment_response_properties'
               - $ref: '#/components/schemas/Cases_alert_comment_response_properties'
+              - $ref: '#/components/schemas/Cases_event_comment_response_properties'
               - $ref: '#/components/schemas/Cases_user_comment_response_properties'
           maxItems: 10000
           title: Case response properties for comments
@@ -76418,6 +76496,10 @@ components:
           example: 0
           type: integer
         totalComment:
+          example: 0
+          type: integer
+        totalEvents:
+          description: The number of events attached to the case.
           example: 0
           type: integer
         updated_at:
@@ -76896,6 +76978,55 @@ components:
         - title
       title: Create case request
       type: object
+    Cases_event_comment_response_properties:
+      title: Case response properties for event comments
+      type: object
+      properties:
+        created_at:
+          example: '2022-05-13T09:16:17.416Z'
+          format: date-time
+          type: string
+        created_by:
+          $ref: '#/components/schemas/Cases_case_response_created_by_properties'
+        eventId:
+          items:
+            example: 7605e6a6f9f4f990ad9f8f6901e5f082f1f1f1665cbaf2f0f2c6f8f6b0d8a39f
+            type: string
+          type: array
+        id:
+          example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+          type: string
+        index:
+          items:
+            example: .internal.alerts-security.alerts-default-000001
+            type: string
+          type: array
+        owner:
+          $ref: '#/components/schemas/Cases_owner'
+        pushed_at:
+          example: null
+          format: date-time
+          nullable: true
+          type: string
+        pushed_by:
+          $ref: '#/components/schemas/Cases_case_response_pushed_by_properties'
+        type:
+          enum:
+            - event
+          example: event
+          type: string
+        updated_at:
+          example: null
+          format: date-time
+          nullable: true
+          type: string
+        updated_by:
+          $ref: '#/components/schemas/Cases_case_response_updated_by_properties'
+        version:
+          example: WzIwNDMxLDFd
+          type: string
+      required:
+        - type
     Cases_external_service:
       nullable: true
       type: object
@@ -76996,10 +77127,12 @@ components:
                 id:
                   description: The rule identifier.
                   example: 94d80550-aaf4-11ec-985f-97e55adae8b9
+                  nullable: true
                   type: string
                 name:
                   description: The rule name.
                   example: security_rule
+                  nullable: true
                   type: string
             type:
               enum:
