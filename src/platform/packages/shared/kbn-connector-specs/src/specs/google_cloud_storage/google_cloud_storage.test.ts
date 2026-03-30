@@ -35,8 +35,41 @@ describe('GoogleCloudStorageConnector', () => {
       expect(GoogleCloudStorageConnector.metadata.minimumLicense).toBe('enterprise');
     });
 
-    it('should support workflows feature', () => {
+    it('should be marked as technical preview', () => {
+      expect(GoogleCloudStorageConnector.metadata.isTechnicalPreview).toBe(true);
+    });
+
+    it('should support workflows and agentBuilder features', () => {
       expect(GoogleCloudStorageConnector.metadata.supportedFeatureIds).toContain('workflows');
+      expect(GoogleCloudStorageConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+    });
+  });
+
+  describe('auth', () => {
+    it('should support bearer auth', () => {
+      expect(GoogleCloudStorageConnector.auth?.types).toContain('bearer');
+    });
+
+    it('should support oauth_authorization_code with correct Google defaults', () => {
+      const oauthType = GoogleCloudStorageConnector.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
+      );
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+          tokenUrl: 'https://oauth2.googleapis.com/token',
+          scope:
+            'https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/cloudplatformprojects.readonly',
+        },
+      });
+    });
+  });
+
+  describe('agentBuilderWorkflows', () => {
+    it('should define 5 workflows', () => {
+      expect(GoogleCloudStorageConnector.agentBuilderWorkflows).toHaveLength(5);
     });
   });
 
