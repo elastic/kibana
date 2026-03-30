@@ -11,6 +11,7 @@ import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import { riskEngineConfigurationTypeName } from '../../risk_engine/saved_object';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
+import { PRIVILEGED_USER_WATCHLIST_ID } from '../../../../../common/entity_analytics/watchlists/constants';
 import { WatchlistConfigClient } from '../management/watchlist_config';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
@@ -18,7 +19,7 @@ const PREBUILT_WATCHLISTS_VERSION = 1;
 
 const PREBUILT_WATCHLISTS = [
   {
-    id: 'privileged-user-monitoring-watchlist-id',
+    id: PRIVILEGED_USER_WATCHLIST_ID,
     name: 'Privileged Users',
     description: 'System-managed watchlist for tracking privileged users',
     managed: true,
