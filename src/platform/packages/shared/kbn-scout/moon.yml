@@ -27,7 +27,7 @@ dependsOn:
   - '@kbn/dev-proc-runner'
   - '@kbn/kbn-client'
   - '@kbn/test-es-server'
-  - '@kbn/test'
+  - '@kbn/test-kibana-server'
   - '@kbn/test-saml-auth'
   - '@kbn/es-archiver'
   - '@kbn/dev-utils'
@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/peggy'
   - '@kbn/apm-synthtrace'
   - '@kbn/apm-synthtrace-client'
+  - '@kbn/test-docker-servers'
 tags:
   - test-helper
   - package

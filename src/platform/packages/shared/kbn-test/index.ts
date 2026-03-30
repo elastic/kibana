@@ -70,12 +70,15 @@ export * from './src/kbn_archiver_cli';
 
 export * from '@kbn/kbn-client';
 
-export * from './src/find_test_plugin_paths';
+export { findTestPluginPaths } from '@kbn/test-kibana-server';
 
 export { getDockerFileMountPath } from '@kbn/es';
 
+// Docker server config + Fleet package registry image (implemented in @kbn/test-docker-servers).
+export type { DockerServer, DockerServerSpec } from '@kbn/test-docker-servers';
 export {
+  defineDockerServersConfig,
+  dockerRegistryPort,
   fleetPackageRegistryDockerImage,
   packageRegistryDocker,
-  dockerRegistryPort,
-} from './src/functional_test_runner';
+} from '@kbn/test-docker-servers';
