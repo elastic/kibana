@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Url from 'url';
+import { format as formatUrl } from 'url';
 
 import { createEsClientForTesting, type EsClientForTestingOptions } from '@kbn/test-es-server';
 import type { Config } from './functional_test_runner';
@@ -34,7 +34,7 @@ export function createEsClientForFtrConfig(
   config: Config,
   overrides?: Omit<EsClientForTestingOptions, 'esUrl'>
 ) {
-  const esUrl = Url.format(config.get('servers.elasticsearch'));
+  const esUrl = formatUrl(config.get('servers.elasticsearch'));
   return createEsClientForTesting({
     esUrl,
     requestTimeout: config.get('timeouts.esRequestTimeout'),
