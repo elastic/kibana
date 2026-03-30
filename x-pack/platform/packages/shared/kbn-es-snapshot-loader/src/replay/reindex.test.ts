@@ -11,9 +11,8 @@ import {
   DEFAULT_REINDEX_REQUEST_TIMEOUT_MS,
   getDestinationInfo,
   reindexAllIndices,
-  reindexThroughPipeline,
 } from './reindex';
-import { createTimestampPipeline, TIMESTAMP_REINDEX_SCRIPT } from './pipeline';
+import { createTimestampPipeline } from './pipeline';
 import { getMaxTimestampFromData, replaySnapshot } from '.';
 
 const log = new ToolingLog({
@@ -191,112 +190,7 @@ describe('getMaxTimestampFromData', () => {
   });
 });
 
-describe('reindexAllIndices with shouldUseInlineScript', () => {
-  it('calls shouldUseInlineScript callback to determine reindex mode per index', async () => {
-    const esClient = createMockEsClient();
-    (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
-      timed_out: false,
-      total: 5,
-      created: 5,
-      failures: [],
-    });
-
-    const shouldUseInlineScript = jest.fn((destIndex: string) => destIndex === 'logs.otel');
-
-    await reindexAllIndices({
-      esClient,
-      log,
-      restoredIndices: ['snapshot-loader-temp-a', 'snapshot-loader-temp-b'],
-      originalIndices: ['logs.otel', 'logs-nginx-default'],
-      pipelineName: 'my-pipeline',
-      maxTimestamp: '2024-01-15T12:00:00.000Z',
-      shouldUseInlineScript,
-      concurrency: 1,
-    });
-
-    expect(shouldUseInlineScript).toHaveBeenCalledWith('logs.otel');
-    expect(shouldUseInlineScript).toHaveBeenCalledWith('logs-nginx-default');
-
-    const calls = (esClient.reindex as unknown as jest.Mock).mock.calls;
-    const otelCall = calls.find(
-      ([req]: [{ dest: { index: string } }]) => req.dest.index === 'logs.otel'
-    );
-    expect(otelCall[0].script).toBeDefined();
-    expect(otelCall[0].dest).not.toHaveProperty('pipeline');
-
-    const nginxCall = calls.find(
-      ([req]: [{ dest: { index: string } }]) => req.dest.index === 'logs-nginx-default'
-    );
-    expect(nginxCall[0].dest.pipeline).toBe('my-pipeline');
-    expect(nginxCall[0].script).toBeUndefined();
-  });
-});
-
-describe('reindexThroughPipeline', () => {
-  it('uses explicit pipeline when useInlineScript is false', async () => {
-    const esClient = createMockEsClient();
-    (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
-      timed_out: false,
-      total: 5,
-      created: 5,
-      failures: [],
-    });
-
-    const result = await reindexThroughPipeline({
-      esClient,
-      log,
-      sourceIndex: 'temp-idx',
-      destIndex: 'logs-nginx-default',
-      isDataStream: true,
-      pipelineName: 'ts-pipeline',
-      maxTimestamp: '2024-01-15T12:00:00.000Z',
-    });
-
-    expect(esClient.reindex).toHaveBeenCalledWith(
-      expect.objectContaining({
-        dest: expect.objectContaining({ pipeline: 'ts-pipeline' }),
-      }),
-      expect.anything()
-    );
-    expect(esClient.reindex).toHaveBeenCalledWith(
-      expect.not.objectContaining({ script: expect.anything() }),
-      expect.anything()
-    );
-    expect(result).toEqual({ total: 5, created: 5, failures: 0, timedOut: false });
-  });
-
-  it('uses inline script when useInlineScript is true', async () => {
-    const esClient = createMockEsClient();
-    (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
-      timed_out: false,
-      total: 5,
-      created: 5,
-      failures: [],
-    });
-
-    const result = await reindexThroughPipeline({
-      esClient,
-      log,
-      sourceIndex: 'temp-idx',
-      destIndex: 'logs.otel',
-      isDataStream: true,
-      pipelineName: 'ts-pipeline',
-      maxTimestamp: '2024-01-15T12:00:00.000Z',
-      useInlineScript: true,
-    });
-
-    const reindexCall = (esClient.reindex as unknown as jest.Mock).mock.calls[0][0];
-    expect(reindexCall.dest).not.toHaveProperty('pipeline');
-    expect(reindexCall.script).toEqual({
-      lang: 'painless',
-      source: TIMESTAMP_REINDEX_SCRIPT,
-      params: { max_timestamp: '2024-01-15T12:00:00.000Z' },
-    });
-    expect(result).toEqual({ total: 5, created: 5, failures: 0, timedOut: false });
-  });
-});
-
-describe('replaySnapshot — beforeReindex hook', () => {
+describe('replaySnapshot', () => {
   const createFullMockEsClient = () =>
     ({
       ingest: {
@@ -339,15 +233,78 @@ describe('replaySnapshot — beforeReindex hook', () => {
       },
     } as unknown as Client);
 
+  const mockRepo = {
+    type: 'gcs' as const,
+    validate: jest.fn(),
+    register: jest.fn().mockResolvedValue(undefined),
+  };
+
+  it('calls shouldUseInlineScript callback to determine reindex mode per index', async () => {
+    const esClient = createFullMockEsClient();
+    const shouldUseInlineScript = jest.fn((destIndex: string) => destIndex === 'logs.otel');
+
+    (esClient.snapshot.get as unknown as jest.Mock).mockResolvedValue({
+      snapshots: [
+        {
+          snapshot: 'test-snap',
+          indices: ['logs.otel', 'logs-nginx-default'],
+          start_time: '2024-01-01T00:00:00.000Z',
+          end_time: '2024-01-01T01:00:00.000Z',
+          state: 'SUCCESS',
+        },
+      ],
+    });
+    (esClient.snapshot.restore as unknown as jest.Mock).mockResolvedValue({
+      snapshot: {
+        indices: ['snapshot-loader-temp-logs.otel', 'snapshot-loader-temp-logs-nginx-default'],
+      },
+    });
+
+    await replaySnapshot({
+      esClient,
+      log,
+      repository: mockRepo,
+      snapshotName: 'test-snap',
+      patterns: ['logs*'],
+      shouldUseInlineScript,
+    });
+
+    expect(shouldUseInlineScript).toHaveBeenCalledWith('logs.otel');
+    expect(shouldUseInlineScript).toHaveBeenCalledWith('logs-nginx-default');
+
+    const calls = (esClient.reindex as unknown as jest.Mock).mock.calls;
+    const otelCall = calls.find(
+      ([req]: [{ dest: { index: string } }]) => req.dest.index === 'logs.otel'
+    );
+    expect(otelCall[0].script).toBeDefined();
+    expect(otelCall[0].dest).not.toHaveProperty('pipeline');
+
+    const nginxCall = calls.find(
+      ([req]: [{ dest: { index: string } }]) => req.dest.index === 'logs-nginx-default'
+    );
+    expect(nginxCall[0].dest.pipeline).toBeDefined();
+    expect(nginxCall[0].script).toBeUndefined();
+  });
+
+  it('uses explicit pipeline when shouldUseInlineScript is not provided', async () => {
+    const esClient = createFullMockEsClient();
+
+    await replaySnapshot({
+      esClient,
+      log,
+      repository: mockRepo,
+      snapshotName: 'test-snap',
+      patterns: ['logs-*'],
+    });
+
+    const reindexCall = (esClient.reindex as unknown as jest.Mock).mock.calls[0][0];
+    expect(reindexCall.dest.pipeline).toBeDefined();
+    expect(reindexCall.script).toBeUndefined();
+  });
+
   it('invokes beforeReindex with correct params after restore and before reindex', async () => {
     const esClient = createFullMockEsClient();
     const beforeReindex = jest.fn();
-
-    const mockRepo = {
-      type: 'gcs' as const,
-      validate: jest.fn(),
-      register: jest.fn().mockResolvedValue(undefined),
-    };
 
     await replaySnapshot({
       esClient,
@@ -369,9 +326,9 @@ describe('replaySnapshot — beforeReindex hook', () => {
       })
     );
 
-    const beforeReindexOrder = (esClient.snapshot.restore as unknown as jest.Mock).mock
+    const restoreOrder = (esClient.snapshot.restore as unknown as jest.Mock).mock
       .invocationCallOrder[0];
     const reindexOrder = (esClient.reindex as unknown as jest.Mock).mock.invocationCallOrder[0];
-    expect(beforeReindexOrder).toBeLessThan(reindexOrder);
+    expect(restoreOrder).toBeLessThan(reindexOrder);
   });
 });
