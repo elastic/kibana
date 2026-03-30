@@ -84,9 +84,9 @@ export default function ({ getPageObjects, getService }) {
 
         it('should update app state with query stored with map', async () => {
           const currentUrl = await browser.getCurrentUrl();
-          const appState = currentUrl.substring(currentUrl.indexOf('_a='));
+          const appState = decodeURIComponent(currentUrl.substring(currentUrl.indexOf('_a=')));
           expect(appState).to.equal(
-            '_a=(filters:!(),query:(language:kuery,query:%27machine.os.raw%20:%20%22ios%22%27))'
+            `_a=(filters:!(),query:(language:kuery,query:'machine.os.raw : "ios"'))`
           );
         });
 
@@ -132,9 +132,9 @@ export default function ({ getPageObjects, getService }) {
 
         it('should update app state with query stored with map', async () => {
           const currentUrl = await browser.getCurrentUrl();
-          const appState = currentUrl.substring(currentUrl.indexOf('_a='));
+          const appState = decodeURIComponent(currentUrl.substring(currentUrl.indexOf('_a=')));
           expect(appState).to.equal(
-            '_a=(filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:c698b940-e149-11e8-a35a-370a8516603a,key:machine.os.raw,negate:!f,params:(query:ios),type:phrase),query:(match_phrase:(machine.os.raw:(query:ios))))),query:(language:kuery,query:%27%27))'
+            `_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:c698b940-e149-11e8-a35a-370a8516603a,key:machine.os.raw,negate:!f,params:(query:ios),type:phrase),query:(match_phrase:(machine.os.raw:(query:ios))))),query:(language:kuery,query:''))`
           );
         });
 
