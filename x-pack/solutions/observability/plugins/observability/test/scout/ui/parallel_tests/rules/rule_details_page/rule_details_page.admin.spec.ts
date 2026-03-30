@@ -190,18 +190,29 @@ test.describe(
       // Verify dashboard selector is visible
       await expect(pageObjects.ruleDetailsPage.dashboardsSelector).toBeVisible();
 
-      // Type the dashboard title to search for it; each poll re-triggers the API query,
-      // which handles the ES indexing delay after dashboard creation.
-      const dashboardInput = pageObjects.ruleDetailsPage.dashboardsSelector.locator('input');
+      // Click to open the dropdown — triggers handleComboBoxFocus → initial loadDashboards
+      await pageObjects.ruleDetailsPage.dashboardsSelector.click();
+      await expect(pageObjects.ruleDetailsPage.comboboxOptionsList).toBeAttached({
+        timeout: 20000,
+      });
+
+      const input = pageObjects.ruleDetailsPage.dashboardsSelector.locator('input');
       const optionsLocator =
         pageObjects.ruleDetailsPage.comboboxOptionsList.locator('[role="option"]');
+
+      // Alternate between two search values so searchValue changes on every poll iteration.
+      // Using the same value each time would leave React state unchanged → loadDashboards
+      // would not re-fire → options would never update. Alternating ensures a new
+      // loadDashboards call on every attempt, handling ES near-real-time indexing delay.
+      let toggle = false;
       await expect
         .poll(
           async () => {
-            await dashboardInput.fill(testDashboardTitle);
+            toggle = !toggle;
+            await input.fill(toggle ? testDashboardTitle : testDashboardTitle.slice(0, -1));
             return optionsLocator.count();
           },
-          { timeout: 30000, intervals: [2000] }
+          { timeout: 30000, intervals: [1000] }
         )
         .toBeGreaterThan(0);
     });
