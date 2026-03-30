@@ -85,7 +85,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
       );
     }
 
-    const regex = /^[\s\r\n]*FROM/;
+    const regex = /^[\s\r\n]*FROM/i;
     const originalIndices = this.originalIndicesFor(executableQuery);
 
     return from(this.checkPermissions(originalIndices)).pipe(

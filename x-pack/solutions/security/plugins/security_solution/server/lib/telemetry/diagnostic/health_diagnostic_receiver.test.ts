@@ -328,6 +328,29 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       });
     });
 
+    test('should not inject FROM prefix when v1 query starts with lowercase from', (done) => {
+      const execQuery = mkExecV1(QueryType.ESQL, {
+        query: 'from logs-* | stats count() by user.name',
+      });
+      const circuitBreaker = createMockCircuitBreaker(true);
+
+      const mockRecords = [{ 'user.name': 'test', 'count()': 1 }];
+      const mockToRecords = jest.fn().mockResolvedValue({ records: mockRecords });
+      mockEsClient.helpers.esql.mockReturnValue({ toRecords: mockToRecords });
+
+      executeObservableTest(
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+        () => {
+          expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+            { query: 'from logs-* | stats count() by user.name' },
+            { signal: expect.any(AbortSignal) }
+          );
+          done();
+        },
+        done
+      );
+    });
+
     test('should handle ES|QL query with FROM clause already present', (done) => {
       const execQuery = mkExecV1(QueryType.ESQL, {
         query: 'FROM logs-* | stats count() by user.name',
