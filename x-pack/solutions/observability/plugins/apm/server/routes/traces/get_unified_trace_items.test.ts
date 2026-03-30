@@ -150,6 +150,7 @@ describe('getUnifiedTraceItems', () => {
               },
             },
           ],
+          total: { value: 1, relation: 'eq' },
         },
       };
 
@@ -214,6 +215,7 @@ describe('getUnifiedTraceItems', () => {
               },
             },
           ],
+          total: { value: 1, relation: 'eq' },
         },
       };
 
@@ -270,6 +272,7 @@ describe('getUnifiedTraceItems', () => {
               },
             },
           ],
+          total: { value: 1, relation: 'eq' },
         },
       };
 
@@ -1254,29 +1257,7 @@ describe('getUnifiedTraceItems', () => {
   });
 
   describe('traceDocsTotal and maxTraceItems', () => {
-    it('returns traceDocsTotal as mapped item count when limit is not hit', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              fields: {
-                ...defaultSearchFields,
-                [SPAN_ID]: ['span-1'],
-                [SPAN_NAME]: ['Test Span'],
-                [SPAN_DURATION]: [1000],
-              },
-            },
-          ],
-          total: { value: 1, relation: 'eq' },
-        },
-      });
-
-      const result = await getUnifiedTraceItems(defaultParams);
-
-      expect(result.traceDocsTotal).toBe(1);
-    });
-
-    it('returns traceDocsTotal as raw ES total when maxTraceItems limit is hit', async () => {
+    it('returns traceDocsTotal as raw ES total', async () => {
       (mockApmEventClient.search as jest.Mock).mockResolvedValue({
         hits: {
           hits: [
@@ -1293,15 +1274,12 @@ describe('getUnifiedTraceItems', () => {
         },
       });
 
-      const result = await getUnifiedTraceItems({
-        ...defaultParams,
-        maxTraceItems: 1, // limit of 1 — immediately hit since we have 1 hit
-      });
+      const result = await getUnifiedTraceItems(defaultParams);
 
       expect(result.traceDocsTotal).toBe(5000);
     });
 
-    it('returns traceDocsTotal as 0 when there are no hits', async () => {
+    it('returns traceDocsTotal as 0 when hits.total is undefined', async () => {
       (mockApmEventClient.search as jest.Mock).mockResolvedValue({
         hits: { hits: [] },
       });

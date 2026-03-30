@@ -58,7 +58,6 @@ describe('getUnifiedTraceItemsPaginated', () => {
 
       expect(mockApmEventClient.search).toHaveBeenCalledTimes(1);
       expect(result.hits).toHaveLength(1);
-      expect(result.hitLimit).toBe(false);
     });
 
     it('stops when hits are empty', async () => {
@@ -68,7 +67,6 @@ describe('getUnifiedTraceItemsPaginated', () => {
 
       expect(mockApmEventClient.search).toHaveBeenCalledTimes(1);
       expect(result.hits).toHaveLength(0);
-      expect(result.hitLimit).toBe(false);
     });
 
     it('stops when mergedHits reaches total', async () => {
@@ -80,7 +78,6 @@ describe('getUnifiedTraceItemsPaginated', () => {
 
       expect(mockApmEventClient.search).toHaveBeenCalledTimes(1);
       expect(result.hits).toHaveLength(2);
-      expect(result.hitLimit).toBe(false);
     });
   });
 
@@ -99,7 +96,6 @@ describe('getUnifiedTraceItemsPaginated', () => {
 
       expect(mockApmEventClient.search).toHaveBeenCalledTimes(2);
       expect(result.hits).toHaveLength(3);
-      expect(result.hitLimit).toBe(false);
 
       // Second call should include search_after from last hit of first page
       const secondCallArgs = (mockApmEventClient.search as jest.Mock).mock.calls[1][1];
@@ -118,8 +114,8 @@ describe('getUnifiedTraceItemsPaginated', () => {
     });
   });
 
-  describe('hitLimit', () => {
-    it('sets hitLimit to true when maxTraceItems is reached', async () => {
+  describe('maxTraceItems limit', () => {
+    it('stops and truncates when maxTraceItems is reached', async () => {
       (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1'), makeHit('span-2')], 100)
       );
@@ -129,36 +125,9 @@ describe('getUnifiedTraceItemsPaginated', () => {
         maxTraceItems: 2,
       });
 
-      expect(result.hitLimit).toBe(true);
+      expect(result.hits).toHaveLength(2);
       expect(result.total).toBe(100);
       expect(mockApmEventClient.search).toHaveBeenCalledTimes(1);
-    });
-
-    it('sets hitLimit to false when all items fetched within limit', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
-        makeSearchResponse([makeHit('span-1')], 1)
-      );
-
-      const result = await getUnifiedTraceItemsPaginated({
-        ...defaultParams,
-        maxTraceItems: 10,
-      });
-
-      expect(result.hitLimit).toBe(false);
-    });
-
-    it('truncates hits to exactly maxTraceItems when limit is reached on a single page', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
-        makeSearchResponse([makeHit('span-1'), makeHit('span-2')], 100)
-      );
-
-      const result = await getUnifiedTraceItemsPaginated({
-        ...defaultParams,
-        maxTraceItems: 2,
-      });
-
-      expect(result.hitLimit).toBe(true);
-      expect(result.hits).toHaveLength(2);
     });
 
     it('truncates hits to exactly maxTraceItems when second page overshoots the limit', async () => {
@@ -174,7 +143,6 @@ describe('getUnifiedTraceItemsPaginated', () => {
         maxTraceItems: 3,
       });
 
-      expect(result.hitLimit).toBe(true);
       expect(result.hits).toHaveLength(3);
       expect(mockApmEventClient.search).toHaveBeenCalledTimes(2);
     });
@@ -206,10 +174,6 @@ describe('getUnifiedTraceItemsPaginated', () => {
     });
 
     it('keeps fetching after dedup if below maxTraceItems', async () => {
-      // First page: 2 hits (MAX_ITEMS_PER_PAGE), total=4
-      // Second page: span-1 (duplicate) + span-3 → only span-3 is new
-      // After page 2: 3 unique hits, still < maxTraceItems=10
-      // But page 2 returned < MAX_ITEMS_PER_PAGE (only 2 raw hits, but stop because total reached)
       (mockApmEventClient.search as jest.Mock)
         .mockResolvedValueOnce(makeSearchResponse([makeHit('span-1'), makeHit('span-2')], 3))
         .mockResolvedValueOnce(makeSearchResponse([makeHit('span-3')], 3));
@@ -217,7 +181,6 @@ describe('getUnifiedTraceItemsPaginated', () => {
       const result = await getUnifiedTraceItemsPaginated(defaultParams);
 
       expect(result.hits).toHaveLength(3);
-      expect(result.hitLimit).toBe(false);
     });
 
     it('drops hits with no id', async () => {

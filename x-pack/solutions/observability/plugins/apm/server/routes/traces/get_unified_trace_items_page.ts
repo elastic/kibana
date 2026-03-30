@@ -173,7 +173,7 @@ async function paginate({
   hits: PageHits;
   seenIds: Set<string>;
   searchAfter?: SortResults;
-}): Promise<{ hits: PageHits; total: number; hitLimit: boolean }> {
+}): Promise<{ hits: PageHits; total: number }> {
   const size = Math.min(maxTraceItems - hits.length, MAX_ITEMS_PER_PAGE);
   const response = await getUnifiedTraceItemsPage({
     apmEventClient,
@@ -209,7 +209,7 @@ async function paginate({
     response.hits.length < size ||
     !lastSort
   ) {
-    return { hits: truncatedHits, total: response.total, hitLimit };
+    return { hits: truncatedHits, total: response.total };
   }
 
   return paginate({

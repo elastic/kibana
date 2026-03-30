@@ -196,7 +196,7 @@ export async function getUnifiedTraceItems({
     traceItems,
     unifiedTraceErrors,
     agentMarks,
-    traceDocsTotal: unifiedTraceItems.hitLimit ? unifiedTraceItems.total : traceItems.length,
+    traceDocsTotal: unifiedTraceItems.total,
   };
 }
 
