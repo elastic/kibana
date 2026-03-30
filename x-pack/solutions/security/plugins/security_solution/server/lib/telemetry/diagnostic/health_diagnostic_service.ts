@@ -74,6 +74,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private _esClient?: ElasticsearchClient;
   private telemetryConfigProvider?: TelemetryConfigProvider;
   private integrationResolver?: IntegrationResolver;
+  private isServerless = false;
 
   constructor(logger: Logger) {
     const mdc = { task_id: TASK_ID, task_type: TASK_TYPE };
@@ -82,6 +83,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
   public setup(setup: HealthDiagnosticServiceSetup) {
     this.logger.debug('Setting up health diagnostic service');
+    this.isServerless = setup.isServerless;
 
     this.registerTask(setup.taskManager);
   }
@@ -89,7 +91,11 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   public async start(start: HealthDiagnosticServiceStart) {
     this.logger.debug('Starting health diagnostic service');
 
-    this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient, this.logger);
+    this.queryExecutor = new CircuitBreakingQueryExecutorImpl(
+      start.esClient,
+      this.isServerless,
+      this.logger
+    );
     this.analytics = start.analytics;
     this._esClient = start.esClient;
     this.telemetryConfigProvider = start.telemetryConfigProvider;

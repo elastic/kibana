@@ -55,6 +55,7 @@ export enum QueryType {
 
 export interface HealthDiagnosticServiceSetup {
   taskManager: TaskManagerSetupContract;
+  isServerless: boolean;
 }
 
 export interface HealthDiagnosticServiceStart {

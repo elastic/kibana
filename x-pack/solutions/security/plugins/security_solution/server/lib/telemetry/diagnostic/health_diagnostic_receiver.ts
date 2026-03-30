@@ -44,8 +44,11 @@ import { newTelemetryLogger, withErrorMessage } from '../helpers';
 
 export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExecutor {
   private readonly logger: TelemetryLogger;
-
-  constructor(private client: ElasticsearchClient, logger: Logger) {
+  constructor(
+    private client: ElasticsearchClient,
+    private readonly isServerless: boolean,
+    logger: Logger
+  ) {
     this.logger = newTelemetryLogger(logger.get('circuit-breaking-query-executor'));
   }
 
@@ -267,6 +270,13 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
         queryName: query.name,
         count: baseIndices.length,
       } as LogMeta);
+    }
+
+    if (this.isServerless) {
+      this.logger.debug('Running in serverless, returning index as is', {
+        queryName: query.name,
+      } as LogMeta);
+      return baseIndices;
     }
 
     if (tiers === undefined || baseIndices.length === 0) {
