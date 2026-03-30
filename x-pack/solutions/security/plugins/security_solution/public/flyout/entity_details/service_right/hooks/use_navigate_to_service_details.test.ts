@@ -39,6 +39,7 @@ const mockProps = {
   contextID: 'testContextId',
   identityFields: { 'service.name': 'testService' },
   isPreviewMode: false,
+  entityId: 'testEntityId',
 };
 
 const tab = EntityDetailsLeftPanelTab.RISK_INPUTS;

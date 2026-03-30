@@ -200,9 +200,11 @@ licenseService.start(
     isAvailable: true,
     isActive: true,
     type: 'platinum',
+    signature: '',
     hasAtLeast: (level: string) => ['basic', 'standard', 'gold', 'platinum'].includes(level),
     getUnavailableReason: () => undefined,
-    toJSON: () => ({}),
+    getFeature: (_name: string) => ({ isAvailable: true, isEnabled: true }),
+    toJSON: () => ({ signature: '' }),
     check: () => ({ state: 'valid' as const }),
   } as import('@kbn/licensing-types').ILicense)
 );
