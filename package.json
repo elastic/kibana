@@ -1806,6 +1806,7 @@
     "@kbn/synthtrace-client": "link:src/platform/packages/shared/kbn-synthtrace-client",
     "@kbn/telemetry-tools": "link:src/platform/packages/private/kbn-telemetry-tools",
     "@kbn/test": "link:src/platform/packages/shared/kbn-test",
+    "@kbn/test-docker-servers": "link:src/platform/packages/shared/kbn-test-docker-servers",
     "@kbn/test-es-server": "link:src/platform/packages/shared/kbn-test-es-server",
     "@kbn/test-eui-helpers": "link:src/platform/packages/private/kbn-test-eui-helpers",
     "@kbn/test-jest-helpers": "link:src/platform/packages/shared/kbn-test-jest-helpers",
