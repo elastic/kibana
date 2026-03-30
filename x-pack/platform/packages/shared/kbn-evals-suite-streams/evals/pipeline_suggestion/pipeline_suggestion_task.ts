@@ -8,7 +8,12 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
-import { TaskStatus, type TaskResult, type ProcessingSimulationResponse, type FlattenRecord } from '@kbn/streams-schema';
+import {
+  TaskStatus,
+  type TaskResult,
+  type ProcessingSimulationResponse,
+  type FlattenRecord,
+} from '@kbn/streams-schema';
 import {
   extractGrokPatternDangerouslySlow,
   groupMessagesByPattern as groupMessagesByGrokPattern,
@@ -120,7 +125,9 @@ const prepareSampleDocuments = async (
 /**
  * Extract grok and dissect patterns from documents (client-side).
  */
-const extractPatterns = (documents: FlattenRecord[]): {
+const extractPatterns = (
+  documents: FlattenRecord[]
+): {
   grok: {
     fieldName: string;
     patternGroups: Array<{
