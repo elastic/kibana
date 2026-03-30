@@ -11,7 +11,7 @@ import {
   type CreateAlertActionBody,
   type CreateAlertActionParams,
 } from '@kbn/alerting-v2-schemas';
-import { Request, Response, type RouteHandler } from '@kbn/core-di-server';
+import { Request, Response, type RouteDefinition, type RouteHandler } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
@@ -40,7 +40,12 @@ export const createAlertActionRouteForType = <
   pathSuffix,
   bodySchema,
   mapBody,
-}: CreateAlertActionRouteForTypeOptions<TAction>) => {
+}: CreateAlertActionRouteForTypeOptions<TAction>): RouteDefinition<
+  CreateAlertActionParams,
+  unknown,
+  Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>,
+  'post'
+> => {
   type ActionBody = Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>;
 
   @injectable()
