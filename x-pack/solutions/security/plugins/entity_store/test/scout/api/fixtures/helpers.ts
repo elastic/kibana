@@ -9,8 +9,6 @@ import type { EsClient } from '@kbn/scout-security';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
 
-import { ENTITY_STORE_ROUTES, LATEST_INDEX, UPDATES_INDEX } from './constants';
-import { hashEuid } from '../../../../server/domain/crud/utils';
 import {
   ENTITY_STORE_ROUTES,
   HISTORY_INDEX_PATTERN,
