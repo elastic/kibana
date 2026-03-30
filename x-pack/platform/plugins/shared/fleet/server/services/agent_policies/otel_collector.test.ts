@@ -255,9 +255,6 @@ describe('generateOtelcolConfig', () => {
   it('should return the otel config when there is one', () => {
     const inputs: FullAgentPolicyInput[] = [otelInput1];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
-      extensions: {
-        'beatsauth/default': {},
-      },
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -290,11 +287,9 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
-          auth: { authenticator: 'beatsauth/default' },
         },
       },
       service: {
-        extensions: ['beatsauth/default'],
         pipelines: {
           'metrics/test-1-stream-id-1': {
             receivers: ['httpcheck/test-1-stream-id-1'],
@@ -313,9 +308,6 @@ describe('generateOtelcolConfig', () => {
   it('should use the output id when it is not the default', () => {
     const inputs: FullAgentPolicyInput[] = [otelInput1];
     expect(generateOtelcolConfig(inputs, { ...defaultOutput, is_default: false })).toEqual({
-      extensions: {
-        'beatsauth/fleet-default-output': {},
-      },
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -348,11 +340,9 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/fleet-default-output': {
           endpoints: ['http://localhost:9200'],
-          auth: { authenticator: 'beatsauth/fleet-default-output' },
         },
       },
       service: {
-        extensions: ['beatsauth/fleet-default-output'],
         pipelines: {
           'metrics/test-1-stream-id-1': {
             receivers: ['httpcheck/test-1-stream-id-1'],
@@ -371,9 +361,6 @@ describe('generateOtelcolConfig', () => {
   it('should return the otel config if there is any', () => {
     const inputs: FullAgentPolicyInput[] = [logInput, otelInput1];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
-      extensions: {
-        'beatsauth/default': {},
-      },
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -406,11 +393,9 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
-          auth: { authenticator: 'beatsauth/default' },
         },
       },
       service: {
-        extensions: ['beatsauth/default'],
         pipelines: {
           'metrics/test-1-stream-id-1': {
             receivers: ['httpcheck/test-1-stream-id-1'],
@@ -469,9 +454,6 @@ describe('generateOtelcolConfig', () => {
   it('should merge otel configs', () => {
     const inputs: FullAgentPolicyInput[] = [logInput, otelInput1, otelInput2];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
-      extensions: {
-        'beatsauth/default': {},
-      },
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -526,11 +508,9 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
-          auth: { authenticator: 'beatsauth/default' },
         },
       },
       service: {
-        extensions: ['beatsauth/default'],
         pipelines: {
           'metrics/test-1-stream-id-1': {
             receivers: ['httpcheck/test-1-stream-id-1'],
@@ -554,9 +534,6 @@ describe('generateOtelcolConfig', () => {
   it('should keep components with the same type', () => {
     const inputs: FullAgentPolicyInput[] = [otelInputMultipleComponentsSameType];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
-      extensions: {
-        'beatsauth/default': {},
-      },
       receivers: {
         'httpcheck/1/test-3-stream-id-1': {
           targets: [
@@ -599,11 +576,9 @@ describe('generateOtelcolConfig', () => {
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
-          auth: { authenticator: 'beatsauth/default' },
         },
       },
       service: {
-        extensions: ['beatsauth/default'],
         pipelines: {
           'metrics/test-3-stream-id-1': {
             receivers: ['httpcheck/1/test-3-stream-id-1', 'httpcheck/2/test-3-stream-id-1'],
@@ -665,17 +640,12 @@ describe('generateOtelcolConfig', () => {
         'elasticapm/apmtest': {},
         forward: {},
       },
-      extensions: {
-        'beatsauth/default': {},
-      },
       exporters: {
         'elasticsearch/default': {
           endpoints: ['http://localhost:9200'],
-          auth: { authenticator: 'beatsauth/default' },
         },
       },
       service: {
-        extensions: ['beatsauth/default'],
         pipelines: {
           'traces/test-traces-stream-id-1': {
             receivers: ['zipkin/test-traces-stream-id-1'],
@@ -1381,25 +1351,12 @@ describe('generateOtelcolConfig', () => {
       });
     });
 
-    it('should produce empty beatsauth config when output has no ssl or proxy fields', () => {
+    it('should omit beatsauth from extensions and exporter auth when output has no ssl or proxy fields', () => {
       const result = generateOtelcolConfig(inputs, defaultOutput);
 
-      expect(result.extensions?.['beatsauth/default']).toEqual({});
-    });
-
-    it('should always include beatsauth in extensions and exporter auth even when config is empty', () => {
-      // Verifies comment D: an empty beatsauth is a valid no-op that keeps the
-      // Beats-compatible transport layer active. The extension and auth.authenticator
-      // reference must always be present, regardless of SSL/proxy configuration.
-      const result = generateOtelcolConfig(inputs, defaultOutput);
-
-      expect(result.extensions).toHaveProperty('beatsauth/default');
-      expect(result.exporters?.['elasticsearch/default']).toEqual(
-        expect.objectContaining({
-          auth: { authenticator: 'beatsauth/default' },
-        })
-      );
-      expect(result.service?.extensions).toContain('beatsauth/default');
+      expect(result.extensions?.['beatsauth/default']).toBeUndefined();
+      expect(result.exporters?.['elasticsearch/default']).not.toHaveProperty('auth');
+      expect(result.service?.extensions ?? []).not.toContain('beatsauth/default');
     });
 
     it('should use secrets.ssl.key when present, ignoring plain ssl.key', () => {
@@ -1452,10 +1409,10 @@ describe('generateOtelcolConfig', () => {
       );
     });
 
-    it('should not allow user YAML to override endpoints or auth', () => {
+    it('should not allow user YAML to override endpoints', () => {
       const outputWithOverrides: Output = {
         ...defaultOutput,
-        otel_exporter_config_yaml: 'endpoints:\n  - http://evil.com\nauth: null',
+        otel_exporter_config_yaml: 'endpoints:\n  - http://evil.com',
       };
 
       const result = generateOtelcolConfig(inputs, outputWithOverrides);
@@ -1463,7 +1420,6 @@ describe('generateOtelcolConfig', () => {
       expect(result.exporters?.['elasticsearch/default']).toEqual(
         expect.objectContaining({
           endpoints: defaultOutput.hosts,
-          auth: { authenticator: 'beatsauth/default' },
         })
       );
     });
@@ -1478,7 +1434,6 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
-        auth: { authenticator: 'beatsauth/default' },
       });
     });
 
@@ -1487,7 +1442,6 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
-        auth: { authenticator: 'beatsauth/default' },
       });
     });
 
@@ -1502,7 +1456,6 @@ describe('generateOtelcolConfig', () => {
       const result = generateOtelcolConfig(inputs, outputWithBadYaml);
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
-        auth: { authenticator: 'beatsauth/default' },
       });
     });
 
@@ -1516,7 +1469,6 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
-        auth: { authenticator: 'beatsauth/default' },
       });
     });
 
@@ -1530,7 +1482,6 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
-        auth: { authenticator: 'beatsauth/default' },
       });
     });
   });

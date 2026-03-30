@@ -336,6 +336,41 @@ const KafkaUpdateSchema = {
   ),
 };
 
+/**
+ * Versioned schemas for SO model versions (used by the check_saved_objects CLI)
+ */
+
+// Schema representing the ingest-outputs SO shape at model version 9 (adds otel_exporter_config_yaml)
+export const OutputSchemaV9 = schema.object({
+  ...BaseSchema,
+  type: schema.string(),
+  // ES output fields
+  hosts: schema.maybe(schema.arrayOf(schema.string())),
+  preset: schema.maybe(schema.string()),
+  // Remote ES output fields
+  service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  // Logstash output fields
+  // Kafka output fields
+  version: schema.maybe(schema.string()),
+  compression: schema.maybe(schema.string()),
+  timeout: schema.maybe(schema.number()),
+  broker_timeout: schema.maybe(schema.number()),
+  required_acks: schema.maybe(schema.number()),
+  client_id: schema.maybe(schema.string()),
+  username: schema.maybe(schema.string()),
+  password: schema.maybe(schema.string()),
+  partition: schema.maybe(schema.string()),
+  topic: schema.maybe(schema.string()),
+  topics: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  headers: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  hash: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  round_robin: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  random: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  sasl: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  auth_type: schema.maybe(schema.string()),
+  connection_type: schema.maybe(schema.string()),
+});
+
 export const OutputSchema = schema.oneOf([
   schema.object({ ...ElasticSearchSchema }, { meta: { id: 'output_elasticsearch' } }),
   schema.object({ ...RemoteElasticSearchSchema }, { meta: { id: 'output_remote_elasticsearch' } }),

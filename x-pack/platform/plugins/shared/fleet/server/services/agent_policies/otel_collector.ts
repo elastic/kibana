@@ -422,10 +422,12 @@ function attachOtelcolExporter(
     ...config.connectors,
     forward: {},
   };
-  config.extensions = {
-    ...config.extensions,
-    ...extensions,
-  };
+  if (Object.keys(extensions).length > 0) {
+    config.extensions = {
+      ...config.extensions,
+      ...extensions,
+    };
+  }
   config.exporters = {
     ...config.exporters,
     ...exporters,
@@ -495,24 +497,21 @@ function generateOtelcolExporter(
   switch (dataOutput.type) {
     case outputType.Elasticsearch: {
       const outputID = getOutputIdForAgentPolicy(dataOutput);
+      const beatsauthConfig = buildBeatsauthConfig(dataOutput, proxy);
+      const hasBeatsauthConfig = Object.keys(beatsauthConfig).length > 0;
       const beatsauthID = `beatsauth/${outputID}`;
       const extraExporterConfig = parseOtelExporterConfigYaml(
         dataOutput.otel_exporter_config_yaml,
         logger
       );
-      // beatsauth is always included, even when empty (no SSL/proxy configured).
-      // An empty beatsauth extension is a valid no-op that ensures the Beats-compatible
-      // HTTP transport layer is always active, consistent with the issue spec and Hybrid Agent behaviour.
       return {
-        extensions: {
-          [beatsauthID]: buildBeatsauthConfig(dataOutput, proxy),
-        },
+        extensions: hasBeatsauthConfig ? { [beatsauthID]: beatsauthConfig } : {},
         exporters: {
           [`elasticsearch/${outputID}`]: {
             ...extraExporterConfig,
             // endpoints and auth always take precedence over user-supplied YAML
             endpoints: dataOutput.hosts,
-            auth: { authenticator: beatsauthID },
+            ...(hasBeatsauthConfig ? { auth: { authenticator: beatsauthID } } : {}),
           },
         },
       };
