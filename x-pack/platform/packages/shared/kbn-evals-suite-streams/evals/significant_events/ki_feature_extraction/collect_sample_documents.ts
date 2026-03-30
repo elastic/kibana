@@ -7,13 +7,12 @@
 
 import { isEmpty } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
-import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getSampleDocuments } from '@kbn/ai-tools';
 import { MANAGED_STREAM_SEARCH_PATTERN, type KIFeatureExtractionScenario } from '../datasets';
 
 const SAMPLE_DOCS_MAX = 60;
-const SAMPLE_DOCS_PAGE_SIZE = 10;
 
 const getAppNameFromFields = (fields: Record<string, unknown>): string | undefined => {
   const app = fields['resource.attributes.app'];
@@ -96,31 +95,38 @@ export const collectSampleDocuments = async ({
   const seen = new Set<string>();
   const requiredApps = extractRequiredAppsFromCriteria(scenario);
 
-  while (
-    docs.length < SAMPLE_DOCS_MAX &&
-    (requiredApps.length === 0 || uniqueApps.size < requiredApps.length)
-  ) {
-    const seenAppFilters: QueryDslQueryContainer[] = [...uniqueApps].map((app) => ({
-      term: { 'resource.attributes.app': app },
-    }));
+  const requiredAppResults = await Promise.all(
+    requiredApps.map((app) =>
+      getSampleDocuments({
+        esClient,
+        index: MANAGED_STREAM_SEARCH_PATTERN,
+        start: 0,
+        end: Date.now(),
+        filter: [...query, { term: { 'resource.attributes.app': app } }],
+        size: 1,
+      })
+    )
+  );
+
+  addUniqueHitsToSample({
+    hits: requiredAppResults.flatMap(({ hits }) => hits),
+    docs,
+    seen,
+    uniqueApps,
+  });
+
+  // fill remaining capacity with random documents
+  while (docs.length < SAMPLE_DOCS_MAX) {
     const { hits } = await getSampleDocuments({
       esClient,
       index: MANAGED_STREAM_SEARCH_PATTERN,
       start: 0,
       end: Date.now(),
-      filter: [...query, { bool: { must_not: seenAppFilters } }],
-      size: SAMPLE_DOCS_PAGE_SIZE,
+      filter: query,
+      size: SAMPLE_DOCS_MAX - docs.length,
     });
-    if (hits.length === 0) {
-      break;
-    }
 
     addUniqueHitsToSample({ hits, docs, seen, uniqueApps });
-  }
-
-  const missingRequiredApps = requiredApps.filter((app) => !uniqueApps.has(app));
-  if (missingRequiredApps.length > 0 && docs.length < SAMPLE_DOCS_MAX) {
-    log.debug(`Missing required apps in sample: ${missingRequiredApps.join(', ')}`);
   }
 
   log.info(
@@ -129,10 +135,10 @@ export const collectSampleDocuments = async ({
     ].join(', ')}`
   );
 
-  const remainingMissingApps = requiredApps.filter((app) => !uniqueApps.has(app));
-  if (remainingMissingApps.length > 0) {
+  const missingApps = requiredApps.filter((app) => !uniqueApps.has(app));
+  if (missingApps.length > 0) {
     log.warning(
-      `Sample is missing required app(s) from criteria: ${remainingMissingApps.join(
+      `Sample is missing required app(s) from criteria: ${missingApps.join(
         ', '
       )} (criteria may not be satisfiable from available logs)`
     );
