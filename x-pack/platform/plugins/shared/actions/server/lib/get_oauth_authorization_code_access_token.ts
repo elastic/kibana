@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import type { AuthMode } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorToken, ConnectorTokenClientContract, UserConnectorToken } from '../types';
+import type { TokenResponseOptions } from './request_oauth_token';
 import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
 
 // Per-connector locks to prevent concurrent token refreshes for the same connector
@@ -53,6 +54,7 @@ interface GetOAuthAuthorizationCodeAccessTokenOpts {
    * even if it hasn't "expired" according to the stored timestamp.
    */
   forceRefresh?: boolean;
+  tokenResponseOptions?: TokenResponseOptions;
 }
 
 interface ExtractedStoredOAuthTokens {
@@ -98,6 +100,7 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
   authMode,
   profileUid,
   forceRefresh = false,
+  tokenResponseOptions,
 }: GetOAuthAuthorizationCodeAccessTokenOpts): Promise<string | null> => {
   const { clientId, tokenUrl, additionalFields, useBasicAuth } = credentials.config;
   const { clientSecret } = credentials.secrets;
@@ -202,7 +205,8 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
           ...additionalFields,
         },
         configurationUtilities,
-        shouldUseBasicAuth
+        shouldUseBasicAuth,
+        tokenResponseOptions
       );
 
       const newAccessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;

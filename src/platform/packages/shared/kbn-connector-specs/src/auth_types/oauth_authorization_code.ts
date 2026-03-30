@@ -28,6 +28,18 @@ const authSchema = z
     useBasicAuth: z.boolean().default(true).optional().meta({
       hidden: true, // Hidden from UI - uses connector spec defaults
     }),
+    scopeParamName: z.string().optional().meta({
+      hidden: true, // Override the authorization URL query param name (default: 'scope')
+    }),
+    accessTokenPath: z.string().optional().meta({
+      hidden: true, // JSON path for access_token in the token response (default: 'access_token')
+    }),
+    tokenTypePath: z.string().optional().meta({
+      hidden: true, // JSON path for token_type in the token response (default: 'token_type')
+    }),
+    tokenType: z.string().optional().meta({
+      hidden: true, // Literal token type for Authorization header, bypasses response extraction
+    }),
   })
   .meta({ label: i18n.OAUTH_AUTHORIZATION_CODE_LABEL });
 
@@ -98,6 +110,9 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
         scope: secret.scope,
         clientId: secret.clientId,
         clientSecret: secret.clientSecret,
+        accessTokenPath: secret.accessTokenPath,
+        tokenTypePath: secret.tokenTypePath,
+        tokenType: secret.tokenType,
       });
     } catch (error) {
       throw new Error(

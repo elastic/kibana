@@ -36,9 +36,9 @@ describe('requestOAuthToken', () => {
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
       data: {
-        tokenType: 'Bearer',
-        accessToken: 'dfjsdfgdjhfgsjdf',
-        expiresIn: 123,
+        token_type: 'Bearer',
+        access_token: 'dfjsdfgdjhfgsjdf',
+        expires_in: 123,
       },
     });
 
@@ -61,6 +61,7 @@ describe('requestOAuthToken', () => {
           "beforeRedirect": [Function],
           "data": "client_id=123456&client_secret=secrert123&grant_type=test&some_additional_param=test",
           "headers": Object {
+            "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
           },
           "httpAgent": undefined,
@@ -184,6 +185,7 @@ describe('requestOAuthToken', () => {
       expect.objectContaining({
         Authorization: expectedHeader,
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        Accept: 'application/json',
       })
     );
   });
@@ -255,6 +257,177 @@ describe('requestOAuthToken', () => {
       expiresIn: 3600,
       refreshToken: 'refresh-token-456',
       refreshTokenExpiresIn: 86400,
+    });
+  });
+
+  test('throws when the token endpoint returns a non-JSON (string) response body', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: 'access_token=gho_abc123&token_type=bearer&scope=repo',
+    });
+
+    await expect(
+      requestOAuthToken<TestOAuthRequestParams>(
+        'https://test',
+        'authorization_code',
+        configurationUtilities,
+        mockLogger,
+        { client_id: 'id', client_secret: 'secret' }
+      )
+    ).rejects.toThrow('non-JSON response body');
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('non-JSON response'));
+  });
+
+  test('throws when access_token is missing from the response', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: { token_type: 'Bearer' },
+    });
+
+    await expect(
+      requestOAuthToken<TestOAuthRequestParams>(
+        'https://test',
+        'authorization_code',
+        configurationUtilities,
+        mockLogger,
+        { client_id: 'id', client_secret: 'secret' }
+      )
+    ).rejects.toThrow('missing required field (access_token)');
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('missing access_token (path: access_token)')
+    );
+  });
+
+  test('throws when token_type is missing from the response', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: { access_token: 'abc123' },
+    });
+
+    await expect(
+      requestOAuthToken<TestOAuthRequestParams>(
+        'https://test',
+        'authorization_code',
+        configurationUtilities,
+        mockLogger,
+        { client_id: 'id', client_secret: 'secret' }
+      )
+    ).rejects.toThrow('missing required field (token_type)');
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('missing token_type (path: token_type)')
+    );
+  });
+
+  test('extracts tokens from nested paths when tokenResponseOptions are provided', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        ok: true,
+        authed_user: {
+          access_token: 'xoxp-slack-user-token',
+          token_type: 'bearer',
+          expires_in: 7200,
+          refresh_token: 'nested-refresh',
+        },
+        access_token: 'xoxb-bot-token',
+        token_type: 'bot',
+        expires_in: 3600,
+      },
+    });
+
+    const result = await requestOAuthToken<TestOAuthRequestParams>(
+      'https://slack.com/api/oauth.v2.access',
+      'authorization_code',
+      configurationUtilities,
+      mockLogger,
+      { client_id: 'slack-client', client_secret: 'slack-secret' },
+      false,
+      {
+        accessTokenPath: 'authed_user.access_token',
+        tokenTypePath: 'authed_user.token_type',
+      }
+    );
+
+    expect(result).toEqual({
+      tokenType: 'bearer',
+      accessToken: 'xoxp-slack-user-token',
+      expiresIn: 7200,
+      refreshToken: 'nested-refresh',
+      refreshTokenExpiresIn: undefined,
+    });
+  });
+
+  test('falls back to default paths when tokenResponseOptions are not provided', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        token_type: 'Bearer',
+        access_token: 'standard-token',
+        expires_in: 3600,
+      },
+    });
+
+    const result = await requestOAuthToken<TestOAuthRequestParams>(
+      'https://test',
+      'authorization_code',
+      configurationUtilities,
+      mockLogger,
+      { client_id: 'id', client_secret: 'secret' },
+      false,
+      undefined
+    );
+
+    expect(result).toEqual({
+      tokenType: 'Bearer',
+      accessToken: 'standard-token',
+      expiresIn: 3600,
+      refreshToken: undefined,
+      refreshTokenExpiresIn: undefined,
+    });
+  });
+
+  test('uses tokenType literal override instead of extracting from response', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        ok: true,
+        authed_user: {
+          access_token: 'xoxp-slack-user-token',
+          token_type: 'user',
+        },
+        access_token: 'xoxb-bot-token',
+        token_type: 'bot',
+      },
+    });
+
+    const result = await requestOAuthToken<TestOAuthRequestParams>(
+      'https://slack.com/api/oauth.v2.access',
+      'authorization_code',
+      configurationUtilities,
+      mockLogger,
+      { client_id: 'slack-client', client_secret: 'slack-secret' },
+      false,
+      {
+        accessTokenPath: 'authed_user.access_token',
+        tokenType: 'bearer',
+      }
+    );
+
+    expect(result).toEqual({
+      tokenType: 'bearer',
+      accessToken: 'xoxp-slack-user-token',
+      expiresIn: undefined,
+      refreshToken: undefined,
+      refreshTokenExpiresIn: undefined,
     });
   });
 });

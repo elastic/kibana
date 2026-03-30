@@ -24,6 +24,7 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
+import { buildTokenResponseOptions } from '../lib/request_oauth_token';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 
@@ -87,6 +88,9 @@ interface OAuthConnectorSecrets {
   clientSecret?: string;
   tokenUrl?: string;
   useBasicAuth?: boolean;
+  accessTokenPath?: string;
+  tokenTypePath?: string;
+  tokenType?: string;
 }
 
 interface OAuthConnectorConfig {
@@ -556,6 +560,12 @@ export const oauthCallbackRoute = (
             coreStart.http.basePath.publicBaseUrl
           );
 
+          const tokenResponseOptions = buildTokenResponseOptions({
+            accessTokenPath: secrets.accessTokenPath,
+            tokenTypePath: secrets.tokenTypePath,
+            tokenType: secrets.tokenType,
+          });
+
           const tokenResult = await requestOAuthAuthorizationCodeToken(
             tokenUrl,
             logger,
@@ -567,7 +577,8 @@ export const oauthCallbackRoute = (
               clientSecret,
             },
             configurationUtilities,
-            useBasicAuth
+            useBasicAuth,
+            tokenResponseOptions
           );
           routeLogger.debug(
             `Successfully exchanged authorization code for access token for connectorId: ${stateConnectorId}`

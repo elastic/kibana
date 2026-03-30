@@ -19,6 +19,7 @@ interface OAuthConnectorSecrets {
   clientSecret?: string;
   tokenUrl?: string;
   scope?: string;
+  scopeParamName?: string;
 }
 
 /**
@@ -42,6 +43,7 @@ export interface OAuthConfig {
   authorizationUrl: string;
   clientId: string;
   scope?: string;
+  scopeParamName?: string;
 }
 
 /**
@@ -51,6 +53,7 @@ interface BuildAuthorizationUrlParams {
   baseAuthorizationUrl: string;
   clientId: string;
   scope?: string;
+  scopeParamName?: string;
   redirectUri: string;
   state: string;
   codeChallenge: string;
@@ -138,10 +141,13 @@ export class OAuthAuthorizationService {
       );
     }
 
+    const scopeParamName = secrets.scopeParamName;
+
     return {
       authorizationUrl,
       clientId,
       scope,
+      scopeParamName,
     };
   }
 
@@ -170,7 +176,15 @@ export class OAuthAuthorizationService {
    * @returns The complete authorization URL as a string
    */
   buildAuthorizationUrl(params: BuildAuthorizationUrlParams): string {
-    const { baseAuthorizationUrl, clientId, scope, redirectUri, state, codeChallenge } = params;
+    const {
+      baseAuthorizationUrl,
+      clientId,
+      scope,
+      scopeParamName,
+      redirectUri,
+      state,
+      codeChallenge,
+    } = params;
 
     const authUrl = new URL(baseAuthorizationUrl);
     authUrl.searchParams.set('client_id', clientId);
@@ -181,7 +195,7 @@ export class OAuthAuthorizationService {
     authUrl.searchParams.set('code_challenge_method', 'S256');
 
     if (scope) {
-      authUrl.searchParams.set('scope', scope);
+      authUrl.searchParams.set(scopeParamName ?? 'scope', scope);
     }
 
     return authUrl.toString();

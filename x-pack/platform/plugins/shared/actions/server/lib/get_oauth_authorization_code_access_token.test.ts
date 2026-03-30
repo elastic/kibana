@@ -240,7 +240,8 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
           scope: 'openid profile',
         },
         configurationUtilities,
-        true // useBasicAuth defaults to true
+        true, // useBasicAuth defaults to true
+        undefined
       );
     });
 
@@ -267,7 +268,8 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         expect.any(Object),
         expect.objectContaining({ tenant_id: 'abc123', custom_flag: true }),
         expect.any(Object),
-        expect.any(Boolean)
+        expect.any(Boolean),
+        undefined
       );
     });
 
@@ -291,7 +293,8 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         expect.any(Object),
         expect.any(Object),
         expect.any(Object),
-        false
+        false,
+        undefined
       );
     });
 
@@ -454,7 +457,8 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         expect.any(Object),
         expect.objectContaining({ refreshToken: 'stored-per-user-refresh-token' }),
         expect.any(Object),
-        expect.any(Boolean)
+        expect.any(Boolean),
+        undefined
       );
       expect(result).toBe('Bearer new-access-token');
     });

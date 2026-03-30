@@ -17,6 +17,7 @@ import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
 import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
+import { buildTokenResponseOptions } from './request_oauth_token';
 import { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
@@ -41,6 +42,9 @@ interface OAuth2AuthCodeParams {
   tokenUrl?: string;
   scope?: string;
   useBasicAuth?: boolean;
+  accessTokenPath?: string;
+  tokenTypePath?: string;
+  tokenType?: string;
 }
 
 async function handleOAuth401Error({
@@ -72,7 +76,16 @@ async function handleOAuth401Error({
   error.config._retry = true;
   logger.debug(`Attempting token refresh for connectorId ${connectorId} after 401 error`);
 
-  const { clientId, clientSecret, tokenUrl, scope, useBasicAuth } = secrets;
+  const {
+    clientId,
+    clientSecret,
+    tokenUrl,
+    scope,
+    useBasicAuth,
+    accessTokenPath,
+    tokenTypePath,
+    tokenType,
+  } = secrets;
   if (!clientId || !clientSecret || !tokenUrl) {
     error.message =
       'Authentication failed: Missing required OAuth configuration (clientId, clientSecret, tokenUrl).';
@@ -99,6 +112,11 @@ async function handleOAuth401Error({
     authMode,
     profileUid,
     forceRefresh: true,
+    tokenResponseOptions: buildTokenResponseOptions({
+      accessTokenPath,
+      tokenTypePath,
+      tokenType,
+    }),
   });
 
   if (!newAccessToken) {
@@ -223,6 +241,12 @@ export const getAxiosInstanceWithAuth = ({
             if (!connectorTokenClient) {
               throw new Error('ConnectorTokenClient is required for OAuth authorization code flow');
             }
+            const tokenResponseOptions = buildTokenResponseOptions({
+              accessTokenPath: opts.accessTokenPath,
+              tokenTypePath: opts.tokenTypePath,
+              tokenType: opts.tokenType,
+            });
+
             return await getOAuthAuthorizationCodeAccessToken({
               connectorId,
               logger,
@@ -241,6 +265,7 @@ export const getAxiosInstanceWithAuth = ({
               scope: opts.scope,
               authMode,
               profileUid,
+              tokenResponseOptions,
             });
           }
 
