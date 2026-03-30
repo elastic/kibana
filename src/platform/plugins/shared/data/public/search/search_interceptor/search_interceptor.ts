@@ -112,7 +112,7 @@ export interface SearchInterceptorDeps {
 const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
 
-const DEFAULT_MULTIPLEXING_POLL_LENGTH = 30_000;
+const DEFAULT_MULTIPLEXING_POLL_LENGTH = '30s';
 
 export class SearchInterceptor {
   private uiSettingsSubs: Subscription[] = [];
@@ -526,7 +526,7 @@ export class SearchInterceptor {
           wait_for_completion_timeout:
             // don't set or override user-configured pollLength, it will be applied server-side
             !this.deps.searchConfig.asyncSearch.pollLength && this.protocolSupportsMultiplexing
-              ? `${DEFAULT_MULTIPLEXING_POLL_LENGTH}ms`
+              ? DEFAULT_MULTIPLEXING_POLL_LENGTH
               : undefined,
 
           // FIXME: the dropNullColumns param shouldn't be needed during polling
