@@ -8,6 +8,7 @@
 import { get } from 'lodash';
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
+import { ConnectorAuthorizationError } from '@kbn/connector-specs';
 import type { OAuthTokenResponse } from './request_oauth_token';
 import type { ConnectorToken, ConnectorTokenClientContract, UserConnectorToken } from '../types';
 
@@ -119,10 +120,11 @@ export const getStoredTokenWithRefresh = async ({
 
     // No token found - user must authorize first
     if (!connectorToken) {
-      logger.warn(
-        `No access token found for connectorId: ${connectorId}. User must complete OAuth authorization flow.`
-      );
-      return null;
+      throw new ConnectorAuthorizationError({
+        authMethod: 'oauth_authorization_code',
+        reason: 'no_token',
+        message: `No access token found for connectorId: ${connectorId}. User must complete OAuth authorization flow.`,
+      });
     }
 
     // Check if access token is still valid (may have been refreshed by another request)
@@ -150,10 +152,11 @@ export const getStoredTokenWithRefresh = async ({
     }
 
     if (!storedRefreshToken) {
-      logger.warn(
-        `Access token expired and no refresh token available for connectorId: ${connectorId}. User must re-authorize.`
-      );
-      return null;
+      throw new ConnectorAuthorizationError({
+        authMethod: 'oauth_authorization_code',
+        reason: 'token_expired',
+        message: `Access token expired and no refresh token available for connectorId: ${connectorId}. User must re-authorize.`,
+      });
     }
 
     // Check if the refresh token is expired
@@ -161,8 +164,11 @@ export const getStoredTokenWithRefresh = async ({
       connectorToken.refreshTokenExpiresAt &&
       Date.parse(connectorToken.refreshTokenExpiresAt) <= now
     ) {
-      logger.warn(`Refresh token expired for connectorId: ${connectorId}. User must re-authorize.`);
-      return null;
+      throw new ConnectorAuthorizationError({
+        authMethod: 'oauth_authorization_code',
+        reason: 'refresh_token_expired',
+        message: `Refresh token expired for connectorId: ${connectorId}. User must re-authorize.`,
+      });
     }
 
     // Refresh the token

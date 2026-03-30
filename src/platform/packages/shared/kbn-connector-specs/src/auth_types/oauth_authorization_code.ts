@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import { normalizeAuthorizationHeaderValue } from './oauth_authz_code_and_ears_helpers';
+import { isConnectorAuthorizationError } from '../errors';
 import * as i18n from './translations';
 
 const authSchema = z
@@ -120,6 +121,9 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
         tokenType: secret.tokenType,
       });
     } catch (error) {
+      if (isConnectorAuthorizationError(error)) {
+        throw error;
+      }
       throw new Error(
         `Unable to retrieve/refresh the access token. User may need to re-authorize: ${error.message}`
       );
