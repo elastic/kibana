@@ -2,7 +2,6 @@
   "type": "shared-common",
   "id": "@kbn/test-saml-auth",
   "owner": [
-    "@elastic/kibana-operations",
     "@elastic/appex-qa"
   ],
   "group": "platform",
