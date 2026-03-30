@@ -9,10 +9,10 @@ import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/use_fetch_discovery_queries';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useQueriesApi } from '../../../hooks/use_queries_api';
-import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
+import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
+import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
 
 interface UseKnowledgeIndicatorsBulkDeleteParams {
   definition: Streams.all.Definition;

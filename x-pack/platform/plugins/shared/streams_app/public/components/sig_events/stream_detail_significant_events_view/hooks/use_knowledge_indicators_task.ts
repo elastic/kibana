@@ -9,9 +9,9 @@ import { useMutation, useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { TaskStatus, type OnboardingResult, type TaskResult } from '@kbn/streams-schema';
-import { useOnboardingApi } from '../../../hooks/use_onboarding_api';
-import { getFormattedError } from '../../../util/errors';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
+import { getFormattedError } from '../../../../util/errors';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 interface Props {
   streamName: string;

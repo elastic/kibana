@@ -25,7 +25,7 @@ import { css } from '@emotion/react';
 import { useKnowledgeIndicatorsBulkDelete } from '../hooks/use_knowledge_indicators_bulk_delete';
 import { KnowledgeIndicatorActionsCell } from '../knowledge_indicator_actions_cell';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
-import { SparkPlot } from '../../spark_plot';
+import { SparkPlot } from '../../../spark_plot';
 import { TableTitle } from '../../stream_detail_systems/table_title';
 
 interface KnowledgeIndicatorsTableProps {

@@ -8,8 +8,8 @@
 import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { useMemo } from 'react';
-import { useFetchDiscoveryQueries } from '../../../hooks/use_fetch_discovery_queries';
-import { useStreamFeatures } from '../../../hooks/use_stream_features';
+import { useFetchDiscoveryQueries } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
+import { useStreamFeatures } from '../../../../hooks/sig_events/use_stream_features';
 
 interface UseKnowledgeIndicatorsDataParams {
   definition: Streams.all.GetResponse;

@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
-import { InfoPanel } from '../../info_panel';
+import { InfoPanel } from '../../../info_panel';
 import { getConfidenceColor } from '../../stream_detail_systems/stream_features/use_stream_features_table';
 
 interface Props {

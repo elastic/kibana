@@ -39,7 +39,7 @@ import type { SignificantEventItem } from '../../../../../hooks/sig_events/use_f
 import { StreamsESQLEditor } from '../../../../esql_query_editor';
 import { InfoPanel } from '../../../../info_panel';
 import { SparkPlot } from '../../../../spark_plot';
-import { SeveritySelector } from '../../../../severity_selector';
+import { SeveritySelector } from '../severity_selector';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { OCCURRENCES_COLUMN, OCCURRENCES_TOOLTIP_NAME } from './translations';
 

@@ -19,8 +19,8 @@ import { i18n } from '@kbn/i18n';
 import type { StreamQuery } from '@kbn/streams-schema';
 import React from 'react';
 import { SeverityBadge } from '../../significant_events_discovery/components/severity_badge/severity_badge';
-import { InfoPanel } from '../../info_panel';
-import { SparkPlot } from '../../spark_plot';
+import { InfoPanel } from '../../../info_panel';
+import { SparkPlot } from '../../../spark_plot';
 
 interface Props {
   query: StreamQuery;

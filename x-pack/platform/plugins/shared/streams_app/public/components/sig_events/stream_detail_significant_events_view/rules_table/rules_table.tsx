@@ -24,7 +24,7 @@ import { useQueriesBulkDelete } from '../hooks/use_queries_bulk_delete';
 import { RuleActionsCell } from './rule_actions_cell';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { SeverityBadge } from '../../significant_events_discovery/components/severity_badge/severity_badge';
-import { SparkPlot } from '../../spark_plot';
+import { SparkPlot } from '../../../spark_plot';
 import { formatLastOccurredAt } from '../../significant_events_discovery/components/queries_table/utils';
 import { TableTitle } from '../../stream_detail_systems/table_title';
 
