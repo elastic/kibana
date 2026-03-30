@@ -10,11 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import {
-  toElasticsearchQuery,
-  fromKueryExpression,
-  getKqlFieldNames,
-} from '@kbn/es-query';
+import { toElasticsearchQuery, fromKueryExpression, getKqlFieldNames } from '@kbn/es-query';
 import {
   buildAggregation,
   getDateRangeInfo,
