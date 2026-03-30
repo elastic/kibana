@@ -20,6 +20,7 @@ import type {
   ParsedGroupingAggregation,
 } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
+import type { estypes } from '@elastic/elasticsearch';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
@@ -116,6 +117,11 @@ interface OwnProps {
     aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
     groupingLevel?: number
   ) => void;
+
+  /**
+   * Filter specifically for the unitsCount aggregation
+   */
+  unitsCountFilter?: estypes.QueryDslQueryContainer;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -147,6 +153,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   multiValueFieldsToFlatten,
   pageScope = PageScope.alerts,
   onAggregationsChange,
+  unitsCountFilter,
 }) => {
   const {
     services: { uiSettings },
@@ -228,6 +235,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       pageSize,
       pageIndex,
       multiValueFieldsToFlatten,
+      unitsCountFilter,
     });
   }, [
     additionalFilters,
@@ -241,6 +249,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     uniqueValue,
     multiValueFieldsToFlatten,
     sort,
+    unitsCountFilter,
   ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);

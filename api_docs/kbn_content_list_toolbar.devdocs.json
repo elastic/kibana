@@ -30,7 +30,7 @@
           ") => React.JSX.Element | null; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
-        "lineNumber": 171,
+        "lineNumber": 174,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -53,7 +53,7 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
-            "lineNumber": 81,
+            "lineNumber": 82,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false
@@ -658,7 +658,7 @@
           "\nProps for the {@link ContentListToolbar} component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -676,7 +676,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -694,7 +694,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1009,7 +1009,7 @@
           "\nProps for the {@link Filters} container component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filters.ts",
-        "lineNumber": 15,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1027,7 +1027,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filters.ts",
-            "lineNumber": 19,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1136,7 +1136,7 @@
               "\nFilter values extracted by this parser, keyed by filter ID.\n\nMerged into the accumulated {@link ActiveFilters} for the current query.\nReturn an empty object when no clauses for this filter type are present —\nthis clears the filter dimension, which is correct since the search bar\nis the source of truth."
             ],
             "signature": [
-              "{ [x: string]: string | ",
+              "{ [x: string]: string | boolean | ",
               {
                 "pluginId": "@kbn/content-list-provider",
                 "scope": "public",
@@ -1144,7 +1144,7 @@
                 "section": "def-public.IncludeExcludeFilter",
                 "text": "IncludeExcludeFilter"
               },
-              " | undefined; search?: string | undefined; }"
+              " | undefined; search?: string | undefined; starredOnly?: boolean | undefined; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/query_parser.ts",
             "lineNumber": 28,
@@ -1700,7 +1700,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filters.ts",
-        "lineNumber": 49,
+        "lineNumber": 50,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

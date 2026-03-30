@@ -14,6 +14,8 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+  OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
 } from '@kbn/management-settings-ids';
 import type { StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
@@ -111,6 +113,41 @@ export function registerFeatureFlags(
       value: false,
       description: i18n.translate('xpack.streams.queryStreamsSettingsDescription', {
         defaultMessage: 'Enable Query streams.',
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
+      readonly: true,
+      readonlyMode: 'ui',
+    },
+    [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.wiredStreamViewsSettingsName', {
+        defaultMessage: 'Wired stream views',
+      }),
+      value: false,
+      description: i18n.translate('xpack.streams.wiredStreamViewsSettingsDescription', {
+        defaultMessage: 'Enable ES|QL views for wired streams.',
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
+      readonly: true,
+      readonlyMode: 'ui',
+    },
+    [OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.streamsOverviewPageSettingsName', {
+        defaultMessage: 'Streams overview page',
+      }),
+      value: false,
+      description: i18n.translate('xpack.streams.streamsOverviewPageSettingsDescription', {
+        defaultMessage:
+          'Enable the stream Overview tab. When disabled, the default management tab is Retention (ingest streams) or Schema (query streams).',
       }),
       type: 'boolean',
       schema: schema.boolean(),

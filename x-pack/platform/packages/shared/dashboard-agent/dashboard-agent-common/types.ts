@@ -6,175 +6,163 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ToolUiEvent } from '@kbn/agent-builder-common/chat';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type {
-  DASHBOARD_ATTACHMENT_TYPE,
-  DASHBOARD_PANEL_ADDED_EVENT,
-  DASHBOARD_PANELS_REMOVED_EVENT,
-} from './constants';
+import type { DASHBOARD_ATTACHMENT_TYPE } from './constants';
+
+// ============================================================================
+// Panel Grid Schema - ideally we should import the schema from dashboard schemas, but they use config-schema library
+// which is not compatible with Zod, so we duplicate the relevant parts here for validation of attachment data.
+// ============================================================================
 
 /**
  * Grid dimensions (in dashboard grid units) for layout.
  * Dashboard grid is 48 columns wide; height is in same units.
  */
 export const panelGridSchema = z.object({
+  x: z.number(),
+  y: z.number(),
   w: z.number().int().min(1).max(48),
-  h: z.number().int().min(1).max(24),
-  x: z.number().int().min(0).max(47),
-  y: z.number().int().min(0),
+  h: z.number().int().min(1),
 });
 
-/**
- * Zod schema for Lens panel entries.
- */
-export const lensAttachmentPanelSchema = z.object({
-  type: z.literal('lens'),
-  panelId: z.string(),
-  /** The visualization configuration in Lens API format (LensApiSchemaType) */
-  visualization: z.record(z.string(), z.unknown()),
-  /** Panel title */
-  title: z.string().optional(),
-  /** Natural language query that created this (if agent-generated) */
-  query: z.string().optional(),
-  /** ES|QL query used (if applicable) */
-  esql: z.string().optional(),
-  /** Layout hint: width and height in grid units. When set, the renderer uses this instead of calculated defaults. */
-  grid: panelGridSchema.optional(),
-});
-
-/**
- * A Lens panel entry containing full visualization configuration in API format.
- * All Lens panels (whether created by the agent or extracted from existing dashboards)
- * are stored in this unified format using LensApiSchemaType.
- */
-export type LensAttachmentPanel = z.infer<typeof lensAttachmentPanelSchema>;
-
-/**
- * Zod schema for generic (non-Lens) panel entries.
- * The `type` field contains the actual embeddable type.
- */
-export const genericAttachmentPanelSchema = z.object({
-  /** The actual embeddable type (e.g., 'DASHBOARD_MARKDOWN', 'aiOpsLogRateAnalysis', 'lens' for unsupported) */
-  type: z.string(),
-  panelId: z.string(),
-  /** The raw panel configuration for recreating the panel */
-  rawConfig: z.record(z.string(), z.unknown()),
-  /** Panel title if available */
-  title: z.string().optional(),
-  /** Layout: width and height in grid units. When set, the renderer uses this instead of fixed defaults. */
-  grid: panelGridSchema.optional(),
-});
-
-/**
- * A non-Lens panel entry containing the raw embeddable configuration.
- * Used for markdown, maps, TSVB, and other panel types, as well as
- * Lens panels with unsupported chart types that can't be converted to API format.
- */
-export type GenericAttachmentPanel = z.infer<typeof genericAttachmentPanelSchema>;
+// ============================================================================
+// Panel Schema
+// ============================================================================
 
 /**
  * Zod schema for dashboard panel entries.
+ * The `type` field contains the actual embeddable type.
  */
-export const attachmentPanelSchema = z.union([
-  lensAttachmentPanelSchema,
-  genericAttachmentPanelSchema,
-]);
+export const attachmentPanelSchema = z.object({
+  type: z.string(),
+  uid: z.string(),
+  config: z.record(z.string(), z.unknown()),
+  grid: panelGridSchema,
+});
 
-/**
- * Union type for dashboard panel entries.
- * - LensAttachmentPanel: Lens visualization with config in API format (type: 'lens')
- * - GenericAttachmentPanel: Non-Lens panels with raw config (type: actual embeddable type)
- */
 export type AttachmentPanel = z.infer<typeof attachmentPanelSchema>;
 
-/**
- * Type guard to check if a panel is a Lens panel.
- */
-export function isLensAttachmentPanel(panel: AttachmentPanel): panel is LensAttachmentPanel {
-  return panel.type === 'lens' && 'visualization' in panel;
-}
+// ============================================================================
+// Section Schema
+// ============================================================================
 
-/**
- * Type guard to check if a panel is a generic (non-Lens) panel.
- */
-export function isGenericAttachmentPanel(panel: AttachmentPanel): panel is GenericAttachmentPanel {
-  return 'rawConfig' in panel;
-}
+export const sectionGridSchema = z.object({
+  y: z.number(),
+});
 
-/**
- * Zod schema for a dashboard section containing panels.
- */
 export const dashboardSectionSchema = z.object({
-  /** Section title */
+  uid: z.string(),
   title: z.string(),
-  /** Panels within this section */
+  collapsed: z.boolean(),
+  grid: sectionGridSchema,
   panels: z.array(attachmentPanelSchema),
 });
 
-/**
- * A dashboard section containing panels.
- */
 export type DashboardSection = z.infer<typeof dashboardSectionSchema>;
+
+export const isSection = (
+  widget: AttachmentPanel | DashboardSection
+): widget is DashboardSection => {
+  return 'panels' in widget;
+};
+
+// ============================================================================
+// Query Schema
+// ============================================================================
+
+const querySchema = z.object({
+  query: z.union([z.string(), z.record(z.string(), z.unknown())]),
+  language: z.string(),
+});
+
+// ============================================================================
+// Time Range Schema
+// ============================================================================
+
+const timeRangeSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  mode: z.union([z.literal('absolute'), z.literal('relative')]).optional(),
+});
+
+// ============================================================================
+// Refresh Interval Schema
+// ============================================================================
+
+const refreshIntervalSchema = z.object({
+  pause: z.boolean(),
+  value: z.number(),
+});
+
+// ============================================================================
+// Dashboard Options Schema
+// ============================================================================
+
+const optionsSchema = z.object({
+  auto_apply_filters: z.boolean().optional(),
+  hide_panel_titles: z.boolean().optional(),
+  hide_panel_borders: z.boolean().optional(),
+  use_margins: z.boolean().optional(),
+  sync_colors: z.boolean().optional(),
+  sync_tooltips: z.boolean().optional(),
+  sync_cursor: z.boolean().optional(),
+});
+
+// ============================================================================
+// Access Control Schema
+// ============================================================================
+
+const accessControlSchema = z
+  .object({
+    access_mode: z.union([z.literal('write_restricted'), z.literal('default')]).optional(),
+  })
+  .optional();
+
+// ============================================================================
+// Filter Schema
+// ============================================================================
+
+// Filters have complex union types that are difficult to express precisely in Zod.
+const filterSchema = z.record(z.string(), z.unknown());
+
+// ============================================================================
+// Pinned Panels (Controls) Schema
+// ============================================================================
+
+// Controls have complex union types. We use a permissive schema here.
+const pinnedControlSchema = z.record(z.string(), z.unknown());
+const pinnedPanelsSchema = z.array(pinnedControlSchema);
+
+// ============================================================================
+// Dashboard Attachment Data Schema (matches DashboardState)
+// ============================================================================
 
 /**
  * Zod schema for dashboard attachment data.
+ * This schema matches the structure of DashboardState from @kbn/dashboard-plugin.
  */
 export const dashboardAttachmentDataSchema = z.object({
   title: z.string(),
-  description: z.string(),
-  /** Optional saved object ID if the dashboard was saved */
-  savedObjectId: z.string().optional(),
-  /** Array of top-level panel entries */
-  panels: z.array(attachmentPanelSchema),
-  /** Optional array of sections containing grouped panels */
-  sections: z.array(dashboardSectionSchema).optional(),
+  description: z.string().optional(),
+  panels: z.array(z.union([attachmentPanelSchema, dashboardSectionSchema])),
+  query: querySchema.optional(),
+  time_range: timeRangeSchema.optional(),
+  refresh_interval: refreshIntervalSchema.optional(),
+  filters: z.array(filterSchema).optional(),
+  options: optionsSchema.optional(),
+  tags: z.array(z.string()).optional(),
+  pinned_panels: pinnedPanelsSchema.optional(),
+  access_control: accessControlSchema.optional(),
+  project_routing: z.string().optional(),
 });
 
-/**
- * Data for a dashboard attachment.
- */
 export type DashboardAttachmentData = z.infer<typeof dashboardAttachmentDataSchema>;
 
-/**
- * Zod schema for dashboard attachment origin references.
- */
-export const dashboardAttachmentOriginSchema = z.object({
-  /** Saved object id for the persisted dashboard */
-  savedObjectId: z.string(),
-});
-
-/**
- * Origin payload for dashboard attachments.
- */
-export type DashboardAttachmentOrigin = z.infer<typeof dashboardAttachmentOriginSchema>;
-
-/**
- * Data payload for a panel added event.
- */
-export interface PanelAddedEventData {
-  dashboardAttachmentId: string;
-  panel: AttachmentPanel;
-}
-
-/**
- * Data payload for a panel removed event.
- */
-export interface PanelsRemovedEventData {
-  dashboardAttachmentId: string;
-  panelIds: string[];
-}
-
-/**
- * Union type for dashboard UI events.
- */
-export type DashboardUiEvent =
-  | ToolUiEvent<typeof DASHBOARD_PANEL_ADDED_EVENT, PanelAddedEventData>
-  | ToolUiEvent<typeof DASHBOARD_PANELS_REMOVED_EVENT, PanelsRemovedEventData>;
+// ============================================================================
+// Attachment Type
+// ============================================================================
 
 export type DashboardAttachment = Attachment<
   typeof DASHBOARD_ATTACHMENT_TYPE,
   DashboardAttachmentData
-> & {
-  origin?: DashboardAttachmentOrigin;
-};
+>;

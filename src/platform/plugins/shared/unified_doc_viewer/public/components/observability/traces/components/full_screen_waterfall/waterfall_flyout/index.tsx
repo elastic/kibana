@@ -24,13 +24,16 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useState } from 'react';
+import { useDocViewerSpanLogViewedEvent } from '@kbn/unified-doc-viewer';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import DocViewerTable from '../../../../../doc_viewer_table';
+import { getUnifiedDocViewerServices } from '../../../../../../plugin';
+import type { FlyoutContentId } from '../../../common/constants';
 
 const tabIds = {
-  OVERVIEW: 'unifiedDocViewerTracesSpanFlyoutOverview',
-  TABLE: 'unifiedDocViewerTracesSpanFlyoutTable',
-  JSON: 'unifiedDocViewerTracesSpanFlyoutJson',
+  OVERVIEW: 'unifiedDocViewerTracesDocDetailFlyoutOverview',
+  TABLE: 'unifiedDocViewerTracesDocDetailFlyoutTable',
+  JSON: 'unifiedDocViewerTracesDocDetailFlyoutJson',
 };
 
 const tabs = [
@@ -76,7 +79,9 @@ export interface Props {
   loading: boolean;
   dataView: DocViewRenderProps['dataView'];
   dataTestSubj?: string;
+  flyoutContentId: FlyoutContentId;
   children: React.ReactNode;
+  skipNextEventReport?: boolean;
 }
 
 export function WaterfallFlyout({
@@ -87,10 +92,21 @@ export function WaterfallFlyout({
   children,
   title,
   dataTestSubj,
+  flyoutContentId,
+  skipNextEventReport,
 }: Props) {
+  const { analytics } = getUnifiedDocViewerServices();
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const flyoutTitleId = useGeneratedHtmlId();
   const flyoutId = useGeneratedHtmlId({ prefix: 'documentDetailFlyout' });
+
+  useDocViewerSpanLogViewedEvent({
+    reportEvent: analytics.reportEvent,
+    contentId: flyoutContentId,
+    tabId: selectedTabId,
+    hit,
+    skipNextReport: skipNextEventReport,
+  });
 
   return (
     <EuiFlyout

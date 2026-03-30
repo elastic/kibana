@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AgentVisibility } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, AgentVisibility } from '@kbn/agent-builder-common';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -316,6 +316,19 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body).to.have.property('id', agentId);
         expect(response.body).to.have.property('visibility', AgentVisibility.Shared);
+      });
+
+      it('should reject visibility change for the default agent (returns 404)', async () => {
+        await supertest.get(`/api/agent_builder/agents/${agentBuilderDefaultAgentId}`).expect(200);
+
+        const response = await supertest
+          .put(`/api/agent_builder/agents/${agentBuilderDefaultAgentId}`)
+          .set('kbn-xsrf', 'kibana')
+          .send({ visibility: AgentVisibility.Private })
+          .expect(404);
+
+        expect(response.body).to.have.property('message');
+        expect(response.body.message).to.contain('not found');
       });
     });
 

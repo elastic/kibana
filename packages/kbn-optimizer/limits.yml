@@ -1,18 +1,19 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  agentBuilder: 96771
-  agentBuilderPlatform: 64202
+  agentBuilder: 45717
+  agentBuilderPlatform: 8886
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
-  apm: 42431
+  alertingVTwo: 157791
+  apm: 25363
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 10143
-  banners: 4087
+  automaticImportVTwo: 15269
+  banners: 4006
   canvas: 14881
-  cases: 306139
+  cases: 177203
   charts: 40269
   cloud: 10648
   cloudConnect: 9149
@@ -26,14 +27,14 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10300
-  core: 556473
+  core: 547151
   cps: 9209
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
   dashboardAgent: 5135
-  dashboardMarkdown: 6219
-  data: 498703
+  dashboardMarkdown: 6151
+  data: 496646
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
@@ -42,22 +43,23 @@ pageLoadAssetSize:
   dataViewFieldEditor: 26024
   dataViewManagement: 6250
   dataViews: 66000
-  dataVisualizer: 32778
+  dataVisualizer: 32727
   developerToolbar: 4467
   devTools: 8109
-  discover: 28241
+  discover: 28240
   discoverEnhanced: 5509
   discoverShared: 2322
-  elasticAssistant: 338870
+  elasticAssistant: 301540
   elasticAssistantSharedState: 4881
+  elasticConsole: 4451
   embeddable: 16634
   embeddableAlertsTable: 6524
-  enterpriseSearch: 37566
-  entityStore: 71717
+  enterpriseSearch: 37565
+  entityStore: 9718
   esql: 21193
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 35000
+  evals: 29638
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45042
@@ -79,10 +81,10 @@ pageLoadAssetSize:
   fleet: 209495
   genAiSettings: 5663
   globalSearch: 6890
-  globalSearchBar: 26330
+  globalSearchBar: 26122
   globalSearchProviders: 4646
   graph: 9924
-  grokdebugger: 5484
+  grokdebugger: 5469
   home: 13091
   imageEmbeddable: 6189
   indexLifecycleManagement: 29818
@@ -91,17 +93,17 @@ pageLoadAssetSize:
   infra: 56302
   ingestPipelines: 17866
   inputControlVis: 7660
-  inspectComponent: 4900
-  inspector: 17954
+  inspectComponent: 4590
+  inspector: 17925
   interactiveSetup: 36524
   intercepts: 21066
   kibanaOverview: 6339
-  kibanaReact: 21501
+  kibanaReact: 21499
   kibanaUsageCollection: 1736
   kibanaUtils: 54161
   kql: 15428
   kubernetesSecurity: 6807
-  lens: 70490
+  lens: 85000
   licenseManagement: 8265
   licensing: 10073
   links: 8620
@@ -115,10 +117,10 @@ pageLoadAssetSize:
   mapsEms: 6734
   metricsDataAccess: 44950
   ml: 89000
-  mockIdpPlugin: 7544
+  mockIdpPlugin: 7463
   monitoring: 28983
   navigation: 11814
-  newsfeed: 11369
+  newsfeed: 11110
   noDataPage: 1749
   observability: 107797
   observabilityAgentBuilder: 10178
@@ -151,9 +153,9 @@ pageLoadAssetSize:
   screenshotting: 3252
   searchAssistant: 6150
   searchGettingStarted: 6678
-  searchHomepage: 7962
+  searchHomepage: 9005
   searchIndices: 9991
-  searchInferenceEndpoints: 8071
+  searchInferenceEndpoints: 9400
   searchNavigation: 7404
   searchNotebooks: 18826
   searchPlayground: 12122
@@ -161,30 +163,30 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79627
-  securitySolution: 187862
+  securitySolution: 135301
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
-  serverless: 7451
-  serverlessObservability: 19144
+  serverless: 7412
+  serverlessObservability: 19104
   serverlessSearch: 26287
   serverlessWorkplaceAI: 5078
   sessionView: 47912
   share: 58677
   slo: 40437
   snapshotRestore: 22068
-  spaces: 30016
+  spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 10000
+  streams: 11422
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
-  timelines: 192134
+  timelines: 131503
   transform: 16515
-  triggersActionsUi: 112000
+  triggersActionsUi: 114000
   uiActions: 35278
-  unifiedDocViewer: 14513
+  unifiedDocViewer: 15000
   unifiedSearch: 19500
   upgradeAssistant: 6898
   uptime: 48171
@@ -208,6 +210,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52210
   watcher: 10485
-  workflowsExtensions: 89850
-  workflowsManagement: 21318
-  workplaceAIApp: 65547
+  workflowsExtensions: 38894
+  workflowsManagement: 31215
+  workplaceAIApp: 14056

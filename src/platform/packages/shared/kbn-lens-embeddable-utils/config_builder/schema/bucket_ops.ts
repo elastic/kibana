@@ -21,6 +21,7 @@ import {
 } from './constants';
 import { formatSchema } from './format';
 import { labelSharedProp } from './shared';
+import { builderEnums } from './enums';
 
 export const bucketDateHistogramOperationSchema = schema.object(
   {
@@ -175,7 +176,9 @@ export const bucketTermsOperationSchema = schema.object(
           /**
            * Direction of the alphabetical order
            */
-          direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+          direction: builderEnums.direction({
+            meta: { id: 'termsRankByAlphabeticalDirection' },
+          }),
         }),
         schema.object({
           type: schema.literal('rare'),
@@ -204,7 +207,9 @@ export const bucketTermsOperationSchema = schema.object(
           /**
            * Direction of the column
            */
-          direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+          direction: builderEnums.direction({
+            meta: { id: 'termsRankByColumnDirection' },
+          }),
         }),
         schema.object({
           type: schema.literal('custom'),
@@ -236,7 +241,9 @@ export const bucketTermsOperationSchema = schema.object(
           /**
            * Direction of the custom operation
            */
-          direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+          direction: builderEnums.direction({
+            meta: { id: 'termsRankByCustomDirection' },
+          }),
         }),
       ])
     ),
@@ -310,67 +317,70 @@ export const bucketHistogramOperationSchema = schema.object(
   { meta: { id: 'histogramOperation', title: 'Histogram Operation' } }
 );
 
-export const bucketRangesOperationSchema = schema.object({
-  operation: schema.literal('range'),
-  ...formatSchema,
-  ...labelSharedProp,
-  /**
-   * Label for the operation
-   */
-  label: schema.maybe(
-    schema.string({
+export const bucketRangesOperationSchema = schema.object(
+  {
+    operation: schema.literal('range'),
+    ...formatSchema,
+    ...labelSharedProp,
+    /**
+     * Label for the operation
+     */
+    label: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Label for the operation',
+        },
+      })
+    ),
+    /**
+     * Field to be used for the range
+     */
+    field: schema.string({
       meta: {
-        description: 'Label for the operation',
+        description: 'Field to be used for the range',
       },
-    })
-  ),
-  /**
-   * Field to be used for the range
-   */
-  field: schema.string({
-    meta: {
-      description: 'Field to be used for the range',
-    },
-  }),
-  /**
-   * Ranges
-   */
-  ranges: schema.arrayOf(
-    schema.object({
-      /**
-       * Less than or equal to
-       */
-      lte: schema.maybe(
-        schema.number({
-          meta: {
-            description: 'Less than or equal to',
-          },
-        })
-      ),
-      /**
-       * Greater than
-       */
-      gt: schema.maybe(
-        schema.number({
-          meta: {
-            description: 'Greater than',
-          },
-        })
-      ),
-      /**
-       * Label
-       */
-      label: schema.maybe(
-        schema.string({
-          meta: {
-            description: 'Label',
-          },
-        })
-      ),
     }),
-    { maxSize: 100, meta: { id: 'rangesOperation', title: 'Ranges Operation' } }
-  ),
-});
+    /**
+     * Ranges
+     */
+    ranges: schema.arrayOf(
+      schema.object({
+        /**
+         * Less than or equal to
+         */
+        lte: schema.maybe(
+          schema.number({
+            meta: {
+              description: 'Less than or equal to',
+            },
+          })
+        ),
+        /**
+         * Greater than
+         */
+        gt: schema.maybe(
+          schema.number({
+            meta: {
+              description: 'Greater than',
+            },
+          })
+        ),
+        /**
+         * Label
+         */
+        label: schema.maybe(
+          schema.string({
+            meta: {
+              description: 'Label',
+            },
+          })
+        ),
+      }),
+      { maxSize: 100 }
+    ),
+  },
+  { meta: { id: 'rangesOperation', title: 'Ranges Operation' } }
+);
 
 export const bucketOperationDefinitionSchema = schema.oneOf([
   bucketDateHistogramOperationSchema,

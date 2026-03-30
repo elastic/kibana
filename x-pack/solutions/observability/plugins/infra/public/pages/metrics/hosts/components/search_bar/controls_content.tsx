@@ -19,6 +19,7 @@ import type { DataControlApi } from '@kbn/controls-plugin/public';
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { NOT_AVAILABLE_LABEL } from '@kbn/observability-plugin/common';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { getControlPanelConfigs } from './control_panels_config';
@@ -56,7 +57,7 @@ export const ControlsContent = ({
   const isLoading = isPending(status);
 
   const getInitialInput = useCallback(async () => {
-    const initialInput: Partial<ControlGroupRuntimeState> = {
+    const initialInput: ControlGroupRuntimeState = {
       initialChildControlState: controlPanels as ControlPanelsState,
     };
 
@@ -78,7 +79,10 @@ export const ControlsContent = ({
             const child = children[childId] as DataControlApi;
 
             child.CustomPrependComponent = () => (
-              <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
+              <ControlTitle
+                title={child.title$?.getValue() ?? NOT_AVAILABLE_LABEL}
+                embeddableId={childId}
+              />
             );
           });
         })

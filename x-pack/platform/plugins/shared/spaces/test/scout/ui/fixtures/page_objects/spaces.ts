@@ -28,8 +28,8 @@ export class SpacesPage {
     });
   }
 
-  async isSpacesSelectorVisible() {
-    return await this.page.testSubj.isVisible('spacesNavSelector');
+  spacesSelectorLocator() {
+    return this.page.testSubj.locator('spacesNavSelector');
   }
 
   async openSpacesSelector() {

@@ -275,6 +275,12 @@ export const getNavigationTreeDefinition = ({
                     {
                       link: 'management:inference_endpoints',
                     },
+                    {
+                      link: 'management:model_settings',
+                    },
+                    {
+                      link: 'management:elastic_inference_service',
+                    },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },
                   ],
@@ -288,6 +294,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:genAiSettings' },
+                    { link: 'management:evals' },
                     { link: 'management:aiAssistantManagementSelection' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.ai', {

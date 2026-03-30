@@ -4,22 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/api-contracts'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/api-contracts'
+  title: '@kbn/api-contracts'
   description: Moon project for @kbn/api-contracts
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: packages/kbn-api-contracts
+  sourceRoot: packages/kbn-api-contracts
 dependsOn:
   - '@kbn/dev-cli-runner'
-  - '@kbn/repo-info'
 tags:
   - shared-common
   - package
@@ -31,16 +29,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

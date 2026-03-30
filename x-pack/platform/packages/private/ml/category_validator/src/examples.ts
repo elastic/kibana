@@ -61,7 +61,8 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
     end: number,
     analyzer: CategorizationAnalyzer,
     runtimeMappings: RuntimeMappings | undefined,
-    indicesOptions: estypes.IndicesOptions | undefined
+    indicesOptions: estypes.IndicesOptions | undefined,
+    projectRouting: string | undefined
   ): Promise<{ examples: CategoryFieldExample[]; error?: Error }> {
     if (timeField !== undefined) {
       const range = {
@@ -100,6 +101,7 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
         sort: ['_doc'],
         ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
         ...(indicesOptions ?? {}),
+        ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
       },
       { maxRetries: 0 }
     );
@@ -209,6 +211,7 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
     analyzer: CategorizationAnalyzer,
     runtimeMappings: RuntimeMappings | undefined,
     indicesOptions: estypes.IndicesOptions | undefined,
+    projectRouting: string | undefined,
     includeExamples = true
   ) {
     const resp = await categorizationExamples(
@@ -221,7 +224,8 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
       end,
       analyzer,
       runtimeMappings,
-      indicesOptions
+      indicesOptions,
+      projectRouting
     );
 
     const { examples } = resp;

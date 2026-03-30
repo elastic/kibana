@@ -151,6 +151,10 @@ export const epmRouteService = {
     );
   },
 
+  getReviewUpgradePath: (pkgName: string) => {
+    return EPM_API_ROUTES.REVIEW_UPGRADE_PATTERN.replace('{pkgName}', pkgName);
+  },
+
   getReauthorizeTransformsPath: (pkgName: string, pkgVersion: string) => {
     return EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS.replace('{pkgName}', pkgName)
       .replace('{pkgVersion}', pkgVersion)

@@ -64,10 +64,12 @@ export class EvalsPlugin
       order: 9000,
       category: DEFAULT_APP_CATEGORIES.management,
       app: ['kibana', PLUGIN_ID],
+      management: { ai: [PLUGIN_ID] },
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
           api: [PLUGIN_ID],
+          management: { ai: [PLUGIN_ID] },
           savedObject: {
             all: [],
             read: [],
@@ -77,6 +79,7 @@ export class EvalsPlugin
         read: {
           app: ['kibana', PLUGIN_ID],
           api: [PLUGIN_ID],
+          management: { ai: [PLUGIN_ID] },
           savedObject: {
             all: [],
             read: [],

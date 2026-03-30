@@ -61,6 +61,7 @@ export const WorkflowsExtensionsExampleApp = ({ http }: AppDeps) => {
           message: 'Emitted from Workflows Extensions Example UI',
           source: 'workflows_extensions_example_app',
           ...(category && { category }),
+          labels: ['example', 'demo'],
         }),
       });
       setResult(
@@ -88,7 +89,7 @@ export const WorkflowsExtensionsExampleApp = ({ http }: AppDeps) => {
         <EuiText>
           <p>
             This example plugin registers custom workflow steps and triggers. Use the button below
-            to emit an event for the <code>example.custom_trigger</code> trigger. Workflows
+            to emit an event for the <code>example.customTrigger</code> trigger. Workflows
             subscribed to that trigger in this space will run.
           </p>
         </EuiText>
@@ -101,14 +102,14 @@ export const WorkflowsExtensionsExampleApp = ({ http }: AppDeps) => {
         >
           <p>
             In the Workflows app, create a workflow with trigger type{' '}
-            <code>example.custom_trigger</code> and enable it. Use <code>with.condition</code> to
-            run only for certain categories, e.g. <code>event.category: &quot;alerts&quot;</code>.
+            <code>example.customTrigger</code> and enable it. Use <code>with.condition</code> to run
+            only for certain categories, e.g. <code>event.category: &quot;alerts&quot;</code>.
           </p>
           <pre style={{ marginBottom: 0, whiteSpace: 'pre-wrap', fontSize: '12px' }}>
             {`name: On custom trigger example
 enabled: true
 triggers:
-  - type: example.custom_trigger
+  - type: example.customTrigger
     on:
       condition: 'event.category: "alerts"'
 steps:

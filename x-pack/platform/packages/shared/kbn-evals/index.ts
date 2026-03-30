@@ -4,6 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+/**
+ * @kbn/evals — Evaluation framework for LLM-based workflows in Kibana.
+ *
+ * This package provides the shared evaluation layer (vision Section 5.2.3): evaluator
+ * factories, data model types, persistence utilities, and reporting primitives. It is
+ * designed to be independent of how evaluations are triggered (CI/offline vs in-tool).
+ *
+ * ## Architecture boundaries
+ * - **Framework primitives** (this package): evaluator contracts, trace-based evaluators,
+ *   data model, persistence, reporting, CLI tooling
+ * - **Solution suites** (separate packages): datasets, tasks, solution-specific evaluators,
+ *   solution-specific reporting
+ *
+ * @module @kbn/evals
+ */
+
 // CLI tools
 export * as cli from './src/cli';
 
@@ -55,7 +72,22 @@ export {
 export { mapToEvaluationScoreDocuments, exportEvaluations } from './src/utils/report_model_score';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
-export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';
+/**
+ * Trace-based evaluators — the preferred pattern for non-functional metrics.
+ *
+ * These evaluators query OTel traces in Elasticsearch via ES|QL, extracting latency,
+ * token usage, tool calls, and skill invocations directly from production-grade traces.
+ * This is the trace-first evaluator pattern described in vision Section 5.2.1.
+ *
+ * New evaluators that measure non-functional signals should use `createTraceBasedEvaluator`
+ * rather than implementing custom ES queries.
+ */
+export {
+  createTraceBasedEvaluator,
+  type TraceBasedEvaluatorConfig,
+  createSpanLatencyEvaluator,
+  createSkillInvocationEvaluator,
+} from './src/evaluators/trace_based';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 
 export {
@@ -72,6 +104,16 @@ export type {
   RetrievedDoc,
 } from './src/evaluators/rag/types';
 export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
+
+export { createTrajectoryEvaluator } from './src/evaluators/trajectory';
+export { createConversationCoherenceEvaluator } from './src/evaluators/conversation_coherence';
+export { createMultiJudgeEvaluator } from './src/evaluators/multi_judge';
+export {
+  createToolPoisoningEvaluator,
+  createPromptLeakDetectionEvaluator,
+  createScopeViolationEvaluator,
+} from './src/evaluators/security';
+export { createSimilarityEvaluator } from './src/evaluators/similarity';
 
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';

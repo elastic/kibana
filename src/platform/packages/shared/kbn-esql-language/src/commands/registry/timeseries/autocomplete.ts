@@ -50,6 +50,8 @@ export async function autocomplete(
     return metadataSuggestions;
   }
 
+  // Only use overlap here to decide when to show `METADATA`.
+  // The replacement range is still handled centrally.
   const metadataOverlap = getOverlapRange(innerText, 'METADATA');
 
   // TS /

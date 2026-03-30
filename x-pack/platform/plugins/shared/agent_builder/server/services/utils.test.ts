@@ -10,12 +10,19 @@ import {
   securityServiceMock,
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
-import {
-  hasVisibilityAccessOverrideFromRequest,
-  getAgentApiAccessFromRequest,
-  getUserFromRequest,
-} from './utils';
+import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
+import { isAdminFromRequest, getAgentApiAccessFromRequest, getUserFromRequest } from './utils';
 import { apiPrivileges } from '../../common/features';
+
+const EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST = {
+  application: [
+    {
+      application: `${APPLICATION_PREFIX}.kibana`,
+      resources: ['*'],
+      privileges: ['agent_builder:admin'],
+    },
+  ],
+};
 
 describe('getUserFromRequest', () => {
   let security: ReturnType<typeof securityServiceMock.createStart>;
@@ -84,14 +91,14 @@ describe('getUserFromRequest', () => {
   });
 });
 
-describe('hasVisibilityAccessOverrideFromRequest', () => {
+describe('isAdminFromRequest', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 
-  it('returns true when privilege check authorizes override privilege', async () => {
+  it('returns true when privilege check authorizes admin privilege', async () => {
     esClient.security.hasPrivileges.mockResolvedValue({
       application: {},
       cluster: {},
@@ -100,13 +107,16 @@ describe('hasVisibilityAccessOverrideFromRequest', () => {
       username: 'testuser',
     });
 
-    const result = await hasVisibilityAccessOverrideFromRequest({ esClient });
+    const result = await isAdminFromRequest({ esClient });
 
     expect(result).toBe(true);
     expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledWith(
+      EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST
+    );
   });
 
-  it('returns false when privilege check does not authorize override privilege', async () => {
+  it('returns false when privilege check does not authorize admin privilege', async () => {
     esClient.security.hasPrivileges.mockResolvedValue({
       application: {},
       cluster: {},
@@ -115,10 +125,24 @@ describe('hasVisibilityAccessOverrideFromRequest', () => {
       username: 'testuser',
     });
 
-    const result = await hasVisibilityAccessOverrideFromRequest({ esClient });
+    const result = await isAdminFromRequest({ esClient });
 
     expect(result).toBe(false);
     expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledWith(
+      EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST
+    );
+  });
+
+  it('returns false when privilege check throws (fail closed)', async () => {
+    esClient.security.hasPrivileges.mockRejectedValue(new Error('Elasticsearch unavailable'));
+
+    const result = await isAdminFromRequest({ esClient });
+
+    expect(result).toBe(false);
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledWith(
+      EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST
+    );
   });
 });
 

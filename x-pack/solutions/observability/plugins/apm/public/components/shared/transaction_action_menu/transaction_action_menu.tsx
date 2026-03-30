@@ -52,7 +52,7 @@ function ActionMenuButton({ onClick, isLoading }: { onClick: () => void; isLoadi
     <EuiButton
       data-test-subj="apmActionMenuButtonInvestigateButton"
       isLoading={isLoading}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onClick}
     >

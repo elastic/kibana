@@ -43,9 +43,16 @@ export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCreden
   azure_credentials_cloud_connector_id?: string;
 }
 
+export interface GcpCloudConnectorCredentials extends BaseCloudConnectorCredentials {
+  serviceAccount?: string;
+  audience?: string;
+  gcp_credentials_cloud_connector_id?: string | CloudConnectorSecretReference;
+}
+
 export type CloudConnectorCredentials =
   | AwsCloudConnectorCredentials
-  | AzureCloudConnectorCredentials;
+  | AzureCloudConnectorCredentials
+  | GcpCloudConnectorCredentials;
 
 export interface NewCloudConnectorFormProps {
   newPolicy: NewPackagePolicy;
@@ -79,6 +86,15 @@ export interface AzureCloudConnectorOption {
   tenantId?: CloudConnectorSecretVar;
   clientId?: CloudConnectorSecretVar;
   azure_credentials_cloud_connector_id?: CloudConnectorVar;
+}
+
+export interface GcpCloudConnectorOption {
+  label: string;
+  value: string;
+  id: string;
+  serviceAccount?: CloudConnectorVar;
+  audience?: CloudConnectorVar;
+  gcp_credentials_cloud_connector_id?: CloudConnectorSecretVar;
 }
 
 export interface CloudConnectorFormProps {
@@ -121,4 +137,6 @@ export interface CloudConnectorField {
   dataTestSubj: string;
   value: string;
   id: string;
+  helpText?: string;
+  tooltip?: string;
 }

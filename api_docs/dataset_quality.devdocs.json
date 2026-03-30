@@ -1900,7 +1900,7 @@
         "signature": [
           "Omit<",
           "HttpFetchOptions",
-          ", \"body\"> & { pathname: string; method?: string | undefined; body?: any; }"
+          ", \"body\"> & { pathname: string; method?: string | undefined; body?: unknown; }"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/fetch_options.ts",
         "lineNumber": 10,
