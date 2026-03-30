@@ -17,10 +17,10 @@ import {
 } from '@elastic/eui';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
-import { useIndexMapping } from '../../hooks/api/use_index_mappings';
 import type { IndexDocuments as IndexDocumentsType } from '../../hooks/api/use_document_search';
 import { IndexDocuments } from '../index_documents/index_documents';
 import { IndexSearchExample } from './details_search_example';
+import type { Mappings } from '../../types';
 
 interface IndexDetailsDataProps {
   indexName: string;
@@ -28,6 +28,7 @@ interface IndexDetailsDataProps {
   isInitialLoading: boolean;
   navigateToPlayground: () => void;
   userPrivileges?: UserStartPrivilegesResponse;
+  mappingData: Mappings | undefined;
 }
 
 export const IndexDetailsData = ({
@@ -36,8 +37,8 @@ export const IndexDetailsData = ({
   isInitialLoading,
   navigateToPlayground,
   userPrivileges,
+  mappingData,
 }: IndexDetailsDataProps) => {
-  const { data: mappingData } = useIndexMapping(indexName);
   const documents = indexDocuments?.results?.data ?? [];
 
   if (isInitialLoading) {

@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Client as ESClient } from 'elasticsearch-8.x'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
-import type {
-  AggregationsAvgAggregate,
-  AggregationsMaxAggregate,
-  AggregationsPercentilesBucketAggregate,
-  AggregationsStatsBucketAggregate,
-  AggregationsStringTermsBucket,
-  SearchResponse,
-} from 'elasticsearch-8.x/lib/api/types'; // Switch to `@elastic/elasticsearch/lib/api/types` when the CI cluster is upgraded.
+import type { Client as ESClient } from '@elastic/elasticsearch';
 import fs from 'node:fs';
 import path from 'node:path';
 import { z } from '@kbn/zod';
+import {
+  SCOUT_TEST_EVENTS_INDEX_PATTERN,
+  ScoutTestTarget,
+  ScoutTestTargetSchema,
+} from '@kbn/scout-info';
 
 export const ScoutTestConfigStatsEntrySchema = z.object({
   path: z.string(),
+  test_target: ScoutTestTargetSchema.transform(
+    (data) => new ScoutTestTarget(data.location, data.arch, data.domain)
+  ),
   runCount: z.number().int(),
   runtime: z.object({
     avg: z.number().int(),
@@ -54,19 +54,12 @@ export type ScoutTestConfigStatsData = z.infer<typeof ScoutTestConfigStatsDataSc
 export class ScoutTestConfigStats {
   constructor(public data: ScoutTestConfigStatsData) {}
 
-  findConfigByPath(configPath: string): ScoutTestConfigStatsEntry | undefined {
-    return this.data.configs.find((config) => config.path === configPath);
-  }
-
-  public get largestConfig(): ScoutTestConfigStatsEntry {
-    return this.data.configs.reduce((previous, current) =>
-      current.runtime.estimate > previous.runtime.estimate ? current : previous
-    );
-  }
-
   writeToFile(outputPath: string) {
+    // lastUpdated shouldn't make it into the file because we read if from file attributes
+    const { lastUpdated, ...fileData } = this.data;
+
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-    fs.writeFileSync(outputPath, JSON.stringify(this.data, null, 2));
+    fs.writeFileSync(outputPath, JSON.stringify(fileData, null, 2));
   }
 
   static fromFile(statsFilePath: string): ScoutTestConfigStats {
@@ -76,9 +69,10 @@ export class ScoutTestConfigStats {
       );
     }
 
-    const data = ScoutTestConfigStatsDataSchema.parse(
-      JSON.parse(fs.readFileSync(statsFilePath, 'utf8'))
-    );
+    const data = ScoutTestConfigStatsDataSchema.parse({
+      lastUpdated: fs.statSync(statsFilePath).mtime,
+      ...JSON.parse(fs.readFileSync(statsFilePath, 'utf8')),
+    });
     return new ScoutTestConfigStats(data);
   }
 
@@ -93,91 +87,80 @@ export class ScoutTestConfigStats {
       };
     }
   ): Promise<ScoutTestConfigStats> {
-    // Build ES query
-    const query: { bool: { must: Record<string, any> } } = {
-      bool: {
-        must: [
-          { term: { 'event.action': { value: 'run-end' } } },
-          { range: { '@timestamp': { gte: `now-${options.lookbackDays}d` } } },
-        ],
-      },
-    };
+    // Build ES query filters
+    const whereClauses = [
+      `@timestamp >= NOW() - ${options.lookbackDays}day`,
+      'event.action == "run-end"',
+      'test_run.target.mode != "unknown"',
+    ];
 
     if (options.configPaths.length > 0) {
-      query.bool.must.push({ terms: { 'test_run.config.file.path': options.configPaths } });
+      whereClauses.push(
+        `test_run.config.file.path IN (${options.configPaths
+          .map((configPath) => `"${configPath}"`)
+          .join(', ')})`
+      );
     }
 
     if (options.buildkite.branch) {
-      query.bool.must.push({ term: { 'buildkite.branch': options.buildkite.branch } });
+      whereClauses.push(`buildkite.branch == "${options.buildkite.branch}"`);
     }
 
     if (options.buildkite.pipelineSlug) {
-      query.bool.must.push({ term: { 'buildkite.pipeline.slug': options.buildkite.pipelineSlug } });
+      whereClauses.push(`buildkite.pipeline.slug == "${options.buildkite.pipelineSlug}"`);
     }
 
-    // Fetch stats from ES
-    const rsp: SearchResponse<
-      any,
-      {
-        config_path: {
-          buckets: Array<
-            AggregationsStringTermsBucket & {
-              avg: AggregationsAvgAggregate;
-              percentile: AggregationsPercentilesBucketAggregate;
-              max: AggregationsMaxAggregate;
-            }
-          >;
-        };
-        config_path_stats: AggregationsStatsBucketAggregate;
-      }
-    > = await es.search({
-      size: 0,
-      track_total_hits: true,
-      query,
-      aggs: {
-        config_path: {
-          terms: { field: 'test_run.config.file.path', size: 9999 },
-          aggs: {
-            avg: {
-              avg: { field: 'test_run.duration' },
-            },
-            percentile: {
-              percentiles: {
-                field: 'test_run.duration',
-                percents: [50, 95, 99],
-                keyed: true,
-              },
-            },
-            max: { max: { field: 'test_run.duration' } },
+    const statsClauses = [
+      'run_count = COUNT(*)',
+      'avg_ms = AVG(test_run.duration)',
+      'max_ms = MAX(test_run.duration)',
+      'median_ms = MEDIAN(test_run.duration)',
+      'p95_ms = PERCENTILE(test_run.duration, 95)',
+      'p99_ms = PERCENTILE(test_run.duration, 99)',
+    ];
+
+    const queryClauses = [
+      `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
+      `WHERE ${whereClauses.join(' AND ')}`,
+      `STATS ${statsClauses.join(', ')}` +
+        ' BY test_run.config.file.path, test_run.target.type, test_run.target.mode',
+      'DISSECT test_run.target.mode "%{arch}-%{domain}"',
+      'DROP test_run.target.mode',
+      'RENAME test_run.config.file.path AS path, test_run.target.type AS location',
+      'LIMIT 10000',
+    ];
+
+    // Process response and into config stats
+    const configs = (
+      await es.helpers.esql({ query: queryClauses.join(' | ') }).toRecords<{
+        location: string;
+        arch: string;
+        domain: string;
+        path: string;
+        run_count: number;
+        avg_ms: number;
+        max_ms: number;
+        median_ms: number;
+        p95_ms: number;
+        p99_ms: number;
+      }>()
+    ).records
+      .filter((stats) => stats.arch != null && stats.domain != null)
+      .map((stats) => {
+        return ScoutTestConfigStatsEntrySchema.parse({
+          path: stats.path,
+          test_target: new ScoutTestTarget(stats.location, stats.arch, stats.domain),
+          runCount: stats.run_count,
+          runtime: {
+            avg: Math.floor(stats.avg_ms || 0),
+            median: Math.floor(stats.median_ms),
+            pc95th: Math.floor(stats.p95_ms),
+            pc99th: Math.floor(stats.p99_ms),
+            max: stats.max_ms || 0,
+            estimate: Math.floor(stats.p95_ms || 0),
           },
-        },
-        config_path_stats: {
-          stats_bucket: { buckets_path: 'config_path>_count' },
-        },
-      },
-    });
-
-    if (!rsp.aggregations) {
-      throw new Error('Aggregation results from the ES search response');
-    }
-
-    // Process search response and into config stats
-    const configs = rsp.aggregations.config_path.buckets.map((bucket) => {
-      const percentiles = bucket.percentile.values as Record<string, number>;
-
-      return ScoutTestConfigStatsEntrySchema.parse({
-        path: bucket.key,
-        runCount: bucket.doc_count,
-        runtime: {
-          avg: Math.floor(bucket.avg.value || 0),
-          median: Math.floor(percentiles['50.0']),
-          pc95th: Math.floor(percentiles['95.0']),
-          pc99th: Math.floor(percentiles['99.0']),
-          max: bucket.max.value || 0,
-          estimate: Math.floor(percentiles['95.0'] || 0),
-        },
+        });
       });
-    });
 
     return new ScoutTestConfigStats({
       lastUpdated: new Date(),

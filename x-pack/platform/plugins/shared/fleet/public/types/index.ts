@@ -144,6 +144,7 @@ export type {
   BulkGetAgentPoliciesResponse,
   RegistryPolicyIntegrationTemplate,
   EnrollmentSettingsFleetServerPolicy,
+  EnrollmentSettingsProxy,
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
   GetSpaceSettingsResponse,
@@ -158,6 +159,7 @@ export type {
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
   CloudConnectorSecretReference,
+  ProxyConfig,
 } from '../../common/types';
 export {
   entries,

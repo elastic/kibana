@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SecurityApiKeyManagedBy } from '@elastic/elasticsearch/lib/api/types';
 import type { AuthenticationProvider } from './authentication_provider';
 import type { User } from './user';
 
@@ -38,6 +39,11 @@ export interface ApiKeyDescriptor {
    * The ID of the API key.
    */
   id: string;
+
+  /**
+   * Which entity manages this API key
+   */
+  managed_by: SecurityApiKeyManagedBy;
 }
 
 /**

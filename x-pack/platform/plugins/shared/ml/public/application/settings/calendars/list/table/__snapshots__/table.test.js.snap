@@ -425,7 +425,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <nav
-              aria-label="Pagination for table: "
+              aria-label="Pagination for table: Calendars"
               class="euiPagination emotion-euiPagination"
             >
               <span

@@ -306,6 +306,9 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       cellProps={(item, field) => ({
         'data-test-subj': `${field.name}_cell`,
       })}
+      tableCaption={i18n.translate('xpack.snapshotRestore.repositoryList.table.tableCaption', {
+        defaultMessage: 'Registered repositories',
+      })}
       data-test-subj="repositoryTable"
     />
   );

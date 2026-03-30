@@ -35,8 +35,7 @@ export default function (providerContext: FtrProviderContext) {
   const es = providerContext.getService('es');
   const dataView = dataViewRouteHelpersFactory(supertest);
 
-  // Failing: See https://github.com/elastic/kibana/issues/236183
-  describe.skip('@ess Entity Store History - Snapshots', () => {
+  describe('@ess Entity Store History - Snapshots', () => {
     describe('Entity Store is not installed by default', () => {
       it("Should return 200 and status 'not_installed'", async () => {
         const { body } = await supertest.get('/api/entity_store/status').expect(200);
@@ -232,15 +231,41 @@ async function createDocumentsAndTriggerTransform(
 ): Promise<void> {
   const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
+  const log = providerContext.getService('log');
 
-  const { count, transforms } = await es.transform.getTransformStats({
-    transform_id: HOST_TRANSFORM_ID,
-  });
-  expect(count).to.eql(1);
-  let transform = transforms[0];
-  expect(transform.id).to.eql(HOST_TRANSFORM_ID);
-  const triggerCount: number = transform.stats.trigger_count;
-  const docsProcessed: number = transform.stats.documents_processed;
+  // Wait for the transform to exist before attempting to get stats
+  let transform: any;
+  let triggerCount: number = 0;
+  let docsProcessed: number = 0;
+
+  await retry.waitForWithTimeout(
+    `Transform ${HOST_TRANSFORM_ID} to exist`,
+    TIMEOUT_MS,
+    async () => {
+      try {
+        const { count, transforms } = await es.transform.getTransformStats({
+          transform_id: HOST_TRANSFORM_ID,
+        });
+        if (count !== 1) {
+          log.debug(`Waiting for transform ${HOST_TRANSFORM_ID} to exist, count: ${count}`);
+          return false;
+        }
+        transform = transforms[0];
+        triggerCount = transform.stats.trigger_count;
+        docsProcessed = transform.stats.documents_processed;
+        log.debug(
+          `Transform ${HOST_TRANSFORM_ID} found, trigger_count: ${triggerCount}, docs_processed: ${docsProcessed}`
+        );
+        return true;
+      } catch (e: any) {
+        if (e.message?.includes('resource_not_found_exception')) {
+          log.debug(`Transform ${HOST_TRANSFORM_ID} not found yet, waiting...`);
+          return false;
+        }
+        throw e;
+      }
+    }
+  );
 
   for (let i = 0; i < docs.length; i++) {
     const { result } = await es.index(buildHostTransformDocument(docs[i], dataStream));
@@ -254,13 +279,38 @@ async function createDocumentsAndTriggerTransform(
   expect(acknowledged).to.be(true);
 
   await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
-    const response = await es.transform.getTransformStats({
-      transform_id: HOST_TRANSFORM_ID,
-    });
-    transform = response.transforms[0];
-    expect(transform.stats.trigger_count).to.greaterThan(triggerCount);
-    expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
-    return true;
+    try {
+      const response = await es.transform.getTransformStats({
+        transform_id: HOST_TRANSFORM_ID,
+      });
+      if (!response.transforms[0]) {
+        log.debug(`Transform ${HOST_TRANSFORM_ID} not found in stats response, retrying...`);
+        return false;
+      }
+      transform = response.transforms[0];
+      if (transform.stats.trigger_count <= triggerCount) {
+        log.debug(
+          `Transform trigger_count ${transform.stats.trigger_count} not greater than ${triggerCount}, waiting...`
+        );
+        return false;
+      }
+      if (transform.stats.documents_processed <= docsProcessed) {
+        log.debug(
+          `Transform docs_processed ${transform.stats.documents_processed} not greater than ${docsProcessed}, waiting...`
+        );
+        return false;
+      }
+      log.debug(
+        `Transform completed: trigger_count=${transform.stats.trigger_count}, docs_processed=${transform.stats.documents_processed}`
+      );
+      return true;
+    } catch (e: any) {
+      if (e.message?.includes('resource_not_found_exception')) {
+        log.debug(`Transform ${HOST_TRANSFORM_ID} not found, retrying...`);
+        return false;
+      }
+      throw e;
+    }
   });
 }
 
@@ -270,38 +320,76 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
   const retry = providerContext.getService('retry');
 
   const RETRIES = 5;
+  const RETRY_DELAY_MS = 5000;
   let success: boolean = false;
+
   for (let attempt = 0; attempt < RETRIES; attempt++) {
+    log.info(
+      `Enabling Entity Store with entityTypes=['host'] (attempt ${attempt + 1}/${RETRIES})...`
+    );
+
+    // Only enable 'host' engine - this test only validates host snapshots.
+    // Enabling all engines concurrently causes task conflicts (server-side issue).
     const response = await supertest
       .post('/api/entity_store/enable')
       .set('kbn-xsrf', 'xxxx')
-      .send({});
-    expect(response.statusCode).to.eql(200);
-    expect(response.body.succeeded).to.eql(true);
+      .send({ entityTypes: ['host'] });
 
-    // and wait for it to start up
-    await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
-      const { body } = await supertest
-        .get('/api/entity_store/status')
-        .query({ include_components: true })
-        .expect(200);
-      if (body.status === 'error') {
-        log.error(`Expected body.status to be 'running', got 'error': ${JSON.stringify(body)}`);
-        success = false;
-        return true;
+    if (response.statusCode !== 200) {
+      log.error(`Enable request failed: ${response.statusCode} - ${JSON.stringify(response.body)}`);
+      if (attempt < RETRIES - 1) {
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+        await cleanUpEntityStore(providerContext);
       }
-      expect(body.status).to.eql('running');
-      success = true;
-      return true;
-    });
+      continue;
+    }
+
+    if (!response.body.succeeded) {
+      log.error(`Enable request returned succeeded=false: ${JSON.stringify(response.body)}`);
+      if (attempt < RETRIES - 1) {
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+        await cleanUpEntityStore(providerContext);
+      }
+      continue;
+    }
+
+    // Wait for Entity Store to reach 'running' status
+    try {
+      await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
+        const { body } = await supertest
+          .get('/api/entity_store/status')
+          .query({ include_components: true })
+          .expect(200);
+
+        if (body.status === 'running') {
+          log.info('Entity Store is now running');
+          success = true;
+          return true;
+        }
+
+        if (body.status === 'error') {
+          log.error(`Entity Store is in error state: ${JSON.stringify(body)}`);
+          return true; // Exit wait loop to trigger retry
+        }
+
+        log.debug(`Entity Store status: ${body.status}, waiting for 'running'...`);
+        return false;
+      });
+    } catch (e: any) {
+      log.error(`Wait for Entity Store failed: ${e.message}`);
+    }
 
     if (success) {
       break;
-    } else {
-      log.info(`Retrying Entity Store setup...`);
+    }
+
+    if (attempt < RETRIES - 1) {
+      log.info(`Retrying Entity Store setup after ${RETRY_DELAY_MS}ms delay...`);
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
       await cleanUpEntityStore(providerContext);
     }
   }
+
   expect(success).ok();
 }
 

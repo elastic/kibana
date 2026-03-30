@@ -263,6 +263,9 @@ export const MiniAlertTable: FC<MiniAlertTableProps> = ({ data }) => {
 
   return (
     <EuiInMemoryTable
+      tableCaption={i18n.translate('xpack.ml.explorer.cellSelectionPopover.alertsTableCaption', {
+        defaultMessage: 'Alerts for the selected swim lane cell',
+      })}
       css={{ width: '510px' }}
       compressed
       columns={columns}

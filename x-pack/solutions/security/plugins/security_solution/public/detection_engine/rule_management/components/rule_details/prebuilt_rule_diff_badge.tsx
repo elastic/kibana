@@ -26,9 +26,7 @@ export const PrebuiltRuleDiffBadge = ({ label, dataTestSubj }: PrebuiltRuleDiffB
       iconType="expand"
       iconSide="right"
       onClick={openCustomizationsPreviewFlyout}
-      iconOnClick={openCustomizationsPreviewFlyout}
       onClickAriaLabel={label}
-      iconOnClickAriaLabel={label}
       title="" // We surround all implementations of the badge with a tooltip on hover
     >
       {label}

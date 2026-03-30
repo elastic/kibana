@@ -139,9 +139,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/EndpointListItem'
-                type: array
+                $ref: '#/components/schemas/EndpointListItem'
           description: Successful response
         '400':
           content:

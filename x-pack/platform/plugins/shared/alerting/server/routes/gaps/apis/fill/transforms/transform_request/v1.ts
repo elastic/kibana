@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
 import type { FillGapByIdQueryV1 } from '../../../../../../../common/routes/gaps/apis/fill';
 import type { FillGapByIdParams } from '../../../../../../application/rule/methods/fill_gap_by_id/types';

@@ -311,7 +311,7 @@ describe('Fleet cloud preconfiguration', () => {
                 data_stream: {
                   namespace: 'default',
                 },
-                id: 'elastic-cloud-apm',
+                id: 'apm-apmserver-elastic-cloud-apm',
                 meta: {
                   package: {
                     name: 'apm',

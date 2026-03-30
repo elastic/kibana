@@ -109,7 +109,7 @@ describe('processFilters', () => {
       )
     ).toEqual({
       bool: {
-        must: [
+        filter: [
           {
             bool: {
               minimum_should_match: 1,
@@ -124,6 +124,7 @@ describe('processFilters', () => {
           },
           {
             bool: {
+              minimum_should_match: 1,
               should: [
                 {
                   match_phrase: {
@@ -131,7 +132,6 @@ describe('processFilters', () => {
                   },
                 },
               ],
-              minimum_should_match: 1,
             },
           },
           {
@@ -140,6 +140,7 @@ describe('processFilters', () => {
             },
           },
         ],
+        must: [],
         must_not: [
           {
             match_phrase: {
@@ -147,6 +148,7 @@ describe('processFilters', () => {
             },
           },
         ],
+        should: [],
       },
     });
   });
@@ -251,12 +253,7 @@ describe('processFilters', () => {
       )
     ).toEqual({
       bool: {
-        must: [
-          {
-            query_string: {
-              query: 'instance:i-d**',
-            },
-          },
+        filter: [
           {
             bool: {
               should: [
@@ -275,6 +272,13 @@ describe('processFilters', () => {
             },
           },
         ],
+        must: [
+          {
+            query_string: {
+              query: 'instance:i-d**',
+            },
+          },
+        ],
         must_not: [
           {
             match_phrase: {
@@ -282,6 +286,7 @@ describe('processFilters', () => {
             },
           },
         ],
+        should: [],
       },
     });
   });

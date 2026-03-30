@@ -15,8 +15,8 @@
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-list-hooks",
     "@kbn/securitysolution-list-utils",
-    "@kbn/doc-links",
     "@kbn/securitysolution-utils",
+    "@kbn/kibana-react-plugin",
   ],
   "exclude": [
     "target/**/*",

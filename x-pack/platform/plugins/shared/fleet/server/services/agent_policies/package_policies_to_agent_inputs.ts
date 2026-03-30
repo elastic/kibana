@@ -9,7 +9,7 @@ import deepMerge from 'deepmerge';
 
 import type { FullAgentPolicyAddFields, GlobalDataTag } from '../../../common/types';
 import { getAgentlessGlobalDataTags } from '../../../common/services/agentless_policy_helper';
-import { isPackageLimited } from '../../../common/services';
+
 import type {
   PackagePolicy,
   FullAgentPolicyInput,
@@ -23,6 +23,7 @@ import { pkgToPkgKey } from '../epm/registry';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
+  FLEET_ENDPOINT_PACKAGE,
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
   OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../common/constants/epm';
@@ -36,15 +37,15 @@ export function getInputId(
   packagePolicyId?: string,
   packageInfo?: PackageInfo
 ): string {
-  // Marks to skip appending input information to package policy ID to make it unique if package is "limited":
-  // this means that only one policy for the package can exist on the agent policy, so its ID is already unique
-  const appendInputId = packageInfo && isPackageLimited(packageInfo) ? false : true;
+  // Only the endpoint (Elastic Defend) package uses a simplified ID format for backward compatibility.
+  // All other packages (including other limited packages) use the standard format with type and policy template.
+  const useSimplifiedId = packageInfo?.name === FLEET_ENDPOINT_PACKAGE;
 
-  return appendInputId
-    ? `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
+  return useSimplifiedId
+    ? packagePolicyId || 'default'
+    : `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
         packagePolicyId ? `-${packagePolicyId}` : ''
-      }`
-    : packagePolicyId || 'default';
+      }`;
 }
 
 export const storedPackagePolicyToAgentInputs = (

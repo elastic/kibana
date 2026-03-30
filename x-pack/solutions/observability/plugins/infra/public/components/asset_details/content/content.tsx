@@ -94,12 +94,21 @@ const TabPanel = ({
 }) => {
   const { renderedTabsSet, activeTabId } = useTabSwitcherContext();
 
+  // The logs tab is a special case because it is not rendered in the DOM until it is clicked due to performance reasons.
+  if (activeWhen === ContentTabIds.LOGS && activeTabId === activeWhen) {
+    return <div data-test-subj={makeTabPanelDataTestSubj({ tabId: activeWhen })}>{children}</div>;
+  }
+
   return renderedTabsSet.current.has(activeWhen) ? (
     <div
       hidden={activeTabId !== activeWhen}
-      data-test-subj={`infraAssetDetails${capitalize(activeWhen)}TabContent`}
+      data-test-subj={makeTabPanelDataTestSubj({ tabId: activeWhen })}
     >
       {children}
     </div>
   ) : null;
 };
+
+function makeTabPanelDataTestSubj({ tabId }: { tabId: ContentTabIds }) {
+  return `infraAssetDetails${capitalize(tabId)}TabContent`;
+}

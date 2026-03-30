@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { processDistanceResponse } from './process_distance_response';
 
 test('should convert elasticsearch response into table', () => {

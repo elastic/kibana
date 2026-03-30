@@ -33,6 +33,7 @@ function createTestConfig(
     enabled: true,
     minThreads: 1,
     maxThreads: 3,
+    maxQueue: 20,
     idleTimeout: { asMilliseconds: () => 30000 },
     taskTimeout: { asMilliseconds: () => 15000 },
     ...overrides,

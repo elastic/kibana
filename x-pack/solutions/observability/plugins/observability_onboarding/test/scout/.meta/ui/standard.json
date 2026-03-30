@@ -1,19 +1,19 @@
 {
-  "lastModified": "2025-12-11T11:22:47.446Z",
-  "sha1": "4da8831b56dfe9d125701c04bdfef3eacbe43607",
+  "sha1": "81d438302f989049ded05dd45dd565b0ff3720b8",
   "tests": [
     {
       "id": "bd77233fbb28a70-b95459eaf733782",
       "title": "Onboarding UI Validation validates main page structure and navigation",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 20,
+        "line": 21,
         "column": 7
       }
     },
@@ -22,13 +22,16 @@
       "title": "Onboarding UI Validation completes Host onboarding flow",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 52,
+        "line": 55,
         "column": 7
       }
     },
@@ -37,13 +40,16 @@
       "title": "Onboarding UI Validation completes Host OTel integration navigation",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 81,
+        "line": 90,
         "column": 7
       }
     },
@@ -52,13 +58,16 @@
       "title": "Onboarding UI Validation completes Kubernetes onboarding flow",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 100,
+        "line": 115,
         "column": 7
       }
     },
@@ -67,13 +76,16 @@
       "title": "Onboarding UI Validation completes Cloud onboarding flow",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 124,
+        "line": 145,
         "column": 7
       }
     },
@@ -82,12 +94,14 @@
       "title": "Onboarding UI Validation completes Application onboarding flow in complete tier",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 147,
+        "line": 174,
         "column": 7
       }
     },
@@ -96,11 +110,12 @@
       "title": "Onboarding UI Validation validates logs-essentials tier restrictions",
       "expectedStatus": "passed",
       "tags": [
-        "@svlLogsEssentials"
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 169,
+        "line": 196,
         "column": 7
       }
     }

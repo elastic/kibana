@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
+import type { UiSettingValues } from '@kbn/kbn-client';
 import { formatTime, isValidUTCDate } from '../../../../utils';
 import { coreWorkerFixtures } from '..';
 import type { ImportSavedObjects, ScoutSpaceParallelFixture } from '.';
@@ -125,6 +125,14 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         unset,
         setDefaultTime,
       };
+
+      /**
+       * To hide the sidenav tour we need to enable 'hideAnnouncements' setting
+       * It should hide both space tour and sidenav tour.
+       * Currently it can be set only per space, so we set it right after new space is created.
+       * TODO: update if setting becomes global https://github.com/elastic/kibana/issues/234771
+       */
+      await kbnClient.uiSettings.update({ hideAnnouncements: true }, { space: spaceId });
 
       log.serviceMessage('scoutSpace', `New Kibana space '${spaceId}' created`);
       await use({ savedObjects, uiSettings, id: spaceId });

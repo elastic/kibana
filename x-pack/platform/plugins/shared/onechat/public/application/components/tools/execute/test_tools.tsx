@@ -170,7 +170,7 @@ const renderFormField = ({
               inputRef={ref}
               value={(value as number) ?? ''}
               type="number"
-              onChange={(e) => onChange(e.target.valueAsNumber || e.target.value)}
+              onChange={(e) => onChange(e.target.valueAsNumber ?? e.target.value)}
               placeholder={i18nMessages.inputPlaceholder(label)}
               fullWidth
             />

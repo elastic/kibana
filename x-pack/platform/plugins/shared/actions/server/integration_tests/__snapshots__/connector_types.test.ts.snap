@@ -2400,6 +2400,27 @@ Object {
       ],
       "type": "string",
     },
+    "region": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
   },
   "type": "object",
 }
@@ -5818,7 +5839,18 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 512,
+            },
+          ],
           "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
             Object {
               "args": Object {
                 "method": [Function],
@@ -5827,6 +5859,14 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 100,
+          },
+          "name": "max",
         },
       ],
       "type": "array",
@@ -5843,7 +5883,18 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 512,
+            },
+          ],
           "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
             Object {
               "args": Object {
                 "method": [Function],
@@ -5852,6 +5903,14 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 100,
+          },
+          "name": "max",
         },
       ],
       "type": "array",
@@ -5978,7 +6037,18 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 512,
+            },
+          ],
           "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
             Object {
               "args": Object {
                 "method": [Function],
@@ -5987,6 +6057,14 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 100,
+          },
+          "name": "max",
         },
       ],
       "type": "array",
@@ -10627,6 +10705,27 @@ Object {
               },
             ],
             "type": "number",
+          },
+          "defaultModel": Object {
+            "flags": Object {
+              "default": [Function],
+              "error": [Function],
+              "presence": "optional",
+            },
+            "metas": Array [
+              Object {
+                "x-oas-optional": true,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
           },
           "headers": Object {
             "flags": Object {

@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 export interface CommonFieldSchema {
   id: string;
   label: string;
+  labelAppend?: ReactNode;
   helpText?: string | ReactNode;
   isRequired?: boolean;
   type?: keyof typeof FIELD_TYPES;
@@ -52,6 +53,7 @@ const { emptyField, urlField } = fieldValidators;
 
 const getFieldConfig = ({
   label,
+  labelAppend,
   isRequired = true,
   isUrlField = false,
   requireTld = true,
@@ -59,6 +61,7 @@ const getFieldConfig = ({
   type,
 }: {
   label: string;
+  labelAppend?: ReactNode;
   isRequired?: boolean;
   isUrlField?: boolean;
   requireTld?: boolean;
@@ -66,6 +69,7 @@ const getFieldConfig = ({
   type?: keyof typeof FIELD_TYPES;
 }) => ({
   label,
+  labelAppend,
   validations: [
     ...(isRequired
       ? [
@@ -119,6 +123,7 @@ const FormRow: React.FC<FormRowProps> = ({
   isPasswordField,
   isRequired = true,
   isUrlField,
+  labelAppend,
   helpText,
   defaultValue,
   euiFieldProps = {},
@@ -141,6 +146,7 @@ const FormRow: React.FC<FormRowProps> = ({
                 type,
                 isRequired,
                 requireTld,
+                labelAppend,
               })}
               helpText={helpText}
               componentProps={{
@@ -155,7 +161,7 @@ const FormRow: React.FC<FormRowProps> = ({
           ) : (
             <UseField
               path={id}
-              config={getFieldConfig({ label, type, isRequired })}
+              config={getFieldConfig({ label, type, isRequired, labelAppend })}
               helpText={helpText}
               component={PasswordField}
               componentProps={{
@@ -174,7 +180,6 @@ const FormRow: React.FC<FormRowProps> = ({
 };
 
 const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
-  isEdit,
   readOnly,
   configFormSchema,
   secretsFormSchema,

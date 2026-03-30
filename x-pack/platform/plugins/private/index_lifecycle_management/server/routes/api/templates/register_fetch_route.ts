@@ -32,7 +32,6 @@ function filterLegacyTemplates(templates: {
   const formattedTemplates = [];
   const templateNames = Object.keys(templates);
   for (const templateName of templateNames) {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { settings, index_patterns } = templates[templateName];
     if (isReservedSystemTemplate(templateName, index_patterns)) {
       continue;

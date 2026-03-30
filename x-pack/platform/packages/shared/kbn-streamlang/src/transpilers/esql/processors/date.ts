@@ -12,13 +12,7 @@ import type { DateProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 
 export function convertDateProcessorToESQL(processor: DateProcessor): ESQLAstCommand[] {
-  const {
-    from,
-    to,
-    formats, // eslint-disable-next-line @typescript-eslint/naming-convention
-    output_format,
-    where,
-  } = processor;
+  const { from, to, formats, output_format, where } = processor;
   const fromColumn = Builder.expression.column(from);
   // In case ES has mapped fromColumn as datetime, we need to convert to string first for DATE_PARSE
   const fromAsString = Builder.expression.func.call('TO_STRING', [fromColumn]);

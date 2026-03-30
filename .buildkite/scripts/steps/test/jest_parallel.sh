@@ -115,6 +115,6 @@ printf "%s\n" "${results[@]}"
 echo ""
 
 # Scout reporter
-source .buildkite/scripts/steps/test/scout_upload_report_events.sh
+source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 
 exit $exitCode

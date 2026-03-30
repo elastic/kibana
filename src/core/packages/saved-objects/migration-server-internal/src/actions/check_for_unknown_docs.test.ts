@@ -107,10 +107,10 @@ describe('checkForUnknownDocs', () => {
   });
 
   it('should throw because neither handler can retry', async () => {
-    // Create a mock client that rejects all methods with a 502 status code response.
+    // Create a mock client that rejects all methods with a 500 status code response.
     const retryableError = new EsErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({
-        statusCode: 502,
+        statusCode: 500,
         body: { error: { type: 'es_type', reason: 'es_reason' } },
       })
     );

@@ -72,3 +72,18 @@ export function writeYaml(filePath: string, obj: any, preamble: string | null = 
     return true;
   }
 }
+
+export function compactFilePathsToGlobs(filePaths: string[]): string[] {
+  const folderGlobs = new Set<string>();
+  const files: string[] = [];
+  filePaths.forEach((filePath) => {
+    if (filePath.includes(path.sep)) {
+      const dirGlob = filePath.split(path.sep)[0] + path.sep + '**' + path.sep + '*';
+      folderGlobs.add(dirGlob);
+    } else {
+      files.push(filePath);
+    }
+  });
+
+  return [...folderGlobs, ...files].map((e) => e.replaceAll(path.sep, '/'));
+}

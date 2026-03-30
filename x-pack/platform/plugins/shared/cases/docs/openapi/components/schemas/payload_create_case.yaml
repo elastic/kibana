@@ -20,6 +20,6 @@ properties:
     type: array
     items:
       type: string
-      example: ["tag-1"]
+    example: ["tag-1"]
   title:
     type: string

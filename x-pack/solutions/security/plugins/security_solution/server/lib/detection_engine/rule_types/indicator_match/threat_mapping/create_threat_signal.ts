@@ -19,9 +19,9 @@ import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_aft
 
 import { buildThreatEnrichment } from './build_threat_enrichment';
 import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
+import { createSearchAfterReturnType } from '../../utils/utils';
 export const createThreatSignal = async ({
   sharedParams,
-  currentResult,
   currentThreatList,
   eventsTelemetry,
   filters,
@@ -59,7 +59,7 @@ export const createThreatSignal = async ({
     ruleExecutionLogger.debug(
       'Indicator items are empty after filtering for missing data, returning without attempting a match'
     );
-    return currentResult;
+    return createSearchAfterReturnType();
   } else {
     const esFilter = await getFilter({
       type,

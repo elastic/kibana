@@ -7,6 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import type { Direction } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
 import { CertStatus } from './cert_status';
@@ -113,6 +114,9 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
           direction: sort.direction,
         },
       }}
+      tableCaption={i18n.translate('xpack.uptime.certificatesList.caption', {
+        defaultMessage: 'Certificates overview',
+      })}
       noItemsMessage={
         certificates.loading ? (
           LOADING_CERTIFICATES

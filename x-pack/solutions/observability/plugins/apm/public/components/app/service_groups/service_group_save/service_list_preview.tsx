@@ -106,6 +106,9 @@ export function ServiceListPreview({ items, isLoading }: Props) {
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('xpack.apm.serviceGroups.selectServicesList.tableCaption', {
+        defaultMessage: 'Service list preview',
+      })}
       loading={isLoading}
       noItemsMessage={i18n.translate('xpack.apm.serviceGroups.selectServicesList.notFoundLabel', {
         defaultMessage:

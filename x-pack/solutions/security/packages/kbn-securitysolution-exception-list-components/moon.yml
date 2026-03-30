@@ -4,26 +4,25 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/securitysolution-exception-list-components'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-detection-engine'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/securitysolution-exception-list-components'
+  title: '@kbn/securitysolution-exception-list-components'
   description: Moon project for @kbn/securitysolution-exception-list-components
   channel: ''
   owner: '@elastic/security-detection-engine'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components
+  sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components
 dependsOn:
   - '@kbn/securitysolution-io-ts-list-types'
   - '@kbn/securitysolution-autocomplete'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
 tags:
-  - shared-common
+  - shared-browser
   - package
   - prod
   - group-security
@@ -37,14 +36,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

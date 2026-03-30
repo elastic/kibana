@@ -68,7 +68,7 @@ export const BulkGetPackagePoliciesRequestSchema = {
 };
 
 export const BulkGetPackagePoliciesResponseBodySchema = schema.object({
-  items: schema.arrayOf(PackagePolicyResponseSchema),
+  items: schema.arrayOf(PackagePolicyResponseSchema, { maxSize: 10000 }),
 });
 
 export const GetOnePackagePolicyRequestSchema = {
@@ -117,7 +117,7 @@ export const UpdatePackagePolicyRequestSchema = {
 
 export const DeletePackagePoliciesRequestSchema = {
   body: schema.object({
-    packagePolicyIds: schema.arrayOf(schema.string()),
+    packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
     force: schema.maybe(schema.boolean()),
   }),
 };
@@ -135,10 +135,11 @@ export const DeletePackagePoliciesResponseBodySchema = schema.arrayOf(
         }),
       ])
     ),
-    policy_ids: schema.arrayOf(schema.string()),
+    policy_ids: schema.arrayOf(schema.string(), { maxSize: 10000 }),
     output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
     package: PackagePolicyPackageSchema,
-  })
+  }),
+  { maxSize: 10000 }
 );
 
 export const DeleteOnePackagePolicyRequestSchema = {
@@ -156,17 +157,18 @@ export const DeleteOnePackagePolicyResponseSchema = schema.object({
 
 export const UpgradePackagePoliciesRequestSchema = {
   body: schema.object({
-    packagePolicyIds: schema.arrayOf(schema.string()),
+    packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
   }),
 };
 
 export const UpgradePackagePoliciesResponseBodySchema = schema.arrayOf(
-  PackagePolicyStatusResponseSchema
+  PackagePolicyStatusResponseSchema,
+  { maxSize: 10000 }
 );
 
 export const DryRunPackagePoliciesRequestSchema = {
   body: schema.object({
-    packagePolicyIds: schema.arrayOf(schema.string()),
+    packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
     packageVersion: schema.maybe(schema.string()),
   }),
 };
@@ -184,7 +186,8 @@ export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
             id: schema.maybe(schema.string()),
           }),
           DryRunPackagePolicySchema,
-        ])
+        ]),
+        { maxSize: 2 }
       )
     ),
     agent_diff: schema.maybe(
@@ -226,7 +229,8 @@ export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
                     })
                     .extendsDeep({
                       unknowns: 'allow',
-                    })
+                    }),
+                  { maxSize: 10000 }
                 )
               ),
               processors: schema.maybe(
@@ -239,15 +243,19 @@ export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
                         schema.oneOf([schema.string(), schema.number()])
                       ),
                     }),
-                  })
+                  }),
+                  { maxSize: 10000 }
                 )
               ),
             })
             .extendsDeep({
               unknowns: 'allow',
-            })
-        )
+            }),
+          { maxSize: 10000 }
+        ),
+        { maxSize: 1 }
       )
     ),
-  })
+  }),
+  { maxSize: 10000 }
 );

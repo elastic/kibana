@@ -309,6 +309,7 @@ const TranslationResultsTable = React.memo<{
       data-test-subj="translatedResultsTable"
       items={items}
       columns={columns}
+      tableCaption={i18n.RULE_MIGRATION_SUMMARY_TITLE}
       compressed
     />
   );

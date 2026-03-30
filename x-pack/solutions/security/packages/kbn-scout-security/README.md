@@ -135,7 +135,7 @@ test.beforeEach(async ({ pageObjects }) => {
 To start the servers without running tests, use the following command:
 
 ```bash
-node scripts/scout.js start-server [--stateful|--serverless=security]
+node scripts/scout.js start-server --arch [stateful|serverless] --domain security_complete
 ```
 
 This is useful for manual testing or running tests via an IDE.
@@ -145,7 +145,7 @@ This is useful for manual testing or running tests via an IDE.
 To start the servers and run tests, use:
 
 ```bash
-node scripts/scout.js run-tests [--stateful|--serverless=security] --config <plugin-path>/test/scout/ui/[playwright.config.ts|parallel.playwright.config.ts]
+node scripts/scout.js run-tests --arch [stateful|serverless] --domain security_complete --config <plugin-path>/test/scout/ui/[playwright.config.ts|parallel.playwright.config.ts]
 ```
 
 This command starts the required servers and then automatically executes the tests using Playwright.

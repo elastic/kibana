@@ -167,7 +167,6 @@ export const enhancedEsSearchStrategyProvider = (
       throw new KbnSearchError(`"params.index" is required when performing a rollup search`, 400);
     }
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { ignore_unavailable, preference, ...params } = {
       ...querystring,
       ...request.params,

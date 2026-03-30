@@ -9,14 +9,12 @@ import { getDatasourceId } from '@kbn/visualization-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import type {
-  VisualizeEditorContext,
-  Suggestion,
-  IndexPatternRef,
-  VisualizationMap,
-} from '../types';
+import type { VisualizeEditorContext, Suggestion, VisualizationMap } from '../types';
 import type { TypedLensByValueInput, TypedLensSerializedState } from '../react_embeddable/types';
-import type { TextBasedPrivateState } from '../datasources/form_based/esql_layer/types';
+import type {
+  TextBasedPrivateState,
+  IndexPatternRef,
+} from '../datasources/form_based/esql_layer/types';
 
 const datasourceHasIndexPatternRefs = (
   unknownDatasource: unknown
@@ -60,7 +58,7 @@ export const injectESQLQueryIntoLensLayers = (
 
   const datasourceState = structuredClone(attributes.state.datasourceStates[datasourceId]);
 
-  // Update each layer with the new query and index pattern if needed
+  // Update each layer with the new query, index pattern, and timeField
   if (datasourceState?.layers) {
     Object.values(datasourceState.layers).forEach((layer) => {
       if (!isEqual(layer.query, query)) {
@@ -69,8 +67,15 @@ export const injectESQLQueryIntoLensLayers = (
         if (index) {
           layer.index = index;
         }
+        if (indexPatternRef) {
+          layer.timeField = indexPatternRef.timeField;
+        }
       }
     });
+  }
+
+  if (indexPatternRef && datasourceHasIndexPatternRefs(datasourceState)) {
+    datasourceState.indexPatternRefs = [indexPatternRef];
   }
   return {
     ...attributes,

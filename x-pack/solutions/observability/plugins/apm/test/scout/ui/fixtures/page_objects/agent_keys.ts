@@ -6,16 +6,15 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { waitForApmSettingsHeaderLink } from '../page_helpers';
 
 export class AgentKeysPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/agent-keys`);
-    await this.page.waitForLoadingIndicatorHidden();
-    this.page.getByRole('heading', { name: 'Settings', level: 1 });
-
-    return this.page;
+    await waitForApmSettingsHeaderLink(this.page);
+    await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
   }
 
   getCreateButtonLocator() {

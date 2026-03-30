@@ -12,7 +12,10 @@
  */
 import type { monaco } from '@kbn/monaco';
 
+import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
+
 const mockPopulateContext = jest.fn();
+const mockEditor = {} as unknown as MonacoEditorActionsProvider;
 
 jest.mock('../../../../lib/autocomplete/engine', () => {
   return {
@@ -27,6 +30,7 @@ import {
   getUrlPathCompletionItems,
   shouldTriggerSuggestions,
   getInsertText,
+  getBodyCompletionItems,
 } from './autocomplete_utils';
 
 describe('autocomplete_utils', () => {
@@ -216,6 +220,116 @@ describe('autocomplete_utils', () => {
       const items = getUrlPathCompletionItems(mockModel, mockPosition);
       expect(items.length).toBe(5);
     });
+
+    it('filters structural suggestions when cursor is inside an unclosed quote (unmatched endpoint)', async () => {
+      const mockAutocompleteSet = [
+        { name: '{' },
+        { name: 'match_all', insertValue: '{' },
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
+
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.autoCompleteSet = mockAutocompleteSet;
+      });
+
+      const mockModel = {
+        getLineContent: () => 'POST not_a_real_endpoint',
+        getValueInRange: jest.fn((range: any) => {
+          if (range.startLineNumber === 2) {
+            return '{\n  "query": "';
+          }
+          if (range.startLineNumber === 3 && range.startColumn === 1) {
+            return '  "query": "';
+          }
+          return '';
+        }),
+        getWordUntilPosition: () => ({ startColumn: 12, word: '' }),
+        getLineMaxColumn: () => 12,
+      } as unknown as monaco.editor.ITextModel;
+
+      const mockPosition = { lineNumber: 3, column: 12 } as monaco.Position;
+
+      const items = await getBodyCompletionItems(mockModel, mockPosition, 1, mockEditor);
+
+      expect(items.map((item) => item.label)).toEqual(['match_all']);
+    });
+
+    it('filters structural suggestions when cursor is inside an unclosed quote (matched endpoint)', async () => {
+      const mockAutocompleteSet = [
+        { name: '{' },
+        { name: 'type' },
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
+
+      const mockEndpoint = {
+        bodyAutocompleteRootComponents: [],
+      };
+
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.endpoint = mockEndpoint;
+        context.autoCompleteSet = mockAutocompleteSet;
+      });
+
+      const mockModel = {
+        getLineContent: () => 'PUT /test',
+        getValueInRange: jest.fn((range: any) => {
+          if (range.startLineNumber === 2) {
+            return '{\n  "mappings": {\n    "properties": {\n      "integer_field": "';
+          }
+          if (range.startLineNumber === 5 && range.startColumn === 1) {
+            return '      "integer_field": "';
+          }
+          return '';
+        }),
+        getWordUntilPosition: () => ({ startColumn: 24, word: '' }),
+        getLineMaxColumn: () => 24,
+      } as unknown as monaco.editor.ITextModel;
+
+      const mockPosition = { lineNumber: 5, column: 24 } as monaco.Position;
+
+      const items = await getBodyCompletionItems(mockModel, mockPosition, 1, mockEditor);
+
+      expect(items.map((item) => item.label)).toEqual(['type']);
+    });
+
+    it('filters structural suggestions when cursor is before existing content on the line', async () => {
+      const mockAutocompleteSet = [
+        { name: '{' },
+        { name: 'type' },
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
+
+      const mockEndpoint = {
+        bodyAutocompleteRootComponents: [],
+      };
+
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.endpoint = mockEndpoint;
+        context.autoCompleteSet = mockAutocompleteSet;
+      });
+
+      const mockModel = {
+        getLineContent: () => 'PUT /test_index',
+        getValueInRange: jest.fn((range: any) => {
+          if (range.startLineNumber === 2) {
+            return '{\n  "mappings": {\n    "properties": {\n      "integer_field": ';
+          }
+          if (range.startLineNumber === 5 && range.startColumn === 1) {
+            return '      "integer_field": ';
+          }
+          // content after cursor: existing value
+          return '"keyword"';
+        }),
+        getWordUntilPosition: () => ({ startColumn: 23, word: '' }),
+        getLineMaxColumn: () => 32,
+      } as unknown as monaco.editor.ITextModel;
+
+      const mockPosition = { lineNumber: 5, column: 23 } as monaco.Position;
+
+      const items = await getBodyCompletionItems(mockModel, mockPosition, 1, mockEditor);
+
+      expect(items.map((item) => item.label)).toEqual(['type']);
+    });
   });
 
   describe('getInsertText', () => {
@@ -225,20 +339,44 @@ describe('autocomplete_utils', () => {
       expect(getInsertText({ name: undefined } as ResultTerm, '', mockContext)).toBe('');
     });
 
-    it('handles unclosed quotes correctly', () => {
+    it('does not add quotes around braces and brackets', () => {
       expect(
         getInsertText(
-          { name: 'match_all' } as ResultTerm,
+          { name: '{' } as ResultTerm,
+          '{\n' + '    "query": {\n' + '      ',
+          mockContext
+        )
+      ).toBe('{$0}');
+      expect(
+        getInsertText(
+          { name: '[' } as ResultTerm,
+          '{\n' + '    "query": {\n' + '      ',
+          mockContext
+        )
+      ).toBe('[$0]');
+      expect(
+        getInsertText(
+          { name: '{' } as ResultTerm,
           '{\n' + '    "query": {\n' + '      "match_a',
           mockContext
         )
-      ).toBe('match_all"');
+      ).toBe('{$0}');
     });
 
     it('wraps insertValue with quotes when appropriate', () => {
       expect(
         getInsertText(
-          { name: 'match_all' } as ResultTerm,
+          { name: 'query', insertValue: 'match_all' } as ResultTerm,
+          '{\n' + '    "query": {\n' + '      ',
+          mockContext
+        )
+      ).toBe('"match_all"');
+    });
+
+    it('uses name when insertValue is a structural token', () => {
+      expect(
+        getInsertText(
+          { name: 'match_all', insertValue: '{' } as ResultTerm,
           '{\n' + '    "query": {\n' + '      ',
           mockContext
         )

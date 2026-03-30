@@ -510,6 +510,9 @@ export class Table extends PureComponent<TableProps, TableState> {
             rowProps={(item) => ({
               'data-test-subj': `savedObjectsTableRow row-${item.id}`,
             })}
+            tableCaption={i18n.translate('savedObjectsManagement.objectsTable.table.tableCaption', {
+              defaultMessage: 'Saved objects list',
+            })}
           />
         </div>
       </Fragment>

@@ -10,7 +10,7 @@ import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/s
 import pMap from 'p-map';
 import { dump } from 'js-yaml';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 
 import { FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
 
@@ -77,6 +77,8 @@ import { cleanupPolicyRevisions } from '../../tasks/fleet_policy_revisions_clean
 
 import { createPackagePolicyHandler } from '../package_policy/handlers';
 import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents';
+
+const deduplicateIds = (ids: string[]) => uniq(ids);
 
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
@@ -232,7 +234,8 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
         ? coreContext.savedObjects.client
         : fleetContext.internalSoClient;
 
-    const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
+    const { full: withPackagePolicies = false, ignoreMissing = false } = request.body;
+    const ids = deduplicateIds(request.body.ids);
     if (!authzFleetReadAgentPolicies && withPackagePolicies) {
       throw new FleetUnauthorizedError(
         'full query parameter require agent policies read permissions'
@@ -369,7 +372,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       for (const requestedSpaceId of spaceIds) {
         if (!authorizedSpaces.includes(requestedSpaceId)) {
           throw new FleetError(
-            `No enough permissions to create policies in space ${requestedSpaceId}`
+            `Not enough permissions to create policies in space ${requestedSpaceId}`
           );
         }
       }
@@ -879,7 +882,7 @@ export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
-  const { ids } = request.body;
+  const ids = deduplicateIds(request.body.ids);
 
   if (!ids) {
     return response.ok({

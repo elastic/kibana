@@ -11,7 +11,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import type {
   ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
   ActionsClientLlm,
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
@@ -50,7 +49,7 @@ interface Drawable {
 
 const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as ActionsClientChatOpenAI;
 
 class FakeChatModelWithBindTools extends FakeChatModel {
   bindTools = () => this;

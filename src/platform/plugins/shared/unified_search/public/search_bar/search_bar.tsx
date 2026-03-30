@@ -327,6 +327,12 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     );
   };
 
+  private onDraftChange = (draft: UnifiedSearchDraft | undefined) => {
+    if (this.props.onDraftChange && !isEqual(this.props.draft, draft)) {
+      this.props.onDraftChange(draft);
+    }
+  };
+
   componentWillUnmount() {
     this.renderSavedQueryManagement.clear();
   }
@@ -744,7 +750,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}
           onChange={this.onQueryBarChange}
-          onDraftChange={this.props.onDraftChange}
+          onDraftChange={this.onDraftChange}
           onSendToBackground={this.onBackgroundSearch}
           isDirty={this.isDirty()}
           customSubmitButton={

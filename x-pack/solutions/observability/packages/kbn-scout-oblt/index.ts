@@ -9,7 +9,7 @@
 export { test, spaceTest } from './src/playwright';
 
 // re-exported test framework from @kbn/scout
-export { expect, lighthouseTest, apiTest, globalSetupHook, tags } from '@kbn/scout';
+export { lighthouseTest, apiTest, globalSetupHook, tags } from '@kbn/scout';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {
@@ -81,3 +81,6 @@ export type { RoleApiCredentials } from '@kbn/scout';
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from '@kbn/scout';
+
+// Re-exported utility for overriding synthtrace clients
+export { getSynthtraceClient } from '@kbn/scout';

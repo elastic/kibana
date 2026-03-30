@@ -37,6 +37,7 @@ export function BurnRateRuleEditor(props: Props) {
   const [selectedSlo, setSelectedSlo] = useState<SLODefinitionResponse | undefined>(undefined);
   const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(ruleParams?.windows || []);
   const [dependencies, setDependencies] = useState<Dependency[]>(ruleParams?.dependencies || []);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
     setSelectedSlo(initialSlo);
@@ -47,6 +48,10 @@ export function BurnRateRuleEditor(props: Props) {
       return createDefaultWindows(initialSlo);
     });
   }, [initialSlo]);
+
+  const setHasInteractedField = () => {
+    setHasInteracted(true);
+  };
 
   const onSelectedSlo = (slo: SLODefinitionResponse | undefined) => {
     setSelectedSlo(slo);
@@ -74,7 +79,12 @@ export function BurnRateRuleEditor(props: Props) {
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
+      <SloSelector
+        initialSlo={selectedSlo}
+        onSelected={onSelectedSlo}
+        errors={hasInteracted ? errors.sloId : undefined}
+        onBlur={setHasInteractedField}
+      />
       {selectedSlo?.groupBy && ![selectedSlo.groupBy].flat().includes(ALL_VALUE) && (
         <>
           <EuiSpacer size="l" />

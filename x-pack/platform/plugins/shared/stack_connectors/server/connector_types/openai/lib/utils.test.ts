@@ -69,7 +69,7 @@ describe('Utils', () => {
 
     it('calls azure_openai_utils sanitizeRequest when provider is AzureAi', () => {
       sanitizeRequest(OpenAiProviderType.AzureAi, azureAiUrl, bodyString);
-      expect(mockAzureAiSanitizeRequest).toHaveBeenCalledWith(azureAiUrl, bodyString);
+      expect(mockAzureAiSanitizeRequest).toHaveBeenCalledWith(azureAiUrl, bodyString, undefined);
       expect(mockOpenAiSanitizeRequest).not.toHaveBeenCalled();
       expect(mockOtherOpenAiSanitizeRequest).not.toHaveBeenCalled();
     });
@@ -134,7 +134,8 @@ describe('Utils', () => {
       expect(mockAzureAiGetRequestWithStreamOption).toHaveBeenCalledWith(
         azureAiUrl,
         bodyString,
-        true
+        true,
+        undefined
       );
       expect(mockOpenAiGetRequestWithStreamOption).not.toHaveBeenCalled();
       expect(mockOtherOpenAiGetRequestWithStreamOption).not.toHaveBeenCalled();

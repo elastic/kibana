@@ -123,11 +123,7 @@ export const CorrelationsOverview: React.FC = () => {
             <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
           )}
           {showAlertsByAncestry && (
-            <RelatedAlertsByAncestry
-              documentId={documentId}
-              indices={securityDefaultPatterns}
-              scopeId={scopeId}
-            />
+            <RelatedAlertsByAncestry documentId={documentId} indices={securityDefaultPatterns} />
           )}
         </EuiFlexGroup>
       ) : (

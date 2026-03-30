@@ -108,6 +108,12 @@ export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable
+          tableCaption={i18n.translate(
+            'xpack.fleet.packagePolicyEditor.datastreamMappings.tableCaption',
+            {
+              defaultMessage: 'Component template mappings',
+            }
+          )}
           items={componentTemplateItems}
           columns={[
             {

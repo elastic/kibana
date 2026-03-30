@@ -21,4 +21,4 @@ schema:
       - tags
       - title
       - user
-example: create_case
+    example: create_case

@@ -16,8 +16,11 @@ import type { TimerangeFilter, TimerangeInput } from '../../../../../../common/s
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getPreferredEsType } from './helpers';
 
+const DEFAULT_DATE_FIELD = '@timestamp';
+
 export const buildTimelineEventsAllQuery = ({
   authFilter,
+  dateRangeField,
   defaultIndex,
   fields,
   filterQuery,
@@ -27,6 +30,7 @@ export const buildTimelineEventsAllQuery = ({
   timerange,
 }: Omit<TimelineEventsAllOptions, 'fieldRequested'>) => {
   const { activePage, querySize } = pagination;
+  const dateField = dateRangeField ?? DEFAULT_DATE_FIELD;
   const filterClause = [...createQueryFilterClauses(filterQuery)];
   const getTimerangeFilter = (timerangeOption: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerangeOption) {
@@ -35,7 +39,7 @@ export const buildTimelineEventsAllQuery = ({
         ? [
             {
               range: {
-                '@timestamp': {
+                [dateField]: {
                   gte: from,
                   lte: to,
                   format: 'strict_date_optional_time',
@@ -86,7 +90,7 @@ export const buildTimelineEventsAllQuery = ({
       'kibana.alert.*',
       ...fields,
       {
-        field: '@timestamp',
+        field: dateField,
         format: 'strict_date_optional_time',
       },
     ],

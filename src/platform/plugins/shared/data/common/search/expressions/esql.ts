@@ -352,7 +352,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             : undefined;
 
           const allColumns =
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
               const hasConflict = type === 'unsupported' && originalTypes.length > 1;

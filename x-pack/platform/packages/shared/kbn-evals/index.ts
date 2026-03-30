@@ -12,3 +12,6 @@ export type { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures } from './src/types';
+
+// Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
+export { tags } from '@kbn/scout';

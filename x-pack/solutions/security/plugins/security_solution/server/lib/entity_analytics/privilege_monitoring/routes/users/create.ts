@@ -21,6 +21,7 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -42,31 +43,34 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<CreatePrivMonUserResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<CreatePrivMonUserResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
-        try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
-          const secSol = await context.securitySolution;
-          const dataClient = secSol.getPrivilegeMonitoringDataClient();
-          const config = secSol.getConfig();
-          const maxUsersAllowed =
-            config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
-          const crudService = createPrivilegedUsersCrudService(dataClient);
+          try {
+            await assertAdvancedSettingsEnabled(
+              await context.core,
+              ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+            );
+            const secSol = await context.securitySolution;
+            const dataClient = secSol.getPrivilegeMonitoringDataClient();
+            const config = secSol.getConfig();
+            const maxUsersAllowed =
+              config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+            const crudService = createPrivilegedUsersCrudService(dataClient);
 
-          const body = await crudService.create(request.body, 'api', maxUsersAllowed);
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error creating user: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+            const body = await crudService.create(request.body, 'api', maxUsersAllowed);
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error creating user: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

@@ -6,12 +6,13 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { BIGGER_TIMEOUT } from '../constants';
 
 export class ServiceInventoryPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async gotoDetailedServiceInventoryWithDateSelected(start: string, end: string) {
     await this.page.goto(`${this.kbnUrl.app('apm')}/services?&rangeFrom=${start}&rangeTo=${end}`);
-    return this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj.waitForSelector('apmUnifiedSearchBar', { timeout: BIGGER_TIMEOUT });
   }
 }

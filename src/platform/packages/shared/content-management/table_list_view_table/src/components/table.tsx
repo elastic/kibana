@@ -25,6 +25,7 @@ import {
   useEuiTheme,
   EuiCode,
   EuiText,
+  EuiLiveAnnouncer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -170,6 +171,17 @@ export function Table<T extends UserContentCommonSchema>({
       };
     }
   }, [deleteItems, dispatch, tableItemsRowActions]);
+
+  const selectionAnnouncement = useMemo(() => {
+    if (selectedIds.length === 0) return '';
+    return i18n.translate('contentManagement.tableList.listing.selectionAnnouncement', {
+      defaultMessage: '{count} {entityName} selected. Delete button is now available.',
+      values: {
+        count: selectedIds.length,
+        entityName: selectedIds.length === 1 ? entityName : entityNamePlural,
+      },
+    });
+  }, [selectedIds.length, entityName, entityNamePlural]);
 
   const {
     isPopoverOpen,
@@ -363,6 +375,7 @@ export function Table<T extends UserContentCommonSchema>({
         totalActiveFilters={totalActiveFilters}
         clearTagSelection={clearTagSelection}
       >
+        <EuiLiveAnnouncer>{selectionAnnouncement}</EuiLiveAnnouncer>
         <EuiInMemoryTable<T>
           itemId="id"
           items={visibleItems}

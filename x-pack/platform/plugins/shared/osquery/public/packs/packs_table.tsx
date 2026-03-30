@@ -240,6 +240,9 @@ const PacksTableComponent = () => {
       columns={columns}
       pagination={true}
       sorting={sorting}
+      tableCaption={i18n.translate('xpack.osquery.packs.table.caption', {
+        defaultMessage: 'List of saved packs',
+      })}
     />
   );
 };

@@ -330,6 +330,12 @@ export const NodeDetailView = memo(function ({
         items={processInfoEntry}
         columns={columns}
         sorting
+        tableCaption={i18n.translate(
+          'xpack.securitySolution.endpoint.resolver.panel.nodeDetail.processMetadataCaption',
+          {
+            defaultMessage: 'Process metadata entries',
+          }
+        )}
       />
     </div>
   );

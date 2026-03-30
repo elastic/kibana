@@ -20,7 +20,6 @@ import type { GrokProcessorResult } from './get_grok_processor';
 export function unwrapPatternDefinitions(
   grokProcessor: Pick<GrokProcessorResult, 'patterns' | 'pattern_definitions'>
 ): string[] {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { patterns, pattern_definitions } = grokProcessor;
 
   if (!pattern_definitions || Object.keys(pattern_definitions).length === 0) {

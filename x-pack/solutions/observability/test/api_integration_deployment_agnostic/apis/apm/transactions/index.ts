@@ -16,6 +16,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./transactions_groups_alerts.spec.ts'));
     loadTestFile(require.resolve('./transactions_groups_detailed_statistics.spec.ts'));
     loadTestFile(require.resolve('./transactions_groups_main_statistics.spec.ts'));
+    loadTestFile(require.resolve('./transactions_groups_order.spec.ts'));
     loadTestFile(require.resolve('./trace_samples.spec.ts'));
   });
 }

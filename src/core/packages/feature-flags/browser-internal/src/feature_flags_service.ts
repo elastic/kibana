@@ -19,7 +19,7 @@ import type {
 import { apm } from '@elastic/apm-rum';
 import { type Client, ClientProviderEvents, OpenFeature } from '@openfeature/web-sdk';
 import deepMerge from 'deepmerge';
-import { filter, map, startWith, Subject } from 'rxjs';
+import { filter, map, merge, startWith, Subject } from 'rxjs';
 import { get } from 'lodash';
 
 /**
@@ -40,6 +40,7 @@ export interface FeatureFlagsSetupDeps {
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
+  private readonly contextChanged$ = new Subject<void>();
   private isProviderReadyPromise?: Promise<void>;
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private overrides: Record<string, unknown> = {};
@@ -104,7 +105,12 @@ export class FeatureFlagsService {
       }
     });
     const observeFeatureFlag$ = (flagName: string) =>
-      featureFlagsChanged$.pipe(
+      merge(
+        // Flag changes
+        featureFlagsChanged$,
+        // Context changes (we need to reevaluate)
+        this.contextChanged$.pipe(map(() => [flagName]))
+      ).pipe(
         filter((flagNames) => flagNames.includes(flagName)),
         startWith([flagName]) // only to emit on the first call
       );
@@ -221,5 +227,6 @@ export class FeatureFlagsService {
     // Merge the formatted context to append to the global context, and set it in the OpenFeature client.
     this.context = deepMerge(this.context, formattedContextToAppend);
     await OpenFeature.setContext(this.context);
+    this.contextChanged$.next();
   }
 }

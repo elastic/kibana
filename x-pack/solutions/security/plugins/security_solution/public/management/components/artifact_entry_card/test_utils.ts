@@ -25,7 +25,6 @@ export const getTrustedAppProviderMock = (): TrustedApp =>
 
 export const getExceptionProviderMock = (): ExceptionListItemSchema => {
   // Grab the properties from the generated Trusted App that should be the same across both types
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { name, description, created_at, updated_at, updated_by, created_by, id } =
     getTrustedAppProviderMock();
 

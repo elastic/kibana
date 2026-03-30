@@ -10,10 +10,11 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import { loadServersConfig } from '..';
-import type { CliSupportedServerModes, ScoutTestConfig } from '../../../types';
+import type { ScoutTestConfig } from '../../../types';
 import { readConfigFile } from '../loader';
 import { getConfigFilePath } from './get_config_file';
 import { saveScoutTestConfigOnDisk } from './save_scout_test_config';
+import { ScoutTestTarget } from '@kbn/scout-info';
 
 jest.mock('./get_config_file', () => ({
   getConfigFilePath: jest.fn(),
@@ -54,7 +55,7 @@ const mockScoutTestConfig: ScoutTestConfig = {
 describe('loadServersConfig', () => {
   let mockLog: ToolingLog;
 
-  const mockMode = `serverless=${mockScoutTestConfig.projectType}` as CliSupportedServerModes;
+  const mockTestTarget = new ScoutTestTarget('cloud', 'serverless', 'observability_complete');
   const mockConfigPath = '/mock/config/path.ts';
 
   const mockClusterConfig = {
@@ -76,9 +77,9 @@ describe('loadServersConfig', () => {
     (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
     (readConfigFile as jest.Mock).mockResolvedValue(mockClusterConfig);
 
-    const result = await loadServersConfig(mockMode, mockLog, configRootDir);
+    const result = await loadServersConfig(mockTestTarget, mockLog, configRootDir);
 
-    expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockMode);
+    expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockTestTarget);
     expect(readConfigFile).toHaveBeenCalledWith(mockConfigPath);
     expect(mockClusterConfig.getScoutTestConfig).toHaveBeenCalled();
     expect(saveScoutTestConfigOnDisk).toHaveBeenCalledWith(mockScoutTestConfig, mockLog);
@@ -91,9 +92,11 @@ describe('loadServersConfig', () => {
     const errorMessage = 'Failed to read config file';
     (readConfigFile as jest.Mock).mockRejectedValue(new Error(errorMessage));
 
-    await expect(loadServersConfig(mockMode, mockLog, configRootDir)).rejects.toThrow(errorMessage);
+    await expect(loadServersConfig(mockTestTarget, mockLog, configRootDir)).rejects.toThrow(
+      errorMessage
+    );
 
-    expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockMode);
+    expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockTestTarget);
     expect(saveScoutTestConfigOnDisk).not.toHaveBeenCalled();
   });
 
@@ -102,9 +105,9 @@ describe('loadServersConfig', () => {
     (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
     (readConfigFile as jest.Mock).mockResolvedValue(mockClusterConfig);
 
-    const result = await loadServersConfig(mockMode, mockLog, configRootDir);
+    const result = await loadServersConfig(mockTestTarget, mockLog, configRootDir);
 
-    expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockMode);
+    expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockTestTarget);
     expect(readConfigFile).toHaveBeenCalledWith(mockConfigPath);
     expect(result).toBe(mockClusterConfig);
   });
@@ -114,11 +117,11 @@ describe('loadServersConfig', () => {
     (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
     (fs.existsSync as jest.Mock).mockReturnValue(false);
 
-    await expect(loadServersConfig(mockMode, mockLog, configRootDir)).rejects.toThrow(
+    await expect(loadServersConfig(mockTestTarget, mockLog, configRootDir)).rejects.toThrow(
       'Config file not found'
     );
 
-    expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockMode);
+    expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockTestTarget);
     expect(readConfigFile).not.toHaveBeenCalled();
     expect(saveScoutTestConfigOnDisk).not.toHaveBeenCalled();
   });

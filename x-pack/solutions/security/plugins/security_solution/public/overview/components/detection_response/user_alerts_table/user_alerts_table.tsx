@@ -104,6 +104,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
               columns={columns}
               items={items}
               loading={isLoading}
+              tableCaption={i18n.USER_ALERTS_SECTION_TITLE}
               noItemsMessage={
                 <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
               }

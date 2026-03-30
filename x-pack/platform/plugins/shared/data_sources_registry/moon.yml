@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/data-sources-registry-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workchat-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/data-sources-registry-plugin'
+  title: '@kbn/data-sources-registry-plugin'
   description: Moon project for @kbn/data-sources-registry-plugin
   channel: ''
   owner: '@elastic/workchat-eng'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/data_sources_registry
+  sourceRoot: x-pack/platform/plugins/shared/data_sources_registry
 dependsOn:
   - '@kbn/core'
 tags:

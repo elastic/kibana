@@ -20,6 +20,7 @@ import type {
   AnalyticsServiceStart,
 } from '@kbn/core/server';
 import {
+  PermissionError,
   type HealthDiagnosticQuery,
   type HealthDiagnosticQueryStats,
   type HealthDiagnosticService,
@@ -172,7 +173,11 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
                 message: error.message,
                 reason: error instanceof ValidationError ? error.result : undefined,
               };
-              this.logger.error('Error running query', withErrorMessage(error));
+              if (error instanceof PermissionError) {
+                this.logger.info('Permission error running query.', withErrorMessage(error));
+              } else {
+                this.logger.error('Error running query', withErrorMessage(error));
+              }
               resolve({
                 ...queryStats,
                 failure,
@@ -195,7 +200,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       this.logger.debug('Query executed. Sending query stats EBT', {
         queryName: query.name,
         traceId: stats.traceId,
-        statistics: stats,
       } as LogMeta);
 
       this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT, stats);
@@ -203,7 +207,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       statistics.push(stats);
     }
 
-    this.logger.debug('Finished running health diagnostic task', { statistics } as LogMeta);
+    this.logger.debug('Finished running health diagnostic task');
 
     return statistics;
   }
