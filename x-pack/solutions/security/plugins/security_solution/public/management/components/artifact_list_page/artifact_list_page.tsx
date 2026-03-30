@@ -14,7 +14,7 @@ import { useLocation } from 'react-router-dom';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
 import { useApi } from '@kbn/securitysolution-list-hooks';
-import type { Action } from '@kbn/securitysolution-exception-list-components/src/header_menu';
+import type { Action } from '@kbn/securitysolution-exception-list-components';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import type { ServerApiError } from '../../../common/types';
 import { AdministrationListPage } from '../administration_list_page';

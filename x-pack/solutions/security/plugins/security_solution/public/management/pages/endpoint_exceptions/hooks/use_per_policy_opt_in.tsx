@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Action } from '@kbn/securitysolution-exception-list-components/src/header_menu';
+import type { Action } from '@kbn/securitysolution-exception-list-components';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EndpointExceptionsPerPolicyOptInCallout } from '../view/components/per_policy_opt_in_callout';
 import { EndpointExceptionsPerPolicyOptInModal } from '../view/components/per_policy_opt_in_modal';
