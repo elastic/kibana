@@ -1024,6 +1024,7 @@ src/platform/packages/shared/kbn-test @elastic/kibana-operations @elastic/appex-
 src/platform/packages/private/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-saml-auth @elastic/appex-qa
 src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 x-pack/solutions/security/test/security_solution_api_integration @elastic/secutity-detection-engine
 src/platform/test
