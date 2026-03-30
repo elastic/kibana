@@ -8,6 +8,7 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -88,10 +89,24 @@ export const AgentPlugins: React.FC = () => {
     [agentPluginIds]
   );
 
+  const enableElasticCapabilities = agent?.configuration?.enable_elastic_capabilities ?? false;
+
+  const builtinPlugins = useMemo(() => allPlugins.filter((p) => p.readonly), [allPlugins]);
+
+  const builtinPluginIdSet = useMemo(
+    () => new Set(builtinPlugins.map((p) => p.id)),
+    [builtinPlugins]
+  );
+
   const activePlugins = useMemo(() => {
     if (!agentPluginIdSet) return [];
+    if (enableElasticCapabilities) {
+      const explicitPlugins = allPlugins.filter((p) => agentPluginIdSet.has(p.id));
+      const builtinNotExplicit = builtinPlugins.filter((p) => !agentPluginIdSet.has(p.id));
+      return [...explicitPlugins, ...builtinNotExplicit];
+    }
     return allPlugins.filter((p) => agentPluginIdSet.has(p.id));
-  }, [allPlugins, agentPluginIdSet]);
+  }, [allPlugins, agentPluginIdSet, enableElasticCapabilities, builtinPlugins]);
 
   useEffect(() => {
     if (pendingSelectPluginIdRef.current) {
@@ -175,22 +190,30 @@ export const AgentPlugins: React.FC = () => {
 
   const handleTogglePlugin = useCallback(
     (plugin: PluginDefinition, isActive: boolean) => {
+      if (enableElasticCapabilities && plugin.readonly) return;
       if (isActive) {
         handleAddPlugin(plugin);
       } else {
         handleRemovePlugin(plugin);
       }
     },
-    [handleAddPlugin, handleRemovePlugin]
+    [handleAddPlugin, handleRemovePlugin, enableElasticCapabilities]
   );
 
   const handleRemoveSelectedPlugin = useCallback(() => {
     if (!selectedPluginId) return;
     const plugin = activePlugins.find((p) => p.id === selectedPluginId);
     if (plugin) {
+      if (enableElasticCapabilities && plugin.readonly) return;
       handleRemovePlugin(plugin);
     }
-  }, [selectedPluginId, activePlugins, handleRemovePlugin]);
+  }, [selectedPluginId, activePlugins, handleRemovePlugin, enableElasticCapabilities]);
+
+  const libraryActivePluginIdSet = useMemo(() => {
+    if (!agentPluginIdSet) return new Set<string>();
+    if (enableElasticCapabilities) return new Set([...agentPluginIdSet, ...builtinPluginIdSet]);
+    return agentPluginIdSet;
+  }, [agentPluginIdSet, enableElasticCapabilities, builtinPluginIdSet]);
 
   const isLoading = agentLoading || pluginsLoading;
 
@@ -305,6 +328,11 @@ export const AgentPlugins: React.FC = () => {
                   onRemove={() => handleRemovePlugin(plugin)}
                   isRemoving={updatePluginsMutation.isLoading}
                   removeAriaLabel={labels.agentPlugins.removePluginAriaLabel}
+                  readOnlyContent={
+                    enableElasticCapabilities && plugin.readonly ? (
+                      <EuiBadge color="hollow">{labels.agentPlugins.autoBadge}</EuiBadge>
+                    ) : undefined
+                  }
                 />
               ))
             )}
@@ -332,7 +360,7 @@ export const AgentPlugins: React.FC = () => {
         <PluginLibraryPanel
           onClose={closeLibrary}
           allPlugins={allPlugins}
-          activePluginIdSet={agentPluginIdSet ?? new Set()}
+          activePluginIdSet={libraryActivePluginIdSet}
           onTogglePlugin={handleTogglePlugin}
           mutatingPluginId={mutatingPluginId}
         />

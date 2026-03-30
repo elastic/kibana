@@ -56,6 +56,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   const currentAgent = agents.find((a) => a.id === agentId);
 
   const headerStyles = css`
+    gap: ${euiTheme.size.s};
     padding: ${euiTheme.size.base} ${euiTheme.size.l};
     flex-grow: 0;
   `;
