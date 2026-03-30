@@ -11,7 +11,7 @@ import {
   type RegisterWatchlistMaintainerDeps,
 } from './watchlist_maintainer';
 
-const WATCHLIST_MAINTAINER_INTERVAL = '1h';
+const WATCHLIST_MAINTAINER_INTERVAL = '10m';
 
 export const registerWatchlistMaintainer = ({
   entityStore,

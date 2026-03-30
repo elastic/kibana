@@ -6,8 +6,10 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { createEntitySourcesService } from '../entity_sources/entity_sources_service';
 
 export interface WatchlistMaintainerDeps {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
@@ -22,18 +24,39 @@ export const createWatchlistMaintainer = ({
 }: WatchlistMaintainerDeps): WatchlistMaintainerConfig => ({
   setup: async ({ status }) => {
     const namespace = status.metadata.namespace;
-
     logger.debug(`Initializing watchlist maintainer for namespace "${namespace}"`);
-
-    // TODO: add watchlist-specific setup logic here (e.g. saved objects, data client init)
-    // Add in call to pre-built watchlists install
     logger.info(`Watchlist maintainer setup completed for namespace "${namespace}"`);
     return status.state;
   },
-  run: async ({ status }) => {
-    logger.debug('Watchlist maintainer run');
+  run: async ({ status, esClient, fakeRequest }) => {
+    const namespace = status.metadata.namespace;
 
-    // TODO: add watchlist-specific run logic here (e.g. sync, license/feature checks)
+    const [coreStart, pluginsStart] = await getStartServices();
+    const license = await pluginsStart.licensing.getLicense();
+
+    if (!license.hasAtLeast('platinum')) {
+      logger.debug('Watchlist maintainer run skipped due to insufficient license');
+      return status.state;
+    }
+
+    logger.debug(`Watchlist maintainer run for namespace "${namespace}"`);
+
+    // Use the authenticated fakeRequest from the task manager (created with the
+    // credentials of the user who installed the Entity Store) rather than
+    // buildScopedInternalSavedObjectsClientUnsafe, which builds its own fake
+    // request with empty headers and no auth credentials.
+    const soClient = coreStart.savedObjects.getScopedClient(fakeRequest, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
+
+    const entitySourcesService = createEntitySourcesService({
+      esClient,
+      soClient,
+      logger,
+      namespace,
+    });
+
+    await entitySourcesService.syncAllWatchlists();
 
     return status.state;
   },

@@ -161,6 +161,7 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
+import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -318,6 +319,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         auditLogger: plugins.security?.audit.withoutRequest,
         productFeaturesService,
       });
+      if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+        registerWatchlistMaintainer({
+          entityStore: plugins.entityStore,
+          getStartServices: core.getStartServices,
+          logger: this.logger,
+        });
+      }
     } else {
       registerRiskScoringTask({
         getStartServices: core.getStartServices,
