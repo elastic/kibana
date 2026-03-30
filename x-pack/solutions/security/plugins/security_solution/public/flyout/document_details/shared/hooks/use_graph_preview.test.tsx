@@ -26,7 +26,7 @@ import { useEntityStoreStatus } from '../../../../entity_analytics/components/en
 const mockUseEntityStoreStatus = useEntityStoreStatus as jest.Mock;
 
 // All EUID source fields (must explicitly handle to avoid mockFieldData bleed-through)
-const ALL_EUID_SOURCE_FIELDS = [
+const ALL_EUID_SOURCE_FIELDS: readonly string[] = [
   ...GRAPH_ACTOR_EUID_SOURCE_FIELDS,
   ...GRAPH_TARGET_EUID_SOURCE_FIELDS,
 ];
