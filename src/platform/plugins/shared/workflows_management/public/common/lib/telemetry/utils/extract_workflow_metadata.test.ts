@@ -21,11 +21,6 @@ function asRuntimeSteps(steps: unknown): WorkflowYaml['steps'] {
   return steps as WorkflowYaml['steps'];
 }
 
-/** Legacy inputs array form is not fully expressed on `WorkflowYaml['inputs']` union typing. */
-function asRuntimeInputs(inputs: unknown): WorkflowYaml['inputs'] {
-  return inputs as WorkflowYaml['inputs'];
-}
-
 /** Runtime triggers can include registered custom trigger ids (e.g. cases.updated). */
 function asRuntimeTriggers(triggers: unknown): WorkflowYaml['triggers'] {
   return triggers as WorkflowYaml['triggers'];
@@ -123,13 +118,18 @@ describe('extractWorkflowMetadata (workflows management UI)', () => {
     expect(withoutCondition.hasTriggerConditions).toBe(false);
   });
 
-  it('reflects root field: inputs (array length)', () => {
+  it('reflects manual trigger inputs (array length)', () => {
     expect(
       extractWorkflowMetadata(
         baseWorkflow({
-          inputs: asRuntimeInputs([
-            { name: 'a', type: 'string' },
-            { name: 'b', type: 'number' },
+          triggers: asRuntimeTriggers([
+            {
+              type: 'manual',
+              inputs: [
+                { name: 'a', type: 'string' },
+                { name: 'b', type: 'number' },
+              ],
+            },
           ]),
         })
       ).inputCount
