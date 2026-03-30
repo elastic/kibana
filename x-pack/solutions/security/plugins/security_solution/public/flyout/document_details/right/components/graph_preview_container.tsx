@@ -46,7 +46,6 @@ export const GraphPreviewContainer: React.FC = () => {
       timestamp={timestamp ?? new Date().toISOString()}
       eventIds={eventIds}
       indexName={indexName}
-      scopeId={scopeId}
       isPreviewMode={isPreviewMode}
       isRulePreview={isRulePreview}
       onExpandGraph={allowFlyoutExpansion ? navigateToGraphVisualization : undefined}
