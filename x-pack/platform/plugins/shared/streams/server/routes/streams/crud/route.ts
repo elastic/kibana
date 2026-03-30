@@ -7,11 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 import { badData } from '@hapi/boom';
-import { Streams, isInheritLifecycle, isInheritFailureStore } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
+import { classicIngestHasEsLevelChanges } from '../../../lib/streams/state_management/streams/helpers';
 import { readStream } from './read_stream';
 import { createClassicStreamRoute } from './create_classic_stream_route';
 import { validateClassicStreamRoute } from './validate_classic_stream_route';
@@ -123,21 +124,10 @@ export const editStreamRoute = createServerRoute({
     // Only Kibana-side data (description, dashboards, queries) can be updated.
     if (Streams.ClassicStream.UpsertRequest.is(params.body)) {
       const dataStream = await streamsClient.getDataStream(params.path.name).catch(() => null);
-      if (dataStream?.replicated) {
-        const { ingest } = params.body.stream;
-        const hasEsLevelChanges =
-          (ingest.processing?.steps?.length ?? 0) > 0 ||
-          !isInheritLifecycle(ingest.lifecycle) ||
-          Object.keys(ingest.settings ?? {}).length > 0 ||
-          !isInheritFailureStore(ingest.failure_store) ||
-          (ingest.classic?.field_overrides &&
-            Object.keys(ingest.classic.field_overrides).length > 0);
-
-        if (hasEsLevelChanges) {
-          throw badData(
-            'Cannot modify Elasticsearch-managed settings (processing, lifecycle, settings, field overrides, failure store) of a replicated stream. It is managed by the source cluster via cross-cluster replication.'
-          );
-        }
+      if (dataStream?.replicated && classicIngestHasEsLevelChanges(params.body.stream.ingest)) {
+        throw badData(
+          'Cannot modify Elasticsearch-managed settings (processing, lifecycle, settings, field overrides, failure store) of a replicated stream. It is managed by the source cluster via cross-cluster replication.'
+        );
       }
     }
 

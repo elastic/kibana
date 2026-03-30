@@ -109,9 +109,17 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
   private async fetchDataStream(): Promise<IndicesDataStream | null> {
     if (this._dataStream === undefined) {
-      this._dataStream = await this.dependencies.streamsClient
-        .getDataStream(this._definition.name)
-        .catch(() => null);
+      try {
+        this._dataStream = await this.dependencies.streamsClient.getDataStream(
+          this._definition.name
+        );
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          this._dataStream = null;
+        } else {
+          throw error;
+        }
+      }
     }
     return this._dataStream;
   }
