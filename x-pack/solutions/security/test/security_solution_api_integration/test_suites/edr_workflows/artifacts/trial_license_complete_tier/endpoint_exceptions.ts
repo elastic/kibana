@@ -275,6 +275,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         if (IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED) {
           it(`should error on [${endpointExceptionApiCall.method}] if policy id is invalid`, async () => {
+            await optInForPerPolicyEndpointExceptions(kibanaServer);
+
             const body = endpointExceptionApiCall.getBody();
             body.tags = [buildPerPolicyTag('123')];
 
@@ -331,6 +333,8 @@ export default function ({ getService }: FtrProviderContext) {
       for (const endpointExceptionApiCall of endpointExceptionCalls) {
         if (IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED) {
           it(`should error on [${endpointExceptionApiCall.method}] - [${endpointExceptionApiCall.info}] when global artifact is the target`, async () => {
+            await optInForPerPolicyEndpointExceptions(kibanaServer);
+
             const requestBody = endpointExceptionApiCall.getBody();
             // keep space tag, but replace any per-policy tags with a global tag
             requestBody.tags = [
@@ -353,6 +357,8 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           it(`should work on [${endpointExceptionApiCall.method}] - [${endpointExceptionApiCall.info}] when per-policy artifact is the target`, async () => {
+            await optInForPerPolicyEndpointExceptions(kibanaServer);
+
             const requestBody = endpointExceptionApiCall.getBody();
 
             // remove existing tag
