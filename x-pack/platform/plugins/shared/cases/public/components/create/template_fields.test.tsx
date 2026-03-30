@@ -12,9 +12,11 @@ import { CreateCaseTemplateFields } from './template_fields';
 import { renderWithTestingProviders } from '../../common/mock';
 
 const mockUseFormData = jest.fn();
+const mockUseFormContext = jest.fn();
 jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => ({
   ...jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib'),
   useFormData: (...args: unknown[]) => mockUseFormData(...args),
+  useFormContext: () => mockUseFormContext(),
 }));
 
 const mockUseTemplateFormSync = jest.fn();
@@ -36,6 +38,7 @@ jest.mock('../templates_v2/field_types/field_types_registry', () => ({
 describe('CreateCaseTemplateFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseFormContext.mockReturnValue({});
   });
 
   it('shows callout when no template is selected', () => {

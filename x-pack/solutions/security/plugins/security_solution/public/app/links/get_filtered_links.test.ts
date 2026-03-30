@@ -33,13 +33,7 @@ const createMockLinkItem = (overrides: Partial<LinkItem> = {}): LinkItem => ({
 
 describe('getFilteredLinks', () => {
   const mockCore = createCoreStartMock();
-  const mockPlugins = {
-    cases: {
-      config: {
-        templatesEnabled: false,
-      },
-    },
-  } as StartPlugins;
+  const mockPlugins = {} as StartPlugins;
   const mockManagementLinks = createMockLinkItem({
     id: SecurityPageName.administration,
     title: 'Management',

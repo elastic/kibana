@@ -1,0 +1,8 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-attack-discovery",
+  "owner": "@elastic/security-generative-ai",
+  "group": "security",
+  "visibility": "private"
+}
+

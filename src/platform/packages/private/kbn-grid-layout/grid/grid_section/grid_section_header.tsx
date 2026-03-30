@@ -12,7 +12,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { distinctUntilChanged, filter, map, pairwise } from 'rxjs';
 
 import { type UseEuiTheme, transparentize } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, euiCanAnimate } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  euiCanAnimate,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -33,7 +40,8 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
   const { gridLayoutStateManager } = useGridLayoutContext();
   const startDrag = useGridLayoutSectionEvents({ sectionId });
-
+  const hasBeenDragged = useRef<boolean>(false);
+  
   const [isActive, setIsActive] = useState<boolean>(false);
   const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
@@ -43,7 +51,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
   const [panelCount, setPanelCount] = useState<number>(
     Object.keys(gridLayoutStateManager.gridLayout$.getValue()[sectionId]?.panels ?? {}).length
   );
-  const hasBeenDragged = useRef<boolean>(false);
 
   useEffect(() => {
     return () => {
@@ -70,9 +77,10 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
   const collapseSectionOnDrag = useCallback(() => {
     const section = gridLayoutStateManager.gridLayout$.getValue()[sectionId];
-    if (section && (section.isMainSection || section.isCollapsed)) return;
+    if (!section || section.isMainSection) return; // main sections cannot be collapsed
+    if (section.isCollapsed || panelCount === 0) return; // prevent collapsing if already collapsed or empty
     toggleIsCollapsed();
-  }, [gridLayoutStateManager, sectionId, toggleIsCollapsed]);
+  }, [gridLayoutStateManager, sectionId, toggleIsCollapsed, panelCount]);
 
   const shouldIgnoreHeaderClick = (target: EventTarget | null) => {
     if (!(target instanceof Element)) return false;
@@ -133,6 +141,8 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     const sectionInteractionSubscription = dragState$.subscribe(({ type, event }) => {
       const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
       if (!headerRef) return;
+      const isTouch = event?.sensorType === 'touch';
+      const isKeyboard = event?.sensorType === 'keyboard';
 
       const handleFirstDrag = () => {
         collapseSectionOnDrag();
@@ -304,17 +314,19 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       />
                     </EuiFlexItem>
                   )}
-                  <EuiFlexItem grow={false} css={isActive && [styles.floatToRight]}>
-                    <EuiButtonIcon
-                      iconType="move"
-                      color="text"
-                      className="kbnGridSection--dragHandle"
-                      aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
-                        defaultMessage: 'Move section',
-                      })}
-                      data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
-                      onKeyDown={handleSectionDragStart}
-                    />
+                  <EuiFlexItem
+                    grow={false}
+                    css={isActive && [styles.floatToRight]}
+                    className="kbnGridSection--dragHandle"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={handleSectionDragStart}
+                    aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
+                      defaultMessage: 'Move section',
+                    })}
+                    data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
+                  >
+                    <EuiIcon type="move" color="text" aria-hidden={true} />
                   </EuiFlexItem>
                 </>
               )}
@@ -369,11 +381,7 @@ const styles = {
       },
       '.kbnGridSection--dragHandle': {
         cursor: 'move',
-        pointerEvents: 'none', // prevents hover effects, since the drag handle is only included for keyboard a11y
-        '&:active, &:hover, &:focus': {
-          transform: 'none !important', // prevent "bump up" that EUI adds on hover
-          backgroundColor: 'transparent',
-        },
+        padding: euiTheme.size.xs,
       },
 
       // these styles hide the delete + move actions by default and only show them on hover
