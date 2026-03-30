@@ -37,6 +37,8 @@ export type { BaseStepDefinition, StepDocumentation } from './spec/step_definiti
 export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';
+export * from './common/well_known_trigger_sources';
+export type { WorkflowExecutionEventDispatchMetadata } from './common/workflow_execution_schedule_metadata';
 export * from './common/privileges';
 export * from './common/utils';
 export * from './common/step_types';

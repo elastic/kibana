@@ -12,7 +12,7 @@ import type { XYVisualizationState } from '@kbn/lens-common';
 import type { XYState } from '../../../schema';
 import { getLegendTruncateAfterLines, stripUndefined } from '../utils';
 
-type OutsideLegendType = Extract<Required<XYState['legend']>, { inside: false }>;
+type OutsideLegendType = Extract<Required<XYState['legend']>, { placement: 'outside' }>;
 
 type StatisticsType = OutsideLegendType['statistics'][number];
 
@@ -70,8 +70,8 @@ function extractAlignment(legend: XYState['legend']):
       horizontalAlignment: 'left' | 'right' | undefined;
     }
   | {} {
-  if (legend?.inside) {
-    const [verticalAlignment, horizontalAlignment] = (legend.alignment?.split('_') ?? [
+  if (legend?.placement === 'inside') {
+    const [verticalAlignment, horizontalAlignment] = (legend.position?.split('_') ?? [
       'top',
       'right',
     ]) as ['top' | 'bottom' | undefined, 'left' | 'right' | undefined];
@@ -109,7 +109,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
       : {}),
     ...extractAlignment(legend),
     ...(legend?.visibility === 'auto' ? { showSingleSeries: true } : {}),
-    ...(legend?.inside
+    ...(legend?.placement === 'inside'
       ? {
           isInside: true,
           position: DEFAULT_LEGEND_POSITON,
@@ -160,20 +160,20 @@ function getLegendAlignment(legend: XYVisualizationState['legend']) {
     return {};
   }
   return {
-    alignment: `${legend.verticalAlignment ?? 'top'}_${legend.horizontalAlignment ?? 'right'}`,
+    position: `${legend.verticalAlignment ?? 'top'}_${legend.horizontalAlignment ?? 'right'}`,
   };
 }
 
 function getLegendLayout(legend: XYVisualizationState['legend']) {
   if (isLegendInside(legend)) {
     return {
-      inside: true,
+      placement: 'inside' as const,
       ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
       ...getLegendAlignment(legend),
     };
   }
   return {
-    inside: false,
+    placement: 'outside' as const,
     ...getLegendSizeAPI(legend.legendSize),
     ...(legend.position ? { position: legend.position } : {}),
   };

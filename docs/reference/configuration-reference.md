@@ -10,7 +10,7 @@ For information about how to update these settings, refer to the appropriate ins
 
 The settings are grouped by feature or purpose, for example:
 
-- [AI Assistant](/reference/configuration-reference/ai-assistant-settings.md)
+- [Knowledge base artifact settings for AI Assistants](/reference/configuration-reference/ai-assistant-settings.md)
 - [Alerting](/reference/configuration-reference/alerting-settings.md)
 - [APM](/reference/configuration-reference/apm-settings.md)
 - [Banners](/reference/configuration-reference/banner-settings.md)

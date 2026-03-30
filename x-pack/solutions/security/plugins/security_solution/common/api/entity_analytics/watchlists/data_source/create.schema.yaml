@@ -36,6 +36,12 @@ paths:
                   description: Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
                 enabled:
                   type: boolean
+                identifierField:
+                  type: string
+                  description: Field used to query the entity store for index-type sources
+                queryRule:
+                  type: string
+                  description: KQL query used to filter data from the provided index patterns
                 matchers:
                   type: array
                   items:
