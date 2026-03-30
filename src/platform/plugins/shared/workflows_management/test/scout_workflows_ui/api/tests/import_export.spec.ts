@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import AdmZip from 'adm-zip';
-import YAML from 'yaml';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -119,32 +117,33 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
     }
   );
 
-  apiTest('should export workflows as a ZIP archive', async ({ kbnClient, apiClient }) => {
-    const createResponse = await kbnClient.request<{ id: string }>({
-      method: 'POST',
-      path: '/api/workflows/workflow',
-      body: { yaml: SIMPLE_WORKFLOW_YAML },
-    });
-    const workflowId = createResponse.data.id;
+  apiTest(
+    'should export workflows as JSON with entries and manifest',
+    async ({ kbnClient, apiClient }) => {
+      const createResponse = await kbnClient.request<{ id: string }>({
+        method: 'POST',
+        path: '/api/workflows/workflow',
+        body: { yaml: SIMPLE_WORKFLOW_YAML },
+      });
+      const workflowId = createResponse.data.id;
 
-    const exportResponse = await apiClient.post('api/workflows/export', {
-      headers: {
-        ...COMMON_HEADERS,
-        ...adminCredentials.apiKeyHeader,
-        'Content-Type': 'application/json',
-      },
-      responseType: 'buffer',
-      body: JSON.stringify({ ids: [workflowId] }),
-    });
+      const exportResponse = await apiClient.post('api/workflows/export', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminCredentials.apiKeyHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids: [workflowId] }),
+      });
 
-    expect(exportResponse).toHaveStatusCode(200);
-
-    const zipBuffer = exportResponse.body as Buffer;
-    const zip = new AdmZip(zipBuffer);
-    const entryNames = zip.getEntries().map((e) => e.entryName);
-    expect(entryNames.some((n) => n.endsWith('.yml'))).toBe(true);
-    expect(entryNames).toContain('manifest.yml');
-  });
+      expect(exportResponse).toHaveStatusCode(200);
+      expect(exportResponse.body.entries).toHaveLength(1);
+      expect(exportResponse.body.entries[0].id).toBe(workflowId);
+      expect(exportResponse.body.entries[0].yaml).toBeDefined();
+      expect(exportResponse.body.manifest).toBeDefined();
+      expect(exportResponse.body.manifest.exportedCount).toBe(1);
+    }
+  );
 
   apiTest('should return 404 when exporting non-existent workflows', async ({ apiClient }) => {
     const response = await apiClient.post('api/workflows/export', {
@@ -175,20 +174,12 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
           ...adminCredentials.apiKeyHeader,
           'Content-Type': 'application/json',
         },
-        responseType: 'buffer',
         body: JSON.stringify({ ids: [originalId] }),
       });
       expect(exportResponse).toHaveStatusCode(200);
 
-      const zipBuffer = exportResponse.body as Buffer;
-      const zip = new AdmZip(zipBuffer);
-      const workflowEntries = zip
-        .getEntries()
-        .filter((e) => e.entryName.endsWith('.yml') && e.entryName !== 'manifest.yml');
-      expect(workflowEntries).toHaveLength(1);
-
-      const reImportedYaml = workflowEntries[0].getData().toString('utf-8');
-      const reImportedId = workflowEntries[0].entryName.replace('.yml', '');
+      const { entries } = exportResponse.body;
+      expect(entries).toHaveLength(1);
 
       const importResponse = await apiClient.post('api/workflows?overwrite=true', {
         headers: {
@@ -197,7 +188,7 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          workflows: [{ id: reImportedId, yaml: reImportedYaml }],
+          workflows: [{ id: entries[0].id, yaml: entries[0].yaml }],
         }),
       });
 
@@ -293,20 +284,12 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
           ...adminCredentials.apiKeyHeader,
           'Content-Type': 'application/json',
         },
-        responseType: 'buffer',
         body: JSON.stringify({ ids: [create1.data.id, create2.data.id] }),
       });
 
       expect(exportResponse).toHaveStatusCode(200);
 
-      const zipBuffer = exportResponse.body as Buffer;
-      const zip = new AdmZip(zipBuffer);
-      const manifestEntry = zip.getEntries().find((e) => e.entryName === 'manifest.yml');
-      expect(manifestEntry).toBeDefined();
-
-      const manifest = YAML.parse(
-        (manifestEntry ?? { getData: () => Buffer.from('') }).getData().toString('utf-8')
-      );
+      const { manifest } = exportResponse.body;
       expect(manifest.exportedCount).toBe(2);
       expect(manifest.version).toBe('1');
       expect(manifest.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
