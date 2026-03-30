@@ -11763,9 +11763,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-saml-auth",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestSamlAuthPluginApi",
                 "section": "def-common.SamlSessionManager",
                 "text": "SamlSessionManager"
               }
@@ -12303,37 +12303,13 @@
             "description": [],
             "signature": [
               "{ kibana: ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "common",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-common.UrlParts",
-                "text": "UrlParts"
-              },
+              "UrlParts",
               "; elasticsearch: ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "common",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-common.UrlParts",
-                "text": "UrlParts"
-              },
+              "UrlParts",
               "; linkedElasticsearch?: ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "common",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-common.UrlParts",
-                "text": "UrlParts"
-              },
+              "UrlParts",
               " | undefined; fleet?: ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "common",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-common.UrlParts",
-                "text": "UrlParts"
-              },
+              "UrlParts",
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
