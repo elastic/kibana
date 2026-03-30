@@ -221,6 +221,19 @@ describe('IntegrationResolverImpl', () => {
       expect('resolution' in results[0]).toBe(false);
     });
 
+    it('skips v2 ESQL query with FROM clause', async () => {
+      const query = createMockQueryV2(QueryType.ESQL, {
+        integrations: ['endpoint'],
+        query: 'FROM logs-* | stats count() by user.name',
+      });
+      const results = await resolver.resolve([query]);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].kind).toBe('skipped');
+      if (results[0].kind !== 'skipped') throw new Error('type guard');
+      expect(results[0].reason).toBe('unsupported_query');
+    });
+
     it('calls Fleet only once even for multiple v2 queries', async () => {
       const q1 = createMockQueryV2(QueryType.DSL, { id: 'q1', integrations: ['endpoint'] });
       const q2 = createMockQueryV2(QueryType.DSL, { id: 'q2', integrations: ['fleet_server'] });

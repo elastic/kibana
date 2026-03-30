@@ -307,6 +307,27 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       );
     });
 
+    test('v2 ESQL query with FROM clause errors without calling esql', (done) => {
+      const execQuery = mkExecV2(QueryType.ESQL, {
+        query: 'FROM logs-* | stats count() by user.name',
+      });
+      const circuitBreaker = createMockCircuitBreaker(true);
+
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+        next: () => done(new Error('Should not emit')),
+        error: (error) => {
+          try {
+            expect(error.message).toContain('FROM clause');
+            expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+            done();
+          } catch (e) {
+            done(e);
+          }
+        },
+        complete: () => done(new Error('Should not complete successfully')),
+      });
+    });
+
     test('should handle ES|QL query with FROM clause already present', (done) => {
       const execQuery = mkExecV1(QueryType.ESQL, {
         query: 'FROM logs-* | stats count() by user.name',

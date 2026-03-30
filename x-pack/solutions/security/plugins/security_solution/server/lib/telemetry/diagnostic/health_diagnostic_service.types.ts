@@ -154,7 +154,8 @@ export type SkipReason =
   | 'datastreams_not_matched'
   | 'integration_not_installed'
   | 'unknown_version'
-  | 'fleet_unavailable';
+  | 'fleet_unavailable'
+  | 'unsupported_query';
 
 export interface SkippedQuery {
   kind: 'skipped';

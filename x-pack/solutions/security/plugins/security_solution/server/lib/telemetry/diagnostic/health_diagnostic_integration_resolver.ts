@@ -7,14 +7,15 @@
 
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
-import type {
-  HealthDiagnosticQuery,
-  HealthDiagnosticQueryV1,
-  HealthDiagnosticQueryV2,
-  ExecutableQuery,
-  SkippedQuery,
-  ResolvedQuery,
-  IntegrationResolution,
+import {
+  QueryType,
+  type HealthDiagnosticQuery,
+  type HealthDiagnosticQueryV1,
+  type HealthDiagnosticQueryV2,
+  type ExecutableQuery,
+  type SkippedQuery,
+  type ResolvedQuery,
+  type IntegrationResolution,
 } from './health_diagnostic_service.types';
 
 export interface IntegrationResolver {
@@ -51,6 +52,11 @@ export class IntegrationResolverImpl implements IntegrationResolver {
       } else if ('version' in query && query.version === 2) {
         if (fleetUnavailable) {
           return [{ kind: 'skipped', query, reason: 'fleet_unavailable' } as SkippedQuery];
+        }
+        // skip ESQL queries with FROM clause since either `integrations` or `index` specify on
+        // which indices or datastreams run the query.
+        if (query.type === QueryType.ESQL && /^[\s\r\n]*FROM/i.test(query.query)) {
+          return [{ kind: 'skipped', query, reason: 'unsupported_query' } as SkippedQuery];
         }
         return this.resolveV2(query, installedPackages);
       } else {

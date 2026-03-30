@@ -13,6 +13,7 @@ import {
   EMPTY,
   from,
   merge,
+  throwError,
   type Observable,
   takeUntil,
   map,
@@ -69,6 +70,18 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
 
   streamEsql<T>(executableQuery: ExecutableQuery, abortSignal: AbortSignal): Observable<T> {
     const { query } = executableQuery;
+
+    if (query.version === 2 && /^[\s\r\n]*FROM/i.test(query.query)) {
+      // never should fail here since we already manage this scenario in the resolver, but just in case, we put this guard to
+      // avoid running potentially unsafe queries
+      return throwError(
+        () =>
+          new Error(
+            'v2 ESQL descriptors must not contain a FROM clause; use the integrations field to target indices'
+          )
+      );
+    }
+
     const regex = /^[\s\r\n]*FROM/;
     const originalIndices = this.originalIndicesFor(executableQuery);
 
