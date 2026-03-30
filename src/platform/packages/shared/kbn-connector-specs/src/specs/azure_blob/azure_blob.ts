@@ -20,6 +20,10 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import searchWorkflow from './workflows/search.yaml';
+import listBlobsWorkflow from './workflows/list_blobs.yaml';
+import listContainersWorkflow from './workflows/list_containers.yaml';
+import getBlobWorkflow from './workflows/get_blob.yaml';
 
 const AZURE_BLOB_API_VERSION = '2021-06-08';
 
@@ -237,4 +241,11 @@ export const AzureBlob: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [
+    searchWorkflow,
+    listBlobsWorkflow,
+    listContainersWorkflow,
+    getBlobWorkflow,
+  ],
 };
