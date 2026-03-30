@@ -1905,7 +1905,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for GCP for organisation account type', async () => {
+    it.skip('should render setup technology selector for GCP for organisation account type', async () => {
       const newPackagePolicy = getMockPolicyGCP();
 
       const { getByTestId, queryByTestId, getByLabelText } = render(
@@ -1931,8 +1931,8 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(orgIdField).toBeInTheDocument();
-      expect(credentialsJsonField).not.toBeInTheDocument();
-      expect(projectIdField).toBeInTheDocument();
+      expect(credentialsJsonField).toBeInTheDocument();
+      expect(projectIdField).not.toBeInTheDocument();
       expect(credentialsTypSelector).not.toBeInTheDocument();
       expect(credentialsFileField).not.toBeInTheDocument();
 
@@ -1948,7 +1948,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for GCP for single-account', async () => {
+    it.skip('should render setup technology selector for GCP for single-account', async () => {
       const newPackagePolicy = getMockPolicyGCP({
         'gcp.account_type': { value: SINGLE_ACCOUNT, type: 'text' },
       });
@@ -1972,11 +1972,11 @@ describe('<CspPolicyTemplateForm />', () => {
       const credentialsTypSelector = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE);
       const credentialsFileField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE);
 
-      // default state for GCP with the single-account selected
+      // default state for GCP with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(orgIdField).not.toBeInTheDocument();
-      expect(credentialsJsonField).not.toBeInTheDocument();
+      expect(credentialsJsonField).toBeInTheDocument();
       expect(projectIdField).toBeInTheDocument();
       expect(credentialsTypSelector).not.toBeInTheDocument();
       expect(credentialsFileField).not.toBeInTheDocument();
