@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import { QUERY_TYPE_MATCH } from '@kbn/streams-schema';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics/constants';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { SignificantEventItem } from '../../../hooks/sig_events/use_fetch_significant_events';
@@ -21,6 +22,7 @@ import { SignificantEventsHistogramChart } from './significant_events_histogram'
 import { buildDiscoverParams } from '../significant_events_discovery/utils/discover_helpers';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { SeverityBadge } from '../significant_events_discovery/components/severity_badge/severity_badge';
+import { QueryTypeBadge } from '../significant_events_discovery/components/query_type_badge/query_type_badge';
 
 export function SignificantEventsTable({
   definition,
@@ -72,6 +74,16 @@ export function SignificantEventsTable({
         ) : (
           record.query.title
         ),
+    },
+    {
+      field: 'query',
+      name: i18n.translate('xpack.streams.significantEventsTable.typeColumnTitle', {
+        defaultMessage: 'Type',
+      }),
+      width: '80px',
+      render: (query: StreamQuery) => (
+        <QueryTypeBadge type={query.type ?? QUERY_TYPE_MATCH} />
+      ),
     },
     {
       field: 'query',

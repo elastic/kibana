@@ -10,9 +10,14 @@ import type { StreamQuery } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useKibana } from '../use_kibana';
 
+interface PromoteResult {
+  promoted: number;
+  skipped: Array<{ id: string; reason: string }>;
+}
+
 interface QueriesApi {
-  promote: ({ queryIds }: { queryIds: string[] }) => Promise<{ promoted: number }>;
-  promoteAll: () => Promise<{ promoted: number }>;
+  promote: ({ queryIds }: { queryIds: string[] }) => Promise<PromoteResult>;
+  promoteAll: () => Promise<PromoteResult>;
   upsertQuery: ({ query, streamName }: { query: StreamQuery; streamName: string }) => Promise<void>;
   removeQuery: ({ queryId, streamName }: { queryId: string; streamName: string }) => Promise<void>;
   getUnbackedQueriesCount: (signal?: AbortSignal | null) => Promise<{ count: number }>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ensureMetadata, extractWhereExpression } from './esql_helpers';
+import { ensureMetadata, extractBucketIntervalMs, extractWhereExpression } from './esql_helpers';
 
 describe('extractWhereExpression', () => {
   it('returns the WHERE expression when present', () => {
@@ -52,5 +52,58 @@ describe('ensureMetadata', () => {
 
   it('returns the original string if there is no FROM command', () => {
     expect(ensureMetadata('SHOW INFO')).toBe('SHOW INFO');
+  });
+});
+
+describe('extractBucketIntervalMs', () => {
+  it('extracts 5 minutes bucket interval', () => {
+    const query =
+      'FROM logs | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | WHERE errors > 10';
+    expect(extractBucketIntervalMs(query)).toBe(300_000);
+  });
+
+  it('extracts compact time unit (5m)', () => {
+    const query = 'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 5m)';
+    expect(extractBucketIntervalMs(query)).toBe(300_000);
+  });
+
+  it('extracts 1 hour bucket interval', () => {
+    const query = 'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 1 hour)';
+    expect(extractBucketIntervalMs(query)).toBe(3_600_000);
+  });
+
+  it('extracts 30 seconds bucket interval', () => {
+    const query = 'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 30 seconds)';
+    expect(extractBucketIntervalMs(query)).toBe(30_000);
+  });
+
+  it('extracts 1 day bucket interval', () => {
+    const query = 'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 1d)';
+    expect(extractBucketIntervalMs(query)).toBe(86_400_000);
+  });
+
+  it('handles case-insensitive BUCKET/bucket', () => {
+    const query = 'FROM logs | STATS c = COUNT(*) BY bucket = bucket(@timestamp, 10 minutes)';
+    expect(extractBucketIntervalMs(query)).toBe(600_000);
+  });
+
+  it('handles TBUCKET syntax', () => {
+    const query = 'FROM logs | STATS c = COUNT(*) BY bucket = TBUCKET(@timestamp, 5 minutes)';
+    expect(extractBucketIntervalMs(query)).toBe(300_000);
+  });
+
+  it('returns null for non-bucketed STATS queries', () => {
+    const query = 'FROM logs | STATS errors = COUNT(*) BY service.name | WHERE errors > 10';
+    expect(extractBucketIntervalMs(query)).toBeNull();
+  });
+
+  it('returns null for match queries', () => {
+    const query = 'FROM logs METADATA _id, _source | WHERE log.level == "ERROR"';
+    expect(extractBucketIntervalMs(query)).toBeNull();
+  });
+
+  it('returns null when bucket is not on @timestamp', () => {
+    const query = 'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(event.created, 5 minutes)';
+    expect(extractBucketIntervalMs(query)).toBeNull();
   });
 });

@@ -35,8 +35,7 @@ export const buildEsqlSearchRequest = ({
   const requestFilter: estypes.QueryDslQueryContainer[] = [rangeFilter];
 
   return {
-    // Make sure query includes `METADATA _id, _source`
-    query: `${query} | limit ${MAX_ALERTS_PER_EXECUTION}`,
+    query: `${query} | LIMIT ${MAX_ALERTS_PER_EXECUTION}`,
     filter: {
       bool: {
         must_not:

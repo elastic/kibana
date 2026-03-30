@@ -10,7 +10,15 @@ import { isBoom } from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import {
+  type StreamQuery,
+  type Streams,
+  type QueryType,
+  QUERY_TYPE_STATS,
+  deriveQueryType,
+  extractBucketIntervalMs,
+  queryTypeSchema,
+} from '@kbn/streams-schema';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
@@ -34,6 +42,7 @@ import {
   QUERY_KQL_BODY,
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
+  QUERY_TYPE,
   RULE_BACKED,
   RULE_ID,
   STREAM_NAME,
@@ -135,6 +144,7 @@ type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_DESCRIPTION]: string;
   [QUERY_ESQL_QUERY]: string;
   [QUERY_SEVERITY_SCORE]?: number;
+  [QUERY_TYPE]?: string;
 };
 
 export type StoredQueryLink = QueryLinkStorageFields & {
@@ -162,6 +172,11 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     [QUERY_FEATURE_TYPE]: 'system';
     [QUERY_EVIDENCE]?: string[];
   };
+
+  const esql = storageFields[QUERY_ESQL_QUERY];
+  const parsed = queryTypeSchema.safeParse(storageFields[QUERY_TYPE]);
+  const type: QueryType = parsed.success ? parsed.data : deriveQueryType(esql);
+
   return {
     ...storageFields,
     stream_name: link[STREAM_NAME],
@@ -169,13 +184,11 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     rule_id: storageFields[RULE_ID],
     query: {
       id: storageFields[ASSET_ID],
+      type,
       title: storageFields[QUERY_TITLE],
       description: storageFields[QUERY_DESCRIPTION],
-      /**
-       * The storageClient migrateSource converts the `kql` and `feature` filter to esql, making safe their removal here.
-       */
       esql: {
-        query: storageFields[QUERY_ESQL_QUERY],
+        query: esql,
       },
       severity_score: storageFields[QUERY_SEVERITY_SCORE],
       evidence: storageFields[QUERY_EVIDENCE],
@@ -193,6 +206,7 @@ function toStorage(definition: Streams.all.Definition, request: QueryLinkRequest
     [QUERY_DESCRIPTION]: query.description,
     [QUERY_ESQL_QUERY]: query.esql.query,
     [QUERY_SEVERITY_SCORE]: query.severity_score,
+    [QUERY_TYPE]: query.type,
     [QUERY_EVIDENCE]: query.evidence,
     [RULE_BACKED]: request.rule_backed,
     [RULE_ID]: link.rule_id,
@@ -519,14 +533,14 @@ export class QueryClient {
         nextQueriesToCreate.push(link);
         allNextQueryLinks.push(link);
       } else if (!currentLink.rule_backed) {
-        // Unbacked queries have no rule, so breaking-change handling doesn't apply.
-        // Preserve the link as-is and update only the query content.
         allNextQueryLinks.push({ ...currentLink, query });
       } else if (hasBreakingChange(currentLink.query, query)) {
         const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesUpdatedWithBreakingChange.push(link);
         allNextQueryLinks.push(link);
       } else {
+        // Non-breaking update: installQueries calls toUpdateRuleParams → buildRuleParams,
+        // which transparently upgrades legacy STATS rule params (adds type + lookbackMinutes).
         const link = { ...currentLink, query };
         nextQueriesUpdatedWithoutBreakingChange.push(link);
         allNextQueryLinks.push(link);
@@ -667,24 +681,27 @@ export class QueryClient {
   public async promoteQueries(
     definition: Streams.all.Definition,
     queryIds: string[]
-  ): Promise<{ promoted: number }> {
+  ): Promise<{ promoted: number; skipped: Array<{ id: string; reason: string }> }> {
     const streamName = definition.name;
 
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
         `Skipping promoteQueries because significant events feature is disabled.`
       );
-      return { promoted: 0 };
+      return { promoted: 0, skipped: [] };
     }
 
     const unbacked = await this.getUnbackedQueries(streamName);
     const idSet = new Set(queryIds);
-    const toPromote = unbacked
-      .filter((link) => idSet.has(link.query.id))
-      .map((link) => toQueryLinkFromQuery({ query: link.query, stream: streamName }));
+    const candidates = unbacked.filter((link) => idSet.has(link.query.id));
+
+    const toPromote = candidates.map((link) =>
+      toQueryLinkFromQuery({ query: link.query, stream: streamName })
+    );
+    const skipped: Array<{ id: string; reason: string }> = [];
 
     if (toPromote.length === 0) {
-      return { promoted: 0 };
+      return { promoted: 0, skipped };
     }
 
     await this.installQueries(toPromote, [], definition);
@@ -709,7 +726,7 @@ export class QueryClient {
       throwOnFail: true,
     });
 
-    return { promoted: toPromote.length };
+    return { promoted: toPromote.length, skipped };
   }
 
   private async installQueries(
@@ -769,6 +786,22 @@ export class QueryClient {
       });
   }
 
+  private buildRuleParams(query: StreamQuery): EsqlRuleParams {
+    const base: EsqlRuleParams = {
+      timestampField: '@timestamp',
+      query: query.esql.query,
+      type: query.type === QUERY_TYPE_STATS ? 'stats' : 'match',
+    };
+
+    if (query.type === QUERY_TYPE_STATS) {
+      const bucketMs = extractBucketIntervalMs(query.esql.query);
+      const bucketMinutes = bucketMs ? bucketMs / 60_000 : 5;
+      base.lookbackMinutes = Math.ceil(2 * bucketMinutes);
+    }
+
+    return base;
+  }
+
   private toCreateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
     const { rule_id: ruleId, query } = queryLink;
 
@@ -778,10 +811,7 @@ export class QueryClient {
         consumer: 'streams',
         alertTypeId: 'streams.rules.esql',
         actions: [],
-        params: {
-          timestampField: '@timestamp',
-          query: query.esql.query,
-        },
+        params: this.buildRuleParams(query),
         enabled: true,
         tags: ['streams', definition.name],
         schedule: {
@@ -802,10 +832,7 @@ export class QueryClient {
       data: {
         name: query.title,
         actions: [],
-        params: {
-          timestampField: '@timestamp',
-          query: query.esql.query,
-        },
+        params: this.buildRuleParams(query),
         tags: ['streams', definition.name],
         schedule: {
           interval: '1m',

@@ -24,6 +24,8 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { QUERY_TYPE_MATCH } from '@kbn/streams-schema';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import React, { useState, useCallback, useMemo } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -87,6 +89,7 @@ import {
 } from './translations';
 import { PromoteAction } from './promote_action';
 import { QueryDetailsFlyout } from './query_details_flyout';
+import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
 import { formatLastOccurredAt } from './utils';
 
 const DEFAULT_PAGINATION = { index: 0, size: 10 };
@@ -145,7 +148,10 @@ export function QueriesTable() {
     [queryClient]
   );
 
-  const promoteAllMutation = useMutation<{ promoted: number }, Error>({
+  const promoteAllMutation = useMutation<
+    { promoted: number; skipped: Array<{ id: string; reason: string }> },
+    Error
+  >({
     mutationFn: promoteAll,
     onSuccess: async ({ promoted }) => {
       toasts.addSuccess(getPromoteAllSuccessToast(promoted));
@@ -276,6 +282,16 @@ export function QueriesTable() {
             />
           );
         },
+      },
+      {
+        field: 'query.type',
+        name: i18n.translate('xpack.streams.queriesTable.typeColumn', {
+          defaultMessage: 'Type',
+        }),
+        width: '80px',
+        render: (_: unknown, item: SignificantEventQueryRow) => (
+          <QueryTypeBadge type={item.query.type ?? QUERY_TYPE_MATCH} />
+        ),
       },
       {
         field: 'stream_name',

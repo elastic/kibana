@@ -10,6 +10,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
+import { hasStatsCommand } from '@kbn/streams-schema';
 
 const ESQL_UNITS: Record<string, string> = {
   s: 'seconds',
@@ -144,10 +145,26 @@ export async function previewSignificantEvents(
     },
   };
 
-  // CHANGE_POINT silently returns no change-point columns when there are
-  // insufficient buckets (< 22), so a single query is enough.
-  // drop_null_columns removes them from the response when they are absent,
-  // and the column-presence check below handles both cases uniformly.
+  if (hasStatsCommand(esqlQuery)) {
+    return previewStatsQuery({ esqlQuery, filter, from, to, bucketSize }, { scopedClusterClient });
+  }
+
+  return previewMatchQuery({ esqlQuery, filter, from, to, bucketSize }, { scopedClusterClient });
+}
+
+async function previewMatchQuery(
+  params: {
+    esqlQuery: string;
+    filter: QueryDslQueryContainer;
+    from: Date;
+    to: Date;
+    bucketSize: string;
+  },
+  deps: { scopedClusterClient: IScopedClusterClient }
+): Promise<SignificantEventsPreviewResponse> {
+  const { esqlQuery, filter, from, to, bucketSize } = params;
+  const { scopedClusterClient } = deps;
+
   const response = await scopedClusterClient.asCurrentUser.esql.query({
     query: buildHistogramQuery(esqlQuery, bucketSize),
     filter,
@@ -164,7 +181,6 @@ export async function previewSignificantEvents(
 
   const occurrences = fillBucketGaps(sparseOccurrences, from, to, bucketSize);
 
-  // Parse change point columns if present (CHANGE_POINT adds `type` and `pvalue`)
   const typeIdx = response.columns.findIndex((col) => col.name === 'type');
   const pvalueIdx = response.columns.findIndex((col) => col.name === 'pvalue');
   let changePoints: SignificantEventsPreviewResponse['change_points'] = { type: {} };
@@ -189,5 +205,62 @@ export async function previewSignificantEvents(
     esql: { query: esqlQuery },
     change_points: changePoints,
     occurrences,
+  };
+}
+
+/**
+ * STATS queries already contain their own aggregation pipeline. Execute them
+ * as-is (including the threshold WHERE clause). Each returned row represents
+ * a time bucket that exceeded the threshold -- a "would have fired" event.
+ */
+async function previewStatsQuery(
+  params: {
+    esqlQuery: string;
+    filter: QueryDslQueryContainer;
+    from: Date;
+    to: Date;
+    bucketSize: string;
+  },
+  deps: { scopedClusterClient: IScopedClusterClient }
+): Promise<SignificantEventsPreviewResponse> {
+  const { esqlQuery, filter, from, to, bucketSize } = params;
+  const { scopedClusterClient } = deps;
+
+  const response = await scopedClusterClient.asCurrentUser.esql.query({
+    query: esqlQuery,
+    filter,
+    drop_null_columns: true,
+  });
+
+  const firingCount = response.values.length;
+
+  // ES|QL's BUCKET(@timestamp, ...) produces a column named "bucket" with type "date".
+  // We rely on this convention to identify temporal results.
+  const bucketCol = response.columns.find(
+    (col) => col.type === 'date' && col.name === 'bucket'
+  );
+
+  if (bucketCol) {
+    const bucketIdx = response.columns.indexOf(bucketCol);
+    const firingDates = response.values
+      .map((row) => row[bucketIdx] as string)
+      .filter(Boolean);
+
+    const sparseOccurrences = firingDates.map((date) => ({ date, count: 1 }));
+    const occurrences = fillBucketGaps(sparseOccurrences, from, to, bucketSize);
+
+    return {
+      esql: { query: esqlQuery },
+      change_points: { type: {} },
+      occurrences,
+      firing_count: firingCount,
+    };
+  }
+
+  return {
+    esql: { query: esqlQuery },
+    change_points: { type: {} },
+    occurrences: [],
+    firing_count: firingCount,
   };
 }

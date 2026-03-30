@@ -40,6 +40,20 @@ function printWithUpdatedFrom(
   return BasicPrettyPrinter.print(Builder.expression.query(updatedCommands as ESQLCommand[]));
 }
 
+/**
+ * Matches `BUCKET(@timestamp, N unit)` or `TBUCKET(@timestamp, N unit)` in
+ * the raw query string. The AST does not expose BUCKET as a named node in a
+ * way that's easy to match, so regex is the pragmatic approach.
+ *
+ * When the match succeeds, group 1 is the numeric value and group 2 is the
+ * time unit (e.g. "5", "minutes"). Returns `null` when no bucket call is found.
+ */
+function matchTimeBucket(esql: string): RegExpMatchArray | null {
+  return esql.match(
+    /(?:BUCKET|TBUCKET)\s*\(\s*@timestamp\s*,\s*(\d+)\s*(seconds?|minutes?|hours?|days?|[smhd])\s*\)/i
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -128,6 +142,124 @@ export function replaceFromSources(esql: string, newSources: string[]): string {
   const nonSourceArgs = fromCmd.args.filter((arg) => !isIndexSource(arg));
   const sourceArgs = newSources.map((s) => Builder.expression.source.index(s));
   return printWithUpdatedFrom(root, fromCmd, [...sourceArgs, ...nonSourceArgs]);
+}
+
+/**
+ * Returns `true` when the ES|QL query contains a STATS command,
+ * indicating an aggregation-based (symptom) query rather than a
+ * row-level (cause / match) query.
+ */
+export function hasStatsCommand(esql: string): boolean {
+  try {
+    const { root } = Parser.parse(esql);
+    return root.commands.some((cmd) => 'name' in cmd && cmd.name === 'stats');
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Derives the canonical {@link QueryType} from an ES|QL query string
+ * by checking whether it contains a STATS command.
+ */
+export function deriveQueryType(esql: string): import('../queries').QueryType {
+  return hasStatsCommand(esql) ? 'stats' : 'match';
+}
+
+/**
+ * Returns quality hints for STATS queries to feed back to the LLM.
+ * Checks for common structural issues in aggregate queries.
+ * Returns an empty array for non-STATS queries or when no issues are found.
+ *
+ * Note: This re-parses the ES|QL string (same as {@link hasStatsCommand}).
+ * The double parse is intentional — callers may invoke only one of the two
+ * functions, and merging them would couple unrelated responsibilities.
+ */
+export function getStatsQueryHints(esql: string): string[] {
+  try {
+    const { root } = Parser.parse(esql);
+    const commands = root.commands.filter(
+      (cmd): cmd is ESQLCommand => 'name' in cmd
+    );
+    const isStats = commands.some((cmd) => cmd.name === 'stats');
+
+    if (!isStats) {
+      const hints: string[] = [];
+      if (commands.some((cmd) => cmd.name === 'eval')) {
+        hints.push(
+          'Warning: EVAL is supported only in stats-type queries. Remove the EVAL command or convert to a STATS query.'
+        );
+      }
+      return hints;
+    }
+
+    const hints: string[] = [];
+    const statsIdx = commands.findIndex((cmd) => cmd.name === 'stats');
+
+    if (!matchTimeBucket(esql)) {
+      hints.push(
+        'Note: This STATS query has no temporal bucketing. Each execution produces one value per group. Consider adding BY bucket = BUCKET(@timestamp, N minutes) for time-series granularity.'
+      );
+    }
+
+    const commandsAfterStats = commands.slice(statsIdx + 1);
+    const hasWhereAfterStats = commandsAfterStats.some((cmd) => cmd.name === 'where');
+    if (!hasWhereAfterStats) {
+      hints.push(
+        'Warning: No threshold filter after STATS. For alerting, add | WHERE <metric> > <threshold> to distinguish normal from anomalous conditions.'
+      );
+    }
+
+    // These commands are disallowed in *all* queries (match and stats alike).
+    // The check is placed here because match queries never reach this function,
+    // but the system prompt already blocks them for match queries.
+    const disallowed = ['sort', 'limit', 'keep'];
+    const found = commands.filter((cmd) => disallowed.includes(cmd.name)).map((cmd) => cmd.name.toUpperCase());
+    if (found.length > 0) {
+      hints.push(
+        `Warning: ${found.join(', ')} should not be used in STATS queries. The system manages ordering and limits.`
+      );
+    }
+
+    return hints;
+  } catch {
+    return [];
+  }
+}
+
+const MS_PER_UNIT: Record<string, number> = {
+  s: 1_000,
+  second: 1_000,
+  seconds: 1_000,
+  m: 60_000,
+  minute: 60_000,
+  minutes: 60_000,
+  h: 3_600_000,
+  hour: 3_600_000,
+  hours: 3_600_000,
+  d: 86_400_000,
+  day: 86_400_000,
+  days: 86_400_000,
+};
+
+/**
+ * Extracts the temporal bucket interval from a STATS query's
+ * `BUCKET(@timestamp, N unit)` or `TBUCKET(@timestamp, N unit)` call
+ * and returns the interval in milliseconds.
+ *
+ * Returns `null` when no temporal bucketing is found.
+ */
+export function extractBucketIntervalMs(esql: string): number | null {
+  const match = matchTimeBucket(esql);
+  if (!match) return null;
+
+  const value = parseInt(match[1], 10);
+  const unit = match[2].toLowerCase();
+  const msPerUnit = MS_PER_UNIT[unit];
+
+  if (!msPerUnit || isNaN(value) || value <= 0) return null;
+
+  return value * msPerUnit;
 }
 
 /**

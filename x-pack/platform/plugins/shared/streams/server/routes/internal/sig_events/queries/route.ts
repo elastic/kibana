@@ -79,7 +79,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<{ promoted: number }> => {
+  }): Promise<{ promoted: number; skipped: Array<{ id: string; reason: string }> }> => {
     const { queryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
@@ -110,6 +110,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     );
 
     let promoted = 0;
+    const skipped: Array<{ id: string; reason: string }> = [];
     for (const [streamName, queryIds] of Object.entries(byStream)) {
       const definition = streamDefinitionsByName.get(streamName);
       if (!definition) {
@@ -118,8 +119,9 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
       }
       const result = await queryClient.promoteQueries(definition, queryIds);
       promoted += result.promoted;
+      skipped.push(...result.skipped);
     }
-    return { promoted };
+    return { promoted, skipped };
   },
 });
 

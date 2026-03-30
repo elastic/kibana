@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import type { Feature, Streams } from '@kbn/streams-schema';
-import { ensureMetadata, getSourcesForStream, replaceFromSources } from '@kbn/streams-schema';
+import type { Feature, QueryType, Streams } from '@kbn/streams-schema';
+import {
+  QUERY_TYPE_STATS,
+  deriveQueryType,
+  ensureMetadata,
+  getSourcesForStream,
+  getStatsQueryHints,
+  replaceFromSources,
+} from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
@@ -26,8 +33,10 @@ import {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
 } from './tools/tool_usage';
+import { buildStatsGuidance } from './tools/stats_guidance';
 
 interface Query {
+  type: QueryType;
   esql: string;
   title: string;
   description: string;
@@ -89,7 +98,7 @@ export async function generateSignificantEvents({
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),
       },
-      maxSteps: 4,
+      maxSteps: 5,
       prompt,
       inferenceClient,
       toolCallbacks: {
@@ -111,10 +120,13 @@ export async function generateSignificantEvents({
             );
             const llmFeatures = features.map(toFeatureForLlmContext);
 
+            const statsGuidance = buildStatsGuidance(llmFeatures);
+
             return {
               response: {
                 features: llmFeatures,
                 count: llmFeatures.length,
+                ...(statsGuidance ? { stats_guidance: statsGuidance } : {}),
               },
             };
           } catch (error) {
@@ -142,18 +154,35 @@ export async function generateSignificantEvents({
           const queryValidationResults = await Promise.all(
             queries.map(async (query) => {
               try {
-                const rewritten = ensureMetadata(replaceFromSources(query.esql, targetSources));
+                const derivedType: QueryType = deriveQueryType(query.esql);
+                const warnings: string[] = [];
+
+                if (query.type && query.type !== derivedType) {
+                  warnings.push(
+                    `Type mismatch: declared "${query.type}" but ES|QL content is "${derivedType}". Using derived type.`
+                  );
+                }
+
+                const sourceRewritten = replaceFromSources(query.esql, targetSources);
+                const rewritten =
+                  derivedType === QUERY_TYPE_STATS
+                    ? sourceRewritten
+                    : ensureMetadata(sourceRewritten);
+
+                const hints = getStatsQueryHints(rewritten);
 
                 await esClient.esql.query({
                   query: `${rewritten}\n| LIMIT 0`,
                   format: 'json',
                 });
 
+                const allHints = [...warnings, ...hints];
                 return {
-                  query: { ...query, esql: rewritten },
+                  query: { ...query, type: derivedType, esql: rewritten },
                   valid: true,
                   status: 'Added',
                   error: undefined,
+                  hints: allHints.length > 0 ? allHints : undefined,
                 };
               } catch (error) {
                 hasFailures = true;

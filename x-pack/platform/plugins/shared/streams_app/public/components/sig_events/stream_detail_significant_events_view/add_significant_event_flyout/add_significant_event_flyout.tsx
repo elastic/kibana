@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { TaskStatus, type StreamQuery, type Streams } from '@kbn/streams-schema';
+import { TaskStatus, QUERY_TYPE_MATCH, type StreamQuery, type Streams } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -166,6 +166,7 @@ export function AddSignificantEventFlyout({
           .filter((nextQuery) => validateEsqlQuery(nextQuery.esql.query).isInvalid === false)
           .map((nextQuery) => ({
             id: v4(),
+            type: nextQuery.type ?? QUERY_TYPE_MATCH,
             esql: nextQuery.esql,
             title: nextQuery.title,
             description: nextQuery.description,

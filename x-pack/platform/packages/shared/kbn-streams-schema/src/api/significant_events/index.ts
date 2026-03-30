@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { EsqlQuery, StreamQuery } from '../../queries';
+import type { EsqlQuery, QueryType, StreamQuery } from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
 
 /**
@@ -52,9 +52,16 @@ interface SignificantEventsGetResponse {
 type SignificantEventsPreviewResponse = Pick<
   SignificantEventsResponse,
   'occurrences' | 'change_points' | 'esql'
->;
+> & {
+  /**
+   * For STATS queries only: how many time buckets exceeded the threshold
+   * during the preview window. Absent for match-type queries.
+   */
+  firing_count?: number;
+};
 
 interface GeneratedSignificantEventQuery {
+  type: QueryType;
   title: string;
   esql: EsqlQuery;
   severity_score: number;

@@ -10,18 +10,26 @@ import { z } from '@kbn/zod/v4';
 
 export interface EsqlRuleInstanceState extends RuleTypeState {
   previousOriginalDocumentIds?: string[];
+  previousFiringIds?: string[];
 }
 
 export const esqlRuleInstanceState = z.object({
   previousOriginalDocumentIds: z.string().array().optional(),
+  previousFiringIds: z.string().array().optional(),
 }) satisfies z.Schema<EsqlRuleInstanceState>;
+
+export type EsqlRuleQueryType = 'match' | 'stats';
 
 export interface EsqlRuleParams extends RuleTypeParams {
   query: string;
   timestampField: string;
+  type?: EsqlRuleQueryType;
+  lookbackMinutes?: number;
 }
 
 export const esqlRuleParams = z.object({
   query: z.string(),
   timestampField: z.string(),
+  type: z.enum(['match', 'stats']).optional(),
+  lookbackMinutes: z.number().optional(),
 }) satisfies z.Schema<EsqlRuleParams>;

@@ -6,11 +6,13 @@
  */
 
 import type { StreamQuery } from '@kbn/streams-schema';
+import { QUERY_TYPE_MATCH } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 
 export function defaultQuery(): StreamQuery {
   return {
     id: v4(),
+    type: QUERY_TYPE_MATCH,
     title: '',
     description: '',
     esql: {

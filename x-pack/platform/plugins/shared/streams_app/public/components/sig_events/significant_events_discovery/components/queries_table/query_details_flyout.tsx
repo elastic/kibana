@@ -36,6 +36,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { QUERY_TYPE_MATCH } from '@kbn/streams-schema';
 import React, { useEffect, useMemo, useState } from 'react';
 import { StreamsESQLEditor } from '../../../../esql_query_editor';
 import type { SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
@@ -57,6 +58,7 @@ import {
 } from './translations';
 import { formatLastOccurredAt } from './utils';
 import { AssetImage } from '../../../../asset_image';
+import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
 
 interface QueryDetailsFlyoutProps {
   item: SignificantEventItem;
@@ -130,7 +132,13 @@ export function QueryDetailsFlyout({
     setIsEditMode(false);
   };
 
+  const queryType = item.query.type ?? QUERY_TYPE_MATCH;
+
   const infoListItems = [
+    {
+      title: TYPE_LABEL,
+      description: <QueryTypeBadge type={queryType} />,
+    },
     {
       title: QUERY_LABEL,
       description: (
@@ -482,6 +490,11 @@ const DELETE_MODAL_BODY = i18n.translate(
 const DELETE_CONFIRM_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.deleteConfirmButtonLabel',
   { defaultMessage: 'Delete query' }
+);
+
+const TYPE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.typeLabel',
+  { defaultMessage: 'Type' }
 );
 
 const NO_OCCURRENCES_DESCRIPTION = i18n.translate(

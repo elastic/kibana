@@ -8,7 +8,7 @@
 import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
-import { ensureMetadata } from '@kbn/streams-schema';
+import { ensureMetadata, deriveQueryType, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { StreamsPluginStartDependencies } from '../../../../types';
@@ -18,6 +18,7 @@ import {
   QUERY_KQL_BODY,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
+  QUERY_TYPE,
   STREAM_NAME,
   RULE_ID,
   RULE_BACKED,
@@ -88,12 +89,17 @@ export class QueryService {
             migrated = { ...migrated, [QUERY_ESQL_QUERY]: esqlQuery };
           }
 
-          // Ensure METADATA _id, _source is present on all stored queries —
-          // covers documents written before METADATA was mandatory.
-          migrated = {
-            ...migrated,
-            [QUERY_ESQL_QUERY]: ensureMetadata(migrated[QUERY_ESQL_QUERY] as string),
-          };
+          const esqlQuery = migrated[QUERY_ESQL_QUERY] as string;
+          // Derive type first — all subsequent migration steps depend on this.
+          const derivedType = deriveQueryType(esqlQuery);
+
+          if (!(QUERY_TYPE in migrated)) {
+            migrated = { ...migrated, [QUERY_TYPE]: derivedType };
+          }
+
+          if (derivedType !== QUERY_TYPE_STATS) {
+            migrated = { ...migrated, [QUERY_ESQL_QUERY]: ensureMetadata(esqlQuery) };
+          }
 
           // Back-fill rule_id for pre-existing documents using the KQL query as the hash
           // input — this preserves the IDs of rules that were already created before rule_id

@@ -12,26 +12,34 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { PersistenceServices } from '@kbn/rule-registry-plugin/server';
+import { extractBucketIntervalMs } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 import { MAX_ALERTS_PER_EXECUTION } from './common';
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
+import { buildStatsEsqlSearchRequest } from './lib/build_stats_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
+import { executeStatsEsqlRequest } from './lib/execute_stats_esql_request';
 import type { EsqlRuleInstanceState, EsqlRuleParams } from './types';
 
-export async function getRuleExecutor(
-  options: RuleExecutorOptions<
-    EsqlRuleParams,
-    EsqlRuleInstanceState,
-    AlertInstanceState,
-    AlertInstanceContext,
-    'default',
-    Alert
-  > & {
-    services: PersistenceServices;
-  }
-) {
+type ExecutorOptions = RuleExecutorOptions<
+  EsqlRuleParams,
+  EsqlRuleInstanceState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  'default',
+  Alert
+> & {
+  services: PersistenceServices;
+};
+
+export async function getRuleExecutor(options: ExecutorOptions) {
+  const queryType = options.params.type ?? 'match';
+  return queryType === 'stats' ? executeStatsPath(options) : executeMatchPath(options);
+}
+
+async function executeMatchPath(options: ExecutorOptions) {
   const { services, params, logger, state, startedAt, spaceId, rule } = options;
   const { scopedClusterClient, alertWithPersistence } = services;
 
@@ -79,7 +87,6 @@ export async function getRuleExecutor(
 
   const { createdAlerts, errors } = await alertWithPersistence(
     alerts,
-    // keep refresh false to optimize performance as we don't need to read these alerts back immediately
     false,
     MAX_ALERTS_PER_EXECUTION
   );
@@ -95,6 +102,98 @@ export async function getRuleExecutor(
   return {
     state: {
       previousOriginalDocumentIds: originalDocumentIds,
+    },
+  };
+}
+
+function alignToBucketBoundary(timestampMs: number, intervalMs: number): number {
+  return Math.floor(timestampMs / intervalMs) * intervalMs;
+}
+
+async function executeStatsPath(options: ExecutorOptions) {
+  const { services, params, logger, state, startedAt, spaceId, rule } = options;
+  const { scopedClusterClient, alertWithPersistence } = services;
+
+  const previousFiringIds = new Set(state.previousFiringIds ?? []);
+  const nowMs = moment(startedAt).valueOf();
+
+  if (params.lookbackMinutes == null) {
+    logger.warn(
+      `STATS rule "${rule.id}" has no lookbackMinutes configured; falling back to 10 minutes. ` +
+        `Re-promote or re-sync the query to set the correct lookback.`
+    );
+  }
+  const lookbackMs = (params.lookbackMinutes ?? 10) * 60_000;
+
+  const bucketIntervalMs = extractBucketIntervalMs(params.query);
+
+  let from: string;
+  let to: string;
+
+  if (bucketIntervalMs) {
+    const toMs = alignToBucketBoundary(nowMs, bucketIntervalMs);
+    const fromMs = alignToBucketBoundary(toMs - lookbackMs, bucketIntervalMs);
+    from = new Date(fromMs).toISOString();
+    to = new Date(toMs).toISOString();
+  } else {
+    from = new Date(nowMs - lookbackMs).toISOString();
+    to = new Date(nowMs).toISOString();
+  }
+
+  const esqlRequest = buildStatsEsqlSearchRequest({
+    query: params.query,
+    timestampField: params.timestampField,
+    from,
+    to,
+  });
+
+  const results = await executeStatsEsqlRequest({
+    esClient: scopedClusterClient.asCurrentUser,
+    esqlRequest,
+    logger,
+  });
+
+  if (results.length === 0) {
+    return { state: { previousFiringIds: [] } };
+  }
+
+  if (results.length >= MAX_ALERTS_PER_EXECUTION) {
+    logger.warn(
+      `STATS query returned ${results.length} rows (limit reached). Some aggregate alerts may be dropped.`
+    );
+  }
+
+  const allAlertIds: string[] = [];
+  const newAlerts: Array<{ _id: string; _source: { original_source: Record<string, unknown> } }> =
+    [];
+
+  for (const row of results) {
+    const alertId = objectHash([row.bucket, ...row.groupValues, rule.id, spaceId]);
+    allAlertIds.push(alertId);
+
+    if (!previousFiringIds.has(alertId)) {
+      newAlerts.push({
+        _id: alertId,
+        _source: { original_source: row.columns },
+      });
+    }
+  }
+
+  if (newAlerts.length > 0) {
+    const { errors } = await alertWithPersistence(
+      newAlerts,
+      false,
+      MAX_ALERTS_PER_EXECUTION
+    );
+
+    if (!isEmpty(errors)) {
+      logger.debug(() => `Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
+    }
+  }
+
+  return {
+    state: {
+      previousFiringIds: allAlertIds.slice(0, MAX_ALERTS_PER_EXECUTION),
     },
   };
 }

@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
 import type { GeneratedSignificantEventQuery, Streams } from '@kbn/streams-schema';
-import { ensureMetadata } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS, ensureMetadata } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { FeatureClient } from '../streams/feature/feature_client';
@@ -62,9 +62,13 @@ export async function generateSignificantEventDefinitions(
 
   return {
     queries: queries.map((query) => ({
+      type: query.type,
       title: query.title,
       description: query.description,
-      esql: { query: ensureMetadata(query.esql) },
+      esql: {
+        query:
+          query.type === QUERY_TYPE_STATS ? query.esql : ensureMetadata(query.esql),
+      },
       severity_score: query.severity_score,
       evidence: query.evidence,
     })),

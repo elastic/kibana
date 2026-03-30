@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { useQueryClient, useMutation } from '@kbn/react-query';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../../hooks/sig_events/use_fetch_discovery_queries';
+import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../../hooks/sig_events/use_unbacked_queries_count';
 import { useFetchErrorToast } from '../../../../../hooks/use_fetch_error_toast';
 import { type SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
 import { useKibana } from '../../../../../hooks/use_kibana';
@@ -32,16 +33,15 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
         toasts.addSuccess(getPromoteQuerySuccessToast(item.query.title));
       }
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: ['unbackedQueriesCount'] });
+      queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY });
     },
     onError: showFetchErrorToast,
   });
 
+  const tooltipContent = !item.rule_backed ? PROMOTE_QUERY_ACTION_TITLE : '';
+
   return (
-    <EuiToolTip
-      content={!item.rule_backed ? PROMOTE_QUERY_ACTION_TITLE : ''}
-      disableScreenReaderOutput
-    >
+    <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="plusCircle"
         aria-label={PROMOTE_QUERY_ACTION_TITLE}

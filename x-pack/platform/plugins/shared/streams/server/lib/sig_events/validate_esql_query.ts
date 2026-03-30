@@ -56,14 +56,18 @@ export function validateEsqlQueryForStreamOrThrow({
     throw new EsqlQueryValidationError(`ES|QL query must use FROM ${wiredPattern}`);
   }
 
-  const metadataOption = Walker.match(fromCmd, { type: 'option', name: 'metadata' });
-  const metadataFields = metadataOption
-    ? Walker.matchAll(metadataOption, { type: 'column' }).map((col) => col.name)
-    : [];
+  const isStatsQuery = Walker.match(root, { type: 'command', name: 'stats' }) !== undefined;
 
-  if (!metadataFields.includes('_id') || !metadataFields.includes('_source')) {
-    throw new EsqlQueryValidationError(
-      'ES|QL query METADATA must include both `_id` and `_source`'
-    );
+  if (!isStatsQuery) {
+    const metadataOption = Walker.match(fromCmd, { type: 'option', name: 'metadata' });
+    const metadataFields = metadataOption
+      ? Walker.matchAll(metadataOption, { type: 'column' }).map((col) => col.name)
+      : [];
+
+    if (!metadataFields.includes('_id') || !metadataFields.includes('_source')) {
+      throw new EsqlQueryValidationError(
+        'ES|QL query METADATA must include both `_id` and `_source`'
+      );
+    }
   }
 }

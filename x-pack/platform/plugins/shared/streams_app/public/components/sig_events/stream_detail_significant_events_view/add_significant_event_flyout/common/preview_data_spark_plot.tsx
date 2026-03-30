@@ -7,6 +7,7 @@
 
 import { niceTimeFormatter } from '@elastic/charts';
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -56,7 +57,7 @@ export function PreviewDataSparkPlot({
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
     esqlQuery: query.esql.query,
-    timeRange: timeRange ?? timeState.asAbsoluteTimeRange,
+    timeRange: effectiveTimeRange,
     isQueryValid,
     noOfBuckets,
   });
@@ -165,22 +166,42 @@ export function PreviewDataSparkPlot({
       { defaultMessage: 'Open in Discover' }
     );
 
+    const firingCount = previewFetch.value?.firing_count;
+
     return (
       <>
         {showTitle && (
           <EuiFlexGroup justifyContent="spaceBetween" css={{ width: '100%' }}>
             <EuiFlexItem>
-              <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-                {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
-                  {
-                    defaultMessage: 'Detected event occurrences ({count})',
-                    values: {
-                      count: sparkPlotData.timeseries.reduce((acc, point) => acc + point.y, 0),
-                    },
-                  }
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+                    {i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
+                      {
+                        defaultMessage: 'Detected event occurrences ({count})',
+                        values: {
+                          count: sparkPlotData.timeseries.reduce((acc, point) => acc + point.y, 0),
+                        },
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+                {firingCount !== undefined && firingCount > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">
+                      {i18n.translate(
+                        'xpack.streams.addSignificantEventFlyout.manualFlow.previewFiringCount',
+                        {
+                          defaultMessage:
+                            '{count, plural, one {# bucket exceeded threshold} other {# buckets exceeded threshold}}',
+                          values: { count: firingCount },
+                        }
+                      )}
+                    </EuiBadge>
+                  </EuiFlexItem>
                 )}
-              </EuiText>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
