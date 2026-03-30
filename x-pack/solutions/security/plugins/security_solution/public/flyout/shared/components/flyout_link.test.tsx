@@ -18,6 +18,7 @@ import { RulePanelKey } from '../../rule_details/right';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../common/lib/kibana', () => {
@@ -27,8 +28,21 @@ jest.mock('../../../common/lib/kibana', () => {
         telemetry: mockedTelemetry,
       },
     }),
+    useUiSetting: () => false,
   };
 });
+
+jest.mock('../../entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: jest.fn().mockReturnValue({
+    entity: null,
+    entityRecord: null,
+    firstSeen: null,
+    lastSeen: null,
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
+}));
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -43,13 +57,15 @@ const renderFlyoutLink = (
   field: string,
   value: string,
   dataTestSuj?: string,
-  isFlyoutOpen?: boolean
+  isFlyoutOpen?: boolean,
+  identityFields?: IdentityFields
 ) =>
   render(
     <TestProviders>
       <FlyoutLink
         field={field}
         value={value}
+        identityFields={identityFields}
         data-test-subj={dataTestSuj}
         scopeId={'scopeId'}
         ruleId={'ruleId'}
@@ -108,15 +124,20 @@ describe('<FlyoutLink />', () => {
     });
 
     it('should render a link to open host flyout', () => {
-      const { getByTestId } = renderFlyoutLink('host.name', 'host', 'host-link');
+      const { getByTestId } = renderFlyoutLink('host.name', 'host', 'host-link', false, {
+        'host.name': 'host',
+        'host.hostname': 'hostname',
+      });
       getByTestId('host-link').click();
 
       expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({
         right: {
           id: HostPanelKey,
           params: {
+            contextID: 'scopeId',
             hostName: 'host',
             scopeId: 'scopeId',
+            entityId: undefined,
           },
         },
       });
@@ -126,12 +147,14 @@ describe('<FlyoutLink />', () => {
       const { getByTestId } = renderFlyoutLink('user.name', 'user', 'user-link');
       getByTestId('user-link').click();
 
-      expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({
+      expect(mockFlyoutApi.openFlyout).toHaveBeenLastCalledWith({
         right: {
           id: UserPanelKey,
           params: {
+            contextID: 'scopeId',
             userName: 'user',
             scopeId: 'scopeId',
+            entityId: undefined,
           },
         },
       });
