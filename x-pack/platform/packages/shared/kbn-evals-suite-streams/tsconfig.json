@@ -26,7 +26,6 @@
     "@kbn/zod",
     "@kbn/es-snapshot-loader",
     "@kbn/es-errors",
-    "@kbn/otel-demo",
-    "@kbn/grok-heuristics"
+    "@kbn/otel-demo"
   ]
 }

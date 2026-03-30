@@ -14,11 +14,6 @@ import {
   type ProcessingSimulationResponse,
   type FlattenRecord,
 } from '@kbn/streams-schema';
-import {
-  extractGrokPatternDangerouslySlow,
-  groupMessagesByPattern as groupMessagesByGrokPattern,
-  type GrokPatternNode,
-} from '@kbn/grok-heuristics';
 import type {
   PipelineSuggestionEvaluationExample,
   PipelineSuggestionGroundTruth,
@@ -122,58 +117,6 @@ const prepareSampleDocuments = async (
   throw new Error(`Example must provide either sample_documents or sample_document_count`);
 };
 
-/**
- * Extract grok and dissect patterns from documents (client-side).
- */
-const extractPatterns = (
-  documents: FlattenRecord[]
-): {
-  grok: {
-    fieldName: string;
-    patternGroups: Array<{
-      messages: string[];
-      nodes: GrokPatternNode[];
-    }>;
-  } | null;
-  dissect: { fieldName: string; messages: string[] } | null;
-} => {
-  const fieldName = 'body.text';
-  const messages = documents
-    .map((doc) => doc[fieldName])
-    .filter((msg): msg is string => typeof msg === 'string');
-
-  if (messages.length === 0) {
-    return { grok: null, dissect: null };
-  }
-
-  let grokResult = null;
-  try {
-    const grouped = groupMessagesByGrokPattern(messages);
-    if (grouped.length > 0) {
-      grokResult = {
-        fieldName,
-        patternGroups: grouped.map((group) => ({
-          messages: group.messages.slice(0, 10),
-          nodes: extractGrokPatternDangerouslySlow(group.messages),
-        })),
-      };
-    }
-  } catch {
-    // fall through to dissect
-  }
-
-  let dissectResult = null;
-  try {
-    if (messages.length > 0) {
-      dissectResult = { fieldName, messages };
-    }
-  } catch {
-    // ignore
-  }
-
-  return { grok: grokResult, dissect: dissectResult };
-};
-
 type PipelineSuggestionTaskStatus = TaskResult<{ pipeline: StreamlangDSL | null }>;
 type CompletedPipelineSuggestionTaskStatus = PipelineSuggestionTaskStatus & {
   status: TaskStatus.Completed | TaskStatus.Acknowledged;
@@ -188,14 +131,14 @@ const waitForPipelineSuggestionResult = async (params: {
   streamName: string;
   connectorId: string;
   documents: FlattenRecord[];
+  fieldName: string;
+  sampleMessages: string[];
   timeoutMs?: number;
   pollIntervalMs?: number;
 }): Promise<CompletedPipelineSuggestionTaskStatus> => {
-  const { kbnClient, streamName, connectorId, documents } = params;
+  const { kbnClient, streamName, connectorId, documents, fieldName, sampleMessages } = params;
   const timeoutMs = params.timeoutMs ?? 300_000;
   const pollIntervalMs = params.pollIntervalMs ?? 1_000;
-
-  const extractedPatterns = extractPatterns(documents);
 
   await kbnClient.request({
     method: 'POST',
@@ -204,7 +147,8 @@ const waitForPipelineSuggestionResult = async (params: {
       action: 'schedule' as const,
       connectorId,
       documents,
-      extractedPatterns,
+      fieldName,
+      sampleMessages,
     },
   });
 
@@ -237,7 +181,8 @@ const waitForPipelineSuggestionResult = async (params: {
             action: 'schedule' as const,
             connectorId,
             documents,
-            extractedPatterns,
+            fieldName,
+            sampleMessages,
           },
         });
       } else {
@@ -406,11 +351,18 @@ export const runPipelineSuggestion = async (
   try {
     const documents = await prepareSampleDocuments(input, esClient);
 
+    const fieldName = 'body.text';
+    const sampleMessages = documents
+      .map((doc) => doc[fieldName])
+      .filter((msg): msg is string => typeof msg === 'string');
+
     const taskResult = await waitForPipelineSuggestionResult({
       kbnClient,
       streamName: input.stream_name,
       connectorId: connector.id,
       documents,
+      fieldName,
+      sampleMessages,
     });
 
     const suggestedPipeline = taskResult.pipeline ?? null;
