@@ -43,16 +43,13 @@ export class AlertActionsClient {
       }),
     ]);
 
-    await this.storageService.bulkIndexDocs({
-      index: ALERT_ACTIONS_DATA_STREAM,
-      docs: [
-        this.buildAlertActionDocument({
-          action: params.action,
-          alertEvent,
-          userProfileUid,
-        }),
-      ],
-    });
+    await this.bulkIndexActions([
+      this.buildAlertActionDocument({
+        action: params.action,
+        alertEvent,
+        userProfileUid,
+      }),
+    ]);
   }
 
   public async createBulkActions(
@@ -87,10 +84,19 @@ export class AlertActionsClient {
       .filter((doc): doc is AlertAction => doc !== undefined);
 
     if (docs.length > 0) {
-      await this.storageService.bulkIndexDocs({ index: ALERT_ACTIONS_DATA_STREAM, docs });
+      await this.bulkIndexActions(docs);
     }
 
     return { processed: docs.length, total: actions.length };
+  }
+
+  private async bulkIndexActions(docs: readonly AlertAction[]): Promise<void> {
+    await this.storageService.bulkIndexDocs({
+      index: ALERT_ACTIONS_DATA_STREAM,
+      docs,
+      // this ensures that the action is immediately visible to the user in the UI
+      refresh: 'wait_for',
+    });
   }
 
   private async fetchLastAlertEventRecordsForActions(
