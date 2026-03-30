@@ -11,8 +11,7 @@ import { test } from '../../../fixtures';
 import { RULE_NAMES } from '../../../fixtures/generators';
 import { getRuleIdByName } from '../../../fixtures/helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/249094
-test.describe.skip(
+test.describe(
   'Rule Details Page - Admin',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -191,9 +190,20 @@ test.describe.skip(
       // Verify dashboard selector is visible
       await expect(pageObjects.ruleDetailsPage.dashboardsSelector).toBeVisible();
 
-      // Poll until at least one dashboard option is available
-      const optionsLocator = await pageObjects.ruleDetailsPage.getDashboardsOptionsLocator();
-      await expect.poll(async () => optionsLocator.count(), { timeout: 10000 }).toBeGreaterThan(0);
+      // Type the dashboard title to search for it; each poll re-triggers the API query,
+      // which handles the ES indexing delay after dashboard creation.
+      const dashboardInput = pageObjects.ruleDetailsPage.dashboardsSelector.locator('input');
+      const optionsLocator =
+        pageObjects.ruleDetailsPage.comboboxOptionsList.locator('[role="option"]');
+      await expect
+        .poll(
+          async () => {
+            await dashboardInput.fill(testDashboardTitle);
+            return optionsLocator.count();
+          },
+          { timeout: 30000, intervals: [2000] }
+        )
+        .toBeGreaterThan(0);
     });
   }
 );
