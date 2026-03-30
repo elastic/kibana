@@ -301,6 +301,195 @@
       }
     }
   },
+  "alerting_api_key_pending_invalidation": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
+      }
+    }
+  },
+  "alerting_notification_policy": {
+    "dynamic": false,
+    "properties": {
+      "auth": {
+        "properties": {
+          "apiKey": {
+            "type": "binary"
+          },
+          "createdByUser": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdByUsername": {
+        "type": "keyword"
+      },
+      "description": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "destinations": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "groupBy": {
+        "type": "keyword"
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "snoozedUntil": {
+        "type": "date"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedByUsername": {
+        "type": "keyword"
+      }
+    }
+  },
+  "alerting_rule": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "evaluation": {
+        "properties": {
+          "query": {
+            "properties": {
+              "base": {
+                "type": "text"
+              },
+              "condition": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "grouping": {
+        "properties": {
+          "fields": {
+            "type": "keyword"
+          }
+        }
+      },
+      "kind": {
+        "type": "keyword"
+      },
+      "metadata": {
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "labels": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "text"
+          },
+          "owner": {
+            "type": "keyword"
+          }
+        }
+      },
+      "no_data": {
+        "properties": {
+          "behavior": {
+            "type": "keyword"
+          },
+          "timeframe": {
+            "type": "keyword"
+          }
+        }
+      },
+      "recovery_policy": {
+        "properties": {
+          "query": {
+            "properties": {
+              "base": {
+                "type": "text"
+              },
+              "condition": {
+                "type": "text"
+              }
+            }
+          },
+          "type": {
+            "type": "keyword"
+          }
+        }
+      },
+      "schedule": {
+        "properties": {
+          "every": {
+            "type": "keyword"
+          },
+          "lookback": {
+            "type": "keyword"
+          }
+        }
+      },
+      "time_field": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      }
+    }
+  },
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {
@@ -1492,6 +1681,9 @@
       "install_version": {
         "type": "keyword"
       },
+      "installed_as_dependency": {
+        "type": "boolean"
+      },
       "installed_es": {
         "properties": {
           "deferred": {
@@ -1534,9 +1726,6 @@
       "latest_install_failed_attempts": {
         "enabled": false,
         "type": "object"
-      },
-      "installed_as_dependency": {
-        "type": "boolean"
       },
       "name": {
         "type": "keyword"
