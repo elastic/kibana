@@ -39,7 +39,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import {
   disablePerPolicyEndpointExceptions,
   optInForPerPolicyEndpointExceptions,
-} from '@kbn/security-solution-plugin/scripts/endpoint/common/per_policy_opt_in';
+} from '@kbn/security-solution-plugin/scripts/endpoint/common/endpoint_artifact_services';
 import type { CustomRole } from '../../../../config/services/types';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';

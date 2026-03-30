@@ -12,7 +12,7 @@ import {
   deleteEndpointExceptionsPerPolicyOptInSO,
   disablePerPolicyEndpointExceptions,
   findEndpointExceptionsPerPolicyOptInSO,
-} from '@kbn/security-solution-plugin/scripts/endpoint/common/per_policy_opt_in';
+} from '@kbn/security-solution-plugin/scripts/endpoint/common/endpoint_artifact_services';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/endpoint_exceptions/constants';
 import type { CustomRole } from '../../../../config/services/types';
