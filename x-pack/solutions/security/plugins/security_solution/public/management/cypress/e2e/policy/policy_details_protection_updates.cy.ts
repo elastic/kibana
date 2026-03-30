@@ -267,8 +267,7 @@ describe(
           }
         });
 
-        it('should render read-only protection updates tab content with and without note', () => {
-          // --- Without note field ---
+        it('should render read-only protection updates without note field', () => {
           loadProtectionUpdatesUrl(policy.id);
           getAutomaticUpdatesToggle().should('not.exist');
           cy.getByTestSubj('protection-updates-state-view-mode');
@@ -286,8 +285,9 @@ describe(
           cy.getByTestSubj('protection-updates-manifest-note').should('not.exist');
           cy.getByTestSubj('protection-updates-manifest-note-view-mode').should('not.exist');
           expectSavedButtonToBeDisabled();
+        });
 
-          // --- With note field ---
+        it('should render read-only protection updates with note field', () => {
           setCustomProtectionUpdatesNote(policy.id, testNote);
           loadProtectionUpdatesUrl(policy.id);
           getAutomaticUpdatesToggle().should('not.exist');
