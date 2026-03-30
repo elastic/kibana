@@ -16,7 +16,6 @@ import { HostDetailsLink } from '../../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import type { HostsTableColumns } from '.';
 import * as i18n from './translations';
-import type { HostsEdges } from '../../../../../common/search_strategy/security_solution/hosts';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { VIEW_HOSTS_BY_SEVERITY } from '../../../../entity_analytics/components/host_risk_score_table/translations';
@@ -34,7 +33,7 @@ export const getHostsColumns = (
       truncateText: false,
       mobileOptions: { show: true },
       sortable: true,
-      render: (hostName, hostEdge: HostsEdges) => {
+      render: (hostName, hostEdge) => {
         if (hostName != null && hostName.length > 0) {
           const name = hostName[0];
           return (
@@ -48,10 +47,7 @@ export const getHostsColumns = (
                 field: 'host.name',
               }}
             >
-              <HostDetailsLink
-                hostName={name}
-                entityId={hostEdge.node.entityId ?? undefined}
-              />
+              <HostDetailsLink hostName={name} entityId={hostEdge.node.entityId ?? undefined} />
             </SecurityCellActions>
           );
         }
@@ -64,7 +60,8 @@ export const getHostsColumns = (
       name: (
         <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
           <>
-            {i18n.LAST_SEEN} <EuiIcon color="subdued" type="info" className="eui-alignTop" />
+            {i18n.LAST_SEEN}{' '}
+            <EuiIcon color="subdued" type="info" className="eui-alignTop" aria-hidden={true} />
           </>
         </EuiToolTip>
       ),
@@ -87,7 +84,8 @@ export const getHostsColumns = (
       name: (
         <EuiToolTip content={i18n.OS_LAST_SEEN_TOOLTIP}>
           <>
-            {i18n.OS} <EuiIcon color="subdued" type="info" className="eui-alignTop" />
+            {i18n.OS}{' '}
+            <EuiIcon color="subdued" type="info" className="eui-alignTop" aria-hidden={true} />
           </>
         </EuiToolTip>
       ),

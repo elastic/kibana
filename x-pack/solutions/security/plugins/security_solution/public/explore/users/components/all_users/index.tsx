@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiLink, EuiText } from '@elastic/eui';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
@@ -18,7 +19,6 @@ import {
   getEmptyTagValue,
   getOrEmptyTagFromValue,
 } from '../../../../common/components/empty_value';
-import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 import type {
   Columns,
@@ -59,7 +59,7 @@ interface UsersTableProps {
 }
 
 export type UsersTableColumns = [
-  Columns<User['name']>,
+  Columns<User['name'], User>,
   Columns<User['lastSeen']>,
   Columns<User['domain']>,
   Columns<RiskSeverity>?,

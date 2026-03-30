@@ -137,7 +137,7 @@ export const mapUserEntityRecordToUserRiskScore = (record: UserEntity): UserRisk
     ...(risk as object),
     rule_risks: [],
     multipliers: [],
-  } as RiskStats;
+  } as unknown as RiskStats;
 
   const timestamp =
     ('@timestamp' in risk && typeof risk['@timestamp'] === 'string' ? risk['@timestamp'] : null) ??

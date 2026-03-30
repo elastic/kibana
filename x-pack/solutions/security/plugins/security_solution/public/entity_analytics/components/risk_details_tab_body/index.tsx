@@ -59,7 +59,7 @@ const buildFilterQueryFromIdentityFields = (
   if (clauses.length === 1) {
     return clauses[0];
   }
-  return { bool: { filter: clauses } };
+  return { bool: { filter: clauses } } as ESQuery;
 };
 
 const RiskDetailsTabBodyComponent: React.FC<

@@ -132,7 +132,7 @@ describe('anomaly_table_euid', () => {
       const identifiers = { 'user.name': 'root' };
       expect(
         anomalyRowMatchesIdentityIdentifiers(
-          { entityName: 'user.name', entityValue: 'root', influencers: [] } as Anomaly,
+          { entityName: 'user.name', entityValue: 'root', influencers: [] } as unknown as Anomaly,
           identifiers
         )
       ).toEqual(true);

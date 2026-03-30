@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 
+import type { InspectResponse } from '../../../../types';
 import { HostsFields } from '../../../../../common/api/search_strategy/hosts/model/sort';
 import type { HostEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { ListEntitiesResponse } from '../../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';

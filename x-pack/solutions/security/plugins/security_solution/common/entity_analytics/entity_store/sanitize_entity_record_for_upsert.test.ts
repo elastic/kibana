@@ -109,7 +109,7 @@ describe('sanitize_entity_record_for_upsert', () => {
     const parsed = bulkBodySchema.safeParse(raw);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
-      expect(parsed.data.entities[0].record.host?.name).toBe('host-a');
+      expect(parsed.data.entities[0].record.entity.name).toBe('host-a');
     }
   });
 });
