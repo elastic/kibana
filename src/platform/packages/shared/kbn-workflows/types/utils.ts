@@ -77,13 +77,12 @@ export function isFailedBeforeSteps(
 }
 
 export function isCancelableStatus(status: ExecutionStatus) {
-  const CancelableStatus: readonly ExecutionStatus[] = [
-    ExecutionStatus.RUNNING,
-    ExecutionStatus.WAITING,
-    ExecutionStatus.WAITING_FOR_INPUT,
-    ExecutionStatus.PENDING,
-  ];
-  return CancelableStatus.includes(status);
+  return (
+    status === ExecutionStatus.RUNNING ||
+    status === ExecutionStatus.WAITING ||
+    status === ExecutionStatus.WAITING_FOR_INPUT ||
+    status === ExecutionStatus.PENDING
+  );
 }
 
 // Type guards for steps types
