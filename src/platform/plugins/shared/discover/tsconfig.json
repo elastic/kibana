@@ -128,6 +128,7 @@
     "@kbn/scout",
     "@kbn/scout-synthtrace",
     "@kbn/synthtrace-client",
+    "@kbn/alerting-v2-plugin",
     "@kbn/cps-utils",
     "@kbn/as-code-data-views-schema",
   ],

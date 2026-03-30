@@ -51,6 +51,8 @@ import type {
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import type { EntityStoreSetupContract } from '@kbn/entity-store/server';
+import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -76,6 +78,8 @@ export interface SecuritySolutionPluginSetupDependencies {
   kql: KqlServerPluginSetup;
   share?: SharePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
+  entityStore?: EntityStoreSetupContract;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {

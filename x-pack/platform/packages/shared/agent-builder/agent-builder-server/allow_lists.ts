@@ -124,3 +124,15 @@ export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[num
 export const isAllowedBuiltinSkill = (skillId: string) => {
   return (AGENT_BUILDER_BUILTIN_SKILLS as readonly string[]).includes(skillId);
 };
+
+/**
+ * This is a manually maintained list of all built-in plugins registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new plugin.
+ */
+export const AGENT_BUILDER_BUILTIN_PLUGINS = [] as const;
+
+export type AgentBuilderBuiltinPlugin = (typeof AGENT_BUILDER_BUILTIN_PLUGINS)[number];
+
+export const isAllowedBuiltinPlugin = (pluginId: string) => {
+  return (AGENT_BUILDER_BUILTIN_PLUGINS as readonly string[]).includes(pluginId);
+};

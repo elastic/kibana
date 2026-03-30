@@ -8,6 +8,7 @@
 import { spawn } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
 import { SCOUT_EVALS_ARGS, parseConnectorsFromEnv } from '../prompts';
+import { envFromDatasetsProfile } from '../profiles';
 
 export const scoutCmd: Command<void> = {
   name: 'scout',
@@ -47,10 +48,14 @@ export const scoutCmd: Command<void> = {
     log.info('');
 
     await new Promise<void>((resolve, reject) => {
+      const childEnv: Record<string, string> = {
+        ...process.env,
+        ...envFromDatasetsProfile(repoRoot),
+      } as Record<string, string>;
       const child = spawn('node', args, {
         cwd: repoRoot,
         stdio: 'inherit',
-        env: process.env,
+        env: childEnv,
       });
 
       child.on('exit', (code) => {
