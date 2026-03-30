@@ -41,7 +41,6 @@ const taskDefinitions = new TaskTypeDictionary(taskManagerLogger);
 taskDefinitions.registerTaskDefinitions({
   limitedTaskTypeWithCost: {
     title: 'Limited Concurrency Task Type with Cost',
-    maxConcurrency: 2,
     cost: TaskCost.Tiny,
     createTaskRunner: jest.fn(),
   },
