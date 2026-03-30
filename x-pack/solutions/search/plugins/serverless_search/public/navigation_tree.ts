@@ -254,7 +254,7 @@ export function createNavigationTree({
               { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               {
-                link: 'management:running_queries',
+                link: 'management:query_activity',
                 breadcrumbStatus: 'hidden',
                 badgeType: 'new',
               },

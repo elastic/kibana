@@ -8423,7 +8423,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/running-queries-plugin@link:x-pack/platform/plugins/shared/running_queries":
+"@kbn/query-activity-plugin@link:x-pack/platform/plugins/shared/query_activity":
   version "0.0.0"
   uid ""
 

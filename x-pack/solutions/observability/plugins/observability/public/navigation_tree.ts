@@ -565,7 +565,7 @@ function createNavTree({
                 link: 'management:maintenanceWindows',
               },
               {
-                link: 'management:running_queries',
+                link: 'management:query_activity',
                 badgeType: 'new',
               },
             ],

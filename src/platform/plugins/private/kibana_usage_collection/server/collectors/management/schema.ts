@@ -796,7 +796,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Non-default value of setting.',
     },
   },
-  'running_queries:minRunningTime': {
+  'query_activity:minRunningTime': {
     type: 'long',
     _meta: {
       description: 'Non-default value of setting.',

@@ -509,7 +509,7 @@ export const createNavigationTree = ({
               { link: 'management:triggersActions' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
-              { link: 'management:running_queries', badgeType: 'new' },
+              { link: 'management:query_activity', badgeType: 'new' },
             ],
           },
           ...filterForFeatureAvailability(

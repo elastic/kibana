@@ -64,21 +64,21 @@ export const getNavigationTreeDefinition = ({
         const navTree: NavigationTreeDefinition = {
           body: [
             {
-              link: SEARCH_HOMEPAGE,
-              title,
               icon,
+              link: SEARCH_HOMEPAGE,
               renderAs: 'home',
+              title,
             },
             {
-              link: 'discover',
               icon: 'productDiscover',
+              link: 'discover',
             },
             {
               getIsActive: ({ pathNameSerialized, prepend, location }) =>
                 pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
                 isEditingFromDashboard(location, pathNameSerialized, prepend),
-              link: 'dashboards',
               icon: 'productDashboard',
+              link: 'dashboards',
             },
             {
               icon: 'productAgent',
@@ -223,7 +223,6 @@ export const getNavigationTreeDefinition = ({
               }),
             },
             {
-              icon: 'managementApp',
               children: [
                 {
                   children: [
@@ -232,11 +231,11 @@ export const getNavigationTreeDefinition = ({
                       // https://github.com/elastic/kibana/issues/241518
                       // And that the sidenav panel opens when user lands to legacy management landing page
                       // https://github.com/elastic/kibana/issues/240275
+                      breadcrumbStatus: 'hidden',
                       link: 'management',
                       title: i18n.translate('xpack.enterpriseSearch.searchNav.management.home', {
                         defaultMessage: 'Home',
                       }),
-                      breadcrumbStatus: 'hidden',
                     },
                     // Only show Cloud Connect in on-prem deployments (not cloud)
                     ...(isCloudEnabled
@@ -264,7 +263,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'management:jobsListLink' },
                     { link: 'management:watcher' },
                     { link: 'management:maintenanceWindows' },
-                    { link: 'management:running_queries', badgeType: 'new' },
+                    { badgeType: 'new', link: 'management:query_activity' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.alerts', {
                     defaultMessage: 'Alerts and Insights',
@@ -346,6 +345,7 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
               ],
+              icon: 'managementApp',
               id: STACK_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to open the panel programmatically
               renderAs: 'panelOpener',
               title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {

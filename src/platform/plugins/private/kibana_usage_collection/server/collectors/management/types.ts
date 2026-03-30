@@ -195,6 +195,6 @@ export interface UsageStats {
   'observability:streamsEnableWiredStreamViews': boolean;
   'observability:streamsEnableOverviewPage': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
-  'running_queries:minRunningTime': number;
+  'query_activity:minRunningTime': number;
   'elasticConsole:enabled': boolean;
 }
