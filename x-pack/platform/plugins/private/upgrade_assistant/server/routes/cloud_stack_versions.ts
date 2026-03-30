@@ -10,7 +10,6 @@ import SemVer from 'semver/classes/semver';
 
 import { API_BASE_PATH } from '../../common/constants';
 import type { CloudStackVersionInfo } from '../../common/types';
-import { DEFAULT_CLOUD_STACK_VERSIONS_API_BASE_URL } from '../config';
 import type { RouteDependencies } from '../types';
 
 /**
@@ -27,6 +26,30 @@ import type { RouteDependencies } from '../types';
  *   so we may need to fall back to a nearby published version to get meaningful upgrade info.
  */
 const CLOUD_STACK_VERSIONS_TIMEOUT_MS = 5_000;
+const CLOUD_STACK_VERSIONS_OVERALL_TIMEOUT_MS = 30_000;
+
+const abortSignalAny = (signals: AbortSignal[]): AbortSignal => {
+  const any = (AbortSignal as unknown as { any?: (s: AbortSignal[]) => AbortSignal }).any;
+  if (typeof any === 'function') return any(signals);
+
+  const controller = new AbortController();
+  const abort = () => {
+    for (const s of signals) {
+      s.removeEventListener('abort', abort);
+    }
+    controller.abort();
+  };
+
+  for (const s of signals) {
+    if (s.aborted) {
+      abort();
+      break;
+    }
+    s.addEventListener('abort', abort, { once: true });
+  }
+
+  return controller.signal;
+};
 
 const parseSemver = (version: string): SemVer | undefined => {
   try {
@@ -75,12 +98,20 @@ const getUpgradableRange = (upgradableTo: string[]) => {
   return { min: minSemver(parsed).version, max: maxSemver(parsed).version };
 };
 
-const fetchCloudStackVersionsApi = async (baseUrl: string, version?: string): Promise<Response> => {
+const fetchCloudStackVersionsApi = async (
+  baseUrl: string,
+  version?: string,
+  overallSignal?: AbortSignal
+): Promise<Response> => {
   const url = version ? `${baseUrl}/${encodeURIComponent(version)}` : baseUrl;
+
+  const signal = overallSignal
+    ? abortSignalAny([overallSignal, AbortSignal.timeout(CLOUD_STACK_VERSIONS_TIMEOUT_MS)])
+    : AbortSignal.timeout(CLOUD_STACK_VERSIONS_TIMEOUT_MS);
 
   return await fetch(url, {
     headers: { accept: 'application/json' },
-    signal: AbortSignal.timeout(CLOUD_STACK_VERSIONS_TIMEOUT_MS),
+    signal,
   });
 };
 
@@ -91,9 +122,12 @@ const fetchCloudStackVersionsApi = async (baseUrl: string, version?: string): Pr
  *
  * This is intentionally defensive: the Cloud response shape isn't guaranteed and should not fail the UI.
  */
-const fetchPublishedCloudStackVersions = async (baseUrl: string): Promise<string[]> => {
+const fetchPublishedCloudStackVersions = async (
+  baseUrl: string,
+  overallSignal?: AbortSignal
+): Promise<string[]> => {
   try {
-    const res = await fetchCloudStackVersionsApi(baseUrl);
+    const res = await fetchCloudStackVersionsApi(baseUrl, undefined, overallSignal);
 
     if (!res.ok) return [];
 
@@ -166,6 +200,7 @@ const resolveLatestAvailableVersion = async (
   directUpgradeableVersionRange?: { min: string; max: string };
 }> => {
   const MAX_ITERATIONS = 10;
+  const overallSignal = AbortSignal.timeout(CLOUD_STACK_VERSIONS_OVERALL_TIMEOUT_MS);
 
   const seen = new Set<string>();
   let lookupVersion = startVersion;
@@ -173,13 +208,30 @@ const resolveLatestAvailableVersion = async (
   let firstHopVersion: string | undefined;
   let directUpgradeableVersionRange: { min: string; max: string } | undefined;
 
+  const bestEffortResult = () => ({
+    lookupVersionUsed,
+    latestAvailableVersion: lookupVersionUsed,
+    minVersionToUpgradeToLatest: firstHopVersion,
+    directUpgradeableVersionRange,
+  });
+
   for (let i = 0; i < MAX_ITERATIONS; i++) {
     if (seen.has(lookupVersion)) {
       break;
     }
     seen.add(lookupVersion);
 
-    let res = await fetchCloudStackVersionsApi(baseUrl, lookupVersion);
+    let res: Response;
+    try {
+      res = await fetchCloudStackVersionsApi(baseUrl, lookupVersion, overallSignal);
+    } catch (e) {
+      if (i === 0) {
+        throw new Error(
+          `Failed to retrieve stack versions from Cloud (fetch error) for ${lookupVersion}`
+        );
+      }
+      return bestEffortResult();
+    }
 
     if (!res.ok && (res.status === 404 || res.status === 400)) {
       let errorBody: unknown;
@@ -191,7 +243,7 @@ const resolveLatestAvailableVersion = async (
 
       // Only fall back when Cloud explicitly reports the version is missing.
       if (isVersionNotFoundBody(errorBody)) {
-        const publishedVersions = await fetchPublishedCloudStackVersions(baseUrl);
+        const publishedVersions = await fetchPublishedCloudStackVersions(baseUrl, overallSignal);
         const parsedLookupVersion = parseSemver(lookupVersion) ?? parsedForFallback;
         const fallback =
           pickBestPublishedFallback(parsedLookupVersion, publishedVersions) ??
@@ -199,7 +251,16 @@ const resolveLatestAvailableVersion = async (
 
         if (fallback) {
           lookupVersion = fallback;
-          res = await fetchCloudStackVersionsApi(baseUrl, lookupVersion);
+          try {
+            res = await fetchCloudStackVersionsApi(baseUrl, lookupVersion, overallSignal);
+          } catch (e) {
+            if (i === 0) {
+              throw new Error(
+                `Failed to retrieve stack versions from Cloud (fetch error) for ${lookupVersion}`
+              );
+            }
+            return bestEffortResult();
+          }
         }
       }
     }
@@ -212,12 +273,7 @@ const resolveLatestAvailableVersion = async (
       }
 
       // Fall back to the best effort version we were using.
-      return {
-        lookupVersionUsed,
-        latestAvailableVersion: lookupVersionUsed,
-        minVersionToUpgradeToLatest: firstHopVersion,
-        directUpgradeableVersionRange,
-      };
+      return bestEffortResult();
     }
 
     let body: unknown;
@@ -227,12 +283,7 @@ const resolveLatestAvailableVersion = async (
       if (i === 0) {
         throw new Error(`Failed to parse Cloud response JSON for ${lookupVersion}`);
       }
-      return {
-        lookupVersionUsed,
-        latestAvailableVersion: lookupVersionUsed,
-        minVersionToUpgradeToLatest: firstHopVersion,
-        directUpgradeableVersionRange,
-      };
+      return bestEffortResult();
     }
 
     const errorCodes = getCloudErrorCodes(body);
@@ -243,12 +294,7 @@ const resolveLatestAvailableVersion = async (
           `Cloud stack versions lookup returned errors for ${lookupVersion}: ${errorCodesMessage}`
         );
       }
-      return {
-        lookupVersionUsed,
-        latestAvailableVersion: lookupVersionUsed,
-        minVersionToUpgradeToLatest: firstHopVersion,
-        directUpgradeableVersionRange,
-      };
+      return bestEffortResult();
     }
 
     lookupVersionUsed = lookupVersion;
@@ -301,8 +347,7 @@ const resolveLatestAvailableVersion = async (
 
 export function registerCloudStackVersionsRoute(deps: RouteDependencies) {
   const { router, log } = deps;
-  const cloudStackVersionsApiBaseUrl =
-    deps.config?.cloudStackVersionsApiBaseUrl ?? DEFAULT_CLOUD_STACK_VERSIONS_API_BASE_URL;
+  const cloudStackVersionsApiBaseUrl = deps.config.cloudStackVersionsApiBaseUrl;
   router.get(
     {
       path: `${API_BASE_PATH}/cloud_stack_versions/{currentVersion}`,
