@@ -121,7 +121,8 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       // The stored entity.id should be the generated EUID
       const source = byGenerated._source as HostEntity;
-      expect(source.host?.entity?.id).toBe(expectedEuid);
+      expect(source.host?.entity?.id).toBeUndefined();
+      expect(source.entity?.id).toBe(expectedEuid);
     }
   );
 
@@ -220,17 +221,14 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       index: LATEST_INDEX,
       query: {
         term: {
-          'host.entity.id': 'host:this-is-update',
+          'entity.id': 'host:this-is-update',
         },
       },
     });
     expect(entities.hits.hits).toHaveLength(1);
     const received = entities.hits.hits[0]._source as HostEntity;
-    expect(received.entity).toBeUndefined();
+    expect(received.entity?.id).toBe(entityObj.entity?.id);
     expect(received.host).toMatchObject({
-      entity: {
-        id: entityObj.entity?.id,
-      },
       name: 'this-is-update',
     });
   });
@@ -265,11 +263,11 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       const entities = await esClient.search({
         index: LATEST_INDEX,
-        query: { term: { 'host.entity.id': 'host:update-id-only' } },
+        query: { term: { 'entity.id': 'host:update-id-only' } },
       });
       expect(entities.hits.hits).toHaveLength(1);
       const received = entities.hits.hits[0]._source as HostEntity;
-      expect(received.host?.entity?.name).toBe('updated-name');
+      expect(received.entity?.name).toBe('updated-name');
     }
   );
 
@@ -305,11 +303,11 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       const entities = await esClient.search({
         index: LATEST_INDEX,
-        query: { term: { 'host.entity.id': 'host:update-identity-only' } },
+        query: { term: { 'entity.id': 'host:update-identity-only' } },
       });
       expect(entities.hits.hits).toHaveLength(1);
       const received = entities.hits.hits[0]._source as HostEntity;
-      expect(received.host?.entity?.name).toBe('updated-via-identity');
+      expect(received.entity?.name).toBe('updated-via-identity');
     }
   );
 
@@ -407,11 +405,11 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
     const entities = await esClient.search({
       index: LATEST_INDEX,
-      query: { term: { 'host.entity.id': 'host:flat-update' } },
+      query: { term: { 'entity.id': 'host:flat-update' } },
     });
     expect(entities.hits.hits).toHaveLength(1);
     const received = entities.hits.hits[0]._source as HostEntity;
-    expect(received.host?.entity?.name).toBe('flat-updated-name');
+    expect(received.entity?.name).toBe('flat-updated-name');
   });
 
   apiTest(
@@ -461,14 +459,14 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       const entities = await esClient.search({
         index: LATEST_INDEX,
-        query: { term: { 'host.entity.id': 'host:flat-double-update' } },
+        query: { term: { 'entity.id': 'host:flat-double-update' } },
       });
       expect(entities.hits.hits).toHaveLength(1);
       const received = entities.hits.hits[0]._source as HostEntity;
 
       // Values must be strings, not arrays. Confirms replace, not merge
-      expect(received.host?.entity?.name).toBe('second-name');
-      expect(typeof received.host?.entity?.name).toBe('string');
+      expect(received.entity?.name).toBe('second-name');
+      expect(typeof received.entity?.name).toBe('string');
       expect(received.host?.name).toBe('flat-double-update');
       expect(typeof received.host?.name).toBe('string');
     }
