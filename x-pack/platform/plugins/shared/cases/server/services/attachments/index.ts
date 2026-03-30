@@ -518,7 +518,9 @@ export class AttachmentService {
     comments,
     refresh,
     requestWithoutType = false,
-  }: BulkUpdateAttachmentArgs): Promise<SavedObjectsBulkUpdateResponse<AttachmentAttributesV2>> {
+  }: BulkUpdateAttachmentArgs): Promise<
+    SavedObjectsBulkUpdateResponse<AttachmentTransformedAttributesV2>
+  > {
     try {
       this.context.log.debug(
         `Attempting to UPDATE attachments ${comments.map((c) => c.savedObjectId).join(', ')}`
@@ -530,7 +532,7 @@ export class AttachmentService {
         const res =
           await this.context.unsecuredSavedObjectsClient.bulkUpdate<UnifiedAttachmentAttributes>(
             comments.map((c) => {
-              const decodedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+              const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
                 c.updatedAttributes
               );
               const transformer = requestWithoutType
@@ -624,8 +626,10 @@ export class AttachmentService {
         // TODO: we should fix the return type of this function so that it can return errors
         validatedAttachments.push(attachment as SavedObjectsUpdateResponse<AttachmentAttributesV2>);
       } else if (attachment.type === CASE_ATTACHMENT_SAVED_OBJECT) {
-        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(
-          attachment.attributes
+        // Saved Objects bulkUpdate may return only the attributes that were sent in the request, not
+        // the full merged document. Match single update(): return the validated patch from the request.
+        const validatedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
+          comments[i].updatedAttributes
         );
         validatedAttachments.push(Object.assign(attachment, { attributes: validatedAttributes }));
       } else {
