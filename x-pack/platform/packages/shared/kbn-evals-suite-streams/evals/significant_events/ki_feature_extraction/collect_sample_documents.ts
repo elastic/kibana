@@ -97,7 +97,9 @@ export const collectSampleDocuments = async ({
   const requiredApps = extractRequiredAppsFromCriteria(scenario);
 
   while (docs.length < SAMPLE_DOCS_MAX && uniqueApps.size < requiredApps.length) {
-    const seenAppFilters: QueryDslQueryContainer[] = [...uniqueApps].map((app) => ({ term: { 'resource.attributes.app': app } }));
+    const seenAppFilters: QueryDslQueryContainer[] = [...uniqueApps].map((app) => ({
+      term: { 'resource.attributes.app': app },
+    }));
     const { hits } = await getSampleDocuments({
       esClient,
       index: MANAGED_STREAM_SEARCH_PATTERN,
