@@ -11,10 +11,7 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { once } from 'lodash';
 import { getRouteConfig } from '../get_route_config';
-import {
-  getCreateRequestBodySchema,
-  getCreateResponseBodySchema,
-} from './schemas';
+import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
 import { create } from './create';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 

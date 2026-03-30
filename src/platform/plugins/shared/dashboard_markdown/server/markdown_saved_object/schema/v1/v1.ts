@@ -14,9 +14,7 @@ export const markdownAttributesSchema = schema.object(
     title: schema.string({
       meta: { description: 'A human-readable title' },
     }),
-    description: schema.maybe(
-      schema.string({ meta: { description: 'A short description.' } })
-    ),
+    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     content: schema.string({
       meta: { description: 'Markdown enriched text content' },
     }),
