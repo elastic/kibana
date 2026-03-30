@@ -319,7 +319,7 @@ export function CloudForwarderPanel() {
                 )}
                 target="_blank"
                 iconSide="right"
-                iconType="popout"
+                iconType="external"
                 fill
                 isDisabled={!isValidS3BucketName(trimmedBucketName)}
                 onClick={() => {

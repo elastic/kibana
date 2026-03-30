@@ -145,7 +145,7 @@ export function DataIngestStatus({
     <>
       <ProgressIndicator
         title={progressTitle}
-        iconType="checkInCircleFilled"
+        iconType="checkCircleFill"
         isLoading={needsMetrics ? !hasMetrics : !hasData}
         css={css`
           max-width: 40%;
