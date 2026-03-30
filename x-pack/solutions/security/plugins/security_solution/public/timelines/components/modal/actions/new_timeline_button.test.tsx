@@ -51,6 +51,7 @@ describe('NewTimelineButton', () => {
   });
 
   it('should call the correct action with clicking on the new timeline button', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     const dataViewId = 'security-solution';
     const selectedPatterns: string[] = [
       'apm-*-transaction*',
@@ -69,8 +70,8 @@ describe('NewTimelineButton', () => {
 
     const { getByTestId } = renderNewTimelineButton();
 
-    await userEvent.click(getByTestId('timeline-modal-new-timeline-dropdown-button'));
-    await userEvent.click(getByTestId('timeline-modal-new-timeline'));
+    await user.click(getByTestId('timeline-modal-new-timeline-dropdown-button'));
+    await user.click(getByTestId('timeline-modal-new-timeline'));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({
