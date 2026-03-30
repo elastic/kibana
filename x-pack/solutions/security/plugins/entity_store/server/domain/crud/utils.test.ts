@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import { isNotEmptyCondition } from '../../../common/domain/definitions/common_fields';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import {
@@ -14,9 +13,8 @@ import {
   type ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
-import { HASH_ALG } from '../constants';
 import { BadCRUDRequestError } from '../errors';
-import { hashEuid, validateAndTransformDoc, validateDocIdentification } from './utils';
+import { validateAndTransformDoc, validateDocIdentification } from './utils';
 
 jest.mock('../../../common/domain/definitions/registry', () => ({
   ...jest.requireActual('../../../common/domain/definitions/registry'),
@@ -54,16 +52,6 @@ describe('crud_client utils', () => {
     jest.clearAllMocks();
   });
 
-  describe('hashEuid', () => {
-    it('returns a valid SHA-256 hash', () => {
-      const hashedId = hashEuid('entity-id');
-      const expectedHash = createHash(HASH_ALG).update('entity-id').digest('hex');
-
-      expect(hashedId).toMatch(/^[a-f0-9]{64}$/);
-      expect(hashedId).toBe(expectedHash);
-    });
-  });
-
   describe('validateDocIdentification', () => {
     it('returns doc entity.id when no generatedId', () => {
       const doc: Entity = { entity: { id: 'my-id' } };
@@ -86,6 +74,39 @@ describe('crud_client utils', () => {
         new BadCRUDRequestError(
           'Supplied ID supplied-id does not match generated EUID different-id'
         )
+      );
+    });
+
+    it('on forced user update, trusts doc entity.id when it disagrees with generated EUID', () => {
+      const doc: Entity = { entity: { id: 'store-id' } };
+      expect(
+        validateDocIdentification(doc, 'derived-id', {
+          force: true,
+          operation: 'update',
+          entityType: 'user',
+        })
+      ).toBe('store-id');
+    });
+
+    it('forced update still throws on id mismatch when entity type is not user', () => {
+      const doc: Entity = { entity: { id: 'store-id' } };
+      expect(() =>
+        validateDocIdentification(doc, 'derived-id', {
+          force: true,
+          operation: 'update',
+          entityType: 'host',
+        })
+      ).toThrow(
+        new BadCRUDRequestError('Supplied ID store-id does not match generated EUID derived-id')
+      );
+    });
+
+    it('still throws on create when doc entity.id disagrees with generated EUID even if force', () => {
+      const doc: Entity = { entity: { id: 'store-id' } };
+      expect(() =>
+        validateDocIdentification(doc, 'derived-id', { force: true, operation: 'create' })
+      ).toThrow(
+        new BadCRUDRequestError('Supplied ID store-id does not match generated EUID derived-id')
       );
     });
 
@@ -114,6 +135,33 @@ describe('crud_client utils', () => {
     });
 
     it('throws when doc entity.id does not match generatedId', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
+
+      const doc: Entity = { entity: { id: 'doc-id' }, host: { name: 'some-host' } };
+      expect(() =>
+        validateAndTransformDoc('update', 'generic', 'default', doc, 'generated-id', false)
+      ).toThrow(
+        new BadCRUDRequestError('Supplied ID doc-id does not match generated EUID generated-id')
+      );
+    });
+
+    it('forced user update uses doc entity.id when it does not match generatedId', () => {
+      mockGetEntityDefinition.mockReturnValue(createDefinition('user', []));
+
+      const doc: Entity = { entity: { id: 'doc-id' }, user: { name: 'u' } };
+      const result = validateAndTransformDoc(
+        'update',
+        'user',
+        'default',
+        doc,
+        'generated-id',
+        true
+      );
+
+      expect(result.id).toBe('doc-id');
+    });
+
+    it('forced update on non-user type throws when doc entity.id does not match generatedId', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
       const doc: Entity = { entity: { id: 'doc-id' }, host: { name: 'some-host' } };

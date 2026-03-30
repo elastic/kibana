@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
 
 import { Position } from '@elastic/charts';
 import { EuiPopover, EuiSelectable } from '@elastic/eui';
+import { LegendLayout } from '@kbn/chart-expressions-common';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -322,7 +323,7 @@ export const getXyVisualization = ({
 
     return {
       title: 'Empty XY chart',
-      legend: { isVisible: true, position: Position.Right },
+      legend: { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
       valueLabels: 'hide',
       preferredSeriesType: defaultSeriesType,
       layers: [
