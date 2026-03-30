@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { ParsedMetricItem, MetricUnit } from '../../../types';
+import type { ParsedMetricItem, MetricUnit, NullableMetricUnit } from '../../../types';
 import { useChartLayers } from './use_chart_layers';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
@@ -94,7 +94,7 @@ describe('useChartLayers', () => {
   it('should normalize denormalized units like "byte" to "bytes"', () => {
     const metricWithDenormalizedUnit: ParsedMetricItem = {
       ...mockMetric,
-      units: ['byte'] as any[],
+      units: ['byte'] as NullableMetricUnit[],
     };
     const { result } = renderHook(() =>
       useChartLayers({
@@ -110,7 +110,7 @@ describe('useChartLayers', () => {
   it('should select the first non-null normalized unit when multiple units exist', () => {
     const metricWithMultipleUnits: ParsedMetricItem = {
       ...mockMetric,
-      units: [null, 'byte', 'bytes'] as any[],
+      units: [null, 'byte', 'bytes'] as NullableMetricUnit[],
     };
     const { result } = renderHook(() =>
       useChartLayers({
