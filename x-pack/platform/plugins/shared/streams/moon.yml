@@ -84,6 +84,7 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
   - '@kbn/datemath'
+  - '@kbn/setup-node-env'
 tags:
   - plugin
   - prod
@@ -99,26 +100,6 @@ fileGroups:
     - types/**/*
     - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}
