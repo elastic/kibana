@@ -64,6 +64,7 @@ const ARTIFACTS = [
     title: 'Endpoint exceptions',
     slug: 'endpoint_exceptions',
     firstSiemVersion: 'siemV4',
+    experimentalFlags: ['endpointExceptionsMovedUnderManagement'],
   },
 ];
 
@@ -125,6 +126,26 @@ const SPLIT_CONFIGS = [
         const filenameSuffix = version === 'siem' ? '' : `_v${versionNumber}`;
         const filename = `${artifact.slug}_rbac_siem${filenameSuffix}.cy.ts`;
 
+        const hasExperimentalFlags =
+          artifact.experimentalFlags && artifact.experimentalFlags.length > 0;
+
+        const describeConfig = hasExperimentalFlags
+          ? [
+              '  {',
+              '    env: {',
+              '      ftrConfig: {',
+              '        kbnServerArgs: [',
+              `          \`--xpack.securitySolution.enableExperimental=\${JSON.stringify([`,
+              ...artifact.experimentalFlags.map((flag) => `            '${flag}',`),
+              '          ])}`,',
+              '        ],',
+              '      },',
+              '    },',
+              "    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],",
+              '  },',
+            ]
+          : ["  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },"];
+
         return {
           filename,
           content: [
@@ -137,7 +158,7 @@ const SPLIT_CONFIGS = [
             '',
             'describe(',
             `  '${artifact.title} RBAC (${version})',`,
-            "  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },",
+            ...describeConfig,
             `  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('${artifact.id}'), {`,
             `    siemVersionFilter: (versions) => versions.filter((v) => v === '${version}'),`,
             '  })',
