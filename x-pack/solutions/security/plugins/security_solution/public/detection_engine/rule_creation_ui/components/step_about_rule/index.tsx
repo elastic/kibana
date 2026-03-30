@@ -336,7 +336,9 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiToolTip>
             <EuiSpacer size="l" />
-            {endpointPerPolicyOptIn?.status === false ? (
+            {endpointPerPolicyOptIn?.status === true ? (
+              <UseField path="isAssociatedToEndpointList" component={GhostFormField} />
+            ) : (
               <EuiFormRow label={I18n.GLOBAL_ENDPOINT_EXCEPTION_LIST} fullWidth>
                 <CommonUseField
                   path="isAssociatedToEndpointList"
@@ -349,8 +351,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   }}
                 />
               </EuiFormRow>
-            ) : (
-              <UseField path="isAssociatedToEndpointList" component={GhostFormField} />
             )}
             <EuiFormRow label={I18n.BUILDING_BLOCK} fullWidth>
               <CommonUseField

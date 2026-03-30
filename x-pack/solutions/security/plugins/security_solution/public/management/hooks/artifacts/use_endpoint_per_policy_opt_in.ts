@@ -7,6 +7,7 @@
 import type { UseQueryResult } from '@kbn/react-query';
 import { useMutation, useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { GetEndpointExceptionsPerPolicyOptInResponse } from '../../../../common/api/endpoint/endpoint_exceptions_per_policy_opt_in/endpoint_exceptions_per_policy_opt_in.gen';
 import { ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE } from '../../../../common/endpoint/constants';
 import { useHttp, useToasts } from '../../../common/lib/kibana';
@@ -27,9 +28,13 @@ export const useGetEndpointExceptionsPerPolicyOptIn = (): UseQueryResult<
 > => {
   const http = useHttp();
   const toasts = useToasts();
+  const isEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
 
   return useQuery<GetEndpointExceptionsPerPolicyOptInResponse, Error>({
     queryKey: ['endpointExceptionsPerPolicyOptIn'],
+    enabled: isEndpointExceptionsMovedUnderManagementFFEnabled,
     queryFn: async () =>
       http.get<GetEndpointExceptionsPerPolicyOptInResponse>(
         ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,

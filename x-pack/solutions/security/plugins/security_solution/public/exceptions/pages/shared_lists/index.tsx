@@ -609,7 +609,8 @@ export const SharedLists = React.memo(() => {
       <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
         {isEndpointExceptionsMovedFFEnabled &&
-          endpointPerPolicyOptIn?.reason !== 'newDeployment' && (
+          (endpointPerPolicyOptIn?.status === false ||
+            endpointPerPolicyOptIn?.reason === 'userOptedIn') && (
             <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
           )}
 
