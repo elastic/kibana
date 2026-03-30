@@ -9,23 +9,40 @@ import { uniq } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import type { EntityType } from '@kbn/entity-store/common';
-import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
+import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
 import type { EntityStoreEntityIdsByType } from '../../../entities/service';
 import type { WatchlistBulkEntity } from '../../types';
 import { createWatchlistSyncMarkersService } from '../sync_markers';
-import type { MonitoringEntitySourceDescriptorClient } from '../../../../privilege_monitoring/saved_objects';
-import { isTimestampGreaterThan } from '../../../../privilege_monitoring/data_sources/sync/utils';
-import { buildEntitiesSearchBody } from './queries';
+import type { WatchlistEntitySourceClient } from '../../infra';
+import { isTimestampGreaterThan } from '../utils';
+import { buildEntitiesSearchBody, buildIndexSourceSearchBody } from './queries';
 import { applyBulkUpsert } from '../../bulk/upsert';
 import { getEntityNameFromDoc } from './entity_utils';
-import type { AfterKey, EntityBucket, EntitiesAggregation } from './types';
+import type { AfterKey, EntityBucket, EntitiesAggregation, IndexSourceAggregation } from './types';
+import type { CorrelationMap } from '../../../entities/types';
 
 export type UpdateDetectionService = ReturnType<typeof createUpdateDetectionService>;
 
 type UpdateDetection = (
-  source: MonitoringEntitySource,
-  entityStoreEntityIdsByType: EntityStoreEntityIdsByType
+  source: WatchlistDataSources.MonitoringEntitySource,
+  entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
+  correlationMap?: CorrelationMap
 ) => Promise<WatchlistBulkEntity[]>;
+
+interface MappedBucket {
+  euid: string;
+  entity: WatchlistBulkEntity;
+  timestamp?: string;
+}
+
+interface PageResult<B> {
+  buckets: B[];
+  afterKey: AfterKey;
+}
+
+type SearchPage<B> = (afterKey: AfterKey, pageSize: number) => Promise<PageResult<B>>;
+
+type MapBucket<B> = (bucket: B) => MappedBucket | null;
 
 const pickLaterTimestamp = (
   current: string | undefined,
@@ -63,43 +80,44 @@ const getExistingEntitiesMap = async (
   return map;
 };
 
-interface UpdateDetectionForEntityTypeResult {
-  entities: WatchlistBulkEntity[];
-  maxTimestamp?: string;
-}
+const paginatedDetection = async <B>(
+  esClient: ElasticsearchClient,
+  targetIndex: string,
+  search: SearchPage<B>,
+  mapBucket: MapBucket<B>
+): Promise<{ entities: WatchlistBulkEntity[]; maxTimestamp?: string }> => {
+  const pageSize = 100;
+  let afterKey: AfterKey;
+  let fetchMore = true;
+  const allEntities: WatchlistBulkEntity[] = [];
+  let maxTimestamp: string | undefined;
 
-const bucketToEntity = (
-  bucket: EntityBucket,
-  entityType: EntityType,
-  sourceId: string,
-  existingMap: Map<string, string>,
-  useSyncMarker: boolean
-): WatchlistBulkEntity => {
-  const entity: WatchlistBulkEntity = {
-    euid: bucket.key.euid,
-    type: entityType,
-    sourceId,
-    existingEntityId: existingMap.get(bucket.key.euid),
-  };
-  if (useSyncMarker && bucket.latest_doc?.hits?.hits?.[0]) {
-    const topHit = bucket.latest_doc.hits.hits[0];
-    entity.name = getEntityNameFromDoc(
-      entityType,
-      (topHit._source ?? {}) as Parameters<typeof getEntityNameFromDoc>[1]
-    );
-  }
-  return entity;
-};
+  while (fetchMore) {
+    const page = await search(afterKey, pageSize);
+    const buckets = page.buckets;
 
-const extractMaxTimestampFromBuckets = (buckets: EntityBucket[]): string | undefined => {
-  let max: string | undefined;
-  for (const bucket of buckets) {
-    const ts = bucket.latest_doc?.hits?.hits?.[0]?._source?.['@timestamp'];
-    if (typeof ts === 'string') {
-      max = max ? (isTimestampGreaterThan(ts, max) ? ts : max) : ts;
+    if (buckets.length > 0) {
+      const mapped = buckets.reduce<MappedBucket[]>((acc, bucket) => {
+        const result = mapBucket(bucket);
+        if (result) acc.push(result);
+        return acc;
+      }, []);
+
+      const batchEuids = mapped.map((m) => m.euid);
+      const existingMap = await getExistingEntitiesMap(esClient, targetIndex, batchEuids);
+
+      for (const { euid, entity, timestamp } of mapped) {
+        entity.existingEntityId = existingMap.get(euid);
+        maxTimestamp = pickLaterTimestamp(maxTimestamp, timestamp);
+        allEntities.push(entity);
+      }
     }
+
+    afterKey = page.afterKey;
+    fetchMore = Boolean(afterKey);
   }
-  return max;
+
+  return { entities: allEntities, maxTimestamp };
 };
 
 const getAllowedEntityIds = (
@@ -116,29 +134,23 @@ export const createUpdateDetectionService = ({
   esClient: ElasticsearchClient;
   logger: Logger;
   targetIndex: string;
-  descriptorClient?: MonitoringEntitySourceDescriptorClient;
+  descriptorClient?: WatchlistEntitySourceClient;
 }) => {
   const syncMarkersService = descriptorClient
     ? createWatchlistSyncMarkersService(descriptorClient)
     : undefined;
 
-  const updateDetectionForEntityType = async (
-    source: MonitoringEntitySource,
+  const detectForIntegrationEntityType = async (
+    source: WatchlistDataSources.MonitoringEntitySource,
     entityType: EntityType,
     allowedEntityIds: string[],
     syncMarker?: string
-  ): Promise<UpdateDetectionForEntityTypeResult> => {
+  ) => {
     if (allowedEntityIds.length === 0) {
-      return { entities: [] };
+      return { entities: [] as WatchlistBulkEntity[] };
     }
 
-    const pageSize = 100;
-    let afterKey: AfterKey;
-    let fetchMore = true;
-    const allEntities: WatchlistBulkEntity[] = [];
-    let maxTimestamp: string | undefined;
-
-    while (fetchMore) {
+    const search: SearchPage<EntityBucket> = async (afterKey, pageSize) => {
       const query = buildEntitiesSearchBody(
         entityType,
         afterKey,
@@ -150,35 +162,79 @@ export const createUpdateDetectionService = ({
         index: source.indexPattern,
         ...query,
       });
-
       const agg = response.aggregations?.entities;
-      const buckets = agg?.buckets ?? [];
+      return { buckets: agg?.buckets ?? [], afterKey: agg?.after_key };
+    };
 
-      if (buckets.length > 0) {
-        const batchEuids = buckets.map((b) => b.key.euid);
-        const existingMap = await getExistingEntitiesMap(esClient, targetIndex, batchEuids);
+    const mapBucket: MapBucket<EntityBucket> = (bucket) => {
+      const euid = bucket.key.euid;
+      const entity: WatchlistBulkEntity = { euid, type: entityType, sourceId: source.id };
 
-        const entities: WatchlistBulkEntity[] = buckets.map((bucket) =>
-          bucketToEntity(bucket, entityType, source.id, existingMap, Boolean(syncMarker))
+      if (syncMarker && bucket.latest_doc?.hits?.hits?.[0]) {
+        const topHit = bucket.latest_doc.hits.hits[0];
+        entity.name = getEntityNameFromDoc(
+          entityType,
+          (topHit._source ?? {}) as Parameters<typeof getEntityNameFromDoc>[1]
         );
-        allEntities.push(...entities);
-
-        if (syncMarker) {
-          const batchMax = extractMaxTimestampFromBuckets(buckets);
-          maxTimestamp = pickLaterTimestamp(maxTimestamp, batchMax);
-        }
       }
 
-      afterKey = agg?.after_key;
-      fetchMore = Boolean(afterKey);
+      const ts = bucket.latest_doc?.hits?.hits?.[0]?._source?.['@timestamp'];
+      return { euid, entity, timestamp: typeof ts === 'string' ? ts : undefined };
+    };
+
+    return paginatedDetection(esClient, targetIndex, search, mapBucket);
+  };
+
+  const detectForIndexSource = async (
+    source: WatchlistDataSources.MonitoringEntitySource,
+    correlationMap: CorrelationMap
+  ) => {
+    const { identifierField } = source;
+    if (!identifierField) {
+      logger.warn(`[WatchlistSync] Index source ${source.id} missing identifierField, skipping`);
+      return { entities: [] as WatchlistBulkEntity[] };
     }
 
-    return { entities: allEntities, maxTimestamp };
+    const correlationValues = Array.from(correlationMap.keys());
+    if (correlationValues.length === 0) {
+      return { entities: [] as WatchlistBulkEntity[] };
+    }
+
+    const search: SearchPage<{ key: { identifier: string }; doc_count: number }> = async (
+      afterKey,
+      pageSize
+    ) => {
+      const query = buildIndexSourceSearchBody(
+        identifierField,
+        correlationValues,
+        afterKey,
+        pageSize,
+        source.queryRule
+      );
+      const response = await esClient.search<never, IndexSourceAggregation>({
+        index: source.indexPattern,
+        ...query,
+      });
+      const agg = response.aggregations?.identifiers;
+      return { buckets: agg?.buckets ?? [], afterKey: agg?.after_key };
+    };
+
+    const mapBucket: MapBucket<{ key: { identifier: string }; doc_count: number }> = (bucket) => {
+      const entry = correlationMap.get(bucket.key.identifier);
+      if (!entry) return null;
+      return {
+        euid: entry.euid,
+        entity: { euid: entry.euid, type: entry.entityType, sourceId: source.id },
+      };
+    };
+
+    return paginatedDetection(esClient, targetIndex, search, mapBucket);
   };
 
   const updateDetection: UpdateDetection = async (
-    source: MonitoringEntitySource,
-    entityStoreEntityIdsByType: EntityStoreEntityIdsByType
+    source: WatchlistDataSources.MonitoringEntitySource,
+    entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
+    correlationMap?: CorrelationMap
   ) => {
     const allEntities: WatchlistBulkEntity[] = [];
     let maxProcessedTimestamp: string | undefined;
@@ -195,7 +251,7 @@ export const createUpdateDetectionService = ({
 
       for (const entityType of ALL_ENTITY_TYPES) {
         const allowedEntityIds = getAllowedEntityIds(entityStoreEntityIdsByType, entityType);
-        const { entities, maxTimestamp } = await updateDetectionForEntityType(
+        const { entities, maxTimestamp } = await detectForIntegrationEntityType(
           source,
           entityType,
           allowedEntityIds,
@@ -209,15 +265,15 @@ export const createUpdateDetectionService = ({
         await syncMarkersService.updateLastProcessedMarker(source, maxProcessedTimestamp);
       }
     } else {
-      for (const entityType of ALL_ENTITY_TYPES) {
-        const allowedEntityIds = getAllowedEntityIds(entityStoreEntityIdsByType, entityType);
-        const { entities } = await updateDetectionForEntityType(
-          source,
-          entityType,
-          allowedEntityIds
+      if (!correlationMap) {
+        logger.warn(
+          `[WatchlistSync] Skipping index source ${source.id}: correlationMap not provided`
         );
-        allEntities.push(...entities);
+        return allEntities;
       }
+
+      const { entities } = await detectForIndexSource(source, correlationMap);
+      allEntities.push(...entities);
     }
 
     await applyBulkUpsert({

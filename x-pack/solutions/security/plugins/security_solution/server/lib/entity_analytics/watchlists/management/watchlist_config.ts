@@ -19,7 +19,7 @@ import { getIndexForWatchlist } from '../entities/utils';
 import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
-import { monitoringEntitySourceTypeName } from '../../privilege_monitoring/saved_objects/monitoring_entity_source_type';
+import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
 
 export const MAX_PER_PAGE = 10_000;
 
@@ -48,7 +48,7 @@ const omitWatchlistMeta = (
 const ENTITY_SOURCE_REF_NAME_PREFIX = 'entity-source_';
 
 const isEntitySourceRef = (ref: SavedObjectReference): boolean =>
-  ref.type === monitoringEntitySourceTypeName && ref.name.startsWith(ENTITY_SOURCE_REF_NAME_PREFIX);
+  ref.type === watchlistEntitySourceTypeName && ref.name.startsWith(ENTITY_SOURCE_REF_NAME_PREFIX);
 
 const extractEntitySourceIds = (references: SavedObjectReference[]): string[] =>
   references.filter(isEntitySourceRef).map((ref) => ref.id);
@@ -165,7 +165,7 @@ export class WatchlistConfigClient {
 
     const newRef: SavedObjectReference = {
       name: `${ENTITY_SOURCE_REF_NAME_PREFIX}${entitySourceId}`,
-      type: monitoringEntitySourceTypeName,
+      type: watchlistEntitySourceTypeName,
       id: entitySourceId,
     };
 
