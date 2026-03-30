@@ -788,4 +788,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Switches the Entity Store Engine to v2',
     },
   },
+  'running_queries:minRunningTime': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
 };
