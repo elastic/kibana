@@ -1,0 +1,127 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
+
+const SO_TYPE = NOTIFICATION_POLICY_SAVED_OBJECT_TYPE;
+const TERMS_SIZE = 100;
+
+interface NotificationPolicyStatsAggregations {
+  unique_workflow_count: { value: number };
+  count_by_throttle_interval: { buckets: Array<{ key: string; doc_count: number }> };
+  count_with_group_by: { doc_count: number };
+  avg_group_by_fields_count: { value: number | null };
+  count_with_matcher: { doc_count: number };
+}
+
+export interface NotificationPolicyStats {
+  notification_policies_count: number;
+  notification_policies_unique_workflow_count: number;
+  notification_policies_count_with_matcher: number;
+  notification_policies_count_with_group_by: number;
+  notification_policies_avg_group_by_fields_count: number | null;
+  notification_policies_count_by_throttle_interval: Record<string, number>;
+}
+
+export async function getNotificationPolicyStats(
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<NotificationPolicyStats> {
+  const response = await esClient.search({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    size: 0,
+    track_total_hits: true,
+    query: {
+      bool: {
+        filter: [{ term: { type: SO_TYPE } }],
+      },
+    },
+    // Runtime mappings for fields not indexed in the notification policy mappings
+    runtime_mappings: {
+      np_has_matcher: {
+        type: 'boolean',
+        script: {
+          source: `
+            def np = params._source['${SO_TYPE}'];
+            if (np != null) {
+              emit(np['matcher'] != null);
+            } else {
+              emit(false);
+            }
+          `,
+        },
+      },
+      np_throttle_interval: {
+        type: 'keyword',
+        script: {
+          source: `
+            def np = params._source['${SO_TYPE}'];
+            if (np != null) {
+              def throttle = np['throttle'];
+              if (throttle != null) {
+                def interval = throttle['interval'];
+                if (interval != null) emit(interval);
+              }
+            }
+          `,
+        },
+      },
+      np_group_by_count: {
+        type: 'long',
+        script: {
+          source: `
+            def np = params._source['${SO_TYPE}'];
+            if (np != null) {
+              def groupBy = np['groupBy'];
+              if (groupBy != null) emit((long) groupBy.size());
+            }
+          `,
+        },
+      },
+    },
+    aggs: {
+      unique_workflow_count: {
+        cardinality: { field: `${SO_TYPE}.destinations.id` },
+      },
+      count_with_matcher: {
+        filter: { term: { np_has_matcher: true } },
+      },
+      count_by_throttle_interval: {
+        terms: { field: 'np_throttle_interval', size: TERMS_SIZE },
+      },
+      count_with_group_by: {
+        filter: { exists: { field: `${SO_TYPE}.groupBy` } },
+      },
+      avg_group_by_fields_count: {
+        avg: { field: 'np_group_by_count' },
+      },
+    },
+  });
+
+  const total =
+    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+
+  const aggs = response.aggregations as unknown as NotificationPolicyStatsAggregations;
+
+  return {
+    notification_policies_count: total,
+    notification_policies_unique_workflow_count: aggs.unique_workflow_count.value,
+    notification_policies_count_with_matcher: aggs.count_with_matcher.doc_count,
+    notification_policies_count_with_group_by: aggs.count_with_group_by.doc_count,
+    notification_policies_avg_group_by_fields_count: aggs.avg_group_by_fields_count.value,
+    notification_policies_count_by_throttle_interval:
+      aggs.count_by_throttle_interval.buckets.reduce<Record<string, number>>(
+        (acc, { key, doc_count: count }) => {
+          acc[key] = count;
+          return acc;
+        },
+        {}
+      ),
+  };
+}

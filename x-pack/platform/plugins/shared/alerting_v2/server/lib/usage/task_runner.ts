@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { RunContext, IntervalSchedule } from '@kbn/task-manager-plugin/server';
+import { emptyState, type LatestTaskStateSchema } from './task_state';
+import { getRuleStats } from './get_rule_stats';
+import { getNotificationPolicyStats } from './get_notification_policy_stats';
+import { getAlertStats } from './get_alert_stats';
+
+export function telemetryTaskRunner(
+  logger: Logger,
+  schedule: IntervalSchedule,
+  getEsClient: () => ElasticsearchClient
+) {
+  return ({ taskInstance }: RunContext) => {
+    const state = taskInstance.state as LatestTaskStateSchema;
+
+    return {
+      async run() {
+        try {
+          const esClient = getEsClient();
+          const [stats, notificationPolicyStats, alertStats] = await Promise.all([
+            getRuleStats(esClient, logger),
+            getNotificationPolicyStats(esClient, logger),
+            getAlertStats(esClient, logger),
+          ]);
+
+          const updatedState: LatestTaskStateSchema = {
+            has_errors: false,
+            error_messages: undefined,
+            runs: (state.runs ?? 0) + 1,
+            ...stats,
+            ...notificationPolicyStats,
+            ...alertStats,
+          };
+
+          return { state: updatedState, schedule };
+        } catch (err) {
+          const errorMessage = err && err.message ? err.message : err.toString();
+          logger.warn(`Error executing alerting v2 telemetry task: ${errorMessage}`);
+
+          return {
+            state: {
+              ...emptyState,
+              runs: (state.runs ?? 0) + 1,
+              has_errors: true,
+              error_messages: [errorMessage],
+            },
+            schedule,
+          };
+        }
+      },
+    };
+  };
+}

@@ -1,0 +1,99 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
+
+const TERMS_SIZE = 100;
+
+interface AlertStatsAggregations {
+  count_by_kind: { buckets: Array<{ key: string; doc_count: number }> };
+  count_by_source: { buckets: Array<{ key: string; doc_count: number }> };
+  count_by_type: { buckets: Array<{ key: string; doc_count: number }> };
+  episode_count: { value: number };
+  min_timestamp: { value: number | null; value_as_string?: string };
+}
+
+export interface AlertStats {
+  alerts_count: number;
+  alerts_count_by_kind: Record<string, number>;
+  alerts_count_by_source: Record<string, number>;
+  alerts_count_by_type: Record<string, number>;
+  alerts_episode_count: number;
+  alerts_min_timestamp: string | null;
+  alerts_index_size_bytes: number | null;
+}
+
+export async function getAlertStats(
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<AlertStats> {
+  const [searchResponse, statsResponse] = await Promise.all([
+    esClient.search({
+      index: ALERT_EVENTS_DATA_STREAM,
+      size: 0,
+      track_total_hits: true,
+      ignore_unavailable: true,
+      query: { match_all: {} },
+      aggs: {
+        count_by_kind: {
+          terms: { field: 'status', size: TERMS_SIZE },
+        },
+        count_by_source: {
+          terms: { field: 'source', size: TERMS_SIZE },
+        },
+        count_by_type: {
+          terms: { field: 'type', size: TERMS_SIZE },
+        },
+        episode_count: {
+          cardinality: { field: 'episode.id' },
+        },
+        min_timestamp: {
+          min: { field: '@timestamp', format: 'strict_date_time' },
+        },
+      },
+    }),
+    esClient.indices.stats({ index: ALERT_EVENTS_DATA_STREAM, metric: 'store' }).catch(() => null),
+  ]);
+
+  const total =
+    typeof searchResponse.hits.total === 'number'
+      ? searchResponse.hits.total
+      : searchResponse.hits.total?.value ?? 0;
+
+  const aggs = searchResponse.aggregations as unknown as AlertStatsAggregations;
+
+  const sizeBytes = statsResponse?._all?.total?.store?.size_in_bytes ?? null;
+
+  return {
+    alerts_count: total,
+    alerts_count_by_kind: aggs.count_by_kind.buckets.reduce<Record<string, number>>(
+      (acc, { key, doc_count: count }) => {
+        acc[key] = count;
+        return acc;
+      },
+      {}
+    ),
+    alerts_count_by_source: aggs.count_by_source.buckets.reduce<Record<string, number>>(
+      (acc, { key, doc_count: count }) => {
+        acc[key] = count;
+        return acc;
+      },
+      {}
+    ),
+    alerts_count_by_type: aggs.count_by_type.buckets.reduce<Record<string, number>>(
+      (acc, { key, doc_count: count }) => {
+        acc[key] = count;
+        return acc;
+      },
+      {}
+    ),
+    alerts_episode_count: aggs.episode_count.value,
+    alerts_min_timestamp: aggs.min_timestamp.value_as_string ?? null,
+    alerts_index_size_bytes: sizeBytes,
+  };
+}
