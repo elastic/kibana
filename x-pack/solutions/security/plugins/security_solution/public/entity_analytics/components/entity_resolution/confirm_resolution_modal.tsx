@@ -53,8 +53,8 @@ export const ConfirmResolutionModal: React.FC<ConfirmResolutionModalProps> = ({
       label: i18n.translate(
         'xpack.securitySolution.entityResolution.confirmModal.resolveNewToCurrent',
         {
-          defaultMessage: 'Resolve {newName} to {currentName}',
-          values: { newName, currentName },
+          defaultMessage: 'Resolve {newId} to {currentId}',
+          values: { newId, currentId },
         }
       ),
     },
@@ -63,8 +63,8 @@ export const ConfirmResolutionModal: React.FC<ConfirmResolutionModalProps> = ({
       label: i18n.translate(
         'xpack.securitySolution.entityResolution.confirmModal.resolveCurrentToNew',
         {
-          defaultMessage: 'Resolve {currentName} to {newName}',
-          values: { currentName, newName },
+          defaultMessage: 'Resolve {currentId} to {newId}',
+          values: { currentId, newId },
         }
       ),
     },
