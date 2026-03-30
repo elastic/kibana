@@ -392,10 +392,9 @@ const styles = {
       [`&:hover .kbnGridLayout--deleteSectionIcon,
         &:hover .kbnGridSection--dragHandle,
         &:has(:focus-visible) .kbnGridLayout--deleteSectionIcon,
-        &:has(:focus-visible) .kbnGridSection--dragHandle, &:has(:focus-within) .kbnGridSection--dragHandle `]:
-        {
-          opacity: 1,
-        },
+        &:has(:focus-visible) .kbnGridSection--dragHandle`]: {
+        opacity: 1,
+      },
 
       // these styles ensure that dragged sections are rendered **above** everything else + the move icon stays visible
       '&.kbnGridSectionHeader--active': {
