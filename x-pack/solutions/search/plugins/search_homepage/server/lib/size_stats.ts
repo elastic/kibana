@@ -26,14 +26,14 @@ export const fetchSizeStats = async (
       _total: { size_in_bytes: sizeInBytes },
       indices,
     } = value;
-    const numberOfDocumentsExcludingHiddenIndices = indices
+    const documentsCountExcludingHiddenIndices = indices
       .filter((index) => !index.name.startsWith('.'))
       .reduce((acc, index) => index.num_docs + acc, 0);
 
     return {
       sizeStats: {
         size: new ByteSizeValue(sizeInBytes).toString(),
-        documents: numberOfDocumentsExcludingHiddenIndices,
+        documents: documentsCountExcludingHiddenIndices,
       },
     };
   } else {
