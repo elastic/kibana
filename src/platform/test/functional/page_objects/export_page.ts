@@ -56,7 +56,7 @@ export class ExportPageObject extends FtrService {
 
   async clickPopoverItem(
     label: string,
-    exportPopoverOpener: () => Promise<void> = this.clickExportTopNavButton.bind(this)
+    exportPopoverOpener: () => Promise<boolean> = this.clickExportTopNavButton.bind(this)
   ) {
     this.log.debug(`clickPopoverItem label: ${label}`);
 
