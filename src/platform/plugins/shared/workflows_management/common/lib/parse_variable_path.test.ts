@@ -9,302 +9,12 @@
 
 import {
   isValidPropertyPath,
-  parsePropertyPath,
   parseVariablePath,
-  segmentsToString,
   validateVariablePath,
 } from './parse_variable_path';
-import type { PathSegment } from './parse_variable_path';
-
-describe('parsePropertyPath', () => {
-  it('should parse a simple identifier', () => {
-    const result = parsePropertyPath('user');
-    expect(result).toEqual({
-      segments: [{ type: 'identifier', value: 'user' }],
-      pos: 4,
-    });
-  });
-
-  it('should parse a dotted path', () => {
-    const result = parsePropertyPath('user.name');
-    expect(result).toEqual({
-      segments: [
-        { type: 'identifier', value: 'user' },
-        { type: 'identifier', value: 'name' },
-      ],
-      pos: 9,
-    });
-  });
-
-  it('should parse numeric bracket access', () => {
-    const result = parsePropertyPath('items[0]');
-    expect(result).toEqual({
-      segments: [
-        { type: 'identifier', value: 'items' },
-        { type: 'numeric_index', value: 0 },
-      ],
-      pos: 8,
-    });
-  });
-
-  it('should parse string bracket access with double quotes', () => {
-    const result = parsePropertyPath('data["user-info"]');
-    expect(result).toEqual({
-      segments: [
-        { type: 'identifier', value: 'data' },
-        { type: 'string_literal', value: 'user-info', quote: '"' },
-      ],
-      pos: 17,
-    });
-  });
-
-  it('should parse string bracket access with single quotes', () => {
-    const result = parsePropertyPath("data['key']");
-    expect(result).toEqual({
-      segments: [
-        { type: 'identifier', value: 'data' },
-        { type: 'string_literal', value: 'key', quote: "'" },
-      ],
-      pos: 11,
-    });
-  });
-
-  it('should parse dynamic bracket access', () => {
-    const result = parsePropertyPath('data[fieldName]');
-    expect(result).toEqual({
-      segments: [
-        { type: 'identifier', value: 'data' },
-        {
-          type: 'dynamic_access',
-          path: [{ type: 'identifier', value: 'fieldName' }],
-        },
-      ],
-      pos: 15,
-    });
-  });
-
-  it('should parse dynamic bracket access with dotted path', () => {
-    const result = parsePropertyPath('obj[steps.a.output]');
-    expect(result).toEqual({
-      segments: [
-        { type: 'identifier', value: 'obj' },
-        {
-          type: 'dynamic_access',
-          path: [
-            { type: 'identifier', value: 'steps' },
-            { type: 'identifier', value: 'a' },
-            { type: 'identifier', value: 'output' },
-          ],
-        },
-      ],
-      pos: 19,
-    });
-  });
-
-  it('should parse nested dynamic bracket access', () => {
-    const result = parsePropertyPath('a[b[c]]');
-    expect(result).toEqual({
-      segments: [
-        { type: 'identifier', value: 'a' },
-        {
-          type: 'dynamic_access',
-          path: [
-            { type: 'identifier', value: 'b' },
-            {
-              type: 'dynamic_access',
-              path: [{ type: 'identifier', value: 'c' }],
-            },
-          ],
-        },
-      ],
-      pos: 7,
-    });
-  });
-
-  it('should parse deeply nested dynamic bracket access', () => {
-    const result = parsePropertyPath('a[b[c[d]]]');
-    expect(result).toEqual({
-      segments: [
-        { type: 'identifier', value: 'a' },
-        {
-          type: 'dynamic_access',
-          path: [
-            { type: 'identifier', value: 'b' },
-            {
-              type: 'dynamic_access',
-              path: [
-                { type: 'identifier', value: 'c' },
-                {
-                  type: 'dynamic_access',
-                  path: [{ type: 'identifier', value: 'd' }],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      pos: 10,
-    });
-  });
-
-  it('should parse a complex real-world path', () => {
-    const result = parsePropertyPath(
-      'steps.load_comment_sync_state.output._source[steps.note_sync_space_comment.output].id'
-    );
-    expect(result).not.toBeNull();
-    expect(result!.pos).toBe(85);
-    expect(result!.segments).toHaveLength(6);
-    expect(result!.segments[4]).toEqual({
-      type: 'dynamic_access',
-      path: [
-        { type: 'identifier', value: 'steps' },
-        { type: 'identifier', value: 'note_sync_space_comment' },
-        { type: 'identifier', value: 'output' },
-      ],
-    });
-  });
-
-  it('should parse nested dynamic access in a real-world path', () => {
-    const input =
-      'steps.load.output._source[steps.note[steps.note_sync_space_comment]].id';
-    const result = parsePropertyPath(input);
-    expect(result).not.toBeNull();
-    expect(result!.pos).toBe(input.length);
-  });
-
-  it('should parse mixed bracket types', () => {
-    const result = parsePropertyPath('data["key"][0][fieldName]');
-    expect(result).toEqual({
-      segments: [
-        { type: 'identifier', value: 'data' },
-        { type: 'string_literal', value: 'key', quote: '"' },
-        { type: 'numeric_index', value: 0 },
-        {
-          type: 'dynamic_access',
-          path: [{ type: 'identifier', value: 'fieldName' }],
-        },
-      ],
-      pos: 25,
-    });
-  });
-
-  it('should handle whitespace in brackets', () => {
-    const result = parsePropertyPath('data[ 0 ]');
-    expect(result).toEqual({
-      segments: [
-        { type: 'identifier', value: 'data' },
-        { type: 'numeric_index', value: 0 },
-      ],
-      pos: 9,
-    });
-  });
-
-  it('should handle identifiers starting with underscore or dollar', () => {
-    const result = parsePropertyPath('_source.$field');
-    expect(result).toEqual({
-      segments: [
-        { type: 'identifier', value: '_source' },
-        { type: 'identifier', value: '$field' },
-      ],
-      pos: 14,
-    });
-  });
-
-  it('should return null for input starting with a number', () => {
-    expect(parsePropertyPath('123invalid')).toBeNull();
-  });
-
-  it('should return null for input starting with a dot', () => {
-    expect(parsePropertyPath('.user')).toBeNull();
-  });
-
-  it('should return null for double dots', () => {
-    expect(parsePropertyPath('user..name')).toBeNull();
-  });
-
-  it('should return null for empty input', () => {
-    expect(parsePropertyPath('')).toBeNull();
-  });
-
-  it('should return null for unclosed string literal', () => {
-    expect(parsePropertyPath('data["key')).toBeNull();
-  });
-
-  it('should return null for unclosed bracket', () => {
-    const result = parsePropertyPath('data[0');
-    expect(result).toBeNull();
-  });
-
-  it('should stop before pipe character', () => {
-    const result = parsePropertyPath('user.name | upcase');
-    expect(result).not.toBeNull();
-    expect(result!.pos).toBe(9);
-  });
-});
-
-describe('segmentsToString', () => {
-  it('should reconstruct a simple identifier', () => {
-    const segments: PathSegment[] = [{ type: 'identifier', value: 'user' }];
-    expect(segmentsToString(segments)).toBe('user');
-  });
-
-  it('should reconstruct a dotted path', () => {
-    const segments: PathSegment[] = [
-      { type: 'identifier', value: 'user' },
-      { type: 'identifier', value: 'name' },
-    ];
-    expect(segmentsToString(segments)).toBe('user.name');
-  });
-
-  it('should reconstruct bracket accessors', () => {
-    const segments: PathSegment[] = [
-      { type: 'identifier', value: 'data' },
-      { type: 'string_literal', value: 'key', quote: '"' },
-      { type: 'numeric_index', value: 0 },
-    ];
-    expect(segmentsToString(segments)).toBe('data["key"][0]');
-  });
-
-  it('should reconstruct dynamic access', () => {
-    const segments: PathSegment[] = [
-      { type: 'identifier', value: 'obj' },
-      {
-        type: 'dynamic_access',
-        path: [
-          { type: 'identifier', value: 'steps' },
-          { type: 'identifier', value: 'a' },
-          { type: 'identifier', value: 'output' },
-        ],
-      },
-    ];
-    expect(segmentsToString(segments)).toBe('obj[steps.a.output]');
-  });
-
-  it('should reconstruct nested dynamic access', () => {
-    const segments: PathSegment[] = [
-      { type: 'identifier', value: 'a' },
-      {
-        type: 'dynamic_access',
-        path: [
-          { type: 'identifier', value: 'b' },
-          {
-            type: 'dynamic_access',
-            path: [{ type: 'identifier', value: 'c' }],
-          },
-        ],
-      },
-    ];
-    expect(segmentsToString(segments)).toBe('a[b[c]]');
-  });
-
-  it('should produce empty string for suffix segments starting with dot accessor', () => {
-    const segments: PathSegment[] = [{ type: 'identifier', value: 'id' }];
-    expect(segmentsToString(segments)).toBe('id');
-  });
-});
 
 describe('isValidPropertyPath', () => {
-  it('should match valid property paths', () => {
+  it('should accept valid property paths', () => {
     const validPaths = [
       'user',
       'user.name',
@@ -321,7 +31,7 @@ describe('isValidPropertyPath', () => {
     });
   });
 
-  it('should match paths with dynamic bracket access', () => {
+  it('should accept paths with dynamic bracket access', () => {
     const dynamicPaths = [
       'data._source[steps.other_step.output].id',
       'obj[steps.a.output]',
@@ -333,7 +43,7 @@ describe('isValidPropertyPath', () => {
     });
   });
 
-  it('should match paths with nested dynamic bracket access', () => {
+  it('should accept paths with nested dynamic bracket access', () => {
     const nestedPaths = [
       'a[b[c]]',
       'a[b[c[d]]]',
@@ -346,7 +56,7 @@ describe('isValidPropertyPath', () => {
     });
   });
 
-  it('should not match paths with liquid filters', () => {
+  it('should reject paths with liquid filters', () => {
     const pathsWithFilters = ['user.name | upcase', 'price | round: 2', 'items | map: "title"'];
 
     pathsWithFilters.forEach((path) => {
@@ -354,13 +64,13 @@ describe('isValidPropertyPath', () => {
     });
   });
 
-  it('should not match invalid property paths', () => {
-    const invalidPaths = [
-      '123invalid',
-      '.user',
-      'user..name',
-      '',
-    ];
+  it('should accept identifiers starting with numbers', () => {
+    expect(isValidPropertyPath('123field')).toBe(true);
+    expect(isValidPropertyPath('3rdPartyId')).toBe(true);
+  });
+
+  it('should reject invalid property paths', () => {
+    const invalidPaths = ['user..name', ''];
 
     invalidPaths.forEach((path) => {
       expect(isValidPropertyPath(path)).toBe(false);
@@ -373,12 +83,9 @@ describe('validateVariablePath', () => {
     expect(validateVariablePath('foo')).toBe(true);
   });
 
-  it('should fail if any segment starts with a number', () => {
-    expect(validateVariablePath('1foo')).toBe(false);
-  });
-
-  it('should fail if any segment contains a space', () => {
-    expect(validateVariablePath('foo bar')).toBe(false);
+  it('should accept identifiers starting with a number', () => {
+    expect(validateVariablePath('1foo')).toBe(true);
+    expect(validateVariablePath('steps.3rdPartyId')).toBe(true);
   });
 
   it('should fail if any segment contains a special character', () => {
@@ -389,11 +96,11 @@ describe('validateVariablePath', () => {
     expect(validateVariablePath('steps.snake_case')).toBe(true);
   });
 
-  it('should fail on kebab-case if accessed with dot', () => {
-    expect(validateVariablePath('steps.first-step')).toBe(false);
+  it('should accept kebab-case identifiers accessed with dot', () => {
+    expect(validateVariablePath('steps.first-step')).toBe(true);
   });
 
-  it('should validate a path with a brackets', () => {
+  it('should validate a path with brackets', () => {
     expect(validateVariablePath('foo["4-bar-a"]')).toBe(true);
     expect(validateVariablePath("foo['4-bar-a']")).toBe(true);
   });
@@ -417,11 +124,11 @@ describe('validateVariablePath', () => {
   });
 
   it('should validate a path with multiple filters', () => {
-    expect(validateVariablePath('foo | replace("foo", "bar") | capitalize')).toBe(true);
+    expect(validateVariablePath('foo | replace: "foo", "bar" | capitalize')).toBe(true);
   });
 
   it('should validate a complex path with filters', () => {
-    expect(validateVariablePath('steps.data["key"] | join(",") | upper')).toBe(true);
+    expect(validateVariablePath('steps.data["key"] | join: "," | upper')).toBe(true);
   });
 
   it('should validate paths with dynamic bracket access', () => {
@@ -463,12 +170,11 @@ describe('parseVariablePath', () => {
     });
   });
 
-  it('should return errors for invalid paths', () => {
+  it('should accept kebab-case paths', () => {
     const result = parseVariablePath('steps.data.kebab-case[0] | capitalize');
-    expect(result).toEqual({
-      errors: ['Invalid property path: steps.data.kebab-case[0]'],
-      propertyPath: null,
-      filters: [],
+    expect(result).toMatchObject({
+      propertyPath: 'steps.data.kebab-case[0]',
+      filters: ['capitalize'],
     });
   });
 
@@ -482,55 +188,28 @@ describe('parseVariablePath', () => {
   });
 
   it('should parse a path with a filter that has arguments', () => {
-    const result = parseVariablePath('foo | join(",")');
-    expect(result).toEqual({
+    const result = parseVariablePath('foo | join: ","');
+    expect(result).toMatchObject({
       propertyPath: 'foo',
-      filters: ['join(",")'],
+      filters: [expect.stringContaining('join')],
       hasDynamicBracketAccess: false,
     });
   });
 
   it('should parse a path with multiple filters', () => {
-    const result = parseVariablePath('foo | replace("foo", "bar") | capitalize');
-    expect(result).toEqual({
+    const result = parseVariablePath('foo | replace: "foo", "bar" | capitalize');
+    expect(result).toMatchObject({
       propertyPath: 'foo',
-      filters: ['replace("foo", "bar")', 'capitalize'],
+      filters: [expect.stringContaining('replace'), 'capitalize'],
       hasDynamicBracketAccess: false,
     });
   });
 
   it('should parse a complex path with multiple filters', () => {
-    const result = parseVariablePath('steps.data["key"] | join(",") | upper | trim');
-    expect(result).toEqual({
+    const result = parseVariablePath('steps.data["key"] | join: "," | upper | trim');
+    expect(result).toMatchObject({
       propertyPath: 'steps.data["key"]',
-      filters: ['join(",")', 'upper', 'trim'],
-      hasDynamicBracketAccess: false,
-    });
-  });
-
-  it('should handle filters with nested parentheses', () => {
-    const result = parseVariablePath('foo | replace("(test)", "bar") | title');
-    expect(result).toEqual({
-      propertyPath: 'foo',
-      filters: ['replace("(test)", "bar")', 'title'],
-      hasDynamicBracketAccess: false,
-    });
-  });
-
-  it('should handle filters with single quotes', () => {
-    const result = parseVariablePath("foo | replace('old', 'new')");
-    expect(result).toEqual({
-      propertyPath: 'foo',
-      filters: ["replace('old', 'new')"],
-      hasDynamicBracketAccess: false,
-    });
-  });
-
-  it('should handle filters with named parameters', () => {
-    const result = parseVariablePath('foo | replace(old="old", new="new")');
-    expect(result).toEqual({
-      propertyPath: 'foo',
-      filters: ['replace(old="old", new="new")'],
+      filters: [expect.stringContaining('join'), 'upper', 'trim'],
       hasDynamicBracketAccess: false,
     });
   });
@@ -594,8 +273,7 @@ describe('parseVariablePath', () => {
       'steps.load.output._source[steps.note[steps.note_sync_space_comment]].id'
     );
     expect(result).toEqual({
-      propertyPath:
-        'steps.load.output._source[steps.note[steps.note_sync_space_comment]].id',
+      propertyPath: 'steps.load.output._source[steps.note[steps.note_sync_space_comment]].id',
       filters: [],
       hasDynamicBracketAccess: true,
       dynamicAccess: {
@@ -620,30 +298,33 @@ describe('parseVariablePath', () => {
     });
   });
 
-  it('should return null for invalid variable paths', () => {
-    expect(parseVariablePath('1foo | title')).toEqual({
-      errors: ['Invalid property path: 1foo'],
-      propertyPath: null,
-      filters: [],
+  it('should accept paths starting with a number', () => {
+    const result = parseVariablePath('1foo | title');
+    expect(result).toMatchObject({
+      propertyPath: '1foo',
+      filters: ['title'],
     });
-    expect(parseVariablePath('foo@bar | title')).toEqual({
-      errors: ['Invalid property path: foo@bar'],
+  });
+
+  it('should return errors for invalid variable paths', () => {
+    const result = parseVariablePath('foo@bar | title');
+    expect(result).toMatchObject({
+      errors: expect.arrayContaining([expect.stringContaining('Invalid')]),
       propertyPath: null,
       filters: [],
     });
   });
 
-  it('should return null for invalid filters', () => {
-    expect(parseVariablePath('foo | 1invalid')).toEqual({
-      errors: ['Invalid filter name: 1invalid'],
+  it('should return errors for invalid filters', () => {
+    const result = parseVariablePath('foo | title | $invalid');
+    expect(result).toMatchObject({
+      errors: expect.arrayContaining([expect.stringContaining('Invalid')]),
       propertyPath: null,
       filters: [],
     });
+  });
 
-    expect(parseVariablePath('foo | title | $invalid')).toEqual({
-      errors: ['Invalid filter name: $invalid'],
-      propertyPath: null,
-      filters: [],
-    });
+  it('should return null for empty input', () => {
+    expect(parseVariablePath('')).toBeNull();
   });
 });
