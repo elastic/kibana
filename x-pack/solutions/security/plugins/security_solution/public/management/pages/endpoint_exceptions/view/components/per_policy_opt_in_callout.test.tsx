@@ -56,11 +56,11 @@ describe('EndpointExceptionsPerPolicyOptInCallout', () => {
     render();
 
     const noPermissionMessage = renderResult.getByText(
-      'Contact your administrator to update details.'
+      /Contact your administrator to update details./
     );
     expect(noPermissionMessage).toBeInTheDocument();
 
-    const updateDetailsButton = renderResult.getByTestId(
+    const updateDetailsButton = renderResult.queryByTestId(
       'updateDetailsEndpointExceptionsPerPolicyOptInButton'
     );
     expect(updateDetailsButton).not.toBeInTheDocument();

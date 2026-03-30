@@ -161,7 +161,7 @@ describe('Endpoint exceptions form', () => {
       },
     });
     mockedUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
-      data: { status: false },
+      data: { status: true },
     } as UseQueryResult<GetEndpointExceptionsPerPolicyOptInResponse, Error>);
 
     formProps = {
@@ -535,7 +535,7 @@ describe('Endpoint exceptions form', () => {
       expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).not.toBeInTheDocument();
     });
 
-    it('should display policy assignment when license is at least platinum', async () => {
+    it('should display policy assignment when license is at least platinum and opt-in is true', async () => {
       await act(() => render());
       expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeInTheDocument();
     });
