@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  DEFAULT_ARTIFACT_VALUE_LIMIT,
+  ARTIFACT_VALUE_LIMITS,
+  RUNBOOK_ARTIFACT_TYPE,
+} from '@kbn/alerting-v2-constants';
 import { createRuleDataSchema, updateRuleDataSchema } from './rule_data_schema';
 
 const validCreateData = {
@@ -638,6 +643,64 @@ describe('createRuleDataSchema', () => {
     });
   });
 
+  describe('artifacts value length', () => {
+    it('accepts a runbook artifact at the maximum allowed length', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]),
+          },
+        ],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a runbook artifact exceeding the maximum allowed length', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] + 1),
+          },
+        ],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts a non-runbook artifact at the default maximum length', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        artifacts: [
+          {
+            id: 'artifact-1',
+            type: 'host',
+            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT),
+          },
+        ],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a non-runbook artifact exceeding the default maximum length', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        artifacts: [
+          {
+            id: 'artifact-1',
+            type: 'host',
+            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT + 1),
+          },
+        ],
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
   describe('required fields', () => {
     it.each(['kind', 'metadata', 'schedule', 'evaluation'] as const)(
       'rejects when required field "%s" is missing',
@@ -783,6 +846,60 @@ describe('updateRuleDataSchema', () => {
         grouping: { fields: Array.from({ length: 17 }, (_, i) => `field-${i}`) },
       });
 
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('artifacts value length', () => {
+    it('accepts a runbook artifact at the maximum allowed length', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]),
+          },
+        ],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a runbook artifact exceeding the maximum allowed length', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] + 1),
+          },
+        ],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts a non-runbook artifact at the default maximum length', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [
+          {
+            id: 'artifact-1',
+            type: 'host',
+            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT),
+          },
+        ],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a non-runbook artifact exceeding the default maximum length', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [
+          {
+            id: 'artifact-1',
+            type: 'host',
+            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT + 1),
+          },
+        ],
+      });
       expect(result.success).toBe(false);
     });
   });

@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/search-types'
   - '@kbn/alerting-v2-schemas'
+  - '@kbn/alerting-v2-constants'
   - '@kbn/yaml-rule-editor'
   - '@kbn/code-editor'
   - '@kbn/monaco'

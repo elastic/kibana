@@ -9,8 +9,5 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/zod",
-    "@kbn/alerting-v2-constants"
-  ]
+  "kbn_references": []
 }

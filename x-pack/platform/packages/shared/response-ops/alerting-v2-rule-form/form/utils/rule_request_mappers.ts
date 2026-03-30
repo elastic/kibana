@@ -11,9 +11,8 @@ import type {
   CreateRuleData,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
+import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
-
-const RUNBOOK_ARTIFACT_TYPE = 'runbook';
 const createRunbookArtifactId = () =>
   `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
