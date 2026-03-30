@@ -10,22 +10,21 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   registerExtensionSteps,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { tavilyDataSource } from './data_type';
 
-const CONNECTOR_NAME = 'fake-mcp-connector';
-const CONNECTOR_ID = 'fake-mcp-connector-uuid';
+const CONNECTOR_NAME = 'fake-tavily-connector';
+const CONNECTOR_ID = 'fake-tavily-connector-uuid';
 
 describe('tavily workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(tavilyDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.tavily_mcp', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 
@@ -33,7 +32,7 @@ describe('tavily workflows', () => {
     fixture = new WorkflowRunFixture();
 
     fixture.scopedActionsClientMock.getAll.mockResolvedValue([
-      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.mcp' },
+      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.tavily_mcp' },
     ]);
 
     registerExtensionSteps(fixture);
@@ -46,28 +45,22 @@ describe('tavily workflows', () => {
     }): Promise<ActionTypeExecutorResult<unknown>> => ({
       status: 'ok',
       actionId,
-      data: {
-        content: [
-          {
-            text: JSON.stringify([
-              {
-                query: 'test',
-                answer: 'answer',
-                response_time: 0.5,
-                results: [
-                  {
-                    title: 'Result',
-                    url: 'https://example.com',
-                    content: 'content',
-                    score: 0.9,
-                    published_date: '2024-01-01',
-                  },
-                ],
-              },
-            ]),
-          },
-        ],
-      },
+      data: [
+        {
+          query: 'test',
+          answer: 'answer',
+          response_time: 0.5,
+          results: [
+            {
+              title: 'Result',
+              url: 'https://example.com',
+              content: 'content',
+              score: 0.9,
+              published_date: '2024-01-01',
+            },
+          ],
+        },
+      ],
     });
   });
 
@@ -84,7 +77,7 @@ describe('tavily workflows', () => {
   });
 
   describe('search workflow', () => {
-    it('forwards search parameters to the MCP connector', async () => {
+    it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'search'),
         inputs: { query: 'kibana dashboards', max_results: 5, search_depth: 'advanced' },
@@ -95,15 +88,12 @@ describe('tavily workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
+            subAction: 'tavilySearch',
             subActionParams: {
-              name: 'tavily_search',
-              arguments: {
-                query: 'kibana dashboards',
-                max_results: 5,
-                search_depth: 'advanced',
-                include_raw_content: false,
-              },
+              query: 'kibana dashboards',
+              max_results: 5,
+              search_depth: 'advanced',
+              include_raw_content: false,
             },
           }),
         })
@@ -112,7 +102,7 @@ describe('tavily workflows', () => {
   });
 
   describe('extract workflow', () => {
-    it('forwards extract parameters to the MCP connector', async () => {
+    it('forwards extract parameters to the connector', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'extract'),
         inputs: { urls: ['https://example.com', 'https://example.org'] },
@@ -123,14 +113,11 @@ describe('tavily workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
+            subAction: 'tavilyExtract',
             subActionParams: {
-              name: 'tavily_extract',
-              arguments: {
-                urls: ['https://example.com', 'https://example.org'],
-                extract_depth: 'basic',
-                include_images: false,
-              },
+              urls: ['https://example.com', 'https://example.org'],
+              extract_depth: 'basic',
+              include_images: false,
             },
           }),
         })
@@ -139,7 +126,7 @@ describe('tavily workflows', () => {
   });
 
   describe('map workflow', () => {
-    it('forwards map parameters to the MCP connector', async () => {
+    it('forwards map parameters to the connector', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'map'),
         inputs: { url: 'https://example.com', instructions: 'find docs' },
@@ -150,16 +137,13 @@ describe('tavily workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
+            subAction: 'tavilyMap',
             subActionParams: {
-              name: 'tavily_map',
-              arguments: {
-                url: 'https://example.com',
-                max_depth: 1,
-                max_breadth: 20,
-                limit: 50,
-                instructions: 'find docs',
-              },
+              url: 'https://example.com',
+              max_depth: 1,
+              max_breadth: 20,
+              limit: 50,
+              instructions: 'find docs',
             },
           }),
         })
@@ -168,7 +152,7 @@ describe('tavily workflows', () => {
   });
 
   describe('crawl workflow', () => {
-    it('forwards crawl parameters to the MCP connector', async () => {
+    it('forwards crawl parameters to the connector', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'crawl'),
         inputs: { url: 'https://example.com', limit: 10, extract_depth: 'advanced' },
@@ -179,17 +163,14 @@ describe('tavily workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
+            subAction: 'tavilyCrawl',
             subActionParams: {
-              name: 'tavily_crawl',
-              arguments: {
-                url: 'https://example.com',
-                max_depth: 1,
-                max_breadth: 20,
-                limit: 10,
-                instructions: undefined,
-                extract_depth: 'advanced',
-              },
+              url: 'https://example.com',
+              max_depth: 1,
+              max_breadth: 20,
+              limit: 10,
+              instructions: undefined,
+              extract_depth: 'advanced',
             },
           }),
         })
