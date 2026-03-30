@@ -29,7 +29,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
   entityId,
   openDetailsPanel,
 }) => {
-  const { data: group, isLoading } = useResolutionGroup(entityId, {
+  const { data: group, isLoading, isFetching } = useResolutionGroup(entityId, {
     enabled: !!entityId,
   });
 
@@ -64,7 +64,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
       >
         <ResolutionGroupTable
           group={group ?? null}
-          isLoading={isLoading}
+          isLoading={isLoading || isFetching}
           targetEntityId={targetEntityId}
         />
       </ExpandablePanel>
