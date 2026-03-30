@@ -141,6 +141,13 @@ const workflowStepTestRunInitiatedSchema: RootSchema<ReportWorkflowStepTestRunIn
         optional: true,
       },
     },
+    triggerTab: {
+      type: 'keyword',
+      _meta: {
+        description: 'The trigger tab selected in the Test Step modal',
+        optional: true,
+      },
+    },
   };
 
 const workflowRunInitiatedSchema: RootSchema<ReportWorkflowRunInitiatedActionParams> = {
