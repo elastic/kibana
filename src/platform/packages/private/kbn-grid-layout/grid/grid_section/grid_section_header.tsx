@@ -41,7 +41,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
   const { gridLayoutStateManager } = useGridLayoutContext();
   const startDrag = useGridLayoutSectionEvents({ sectionId });
   const hasBeenDragged = useRef<boolean>(false);
-  
+
   const [isActive, setIsActive] = useState<boolean>(false);
   const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
@@ -141,14 +141,12 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     const sectionInteractionSubscription = dragState$.subscribe(({ type, event }) => {
       const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
       if (!headerRef) return;
-      const isTouch = event?.sensorType === 'touch';
-      const isKeyboard = event?.sensorType === 'keyboard';
 
       const handleFirstDrag = () => {
-        collapseSectionOnDrag();
-        setIsActive(true);
-
         hasBeenDragged.current = true;
+        setIsActive(true);
+        collapseSectionOnDrag();
+
         const width = headerRef.getBoundingClientRect().width;
         headerRef.style.width = `${width}px`;
         headerRef.style.position = 'fixed';
@@ -361,15 +359,15 @@ const styles = {
       gridRowStart: `span 1`,
       gridRowEnd: `start-${sectionId}`,
       height: `${euiTheme.size.xl}`,
-      touchAction: 'none', // prevents default drag behaviour on mobile
+      touchAction: 'none', // prevents default scroll on drag behaviour on mobile
       ...(readOnly
         ? {
             cursor: 'pointer',
           }
         : {
+            cursor: 'move',
             userSelect: 'none',
-            '&:hover': {
-              cursor: 'move',
+            '&:hover:not(.kbnGridSectionHeader--active)': {
               backgroundColor: `${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)}`,
             },
           }),
@@ -380,7 +378,6 @@ const styles = {
         textWrapMode: 'nowrap', // prevent panel count from wrapping
       },
       '.kbnGridSection--dragHandle': {
-        cursor: 'move',
         padding: euiTheme.size.xs,
       },
 
@@ -395,15 +392,17 @@ const styles = {
       [`&:hover .kbnGridLayout--deleteSectionIcon,
         &:hover .kbnGridSection--dragHandle,
         &:has(:focus-visible) .kbnGridLayout--deleteSectionIcon,
-        &:has(:focus-visible) .kbnGridSection--dragHandle`]: {
-        opacity: 1,
-      },
+        &:has(:focus-visible) .kbnGridSection--dragHandle, &:has(:focus-within) .kbnGridSection--dragHandle `]:
+        {
+          opacity: 1,
+        },
 
       // these styles ensure that dragged sections are rendered **above** everything else + the move icon stays visible
       '&.kbnGridSectionHeader--active': {
         zIndex: euiTheme.levels.modal,
+        pointerEvents: 'auto', // allow pointer events through so that cursor can change
+        cursor: 'move',
         '.kbnGridSection--dragHandle': {
-          cursor: 'move',
           opacity: 1,
         },
       },
