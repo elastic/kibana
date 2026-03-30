@@ -883,7 +883,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
             "css-1751mc5-navCss": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
           },
           "sheet": StyleSheet {
-            "_alreadyInsertedOrderInsensitiveRule": true,
             "_insertTag": [Function],
             "before": null,
             "container": <head>
@@ -892,19 +891,11 @@ exports[`CollapsibleNav renders the default nav 1`] = `
                 data-s=""
               >
                 
-                .css-1751mc5-navCss{}
-              </style>
-              <style
-                data-emotion="css"
-                data-s=""
-              >
-                
-                @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
               </style>
             </head>,
             "ctr": 1,
             "insertionPoint": undefined,
-            "isSpeedy": false,
+            "isSpeedy": true,
             "key": "css",
             "nonce": undefined,
             "prepend": undefined,
@@ -914,14 +905,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
                 data-s=""
               >
                 
-                .css-1751mc5-navCss{}
-              </style>,
-              <style
-                data-emotion="css"
-                data-s=""
-              >
-                
-                @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
               </style>,
             ],
           },
@@ -1147,7 +1130,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
             "css-1751mc5-navCss": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
           },
           "sheet": StyleSheet {
-            "_alreadyInsertedOrderInsensitiveRule": true,
             "_insertTag": [Function],
             "before": null,
             "container": <head>
@@ -1156,19 +1138,11 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                 data-s=""
               >
                 
-                .css-1751mc5-navCss{}
-              </style>
-              <style
-                data-emotion="css"
-                data-s=""
-              >
-                
-                @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
               </style>
             </head>,
             "ctr": 1,
             "insertionPoint": undefined,
-            "isSpeedy": false,
+            "isSpeedy": true,
             "key": "css",
             "nonce": undefined,
             "prepend": undefined,
@@ -1178,14 +1152,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                 data-s=""
               >
                 
-                .css-1751mc5-navCss{}
-              </style>,
-              <style
-                data-emotion="css"
-                data-s=""
-              >
-                
-                @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
               </style>,
             ],
           },
