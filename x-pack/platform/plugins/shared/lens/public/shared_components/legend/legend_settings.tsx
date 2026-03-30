@@ -321,7 +321,7 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
     position,
     layout,
   });
-  const usesWidthLimitTruncation = effectiveLayout === LegendLayout.List;
+  const isNoTruncationLayout = effectiveLayout === LegendLayout.List;
 
   const showsLegendTitleSetting = isTableLayout && !!onLegendTitleChange;
 
@@ -476,7 +476,7 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
         </EuiFormRow>
       )}
 
-      {isLegendNotHidden && !usesWidthLimitTruncation && (
+      {isLegendNotHidden && !isNoTruncationLayout && (
         <EuiFormRow
           display="columnCompressed"
           label={labelTruncationLabel}
