@@ -23,6 +23,7 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
   mergeAllMetricsWithChartDimensionSchemaWithStaticOps,
+  xScaleSchema,
 } from './shared';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
@@ -262,16 +263,6 @@ const decorationsSchema = schema.object(
       description: 'Visual enhancements and styling options for the chart',
     },
   }
-);
-
-const xScaleSchema = schema.maybe(
-  schema.oneOf([schema.literal('ordinal'), schema.literal('temporal'), schema.literal('linear')], {
-    meta: {
-      // IMPORTANT: This description guides LLM agents - modify with caution and test agent behavior after changes
-      description:
-        "X-axis scale type for ES|QL charts. Use 'temporal' for timestamp/date fields (e.g., @timestamp, DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
-    },
-  })
 );
 
 /**
@@ -835,7 +826,6 @@ export const xyStateSchemaESQL = schema.object(
   }
 );
 
-export type XScaleSchemaType = TypeOf<typeof xScaleSchema>;
 export type XYState = TypeOf<typeof xyStateSchema>;
 export type XYStateESQL = TypeOf<typeof xyStateSchemaESQL>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;

@@ -6,13 +6,13 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { MonitoringEntitySourceDescriptorClient } from '../../privilege_monitoring/saved_objects';
+import { WatchlistEntitySourceClient } from './infra';
+import type { IntegrationType } from './infra';
 import { WatchlistConfigClient } from '../management/watchlist_config';
 import type { IdentityProvider } from '../entities/service';
 import { createWatchlistEntitiesService } from '../entities/service';
 import { getIndexForWatchlist } from '../entities/utils';
 import { createIndexSyncService } from './sync/index_sync';
-import type { IntegrationType } from '../../privilege_monitoring/data_sources/constants';
 
 export type EntitySourcesService = ReturnType<typeof createEntitySourcesService>;
 
@@ -28,7 +28,7 @@ export const createEntitySourcesService = ({
   namespace: string;
 }) => {
   const watchlistClient = new WatchlistConfigClient({ esClient, soClient, logger, namespace });
-  const descriptorClient = new MonitoringEntitySourceDescriptorClient({ soClient, namespace });
+  const descriptorClient = new WatchlistEntitySourceClient({ soClient, namespace });
   const watchlistEntitiesService = createWatchlistEntitiesService({
     esClient,
     namespace,
@@ -40,25 +40,30 @@ export const createEntitySourcesService = ({
     const targetIndex = getIndexForWatchlist(watchlist.name, namespace);
 
     const { sources } = await descriptorClient.list({});
-    const idp = (source: (typeof sources)[number]): IdentityProvider => {
-      if (source.type === 'index') {
-        return {
-          type: 'index' as const,
-          field: source.indexPattern || '', // TODO: this is wrong, I think we need to store the id field in the source SO now.
-        };
-      }
-
-      return {
-        type: 'integration' as const,
-        name: source.integrationName as IntegrationType,
-      };
-    };
     const entitiesBySource = await Promise.all(
       sources
         .filter((s) => sourceIds.includes(s.id))
         .map(async (source) => {
+          if (source.type === 'index') {
+            const identity: IdentityProvider = {
+              type: 'index',
+              field: source.identifierField || '',
+            };
+            const { correlationMap, entityIdsByType } =
+              await watchlistEntitiesService.listEntityStoreEntities(identity);
+            return {
+              sourceId: source.id,
+              entityStoreEntityIdsByType: entityIdsByType,
+              correlationMap,
+            };
+          }
+
+          const identity: IdentityProvider = {
+            type: 'integration',
+            name: source.integrationName as IntegrationType,
+          };
           const entityStoreEntityIdsByType = await watchlistEntitiesService.listEntityStoreEntities(
-            idp(source)
+            identity
           );
           return { sourceId: source.id, entityStoreEntityIdsByType };
         })
