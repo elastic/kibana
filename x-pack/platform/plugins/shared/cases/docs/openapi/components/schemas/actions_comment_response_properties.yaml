@@ -1,0 +1,58 @@
+title: Case response properties for actions comments
+type: object
+required:
+  - type
+properties:
+  actions:
+    type: object
+    properties:
+      targets:
+        type: array
+        items:
+          type: object
+          properties:
+            endpointId:
+              type: string
+              example: 001
+            hostname:
+              type: string
+              example: host-01
+      type:
+        type: string
+        example: isolate
+  comment:
+    type: string
+    example: Isolating the host from the case UI.
+  created_at:
+    type: string
+    format: date-time
+    example: 2022-05-13T09:16:17.416Z
+  created_by:
+    $ref: 'case_response_created_by_properties.yaml'
+  id:
+    type: string
+    example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+  owner:
+    $ref: 'owner.yaml'
+  pushed_at:
+    type: string
+    format: date-time
+    nullable: true
+    example: null
+  pushed_by:
+    $ref: 'case_response_pushed_by_properties.yaml'
+  type:
+    type: string
+    example: actions
+    enum:
+      - actions
+  updated_at:
+    type: string
+    format: date-time
+    nullable: true
+    example: null
+  updated_by:
+    $ref: 'case_response_updated_by_properties.yaml'
+  version:
+    type: string
+    example: WzIwNDMxLDFd
