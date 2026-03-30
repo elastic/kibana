@@ -65,8 +65,17 @@ export const euid = {
     /**
      * Broad predicate: documents allowed into the entity pipeline and that could carry an EUID for this type.
      * Input: entity type only. Output: ESQL boolean fragment for `WHERE` (no leading `WHERE`).
+     * NOTE: merges documentsFilter with postAggFilter — use getRawDocumentsFilter when querying
+     * raw event indices where store-only fields like `entity.id` do not exist.
      */
     getEuidDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
+
+    /**
+     * Like getEuidDocumentsContainsIdFilter but uses only documentsFilter — without postAggFilter.
+     * Use this when querying raw event indices where store-only fields like `entity.id` do not exist
+     * and would cause a verification_exception.
+     */
+    getEuidEsqlRawDocumentsFilter: euidModule.getEuidEsqlRawDocumentsFilter,
 
     /**
      * Full ESQL expression used in extraction to compute the typed EUID (e.g. inside `EVAL` / `STATS`).

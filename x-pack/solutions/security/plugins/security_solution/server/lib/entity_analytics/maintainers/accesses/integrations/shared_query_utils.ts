@@ -91,8 +91,8 @@ export function buildAccessEsqlQuery(indexPattern: string, whereClause: string):
   const userFieldEvals = getFieldEvaluationsEsql('user');
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
   const userIdEval = euid.esql.getEuidEvaluation('user', { withTypeId: false });
-  const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
-  const hostIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('host');
+  const userIdFilter = euid.esql.getEuidEsqlRawDocumentsFilter('user');
+  const hostIdFilter = euid.esql.getEuidEsqlRawDocumentsFilter('host');
   const hostIdEval = euid.esql.getEuidEvaluation('host', { withTypeId: false });
 
   return `FROM ${indexPattern}
@@ -105,17 +105,15 @@ ${userFieldEvalsLine}| EVAL actorUserId = ${userIdEval}
 | EVAL targetEntityId = COALESCE(${hostIdEval}, TO_STRING(host.ip), TO_STRING(host.mac))
 | MV_EXPAND targetEntityId
 | WHERE targetEntityId IS NOT NULL AND targetEntityId != ""
-| STATS access_count = COUNT(*), _userId = MIN(user.id), _ns = MIN(entity.namespace) BY actorUserId, targetEntityId
+| STATS access_count = COUNT(*) BY actorUserId, targetEntityId
 | EVAL access_type = CASE(
     access_count >= 4, "accesses_frequently",
     "accesses_infrequently"
   )
-| STATS targets = VALUES(targetEntityId), _userId = MIN(_userId), _ns = MIN(_ns) BY access_type, actorUserId
+| STATS targets = VALUES(targetEntityId) BY access_type, actorUserId
 | STATS
     accesses_frequently   = VALUES(targets) WHERE access_type == "accesses_frequently",
-    accesses_infrequently = VALUES(targets) WHERE access_type == "accesses_infrequently",
-    _userId = MIN(_userId),
-    _ns = MIN(_ns)
+    accesses_infrequently = VALUES(targets) WHERE access_type == "accesses_infrequently"
   BY actorUserId
 | LIMIT ${COMPOSITE_PAGE_SIZE}`;
 }

@@ -14,6 +14,7 @@ export {
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlEvaluation,
   getEuidEsqlFilterBasedOnDocument,
+  getEuidEsqlRawDocumentsFilter,
   getFieldEvaluationsEsql,
 } from './esql';
 export { applyFieldEvaluations } from './field_evaluations';

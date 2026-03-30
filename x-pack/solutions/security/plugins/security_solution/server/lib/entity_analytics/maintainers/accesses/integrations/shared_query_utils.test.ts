@@ -212,4 +212,9 @@ describe('buildAccessEsqlQuery', () => {
     const query = buildAccessEsqlQuery(indexPattern, whereClause);
     expect(query).toContain(`| LIMIT ${COMPOSITE_PAGE_SIZE}`);
   });
+
+  it('does not reference entity.id — uses raw documents filter to avoid verification_exception on event indices', () => {
+    const query = buildAccessEsqlQuery(indexPattern, whereClause);
+    expect(query).not.toContain('entity.id');
+  });
 });
