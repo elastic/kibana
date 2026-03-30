@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { get } from 'lodash';
 import type { Entity as EntityStoreEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
@@ -20,7 +21,8 @@ export type EntityStoreEntityIdsByType = Record<EntityType, string[]>;
 
 export type IdentityProvider =
   | { type: 'integration'; name: IntegrationType }
-  | { type: 'index'; field: string };
+  | { type: 'index'; field: string }
+  | { type: 'store'; queryRule: string };
 
 export interface IndexSourceResult {
   entityIdsByType: EntityStoreEntityIdsByType;
@@ -43,15 +45,22 @@ export const createWatchlistEntitiesService = ({
   function listEntityStoreEntities(
     idp: IdentityProvider & { type: 'integration' }
   ): Promise<EntityStoreEntityIdsByType>;
+  function listEntityStoreEntities(
+    idp: IdentityProvider & { type: 'store' }
+  ): Promise<EntityStoreEntityIdsByType>;
   async function listEntityStoreEntities(
     idp: IdentityProvider
   ): Promise<EntityStoreEntityIdsByType | IndexSourceResult> {
     const isIndexSync = idp.type === 'index';
 
-    const query =
-      idp.type === 'integration'
-        ? { term: { 'entity.namespace': integrationToStoreNamespaceMap[idp.name] } }
-        : { exists: { field: idp.field } };
+    let query: Record<string, unknown>;
+    if (idp.type === 'integration') {
+      query = { term: { 'entity.namespace': integrationToStoreNamespaceMap[idp.name] } };
+    } else if (idp.type === 'store') {
+      query = toElasticsearchQuery(fromKueryExpression(idp.queryRule));
+    } else {
+      query = { exists: { field: idp.field } };
+    }
 
     const entityIdsByType = createEmptyEntityStoreEntityIdsByType();
     const correlationMap: CorrelationMap = new Map();
