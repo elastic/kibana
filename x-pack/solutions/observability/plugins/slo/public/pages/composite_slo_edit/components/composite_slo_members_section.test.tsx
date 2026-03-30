@@ -27,7 +27,10 @@ const defaultDefinitions = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  useFetchSloDefinitionsWithRemoteMock.mockReturnValue({ data: defaultDefinitions, isLoading: false });
+  useFetchSloDefinitionsWithRemoteMock.mockReturnValue({
+    data: defaultDefinitions,
+    isLoading: false,
+  });
   useFetchSloInstancesMock.mockReturnValue({ data: undefined, isLoading: false });
 });
 
