@@ -68,6 +68,7 @@ export type SearchHomepageServicesContext = CoreStart &
   SearchHomepageAppPluginStartDependencies & {
     history: AppMountParameters['history'];
     kibanaVersion: string;
+    isServerless: boolean;
   };
 
 export interface AppUsageTracker {

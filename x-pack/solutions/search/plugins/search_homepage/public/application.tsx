@@ -24,11 +24,12 @@ export const renderApp = async (
   services: SearchHomepageServicesContextDeps,
   element: HTMLElement,
   queryClient: QueryClient,
-  kibanaVersion: string
+  kibanaVersion: string,
+  isServerless: boolean
 ) => {
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
-      <KibanaContextProvider services={{ ...core, ...services, kibanaVersion }}>
+      <KibanaContextProvider services={{ ...core, ...services, kibanaVersion, isServerless }}>
         <UsageTrackerContextProvider usageCollection={services.usageCollection}>
           <QueryClientProvider client={queryClient}>
             <I18nProvider>

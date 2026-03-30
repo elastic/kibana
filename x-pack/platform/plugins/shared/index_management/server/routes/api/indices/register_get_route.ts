@@ -43,6 +43,7 @@ export function registerGetRoute({
           indexNames: [indexName],
           config,
         });
+        console.log('fetchIndices result::', indices);
         if (indices.length !== 1) {
           return reportServerError(
             response,

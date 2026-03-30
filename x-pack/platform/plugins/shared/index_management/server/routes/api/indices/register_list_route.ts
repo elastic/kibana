@@ -30,6 +30,7 @@ export function registerListRoute({
       const { client } = (await context.core).elasticsearch;
       try {
         const indices = await fetchIndices({ client, indexDataEnricher, config });
+
         return response.ok({ body: indices });
       } catch (error) {
         return handleEsError({ error, response });
