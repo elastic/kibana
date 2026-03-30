@@ -38,7 +38,8 @@ const buildFilterQuery = (excludeEntityIds: string[], searchQuery: string): stri
 
   const must: object[] = [];
   if (searchQuery) {
-    const pattern = `*${searchQuery}*`;
+    const escaped = searchQuery.replace(/([*?\\])/g, '\\$1');
+    const pattern = `*${escaped}*`;
     must.push({
       bool: {
         should: [

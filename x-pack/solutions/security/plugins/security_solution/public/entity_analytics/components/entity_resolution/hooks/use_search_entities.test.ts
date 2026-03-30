@@ -94,6 +94,31 @@ describe('useSearchEntities', () => {
     ]);
   });
 
+  it('escapes wildcard metacharacters in searchQuery', () => {
+    renderHook(
+      () =>
+        useSearchEntities({
+          ...defaultParams,
+          searchQuery: 'al*ce?',
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    const call = mockUseEntitiesListQuery.mock.calls[0][0];
+    const filterQuery = JSON.parse(call.filterQuery);
+
+    expect(filterQuery.bool.must).toEqual([
+      {
+        bool: {
+          should: [
+            { wildcard: { 'entity.name': { value: '*al\\*ce\\?*', case_insensitive: true } } },
+            { wildcard: { 'entity.id': { value: '*al\\*ce\\?*', case_insensitive: true } } },
+          ],
+        },
+      },
+    ]);
+  });
+
   it('omits must clause when searchQuery is empty', () => {
     renderHook(() => useSearchEntities(defaultParams), { wrapper: createWrapper() });
 
