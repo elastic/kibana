@@ -13,7 +13,7 @@ import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import {
   toElasticsearchQuery,
   fromKueryExpression,
-  getKqlFieldNamesFromExpression,
+  getKqlFieldNames,
 } from '@kbn/es-query';
 import {
   buildAggregation,
@@ -100,16 +100,17 @@ export async function timeSeriesQuery(
 
   let filterQuery: object[] = [];
   if (filterKuery) {
+    const kueryNode = fromKueryExpression(filterKuery);
     let dataView: DataViewBase | undefined;
     try {
-      const fieldNames = getKqlFieldNamesFromExpression(filterKuery);
+      const fieldNames = getKqlFieldNames(kueryNode);
       dataView = await fetchDataViewBase(esClient, index, fieldNames);
     } catch (err) {
       logger.warn(
         `indexThreshold timeSeriesQuery: failed to fetch field caps for filter, falling back to untyped conversion: ${err.message}`
       );
     }
-    filterQuery = [toElasticsearchQuery(fromKueryExpression(filterKuery), dataView)];
+    filterQuery = [toElasticsearchQuery(kueryNode, dataView)];
   }
 
   // core query
