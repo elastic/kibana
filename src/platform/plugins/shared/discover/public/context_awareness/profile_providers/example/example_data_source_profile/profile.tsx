@@ -16,7 +16,7 @@ import React from 'react';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
-import { ChartWithCustomButtons, CustomDocViewerHeader } from './components';
+import { ChartWithCustomButtons, CustomDocViewerFooter, CustomDocViewerHeader } from './components';
 import { CustomDocView } from './components/custom_doc_view';
 import { RestorableStateDocView } from './components/restorable_state_doc_view';
 
@@ -94,6 +94,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             return prevValue.docViewsRegistry(registry);
           },
           renderHeader: (props) => <CustomDocViewerHeader {...props} />,
+          renderFooter: (props) => <CustomDocViewerFooter {...props} />,
         };
       },
     /**
