@@ -8004,6 +8004,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/scout-synthtrace@link:src/platform/packages/shared/kbn-scout-synthtrace":
+  version "0.0.0"
+  uid ""
+
 "@kbn/scout@link:src/platform/packages/shared/kbn-scout":
   version "0.0.0"
   uid ""
@@ -8796,6 +8800,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-docker-servers@link:src/platform/packages/shared/kbn-test-docker-servers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-es-server@link:src/platform/packages/shared/kbn-test-es-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-eui-helpers@link:src/platform/packages/private/kbn-test-eui-helpers":
   version "0.0.0"
   uid ""
@@ -8805,6 +8817,14 @@
   uid ""
 
 "@kbn/test-jest-helpers@link:src/platform/packages/shared/kbn-test-jest-helpers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-kibana-server@link:src/platform/packages/shared/kbn-test-kibana-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-saml-auth@link:src/platform/packages/shared/kbn-test-saml-auth":
   version "0.0.0"
   uid ""
 
@@ -9719,55 +9739,49 @@
     zod "^3.25 || ^4.0"
     zod-to-json-schema "^3.25.1"
 
-"@moonrepo/cli@1.41.7":
-  version "1.41.7"
-  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.41.7.tgz#72dd13be6309c7d7608843c2e754f395a8fb3153"
-  integrity sha512-zZdE/2m/V/33B3DZOhsuNwRPme+WZiEpggcK6N2og6FCezD/4AxNjc9uZNPBAj2qaDFl3Q+bgtfrHBjdKy4ilg==
+"@moonrepo/cli@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-2.0.4.tgz#2ebc52411ae3c280dc4485a6e6360f877603ef00"
+  integrity sha512-cP62Fa7hzToEi0I2i3Gx7zhPPdimVCeW8WqbSlE5y6fhjH38g1N77vZg4A6rcauDEUl/cpA5+vWQyxm4KCsqUA==
   dependencies:
-    detect-libc "^2.0.4"
+    detect-libc "^2.1.2"
   optionalDependencies:
-    "@moonrepo/core-linux-arm64-gnu" "1.41.7"
-    "@moonrepo/core-linux-arm64-musl" "1.41.7"
-    "@moonrepo/core-linux-x64-gnu" "1.41.7"
-    "@moonrepo/core-linux-x64-musl" "1.41.7"
-    "@moonrepo/core-macos-arm64" "1.41.7"
-    "@moonrepo/core-macos-x64" "1.41.7"
-    "@moonrepo/core-windows-x64-msvc" "1.41.7"
+    "@moonrepo/core-linux-arm64-gnu" "2.0.4"
+    "@moonrepo/core-linux-arm64-musl" "2.0.4"
+    "@moonrepo/core-linux-x64-gnu" "2.0.4"
+    "@moonrepo/core-linux-x64-musl" "2.0.4"
+    "@moonrepo/core-macos-arm64" "2.0.4"
+    "@moonrepo/core-windows-x64-msvc" "2.0.4"
 
-"@moonrepo/core-linux-arm64-gnu@1.41.7":
-  version "1.41.7"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.41.7.tgz#8d1393af9c796a1e9c31d6a8529a7350a5bb7b3a"
-  integrity sha512-Opa+jmNLYsHMRlJcmIn78kKY+76CT/93BvynxuMICPfaQqJTAR/5WPGre1omehGlkg5rbiVshsNTiaa+2bHzpA==
+"@moonrepo/core-linux-arm64-gnu@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-2.0.4.tgz#a75e60d40831cf358fde7cb26f7fd8f2afd116b4"
+  integrity sha512-pvMgTfYUN8ARvhOgVumR1j1XQY0V+59qz+Bi9BBmgOJsaB/QosGGWkCfdV2dChpzfE9AELnjIBgrazUGcOX9KA==
 
-"@moonrepo/core-linux-arm64-musl@1.41.7":
-  version "1.41.7"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.41.7.tgz#288d5a9f0fd0e6c983210b6facc1593e49c41b8f"
-  integrity sha512-0ipCRwg75iFWfsjxIYY9IAm/cMoUy9iUk/qs2+JhruFeDrY6tCdV9Nyo8F2h45WC+/2qwZ7IMEdfWNPJT0TSyA==
+"@moonrepo/core-linux-arm64-musl@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-2.0.4.tgz#386f6cb0086765e30eb7b79608dc543c7b3fc6c0"
+  integrity sha512-lF+KuN8ymTR+kynI7OU+CN//V6hSGL9eq8+7VUVFY3cRobyzjEulB7xkPgVYH2C81E8TUK2tp1R79Y8nOgEHaA==
 
-"@moonrepo/core-linux-x64-gnu@1.41.7":
-  version "1.41.7"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.41.7.tgz#3044afd53959f2d3e3726ec242f37c12b65c6656"
-  integrity sha512-iHLaZF0ryKhFTf5G/dFrQHPEFII9p88pXXUl17U9tjfeziFyksbdkQrZhNv6sfbE0bDJGPA3H5TEMR93ZwXo/A==
+"@moonrepo/core-linux-x64-gnu@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-2.0.4.tgz#4588a785168a1efbbead17a029b05926ae36f1b5"
+  integrity sha512-0auEy/jyMm5vjIZy/dLdrIoOJ0hnoxcEk+veBGwZatS65dSKEvXdUYrYSGWTRvykbsXDBTAaXFUtj1enGzIXmg==
 
-"@moonrepo/core-linux-x64-musl@1.41.7":
-  version "1.41.7"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.41.7.tgz#c17009a889dbd6ea2cea424d3eb31cf6ff925a31"
-  integrity sha512-0nZMjOBBSGHNUSIGcCBrfxgKVmeZQjmXpeMVfO3YG9e2irFR2neHbNIud6vLapC+StgV2UbrKoExR+HRtoyzuA==
+"@moonrepo/core-linux-x64-musl@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-2.0.4.tgz#5c2e9a71e68df0275899b186bf29e8dde55f222b"
+  integrity sha512-h7b7uw8GdhTyZg2R7rHA04mqBIvYvcHtgtVBUXwwZQlh6jprFFtxuvehAdK32PN8sxygwRa+AdTfgq3vZHXFmw==
 
-"@moonrepo/core-macos-arm64@1.41.7":
-  version "1.41.7"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.41.7.tgz#76e9a68c3f72f8f55207f562500498c9d5b6662d"
-  integrity sha512-Z6okifZS8MA6aXFQ1q/Ej45aAq6i2riDgqWB9CmBVqV7JIdJMLP4++ir+FqGu9S0G34SFgspV0g+mrfFgR+/Nw==
+"@moonrepo/core-macos-arm64@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-2.0.4.tgz#e5e6d30ebaf72a545d07b583c740b1be5afd7a58"
+  integrity sha512-gz2FO0xRHUOXQjzBAz97S4pShL0YbTeNWLdCuRyjX8SNU1l82TX+l20e6OKfyt6jThWvCZeSiolx7W02xDT+iA==
 
-"@moonrepo/core-macos-x64@1.41.7":
-  version "1.41.7"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.41.7.tgz#a4a39b4fcd30b3fc3f49a7b84991b0cfb78f049e"
-  integrity sha512-mOHO4/Ag331oVAxg1QNfaWCNfrKdy6HsUJXNY11ERvpNsi0Fh+qnZ+if3ZiC9jwUdwjw2MvtCRxrlXgtI/shrQ==
-
-"@moonrepo/core-windows-x64-msvc@1.41.7":
-  version "1.41.7"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.41.7.tgz#82051dc3fbdf0e68836f4d0ca7dd3eeeb98e65bb"
-  integrity sha512-p7CiKyWh4j1lhdF81vcacQmgPLV/di3nU5QXjg1lL2mF296HMx4H8sOlcxD/RieGfFW0Qfg5zIreugCHCNUCeA==
+"@moonrepo/core-windows-x64-msvc@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-2.0.4.tgz#3bbf9bdb749ab5792f6575f483ee50554ebef696"
+  integrity sha512-LjwpvjWTeusQjpqLNK7N7tVr/IQSd0W8v0L7fUIKBXNGmuONhDCHwgDqSs3yVzwcQMluiHM2qwu9YSKIEVfTIw==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -11546,17 +11560,17 @@
     json-schema-traverse "^1.0.0"
     require-from-string "^2.0.2"
 
-"@redocly/cli@2.16.0":
-  version "2.16.0"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-2.16.0.tgz#e16b566229b849c7e342f6c91eb426b859677786"
-  integrity sha512-5ys+jqUVl8wk4SjdmoZOsZVOEJpikUD0YIzinrVz8RUzI5uS7lFVdd4xspFFpq1HwN2SnUYTsU3wTFERjSVGNA==
+"@redocly/cli@2.18.0":
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-2.18.0.tgz#b7e4739eb27978d99b84a69e7c314df6677c2d49"
+  integrity sha512-LZCfASCqlHThihfXbs5OLR/ggBs+8GeMDeP6vw39eX4uyCOtSeadRGXnVlEbMqNOmXM7YITApPrWKiAoZ18uag==
   dependencies:
     "@opentelemetry/exporter-trace-otlp-http" "0.202.0"
     "@opentelemetry/resources" "2.0.1"
     "@opentelemetry/sdk-trace-node" "2.0.1"
     "@opentelemetry/semantic-conventions" "1.34.0"
-    "@redocly/openapi-core" "2.16.0"
-    "@redocly/respect-core" "2.16.0"
+    "@redocly/openapi-core" "2.18.0"
+    "@redocly/respect-core" "2.18.0"
     abort-controller "^3.0.0"
     ajv "npm:@redocly/ajv@8.17.1"
     ajv-formats "^3.0.1"
@@ -11585,20 +11599,20 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.22.1.tgz#e14461c009ac53b74f82c9788f9c43fc2c718f24"
   integrity sha512-1CqQfiG456v9ZgYBG9xRQHnpXjt8WoSnDwdkX6gxktuK69v2037hTAR1eh0DGIqpZ1p4k82cGH8yTNwt7/pI9g==
 
-"@redocly/config@^0.41.4":
-  version "0.41.4"
-  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.41.4.tgz#079d18433a62b2636124646cf2e54ed948f94aef"
-  integrity sha512-LaRKXpHyK5GxmgG2n2e8xp2NyUa8qZls3WMAVg5hKO4b2d7X5uU5F2jvH6JUTVdRW/VfStQqan5DQ1uQz7MVzg==
+"@redocly/config@^0.43.0":
+  version "0.43.0"
+  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.43.0.tgz#855508c42b5b79cba1340191dea6183319371270"
+  integrity sha512-AbyFKRHKJ2VBmh9nO2lrG9tO2Gu/Lmnfdj4Uwoh7h/a7jWr1104t4fBgQZs/NwgGBAOkGmyQYAvardwyBeRGZA==
   dependencies:
     json-schema-to-ts "2.7.2"
 
-"@redocly/openapi-core@2.16.0":
-  version "2.16.0"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-2.16.0.tgz#f80829e6f6056b74625ab0d189758d8038dddf26"
-  integrity sha512-/GzDiwmA9p7VCkN2Rzrgc6xU3f+Cpik4QXXwdtM5BykdhJas0K1nrRxgMJCwuxZPEOI9VzROWn56Hv1PJgajhA==
+"@redocly/openapi-core@2.18.0":
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-2.18.0.tgz#59d5d76657653a3f41ab57d2b8bd44c890f8bbe0"
+  integrity sha512-I6SqmxPb/Q0Wf9eu3cbWxtTsHocgW/cL1+hEmS9C05aO1BQ+a+sd5BX96ffTxv8PRpwTeCdkuhmvmfczgvD3hA==
   dependencies:
     "@redocly/ajv" "^8.17.2"
-    "@redocly/config" "^0.41.4"
+    "@redocly/config" "^0.43.0"
     ajv "npm:@redocly/ajv@8.17.2"
     ajv-formats "^3.0.1"
     colorette "^1.2.0"
@@ -11623,15 +11637,15 @@
     pluralize "^8.0.0"
     yaml-ast-parser "0.0.43"
 
-"@redocly/respect-core@2.16.0":
-  version "2.16.0"
-  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-2.16.0.tgz#cddd4d6f7fda5b8c7a7180a18114a9e8cc4cdb13"
-  integrity sha512-AObN0S9eSJIIOfMzTcH10Lu+LjlMdYYaHdelu4l/PJj8L4hlpXpdkgC4vYUIq2s3cgSuDO8ngL3XyboUxUVRTA==
+"@redocly/respect-core@2.18.0":
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-2.18.0.tgz#056fb8ebfdec517d7cdf2c146acf3d92b0f70a73"
+  integrity sha512-mLCXnGYjiW+fq9AB3UAMhpOPAMd/ww2L2h+lbDOtTVC9PfFnC7QZcBKN40MoEwoM0b/KKf5y8lsSzkctLIj4XQ==
   dependencies:
     "@faker-js/faker" "^7.6.0"
     "@noble/hashes" "^1.8.0"
     "@redocly/ajv" "8.17.1"
-    "@redocly/openapi-core" "2.16.0"
+    "@redocly/openapi-core" "2.18.0"
     ajv "npm:@redocly/ajv@8.17.1"
     better-ajv-errors "^1.2.0"
     colorette "^2.0.20"
@@ -16056,7 +16070,7 @@ axe-core@~4.11.0:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.11.0.tgz#16f74d6482e343ff263d4f4503829e9ee91a86b6"
   integrity sha512-ilYanEU8vxxBexpJd8cWM4ElSQq4QctCLKih0TSfjIfCQTeyH/6zVrmIJfLPrKTKJRbiG+cfnZbQIjAlJmF1jQ==
 
-axios@1.13.5, axios@^1.11.0, axios@^1.12.0, axios@^1.8.2:
+axios@1.13.5:
   version "1.13.5"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.5.tgz#5e464688fa127e11a660a2c49441c009f6567a43"
   integrity sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==
@@ -16064,6 +16078,15 @@ axios@1.13.5, axios@^1.11.0, axios@^1.12.0, axios@^1.8.2:
     follow-redirects "^1.15.11"
     form-data "^4.0.5"
     proxy-from-env "^1.1.0"
+
+axios@^1.11.0, axios@^1.13.5, axios@^1.8.2:
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.14.0.tgz#7c29f4cf2ea91ef05018d5aa5399bf23ed3120eb"
+  integrity sha512-3Y8yrqLSwjuzpXuZ0oIYZ/XGgLwUIBU3uLvbcpb0pidD9ctpShJd43KSlEEkVQg6DS0G9NKyzOvBfUtDKEyHvQ==
+  dependencies:
+    follow-redirects "^1.15.11"
+    form-data "^4.0.5"
+    proxy-from-env "^2.1.0"
 
 axobject-query@^3.1.1:
   version "3.2.1"
@@ -17240,17 +17263,17 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@145.0.0:
-  version "145.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-145.0.0.tgz#994cdb278b1fe9b8f98f60ab63cf3f372544db04"
-  integrity sha512-rnqHS3u+OEdhaS3PmV7V8KYHBLiIOrIKMkRZSEaQcQXnpqHQTPBrS/1x7r0MJvuywtv2qFQYNbd5yXUmuxFvmg==
+chromedriver@146.0.3:
+  version "146.0.3"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-146.0.3.tgz#546a156b5807e70263c6e9a6d5fa16ad22c5188a"
+  integrity sha512-RFhEoG3bmI+TaDm/9vDNntkxM76Sb/VIxvX3kHPzfQ3wvmE+PPSTw6gnD+Oa+dcJAc/kg/vQAwMrOUs8E1LdyQ==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
-    axios "^1.12.0"
+    axios "^1.13.5"
     compare-versions "^6.1.0"
     extract-zip "^2.0.1"
-    proxy-agent "^6.4.0"
-    proxy-from-env "^1.1.0"
+    proxy-agent "^6.5.0"
+    proxy-from-env "^2.0.0"
     tcp-port-used "^1.0.2"
 
 chromium-bidi@11.0.0:
@@ -19295,7 +19318,7 @@ detect-libc@^1.0.3:
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
   integrity sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg==
 
-detect-libc@^2.0.1, detect-libc@^2.0.3, detect-libc@^2.0.4, detect-libc@^2.1.0:
+detect-libc@^2.0.1, detect-libc@^2.0.3, detect-libc@^2.1.0, detect-libc@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.1.2.tgz#689c5dcdc1900ef5583a4cb9f6d7b473742074ad"
   integrity sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==
@@ -28959,7 +28982,7 @@ proxy-addr@^2.0.7, proxy-addr@~2.0.7:
     forwarded "0.2.0"
     ipaddr.js "1.9.1"
 
-proxy-agent@^6.4.0, proxy-agent@^6.5.0:
+proxy-agent@^6.5.0:
   version "6.5.0"
   resolved "https://registry.yarnpkg.com/proxy-agent/-/proxy-agent-6.5.0.tgz#9e49acba8e4ee234aacb539f89ed9c23d02f232d"
   integrity sha512-TmatMXdr2KlRiA2CyDu8GqR8EjahTG3aY3nXjdzFyoZbmB8hrBsTyMezhULIXKnC0jpfjlmiZ3+EaCzoInSu/A==
@@ -28982,6 +29005,11 @@ proxy-from-env@1.1.0, proxy-from-env@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/proxy-from-env/-/proxy-from-env-1.1.0.tgz#e102f16ca355424865755d2c9e8ea4f24d58c3e2"
   integrity sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==
+
+proxy-from-env@^2.0.0, proxy-from-env@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/proxy-from-env/-/proxy-from-env-2.1.0.tgz#a7487568adad577cfaaa7e88c49cab3ab3081aba"
+  integrity sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==
 
 proxy@2.1.1:
   version "2.1.1"
@@ -30925,15 +30953,15 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@4.40.0:
-  version "4.40.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.40.0.tgz#2872adbb2d3cde87585f5ba863daf51c2521ca26"
-  integrity sha512-dU0QbnVKdPmoNP8OtMCazRdtU2Ux6Wl4FEpG1iwUbDeajJK1dBAywBLrC1D7YFRtogHzN96AbXBgBAJaarcysw==
+selenium-webdriver@4.41.0:
+  version "4.41.0"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.41.0.tgz#53b4e459462c4df64a99d5aedd15d4520a7c9977"
+  integrity sha512-1XxuKVhr9az24xwixPBEDGSZP+P0z3ZOnCmr9Oiep0MlJN2Mk+flIjD3iBS9BgyjS4g14dikMqnrYUPIjhQBhA==
   dependencies:
     "@bazel/runfiles" "^6.5.0"
     jszip "^3.10.1"
     tmp "^0.2.5"
-    ws "^8.18.3"
+    ws "^8.19.0"
 
 self-signed-cert@^1.0.1:
   version "1.0.1"
@@ -34987,10 +35015,10 @@ ws@^7.0.0, ws@^7.2.0, ws@^7.3.1, ws@^7.4.2:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.10.tgz#58b5c20dc281633f6c19113f39b349bd8bd558d9"
   integrity sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==
 
-ws@^8.18.0, ws@^8.18.3, ws@^8.2.3, ws@^8.9.0:
-  version "8.18.3"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.3.tgz#b56b88abffde62791c639170400c93dcb0c95472"
-  integrity sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==
+ws@^8.18.0, ws@^8.18.3, ws@^8.19.0, ws@^8.2.3, ws@^8.9.0:
+  version "8.19.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.19.0.tgz#ddc2bdfa5b9ad860204f5a72a4863a8895fd8c8b"
+  integrity sha512-blAT2mjOEIi0ZzruJfIhb3nps74PRWTCz1IjglWEEpQl5XS/UNama6u2/rjFkDDouqr4L67ry+1aGIALViWjDg==
 
 wsl-utils@^0.3.0:
   version "0.3.0"
