@@ -15,12 +15,18 @@ import type { XYVisualizationState, XYAnnotationLayerConfig, XYDataLayerConfig }
 import { visualizationSubtypes } from './types';
 import { generateId } from '../../id_generator';
 import { type PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import { KbnPalette } from '@kbn/palettes';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { getVisualizationSubtypeId } from './visualization_helpers';
 
 jest.mock('../../id_generator');
 
 describe('xy_suggestions', () => {
+  const DEFAULT_LINE_COLOR_MAPPING_CONFIG = {
+    ...DEFAULT_COLOR_MAPPING_CONFIG,
+    paletteId: KbnPalette.ElasticLineOptimized,
+  };
+
   function numCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
@@ -1137,7 +1143,7 @@ describe('xy_suggestions', () => {
         {
           ...currentState.layers[0],
           seriesType: 'line',
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          colorMapping: DEFAULT_LINE_COLOR_MAPPING_CONFIG,
         },
       ],
     });
@@ -1184,7 +1190,7 @@ describe('xy_suggestions', () => {
         {
           ...currentState.layers[0],
           seriesType: 'line',
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          colorMapping: DEFAULT_LINE_COLOR_MAPPING_CONFIG,
         },
       ],
     });
