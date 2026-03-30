@@ -77,13 +77,11 @@ describe('kibana cli', function () {
           });
         });
 
-        it('should throw an UnsupportedProtocolError for an invalid url', function () {
+        it('should throw a TypeError for an invalid url', function () {
           const sourceUrl = 'i am an invalid url';
 
-          return _downloadSingle(settings, logger, sourceUrl).then(shouldReject, function (err) {
-            expect(err).toBeInstanceOf(UnsupportedProtocolError);
-            expectWorkingPathEmpty();
-          });
+          expect(() => _downloadSingle(settings, logger, sourceUrl)).toThrow(/Invalid URL/);
+          expectWorkingPathEmpty();
         });
 
         it('should download a file from a valid http url', function () {

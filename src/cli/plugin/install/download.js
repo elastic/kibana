@@ -69,7 +69,14 @@ export function download(settings, logger) {
 
     logger.log(`Attempting to transfer from ${sourceUrl}`);
 
-    return _downloadSingle(settings, logger, sourceUrl).catch((err) => {
+    let singleResult;
+    try {
+      singleResult = _downloadSingle(settings, logger, sourceUrl);
+    } catch (err) {
+      return tryNext();
+    }
+
+    return singleResult.catch((err) => {
       const isUnsupportedProtocol = err instanceof UnsupportedProtocolError;
       const isDownloadResourceNotFound = err.message === 'ENOTFOUND';
       if (isUnsupportedProtocol || isDownloadResourceNotFound) {
