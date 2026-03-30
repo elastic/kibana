@@ -20,5 +20,6 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-plugins-browser",
     "@kbn/core-di-internal",
+    "@kbn/core-di",
   ]
 }
