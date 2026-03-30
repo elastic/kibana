@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { AgentBuilderApiFtrProviderContext } from '../../../agent_builder/services/api';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
 import { setupAgentDirectAnswer } from '../../utils/proxy_scenario';
@@ -75,69 +75,103 @@ export function createAttachmentsTests(executionMode: ExecutionMode) {
         expect(body.message).to.contain('Attachment validation failed');
       });
 
-      it('returns an error when attachment has neither data nor origin', async () => {
-        const body: any = await agentBuilderApiClient.converse({
-          input: 'Hello AgentBuilder',
-          attachments: [
-            {
-              type: 'text',
-            },
-          ],
-          connector_id: connectorId,
-        });
+      describe('Converse attachment payload: data vs origin', () => {
+        it('accepts data-only: forwards attachment content to the LLM', async () => {
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            title: MOCKED_LLM_TITLE,
+            response: MOCKED_LLM_RESPONSE,
+          });
 
-        expect(body.statusCode).to.eql(400);
-        expect(body.message).to.contain('either data or origin');
-      });
-
-      it('returns an error when origin-only attachment type does not support resolve', async () => {
-        const body: any = await agentBuilderApiClient.converse({
-          input: 'Hello AgentBuilder',
-          attachments: [
-            {
-              type: 'text',
-              origin: 'some-origin-id',
-            },
-          ],
-          connector_id: connectorId,
-        });
-
-        expect(body.statusCode).to.eql(400);
-        expect(body.message).to.contain('does not support resolving from origin');
-      });
-
-      it('calls the LLM with the attachment', async () => {
-        await setupAgentDirectAnswer({
-          proxy: llmProxy,
-          title: MOCKED_LLM_TITLE,
-          response: MOCKED_LLM_RESPONSE,
-        });
-
-        await agentBuilderApiClient.converse({
-          input: 'Hello AgentBuilder',
-          attachments: [
-            {
-              type: 'text',
-              data: {
-                content: 'some text content',
+          await agentBuilderApiClient.converse({
+            input: 'Hello AgentBuilder',
+            attachments: [
+              {
+                type: 'text',
+                data: {
+                  content: 'some text content',
+                },
               },
-            },
-          ],
-          connector_id: connectorId,
+            ],
+            connector_id: connectorId,
+          });
+
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+          const firstAgentRequest = llmProxy.interceptedRequests.find(
+            (request) => request.matchingInterceptorName === 'handover-to-answer'
+          )!.requestBody;
+
+          // Attachments are injected via conversation-level presentation, not legacy per-round fields.
+          const allMessageContent = firstAgentRequest.messages
+            .map((m: any) => String(m.content ?? ''))
+            .join('\n');
+          expect(allMessageContent).to.contain('some text content');
         });
 
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        it('rejects attachment with neither data nor origin', async () => {
+          const body: any = await agentBuilderApiClient.converse({
+            input: 'Hello AgentBuilder',
+            attachments: [
+              {
+                type: 'text',
+              },
+            ],
+            connector_id: connectorId,
+          });
 
-        const firstAgentRequest = llmProxy.interceptedRequests.find(
-          (request) => request.matchingInterceptorName === 'handover-to-answer'
-        )!.requestBody;
+          expect(body.statusCode).to.eql(400);
+          expect(body.message).to.contain('either data or origin');
+        });
 
-        // Attachments are now injected into the LLM context via conversation-level attachments presentation,
-        // not as legacy per-round user message attachments.
-        const allMessageContent = firstAgentRequest.messages
-          .map((m: any) => String(m.content ?? ''))
-          .join('\n');
-        expect(allMessageContent).to.contain('some text content');
+        it('rejects origin-only when the type does not implement resolve (e.g. text)', async () => {
+          const body: any = await agentBuilderApiClient.converse({
+            input: 'Hello AgentBuilder',
+            attachments: [
+              {
+                type: 'text',
+                origin: 'some-origin-id',
+              },
+            ],
+            connector_id: connectorId,
+          });
+
+          expect(body.statusCode).to.eql(400);
+          expect(body.message).to.contain('does not support resolving from origin');
+        });
+
+        it('accepts data and origin together and uses inline data for the model', async () => {
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            title: MOCKED_LLM_TITLE,
+            response: MOCKED_LLM_RESPONSE,
+          });
+
+          await agentBuilderApiClient.converse({
+            input: 'Hello AgentBuilder',
+            attachments: [
+              {
+                type: 'text',
+                origin: 'ignored-origin-id',
+                data: {
+                  content: 'inline-payload-for-model',
+                },
+              },
+            ],
+            connector_id: connectorId,
+          });
+
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+          const firstAgentRequest = llmProxy.interceptedRequests.find(
+            (request) => request.matchingInterceptorName === 'handover-to-answer'
+          )!.requestBody;
+
+          const allMessageContent = firstAgentRequest.messages
+            .map((m: any) => String(m.content ?? ''))
+            .join('\n');
+          expect(allMessageContent).to.contain('inline-payload-for-model');
+        });
       });
 
       it('persists the attachment in the conversation', async () => {

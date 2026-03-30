@@ -30,7 +30,7 @@ export const validateAttachment = async <Type extends string, Data>({
     return { valid: false, error: `Unknown attachment type: ${attachment.type}` };
   }
 
-  const typeDefinition = registry.get(attachment.type)! as AttachmentTypeDefinition<any>;
+  const typeDefinition = registry.get(attachment.type)!;
 
   try {
     const resolvedData = await resolveAttachment({ attachment, resolveContext, typeDefinition });
@@ -50,7 +50,8 @@ export const validateAttachment = async <Type extends string, Data>({
       },
     };
   } catch (e) {
-    return { valid: false, error: `Error during attachment validation: ${e.message}` };
+    const message = e instanceof Error ? e.message : String(e);
+    return { valid: false, error: `Error during attachment validation: ${message}` };
   }
 };
 
@@ -61,10 +62,10 @@ const resolveAttachment = async <Type extends string, Data>({
 }: {
   attachment: AttachmentInput<Type, Data>;
   resolveContext: AttachmentResolveContext;
-  typeDefinition: AttachmentTypeDefinition<Type, Data>;
+  typeDefinition: AttachmentTypeDefinition;
 }): Promise<Data> => {
   if (attachment.data !== undefined) {
-    return attachment.data as Data;
+    return attachment.data;
   }
 
   if (attachment.origin === undefined) {
@@ -75,10 +76,10 @@ const resolveAttachment = async <Type extends string, Data>({
     throw new Error(`Attachment type "${attachment.type}" does not support resolving from origin`);
   }
   const resolved = await typeDefinition.resolve(attachment.origin, resolveContext);
-  if (resolved === undefined) {
+  if (resolved == null) {
     throw new Error(
       `Failed to resolve content from origin for attachment type "${attachment.type}"`
     );
   }
-  return resolved;
+  return resolved as Data;
 };

@@ -312,6 +312,9 @@ export interface UpdateOriginResponse {
   attachment: VersionedAttachment;
 }
 
+/**
+ * Builds a stable key for deduplicating or grouping attachment inputs (e.g. pending rows).
+ */
 export const getContentKey = (input: AttachmentInput, fallback: string): string => {
   if (input.data !== undefined) {
     return `${input.type}:${hashContent(input.data)}`;

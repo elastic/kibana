@@ -29,79 +29,90 @@ describe('validateAttachment', () => {
     savedObjectsClient: {} as AttachmentResolveContext['savedObjectsClient'],
   };
 
-  it('validates by-value attachments and preserves optional origin', async () => {
-    const registry = createRegistry({
-      validate: async (input) => ({ valid: true, data: input }),
+  describe('Converse attachment input scenarios (structural + resolution)', () => {
+    it('only data: validates using inline data', async () => {
+      const registry = createRegistry({
+        validate: async (input) => ({ valid: true, data: input }),
+      });
+
+      const result = await validateAttachment({
+        attachment: { type: 'text', data: { body: 'only-data' } },
+        registry,
+        resolveContext,
+      });
+
+      expect(result).toEqual({
+        valid: true,
+        attachment: expect.objectContaining({
+          type: 'text',
+          data: { body: 'only-data' },
+        }),
+      });
     });
 
-    const result = await validateAttachment({
-      attachment: { type: 'text', data: { body: 'hi' }, origin: 'so-1' },
-      registry,
+    it('only origin: resolves when resolve() and context are available', async () => {
+      const resolved = { body: 'from-origin' };
+      const registry = createRegistry({
+        validate: async (input) => ({ valid: true, data: input }),
+        resolve: async () => resolved,
+      });
+
+      const result = await validateAttachment({
+        attachment: { type: 'text', origin: 'dashboard-id' },
+        registry,
+        resolveContext,
+      });
+
+      expect(result).toEqual({
+        valid: true,
+        attachment: expect.objectContaining({
+          type: 'text',
+          data: resolved,
+          origin: 'dashboard-id',
+        }),
+      });
     });
 
-    expect(result).toEqual({
-      valid: true,
-      attachment: expect.objectContaining({
-        type: 'text',
-        data: { body: 'hi' },
-        origin: 'so-1',
-      }),
-    });
-  });
+    it('data and origin: uses inline data and does not call resolve', async () => {
+      const resolve = jest.fn().mockRejectedValue(new Error('resolve should not run'));
+      const registry = createRegistry({
+        validate: async (input) => ({ valid: true, data: input }),
+        resolve,
+      });
 
-  it('resolves origin-only attachments when resolve context and resolve() are available', async () => {
-    const resolved = { body: 'from-origin' };
-    const registry = createRegistry({
-      validate: async (input) => ({ valid: true, data: input }),
-      resolve: async () => resolved,
-    });
+      const result = await validateAttachment({
+        attachment: { type: 'text', data: { body: 'inline' }, origin: 'so-1' },
+        registry,
+        resolveContext,
+      });
 
-    const result = await validateAttachment({
-      attachment: { type: 'text', origin: 'dashboard-id' },
-      registry,
-      resolveContext,
-    });
-
-    expect(result).toEqual({
-      valid: true,
-      attachment: expect.objectContaining({
-        type: 'text',
-        data: resolved,
-        origin: 'dashboard-id',
-      }),
-    });
-  });
-
-  it('fails origin-only attachments without resolve context', async () => {
-    const registry = createRegistry({
-      validate: async (input) => ({ valid: true, data: input }),
-      resolve: async () => ({}),
+      expect(resolve).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        valid: true,
+        attachment: expect.objectContaining({
+          type: 'text',
+          data: { body: 'inline' },
+          origin: 'so-1',
+        }),
+      });
     });
 
-    const result = await validateAttachment({
-      attachment: { type: 'text', origin: 'x' },
-      registry,
-    });
+    it('neither data nor origin: fails before type validation', async () => {
+      const registry = createRegistry({
+        validate: async (input) => ({ valid: true, data: input }),
+      });
 
-    expect(result).toEqual({
-      valid: false,
-      error: 'Resolve context is required for attachments that only specify origin',
-    });
-  });
+      const result = await validateAttachment({
+        attachment: { type: 'text' },
+        registry,
+        resolveContext,
+      });
 
-  it('fails when neither data nor origin is provided', async () => {
-    const registry = createRegistry({
-      validate: async (input) => ({ valid: true, data: input }),
-    });
-
-    const result = await validateAttachment({
-      attachment: { type: 'text' },
-      registry,
-    });
-
-    expect(result).toEqual({
-      valid: false,
-      error: 'Either data or origin must be provided for an attachment',
+      expect(result).toEqual({
+        valid: false,
+        error:
+          'Error during attachment validation: Either data or origin must be provided for an attachment',
+      });
     });
   });
 });
