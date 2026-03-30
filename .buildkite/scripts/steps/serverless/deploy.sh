@@ -160,6 +160,20 @@ EOF
 
 # This is the integration with the observability-test-environments
 create_github_issue_oblt_test_environments() {
+  create_github_issue_oblt_robots "elastic/observability-test-environments" "deploy-custom-kibana-serverless"
+}
+
+# This is the integration with the exploratory testing
+create_github_issue_exploratory_testing() {
+  create_github_issue_oblt_robots "elastic/kibana-exploratory-testing" "exploratory-testing"
+}
+
+# This creates a GitHub issue in the specified repository with details about the deployed Kibana serverless instance,
+# triggered by the presence of the 'ci:project-deploy-observability' label in the PR. The issue is labeled with 'deploy-custom-kibana-serverless' and
+# includes information such as the Kibana image used and a link to the PR.
+create_github_issue_oblt_robots() {
+GITHUB_REPO="${1:-elastic/observability-test-environments}"
+GITHUB_LABEL="${2:-deploy-custom-kibana-serverless}"
 
 echo "--- Create GitHub issue for deploying in the oblt test env"
 
@@ -182,8 +196,8 @@ EOF
   gh issue create \
     --title "[Deploy Serverless Kibana] for user $GITHUB_PR_TRIGGER_USER with PR kibana@pr-$PR_NUMBER" \
     --body-file "${GITHUB_ISSUE}" \
-    --label 'deploy-custom-kibana-serverless' \
-    --repo 'elastic/observability-test-environments'
+    --label "$GITHUB_LABEL" \
+    --repo "$GITHUB_REPO"
 }
 
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
@@ -196,6 +210,7 @@ if is_pr_with_label "ci:project-deploy-observability" ; then
   if [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" == "main" ]]; then
     create_github_issue_oblt_test_environments
     buildkite-agent annotate --context obl-test-info --style info 'See linked [Deploy Serverless Kibana] issue in pull request for project deployment information'
+    create_github_issue_exploratory_testing
   fi
 fi
 
