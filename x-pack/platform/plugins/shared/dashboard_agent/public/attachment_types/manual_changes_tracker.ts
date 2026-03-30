@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { debounceTime, merge, skip, type Subscription } from 'rxjs';
+import { debounceTime, merge, skip, type Observable, type Subscription } from 'rxjs';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_ATTACHMENT_TYPE, dashboardStateToAttachment } from '@kbn/dashboard-agent-common';
+import { childrenUnsavedChanges$ } from '@kbn/presentation-publishing';
 
 export interface ManualChangesTrackerParams {
   api: DashboardApi;
@@ -23,6 +24,7 @@ export interface ManualChangesTrackerParams {
  *
  * Manual changes include:
  * - Layout changes (panel positions, sizes)
+ * - Child panel state changes
  * - Title and description changes
  * - Filter, query, and time range changes
  * - Dashboard settings changes (margins, sync options, etc.)
@@ -37,7 +39,7 @@ export const createManualChangesTracker = ({
   addAttachment,
 }: ManualChangesTrackerParams): Subscription => {
   // Collect observables for all trackable dashboard state
-  const observables = [
+  const observables: Array<Observable<unknown>> = [
     api.layout$,
     api.title$,
     api.description$,
@@ -53,8 +55,9 @@ export const createManualChangesTracker = ({
     api.hideTitle$,
     api.hideBorder$,
   ].filter((o): o is NonNullable<typeof o> => Boolean(o));
+  const childrenChanges$ = childrenUnsavedChanges$(api.children$).pipe(skip(1));
 
-  return merge(...observables)
+  return merge(...observables, childrenChanges$)
     .pipe(
       skip(observables.length), // Skip initial emissions from all BehaviorSubjects
       debounceTime(150)

@@ -14,6 +14,7 @@ import { onAttachmentMount, type OnAttachmentMountParams } from './create_attach
 interface MockDashboardApi {
   savedObjectId$: BehaviorSubject<string | undefined>;
   layout$: BehaviorSubject<unknown>;
+  children$: BehaviorSubject<Record<string, MockChildApi>>;
   title$: BehaviorSubject<string>;
   description$: BehaviorSubject<string>;
   filters$: BehaviorSubject<unknown[]>;
@@ -34,9 +35,24 @@ interface MockDashboardApi {
   getSerializedState: jest.Mock;
 }
 
+interface MockChildApi {
+  uuid: string;
+  hasUnsavedChanges$: BehaviorSubject<boolean>;
+  serializeState: jest.Mock;
+  applySerializedState: jest.Mock;
+}
+
 const createMockDashboardApi = (): MockDashboardApi => ({
   savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
   layout$: new BehaviorSubject<unknown>([]),
+  children$: new BehaviorSubject<Record<string, MockChildApi>>({
+    'panel-1': {
+      uuid: 'panel-1',
+      hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
+      serializeState: jest.fn().mockReturnValue({}),
+      applySerializedState: jest.fn(),
+    },
+  }),
   title$: new BehaviorSubject<string>('Test Dashboard'),
   description$: new BehaviorSubject<string>('Test Description'),
   filters$: new BehaviorSubject<unknown[]>([]),
@@ -245,6 +261,17 @@ describe('onAttachmentMount - manual changes sync', () => {
 
       mockApi.layout$.next([{ id: 'panel-1', row: 0, column: 0 }]);
       jest.advanceTimersByTime(200);
+
+      expect(addAttachment).toHaveBeenCalledTimes(1);
+    });
+
+    it('triggers sync when child state changes', () => {
+      mountHandler();
+      dashboardAppClientApi$.next(mockApi);
+
+      jest.advanceTimersByTime(150);
+      mockApi.children$.value['panel-1'].hasUnsavedChanges$.next(true);
+      jest.advanceTimersByTime(300);
 
       expect(addAttachment).toHaveBeenCalledTimes(1);
     });
