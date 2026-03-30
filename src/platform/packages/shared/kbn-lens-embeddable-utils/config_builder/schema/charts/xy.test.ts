@@ -67,7 +67,7 @@ describe('XY', () => {
               ignore_global_filters: false,
               sampling: 1,
               y: [{ operation: 'count', empty_as_null: false }],
-              breakdown_by: { operation: 'terms', fields: ['product'], size: 5 },
+              breakdown_by: { operation: 'terms', fields: ['product'], limit: 5 },
             },
           ],
         } satisfies XYState)
@@ -95,7 +95,7 @@ describe('XY', () => {
                   include_empty_rows: false,
                 },
                 y: [{ operation: 'count', empty_as_null: false }],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
             ],
           } satisfies XYState)
@@ -149,7 +149,7 @@ describe('XY', () => {
               breakdown_by: {
                 operation: 'terms',
                 fields: ['product', 'category'],
-                size: 5,
+                limit: 5,
               },
             },
             {
@@ -191,7 +191,7 @@ describe('XY', () => {
                 include_empty_rows: false,
               },
               y: [{ operation: 'count', empty_as_null: false }],
-              breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+              breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
             },
             {
               type: 'annotations',
@@ -247,7 +247,7 @@ describe('XY', () => {
                   { operation: 'count', empty_as_null: false },
                   { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
                 dataset: { type: 'dataView', id: 'companyBIndex' },
@@ -265,7 +265,7 @@ describe('XY', () => {
                   { operation: 'count', empty_as_null: false },
                   { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
             ],
           } satisfies XYState)
@@ -297,7 +297,7 @@ describe('XY', () => {
                   { operation: 'count', empty_as_null: false },
                   { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
                 dataset: { type: 'dataView', id: 'companyBIndex' },
@@ -315,7 +315,7 @@ describe('XY', () => {
                   { operation: 'count', empty_as_null: false },
                   { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
                 dataset: { type: 'dataView', id: 'myDataView' },
@@ -569,7 +569,7 @@ describe('XY', () => {
                 { operation: 'count', empty_as_null: false },
                 { operation: 'average', field: 'price' },
               ],
-              breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+              breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
             },
           ],
         } satisfies XYState)
