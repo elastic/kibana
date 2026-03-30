@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WatchlistEntitySourceClient } from '../infra';
-import type { EntityStoreEntityIdsByType } from '../../entities/service';
 import { createSourcesSyncService } from './sources_sync';
+import type { SyncSourceEntry } from './sources_sync';
 import { createUpdateDetectionService } from './update_detection/update_detection';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
@@ -32,17 +32,16 @@ export const createIndexSyncService = ({
   });
   const sourcesSyncService = createSourcesSyncService({ logger });
 
-  const plainIndexSync = async (
-    sources: {
-      sourceId: string;
-      entityStoreEntityIdsByType: EntityStoreEntityIdsByType;
-    }[]
-  ) => {
+  const plainIndexSync = async (sources: SyncSourceEntry[]) => {
     await sourcesSyncService.syncBySourceIds({
       descriptorClient,
       sources,
-      process: async (source, entityStoreEntityIdsByType) => {
-        await updateDetectionService.updateDetection(source, entityStoreEntityIdsByType);
+      process: async (source, entityStoreEntityIdsByType, correlationMap) => {
+        await updateDetectionService.updateDetection(
+          source,
+          entityStoreEntityIdsByType,
+          correlationMap
+        );
       },
     });
   };
