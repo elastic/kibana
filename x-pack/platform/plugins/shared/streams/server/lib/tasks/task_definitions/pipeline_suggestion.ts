@@ -13,18 +13,6 @@ import { suggestProcessingPipeline } from '@kbn/streams-ai';
 import { Streams } from '@kbn/streams-schema';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import type { StreamlangDSL, GrokProcessor, DissectProcessor } from '@kbn/streamlang';
-import {
-  getGrokProcessor,
-  getReviewFields as getGrokReviewFields,
-  mergeGrokProcessors,
-  type GrokProcessorResult,
-} from '@kbn/grok-heuristics';
-import {
-  getDissectProcessorWithReview,
-  getReviewFields as getDissectReviewFields,
-  extractDissectPattern,
-  groupMessagesByPattern as groupMessagesByDissectPattern,
-} from '@kbn/dissect-heuristics';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
@@ -35,26 +23,14 @@ import { handleProcessingGrokSuggestions } from '../../../routes/internal/stream
 import { handleProcessingDissectSuggestions } from '../../../routes/internal/streams/processing/dissect_suggestions_handler';
 import { isNoLLMSuggestionsError } from '../../../routes/internal/streams/processing/no_llm_suggestions_error';
 import type { StreamsClient } from '../../streams/client';
-
-type GrokPatternNode = { pattern: string } | { id: string; component: string; values: string[] };
+import type { IPatternExtractionService } from '../../pattern_extraction/pattern_extraction_service';
 
 export interface PipelineSuggestionTaskParams {
   connectorId: string;
   streamName: string;
   documents: FlattenRecord[];
-  extractedPatterns: {
-    grok: {
-      fieldName: string;
-      patternGroups: Array<{
-        messages: string[];
-        nodes: Array<{ pattern: string } | { id: string; component: string; values: string[] }>;
-      }>;
-    } | null;
-    dissect: {
-      fieldName: string;
-      messages: string[];
-    } | null;
-  };
+  fieldName: string;
+  sampleMessages: string[];
 }
 
 export interface PipelineSuggestionTaskPayload {
@@ -74,8 +50,8 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, streamName, documents, extractedPatterns, _task } = runContext
-                .taskInstance.params as TaskParams<PipelineSuggestionTaskParams>;
+              const { connectorId, streamName, documents, fieldName, sampleMessages, _task } =
+                runContext.taskInstance.params as TaskParams<PipelineSuggestionTaskParams>;
 
               const {
                 taskClient,
@@ -97,8 +73,7 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
                 const abortController = runContext.abortController;
                 let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
 
-                if (extractedPatterns) {
-                  const { grok, dissect } = extractedPatterns;
+                if (sampleMessages.length > 0) {
                   const candidatePromises: Array<
                     Promise<{
                       type: 'grok' | 'dissect';
@@ -107,59 +82,57 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
                     } | null>
                   > = [];
 
-                  if (grok) {
-                    logger.debug(
-                      `(parallel) scheduling grok patternGroups=${grok.patternGroups.length} fieldName=${grok.fieldName}`
-                    );
-                    candidatePromises.push(
-                      processGrokPatterns({
-                        patternGroups: grok.patternGroups,
-                        fieldName: grok.fieldName,
-                        streamName,
-                        connectorId,
-                        documents,
-                        inferenceClient,
-                        scopedClusterClient,
-                        streamsClient,
-                        fieldsMetadataClient,
-                        signal: abortController.signal,
-                        logger,
-                      }).catch((error) => {
-                        if (isNoLLMSuggestionsError(error)) {
-                          logger.debug('No LLM suggestions available for grok');
-                          return null;
-                        }
-                        throw error;
-                      })
-                    );
-                  }
+                  logger.debug(
+                    `(parallel) scheduling grok fieldName=${fieldName} messages=${sampleMessages.length}`
+                  );
+                  candidatePromises.push(
+                    processGrokPatterns({
+                      sampleMessages,
+                      fieldName,
+                      streamName,
+                      connectorId,
+                      documents,
+                      inferenceClient,
+                      scopedClusterClient,
+                      streamsClient,
+                      fieldsMetadataClient,
+                      patternExtractionService: taskContext.patternExtractionService,
+                      signal: abortController.signal,
+                      logger,
+                    }).catch((error) => {
+                      if (isNoLLMSuggestionsError(error)) {
+                        logger.debug('No LLM suggestions available for grok');
+                        return null;
+                      }
+                      throw error;
+                    })
+                  );
 
-                  if (dissect) {
-                    logger.debug(
-                      `(parallel) scheduling dissect messages=${dissect.messages.length} fieldName=${dissect.fieldName}`
-                    );
-                    candidatePromises.push(
-                      processDissectPattern({
-                        messages: dissect.messages,
-                        fieldName: dissect.fieldName,
-                        streamName,
-                        connectorId,
-                        documents,
-                        inferenceClient,
-                        scopedClusterClient,
-                        streamsClient,
-                        fieldsMetadataClient,
-                        signal: abortController.signal,
-                        logger,
-                      }).catch((error) => {
-                        if (isNoLLMSuggestionsError(error)) {
-                          logger.debug('No LLM suggestions available for dissect');
-                          return null;
-                        }
-                        throw error;
-                      })
-                    );
-                  }
+                  logger.debug(
+                    `(parallel) scheduling dissect fieldName=${fieldName} messages=${sampleMessages.length}`
+                  );
+                  candidatePromises.push(
+                    processDissectPattern({
+                      sampleMessages,
+                      fieldName,
+                      streamName,
+                      connectorId,
+                      documents,
+                      inferenceClient,
+                      scopedClusterClient,
+                      streamsClient,
+                      fieldsMetadataClient,
+                      patternExtractionService: taskContext.patternExtractionService,
+                      signal: abortController.signal,
+                      logger,
+                    }).catch((error) => {
+                      if (isNoLLMSuggestionsError(error)) {
+                        logger.debug('No LLM suggestions available for dissect');
+                        return null;
+                      }
+                      throw error;
+                    })
+                  );
 
                   const results = await Promise.all(candidatePromises);
                   const candidates = results.filter(
@@ -209,7 +182,7 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
                   PipelineSuggestionTaskPayload
                 >(
                   _task,
-                  { connectorId, streamName, documents, extractedPatterns },
+                  { connectorId, streamName, documents, fieldName, sampleMessages },
                   { pipeline: pipeline.pipeline }
                 );
               } catch (error) {
@@ -221,7 +194,7 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
                     PipelineSuggestionTaskPayload
                   >(
                     _task,
-                    { connectorId, streamName, documents, extractedPatterns },
+                    { connectorId, streamName, documents, fieldName, sampleMessages },
                     { pipeline: null }
                   );
                   return;
@@ -253,7 +226,7 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
                   );
                   await taskClient.fail<PipelineSuggestionTaskParams>(
                     _task,
-                    { connectorId, streamName, documents, extractedPatterns },
+                    { connectorId, streamName, documents, fieldName, sampleMessages },
                     errorMessage
                   );
                   return;
@@ -263,7 +236,7 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
 
                 await taskClient.fail<PipelineSuggestionTaskParams>(
                   _task,
-                  { connectorId, streamName, documents, extractedPatterns },
+                  { connectorId, streamName, documents, fieldName, sampleMessages },
                   errorMessage
                 );
               }
@@ -278,13 +251,14 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
 }
 
 /**
- * Process grok patterns extracted client-side:
+ * Process grok patterns server-side:
+ * - Extract patterns via patternExtractionService (worker threads)
  * - Call LLM to review patterns
  * - Simulate to get parsed rate
  * - Return best grok processor
  */
 async function processGrokPatterns({
-  patternGroups,
+  sampleMessages,
   fieldName,
   streamName,
   connectorId,
@@ -293,13 +267,11 @@ async function processGrokPatterns({
   scopedClusterClient,
   streamsClient,
   fieldsMetadataClient,
+  patternExtractionService,
   signal,
   logger,
 }: {
-  patternGroups: Array<{
-    messages: string[];
-    nodes: Array<{ pattern: string } | { id: string; component: string; values: string[] }>;
-  }>;
+  sampleMessages: string[];
   fieldName: string;
   streamName: string;
   connectorId: string;
@@ -308,68 +280,33 @@ async function processGrokPatterns({
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
+  patternExtractionService: IPatternExtractionService;
   signal: AbortSignal;
   logger: Logger;
 }): Promise<{ type: 'grok'; processor: GrokProcessor; parsedRate: number } | null> {
   const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
 
-  // Request grok pattern reviews for each group in parallel
-  const grokResults = await Promise.allSettled(
-    patternGroups.map(async (group) => {
-      logger.debug(`[grok] Reviewing group messages=${group.messages.length}`);
-      // Call LLM to review patterns directly
-      const patterns = group.nodes
-        .filter((node): node is { pattern: string } => 'pattern' in node)
-        .map((node) => node.pattern);
-      logger.debug(`[grok] Derived patterns=${patterns.length}`);
+  const grokProcessor = await handleProcessingGrokSuggestions({
+    params: {
+      path: { name: streamName },
+      body: {
+        connector_id: connectorId,
+        field_name: fieldName,
+        sample_messages: sampleMessages,
+      },
+    },
+    inferenceClient,
+    scopedClusterClient,
+    streamsClient,
+    fieldsMetadataClient,
+    patternExtractionService,
+    signal,
+    logger,
+  });
 
-      const grokProcessor = await handleProcessingGrokSuggestions({
-        params: {
-          path: { name: streamName },
-          body: {
-            connector_id: connectorId,
-            field_name: fieldName,
-            sample_messages: group.messages,
-            review_fields: getGrokReviewFields(group.nodes as GrokPatternNode[], 10),
-          },
-        },
-        inferenceClient,
-        scopedClusterClient,
-        streamsClient,
-        fieldsMetadataClient,
-        signal,
-        logger,
-      });
-      logger.debug('[grok] LLM review response received');
-
-      const grokProcessorResult = getGrokProcessor(
-        patterns.map((pattern) => ({ pattern })),
-        grokProcessor
-      );
-      logger.debug(
-        `[grok] getGrokProcessor produced patterns=${grokProcessorResult.patterns.length}`
-      );
-
-      return grokProcessorResult;
-    })
-  );
-
-  // Collect successful results
-  const grokProcessors = grokResults.reduce<GrokProcessorResult[]>((acc, result) => {
-    if (result.status === 'fulfilled') {
-      acc.push(result.value);
-    } else {
-      logger.error('[grok] LLM review failed:', result.reason);
-    }
-    return acc;
-  }, []);
-
-  if (grokProcessors.length === 0) {
+  if (!grokProcessor) {
     return null;
   }
-
-  // Merge all grok processors into one
-  const combinedGrokProcessor = mergeGrokProcessors(grokProcessors);
 
   // Run simulation to verify grok patterns work
   const simulationResult = await simulateProcessing({
@@ -383,7 +320,7 @@ async function processGrokPatterns({
               action: 'grok',
               customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
               from: fieldName,
-              patterns: combinedGrokProcessor.patterns,
+              patterns: grokProcessor.patterns,
             },
           ],
         },
@@ -399,24 +336,20 @@ async function processGrokPatterns({
 
   return {
     type: 'grok',
-    processor: {
-      action: 'grok',
-      from: fieldName,
-      patterns: combinedGrokProcessor.patterns as [string, ...string[]],
-    },
+    processor: grokProcessor,
     parsedRate,
   };
 }
 
 /**
- * Process dissect patterns by extracting them server-side:
- * - Extract dissect pattern from messages
+ * Process dissect patterns server-side:
+ * - Extract patterns via patternExtractionService (worker threads)
  * - Call LLM to review pattern
  * - Simulate to get parsed rate
  * - Return dissect processor
  */
 async function processDissectPattern({
-  messages,
+  sampleMessages,
   fieldName,
   streamName,
   connectorId,
@@ -425,10 +358,11 @@ async function processDissectPattern({
   scopedClusterClient,
   streamsClient,
   fieldsMetadataClient,
+  patternExtractionService,
   signal,
   logger,
 }: {
-  messages: string[];
+  sampleMessages: string[];
   fieldName: string;
   streamName: string;
   connectorId: string;
@@ -437,59 +371,35 @@ async function processDissectPattern({
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
+  patternExtractionService: IPatternExtractionService;
   signal: AbortSignal;
   logger: Logger;
 }): Promise<{ type: 'dissect'; processor: DissectProcessor; parsedRate: number } | null> {
   const SUGGESTED_DISSECT_PROCESSOR_ID = 'dissect-processor';
 
-  if (messages.length === 0) {
+  if (sampleMessages.length === 0) {
     return null;
   }
 
-  // Extract dissect pattern on server-side
-  logger.debug('[dissect] Grouping messages by pattern');
-  const grouped = groupMessagesByDissectPattern(messages);
-  if (grouped.length === 0) {
-    logger.debug('[dissect] No patterns found in messages');
-    return null;
-  }
-
-  const largestGroup = grouped[0];
-  logger.debug(
-    `[dissect] Extracting pattern from largest group messages=${largestGroup.messages.length}`
-  );
-  const dissectPattern = extractDissectPattern(largestGroup.messages);
-
-  if (!dissectPattern.ast.nodes.length) {
-    logger.debug('[dissect] No AST nodes in extracted pattern');
-    return null;
-  }
-
-  // Use extracted fields for review & processor generation
-  const reviewFields = getDissectReviewFields(dissectPattern, 10);
-  const dissectReview = await handleProcessingDissectSuggestions({
+  const dissectProcessor = await handleProcessingDissectSuggestions({
     params: {
       path: { name: streamName },
       body: {
         connector_id: connectorId,
         field_name: fieldName,
-        sample_messages: largestGroup.messages.slice(0, 10),
-        review_fields: reviewFields,
+        sample_messages: sampleMessages,
       },
     },
     inferenceClient,
     scopedClusterClient,
     streamsClient,
     fieldsMetadataClient,
+    patternExtractionService,
     signal,
     logger,
   });
 
-  const dissectProcessor = getDissectProcessorWithReview(dissectPattern, dissectReview, fieldName);
-  const pattern = dissectProcessor.pattern;
-
-  if (!pattern || pattern.trim().length === 0) {
-    logger.debug('[dissect] Empty pattern generated; skipping simulation');
+  if (!dissectProcessor) {
     return null;
   }
 
@@ -504,7 +414,7 @@ async function processDissectPattern({
               action: 'dissect',
               customIdentifier: SUGGESTED_DISSECT_PROCESSOR_ID,
               from: fieldName,
-              pattern,
+              pattern: dissectProcessor.pattern,
             },
           ],
         },
@@ -520,12 +430,7 @@ async function processDissectPattern({
 
   return {
     type: 'dissect',
-    processor: {
-      action: 'dissect',
-      from: fieldName,
-      pattern,
-      append_separator: ' ',
-    },
+    processor: dissectProcessor,
     parsedRate,
   };
 }

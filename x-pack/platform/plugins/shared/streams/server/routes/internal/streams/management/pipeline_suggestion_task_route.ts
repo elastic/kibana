@@ -17,7 +17,7 @@ import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
   getFeaturesIdentificationTaskId,
 } from '../../../../lib/tasks/task_definitions/features_identification';
-import { SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE } from '../../../../lib/tasks/task_definitions/significant_events_queries_generation';
+import { SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE } from '../../../../lib/sig_events/tasks/significant_events_queries_generation';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { SuggestionBulkStatusItem } from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';
@@ -37,38 +37,6 @@ export type PipelineSuggestionTaskResult = TaskResult<PipelineSuggestionTaskPayl
 function getPipelineSuggestionTaskId(streamName: string): string {
   return `${STREAMS_PIPELINE_SUGGESTION_TASK_TYPE}_${streamName}`;
 }
-
-/**
- * Zod schema for extracted_patterns parameter (shared with existing route)
- */
-const extractedPatternsSchema = z.object({
-  grok: z
-    .object({
-      fieldName: z.string(),
-      patternGroups: z.array(
-        z.object({
-          messages: z.array(z.string()),
-          nodes: z.array(
-            z.union([
-              z.object({ pattern: z.string() }),
-              z.object({
-                id: z.string(),
-                component: z.string(),
-                values: z.array(z.string()),
-              }),
-            ])
-          ),
-        })
-      ),
-    })
-    .nullable(),
-  dissect: z
-    .object({
-      fieldName: z.string(),
-      messages: z.array(z.string()),
-    })
-    .nullable(),
-});
 
 const pipelineSuggestionTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/_pipeline_suggestion/_task',
@@ -97,9 +65,8 @@ const pipelineSuggestionTaskRoute = createServerRoute({
             'Optional connector ID. If not provided, the default AI connector from settings will be used.'
           ),
         documents: z.array(flattenRecord).describe('Sample documents to use for suggestion'),
-        extractedPatterns: extractedPatternsSchema.describe(
-          'Grok and dissect patterns extracted client-side'
-        ),
+        fieldName: z.string().describe('The field name to extract patterns from'),
+        sampleMessages: z.array(z.string()).describe('Sample messages for pattern extraction'),
       }),
       z.object({
         action: z.literal('cancel').describe('Cancel an in-progress pipeline suggestion task'),
@@ -146,7 +113,8 @@ const pipelineSuggestionTaskRoute = createServerRoute({
                   connectorId,
                   streamName,
                   documents: body.documents,
-                  extractedPatterns: body.extractedPatterns,
+                  fieldName: body.fieldName,
+                  sampleMessages: body.sampleMessages,
                 };
               })(),
               request,

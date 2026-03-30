@@ -32,51 +32,6 @@ export interface SuggestPipelineInput {
   notifications: NotificationsStart;
 }
 
-interface ExtractedGrokPattern {
-  type: 'grok';
-  fieldName: string;
-  patternGroups: Array<{
-    messages: string[];
-    nodes: GrokPatternNode[];
-  }>;
-}
-
-/**
- * CLIENT-SIDE: Extract grok patterns from messages
- * This is compute-intensive pattern matching that should stay client-side
- */
-async function extractGrokPatternsClientSide(
-  messages: string[],
-  fieldName: string
-): Promise<ExtractedGrokPattern | null> {
-  try {
-    const groupedMessages = groupMessagesByGrokPattern(messages);
-
-    if (groupedMessages.length === 0) {
-      return null;
-    }
-
-    // Extract patterns for each message group
-    const patternGroups = groupedMessages.map((group) => {
-      const grokPatternNodes = extractGrokPatternDangerouslySlow(group.messages);
-      return {
-        messages: group.messages.slice(0, 10), // Limit to 10 samples per group
-        nodes: grokPatternNodes,
-      };
-    });
-
-    return {
-      type: 'grok',
-      fieldName,
-      patternGroups,
-    };
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.warn('Client-side grok pattern extraction failed:', error);
-    return null;
-  }
-}
-
 export async function schedulePipelineSuggestionTaskLogic(
   input: SuggestPipelineInput
 ): Promise<void> {
@@ -87,30 +42,11 @@ export async function schedulePipelineSuggestionTaskLogic(
     (doc) => flattenObjectNestedLast(doc.document) as FlattenRecord
   );
 
-  // CLIENT-SIDE - Extract patterns from documents
+  // Determine field name and extract messages
   const fieldName = getDefaultTextField(documents, PRIORITIZED_CONTENT_FIELDS);
   const messages = extractMessagesFromField(documents, fieldName);
 
-  // Only grok extraction is CPU-intensive enough to warrant client-side processing
-  const grokPatterns = await extractGrokPatternsClientSide(messages, fieldName);
-
-  // Schedule background task for server-side processing
-  const extractedPatterns = {
-    grok: grokPatterns
-      ? {
-          fieldName: grokPatterns.fieldName,
-          patternGroups: grokPatterns.patternGroups,
-        }
-      : null,
-    dissect:
-      messages.length > 0
-        ? {
-            fieldName,
-            messages,
-          }
-        : null,
-  };
-
+  // Schedule background task for server-side processing (extraction + review + assembly)
   const maxRetries = 10;
   const retryIntervalMs = 1000;
 
@@ -126,7 +62,8 @@ export async function schedulePipelineSuggestionTaskLogic(
               action: 'schedule' as const,
               connectorId,
               documents,
-              extractedPatterns,
+              fieldName,
+              sampleMessages: messages,
             },
           },
         }

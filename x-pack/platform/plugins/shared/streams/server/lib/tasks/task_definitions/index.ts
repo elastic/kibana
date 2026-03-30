@@ -15,11 +15,13 @@ import type { EbtTelemetryClient } from '../../telemetry';
 import { createStreamsFeaturesIdentificationTask } from './features_identification';
 import { createStreamsPipelineSuggestionTask } from './pipeline_suggestion';
 import { createStreamsOnboardingTask } from './onboarding';
+import type { IPatternExtractionService } from '../../pattern_extraction/pattern_extraction_service';
 
 export interface TaskContext {
   logger: Logger;
   getScopedClients: GetScopedClients;
   telemetry: EbtTelemetryClient;
+  patternExtractionService: IPatternExtractionService;
 }
 
 export function createTaskDefinitions(taskContext: TaskContext) {

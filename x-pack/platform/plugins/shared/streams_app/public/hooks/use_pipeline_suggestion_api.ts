@@ -10,20 +10,6 @@ import { useAbortController } from '@kbn/react-hooks';
 import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { useKibana } from './use_kibana';
 
-interface ExtractedPatterns {
-  grok: {
-    fieldName: string;
-    patternGroups: Array<{
-      messages: string[];
-      nodes: Array<{ pattern: string } | { id: string; component: string; values: string[] }>;
-    }>;
-  } | null;
-  dissect: {
-    fieldName: string;
-    messages: string[];
-  } | null;
-}
-
 export function usePipelineSuggestionApi(streamName: string) {
   const {
     dependencies: {
@@ -39,7 +25,8 @@ export function usePipelineSuggestionApi(streamName: string) {
     schedulePipelineSuggestionTask: async (params: {
       connectorId?: string;
       documents: FlattenRecord[];
-      extractedPatterns: ExtractedPatterns;
+      fieldName: string;
+      sampleMessages: string[];
     }) => {
       const maxRetries = 5;
       const retryIntervalMs = 1000;
@@ -56,7 +43,8 @@ export function usePipelineSuggestionApi(streamName: string) {
                   action: 'schedule' as const,
                   connectorId: params.connectorId,
                   documents: params.documents,
-                  extractedPatterns: params.extractedPatterns,
+                  fieldName: params.fieldName,
+                  sampleMessages: params.sampleMessages,
                 },
               },
             }

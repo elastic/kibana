@@ -217,6 +217,7 @@ export class StreamsPlugin
       getScopedClients,
       logger: this.logger,
       telemetry: telemetryClient,
+      patternExtractionService: this.patternExtractionService!,
     });
 
     plugins.features.registerKibanaFeature({
