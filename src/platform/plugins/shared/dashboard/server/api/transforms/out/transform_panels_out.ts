@@ -80,7 +80,7 @@ function transformPanelProperties(
 
   // Temporary escape hatch for lens as code
   // TODO remove when lens as code transforms are ready for production
-  const transformType = type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : type;
+  const transformType = type === 'vis' && isDashboardAppRequest ? 'lens-dashboard-app' : type;
   const transforms = embeddableService?.getTransforms(transformType);
 
   let transformedPanelConfig;

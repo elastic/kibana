@@ -68,7 +68,7 @@ function transformPanelIn(
   // Temporary escape hatch for lens as code
   // TODO remove when lens as code transforms are ready for production
   const transformType =
-    panel.type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : panel.type;
+    panel.type === 'vis' && isDashboardAppRequest ? 'lens-dashboard-app' : panel.type;
   const transforms = embeddableService?.getTransforms(transformType);
 
   // Dashboard application routes do not validate panel.config at route level

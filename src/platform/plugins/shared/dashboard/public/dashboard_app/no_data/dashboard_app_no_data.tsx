@@ -103,7 +103,7 @@ export const DashboardAppNoDataPage = ({
             .navigateToWithEmbeddablePackages<LensSerializedState>('dashboards', {
               state: [
                 {
-                  type: 'lens',
+                  type: 'vis',
                   serializedState: {
                     attributes: getLensAttributesFromSuggestion({
                       filters: [],

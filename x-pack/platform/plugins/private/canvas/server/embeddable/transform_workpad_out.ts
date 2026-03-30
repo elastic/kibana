@@ -128,7 +128,7 @@ export function transformWorkpadOut(
         // Temporary escape hatch for lens as code
         // TODO remove when lens as code transforms are ready for production
         const transforms = embeddableService.getTransforms(
-          embeddableType === 'lens' ? 'lens-dashboard-app' : embeddableType
+          embeddableType === 'vis' ? 'lens-dashboard-app' : embeddableType
         );
 
         try {
