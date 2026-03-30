@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Context, useContainer, useExtensions, useService } from './src/react';
-export {
-  Application,
-  type ApplicationDefinition,
-  type ApplicationHandler,
-  ApplicationParameters,
-} from './src/services/application';
-export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';
+import type { ServiceIdentifier } from 'inversify';
+
+export const HostedExtensionPoint = Symbol.for(
+  'HostedExtensionPoint'
+) as ServiceIdentifier<ServiceIdentifier>;

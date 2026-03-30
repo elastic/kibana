@@ -9,6 +9,7 @@
 
 import type { Container, GetOptions, OptionalGetOptions, ServiceIdentifier } from 'inversify';
 import { createContext, useContext, useMemo } from 'react';
+import { getExtensions, getService, type ExtensionPointToken } from '@kbn/core-di';
 
 /**
  * The React context to provide the dependency injection container.
@@ -27,6 +28,9 @@ export const useContainer = () => useContext(Context);
 
 /**
  * The `useService` hook is used to retrieve a service from the dependency injection container.
+ *
+ * Cross-plugin callers should pass a `ServiceToken`. Local/private DI may also
+ * pass any other Inversify `ServiceIdentifier`.
  * @see {@link Container.get}
  * @param service The service identifier to resolve.
  * @param options InverisfyJS options to pass to the `get` method.
@@ -47,12 +51,28 @@ export function useService<T>(
 ): T | undefined;
 
 /** @internal */
-export function useService<T>(...params: Parameters<Container['get']>): T {
+export function useService<T>(
+  service: ServiceIdentifier<T>,
+  options?: GetOptions | OptionalGetOptions
+): T {
+  const container = useContainer();
+  if (!container) {
+    throw new Error('The dependency injection container is not provided in the context.');
+  }
+  return useMemo(() => {
+    return getService<T>(container, service, options);
+  }, [container, service, options]);
+}
+
+/**
+ * The `useExtensions` hook resolves all contributions registered for an extension point.
+ * @public
+ */
+export const useExtensions = <T>(extensionPoint: ExtensionPointToken<T>): T[] => {
   const container = useContainer();
   if (!container) {
     throw new Error('The dependency injection container is not provided in the context.');
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => container.get<T>(...params), [container, ...params]);
-}
+  return useMemo(() => getExtensions(container, extensionPoint), [container, extensionPoint]);
+};
