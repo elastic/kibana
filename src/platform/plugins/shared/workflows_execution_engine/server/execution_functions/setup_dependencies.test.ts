@@ -13,6 +13,7 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from './__mock__/context_dependencies';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 import '../workflow_event_logger/mocks';
@@ -117,6 +118,7 @@ describe('setupDependencies', () => {
 
     expect(mockAsScoped).toHaveBeenCalledWith(mockFakeRequest);
     expect(result.esClient).toBe(mockAsCurrentUser);
+    expect(result.telemetryClient).toBeInstanceOf(WorkflowExecutionTelemetryClient);
   });
 
   it('should use scoped actions client with fakeRequest', async () => {

@@ -22,6 +22,7 @@ import type {
   WorkflowDetailDto,
   WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
+  WorkflowExecutionEventDispatchMetadata,
   WorkflowExecutionListDto,
   WorkflowListDto,
   WorkflowYaml,
@@ -256,15 +257,19 @@ export class WorkflowsManagementApi {
     spaceId: string,
     inputs: Record<string, any>,
     request: KibanaRequest,
-    triggeredBy: string
+    triggeredBy: string,
+    metadata?: WorkflowExecutionEventDispatchMetadata
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
-    const context = {
+    const context: Record<string, unknown> = {
       event,
       spaceId,
       inputs: manualInputs,
       triggeredBy,
     };
+    if (metadata) {
+      context.metadata = metadata;
+    }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const scheduleResponse = await workflowsExecutionEngine.scheduleWorkflow(
       workflow,
@@ -335,6 +340,7 @@ export class WorkflowsManagementApi {
     workflowYaml: string,
     stepId: string,
     workflowId: string | undefined,
+    executionContext: Record<string, unknown> | undefined,
     contextOverride: Record<string, any>,
     spaceId: string,
     request: KibanaRequest
@@ -360,6 +366,7 @@ export class WorkflowsManagementApi {
         spaceId,
       },
       stepId,
+      executionContext,
       contextOverride,
       request
     );

@@ -14,9 +14,9 @@ import { gaugeStateSchema } from './gauge';
 
 describe('Gauge Schema', () => {
   const baseGaugeConfig = {
-    type: 'gauge' as const,
+    type: 'gauge',
     dataset: {
-      type: 'dataView' as const,
+      type: 'dataView',
       id: 'test-data-view',
     },
   } satisfies Partial<GaugeState>;
@@ -32,7 +32,7 @@ describe('Gauge Schema', () => {
     const input = {
       ...baseGaugeConfig,
       metric: {
-        operation: 'count' as const,
+        operation: 'count',
         field: 'test_field',
         empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       },
@@ -67,7 +67,7 @@ describe('Gauge Schema', () => {
         ...baseGaugeConfig,
         title: 'Performance Gauge',
         metric: {
-          operation: 'sum' as const,
+          operation: 'sum',
           field: 'performance_score',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           title: { text: 'Score' },
@@ -75,21 +75,21 @@ describe('Gauge Schema', () => {
           color,
           ticks: { mode: 'bands' as const },
           min: {
-            operation: 'static_value' as const,
+            operation: 'static_value',
             value: 0,
           },
           max: {
-            operation: 'static_value' as const,
+            operation: 'static_value',
             value: 100,
           },
           goal: {
-            operation: 'static_value' as const,
+            operation: 'static_value',
             value: 80,
           },
         },
         shape: {
-          type: 'bullet' as const,
-          direction: 'vertical' as const,
+          type: 'bullet',
+          orientation: 'vertical',
         },
       } satisfies GaugeInput;
 
@@ -102,12 +102,12 @@ describe('Gauge Schema', () => {
     const input = {
       ...baseGaugeConfig,
       metric: {
-        operation: 'average' as const,
+        operation: 'average',
         field: 'cpu_usage',
         ticks: { mode: 'auto' as const },
       },
       shape: {
-        type: 'circle' as const,
+        type: 'circle',
       },
     } satisfies GaugeInput;
 
@@ -119,34 +119,34 @@ describe('Gauge Schema', () => {
     const input = {
       ...baseGaugeConfig,
       metric: {
-        operation: 'count' as const,
+        operation: 'count',
         field: 'test_field',
         empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       },
       shape: {
-        type: 'bullet' as const,
-        direction: 'horizontal' as const,
+        type: 'bullet',
+        orientation: 'horizontal',
       },
     } satisfies GaugeInput;
 
     const validated = gaugeStateSchema.validate(input);
     expect(validated.shape).toEqual({
       type: 'bullet',
-      direction: 'horizontal',
+      orientation: 'horizontal',
     });
     expect(validated.metric.ticks).toBeUndefined();
   });
 
   it('validates ESQL configuration', () => {
     const input = {
-      type: 'gauge' as const,
+      type: 'gauge',
       dataset: {
-        type: 'esql' as const,
+        type: 'esql',
         query: 'FROM my-index | LIMIT 100',
       },
       metric: {
         operation: 'value',
-        column: 'score' as const,
+        column: 'score',
         sub_title: 'Performance',
       },
     } satisfies GaugeInput;
@@ -157,14 +157,14 @@ describe('Gauge Schema', () => {
 
   it('validates ES|QL full configuration with bullet shape', () => {
     const input = {
-      type: 'gauge' as const,
+      type: 'gauge',
       dataset: {
-        type: 'esql' as const,
+        type: 'esql',
         query: 'FROM my-index | LIMIT 100',
       },
       title: 'Performance Gauge',
       metric: {
-        operation: 'value' as const,
+        operation: 'value',
         column: 'score',
         title: { text: 'Score' },
         sub_title: 'with 80% target',
@@ -178,21 +178,21 @@ describe('Gauge Schema', () => {
         },
         ticks: { mode: 'bands' as const },
         min: {
-          operation: 'value' as const,
+          operation: 'value',
           column: 'min',
         },
         max: {
-          operation: 'value' as const,
+          operation: 'value',
           column: 'max',
         },
         goal: {
-          operation: 'value' as const,
+          operation: 'value',
           column: 'goal',
         },
       },
       shape: {
-        type: 'bullet' as const,
-        direction: 'vertical' as const,
+        type: 'bullet',
+        orientation: 'vertical',
       },
     } satisfies GaugeInput;
 
@@ -202,24 +202,24 @@ describe('Gauge Schema', () => {
 
   it('throws on mixed DSL and ES|QL configs', () => {
     const input = {
-      type: 'gauge' as const,
+      type: 'gauge',
       dataset: {
-        type: 'esql' as const,
+        type: 'esql',
         query: 'FROM my-index | LIMIT 100',
       },
       title: 'Performance Gauge',
       metric: {
-        operation: 'value' as const,
+        operation: 'value',
         column: 'score',
         min: {
           // @ts-expect-error
-          operation: 'static' as const,
+          operation: 'static',
           value: 5,
         },
       },
       shape: {
-        type: 'bullet' as const,
-        direction: 'vertical' as const,
+        type: 'bullet',
+        orientation: 'vertical',
       },
     } satisfies GaugeInput;
 
@@ -241,7 +241,7 @@ describe('Gauge Schema', () => {
       ...baseGaugeConfig,
       // @ts-expect-error
       metric: {
-        operation: 'count' as const,
+        operation: 'count',
         field: 'test_field',
       },
       shape: {
@@ -257,7 +257,7 @@ describe('Gauge Schema', () => {
     const input = {
       ...baseGaugeConfig,
       metric: {
-        operation: 'count' as const,
+        operation: 'count',
         field: 'test_field',
         ticks: {
           // @ts-expect-error

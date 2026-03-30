@@ -37,8 +37,12 @@ import {
   useTriggerTypeDecorations,
   useWorkflowIdDecorations,
 } from './decorations';
+import { DocumentationLink } from './documentation_link';
+import type { ExtraAction } from './extra_actions_bar';
+import { ExtraActionsBar } from './extra_actions_bar';
 import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
+import { KeyboardShortcutsPopover } from './keyboard_shortcuts_popover';
 import { StepActions } from './step_actions';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
@@ -386,6 +390,7 @@ export const WorkflowYAMLEditor = ({
       if (!model) {
         return;
       }
+
       // If no model, just set the mounted state
       setTimeout(() => {
         setIsEditorMounted(true);
@@ -633,6 +638,27 @@ export const WorkflowYAMLEditor = ({
     }
   }, [workflowJsonSchemaStrict, notifications]);
 
+  const extraActions = useMemo<ExtraAction[]>(
+    () => [
+      {
+        id: 'documentation',
+        content: <DocumentationLink />,
+        showInReadOnly: true,
+      },
+      {
+        id: 'actions-menu',
+        content: <ActionsMenuButton onClick={openActionsPopover} />,
+        showInReadOnly: false,
+      },
+      {
+        id: 'keyboard-shortcuts',
+        content: <KeyboardShortcutsPopover />,
+        showInReadOnly: true,
+      },
+    ],
+    [openActionsPopover]
+  );
+
   return (
     <div css={css([styles.container, stepExecutionStyles])} ref={containerRef}>
       <GlobalWorkflowEditorStyles />
@@ -734,10 +760,7 @@ export const WorkflowYAMLEditor = ({
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
-          extraAction={
-            // Only show the shortcuts in edit mode
-            !isExecutionYaml ? <ActionsMenuButton onClick={openActionsPopover} /> : null
-          }
+          extraAction={<ExtraActionsBar actions={extraActions} isReadOnly={isExecutionYaml} />}
         />
       </div>
     </div>
