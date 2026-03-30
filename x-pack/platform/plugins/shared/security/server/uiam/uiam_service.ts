@@ -289,7 +289,7 @@ export class UiamService implements UiamServicePublic {
 
       const audience = response.credentials?.oauth?.audience;
       if (audience !== expectedAudience) {
-        throw new Error(
+        throw Boom.badRequest(
           `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`
         );
       }

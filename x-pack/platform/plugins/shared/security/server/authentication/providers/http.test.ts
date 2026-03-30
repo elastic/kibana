@@ -298,10 +298,7 @@ describe('HTTPAuthenticationProvider', () => {
       const user = mockAuthenticatedUser();
       const expectedAudience = mockOptionsWithUiam.getServerBaseURL();
 
-      mockOptionsWithUiam.uiam!.exchangeOAuthToken.mockResolvedValue({
-        ephemeralToken: 'essu_ephemeral_token',
-        audience: expectedAudience,
-      });
+      mockOptionsWithUiam.uiam!.exchangeOAuthToken.mockResolvedValue('essu_ephemeral_token');
 
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: header },
@@ -314,7 +311,6 @@ describe('HTTPAuthenticationProvider', () => {
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
         supportedSchemes: new Set(['bearer']),
-
       });
 
       await expect(provider.authenticate(request)).resolves.toEqual(
@@ -343,40 +339,6 @@ describe('HTTPAuthenticationProvider', () => {
       });
     });
 
-    it('fails authentication when audience does not match.', async () => {
-      const header = 'Bearer essu_oauth_access_token';
-      const expectedAudience = mockOptionsWithUiam.getServerBaseURL();
-
-      mockOptionsWithUiam.uiam!.exchangeOAuthToken.mockResolvedValue({
-        ephemeralToken: 'essu_ephemeral_token',
-        audience: 'https://wrong-kibana.example.com',
-      });
-
-      const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: header },
-        routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
-      });
-
-      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
-        supportedSchemes: new Set(['bearer']),
-
-      });
-
-      const result = await provider.authenticate(request);
-
-      expect(result.failed()).toBe(true);
-      expect(result.error?.message).toContain(
-        'OAuth access token audience does not match Kibana audience.'
-      );
-
-      expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).toHaveBeenCalledWith(
-        'essu_oauth_access_token',
-        expectedAudience
-      );
-
-      expect(mockOptionsWithUiam.client.asScoped).not.toHaveBeenCalled();
-    });
-
     it('fails authentication when UIAM token exchange fails.', async () => {
       const header = 'Bearer essu_oauth_access_token';
       const exchangeError = new Error('UIAM service unavailable');
@@ -390,7 +352,6 @@ describe('HTTPAuthenticationProvider', () => {
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
         supportedSchemes: new Set(['bearer']),
-
       });
 
       await expect(provider.authenticate(request)).resolves.toEqual(
@@ -412,7 +373,6 @@ describe('HTTPAuthenticationProvider', () => {
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
         supportedSchemes: new Set(['bearer']),
-
       });
 
       await expect(provider.authenticate(request)).resolves.toEqual(
@@ -439,7 +399,6 @@ describe('HTTPAuthenticationProvider', () => {
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
         supportedSchemes: new Set(['bearer']),
-
       });
 
       await provider.authenticate(request);
@@ -460,11 +419,11 @@ describe('HTTPAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
-      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptionsWithUiam.uiam = undefined;
+      const optionsWithoutUiam = mockAuthenticationProviderOptions({ name: 'http' });
+      optionsWithoutUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+      const provider = new HTTPAuthenticationProvider(optionsWithoutUiam, {
         supportedSchemes: new Set(['bearer']),
       });
 
@@ -475,7 +434,7 @@ describe('HTTPAuthenticationProvider', () => {
         )
       );
 
-      expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).not.toHaveBeenCalled();
+      expect(optionsWithoutUiam.client.asScoped).toHaveBeenCalledWith(request);
     });
 
     it('does not intercept non-essu_ Bearer tokens on tagged routes.', async () => {
@@ -493,7 +452,6 @@ describe('HTTPAuthenticationProvider', () => {
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
         supportedSchemes: new Set(['bearer']),
-
       });
 
       await expect(provider.authenticate(request)).resolves.toEqual(
