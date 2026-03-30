@@ -20,7 +20,7 @@ interface GenerateOptions {
 
 export const generateSecretsSchemaFromSpec = (
   authSpec: ConnectorSpec['auth'],
-  { isPfxEnabled, isEarsEnabled = true, authMode }: GenerateOptions = {
+  { isPfxEnabled, isEarsEnabled = false, authMode }: GenerateOptions = {
     isPfxEnabled: true,
   }
 ) => {
