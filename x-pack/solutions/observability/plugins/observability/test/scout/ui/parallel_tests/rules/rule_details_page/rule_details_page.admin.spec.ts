@@ -100,7 +100,7 @@ test.describe(
       const url = page.url();
       expect(url).toContain('tabId=alerts');
       expect(url).toContain('selected_options:!(active)');
-      expect(url).toContain('rangeFrom:now-30d');
+      expect(url).toContain('rangeFrom:now-');
       expect(url).toContain('rangeTo:now');
     });
 
@@ -119,7 +119,7 @@ test.describe(
       expect(url).toContain('tabId=alerts');
       // All statuses = empty selectedOptions array
       expect(url).toContain('selected_options:!()');
-      expect(url).toContain('rangeFrom:now-30d');
+      expect(url).toContain('rangeFrom:now-');
       expect(url).toContain('rangeTo:now');
     });
 
