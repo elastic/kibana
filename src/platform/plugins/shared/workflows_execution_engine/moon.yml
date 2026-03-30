@@ -18,8 +18,6 @@ project:
   sourceRoot: src/platform/plugins/shared/workflows_execution_engine
 dependsOn:
   - '@kbn/core'
-  - '@kbn/core-http-server-utils'
-  - '@kbn/spaces-utils'
   - '@kbn/config-schema'
   - '@kbn/actions-plugin'
   - '@kbn/workflows'
