@@ -12,8 +12,9 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { createUpdateDetectionService } from './update_detection';
-import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
+import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
 import type { EntityStoreEntityIdsByType } from '../../../entities/service';
+import type { CorrelationMap } from '../../../entities/types';
 
 jest.mock('../../infra/entity_source_client');
 
@@ -39,15 +40,16 @@ type CapturedSearchRequest = SearchRequest & {
   };
 };
 
-const indexSource: MonitoringEntitySource = {
+const indexSource: WatchlistDataSources.MonitoringEntitySource = {
   id: 'index-source-1',
   type: 'index',
   name: 'test-index',
   indexPattern: 'logs-*',
+  identifierField: 'user.name',
   enabled: true,
 };
 
-const integrationSource: MonitoringEntitySource = {
+const integrationSource: WatchlistDataSources.MonitoringEntitySource = {
   id: 'integration-source-1',
   type: 'entity_analytics_integration',
   name: 'test-integration',
@@ -80,11 +82,16 @@ describe('Watchlist update detection service', () => {
     logger = loggingSystemMock.createLogger();
   });
 
-  describe('index source (plain sync)', () => {
-    it('uses buildEntitiesSearchBody without syncMarker and applies bulk upsert', async () => {
+  describe('index source (correlation-based sync)', () => {
+    it('queries source index by identifierField and correlation values, then applies bulk upsert', async () => {
       const searchCalls: CapturedSearchRequest[] = [];
       const targetIndex = '.watchlist-entities-default';
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+      const correlationMap: CorrelationMap = new Map([
+        ['jdoe', { euid: 'user:jdoe', entityType: 'user' as const }],
+      ]);
+
       esClient.search.mockImplementation((params?: SearchRequest) => {
         if (!params) {
           throw new Error('Expected search params');
@@ -95,8 +102,8 @@ describe('Watchlist update detection service', () => {
         }
         return Promise.resolve({
           aggregations: {
-            entities: {
-              buckets: [{ key: { euid: 'user:jdoe' }, doc_count: 1 }],
+            identifiers: {
+              buckets: [{ key: { identifier: 'jdoe' }, doc_count: 1 }],
               after_key: undefined,
             },
           },
@@ -112,20 +119,20 @@ describe('Watchlist update detection service', () => {
 
       await service.updateDetection(
         indexSource,
-        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
+        correlationMap
       );
 
       expect(searchCalls.length).toBeGreaterThan(0);
-      const firstSearchParams = searchCalls[0];
-      expect(firstSearchParams.aggs?.entities?.aggs).toBeUndefined();
-      expect(firstSearchParams.query?.bool?.must).toHaveLength(2);
-      expect(firstSearchParams.query?.bool?.must).toContainEqual({
-        terms: { euid: ['user:jdoe'] },
+      const sourceSearchParams = searchCalls[0];
+      expect(sourceSearchParams.index).toBe('logs-*');
+      expect(sourceSearchParams.query?.bool?.must).toContainEqual({
+        terms: { 'user.name': ['jdoe'] },
       });
       expect(esClient.bulk).toHaveBeenCalled();
     });
 
-    it('skips source searching when the allowlist is empty for all entity types', async () => {
+    it('skips sync when correlation map is empty', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
       const service = createUpdateDetectionService({
@@ -134,11 +141,36 @@ describe('Watchlist update detection service', () => {
         targetIndex: '.watchlist-entities-default',
       });
 
-      const result = await service.updateDetection(indexSource, createEntityStoreEntityIdsByType());
+      const correlationMap: CorrelationMap = new Map();
+      const result = await service.updateDetection(
+        indexSource,
+        createEntityStoreEntityIdsByType(),
+        correlationMap
+      );
 
       expect(result).toEqual([]);
       expect(esClient.search).not.toHaveBeenCalled();
       expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('logs warning and returns empty when correlationMap is not provided', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+      const service = createUpdateDetectionService({
+        esClient,
+        logger,
+        targetIndex: '.watchlist-entities-default',
+      });
+
+      const result = await service.updateDetection(
+        indexSource,
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+      );
+
+      expect(result).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('correlationMap not provided')
+      );
     });
   });
 

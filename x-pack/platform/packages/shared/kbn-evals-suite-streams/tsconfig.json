@@ -15,7 +15,6 @@
     "@kbn/streams-ai",
     "@kbn/datemath",
     "@kbn/scout",
-    "@kbn/ai-tools",
     "@kbn/streamlang",
     "@kbn/streams-schema",
     "@kbn/kibana-api-cli",

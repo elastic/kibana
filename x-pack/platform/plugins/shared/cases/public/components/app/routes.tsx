@@ -92,16 +92,25 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
 
         {isTemplatesEnabled && (
           <Route exact path={getCasesConfigureCreateTemplatePath(basePath)}>
-            <Suspense fallback={<EuiLoadingSpinner />}>
-              <CreateTemplateLazy />
-            </Suspense>
+            {permissions.manageTemplates ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <CreateTemplateLazy />
+              </Suspense>
+            ) : (
+              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+            )}
           </Route>
         )}
+
         {isTemplatesEnabled && (
           <Route exact path={getCasesConfigureEditTemplatePath(basePath)}>
-            <Suspense fallback={<EuiLoadingSpinner />}>
-              <EditTemplateLazy />
-            </Suspense>
+            {permissions.manageTemplates ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <EditTemplateLazy />
+              </Suspense>
+            ) : (
+              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+            )}
           </Route>
         )}
 
