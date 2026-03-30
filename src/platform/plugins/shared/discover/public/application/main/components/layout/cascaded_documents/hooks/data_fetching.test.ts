@@ -21,6 +21,15 @@ import { createElement, type ReactNode } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { CascadedDocumentsFetcher } from '../../../../data_fetching/cascaded_documents_fetcher';
 
+jest.mock('../telemetry', () => ({
+  useCascadedDocumentsTelemetry: () => ({
+    trackCascadeExpanded: jest.fn(),
+    trackCascadeCollapsed: jest.fn(),
+    trackCascadeOptOut: jest.fn(),
+    trackCascadeOpenInNewTab: jest.fn(),
+  }),
+}));
+
 describe('data_fetching related hooks', () => {
   beforeEach(() => {
     jest.clearAllMocks();

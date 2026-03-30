@@ -14,7 +14,6 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiTitle,
   EuiLink,
   useEuiTheme,
@@ -22,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-
+import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -317,9 +316,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 title={
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="sparkles" size="m" aria-hidden={true} />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
                       <EuiTitle size="xs">
                         <h3 data-test-subj="connectorsTitle">
                           <FormattedMessage
@@ -328,6 +324,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                           />
                         </h3>
                       </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <AiIcon iconType="sparkles" size="m" aria-hidden={true} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
