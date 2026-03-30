@@ -91,6 +91,7 @@ export class WorkflowsBaseTelemetry {
       hasDescription: metadata.hasDescription,
       tagCount: metadata.tagCount,
       constCount: metadata.constCount,
+      hasTriggerConditions: metadata.hasTriggerConditions,
       ...this.getBaseResultParams(error),
     });
   };
