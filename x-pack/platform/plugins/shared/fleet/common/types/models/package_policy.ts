@@ -32,7 +32,7 @@ export interface NewPackagePolicyInputStream {
   keep_enabled?: boolean;
   data_stream: {
     dataset: string;
-    type: string;
+    type?: string;
     elasticsearch?: {
       // TODO: these don't really need to be defined in the package policy schema and could be pulled directly from
       // the package where needed.
