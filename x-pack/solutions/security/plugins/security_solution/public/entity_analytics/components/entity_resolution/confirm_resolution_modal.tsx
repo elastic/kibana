@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CONFIRM_MODAL_TITLE, CONFIRM_MODAL_CANCEL, CONFIRM_MODAL_CONFIRM } from './translations';
 import { CONFIRM_RESOLUTION_MODAL_TEST_ID } from './test_ids';
-import { getEntityName, getEntityId } from './helpers';
+import { getEntityId } from './helpers';
 
 interface ConfirmResolutionModalProps {
   currentEntity: Record<string, unknown>;
@@ -38,9 +38,6 @@ export const ConfirmResolutionModal: React.FC<ConfirmResolutionModalProps> = ({
   onCancel,
   isLoading,
 }) => {
-  const currentName = getEntityName(currentEntity);
-  const newName = getEntityName(newEntity);
-
   const currentId = getEntityId(currentEntity);
   const newId = getEntityId(newEntity);
 
