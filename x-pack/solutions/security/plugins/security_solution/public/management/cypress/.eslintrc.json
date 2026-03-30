@@ -9,5 +9,13 @@
   "rules": {
     "cypress/no-force": "warn",
     "import/no-extraneous-dependencies": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["scripts/**/*.js"],
+      "rules": {
+        "import/no-nodejs-modules": "off"
+      }
+    }
+  ]
 }

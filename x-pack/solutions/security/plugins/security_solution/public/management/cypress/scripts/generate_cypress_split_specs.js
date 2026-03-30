@@ -99,7 +99,7 @@ const SPLIT_CONFIGS = [
         '    env: {',
         '      ftrConfig: {',
         '        kbnServerArgs: [',
-        "          `--xpack.securitySolution.enableExperimental=${JSON.stringify([",
+        '          `--xpack.securitySolution.enableExperimental=${JSON.stringify([',
         "            'endpointExceptionsMovedUnderManagement',",
         '          ])}`,',
         '        ],',
@@ -174,17 +174,16 @@ for (const config of SPLIT_CONFIGS) {
         }
         totalDeleted++;
       }
-      continue;
-    }
-
-    if (DRY_RUN) {
-      console.log(`[dry-run] Would generate: ${relativePath}`);
     } else {
-      fs.mkdirSync(outputDir, { recursive: true });
-      fs.writeFileSync(filePath, spec.content, 'utf8');
-      console.log(`Generated: ${relativePath}`);
+      if (DRY_RUN) {
+        console.log(`[dry-run] Would generate: ${relativePath}`);
+      } else {
+        fs.mkdirSync(outputDir, { recursive: true });
+        fs.writeFileSync(filePath, spec.content, 'utf8');
+        console.log(`Generated: ${relativePath}`);
+      }
+      totalGenerated++;
     }
-    totalGenerated++;
   }
 }
 
