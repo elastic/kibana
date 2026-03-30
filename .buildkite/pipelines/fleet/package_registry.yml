@@ -114,7 +114,7 @@ steps:
       diskSizeGb: 120
       preemptible: true
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 4
     depends_on: build
     retry:
       automatic:
@@ -131,7 +131,7 @@ steps:
       diskSizeGb: 120
       preemptible: true
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 4
     depends_on: build
     retry:
       automatic:
