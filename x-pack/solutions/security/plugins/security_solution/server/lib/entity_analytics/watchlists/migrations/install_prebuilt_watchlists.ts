@@ -8,8 +8,12 @@
 import { asyncForEach } from '@kbn/std';
 import { first } from 'lodash/fp';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
-import { riskEngineConfigurationTypeName } from '../../risk_engine/saved_object';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
+
+// V2 entity store (the @kbn/entity-store plugin) uses 'entity-engine-descriptor-v2' for engine
+// descriptors, distinct from V1's 'entity-engine-status'. The constant isn't exported publicly
+// from @kbn/entity-store so we reference the literal here.
+const ENTITY_ENGINE_DESCRIPTOR_V2_TYPE = 'entity-engine-descriptor-v2';
 import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
 import { PRIVILEGED_USER_WATCHLIST_ID } from '../../../../../common/entity_analytics/watchlists/constants';
 import { WatchlistConfigClient } from '../management/watchlist_config';
@@ -35,13 +39,13 @@ export const installPrebuiltWatchlists = async ({
   const soClientInternal = coreStart.savedObjects.createInternalRepository();
 
   const savedObjectsResponse = await soClientInternal.find({
-    type: riskEngineConfigurationTypeName,
+    type: ENTITY_ENGINE_DESCRIPTOR_V2_TYPE,
     perPage: 100,
     namespaces: ['*'],
   });
 
   if (savedObjectsResponse.total === 0) {
-    logger.debug('No risk engine configurations found. Skipping prebuilt watchlist installation.');
+    logger.debug('No entity engine descriptors found. Skipping prebuilt watchlist installation.');
     return;
   }
 
@@ -52,7 +56,7 @@ export const installPrebuiltWatchlists = async ({
 
     if (!namespace) {
       logger.error(
-        'Unexpected saved object. Risk engine configuration saved objects must have a namespace'
+        'Unexpected saved object. Entity engine descriptor saved objects must have a namespace'
       );
       return;
     }

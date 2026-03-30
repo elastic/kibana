@@ -36,7 +36,7 @@ const buildSavedObjectResponse = (namespaces: string[] = ['default']) => ({
     namespaces: [namespace],
     attributes: {},
     id: 'id',
-    type: 'type',
+    type: 'entity-engine-descriptor-v2',
     references: [],
     score: 1,
   })),
@@ -80,13 +80,13 @@ describe('installPrebuiltWatchlists', () => {
     ]);
   });
 
-  it('should skip installation when no risk engine configurations exist', async () => {
+  it('should skip installation when no entity engine descriptors exist', async () => {
     mockSoClient.find.mockResolvedValue(buildEmptyResponse());
 
     await callInstall();
 
     expect(mockLogger.debug).toHaveBeenCalledWith(
-      'No risk engine configurations found. Skipping prebuilt watchlist installation.'
+      'No entity engine descriptors found. Skipping prebuilt watchlist installation.'
     );
     expect(mockWatchlistGet).not.toHaveBeenCalled();
     expect(mockWatchlistCreate).not.toHaveBeenCalled();
@@ -153,7 +153,7 @@ describe('installPrebuiltWatchlists', () => {
     await callInstall();
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      'Unexpected saved object. Risk engine configuration saved objects must have a namespace'
+      'Unexpected saved object. Entity engine descriptor saved objects must have a namespace'
     );
     expect(mockWatchlistGet).not.toHaveBeenCalled();
   });
