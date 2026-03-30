@@ -9,8 +9,8 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import { getRawData } from '../../../../assistant/helpers';
+import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
+import { getRawData } from '../../../assistant/helpers';
 import {
   ALERT_SUMMARY_CONTEXT_DESCRIPTION,
   ALERT_SUMMARY_CONVERSATION_ID,
@@ -18,11 +18,11 @@ import {
   EVENT_SUMMARY_CONTEXT_DESCRIPTION,
   EVENT_SUMMARY_CONVERSATION_ID,
   EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
-} from '../../../../common/components/event_details/translations';
+} from '../../../common/components/event_details/translations';
 import {
   PROMPT_CONTEXT_ALERT_CATEGORY,
   PROMPT_CONTEXT_EVENT_CATEGORY,
-} from '../../../../assistant/content/prompt_contexts';
+} from '../../../assistant/content/prompt_contexts';
 
 const SUMMARY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.summaryView', {
   defaultMessage: 'summary',

@@ -24,6 +24,9 @@ jest.mock('../../../common/components/discover_in_timeline/provider', () => ({
     <>{children}</>
   ),
 }));
+jest.mock('../../../assistant/provider', () => ({
+  AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 
 const services = {
   uiActions: {
