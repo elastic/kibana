@@ -17,19 +17,21 @@ export const useCascadedDocumentsTelemetry = () => {
   const tabId = useCurrentTabSelector((tab) => tab.id);
 
   const trackCascadeExpanded = useCallback(
-    () =>
+    (nodeId: string) =>
       scopedEBTManager.trackCascadeEvent({
         [CascadeEventDataKeys.CASCADE_EVENT_NAME]: CascadeEventName.EXPANDED,
         [CascadeEventDataKeys.TAB_ID]: tabId,
+        [CascadeEventDataKeys.NODE_ID]: nodeId,
       }),
     [scopedEBTManager, tabId]
   );
 
   const trackCascadeCollapsed = useCallback(
-    () =>
+    (nodeId: string) =>
       scopedEBTManager.trackCascadeEvent({
         [CascadeEventDataKeys.CASCADE_EVENT_NAME]: CascadeEventName.COLLAPSED,
         [CascadeEventDataKeys.TAB_ID]: tabId,
+        [CascadeEventDataKeys.NODE_ID]: nodeId,
       }),
     [scopedEBTManager, tabId]
   );

@@ -419,10 +419,7 @@ export class ScopedDiscoverEBTManager {
     this.reportEvent(TABS_EVENT_TYPE, eventData);
   }
 
-  public trackCascadeEvent({
-    [CascadeEventDataKeys.CASCADE_EVENT_NAME]: eventName,
-    ...payload
-  }: CascadeEBTEvent) {
+  public trackCascadeEvent({ eventName, ...payload }: CascadeEBTEvent) {
     if (!this.reportEvent) {
       return;
     }

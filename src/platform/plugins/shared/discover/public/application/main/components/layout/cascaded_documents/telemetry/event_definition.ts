@@ -19,13 +19,15 @@ export enum CascadeEventName {
 }
 
 export enum CascadeEventDataKeys {
-  CASCADE_EVENT_NAME = 'cascade_event_name',
-  TAB_ID = 'tab_id',
+  CASCADE_EVENT_NAME = 'eventName',
+  TAB_ID = 'tabId',
+  NODE_ID = 'nodeId',
 }
 
 export interface CascadeEBTEvent {
   [CascadeEventDataKeys.CASCADE_EVENT_NAME]: CascadeEventName;
   [CascadeEventDataKeys.TAB_ID]: string;
+  [CascadeEventDataKeys.NODE_ID]?: string;
 }
 
 export const cascadeEventType: EventTypeOpts<Record<string, unknown>> = {
@@ -43,6 +45,13 @@ export const cascadeEventType: EventTypeOpts<Record<string, unknown>> = {
       _meta: {
         description: 'The ID of the tab where the cascade interaction occurred',
         optional: false,
+      },
+    },
+    [CascadeEventDataKeys.NODE_ID]: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the node that was expanded',
+        optional: true,
       },
     },
   },

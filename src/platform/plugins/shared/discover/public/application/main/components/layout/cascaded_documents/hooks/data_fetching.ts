@@ -193,7 +193,7 @@ export function useDataCascadeRowExpansionHandlers({
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>
     >['onCascadeLeafNodeExpanded']
   >(({ row, nodePath, nodePathMap }) => {
-    trackCascadeExpanded();
+    trackCascadeExpanded(row.id);
 
     return cascadedDocumentsFetcher.fetchCascadedDocuments({
       nodeId: row.id,
@@ -215,7 +215,7 @@ export function useDataCascadeRowExpansionHandlers({
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['onCascadeLeafNodeCollapsed']
     >
   >(({ row }) => {
-    trackCascadeCollapsed();
+    trackCascadeCollapsed(row.id);
 
     cascadedDocumentsFetcher.cancelFetch(row.id);
   });
