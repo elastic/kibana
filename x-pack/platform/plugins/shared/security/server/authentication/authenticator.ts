@@ -698,7 +698,6 @@ export class Authenticator {
       new HTTPAuthenticationProvider(options, {
         supportedSchemes,
         jwt: this.options.config.authc.http.jwt,
-        acceptUiamOAuth: this.options.config.uiam?.enabled,
       })
     );
   }

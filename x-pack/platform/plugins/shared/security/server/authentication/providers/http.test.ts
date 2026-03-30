@@ -314,7 +314,7 @@ describe('HTTPAuthenticationProvider', () => {
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
         supportedSchemes: new Set(['bearer']),
-        acceptUiamOAuth: true,
+
       });
 
       await expect(provider.authenticate(request)).resolves.toEqual(
@@ -359,7 +359,7 @@ describe('HTTPAuthenticationProvider', () => {
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
         supportedSchemes: new Set(['bearer']),
-        acceptUiamOAuth: true,
+
       });
 
       const result = await provider.authenticate(request);
@@ -390,7 +390,7 @@ describe('HTTPAuthenticationProvider', () => {
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
         supportedSchemes: new Set(['bearer']),
-        acceptUiamOAuth: true,
+
       });
 
       await expect(provider.authenticate(request)).resolves.toEqual(
@@ -412,7 +412,7 @@ describe('HTTPAuthenticationProvider', () => {
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
         supportedSchemes: new Set(['bearer']),
-        acceptUiamOAuth: true,
+
       });
 
       await expect(provider.authenticate(request)).resolves.toEqual(
@@ -439,7 +439,7 @@ describe('HTTPAuthenticationProvider', () => {
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
         supportedSchemes: new Set(['bearer']),
-        acceptUiamOAuth: true,
+
       });
 
       await provider.authenticate(request);
@@ -449,7 +449,7 @@ describe('HTTPAuthenticationProvider', () => {
       );
     });
 
-    it('does not intercept essu_ tokens when acceptUiamOAuth is not enabled.', async () => {
+    it('does not intercept essu_ tokens when UIAM is not enabled.', async () => {
       const header = 'Bearer essu_some_token';
       const user = mockAuthenticatedUser();
 
@@ -461,6 +461,8 @@ describe('HTTPAuthenticationProvider', () => {
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      mockOptionsWithUiam.uiam = undefined;
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
         supportedSchemes: new Set(['bearer']),
@@ -491,7 +493,7 @@ describe('HTTPAuthenticationProvider', () => {
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
         supportedSchemes: new Set(['bearer']),
-        acceptUiamOAuth: true,
+
       });
 
       await expect(provider.authenticate(request)).resolves.toEqual(

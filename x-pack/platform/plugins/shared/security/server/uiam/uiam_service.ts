@@ -133,15 +133,13 @@ export interface UiamServicePublic {
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
-   * Exchanges an OAuth access token for an ephemeral UIAM token.
+   * Exchanges an OAuth access token for an ephemeral UIAM token. Validates that the audience
+   * returned by UIAM matches the expected audience and throws if there is a mismatch.
    * @param accessToken The OAuth access token.
    * @param expectedAudience The audience value Kibana expects.
-   * @returns The ephemeral token and the audience returned by UIAM.
+   * @returns The ephemeral token.
    */
-  exchangeOAuthToken(
-    accessToken: string,
-    expectedAudience: string
-  ): Promise<{ ephemeralToken: string; audience: string }>;
+  exchangeOAuthToken(accessToken: string, expectedAudience: string): Promise<string>;
 
   /**
    * Revokes a UIAM API key by its ID.
@@ -268,17 +266,14 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.exchangeOAuthToken}.
    */
-  async exchangeOAuthToken(
-    accessToken: string,
-    expectedAudience: string
-  ): Promise<{ ephemeralToken: string; audience: string }> {
+  async exchangeOAuthToken(accessToken: string, expectedAudience: string): Promise<string> {
     this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
 
-    try {
-      const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
-      url.searchParams.set('include_token', 'true');
-      url.searchParams.set('audience', expectedAudience);
+    const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
+    url.searchParams.set('include_token', 'true');
+    url.searchParams.set('audience', expectedAudience);
 
+    try {
       const response = await UiamService.#parseUiamResponse(
         await fetch(url.toString(), {
           method: 'POST',
@@ -292,10 +287,14 @@ export class UiamService implements UiamServicePublic {
         })
       );
 
-      return {
-        ephemeralToken: response.token,
-        audience: response.credentials.oauth.audience,
-      };
+      const audience = response.credentials?.oauth?.audience;
+      if (audience !== expectedAudience) {
+        throw new Error(
+          `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`
+        );
+      }
+
+      return response.token;
     } catch (err) {
       this.#logger.error(
         () => `Failed to exchange OAuth access token: ${getDetailedErrorMessage(err)}`

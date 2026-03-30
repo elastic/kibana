@@ -101,6 +101,40 @@ apiTest.describe(
     });
 
     apiTest(
+      'should reject OAuth token with wrong audience on MCP endpoint',
+      async ({ apiClient, config: { organizationId, projectType } }) => {
+        const wrongAudienceToken = await createUiamOAuthAccessToken({
+          username: '1234567890',
+          organizationId: organizationId!,
+          projectType: projectType!,
+          roles: ['admin'],
+          email: 'elastic_admin@elastic.co',
+          audience: 'https://wrong-kibana.example.com',
+        });
+
+        const response = await apiClient.post(MCP_ENDPOINT, {
+          headers: {
+            ...COMMON_HEADERS,
+            Authorization: `Bearer ${wrongAudienceToken}`,
+          },
+          responseType: 'json',
+          body: {
+            jsonrpc: '2.0',
+            method: 'initialize',
+            params: {
+              protocolVersion: '2024-11-05',
+              capabilities: {},
+              clientInfo: { name: 'test-client', version: '1.0.0' },
+            },
+            id: 1,
+          },
+        });
+
+        expect(response.statusCode).toBe(401);
+      }
+    );
+
+    apiTest(
       'should reject a non-essu_ Bearer token on MCP endpoint (falls through to ES)',
       async ({ apiClient }) => {
         // A regular Bearer token (not prefixed with `essu_`) on a tagged route should

@@ -26,8 +26,6 @@ interface HTTPAuthenticationProviderOptions {
     // When set, only routes marked with `ROUTE_TAG_ACCEPT_JWT` tag will accept JWT as a means of authentication.
     taggedRoutesOnly: boolean;
   };
-  // When set, only routes marked  with `ROUTE_TAG_ACCEPT_UIAM_OAUTH` tag will accept UIAM OAuth access tokens.
-  acceptUiamOAuth?: boolean;
 }
 
 /**
@@ -50,11 +48,6 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private readonly jwt: HTTPAuthenticationProviderOptions['jwt'];
 
-  /**
-   * Indicates whether the HTTP authentication provider will accept UIAM OAuth access tokens for authentication.
-   */
-  private readonly acceptUiamOAuth: boolean;
-
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
     httpOptions: Readonly<HTTPAuthenticationProviderOptions>
@@ -68,7 +61,6 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       [...httpOptions.supportedSchemes].map((scheme) => scheme.toLowerCase())
     );
     this.jwt = httpOptions.jwt;
-    this.acceptUiamOAuth = httpOptions.acceptUiamOAuth ?? false;
   }
 
   /**
@@ -100,7 +92,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     if (
-      this.acceptUiamOAuth &&
+      this.options.uiam &&
       authorizationHeader.scheme.toLowerCase() === 'bearer' &&
       isUiamCredential(authorizationHeader)
     ) {
@@ -180,34 +172,13 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     request: KibanaRequest,
     authorizationHeader: HTTPAuthorizationHeader
   ): Promise<AuthenticationResult> {
-    if (!this.options.uiam) {
-      this.logger.error(
-        'UIAM OAuth authentication is enabled but the UIAM service is not available.'
-      );
-      return AuthenticationResult.failed(
-        new Error('UIAM service is not available for OAuth token exchange.')
-      );
-    }
-
-    const expectedAudience = this.options.getServerBaseURL();
-
     try {
-      const { ephemeralToken, audience } = await this.options.uiam.exchangeOAuthToken(
+      const ephemeralToken = await this.options.uiam!.exchangeOAuthToken(
         authorizationHeader.credentials,
-        expectedAudience
+        this.options.getServerBaseURL()
       );
 
-      if (audience !== expectedAudience) {
-        this.logger.error(
-          `OAuth token audience mismatch. Expected "${expectedAudience}", ` +
-            `but UIAM returned "${audience}". Rejecting authentication.`
-        );
-        return AuthenticationResult.failed(
-          new Error('OAuth access token audience does not match Kibana audience.')
-        );
-      }
-
-      const authHeaders = this.options.uiam.getAuthenticationHeaders(ephemeralToken);
+      const authHeaders = this.options.uiam!.getAuthenticationHeaders(ephemeralToken);
 
       const user = await this.getUser(request, authHeaders);
 

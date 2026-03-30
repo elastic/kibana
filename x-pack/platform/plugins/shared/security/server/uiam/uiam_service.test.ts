@@ -376,10 +376,7 @@ describe('UiamService', () => {
           'essu_oauth_access_token',
           'https://my-project.kb.us-east-1.cloud.es.io'
         )
-      ).resolves.toEqual({
-        ephemeralToken: 'essu_ephemeral_token_value',
-        audience: 'https://my-project.kb.us-east-1.cloud.es.io',
-      });
+      ).resolves.toBe('essu_ephemeral_token_value');
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
@@ -394,6 +391,25 @@ describe('UiamService', () => {
           dispatcher: AGENT_MOCK,
         }
       );
+    });
+
+    it('throws when audience in response does not match expected audience', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          token: 'essu_ephemeral_token_value',
+          credentials: {
+            oauth: { audience: 'https://wrong-kibana.example.com' },
+          },
+        }),
+      });
+
+      await expect(
+        uiamService.exchangeOAuthToken(
+          'essu_oauth_access_token',
+          'https://my-project.kb.us-east-1.cloud.es.io'
+        )
+      ).rejects.toThrow('OAuth token audience mismatch');
     });
 
     it('throws and logs error when UIAM service returns an error', async () => {
