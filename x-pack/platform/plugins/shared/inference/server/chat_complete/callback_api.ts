@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatCompleteOptions, AnonymizationRule, Model } from '@kbn/inference-common';
 import {
@@ -22,6 +21,7 @@ import { defer, forkJoin, from, identity, share, switchMap, catchError, throwErr
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
+import type { ActionsClientProvider } from '../types';
 import type {
   InferenceAdapterChatCompleteOptions,
   InferenceConnectorAdapterChatCompleteEvent,
@@ -50,7 +50,7 @@ import { prepareAnonymization } from './prepare_anonymization';
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
   namespace: string;
-  actions: ActionsPluginStart;
+  actions: ActionsClientProvider;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
@@ -280,7 +280,7 @@ function resolveAndCreatePipeline({
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
   request: KibanaRequest;
-  actions: ActionsPluginStart;
+  actions: ActionsClientProvider;
   esClient: ElasticsearchClient;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
