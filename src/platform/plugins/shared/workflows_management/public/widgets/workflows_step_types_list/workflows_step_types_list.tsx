@@ -117,7 +117,7 @@ export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) =
             <PopoverItems
               items={uniqueStepTypes}
               popoverTitle={i18n.translate('workflows.stepTypesList.title', {
-                defaultMessage: 'Integrations',
+                defaultMessage: 'Step types',
               })}
               popoverButtonTitle={
                 displayCount === 0
