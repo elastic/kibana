@@ -37,16 +37,25 @@ import {
   WATCHLIST_INDEX_PATTERN_PLACEHOLDER,
 } from './translations';
 
-const RULE_TOGGLE_BUTTONS = [
-  {
-    id: 'entityStore',
-    label: 'Entity Store',
-  },
-  {
-    id: 'indexPattern',
-    label: 'IndexPattern',
-  },
-];
+const getRuleToggleButtons = (
+  initialEntitySource?: RuleBasedSourceInputProps['initialEntitySource']
+) => {
+  const isEditMode = Boolean(initialEntitySource);
+  const lockedType = initialEntitySource?.type === 'index' ? 'indexPattern' : 'entityStore';
+
+  return [
+    {
+      id: 'entityStore',
+      label: 'Entity Store',
+      isDisabled: isEditMode && lockedType !== 'entityStore',
+    },
+    {
+      id: 'indexPattern',
+      label: 'IndexPattern',
+      isDisabled: isEditMode && lockedType !== 'indexPattern',
+    },
+  ];
+};
 
 /**
  * Real ES field names that can be used as the identifier field for index-type sources.
@@ -327,13 +336,17 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
   );
 
   const isEntityStore = ruleFilter === 'entityStore';
+  const ruleToggleButtons = useMemo(
+    () => getRuleToggleButtons(initialEntitySource),
+    [initialEntitySource]
+  );
 
   return (
     <>
       <EuiFormRow>
         <EuiButtonGroup
           legend="Rule based data source type"
-          options={RULE_TOGGLE_BUTTONS}
+          options={ruleToggleButtons}
           idSelected={ruleFilter}
           onChange={onRuleButtonChange}
         />
