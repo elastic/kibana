@@ -9,6 +9,10 @@
 
 import { escape } from 'lodash';
 
+// TODO: Remove these duplicated utils when we have a proper way to access the highlight tags
+// or when we have a proper HTML field formatters
+// Related issue for field formatters: https://github.com/elastic/kibana/issues/259286
+
 // Duplicated from @kbn/field-formats-plugin because packages cannot depend on plugins.
 const HTML_HIGHLIGHT_PRE_TAG = '<mark class="ffSearch__highlight">';
 const HTML_HIGHLIGHT_POST_TAG = '</mark>';
