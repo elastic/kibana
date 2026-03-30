@@ -63,11 +63,16 @@ test.describe(
     });
 
     test('should show an error when the alert does not exist', async ({ page, pageObjects }) => {
-      await pageObjects.alertPage.goto('non-existent-alert-id');
-      await expect(page.testSubj.locator('alertDetailsError')).toBeVisible({ timeout: 30_000 });
+      await expect(async () => {
+        await pageObjects.alertPage.goto('non-existent-alert-id');
+        await expect(page.testSubj.locator('alertDetailsError')).toBeVisible();
+      }).toPass({ timeout: 60_000, intervals: [2_000] });
     });
 
-    test('should show a tabbed view', async ({ page, pageObjects }) => {
+    // The tests below require an active alert from the rule created in beforeAll.
+    // They are skipped because there is no metric data in CI to trigger the rule.
+    // See https://github.com/elastic/kibana/issues/250046
+    test.skip('should show a tabbed view', async ({ page, pageObjects }) => {
       await expect(async () => {
         await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
         await expect(page.testSubj.locator('overviewTab')).toBeVisible();
@@ -78,21 +83,21 @@ test.describe(
       }).toPass({ timeout: 60_000, intervals: [2_000] });
     });
 
-    test('should show a Threshold Alert Overview section', async ({ page, pageObjects }) => {
+    test.skip('should show a Threshold Alert Overview section', async ({ page, pageObjects }) => {
       await expect(async () => {
         await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
         await expect(page.testSubj.locator('thresholdAlertOverviewSection')).toBeVisible();
       }).toPass({ timeout: 60_000, intervals: [2_000] });
     });
 
-    test('should show an Alerts History section', async ({ page, pageObjects }) => {
+    test.skip('should show an Alerts History section', async ({ page, pageObjects }) => {
       await expect(async () => {
         await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
         await expect(page.testSubj.locator('AlertDetails')).toBeVisible();
       }).toPass({ timeout: 60_000, intervals: [2_000] });
     });
 
-    test('should show Metadata tab panel when Metadata tab is clicked', async ({
+    test.skip('should show Metadata tab panel when Metadata tab is clicked', async ({
       page,
       pageObjects,
     }) => {
@@ -103,7 +108,7 @@ test.describe(
       }).toPass({ timeout: 60_000, intervals: [2_000] });
     });
 
-    test('should show an empty prompt in the Investigation Guide tab when no guide is set', async ({
+    test.skip('should show an empty prompt in the Investigation Guide tab when no guide is set', async ({
       page,
       pageObjects,
     }) => {
@@ -114,7 +119,7 @@ test.describe(
       }).toPass({ timeout: 60_000, intervals: [2_000] });
     });
 
-    test('should show a Related Alerts table when Related Alerts tab is clicked', async ({
+    test.skip('should show a Related Alerts table when Related Alerts tab is clicked', async ({
       page,
       pageObjects,
     }) => {
@@ -125,7 +130,7 @@ test.describe(
       }).toPass({ timeout: 60_000, intervals: [2_000] });
     });
 
-    test('should show a Related Dashboard component when Related Dashboards tab is clicked', async ({
+    test.skip('should show a Related Dashboard component when Related Dashboards tab is clicked', async ({
       page,
       pageObjects,
     }) => {
