@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/validate-next-docs-cli'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/validate-next-docs-cli'
+  title: '@kbn/validate-next-docs-cli'
   description: Moon project for @kbn/validate-next-docs-cli
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: packages/kbn-validate-next-docs-cli
+  sourceRoot: packages/kbn-validate-next-docs-cli
 dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/tooling-log'
@@ -35,14 +34,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

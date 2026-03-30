@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/inspect-component-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/inspect-component-plugin'
+  title: '@kbn/inspect-component-plugin'
   description: Moon project for @kbn/inspect-component-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/plugins/private/inspect_component
+  sourceRoot: src/platform/plugins/private/inspect_component
 dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/core'
@@ -41,14 +40,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

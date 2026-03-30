@@ -9,7 +9,7 @@
 
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import Url from 'url';
-import { systemIndicesSuperuser } from '../kbn';
+import { SYSTEM_INDICES_SUPERUSER } from '@kbn/es';
 
 class EsTestConfig {
   getVersion() {
@@ -56,8 +56,8 @@ class EsTestConfig {
       };
     }
 
-    const username = process.env.TEST_ES_USERNAME || systemIndicesSuperuser.username;
-    const password = process.env.TEST_ES_PASSWORD || systemIndicesSuperuser.password;
+    const username = process.env.TEST_ES_USERNAME || SYSTEM_INDICES_SUPERUSER;
+    const password = process.env.TEST_ES_PASSWORD || process.env.TEST_ES_PASS || 'changeme';
 
     const port = process.env.TEST_ES_PORT ? parseInt(process.env.TEST_ES_PORT, 10) : 9220;
 
@@ -69,7 +69,7 @@ class EsTestConfig {
 
     return {
       // Allow setting any individual component(s) of the URL,
-      // or use default values (username and password from ../kbn/users.js)
+      // or use default values (aligned with @kbn/test systemIndicesSuperuser defaults)
       protocol: process.env.TEST_ES_PROTOCOL || 'http',
       hostname: process.env.TEST_ES_HOSTNAME || 'localhost',
       port,

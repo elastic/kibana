@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   Form,
@@ -95,6 +96,7 @@ const mockResendRequest = jest.fn();
 const MockInferenceFlyoutWrapper = ({
   onFlyoutClose,
   onSubmitSuccess,
+  allowedTaskTypes,
 }: {
   onFlyoutClose: () => void;
   onSubmitSuccess: (id: string) => void;
@@ -102,6 +104,7 @@ const MockInferenceFlyoutWrapper = ({
   toasts?: unknown;
   isEdit?: boolean;
   enforceAdaptiveAllocations?: boolean;
+  allowedTaskTypes?: InferenceTaskType[];
 }) => (
   <div data-test-subj="inference-flyout-wrapper">
     <button data-test-subj="mock-flyout-close" onClick={onFlyoutClose}>
@@ -110,6 +113,9 @@ const MockInferenceFlyoutWrapper = ({
     <button data-test-subj="mock-flyout-submit" onClick={() => onSubmitSuccess('new-endpoint-id')}>
       Submit
     </button>
+    {allowedTaskTypes && (
+      <div data-test-subj="mock-allowed-task-types">{allowedTaskTypes.join(',')}</div>
+    )}
   </div>
 );
 
@@ -359,6 +365,20 @@ describe('SelectInferenceId', () => {
       await actClick(await screen.findByTestId('createInferenceEndpointButton'));
 
       expect(await screen.findByTestId('inference-flyout-wrapper')).toBeInTheDocument();
+    });
+
+    it('SHOULD pass allowedTaskTypes to restrict endpoint creation to compatible types', async () => {
+      render(
+        <TestFormWrapper>
+          <SelectInferenceId {...defaultProps} />
+        </TestFormWrapper>
+      );
+
+      await actClick(await screen.findByTestId('inferenceIdButton'));
+      await actClick(await screen.findByTestId('createInferenceEndpointButton'));
+
+      const allowedTaskTypes = await screen.findByTestId('mock-allowed-task-types');
+      expect(allowedTaskTypes).toHaveTextContent('text_embedding,sparse_embedding');
     });
 
     describe('AND flyout close is triggered', () => {

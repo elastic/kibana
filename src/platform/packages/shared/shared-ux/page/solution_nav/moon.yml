@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/shared-ux-page-solution-nav'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/shared-ux-page-solution-nav'
+  title: '@kbn/shared-ux-page-solution-nav'
   description: Moon project for @kbn/shared-ux-page-solution-nav
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/shared-ux/page/solution_nav
+  sourceRoot: src/platform/packages/shared/shared-ux/page/solution_nav
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
@@ -35,14 +34,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

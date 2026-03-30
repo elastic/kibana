@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ml-nested-property'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ml-nested-property'
+  title: '@kbn/ml-nested-property'
   description: Moon project for @kbn/ml-nested-property
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/packages/private/ml/nested_property
+  sourceRoot: x-pack/platform/packages/private/ml/nested_property
 tags:
   - shared-common
   - package
@@ -31,14 +30,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
