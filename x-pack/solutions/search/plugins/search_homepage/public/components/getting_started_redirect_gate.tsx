@@ -18,35 +18,35 @@ interface Props {
 }
 
 export const GettingStartedRedirectGate = ({ coreStart, children }: Props) => {
-  // check docs count
-  const { data: storageStats, isLoading, isError } = useStats();
   const { cloud, isServerless } = useKibana().services;
+  const { data: storageStats, isLoading, isError } = useStats();
+
   const hasRedirected = useRef(false);
   const { isTrial } = useGetLicenseInfo();
 
-  const gettingStartedSessionStorage = sessionStorage.getItem(GETTING_STARTED_SESSIONSTORAGE_KEY);
-  const hasNotVisitedGettingStarted =
-    !gettingStartedSessionStorage || gettingStartedSessionStorage === 'false'; // visit if null or value is false
-  console.log(cloud, cloud?.isInTrial(), 'isTrial', isTrial);
+  const visitedGettingStartedPage = sessionStorage.getItem(GETTING_STARTED_SESSIONSTORAGE_KEY);
+  const shouldVisitGettingStartedPage =
+    !visitedGettingStartedPage || visitedGettingStartedPage === 'false'; // visit if null or value is false
+
   const shouldRedirect =
     storageStats !== undefined &&
-    ((isServerless ? cloud?.isInTrial() : isTrial) || storageStats.documents === 0);
+    ((isServerless ? cloud?.isInTrial() : isTrial) || storageStats.shouldDefaultGettingStartedPage);
 
   useEffect(() => {
-    if (shouldRedirect && hasNotVisitedGettingStarted && !hasRedirected.current) {
+    if (shouldRedirect && shouldVisitGettingStartedPage && !hasRedirected.current) {
       hasRedirected.current = true;
       coreStart.application.navigateToApp('searchGettingStarted');
     }
-  }, [coreStart, hasNotVisitedGettingStarted, cloud, isServerless, shouldRedirect]);
+  }, [coreStart, shouldVisitGettingStartedPage, cloud, isServerless, shouldRedirect]);
 
   // While stats are loading, suppress children to avoid mounting the homepage
   // only to immediately unmount it if a redirect is needed. If the stats call
   // fails, fall through and render children (fail open).
-  if (isLoading && hasNotVisitedGettingStarted && !isError) {
+  if (isLoading && shouldVisitGettingStartedPage && !isError) {
     return null;
   }
 
-  if (shouldRedirect && hasNotVisitedGettingStarted) {
+  if (shouldRedirect && shouldVisitGettingStartedPage) {
     // Don't render children if we're going to redirect immediately.
     // This prevents mounting the homepage (with its console) only to unmount it milliseconds later.
     return null;
