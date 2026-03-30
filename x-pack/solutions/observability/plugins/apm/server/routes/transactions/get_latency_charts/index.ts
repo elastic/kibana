@@ -17,6 +17,7 @@ import type { LatencyAggregationType } from '../../../../common/latency_aggregat
 import type { RollupInterval } from '../../../../common/rollup';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { nullifyLeadingTrailingEmptyRedMetricPoints } from '../../../../common/utils/red_metric_value_for_histogram_bucket';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import type { Coordinate } from '../../../../typings/timeseries';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -170,15 +171,19 @@ export async function getLatencyTimeseries({
 
   return {
     overallAvgDuration: response.aggregations.overall_avg_duration.value || null,
-    latencyTimeseries: response.aggregations.latencyTimeseries.buckets.map((bucket) => {
-      return {
-        x: bucket.key,
-        y: getLatencyValue({
+    latencyTimeseries: nullifyLeadingTrailingEmptyRedMetricPoints(
+      response.aggregations.latencyTimeseries.buckets.map((bucket) => {
+        const y = getLatencyValue({
           latencyAggregationType,
           aggregation: bucket.latency,
-        }),
-      };
-    }),
+        });
+        return {
+          x: bucket.key,
+          docCount: bucket.doc_count,
+          y,
+        };
+      })
+    ),
   };
 }
 
