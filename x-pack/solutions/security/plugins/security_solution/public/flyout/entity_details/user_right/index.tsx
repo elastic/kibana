@@ -56,6 +56,9 @@ import {
 } from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
 import { useNavigateToGraphView } from './hooks/use_navigate_to_graph_view';
+import { USER_PANEL_RISK_SCORE_QUERY_ID } from './constants';
+
+export { USER_PANEL_RISK_SCORE_QUERY_ID };
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -77,7 +80,6 @@ export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
 }
 
 export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
-export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
@@ -262,7 +264,7 @@ export const UserPanel = ({
     !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
   const hasGraphView = Boolean(entityFromStore);
-  const navigagteToGraphView = useNavigateToGraphView({
+  const navigateToGraphView = useNavigateToGraphView({
     userName,
     identityFields: documentEntityIdentifiers,
     entityId: panelDisplayEntityId,
@@ -307,7 +309,7 @@ export const UserPanel = ({
         contextID={safeContextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
-        navigagteToGraphView={navigagteToGraphView}
+        navigateToGraphView={navigateToGraphView}
         isPreviewMode={isPreviewMode}
         identityFields={documentEntityIdentifiers}
         entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}

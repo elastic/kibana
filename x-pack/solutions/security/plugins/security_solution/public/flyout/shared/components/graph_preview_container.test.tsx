@@ -96,7 +96,7 @@ describe('<GraphPreviewContainer /> (shared)', () => {
 
     const timestamp = new Date().toISOString();
 
-    const { findByTestId } = renderGraphPreview({
+    const { queryByTestId } = renderGraphPreview({
       timestamp,
       eventIds: [],
       shouldShowGraph: false,
@@ -104,8 +104,8 @@ describe('<GraphPreviewContainer /> (shared)', () => {
     });
 
     expect(
-      await findByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
+      queryByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
     expect(mockUseFetchGraphData.mock.calls[0][0].options.enabled).toBe(false);
     expect(uiMetricServiceMock.trackUiMetric).not.toHaveBeenCalled();
   });

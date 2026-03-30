@@ -67,6 +67,8 @@ describe('useNavigateToServiceDetails', () => {
         serviceName: mockProps.serviceName,
         scopeId: mockProps.scopeId,
         isRiskScoreExist: mockProps.isRiskScoreExist,
+        identityFields: mockProps.identityFields,
+        entityId: mockProps.entityId,
         path: { tab, subTab },
       },
     });

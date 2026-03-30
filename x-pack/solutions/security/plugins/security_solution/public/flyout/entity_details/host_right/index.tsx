@@ -55,6 +55,9 @@ import {
 } from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
 import { useNavigateToGraphView } from './hooks/use_navigate_to_graph_view';
+import { HOST_PANEL_RISK_SCORE_QUERY_ID, HOST_PANEL_OBSERVED_HOST_QUERY_ID } from './constants';
+
+export { HOST_PANEL_RISK_SCORE_QUERY_ID, HOST_PANEL_OBSERVED_HOST_QUERY_ID };
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -76,8 +79,6 @@ export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
 }
 
 export const HostPreviewPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-preview-panel';
-export const HOST_PANEL_RISK_SCORE_QUERY_ID = 'HostPanelRiskScoreQuery';
-export const HOST_PANEL_OBSERVED_HOST_QUERY_ID = 'HostPanelObservedHostQuery';
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,

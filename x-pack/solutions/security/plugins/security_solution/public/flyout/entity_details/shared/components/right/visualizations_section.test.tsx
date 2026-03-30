@@ -19,31 +19,17 @@ import {
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
 } from './test_ids';
-import {
-  ANALYZER_PREVIEW_TEST_ID,
-  SESSION_PREVIEW_TEST_ID,
-} from '../../../../../flyout_v2/document/components/test_ids';
 import { VisualizationsSection } from './visualizations_section';
 import { mockContextValue } from '../../../../document_details/shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../../../document_details/shared/mocks/mock_data_formatted_for_field_browser';
 import { DocumentDetailsContext } from '../../../../document_details/shared/context';
-import { useAlertPrevalenceFromProcessTree } from '../../../../../flyout_v2/document/hooks/use_alert_prevalence_from_process_tree';
 import { TestProviders } from '../../../../../common/mock';
 import { useExpandSection } from '../../../../../flyout_v2/shared/hooks/use_expand_section';
-import { useInvestigateInTimeline } from '../../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
-import { useIsAnalyzerEnabled } from '../../../../../detections/hooks/use_is_analyzer_enabled';
-import { useGraphPreview } from '../../../../shared/hooks/use_graph_preview';
-import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
+import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
 
 jest.mock('../../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
-jest.mock('../../../../../flyout_v2/document/hooks/use_alert_prevalence_from_process_tree', () => ({
-  useAlertPrevalenceFromProcessTree: jest.fn(),
-}));
-const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
-
-jest.mock('../../../../../data_view_manager/hooks/use_selected_patterns');
 
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -53,21 +39,10 @@ jest.mock('react-redux', () => {
     useDispatch: () => jest.fn(),
   };
 });
-jest.mock(
-  '../../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
-);
 
-const mockUseUiSetting = jest.fn().mockImplementation((key) => [false]);
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    useUiSetting$: (...args: unknown[]) => mockUseUiSetting(...args),
-  };
-});
-jest.mock('../../../../shared/hooks/use_graph_preview');
+jest.mock('../../../../shared/hooks/use_should_show_graph');
 
-const mockUseGraphPreview = useGraphPreview as jest.Mock;
+const mockUseShouldShowGraph = useShouldShowGraph as jest.Mock;
 
 jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
   useFetchGraphData: jest.fn(),
@@ -107,19 +82,8 @@ describe('<VisualizationsSection />', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
 
   beforeEach(() => {
-    mockUseUiSetting.mockImplementation(() => [false]);
-    (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
-    mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
-      loading: false,
-      error: false,
-      alertIds: undefined,
-      statsNodes: undefined,
-    });
-    // Default mock: graph visualization not available (UI setting is false by default)
-    mockUseGraphPreview.mockReturnValue({
-      shouldShowGraph: false,
-      eventIds: [],
-    });
+    // Default mock: graph visualization available
+    mockUseShouldShowGraph.mockReturnValue(true);
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
@@ -145,28 +109,17 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should render the component expanded if value is true in local storage', () => {
-    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
-      investigateInTimelineAlertClick: jest.fn(),
-    });
-    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
     mockUseExpandSection.mockReturnValue(true);
 
-    const { getByTestId, queryByTestId } = renderVisualizationsSection();
+    const { getByTestId } = renderVisualizationsSection();
     expect(getByTestId(VISUALIZATIONS_SECTION_CONTENT_TEST_ID)).toBeVisible();
 
-    expect(getByTestId(`${SESSION_PREVIEW_TEST_ID}LeftSection`)).toBeInTheDocument();
-    expect(getByTestId(`${ANALYZER_PREVIEW_TEST_ID}LeftSection`)).toBeInTheDocument();
-    expect(queryByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).not.toBeInTheDocument();
+    expect(getByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).toBeInTheDocument();
   });
 
   it('should render the graph preview component if the feature is enabled', () => {
     mockUseExpandSection.mockReturnValue(true);
-
-    // Mock useGraphPreview to reflect that graph is available when UI setting is enabled
-    mockUseGraphPreview.mockReturnValue({
-      shouldShowGraph: true,
-      eventIds: [],
-    });
+    mockUseShouldShowGraph.mockReturnValue(true);
 
     const { getByTestId } = renderVisualizationsSection();
 
@@ -179,6 +132,7 @@ describe('<VisualizationsSection />', () => {
 
   it('should not render the graph preview component if the graph feature is disabled', () => {
     mockUseExpandSection.mockReturnValue(true);
+    mockUseShouldShowGraph.mockReturnValue(false);
 
     const { queryByTestId } = renderVisualizationsSection();
 

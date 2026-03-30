@@ -18,7 +18,7 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
-import { useGraphPreview } from '../../../shared/hooks/use_graph_preview';
+import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import {
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
@@ -55,7 +55,11 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
-jest.mock('../../../shared/hooks/use_graph_preview');
+jest.mock('../../../shared/hooks/use_should_show_graph', () => ({
+  useShouldShowGraph: jest.fn().mockReturnValue(false),
+}));
+
+jest.mock('../../shared/hooks/use_graph_preview');
 jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
   useFetchGraphData: jest.fn(),
 }));

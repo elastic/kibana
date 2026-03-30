@@ -106,6 +106,7 @@ describe('hooks', () => {
 
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
       ]);
     });
 
@@ -126,16 +127,37 @@ describe('hooks', () => {
 
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.CSP_INSIGHTS }),
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
       ]);
     });
 
-    it('should return an empty array when no tabs are available', () => {
+    it('should return only the graph view tab when no other tabs are available', () => {
       const { result } = renderHook(
         () =>
           useTabs({
             isRiskScoreExist: false,
             hostName: 'testHost',
             entityId: 'testEntityId',
+            scopeId: 'scope1',
+            hasMisconfigurationFindings: false,
+            hasVulnerabilitiesFindings: false,
+            hasNonClosedAlerts: false,
+          }),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current).toEqual([
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
+      ]);
+    });
+
+    it('should return an empty array when no tabs are available and entityId is not provided', () => {
+      const { result } = renderHook(
+        () =>
+          useTabs({
+            isRiskScoreExist: false,
+            hostName: 'testHost',
+            entityId: '',
             scopeId: 'scope1',
             hasMisconfigurationFindings: false,
             hasVulnerabilitiesFindings: false,

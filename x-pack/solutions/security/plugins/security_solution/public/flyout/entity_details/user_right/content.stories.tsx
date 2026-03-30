@@ -11,7 +11,7 @@ import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../shared/mocks';
-import { mockObservedUser } from './mocks';
+import { mockObservedUser, mockEntityRecord } from './mocks';
 import { UserPanelContent } from './content';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
@@ -40,7 +40,7 @@ export const Default = {
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigagteToGraphView={() => {}}
+      navigateToGraphView={() => {}}
       identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
@@ -59,7 +59,7 @@ export const IntegrationDisabled = {
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigagteToGraphView={() => {}}
+      navigateToGraphView={() => {}}
       identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
@@ -70,6 +70,26 @@ export const IntegrationDisabled = {
   name: 'integration disabled',
 };
 
+export const WithGraphVisualization = {
+  render: () => (
+    <UserPanelContent
+      observedUser={mockObservedUser}
+      riskScoreState={riskScoreData}
+      contextID={'test-user-details'}
+      scopeId={'test-scopeId'}
+      openDetailsPanel={() => {}}
+      navigateToGraphView={() => {}}
+      identityFields={{ 'user.name': 'test-user-name' }}
+      onAssetCriticalityChange={() => {}}
+      recalculatingScore={false}
+      isPreviewMode={false}
+      entityRecord={mockEntityRecord}
+    />
+  ),
+
+  name: 'with graph visualization',
+};
+
 export const NoManagedData = {
   render: () => (
     <UserPanelContent
@@ -78,7 +98,7 @@ export const NoManagedData = {
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigagteToGraphView={() => {}}
+      navigateToGraphView={() => {}}
       identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
@@ -120,7 +140,7 @@ export const NoObservedData = {
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigagteToGraphView={() => {}}
+      navigateToGraphView={() => {}}
       identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
@@ -162,7 +182,7 @@ export const Loading = {
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigagteToGraphView={() => {}}
+      navigateToGraphView={() => {}}
       identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}

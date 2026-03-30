@@ -17,7 +17,7 @@ import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
-import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
+import { USER_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
@@ -41,7 +41,7 @@ interface UserPanelContentProps {
   scopeId: string;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  navigagteToGraphView: () => void;
+  navigateToGraphView: () => void;
   isPreviewMode: boolean;
   entityRecord?: Entity;
   criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
@@ -58,7 +58,7 @@ export const UserPanelContent = ({
   contextID,
   scopeId,
   openDetailsPanel,
-  navigagteToGraphView,
+  navigateToGraphView,
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
@@ -118,7 +118,7 @@ export const UserPanelContent = ({
             entityId={entityId}
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
-            onExpandGraph={navigagteToGraphView}
+            onExpandGraph={navigateToGraphView}
           />
           <EuiHorizontalRule margin="m" />
         </>

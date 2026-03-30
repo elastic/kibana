@@ -12,14 +12,10 @@ import { useGraphPreview } from './use_graph_preview';
 import type { GetFieldsData } from '../../document_details/shared/hooks/use_get_fields_data';
 import { mockFieldData } from '../../document_details/shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../document_details/shared/mocks/mock_data_formatted_for_field_browser';
-import { useHasGraphVisualizationLicense } from '../../../common/hooks/use_has_graph_visualization_license';
 
-jest.mock('../../../common/hooks/use_has_graph_visualization_license');
-const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
-
-jest.mock('@kbn/kibana-react-plugin/public');
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-const mockUseUiSetting = useUiSetting$ as jest.Mock;
+jest.mock('./use_should_show_graph');
+import { useShouldShowGraph } from './use_should_show_graph';
+const mockUseShouldShowGraph = useShouldShowGraph as jest.Mock;
 
 const alertMockGetFieldsData: GetFieldsData = (field: string) => {
   if (field === 'kibana.alert.uuid') {
@@ -58,10 +54,8 @@ const eventMockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [];
 describe('useGraphPreview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default mock: graph visualization feature is available
-    mockUseHasGraphVisualizationLicense.mockReturnValue(true);
-    // Default mock: UI setting is enabled
-    mockUseUiSetting.mockReturnValue([true, jest.fn()]);
+    // Default mock: entity store is running and all conditions are met
+    mockUseShouldShowGraph.mockReturnValue(true);
   });
 
   it(`should return false when missing actor and target`, () => {
@@ -554,7 +548,7 @@ describe('useGraphPreview', () => {
   });
 
   it('should return false when all conditions are met but env does not have required license', () => {
-    mockUseHasGraphVisualizationLicense.mockReturnValue(false);
+    mockUseShouldShowGraph.mockReturnValue(false);
 
     const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
@@ -582,7 +576,7 @@ describe('useGraphPreview', () => {
   });
 
   it('should return false for shouldShowGraph when UI setting is disabled', () => {
-    mockUseUiSetting.mockReturnValue([false, jest.fn()]);
+    mockUseShouldShowGraph.mockReturnValue(false);
 
     const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
