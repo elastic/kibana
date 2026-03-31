@@ -53,11 +53,11 @@ const putSignificantEventsSettingsBodySchema = z.object({
   connectorIdRuleGeneration: z.string().optional(),
   connectorIdDiscovery: z.string().optional(),
   indexPatterns: z.string().optional(),
-  continuousExtraction: z
+  continuousKiExtraction: z
     .object({
       enabled: z.boolean().optional(),
       intervalHours: z.number().min(MIN_EXTRACTION_INTERVAL_HOURS).optional(),
-      excludedStreams: z.array(z.string()).optional(),
+      excludedStreamPatterns: z.string().optional(),
     })
     .optional(),
 });
@@ -83,7 +83,7 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    continuousExtractionWorkflow,
+    continuousKiExtractionWorkflow,
   }): Promise<{ success: true }> => {
     const { modelSettingsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
@@ -91,13 +91,12 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await modelSettingsClient.updateSettings(params.body);
 
-    if (params.body.continuousExtraction && continuousExtractionWorkflow) {
+    if (params.body.continuousKiExtraction && continuousKiExtractionWorkflow) {
       const updatedSettings = await modelSettingsClient.getSettings();
-      await continuousExtractionWorkflow.ensureWorkflow({
-        enabled: updatedSettings.continuousExtraction?.enabled ?? false,
+      await continuousKiExtractionWorkflow.ensureWorkflow({
+        enabled: updatedSettings.continuousKiExtraction?.enabled ?? false,
         request,
         spaceId: DEFAULT_SPACE_ID,
-        modelSettingsClient,
       });
     }
 

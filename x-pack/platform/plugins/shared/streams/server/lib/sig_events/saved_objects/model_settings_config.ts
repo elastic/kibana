@@ -15,14 +15,6 @@ export const streamsSignificantEventsSettingsSOAttributesV1 = schema.object({
   connectorIdRuleGeneration: schema.maybe(schema.string()),
   connectorIdDiscovery: schema.maybe(schema.string()),
   indexPatterns: schema.maybe(schema.string()),
-  continuousExtraction: schema.maybe(
-    schema.object({
-      enabled: schema.maybe(schema.boolean()),
-      intervalHours: schema.maybe(schema.number()),
-      workflowId: schema.maybe(schema.string()),
-      excludedStreams: schema.maybe(schema.arrayOf(schema.string())),
-    })
-  ),
 });
 
 export type ModelSettingsConfigAttributes = TypeOf<

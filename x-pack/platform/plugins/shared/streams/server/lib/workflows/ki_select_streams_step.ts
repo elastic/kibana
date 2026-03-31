@@ -11,6 +11,7 @@ import { StepCategory } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import { Streams, TaskStatus } from '@kbn/streams-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { minimatch } from 'minimatch';
 import type { GetScopedClients } from '../../routes/types';
 import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
@@ -64,11 +65,11 @@ export const registerKiSelectStreamsStep = ({
 
       const settings = await modelSettingsClient.getSettings();
 
-      if (!settings.continuousExtraction?.enabled) {
-        throw new Error('Continuous extraction is disabled');
+      if (!settings.continuousKiExtraction?.enabled) {
+        throw new Error('Continuous KI extraction is disabled');
       }
 
-      const { continuousExtraction } = settings;
+      const { continuousKiExtraction } = settings;
 
       const [connectorId, sortedTasks, allStreams] = await Promise.all([
         resolveConnectorId({
@@ -90,20 +91,28 @@ export const registerKiSelectStreamsStep = ({
         streamsClient.listStreams(),
       ]);
 
-      const excluded = new Set(continuousExtraction.excludedStreams ?? []);
-      const eligibleNames = new Set(
-        allStreams
-          .filter(
-            (stream) => !Streams.QueryStream.Definition.is(stream) && !excluded.has(stream.name)
-          )
-          .map((stream) => stream.name)
-      );
+      const excludePatterns = (continuousKiExtraction.excludedStreamPatterns ?? '')
+        .split(',')
+        .map((p) => p.trim())
+        .filter(Boolean);
+      const isExcluded = (name: string) =>
+        excludePatterns.some((pattern) => minimatch(name, pattern));
+      const excluded: string[] = [];
+      const eligibleNames = new Set<string>();
+      for (const stream of allStreams) {
+        if (Streams.QueryStream.Definition.is(stream)) continue;
+        if (isExcluded(stream.name)) {
+          excluded.push(stream.name);
+        } else {
+          eligibleNames.add(stream.name);
+        }
+      }
 
       // Walk tasks in ES-sorted order (null last_completed_at first, then oldest).
       // This preserves the sort for the candidates list without an in-memory re-sort.
       const intervalHours =
         extractionIntervalHours ??
-        continuousExtraction.intervalHours ??
+        continuousKiExtraction.intervalHours ??
         DEFAULT_EXTRACTION_INTERVAL_HOURS;
       const intervalMs = intervalHours * 3_600_000;
       const now = Date.now();
@@ -189,10 +198,12 @@ export const registerKiSelectStreamsStep = ({
           alreadyRunning,
           skipped,
           upToDate,
-          excluded: [...excluded],
+          excluded,
           settings: {
-            enabled: continuousExtraction.enabled ?? false,
-            intervalHours: continuousExtraction.intervalHours ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
+            enabled: continuousKiExtraction.enabled ?? false,
+            intervalHours:
+              continuousKiExtraction.intervalHours ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
+            excludePatterns,
           },
         },
       };

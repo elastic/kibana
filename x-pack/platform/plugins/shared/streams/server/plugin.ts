@@ -60,8 +60,8 @@ import { PatternExtractionService } from './lib/pattern_extraction/pattern_extra
 import { registerKiSelectStreamsStep } from './lib/workflows/ki_select_streams_step';
 import { registerKiFeaturesExtractStreamStep } from './lib/workflows/ki_features_extract_stream_step';
 import {
-  createContinuousExtractionWorkflowService,
-  type ContinuousExtractionWorkflowService,
+  createContinuousKiExtractionWorkflowService,
+  type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -144,12 +144,12 @@ export class StreamsPlugin
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
 
-      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
-        coreStart.savedObjects.getScopedClient(request)
-      );
+      const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
+      const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
 
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-      const soClient = coreStart.savedObjects.getScopedClient(request);
+      const soClient = scopedSoClient;
       const inferenceClient = pluginsStart.inference.getClient({ request });
       const licensing = pluginsStart.licensing;
       const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
@@ -188,6 +188,7 @@ export class StreamsPlugin
 
       const modelSettingsClient = modelSettingsConfigService.getClient({
         soClient,
+        globalUiSettingsClient,
       });
 
       return {
@@ -203,6 +204,7 @@ export class StreamsPlugin
         fieldsMetadataClient,
         licensing,
         uiSettingsClient,
+        globalUiSettingsClient,
         taskClient,
         modelSettingsClient,
       };
@@ -217,7 +219,7 @@ export class StreamsPlugin
       });
     }
 
-    let continuousExtractionWorkflow: ContinuousExtractionWorkflowService | undefined;
+    let continuousKiExtractionWorkflow: ContinuousKiExtractionWorkflowService | undefined;
 
     if (plugins.workflowsExtensions && plugins.workflowsManagement) {
       registerKiSelectStreamsStep({
@@ -229,7 +231,7 @@ export class StreamsPlugin
         workflowsExtensions: plugins.workflowsExtensions,
         getScopedClients,
       });
-      continuousExtractionWorkflow = createContinuousExtractionWorkflowService(
+      continuousKiExtractionWorkflow = createContinuousKiExtractionWorkflowService(
         this.logger,
         plugins.workflowsManagement.management
       );
@@ -304,7 +306,7 @@ export class StreamsPlugin
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
-        continuousExtractionWorkflow,
+        continuousKiExtractionWorkflow,
       },
       core,
       logger: this.logger,

@@ -26,7 +26,7 @@ import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
 import type { InsightClient } from '../lib/sig_events/insights/client/insight_client';
 import type { ModelSettingsConfigClient } from '../lib/sig_events/saved_objects/model_settings_config_service';
-import type { ContinuousExtractionWorkflowService } from '../lib/workflows/continuous_extraction_workflow';
+import type { ContinuousKiExtractionWorkflowService } from '../lib/workflows/continuous_extraction_workflow';
 
 export type GetScopedClients = ({
   request,
@@ -46,6 +46,7 @@ export interface RouteHandlerScopedClients {
   queryClient: QueryClient;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
+  globalUiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   taskClient: TaskClient<StreamsTaskType>;
   modelSettingsClient: ModelSettingsConfigClient;
@@ -57,7 +58,7 @@ export interface RouteDependencies {
   getScopedClients: GetScopedClients;
   processorSuggestions: ProcessorSuggestionsService;
   patternExtractionService: IPatternExtractionService;
-  continuousExtractionWorkflow?: ContinuousExtractionWorkflowService;
+  continuousKiExtractionWorkflow?: ContinuousKiExtractionWorkflowService;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

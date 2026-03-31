@@ -7,7 +7,6 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { ModelSettingsConfigClient } from '../sig_events/saved_objects/model_settings_config_service';
 
 import {
   KI_SELECT_STREAMS_STEP_TYPE,
@@ -15,6 +14,7 @@ import {
   COORDINATOR_INTERVAL_MINUTES,
   MAX_SCHEDULED_STREAMS,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
+  CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
 } from '../../../common/constants';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 
@@ -50,80 +50,73 @@ assertYamlInSync(
   'extractionIntervalHours input'
 );
 
-export interface ContinuousExtractionWorkflowService {
+export interface ContinuousKiExtractionWorkflowService {
   ensureWorkflow(params: {
     enabled: boolean;
     request: KibanaRequest;
     spaceId: string;
-    modelSettingsClient: ModelSettingsConfigClient;
   }): Promise<void>;
 }
 
-export const createContinuousExtractionWorkflowService = (
+export const createContinuousKiExtractionWorkflowService = (
   logger: Logger,
   managementApi: WorkflowsServerPluginSetup['management']
-): ContinuousExtractionWorkflowService => {
-  const log = logger.get('continuous-extraction-workflow');
+): ContinuousKiExtractionWorkflowService => {
+  const log = logger.get('continuous-ki-extraction-workflow');
 
   return {
-    async ensureWorkflow({ enabled, request, spaceId, modelSettingsClient }) {
-      const settings = await modelSettingsClient.getSettings();
-      const existingWorkflowId = settings.continuousExtraction?.workflowId;
+    async ensureWorkflow({ enabled, request, spaceId }) {
+      const existing = await managementApi.getWorkflow(
+        CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+        spaceId
+      );
 
-      if (existingWorkflowId) {
-        const existing = await managementApi.getWorkflow(existingWorkflowId, spaceId);
-        if (existing) {
-          const yamlChanged = existing.yaml !== WORKFLOW_YAML;
-          const enabledChanged = existing.enabled !== enabled;
+      if (existing) {
+        const yamlChanged = existing.yaml !== WORKFLOW_YAML;
+        const enabledChanged = existing.enabled !== enabled;
 
-          if (!yamlChanged && !enabledChanged) {
-            log.debug(`Continuous extraction workflow ${existingWorkflowId} is already up to date`);
-            return;
-          }
-
-          const patch: { yaml?: string; enabled?: boolean } = {};
-          if (yamlChanged) patch.yaml = WORKFLOW_YAML;
-          if (enabledChanged) patch.enabled = enabled;
-
-          await managementApi.updateWorkflow(existingWorkflowId, patch, spaceId, request);
-
-          log.info(`Updated continuous extraction workflow ${existingWorkflowId}`);
+        if (!yamlChanged && !enabledChanged) {
+          log.debug(
+            `Continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID} is already up to date`
+          );
           return;
         }
-        log.warn(`Stored workflow ID ${existingWorkflowId} not found, creating a new workflow`);
+
+        const patch: { yaml?: string; enabled?: boolean } = {};
+        if (yamlChanged) patch.yaml = WORKFLOW_YAML;
+        if (enabledChanged) patch.enabled = enabled;
+
+        await managementApi.updateWorkflow(
+          CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+          patch,
+          spaceId,
+          request
+        );
+
+        log.info(
+          `Updated continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`
+        );
+        return;
       }
 
       if (!enabled) {
         return;
       }
 
-      const created = await managementApi.createWorkflow({ yaml: WORKFLOW_YAML }, spaceId, request);
+      await managementApi.createWorkflow(
+        { yaml: WORKFLOW_YAML, id: CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID },
+        spaceId,
+        request
+      );
 
-      try {
-        await modelSettingsClient.updateSettings({
-          continuousExtraction: { workflowId: created.id },
-        });
+      await managementApi.updateWorkflow(
+        CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+        { enabled: true },
+        spaceId,
+        request
+      );
 
-        await managementApi.updateWorkflow(created.id, { enabled: true }, spaceId, request);
-      } catch (err) {
-        log.error(
-          `Failed to finalize workflow ${created.id}, deleting orphaned workflow: ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
-        try {
-          await managementApi.deleteWorkflows([created.id], spaceId, request);
-        } catch (deleteErr) {
-          log.warn(
-            `Failed to clean up orphaned workflow ${created.id}: ${
-              deleteErr instanceof Error ? deleteErr.message : String(deleteErr)
-            }`
-          );
-        }
-        throw err;
-      }
-
-      log.info(`Created continuous extraction workflow ${created.id}`);
+      log.info(`Created continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`);
     },
   };
 };

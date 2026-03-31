@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract, IUiSettingsClient } from '@kbn/core/server';
 import type { ModelSettingsConfigClient } from './model_settings_config_client';
 import { ModelSettingsConfigClientImpl } from './model_settings_config_client';
 
@@ -14,8 +14,14 @@ export type { ModelSettings, ModelSettingsConfigClient } from './model_settings_
 export class ModelSettingsConfigService {
   constructor(private readonly logger: Logger) {}
 
-  getClient({ soClient }: { soClient: SavedObjectsClientContract }): ModelSettingsConfigClient {
+  getClient({
+    soClient,
+    globalUiSettingsClient,
+  }: {
+    soClient: SavedObjectsClientContract;
+    globalUiSettingsClient: IUiSettingsClient;
+  }): ModelSettingsConfigClient {
     const clientLogger = this.logger.get('model-settings-config-client');
-    return new ModelSettingsConfigClientImpl(soClient, clientLogger);
+    return new ModelSettingsConfigClientImpl(soClient, globalUiSettingsClient, clientLogger);
   }
 }

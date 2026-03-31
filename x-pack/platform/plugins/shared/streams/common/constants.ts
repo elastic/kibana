@@ -62,5 +62,7 @@ export const MAX_SCHEDULED_STREAMS = 5;
 
 export const COORDINATOR_INTERVAL_MINUTES = 10;
 
+export const CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID = 'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
+
 export const KI_SELECT_STREAMS_STEP_TYPE = 'streams.ki_select_streams';
 export const KI_FEATURES_EXTRACT_STREAM_STEP_TYPE = 'streams.ki_features_extract_stream';

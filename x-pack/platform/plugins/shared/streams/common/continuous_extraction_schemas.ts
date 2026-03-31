@@ -55,6 +55,7 @@ export const kiSelectStreamsOutputSchema = z.object({
   settings: z.object({
     enabled: z.boolean(),
     intervalHours: z.number(),
+    excludePatterns: z.array(z.string()),
   }),
 });
 
