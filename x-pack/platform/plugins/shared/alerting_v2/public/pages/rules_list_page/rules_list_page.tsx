@@ -5,25 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
   EuiFieldSearch,
-  EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPageHeader,
-  EuiPopover,
-  EuiSelectable,
   EuiSpacer,
-  useEuiTheme,
   type Criteria,
-  type EuiSelectableOption,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,47 +28,12 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
 import { RulesListTableContainer } from './rules_list_table_container';
 import type { RulesListTableSortField } from './rules_list_table';
+import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_popover';
+import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
+import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
-
-interface FilterPopoverOption {
-  value: string;
-  label: string;
-  iconType?: string;
-}
-
-const MODE_FILTER_OPTIONS: FilterPopoverOption[] = [
-  {
-    value: 'alert',
-    label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.alert', {
-      defaultMessage: 'Alerting',
-    }),
-    iconType: 'bell',
-  },
-  {
-    value: 'signal',
-    label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.signal', {
-      defaultMessage: 'Detect only',
-    }),
-    iconType: 'radar',
-  },
-];
-
-const STATUS_FILTER_OPTIONS: FilterPopoverOption[] = [
-  {
-    value: 'true',
-    label: i18n.translate('xpack.alertingV2.rulesList.statusFilter.enabled', {
-      defaultMessage: 'Enabled',
-    }),
-  },
-  {
-    value: 'false',
-    label: i18n.translate('xpack.alertingV2.rulesList.statusFilter.disabled', {
-      defaultMessage: 'Disabled',
-    }),
-  },
-];
 
 const SORT_FIELD_TO_TABLE_FIELD: Record<ListRulesSortField, RulesListTableSortField> = {
   kind: 'kind',
@@ -113,248 +71,6 @@ export const buildRulesListFilter = ({
   ].filter((clause): clause is string => Boolean(clause));
 
   return clauses.length > 0 ? clauses.join(' AND ') : undefined;
-};
-
-const filterButtonStyles = (
-  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme'],
-  buttonWidth: number = 112
-) => css`
-  min-inline-size: ${buttonWidth}px;
-  inline-size: ${buttonWidth}px;
-  box-shadow: inset 0 0 0 1px ${euiTheme.colors.borderBaseSubdued};
-  border-radius: ${euiTheme.border.radius.medium};
-
-  .euiButtonEmpty__content {
-    inline-size: 100%;
-    justify-content: space-between;
-  }
-
-  .euiFilterButton__text {
-    min-inline-size: 0;
-  }
-`;
-
-const SingleSelectionFilterPopover = ({
-  label,
-  options,
-  dataTestSubj,
-  popoverLabel,
-  ariaLabel,
-  buttonWidth = 112,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: FilterPopoverOption[];
-  dataTestSubj: string;
-  popoverLabel: string;
-  ariaLabel: string;
-  buttonWidth?: number;
-  value: string;
-  onChange: (value: string) => void;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const [isOpen, setIsOpen] = useState(false);
-
-  const selectableOptions = useMemo<EuiSelectableOption[]>(
-    () =>
-      options.map(({ value: optionValue, label: optionLabel, iconType }) => ({
-        key: optionValue,
-        label: optionLabel,
-        prepend: iconType ? <EuiIcon type={iconType} aria-hidden={true} /> : undefined,
-        checked: value === optionValue ? 'on' : undefined,
-        'data-test-subj': `${dataTestSubj}Option-${optionValue}`,
-      })),
-    [dataTestSubj, options, value]
-  );
-
-  const togglePopover = useCallback(() => {
-    setIsOpen((prevIsOpen) => !prevIsOpen);
-  }, []);
-
-  const closePopover = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
-  const handleSelectionChange = useCallback(
-    (_options: EuiSelectableOption[], __: unknown, changedOption: EuiSelectableOption) => {
-      const nextValue = changedOption.key as string;
-      onChange(value === nextValue ? '' : nextValue);
-    },
-    [onChange, value]
-  );
-
-  const activeCount = value ? 1 : 0;
-
-  return (
-    <EuiPopover
-      aria-label={popoverLabel}
-      isOpen={isOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      button={
-        <EuiFilterButton
-          iconType="arrowDown"
-          onClick={togglePopover}
-          isSelected={isOpen}
-          hasActiveFilters={activeCount > 0}
-          numActiveFilters={activeCount > 0 ? activeCount : undefined}
-          css={filterButtonStyles(euiTheme, buttonWidth)}
-          data-test-subj={dataTestSubj}
-        >
-          {label}
-        </EuiFilterButton>
-      }
-    >
-      <EuiSelectable
-        aria-label={ariaLabel}
-        searchable={false}
-        options={selectableOptions}
-        onChange={handleSelectionChange}
-        listProps={{
-          paddingSize: 's',
-          showIcons: true,
-          style: { minWidth: 240 },
-        }}
-      >
-        {(list) => list}
-      </EuiSelectable>
-    </EuiPopover>
-  );
-};
-
-const StatusFilterPopover = ({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) => (
-  <SingleSelectionFilterPopover
-    label={i18n.translate('xpack.alertingV2.rulesList.statusFilter.label', {
-      defaultMessage: 'Status',
-    })}
-    options={STATUS_FILTER_OPTIONS}
-    dataTestSubj="rulesListStatusFilter"
-    popoverLabel={i18n.translate('xpack.alertingV2.rulesList.statusFilter.popoverLabel', {
-      defaultMessage: 'Status filter options',
-    })}
-    ariaLabel={i18n.translate('xpack.alertingV2.rulesList.statusFilter.ariaLabel', {
-      defaultMessage: 'Filter rules by status',
-    })}
-    buttonWidth={140}
-    value={value}
-    onChange={onChange}
-  />
-);
-
-const ModeFilterPopover = ({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) => (
-  <SingleSelectionFilterPopover
-    label={i18n.translate('xpack.alertingV2.rulesList.modeFilter.label', {
-      defaultMessage: 'Mode',
-    })}
-    options={MODE_FILTER_OPTIONS}
-    dataTestSubj="rulesListModeFilter"
-    popoverLabel={i18n.translate('xpack.alertingV2.rulesList.modeFilter.popoverLabel', {
-      defaultMessage: 'Mode filter options',
-    })}
-    ariaLabel={i18n.translate('xpack.alertingV2.rulesList.modeFilter.ariaLabel', {
-      defaultMessage: 'Filter rules by mode',
-    })}
-    value={value}
-    onChange={onChange}
-  />
-);
-
-const TagsFilterPopover = ({
-  options,
-  value,
-  onChange,
-}: {
-  options: string[];
-  value: string[];
-  onChange: (values: string[]) => void;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const [isOpen, setIsOpen] = useState(false);
-
-  const selectableOptions = useMemo<EuiSelectableOption[]>(() => {
-    const selectedSet = new Set(value);
-    return options.map((tag) => ({
-      key: tag,
-      label: tag,
-      checked: selectedSet.has(tag) ? 'on' : undefined,
-      'data-test-subj': `rulesListTagsFilterOption-${tag}`,
-    }));
-  }, [options, value]);
-
-  const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
-  const closePopover = useCallback(() => setIsOpen(false), []);
-
-  const handleSelectionChange = useCallback(
-    (updatedOptions: EuiSelectableOption[]) => {
-      const selected = updatedOptions
-        .filter((opt) => opt.checked === 'on')
-        .map((opt) => opt.key as string);
-      onChange(selected);
-    },
-    [onChange]
-  );
-
-  const activeCount = value.length;
-
-  return (
-    <EuiPopover
-      aria-label={i18n.translate('xpack.alertingV2.rulesList.tagsFilter.popoverLabel', {
-        defaultMessage: 'Tags filter options',
-      })}
-      isOpen={isOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      button={
-        <EuiFilterButton
-          iconType="arrowDown"
-          onClick={togglePopover}
-          isSelected={isOpen}
-          hasActiveFilters={activeCount > 0}
-          numActiveFilters={activeCount > 0 ? activeCount : undefined}
-          css={filterButtonStyles(euiTheme)}
-          data-test-subj="rulesListTagsFilter"
-        >
-          {i18n.translate('xpack.alertingV2.rulesList.tagsFilter.label', {
-            defaultMessage: 'Tags',
-          })}
-        </EuiFilterButton>
-      }
-    >
-      <EuiSelectable
-        aria-label={i18n.translate('xpack.alertingV2.rulesList.tagsFilter.ariaLabel', {
-          defaultMessage: 'Filter rules by tags',
-        })}
-        searchable
-        options={selectableOptions}
-        onChange={handleSelectionChange}
-        listProps={{
-          paddingSize: 's',
-          showIcons: true,
-          style: { minWidth: 240 },
-        }}
-      >
-        {(list, search) => (
-          <>
-            {search}
-            {list}
-          </>
-        )}
-      </EuiSelectable>
-    </EuiPopover>
-  );
 };
 
 export const RulesListPage = () => {
