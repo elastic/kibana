@@ -97,6 +97,21 @@ describe('GaugeDimensionEditor', () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it('shows band colors on when colorMode and palette are omitted (implicit defaults)', () => {
+    const implicitState: GaugeVisualizationState = {
+      layerId: 'first',
+      layerType: LayerTypes.DATA,
+      metricAccessor: 'metric-col-id',
+      ticksPosition: GaugeTicksPositions.AUTO,
+      labelMajorMode: 'auto',
+      shape: 'horizontalBullet',
+    };
+
+    renderGaugeDimensionEditor({ state: implicitState });
+
+    expect(screen.getByTestId('lnsDynamicColoringGaugeSwitch')).toBeChecked();
+  });
+
   it('toggles dynamic coloring when the band colors switch is clicked', async () => {
     const user = userEvent.setup();
 

@@ -131,7 +131,13 @@ describe('gauge', () => {
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
             isMetricDimension: true,
-            accessors: [{ columnId: 'metric-accessor', triggerIconType: 'none' }],
+            accessors: [
+              {
+                columnId: 'metric-accessor',
+                triggerIconType: 'colorBy',
+                palette: ['blue', 'red', 'yellow', 'green'],
+              },
+            ],
             filterOperations: isNumericDynamicMetric,
             supportsMoreColumns: false,
             requiredMinDimensionCount: 1,
@@ -481,7 +487,21 @@ describe('gauge', () => {
               min: ['min-accessor'],
               max: ['max-accessor'],
               goal: ['goal-accessor'],
-              colorMode: ['none'],
+              colorMode: ['palette'],
+              palette: [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'system_palette',
+                      arguments: {
+                        name: ['mocked'],
+                      },
+                    },
+                  ],
+                },
+              ],
               ticksPosition: ['auto'],
               labelMajorMode: ['auto'],
               labelMinor: ['Subtitle'],
@@ -498,6 +518,35 @@ describe('gauge', () => {
         minAccessor: 'min-accessor',
       };
       expect(getGaugeVisualization(deps).toExpression(state, datasourceLayers)).toEqual(null);
+    });
+
+    test('respects explicit colorMode none (no palette)', () => {
+      const state: GaugeVisualizationState = {
+        ...exampleState(),
+        layerId: 'first',
+        metricAccessor: 'metric-accessor',
+        minAccessor: 'min-accessor',
+        maxAccessor: 'max-accessor',
+        colorMode: 'none',
+      };
+      expect(getGaugeVisualization(deps).toExpression(state, datasourceLayers)).toEqual({
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'gauge',
+            arguments: {
+              metric: ['metric-accessor'],
+              min: ['min-accessor'],
+              max: ['max-accessor'],
+              colorMode: ['none'],
+              ticksPosition: ['auto'],
+              labelMajorMode: ['auto'],
+              shape: ['horizontalBullet'],
+            },
+          },
+        ],
+      });
     });
   });
 

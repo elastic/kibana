@@ -28,3 +28,23 @@ export const getDefaultPalette = (
     stops: applyPaletteParams(paletteService, DEFAULT_PALETTE, { min: 0, max: 100 }),
   },
 });
+
+/**
+ * Aligns persisted state with rendering: when `colorMode` / `palette` are omitted (e.g. API-built
+ * configs), Lens uses the same defaults as `initialize()` and `toExpression`.
+ */
+export const resolveGaugePaletteForExpression = (
+  paletteService: PaletteRegistry,
+  state: GaugeVisualizationState
+): {
+  colorMode: 'palette' | 'none';
+  palette: PaletteOutput<CustomPaletteParams> | undefined;
+} => {
+  if (state.colorMode === 'none') {
+    return { colorMode: 'none', palette: undefined };
+  }
+
+  const palette = state.palette?.params != null ? state.palette : getDefaultPalette(paletteService);
+
+  return { colorMode: 'palette', palette };
+};

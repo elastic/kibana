@@ -20,7 +20,7 @@ import { isNumericFieldForDatatable } from '../../../common/expressions/impl/dat
 import { PalettePanelContainer } from '../../shared_components';
 import type { GaugeVisualizationState } from './constants';
 import { defaultPaletteParams } from './palette_config';
-import { getAccessorsFromState } from './utils';
+import { getAccessorsFromState, resolveGaugePaletteForExpression } from './utils';
 
 export function GaugeDimensionEditor(
   props: VisualizationDimensionEditorProps<GaugeVisualizationState> & {
@@ -40,7 +40,10 @@ export function GaugeDimensionEditor(
 
   const accessors = getAccessorsFromState(state);
 
-  const hasDynamicColoring = state?.colorMode === 'palette';
+  const { colorMode: effectiveColorMode, palette: resolvedPalette } =
+    resolveGaugePaletteForExpression(props.paletteService, state);
+
+  const hasDynamicColoring = effectiveColorMode !== 'none';
 
   const currentMinMax = {
     min: getMinValue(firstRow, accessors),
@@ -48,7 +51,8 @@ export function GaugeDimensionEditor(
   };
 
   const activePalette =
-    state?.palette ||
+    resolvedPalette ??
+    state?.palette ??
     ({
       type: 'palette',
       name: defaultPaletteParams.name,
