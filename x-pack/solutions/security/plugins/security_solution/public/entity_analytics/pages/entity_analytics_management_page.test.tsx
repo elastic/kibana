@@ -78,6 +78,7 @@ jest.mock('../../common/lib/kibana', () => ({
       },
     },
   }),
+  useUiSetting$: () => [false],
 }));
 
 jest.mock('../../helper_hooks', () => ({

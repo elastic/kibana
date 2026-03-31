@@ -29,6 +29,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/share-plugin",
+    "@kbn/workflows",
     "@kbn/core-logging-server-mocks",
     "@kbn/connector-specs",
     "@kbn/core-saved-objects-api-server"
