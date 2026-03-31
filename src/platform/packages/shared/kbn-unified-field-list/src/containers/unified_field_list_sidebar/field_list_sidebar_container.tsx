@@ -37,6 +37,8 @@ import {
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { prepareDataViewForEditing } from '@kbn/discover-utils';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import {
   useExistingFieldsFetcher,
   type ExistingFieldsFetcherParams,
@@ -352,6 +354,19 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     [sidebarVisibility, refetchFieldsExistenceInfo, closeFieldListFlyout, editField, deleteField]
   );
 
+  const streamNames = useMemo(() => {
+    const query = querySubscriberResult.query;
+    if (query && isOfAggregateQueryType(query) && 'esql' in query) {
+      const indexPattern = getIndexPatternFromESQLQuery(query.esql);
+      // Return the first source from the query (stream name)
+      // Don't return if it contains wildcards or commas (multiple sources)
+      if (indexPattern && !indexPattern.includes('*')) {
+        return indexPattern.split(',');
+      }
+    }
+    return undefined;
+  }, [querySubscriberResult.query]);
+
   const commonSidebarProps: UnifiedFieldListSidebarProps = useMemo(() => {
     const commonProps: UnifiedFieldListSidebarProps = {
       ...props,
@@ -364,6 +379,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
       onDeleteField: deleteField,
       compressed: stateService.creationOptions.compressed ?? false,
       buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
+      streamNames,
     };
 
     if (stateService.creationOptions.showSidebarToggleButton) {
@@ -381,6 +397,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     searchMode,
     sidebarVisibility.toggle,
     stateService,
+    streamNames,
   ]);
 
   if (!dataView) {

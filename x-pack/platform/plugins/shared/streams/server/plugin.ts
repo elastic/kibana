@@ -57,6 +57,7 @@ import { InsightService } from './lib/sig_events/insights/client/insight_service
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
+import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -360,6 +361,12 @@ export class StreamsPlugin
           this.logger.error(`Error preconfiguring streams: ${error}`);
         });
     }
+
+    registerFieldsMetadataExtractors({
+      core,
+      fieldsMetadata: plugins.fieldsMetadata,
+      logger: this.logger,
+    });
 
     return {};
   }

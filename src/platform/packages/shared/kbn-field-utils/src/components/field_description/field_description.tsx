@@ -45,23 +45,54 @@ export interface FieldDescriptionContentProps {
 
 export interface FieldDescriptionProps extends FieldDescriptionContentProps {
   fieldsMetadataService?: FieldsMetadataPublicStart;
+  streamNames?: string[];
 }
 
 export const FieldDescription: React.FC<FieldDescriptionProps> = ({
   fieldsMetadataService,
+  streamNames,
   ...props
 }) => {
   if (fieldsMetadataService && !props.field.customDescription) {
-    return <EcsFieldDescriptionFallback fieldsMetadataService={fieldsMetadataService} {...props} />;
+    return (
+      <EcsFieldDescriptionFallback
+        fieldsMetadataService={fieldsMetadataService}
+        streamNames={streamNames}
+        {...props}
+      />
+    );
   }
 
   return <FieldDescriptionContent {...props} />;
 };
 
 const EcsFieldDescriptionFallback: React.FC<
-  FieldDescriptionProps & { fieldsMetadataService: FieldsMetadataPublicStart }
-> = ({ fieldsMetadataService, ...props }) => {
+  FieldDescriptionProps & { fieldsMetadataService: FieldsMetadataPublicStart; streamName?: string }
+> = ({ fieldsMetadataService, streamNames, ...props }) => {
+  console.log('### caue ~ EcsFieldDescriptionFallback ~ streamName:', streamNames);
   const fieldName = removeKeywordSuffix(props.field.name);
+
+  // Loop through streamNames and get the fields metadata for each stream
+  const streamMetadata = streamNames?.map((streamName) => {
+    return fieldsMetadataService.useFieldsMetadata({
+      attributes: ['description', 'type'],
+      fieldNames: [fieldName],
+      streamName,
+    });
+  });
+
+  // const { fieldsMetadata: streamMetadata, loading: streamLoading } =
+  //   fieldsMetadataService.useFieldsMetadata(
+  //     streamNames && streamNames.length > 0
+  //       ? {
+  //           attributes: ['description', 'type'],
+  //           fieldNames: [fieldName],
+  //           streamNames,
+  //         }
+  //       : { attributes: [], fieldNames: [] }
+  //   );
+  console.log('### caue ~ EcsFieldDescriptionFallback ~ streamMetadata:', streamMetadata);
+
   const { fieldsMetadata, loading } = fieldsMetadataService.useFieldsMetadata({
     attributes: ['description', 'type'],
     fieldNames: [fieldName],

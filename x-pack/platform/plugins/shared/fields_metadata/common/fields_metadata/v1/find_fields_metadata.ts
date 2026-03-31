@@ -20,6 +20,7 @@ const baseFindFieldsMetadataRequestQueryRT = rt.exact(
     source: rt.union([fieldSourceRT, rt.array(fieldSourceRT)]),
     integration: rt.string,
     dataset: rt.string,
+    streamName: rt.string,
   })
 );
 
@@ -55,6 +56,7 @@ export type FindFieldsMetadataRequestQuery =
       source?: FieldSource | FieldSource[];
       integration?: undefined;
       dataset?: undefined;
+      streamName?: string;
     }
   | {
       attributes?: FieldAttribute[];
@@ -62,6 +64,7 @@ export type FindFieldsMetadataRequestQuery =
       source?: FieldSource | FieldSource[];
       integration: string;
       dataset: typeof ANY_DATASET | (string & {});
+      streamName?: string;
     };
 
 export type FindFieldsMetadataResponsePayload = rt.TypeOf<

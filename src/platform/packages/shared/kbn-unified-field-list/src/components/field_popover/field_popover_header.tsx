@@ -39,6 +39,7 @@ export interface FieldPopoverHeaderProps {
   services?: {
     fieldsMetadata?: FieldsMetadataPublicStart;
   };
+  streamNames?: string[];
 }
 
 export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
@@ -55,6 +56,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   onEditField,
   onDeleteField,
   services,
+  streamNames,
 }) => {
   if (!field) {
     return null;
@@ -195,6 +197,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
         field={field}
         Wrapper={FieldDescriptionWrapper}
         fieldsMetadataService={services?.fieldsMetadata}
+        streamNames={streamNames}
       />
     </>
   );
