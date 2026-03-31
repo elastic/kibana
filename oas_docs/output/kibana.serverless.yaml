@@ -19543,6 +19543,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                CreateScriptEntrySuccess:
+                  summary: Create a script entry
+                  value:
+                    data:
+                      description: Collects host data for investigation
+                      file: ./collect_host_data.sh
+                      fileType: script
+                      id: 1234567890
+                      instructions: No arguments required
+                      name: Collect host data
+                      platform:
+                        - linux
+                        - macos
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Management_API_ScriptsApiResponse'
           description: Action request was successfully created
@@ -19614,6 +19628,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                UpdateScriptEntrySuccess:
+                  summary: Get one script entry success
+                  value:
+                    data:
+                      description: Collects host data for investigation
+                      file: ./collect_host_data.sh
+                      fileType: script
+                      id: 1234567890
+                      instructions: No arguments required
+                      name: Collect host data
+                      platform:
+                        - linux
+                        - macos
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Management_API_ScriptsApiResponse'
           description: Get script response
@@ -19667,6 +19695,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                UpdateScriptEntrySuccess:
+                  summary: Update script entry success
+                  value:
+                    data:
+                      description: Collects host data for investigation
+                      file: ./collect_host_data.sh
+                      fileType: script
+                      id: 1234567890
+                      instructions: No arguments required
+                      name: Collect host data
+                      platform:
+                        - linux
+                        - macos
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Management_API_ScriptsApiResponse'
           description: Action request was successfully updated
