@@ -212,4 +212,3 @@ describe('IndexLifecycleSummary polling', () => {
     expect(screen.getByTestId('ilmExplainFailedPanel')).toBeInTheDocument();
   });
 });
-
