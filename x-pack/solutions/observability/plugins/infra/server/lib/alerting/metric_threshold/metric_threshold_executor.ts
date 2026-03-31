@@ -400,9 +400,8 @@ export const createMetricThresholdExecutor =
             : {}
           : {};
 
-        additionalContext.tags = Array.from(
-          new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
-        );
+        const contextTags = [additionalContext.tags ?? []].flat();
+        additionalContext.tags = Array.from(new Set([...contextTags, ...options.rule.tags]));
 
         const evaluationValues = getEvaluationValues<Evaluation>(alertResults, group);
         const thresholds = getThresholds<any>(criteria);

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-test-helpers-http-setup-browser'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-test-helpers-http-setup-browser'
+  title: '@kbn/core-test-helpers-http-setup-browser'
   description: Moon project for @kbn/core-test-helpers-http-setup-browser
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/core/packages/test-helpers/http-setup-browser
+  sourceRoot: src/core/packages/test-helpers/http-setup-browser
 dependsOn:
   - '@kbn/core-execution-context-browser-mocks'
   - '@kbn/core-fatal-errors-browser-mocks'
@@ -35,14 +34,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

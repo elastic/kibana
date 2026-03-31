@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ai-agent-confirmation-modal'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-ai-infra'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ai-agent-confirmation-modal'
+  title: '@kbn/ai-agent-confirmation-modal'
   description: Moon project for @kbn/ai-agent-confirmation-modal
   channel: ''
   owner: '@elastic/appex-ai-infra'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal
+  sourceRoot: x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
@@ -35,14 +34,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
