@@ -426,36 +426,29 @@ function createNavTree({
       },
     ],
     footer: [
-      ...(ingestHubAvailable
-        ? [
-            {
-              link: 'ingestHub' as const,
-              title: i18n.translate('xpack.observability.obltNav.ingestHub', {
-                defaultMessage: 'Ingest Hub',
-              }),
-              icon: 'launch',
-              children: [
-                {
-                  link: 'ingestHub' as const,
-                  title: i18n.translate('xpack.observability.obltNav.ingestHub.getStarted', {
-                    defaultMessage: 'Get started',
-                  }),
-                },
-              ],
-            },
-          ]
-        : []),
-      ...(ingestHubAvailable
-        ? []
-        : [
-            {
-              title: i18n.translate('xpack.observability.obltNav.addData', {
-                defaultMessage: 'Add data',
-              }),
-              link: 'observabilityOnboarding' as const,
-              icon: 'plusInCircle',
-            },
-          ]),
+      ingestHubAvailable
+        ? {
+            link: 'ingestHub' as const,
+            title: i18n.translate('xpack.observability.obltNav.ingestHub', {
+              defaultMessage: 'Ingest Hub',
+            }),
+            icon: 'launch',
+            children: [
+              {
+                link: 'ingestHub' as const,
+                title: i18n.translate('xpack.observability.obltNav.ingestHub.getStarted', {
+                  defaultMessage: 'Get started',
+                }),
+              },
+            ],
+          }
+        : {
+            title: i18n.translate('xpack.observability.obltNav.addData', {
+              defaultMessage: 'Add data',
+            }),
+            link: 'observabilityOnboarding' as const,
+            icon: 'plusInCircle',
+          },
       {
         id: 'devTools',
         title: i18n.translate('xpack.observability.obltNav.devTools', {

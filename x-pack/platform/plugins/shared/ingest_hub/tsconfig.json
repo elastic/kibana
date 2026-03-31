@@ -16,6 +16,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/shared-ux-router",
     "@kbn/spaces-plugin",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/deeplinks-observability"
   ]
 }

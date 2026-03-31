@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { AppMountParameters, AppUpdater, CoreStart } from '@kbn/core/public';
 import {
   DEFAULT_APP_CATEGORIES,
@@ -15,6 +15,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { INGEST_HUB_APP_ID } from '@kbn/deeplinks-observability';
 import type { Observable } from 'rxjs';
 import { catchError, from, map, of, switchMap } from 'rxjs';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -69,7 +70,7 @@ export class IngestHubPlugin
     const startServicesPromise = coreSetup.getStartServices();
 
     coreSetup.application.register({
-      id: 'ingestHub',
+      id: INGEST_HUB_APP_ID,
       title: i18n.translate('xpack.ingestHub.appTitle', {
         defaultMessage: 'Ingest Hub',
       }),
@@ -97,13 +98,13 @@ export class IngestHubPlugin
           return () => {};
         }
 
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           coreStart.rendering.addContext(
             <IngestHubApp ingestFlows={this.ingestFlows} history={history} />
-          ),
-          element
+          )
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
 
