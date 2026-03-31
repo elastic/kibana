@@ -65,6 +65,9 @@
     "script": ".buildkite/scripts/steps/checks/native_modules.sh"
   },
   {
+    "script": ".buildkite/scripts/steps/checks/test_files_missing_owner.sh"
+  },
+  {
     "script": ".buildkite/scripts/steps/checks/styled_components_mapping.sh",
     "mayChangeFiles": true
   },

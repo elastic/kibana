@@ -11,6 +11,7 @@ import { useAuthz, useStartServices } from '../../../../../hooks';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import { AgentLogsUI } from './agent_logs';
+import { SelectLogLevel } from './select_log_level';
 
 jest.mock('@kbn/kibana-utils-plugin/public', () => {
   return {
@@ -192,12 +193,38 @@ describe('AgentLogsUI', () => {
     expect(result.queryByTestId('viewInLogsBtn')).not.toBeInTheDocument();
   });
 
-  it('should show log level dropdown with correct value', () => {
+  it('should show log level dropdown with correct value when agent has a per-agent override', () => {
     mockStartServices();
     const result = renderComponent();
     const logLevelDropdown = result.getByTestId('selectAgentLogLevel');
     expect(logLevelDropdown.getElementsByTagName('option').length).toBe(4);
     expect(logLevelDropdown).toHaveDisplayValue('debug');
+  });
+
+  it('should fall back to policy log level when agent has no per-agent override', () => {
+    jest.mocked(useStartServices).mockReturnValue({
+      notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+    } as any);
+    const renderer = createFleetTestRendererMock();
+    const agent = {
+      id: 'agent1',
+      local_metadata: { elastic: { agent: { version: '8.15.0' } } },
+    } as any;
+    const result = renderer.render(<SelectLogLevel agent={agent} agentPolicyLogLevel="warning" />);
+    expect(result.getByTestId('selectAgentLogLevel')).toHaveDisplayValue('warning');
+  });
+
+  it('should fall back to info when agent has no per-agent override and policy has no log level set', () => {
+    jest.mocked(useStartServices).mockReturnValue({
+      notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+    } as any);
+    const renderer = createFleetTestRendererMock();
+    const agent = {
+      id: 'agent1',
+      local_metadata: { elastic: { agent: { version: '8.15.0' } } },
+    } as any;
+    const result = renderer.render(<SelectLogLevel agent={agent} />);
+    expect(result.getByTestId('selectAgentLogLevel')).toHaveDisplayValue('info');
   });
 
   it('should always show apply log level changes button', () => {

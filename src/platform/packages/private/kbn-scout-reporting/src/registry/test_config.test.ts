@@ -62,6 +62,16 @@ describe('test_config module', () => {
         configType: 'standard',
         nestedName: 'vis_types/timelion',
       },
+      {
+        basePath: 'src/core',
+        moduleGroup: 'core',
+        moduleType: 'package',
+        moduleVisibility: '',
+        testCategory: 'api',
+        configType: 'standard',
+        nestedName: 'user-storage',
+        customScoutName: 'user_storage',
+      },
     ])(
       'can parse a valid config path correctly for $moduleType in $basePath',
       (expected: {
@@ -72,6 +82,7 @@ describe('test_config module', () => {
         testCategory: string;
         configType: string;
         nestedName?: string;
+        customScoutName?: string;
       }) => {
         const moduleName = expected.nestedName ?? 'moddy_mc_moduleface';
         const moduleRoot = path.join(
@@ -80,7 +91,10 @@ describe('test_config module', () => {
           expected.moduleVisibility || '',
           moduleName
         );
-        const scoutRoot = path.join(moduleRoot, 'test/scout');
+        const scoutDirName = `scout${
+          expected.customScoutName ? `_${expected.customScoutName}` : ''
+        }`;
+        const scoutRoot = path.join(moduleRoot, `test/${scoutDirName}`);
         const validManifestContent = {
           sha1: 'b72df4fa5abc546e5f21e6c2f6eaaaa523755720',
           tests: [
@@ -131,13 +145,16 @@ describe('test_config module', () => {
             name: moduleName,
             group: expected.moduleGroup,
             type: expected.moduleType,
-            visibility: expected.moduleVisibility,
+            visibility: expected.moduleVisibility || 'private',
             root: moduleRoot,
           },
           manifest: {
             path: manifestPath,
             exists: true,
             ...validManifestContent,
+          },
+          server: {
+            configSet: expected.customScoutName || 'default',
           },
         });
       }
@@ -168,6 +185,9 @@ describe('test_config module', () => {
         manifest: {
           path: manifestPath,
           ...dummyManifestProps,
+        },
+        server: {
+          configSet: 'default',
         },
       });
     });
@@ -225,6 +245,9 @@ describe('test_config module', () => {
           path: 'src/platform/plugins/shared/pluggy_mc_pluginface/test/scout/.meta/api/standard.json',
           ...dummyManifestProps,
         },
+        server: {
+          configSet: 'default',
+        },
       },
       {
         path: 'x-pack/solutions/security/packages/halt_who_goes_there/test/scout/api/playwright.config.ts',
@@ -240,6 +263,9 @@ describe('test_config module', () => {
         manifest: {
           path: 'x-pack/solutions/security/packages/halt_who_goes_there/test/scout/.meta/api/standard.json',
           ...dummyManifestProps,
+        },
+        server: {
+          configSet: 'default',
         },
       },
     ];

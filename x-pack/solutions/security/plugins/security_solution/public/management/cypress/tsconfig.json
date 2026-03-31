@@ -21,6 +21,7 @@
     "@kbn/cypress-config",
     "@kbn/test-subj-selector",
     "@kbn/cases-plugin",
+    "@kbn/kbn-client",
     "@kbn/test",
     "@kbn/repo-info",
     "@kbn/tooling-log",

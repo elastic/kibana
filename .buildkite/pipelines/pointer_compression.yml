@@ -68,6 +68,7 @@ steps:
     key: build_scout_tests
     timeout_in_minutes: 10
     env:
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
@@ -370,6 +371,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 115
       preemptible: true
     depends_on:
       - build
@@ -387,6 +389,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 115
       preemptible: true
     depends_on:
       - build

@@ -35,7 +35,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('logSummaryBetween', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/255042
+  describe.skip('logSummaryBetween', function () {
     this.onlyEsVersion('8.19');
 
     before(() =>

@@ -12,6 +12,9 @@ import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   APP_ID,
+  DEFAULT_AI_CONNECTOR,
+  DEFAULT_ALERT_TAGS_KEY,
+  DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
@@ -26,22 +29,20 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
+  ENABLE_CCS_READ_WARNING_SETTING,
+  ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
+  ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
+  EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
+  EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE,
+  EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
+  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
+  EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
-  ENABLE_CCS_READ_WARNING_SETTING,
   SHOW_RELATED_INTEGRATIONS_SETTING,
-  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
-  EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
-  DEFAULT_ALERT_TAGS_KEY,
-  DEFAULT_ALERT_TAGS_VALUE,
-  EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
-  EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
-  ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
-  ENABLE_GRAPH_VISUALIZATION_SETTING,
-  DEFAULT_AI_CONNECTOR,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -205,6 +206,28 @@ export const initUiSettings = (
         {
           defaultMessage:
             '<p>When enabled, cold and frozen tiers will be skipped in analyzer queries</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+      solution: 'security',
+    },
+    [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInPrevalence',
+        {
+          defaultMessage: 'Exclude cold and frozen tiers in Prevalence',
+        }
+      ),
+      value: false,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInPrevalenceDescription',
+        {
+          defaultMessage:
+            '<p>When enabled, cold and frozen tiers will be skipped in prevalence queries</p>',
           values: { p: (chunks) => `<p>${chunks}</p>` },
         }
       ),

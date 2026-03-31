@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/guided-onboarding-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/guided-onboarding-example-plugin'
+  title: '@kbn/guided-onboarding-example-plugin'
   description: Moon project for @kbn/guided-onboarding-example-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: examples/guided_onboarding_example
+  sourceRoot: examples/guided_onboarding_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/guided-onboarding-plugin'

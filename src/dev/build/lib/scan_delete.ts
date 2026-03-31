@@ -67,7 +67,7 @@ export async function scanDelete(directory: string, options: Options) {
     getPathsToDelete$(directory).pipe(
       Rx.mergeMap(
         async (path) => await Fsp.rm(path, { recursive: true, maxRetries: 1 }),
-        options.concurrency
+        options.concurrency ?? 20
       ),
       Rx.count()
     )

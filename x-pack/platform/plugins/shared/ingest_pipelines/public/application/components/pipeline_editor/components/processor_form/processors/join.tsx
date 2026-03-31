@@ -35,7 +35,9 @@ const fieldsConfig: FieldsConfig = {
         validator: emptyField(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.joinForm.separatorRequiredError', {
             defaultMessage: 'A value is required.',
-          })
+          }),
+          // Do not trim the separator value to avoid whitespace characters being removed
+          false
         ),
       },
     ],
@@ -52,7 +54,12 @@ export const Join: FunctionComponent = () => {
         )}
       />
 
-      <UseField config={fieldsConfig.separator} component={Field} path="fields.separator" />
+      <UseField
+        config={fieldsConfig.separator}
+        component={Field}
+        path="fields.separator"
+        data-test-subj="separatorValueField"
+      />
 
       <TargetField />
     </>

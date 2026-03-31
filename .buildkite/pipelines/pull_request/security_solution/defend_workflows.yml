@@ -1,6 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
+    key: defend-workflows
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
@@ -10,6 +11,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
+    parallelism: 16
     retry:
       automatic:
         - exit_status: '-1'

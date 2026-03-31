@@ -210,7 +210,7 @@ describe('LensEditConfigurationFlyout', () => {
     expect(updatePanelStateSpy).toHaveBeenCalled();
   });
 
-  it('should call the updateByRefInput callback if cancel button is clicked and savedObjectId exists', async () => {
+  it('should call the updateByRefInput callback with savedObjectId and previous attributes if cancel button is clicked and savedObjectId exists', async () => {
     const updateByRefInputSpy = jest.fn();
 
     await renderConfigFlyout({
@@ -219,10 +219,10 @@ describe('LensEditConfigurationFlyout', () => {
       savedObjectId: 'id',
     });
     await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
-    expect(updateByRefInputSpy).toHaveBeenCalled();
+    expect(updateByRefInputSpy).toHaveBeenCalledWith('id', lensAttributes);
   });
 
-  it('should call the saveByRef callback if apply button is clicked and savedObjectId exists', async () => {
+  it('should call the saveByRef and updateByRefInput with the current attributes when apply button is clicked and savedObjectId exists', async () => {
     const updateByRefInputSpy = jest.fn();
     const saveByRefSpy = jest.fn();
 
@@ -233,8 +233,14 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
     });
     await userEvent.click(screen.getByTestId('applyFlyoutButton'));
-    expect(updateByRefInputSpy).toHaveBeenCalled();
     expect(saveByRefSpy).toHaveBeenCalled();
+    expect(updateByRefInputSpy).toHaveBeenCalledWith(
+      'id',
+      expect.objectContaining({
+        title: 'test',
+        visualizationType: 'testVis',
+      })
+    );
   });
 
   it('should call the onApplyCb callback if apply button is clicked', async () => {
