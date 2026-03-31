@@ -53,6 +53,8 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/zod'
+  - '@kbn/shared-ux-ai-components'
 tags:
   - plugin
   - prod
@@ -66,26 +68,6 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

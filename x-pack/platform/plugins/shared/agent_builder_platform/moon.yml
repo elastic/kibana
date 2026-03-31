@@ -40,6 +40,9 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/share-plugin'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/connector-specs'
+  - '@kbn/core-saved-objects-api-server'
 tags:
   - plugin
   - prod
@@ -53,26 +56,6 @@ fileGroups:
     - server/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

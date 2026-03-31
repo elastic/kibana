@@ -1,10 +1,11 @@
-summary: Retrieves information about an Observability case including its alerts and comments.
+summary: Get case response (Observability). Comments are not included; use the find case comments API. totalComment reflects the actual count.
 value: 
   {
   "description": "An Observability case description.",
   "owner": "observability",
   "settings": {
-    "syncAlerts": false
+    "syncAlerts": false,
+    "extractObservables": false
   },
   "tags": [
     "observability",
@@ -47,51 +48,5 @@ value:
   "version": "WzI0NywyXQ==",
   "totalComment": 1,
   "totalAlerts": 1,
-  "comments": [
-    {
-      "alertId": [
-        "a6e12ac4-7bce-457b-84f6-d7ce8deb8446"
-      ],
-      "index": [
-        ".internal.alerts-observability.logs.alerts-default-000001"
-      ],
-      "type": "alert",
-      "rule": {
-        "id": "03e4eb87-62ca-4e5d-9570-3d7625e9669d",
-        "name": "Observability rule"
-      },
-      "owner": "observability",
-      "created_at": "2023-11-06T19:29:38.424Z",
-      "created_by": {
-        "email": null,
-        "full_name": null,
-        "username": "elastic",
-        "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
-      },
-      "pushed_at": null,
-      "pushed_by": null,
-      "updated_at": null,
-      "updated_by": null,
-      "id": "59d438d0-79a9-4864-8d4b-e63adacebf6e",
-      "version": "WzY3LDJd"
-    },
-    {
-      "comment": "The first comment.",
-      "type": "user",
-      "owner": "observability",
-      "created_at": "2023-11-06T19:29:57.812Z",
-      "created_by": {
-        "email": null,
-        "full_name": null,
-        "username": "elastic",
-        "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
-      },
-      "pushed_at": null,
-      "pushed_by": null,
-      "updated_at": null,
-      "updated_by": null,
-      "id": "d99342d3-3aa3-4b80-90ec-a702607604f5",
-      "version": "WzcyLDJd"
-    }
-  ]
+  "totalEvents": 0,
 }

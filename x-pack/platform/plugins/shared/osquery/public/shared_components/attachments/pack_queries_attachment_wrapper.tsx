@@ -67,6 +67,7 @@ export const PackQueriesAttachmentWrapper = ({
           startDate={scheduledData?.timestamp}
           scheduleId={scheduleId}
           executionCount={executionCount}
+          packName={scheduledData?.packName}
         />
       </CasesAttachmentWrapperContext.Provider>
     );

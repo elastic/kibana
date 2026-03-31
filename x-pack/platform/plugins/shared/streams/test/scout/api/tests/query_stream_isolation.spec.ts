@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { streamsApiTest as apiTest } from '../fixtures';
+import { PUBLIC_API_HEADERS } from '../fixtures/constants';
 
 const VIEW_PREFIX = '$.';
 const viewName = (streamName: string) => `${VIEW_PREFIX}${streamName}`;
@@ -79,12 +80,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
       const { statusCode, body } = await apiClient.get('api/streams', {
-        headers: {
-          'kbn-xsrf': 'some-xsrf-token',
-          'x-elastic-internal-origin': 'kibana',
-          'elastic-api-version': '2023-10-31',
-          ...cookieHeader,
-        },
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
 
@@ -156,6 +152,68 @@ apiTest.describe(
         const columnNames = result.columns.map((c) => c.name);
         expect(columnNames).not.toContain('error_count');
         expect(columnNames).not.toContain('doubled');
+      }
+    );
+
+    // Wired sibling deletion preserves query_streams on parent
+
+    apiTest(
+      'deleting a wired sibling preserves query stream references on parent',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const headers = { ...PUBLIC_API_HEADERS, ...cookieHeader };
+        const wiredSibling = `${parentStream}.wired-sib`;
+
+        // Fork a wired sibling under the same parent
+        const { statusCode: forkStatus } = await apiClient.post(
+          `api/streams/${parentStream}/_fork`,
+          {
+            headers,
+            body: {
+              stream: { name: wiredSibling },
+              where: { field: 'service.name', eq: 'wired-sibling-test' },
+              status: 'enabled',
+            },
+            responseType: 'json',
+          }
+        );
+        expect(forkStatus).toBe(200);
+
+        // Verify parent has the query child before deletion
+        const { body: before } = await apiClient.get(`api/streams/${parentStream}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(before.stream.query_streams?.map((ref: { name: string }) => ref.name)).toContain(
+          queryChildName
+        );
+
+        // Delete the wired sibling — this triggers a cascading parent update
+        const { statusCode: deleteStatus } = await apiClient.delete(`api/streams/${wiredSibling}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(deleteStatus).toBe(200);
+
+        // Confirm the sibling is actually gone
+        const { statusCode: siblingStatus } = await apiClient.get(`api/streams/${wiredSibling}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(siblingStatus).toBe(404);
+
+        // Verify the cascading parent update preserved query_streams and removed routing
+        const { body: after } = await apiClient.get(`api/streams/${parentStream}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(after.stream.query_streams?.map((ref: { name: string }) => ref.name)).toContain(
+          queryChildName
+        );
+        const routingDestinations = after.stream.ingest.wired.routing.map(
+          (r: { destination: string }) => r.destination
+        );
+        expect(routingDestinations).not.toContain(wiredSibling);
       }
     );
 

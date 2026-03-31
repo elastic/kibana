@@ -16,6 +16,7 @@ export {
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,
+  platformStreamsSigEventsTools,
   attachmentTools,
   filestoreTools,
   defaultAgentToolIds,
@@ -97,6 +98,7 @@ export {
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
 export { type UserIdAndName } from './base/users';
 export { EsResourceType } from './base/resources';
+export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
   AgentType,
@@ -130,10 +132,17 @@ export {
   type ConversationRoundStep,
   type ReasoningStepData,
   type ReasoningStep,
+  type CompactionStepData,
+  type CompactionStep,
   type RoundModelUsageStats,
+  type CompactionSummary,
+  type CompactionStructuredData,
+  type CompactionToolCallSummary,
+  type CompactionEntity,
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,
+  isCompactionStep,
   ChatEventType,
   ConversationRoundStatus,
   type ChatEventBase,
@@ -180,6 +189,12 @@ export {
   isConversationUpdatedEvent,
   isToolProgressEvent,
   isPromptRequestEvent,
+  type CompactionStartedEvent,
+  type CompactionStartedEventData,
+  type CompactionCompletedEvent,
+  type CompactionCompletedEventData,
+  isCompactionStartedEvent,
+  isCompactionCompletedEvent,
 } from './chat';
 export {
   type PublicSkillDefinition,
@@ -187,12 +202,6 @@ export {
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
   type SkillReferencedContent,
-  type SkillSelection,
-  allSkillsSelectionWildcard,
-  allBuiltInSkillsSelection,
-  skillMatchSelection,
-  hasSkillSelectionWildcard,
-  getExplicitSkillIds,
   skillCreateRequestSchema,
   skillUpdateRequestSchema,
   validateSkillId,

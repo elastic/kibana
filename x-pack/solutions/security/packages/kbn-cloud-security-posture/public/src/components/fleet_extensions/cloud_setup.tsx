@@ -308,6 +308,9 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             updatePolicy={updatePolicy}
             disabled={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
+            setupTechnology={setupTechnology}
+            cloud={cloud}
+            isEditPage={isEditPage}
           />
         )}
         {selectedProvider === GCP_PROVIDER && setupTechnology !== SetupTechnology.AGENTLESS && (

@@ -7,12 +7,20 @@
 import {
   getInlineSplQuery,
   type GetInlineSplQueryParams,
+  getSPLQueryKeywords,
+  SPL_KEYWORDS,
 } from '../../../../../../../common/task/agent/helpers/inline_spl_query';
 import { OriginalRuleVendorEnum } from '../../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { GraphNode } from '../../types';
+import type { RuleMigrationTelemetryClient } from '../../../../../rule_migrations_telemetry_client';
 
-export const getInlineQueryNode = (params: GetInlineSplQueryParams): GraphNode => {
-  const inlineSplQuery = getInlineSplQuery(params);
+interface InlineQueryNodeParams extends GetInlineSplQueryParams {
+  telemetryClient: RuleMigrationTelemetryClient;
+}
+
+export const getInlineQueryNode = (params: InlineQueryNodeParams): GraphNode => {
+  const { telemetryClient, ...inlineParams } = params;
+  const inlineSplQuery = getInlineSplQuery(inlineParams);
   return async (state) => {
     if (state.original_rule.vendor !== OriginalRuleVendorEnum.splunk) {
       // We only support inlining SPL queries, if the original rule is not a Splunk rule, we return the original query without inlining and add a comment about it.
@@ -28,8 +36,15 @@ export const getInlineQueryNode = (params: GetInlineSplQueryParams): GraphNode =
       // Graph conditional edge detects undefined inline_query as unsupported query
       return { inline_query: undefined, comments };
     }
+    const finalInlineQuery = inlineQuery ?? state.original_rule.query;
+    if (finalInlineQuery) {
+      telemetryClient.reportSourceQueryKeywords({
+        type: 'rules',
+        keywords: getSPLQueryKeywords(finalInlineQuery, SPL_KEYWORDS),
+      });
+    }
     return {
-      inline_query: inlineQuery ?? state.original_rule.query,
+      inline_query: finalInlineQuery,
       comments,
     };
   };

@@ -42,7 +42,7 @@ export const AnomalyJobSelectorEmptyState: FC<Props> = ({ jobsManagementPath, ca
         color="primary"
         href={jobsManagementPath}
         fill
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isDisabled={!canCreateJobs}
         data-test-subj="mlMapsCreateNewJobButton"
       >

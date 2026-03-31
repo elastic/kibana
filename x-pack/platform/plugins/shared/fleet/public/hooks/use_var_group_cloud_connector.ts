@@ -12,9 +12,10 @@ import {
   getCloudConnectorOption,
   getCloudConnectorVars,
   getIacTemplateUrlFromVarGroupSelection,
+  getAccountTypeFromVarGroupOrInputs,
   type VarGroupSelection,
 } from '../../common/services/cloud_connectors';
-import type { CloudProvider } from '../types';
+import type { AccountType, CloudProvider } from '../types';
 import type { UpdatePolicy } from '../components/cloud_connector/types';
 
 export type { VarGroupSelection };
@@ -24,6 +25,8 @@ export interface CloudConnectorInfo {
   isSelected: boolean;
   /** The cloud provider (e.g., 'aws', 'azure') if cloud connector is selected */
   cloudProvider?: CloudProvider;
+  /** The account type (e.g., 'single-account', 'organization-account') derived from input vars or var_group scope */
+  accountType: AccountType;
   /** IaC template URL from the selected var_group option */
   iacTemplateUrl?: string;
   /** Set of variable names handled by cloud connector (should be hidden from regular var fields) */
@@ -37,6 +40,8 @@ export interface UseVarGroupCloudConnectorProps {
   varGroups: RegistryVarGroup[] | undefined;
   /** Current var_group selections */
   varGroupSelections: VarGroupSelection;
+  /** The current package policy (used to derive account type from input vars) */
+  packagePolicy: NewPackagePolicy;
   /** Callback to update the package policy */
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
 }
@@ -58,6 +63,7 @@ export interface UseVarGroupCloudConnectorProps {
 export const useVarGroupCloudConnector = ({
   varGroups,
   varGroupSelections,
+  packagePolicy,
   updatePackagePolicy,
 }: UseVarGroupCloudConnectorProps): CloudConnectorInfo => {
   // Check if a cloud connector option is selected
@@ -78,6 +84,17 @@ export const useVarGroupCloudConnector = ({
     [varGroups, varGroupSelections]
   );
 
+  const accountType = useMemo(
+    () =>
+      getAccountTypeFromVarGroupOrInputs(
+        cloudConnectorOption.provider,
+        varGroups,
+        cloudConnectorVars,
+        packagePolicy.inputs
+      ),
+    [cloudConnectorOption.provider, varGroups, cloudConnectorVars, packagePolicy.inputs]
+  );
+
   // Create an UpdatePolicy callback compatible with CloudConnectorSetup
   const handleCloudConnectorUpdate: UpdatePolicy = useCallback(
     ({ updatedPolicy }) => {
@@ -89,6 +106,7 @@ export const useVarGroupCloudConnector = ({
   return {
     isSelected: cloudConnectorOption.isSelected,
     cloudProvider: cloudConnectorOption.provider,
+    accountType,
     iacTemplateUrl,
     cloudConnectorVars,
     handleCloudConnectorUpdate,

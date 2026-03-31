@@ -109,4 +109,113 @@ describe('PublicTriggerRegistry', () => {
       expect(all).toContainEqual(definition2);
     });
   });
+
+  describe('register with async loader', () => {
+    it('should resolve loader and add definition to registry', async () => {
+      registry.register(() => Promise.resolve(defaultDefinition));
+
+      expect(registry.has(triggerId)).toBe(false);
+      await registry.whenReady();
+      expect(registry.has(triggerId)).toBe(true);
+      expect(registry.get(triggerId)).toEqual(defaultDefinition);
+    });
+
+    it('should throw when resolved definition duplicates an existing trigger id', async () => {
+      registry.register(defaultDefinition);
+      const loader = () =>
+        Promise.resolve({ ...defaultDefinition, title: 'Other' } as PublicTriggerDefinition);
+
+      registry.register(loader);
+
+      await expect(registry.whenReady()).rejects.toThrow(
+        'Trigger definition for "example.test_trigger" is already registered'
+      );
+    });
+
+    it('whenReady() should resolve after all loaders have settled', async () => {
+      const def1: PublicTriggerDefinition = {
+        ...defaultDefinition,
+        id: 'example.trigger1',
+      };
+      const def2: PublicTriggerDefinition = {
+        ...defaultDefinition,
+        id: 'example.trigger2',
+      };
+      let resolve1!: (d: PublicTriggerDefinition) => void;
+      let resolve2!: (d: PublicTriggerDefinition) => void;
+      const promise1 = new Promise<PublicTriggerDefinition>((r) => {
+        resolve1 = r;
+      });
+      const promise2 = new Promise<PublicTriggerDefinition>((r) => {
+        resolve2 = r;
+      });
+
+      registry.register(() => promise1);
+      registry.register(() => promise2);
+
+      const readyPromise = registry.whenReady();
+      expect(registry.getAll()).toHaveLength(0);
+
+      resolve1(def1);
+      await Promise.resolve();
+      expect(registry.getAll()).toHaveLength(1);
+
+      resolve2(def2);
+      await readyPromise;
+      expect(registry.getAll()).toHaveLength(2);
+    });
+
+    it('should support mixed sync and async registration', async () => {
+      const syncDef: PublicTriggerDefinition = {
+        ...defaultDefinition,
+        id: 'example.sync',
+      };
+      const asyncDef: PublicTriggerDefinition = {
+        ...defaultDefinition,
+        id: 'example.async',
+      };
+
+      registry.register(syncDef);
+      registry.register(() => Promise.resolve(asyncDef));
+
+      expect(registry.has('example.sync')).toBe(true);
+      expect(registry.has('example.async')).toBe(false);
+
+      await registry.whenReady();
+
+      expect(registry.get('example.sync')).toEqual(syncDef);
+      expect(registry.get('example.async')).toEqual(asyncDef);
+      expect(registry.getAll()).toHaveLength(2);
+    });
+
+    it('should throw when loader resolves with undefined', async () => {
+      registry.register(() => Promise.resolve(undefined as unknown as PublicTriggerDefinition));
+
+      await expect(registry.whenReady()).rejects.toThrow(
+        'Trigger definition is not loaded correctly'
+      );
+    });
+
+    it('should throw when loader resolves with null', async () => {
+      registry.register(() => Promise.resolve(null as unknown as PublicTriggerDefinition));
+
+      await expect(registry.whenReady()).rejects.toThrow(
+        'Trigger definition is not loaded correctly'
+      );
+    });
+
+    it('should reject whenReady() when loader rejects', async () => {
+      const loadError = new Error('Failed to load trigger module');
+      registry.register(() => Promise.reject(loadError));
+
+      await expect(registry.whenReady()).rejects.toThrow('Failed to load trigger module');
+    });
+  });
+
+  describe('whenReady', () => {
+    it('should resolve immediately when no pending loaders', async () => {
+      registry.register(defaultDefinition);
+      await expect(registry.whenReady()).resolves.toBeUndefined();
+    });
+  });
 });

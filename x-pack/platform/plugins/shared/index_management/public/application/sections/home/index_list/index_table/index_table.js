@@ -18,6 +18,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLiveAnnouncer,
   EuiPageSection,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -32,6 +33,7 @@ import {
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
   EuiText,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { get } from 'lodash';
 
@@ -71,6 +73,8 @@ const getColumnConfigs = ({
         defaultMessage: 'Name',
       }),
       order: 10,
+      width: '15em', // This is just a recommendation and the column will grow if there's extra space
+      minWidth: '12em',
       render: (index) => {
         return (
           <>
@@ -98,6 +102,8 @@ const getColumnConfigs = ({
       label: i18n.translate('xpack.idxMgmt.indexTable.headers.dataStreamHeader', {
         defaultMessage: 'Data stream',
       }),
+      width: '10em',
+      minWidth: '7.5em',
       order: 80,
       render: (index) => {
         if (index.data_stream) {
@@ -130,6 +136,10 @@ const getColumnConfigs = ({
           return <DocCountCell indexName={index.name} docCountApi={docCountApi} />;
         },
         readOnly: true,
+        minWidth: '8em',
+        width: '12em',
+        className: 'eui-textNoWrap',
+        align: RIGHT_ALIGNMENT,
       },
       {
         fieldName: 'size',
@@ -138,6 +148,10 @@ const getColumnConfigs = ({
         }),
         render: (index) => formatBytes(index.size),
         order: 70,
+        minWidth: '9em',
+        width: '12em',
+        className: 'eui-textNoWrap',
+        align: RIGHT_ALIGNMENT,
       }
     );
   }
@@ -149,6 +163,9 @@ const getColumnConfigs = ({
           defaultMessage: 'Health',
         }),
         order: 20,
+        width: '7em',
+        minWidth: '7em',
+        className: 'eui-textNoWrap',
         render: (index) => (index.health ? <DataHealth health={index.health} /> : undefined),
       },
       {
@@ -157,6 +174,10 @@ const getColumnConfigs = ({
           defaultMessage: 'Status',
         }),
         order: 30,
+        width: '6em',
+        minWidth: '6em',
+        maxWidth: '6em',
+        className: 'eui-textNoWrap',
       },
       {
         fieldName: 'primary',
@@ -164,6 +185,10 @@ const getColumnConfigs = ({
           defaultMessage: 'Primaries',
         }),
         order: 40,
+        width: '6.5em',
+        minWidth: '6.5em',
+        className: 'eui-textNoWrap',
+        align: RIGHT_ALIGNMENT,
       },
       {
         fieldName: 'replica',
@@ -171,6 +196,10 @@ const getColumnConfigs = ({
           defaultMessage: 'Replicas',
         }),
         order: 50,
+        width: '6.5em',
+        minWidth: '6.5em',
+        className: 'eui-textNoWrap',
+        align: RIGHT_ALIGNMENT,
       }
     );
   }
@@ -205,6 +234,7 @@ export class IndexTable extends Component {
     this.docCountApi = docCountApi(props.http);
     this.state = {
       selectedIndicesMap: {},
+      selectionAnnouncement: '',
     };
   }
 
@@ -234,6 +264,35 @@ export class IndexTable extends Component {
     for (const toggleParam of toggleParams) {
       if (toggles.includes(toggleParam)) {
         toggleChanged(toggleParam, rest[toggleParam] === 'true');
+      }
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const hadSelectedItems = Object.keys(prevState.selectedIndicesMap).length > 0;
+    const hasSelectedItems = Object.keys(this.state.selectedIndicesMap).length > 0;
+
+    if (!hadSelectedItems && hasSelectedItems) {
+      const selectionAnnouncement = i18n.translate(
+        'xpack.idxMgmt.indexTable.bulkActionsAnnouncementVisible',
+        {
+          defaultMessage: 'Bulk actions menu is now available.',
+        }
+      );
+
+      if (this.state.selectionAnnouncement !== selectionAnnouncement) {
+        this.setState({ selectionAnnouncement });
+      }
+    } else if (hadSelectedItems && !hasSelectedItems) {
+      const selectionAnnouncement = i18n.translate(
+        'xpack.idxMgmt.indexTable.bulkActionsAnnouncementHidden',
+        {
+          defaultMessage: 'Bulk actions menu is now hidden.',
+        }
+      );
+
+      if (this.state.selectionAnnouncement !== selectionAnnouncement) {
+        this.setState({ selectionAnnouncement });
       }
     }
   }
@@ -394,24 +453,28 @@ export class IndexTable extends Component {
 
   buildHeader(columnConfigs) {
     const { sortField, isSortAscending } = this.props;
-    return columnConfigs.map(({ fieldName, label, readOnly }) => {
-      const isSorted = sortField === fieldName;
-      // we only want to make index name column 25% width when there are more columns displayed
-      const widthStyle = fieldName === 'name' && columnConfigs.length > 2 ? { width: '25%' } : {};
-      return (
-        <EuiTableHeaderCell
-          key={fieldName}
-          onSort={() => this.onSort(fieldName)}
-          isSorted={isSorted}
-          isSortAscending={isSortAscending}
-          style={widthStyle}
-          data-test-subj={`indexTableHeaderCell-${fieldName}`}
-          readOnly={readOnly}
-        >
-          {label}
-        </EuiTableHeaderCell>
-      );
-    });
+    return columnConfigs.map(
+      ({ fieldName, label, readOnly, width, minWidth, maxWidth, className, align }) => {
+        const isSorted = sortField === fieldName;
+        return (
+          <EuiTableHeaderCell
+            key={fieldName}
+            onSort={() => this.onSort(fieldName)}
+            isSorted={isSorted}
+            isSortAscending={isSortAscending}
+            data-test-subj={`indexTableHeaderCell-${fieldName}`}
+            readOnly={readOnly}
+            width={width}
+            minWidth={minWidth}
+            maxWidth={maxWidth}
+            className={className}
+            align={align}
+          >
+            {label}
+          </EuiTableHeaderCell>
+        );
+      }
+    );
   }
 
   buildRowCell(index, columnConfig) {
@@ -424,16 +487,19 @@ export class IndexTable extends Component {
   buildRowCells(index, columnConfigs) {
     return columnConfigs.map((columnConfig) => {
       const { name } = index;
-      const { fieldName } = columnConfig;
-      const cellStyle = fieldName === 'name' ? { wordBreak: 'break-all' } : {};
+      const { fieldName, width, minWidth, maxWidth, className, align } = columnConfig;
       return (
         <EuiTableRowCell
           key={`${fieldName}-${name}`}
           truncateText={false}
           setScopeRow={fieldName === 'name'}
           data-test-subj={`indexTableCell-${fieldName}`}
-          style={cellStyle}
           header={fieldName}
+          width={width}
+          minWidth={minWidth}
+          maxWidth={maxWidth}
+          className={className}
+          align={align}
         >
           {this.buildRowCell(index, columnConfig)}
         </EuiTableRowCell>
@@ -601,7 +667,7 @@ export class IndexTable extends Component {
       }
     }
 
-    const { selectedIndicesMap } = this.state;
+    const { selectedIndicesMap, selectionAnnouncement } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
 
     return (
@@ -675,6 +741,7 @@ export class IndexTable extends Component {
                           indexNames={Object.keys(selectedIndicesMap)}
                           isOnListView={true}
                           indicesListURLParams={location.search || ''}
+                          docCountApi={this.docCountApi}
                           resetSelection={() => {
                             this.setState({ selectedIndicesMap: {} });
                           }}
@@ -742,8 +809,15 @@ export class IndexTable extends Component {
 
               <EuiSpacer size="m" />
 
+              <EuiLiveAnnouncer>{selectionAnnouncement}</EuiLiveAnnouncer>
+
               <div style={{ maxWidth: '100%', overflow: 'auto' }}>
-                <EuiTable data-test-subj="indexTable">
+                <EuiTable
+                  data-test-subj="indexTable"
+                  scrollableInline
+                  responsiveBreakpoint={false}
+                  tableLayout="auto"
+                >
                   <EuiScreenReaderOnly>
                     <caption role="status" aria-relevant="text" aria-live="polite">
                       <FormattedMessage

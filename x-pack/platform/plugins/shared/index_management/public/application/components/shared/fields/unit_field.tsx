@@ -38,7 +38,7 @@ export const UnitField: FunctionComponent<Props> = ({ path, disabled, options, e
                 size="xs"
                 color="text"
                 iconSide="right"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 onClick={() => setOpen((isOpen) => !isOpen)}
                 data-test-subj="show-filters-button"
                 disabled={disabled}

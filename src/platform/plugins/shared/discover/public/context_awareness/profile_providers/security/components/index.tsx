@@ -25,3 +25,11 @@ export const EnhancedAlertEventOverviewLazy = withSuspense(
     }))
   )
 );
+
+export const EnhancedAlertFlyoutHeaderLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_alert_flyout_header').then((module) => ({
+      default: module.EnhancedAlertFlyoutHeader,
+    }))
+  )
+);
