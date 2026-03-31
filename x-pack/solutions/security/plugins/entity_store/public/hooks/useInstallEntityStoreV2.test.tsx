@@ -12,7 +12,7 @@ import {
   type Services,
 } from './useInstallEntityStoreV2';
 import { EntityStoreStatus } from '../../common';
-import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common/constants';
+import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
 
 interface MockServices {
   http: { get: jest.Mock; post: jest.Mock };

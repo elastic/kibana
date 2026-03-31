@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { EntityType } from '../common';
-import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../common/constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../common';
 
 export interface BulkUpdateEntitiesParams {
   entityType: EntityType;
