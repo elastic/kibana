@@ -166,7 +166,12 @@ describe('flattenSteps', () => {
         action: 'set',
         to: 'result',
         value: 'ok',
-        where: { and: [{ field: 'env', eq: 'prod' }, { field: 'status', eq: 200 }] },
+        where: {
+          and: [
+            { field: 'env', eq: 'prod' },
+            { field: 'status', eq: 200 },
+          ],
+        },
       },
       {
         action: 'set',

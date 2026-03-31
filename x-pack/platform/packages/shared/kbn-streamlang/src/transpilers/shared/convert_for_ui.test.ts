@@ -276,12 +276,8 @@ describe('convertUIStepsToDSL', () => {
           condition: {
             field: 'env',
             eq: 'prod',
-            steps: [
-              { customIdentifier: 'if1', action: 'set', to: 'flag', value: 'true' },
-            ],
-            else: [
-              { customIdentifier: 'else1', action: 'set', to: 'flag', value: 'false' },
-            ],
+            steps: [{ customIdentifier: 'if1', action: 'set', to: 'flag', value: 'true' }],
+            else: [{ customIdentifier: 'else1', action: 'set', to: 'flag', value: 'false' }],
           },
         },
       ],

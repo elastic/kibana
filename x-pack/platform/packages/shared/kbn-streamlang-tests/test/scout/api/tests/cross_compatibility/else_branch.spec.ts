@@ -48,10 +48,7 @@ apiTest.describe(
         const { query } = await transpileEsql(streamlangDSL);
 
         const mappingDoc = { attributes: { status: 'null', outcome: 'null' } };
-        const docs = [
-          { attributes: { status: 'active' } },
-          { attributes: { status: 'inactive' } },
-        ];
+        const docs = [{ attributes: { status: 'active' } }, { attributes: { status: 'inactive' } }];
 
         // Test ingest pipeline
         await testBed.ingest('ingest-else', docs, processors);

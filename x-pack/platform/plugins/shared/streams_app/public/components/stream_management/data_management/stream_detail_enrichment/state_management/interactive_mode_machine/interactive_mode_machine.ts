@@ -163,7 +163,11 @@ export const interactiveModeMachine = setup({
         assignArgs.context.grokCollection,
         { isNew: true }
       );
-      const insertIndex = findInsertIndex(assignArgs.context.stepRefs, parentId, targetStepUIDefinition.branch ?? 'if');
+      const insertIndex = findInsertIndex(
+        assignArgs.context.stepRefs,
+        parentId,
+        targetStepUIDefinition.branch ?? 'if'
+      );
 
       return {
         stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
