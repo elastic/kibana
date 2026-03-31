@@ -248,8 +248,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const euidApi = useEntityStoreEuidApi();
 
+  const noEntityInStore =
+    entityStoreV2Enabled && !entityFromStoreResult.isLoading && !entityFromStoreResult.entityRecord;
+
   const usersDetailsEventsPageFilters = useMemo(() => {
-    if (!entityStoreV2Enabled) {
+    if (!entityStoreV2Enabled || !noEntityInStore) {
       return getUsersDetailsPageFilters(detailName);
     }
     const fromStore =
@@ -264,6 +267,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     detailName,
     entityFromStoreResult.entityRecord,
     entityStoreV2Enabled,
+    noEntityInStore,
     euidApi?.euid,
     resolvedIdentityFields,
   ]);
@@ -311,9 +315,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
       observedUser.refetchEntityStore,
     ]
   );
-
-  const noEntityInStore =
-    entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedUser.entityRecord;
 
   const displayEntityId = useMemo(
     () => (entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : entityId),
