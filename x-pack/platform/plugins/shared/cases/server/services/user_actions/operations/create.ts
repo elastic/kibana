@@ -382,7 +382,7 @@ export class UserActionPersister {
         caseId,
         user,
         owner: attachment.owner,
-        attachmentId: attachment.id,
+        savedObjectId: attachment.id,
         payload: { attachment: attachment.attachment },
       });
 
@@ -451,7 +451,7 @@ export class UserActionPersister {
     userAction,
     refresh,
   }: CreateUserActionArgs<T>): Promise<void> {
-    const { action, type, caseId, user, owner, payload, connectorId, attachmentId } = userAction;
+    const { action, type, caseId, user, owner, payload, connectorId, savedObjectId } = userAction;
 
     try {
       this.context.log.debug(`Attempting to create a user action of type: ${type}`);
@@ -463,7 +463,7 @@ export class UserActionPersister {
         user,
         owner,
         connectorId,
-        attachmentId,
+        savedObjectId,
         payload,
       });
 
@@ -488,7 +488,7 @@ export class UserActionPersister {
       }
 
       const userActionsPayload = userActions
-        .map(({ action, type, caseId, user, owner, payload, connectorId, attachmentId }) => {
+        .map(({ action, type, caseId, user, owner, payload, connectorId, savedObjectId }) => {
           const userActionBuilder = this.builderFactory.getBuilder<T>(type);
           const userAction = userActionBuilder?.build({
             action,
@@ -496,7 +496,7 @@ export class UserActionPersister {
             user,
             owner,
             connectorId,
-            attachmentId,
+            savedObjectId,
             payload,
           });
 

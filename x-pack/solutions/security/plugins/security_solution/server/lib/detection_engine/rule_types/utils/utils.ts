@@ -7,7 +7,7 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isArray, isEmpty, merge } from 'lodash';
+import { get, invert, isArray, isEmpty, merge, sum } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
@@ -35,7 +35,8 @@ import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleAction, GapReason } from '@kbn/alerting-plugin/common';
+import { gapReasonType } from '@kbn/alerting-plugin/common';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
@@ -310,6 +311,55 @@ export const getGapBetweenRuns = ({
   return currentDuration.subtract(driftTolerance);
 };
 
+export { type GapReason } from '@kbn/alerting-plugin/common';
+
+/**
+ * Determines why a gap occurred between rule executions.
+ *
+ * Returns `rule_disabled` only when the rule was re-enabled during the gap
+ * and fired promptly after (within the lookback window). Defaults to
+ * `rule_did_not_run` in all other cases (outages, missing data, etc).
+ *
+ * Known limitation: a brief toggle during an unrelated outage can be
+ * misclassified as rule_disabled.
+ */
+export const getGapReason = ({
+  previousStartedAt,
+  startedAt,
+  lastEnabledAt,
+  originalFrom,
+  originalTo,
+}: {
+  previousStartedAt: Date | null | undefined;
+  startedAt: Date;
+  lastEnabledAt: Date | null | undefined;
+  originalFrom: moment.Moment;
+  originalTo: moment.Moment;
+}): GapReason => {
+  if (previousStartedAt == null || lastEnabledAt == null) {
+    return { type: gapReasonType.RULE_DID_NOT_RUN };
+  }
+
+  const lastEnabledAtMs = lastEnabledAt.getTime();
+  const previousStartedAtMs = previousStartedAt.getTime();
+  const startedAtMs = startedAt.getTime();
+
+  const isInGapWindow = lastEnabledAtMs > previousStartedAtMs && lastEnabledAtMs <= startedAtMs;
+
+  if (!isInGapWindow) {
+    return { type: gapReasonType.RULE_DID_NOT_RUN };
+  }
+
+  const driftToleranceMs = originalTo.diff(originalFrom);
+  const postEnableDelayMs = startedAtMs - lastEnabledAtMs;
+
+  if (postEnableDelayMs <= driftToleranceMs) {
+    return { type: gapReasonType.RULE_DISABLED };
+  }
+
+  return { type: gapReasonType.RULE_DID_NOT_RUN };
+};
+
 export const makeFloatString = (num: number): string => Number(num).toFixed(2);
 
 export const getRuleRangeTuples = async ({
@@ -321,6 +371,7 @@ export const getRuleRangeTuples = async ({
   maxSignals,
   ruleExecutionLogger,
   alerting,
+  lastEnabledAt,
 }: {
   startedAt: Date;
   previousStartedAt: Date | null | undefined;
@@ -330,6 +381,7 @@ export const getRuleRangeTuples = async ({
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   alerting: AlertingServerSetup;
+  lastEnabledAt: Date | null | undefined;
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
@@ -397,11 +449,19 @@ export const getRuleRangeTuples = async ({
   );
 
   let gapRange;
+  let detectedGapReason: GapReason | undefined;
   if (remainingGapMilliseconds > 0 && previousStartedAt != null) {
     gapRange = {
       gte: previousStartedAt.toISOString(),
       lte: moment(previousStartedAt).add(remainingGapMilliseconds).toDate().toISOString(),
     };
+    detectedGapReason = getGapReason({
+      previousStartedAt,
+      startedAt,
+      lastEnabledAt,
+      originalFrom,
+      originalTo,
+    });
   }
 
   return {
@@ -409,6 +469,7 @@ export const getRuleRangeTuples = async ({
     remainingGap: moment.duration(remainingGapMilliseconds),
     warningStatusMessage,
     gap: gapRange,
+    gapReason: detectedGapReason,
     originalFrom,
     originalTo,
   };
@@ -566,6 +627,7 @@ export const createSearchAfterReturnTypeFromResponse = <
           )
         );
       }),
+    alertsCandidateCount: searchResult.hits.hits.length,
   });
 };
 
@@ -575,6 +637,7 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes,
   enrichmentTimes,
   bulkCreateTimes,
+  alertsCandidateCount,
   createdSignalsCount,
   createdSignals,
   errors,
@@ -587,6 +650,7 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes?: string[] | undefined;
   enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
+  alertsCandidateCount?: number | undefined;
   createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
@@ -600,6 +664,7 @@ export const createSearchAfterReturnType = ({
     searchAfterTimes: searchAfterTimes ?? [],
     enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
+    alertsCandidateCount,
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
@@ -640,6 +705,7 @@ export const mergeReturns = (
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       enrichmentTimes: existingEnrichmentTimes,
+      alertsCandidateCount: existingAlertsCandidateCount,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
@@ -654,6 +720,7 @@ export const mergeReturns = (
       searchAfterTimes: newSearchAfterTimes,
       enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
+      alertsCandidateCount: newAlertsCandidateCount,
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
@@ -668,6 +735,7 @@ export const mergeReturns = (
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
+      alertsCandidateCount: sum([existingAlertsCandidateCount, newAlertsCandidateCount]),
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],

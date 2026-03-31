@@ -28,7 +28,7 @@
         "label": "AsCodeGroupFilterRecursive",
         "description": [],
         "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-        "lineNumber": 212,
+        "lineNumber": 235,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -41,7 +41,7 @@
             "label": "group",
             "description": [],
             "signature": [
-              "{ operator: \"and\" | \"or\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
+              "{ operator: \"or\" | \"and\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
               {
                 "pluginId": "@kbn/as-code-filters-schema",
                 "scope": "common",
@@ -52,7 +52,7 @@
               ")[]; }"
             ],
             "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-            "lineNumber": 213,
+            "lineNumber": 236,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -122,7 +122,7 @@
             "section": "def-common.Writable",
             "text": "Writable"
           },
-          "<Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"group\"; group: Readonly<{} & { operator: \"and\" | \"or\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
+          "<Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"group\"; group: Readonly<{} & { operator: \"or\" | \"and\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
           {
             "pluginId": "@kbn/as-code-filters-schema",
             "scope": "common",
@@ -163,7 +163,7 @@
         "label": "AsCodeGroupFilter",
         "description": [],
         "signature": [
-          "{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; type: \"group\"; group: Readonly<{} & { operator: \"and\" | \"or\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
+          "{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; type: \"group\"; group: Readonly<{} & { operator: \"or\" | \"and\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
           {
             "pluginId": "@kbn/as-code-filters-schema",
             "scope": "common",
@@ -283,7 +283,7 @@
           "<Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }>>; }>>"
         ],
         "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-        "lineNumber": 222,
+        "lineNumber": 245,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -389,7 +389,7 @@
           "<any>; }>>"
         ],
         "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-        "lineNumber": 271,
+        "lineNumber": 301,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -412,7 +412,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"condition\"; condition: Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"group\"; group: Readonly<{} & { operator: \"and\" | \"or\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
+          "<Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"condition\"; condition: Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"group\"; group: Readonly<{} & { operator: \"or\" | \"and\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
           {
             "pluginId": "@kbn/as-code-filters-schema",
             "scope": "common",
@@ -423,7 +423,7 @@
           ")[]; }>; }> | Readonly<{ params?: any; label?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>>"
         ],
         "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-        "lineNumber": 325,
+        "lineNumber": 357,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -516,7 +516,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"and\" | \"or\">; conditions: ",
+          "<\"or\" | \"and\">; conditions: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -535,7 +535,7 @@
           ")[]>; }>; }>>"
         ],
         "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-        "lineNumber": 240,
+        "lineNumber": 264,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -625,7 +625,7 @@
           "<Record<string, any>>; }>>"
         ],
         "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-        "lineNumber": 306,
+        "lineNumber": 337,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
