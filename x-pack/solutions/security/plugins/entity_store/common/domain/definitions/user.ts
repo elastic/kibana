@@ -7,6 +7,7 @@
 
 import type { Condition } from '@kbn/streamlang';
 import {
+  ENTITY_SOURCE_FIELD_EVALUATION,
   fieldNotOneOfCondition,
   getCommonFieldDescriptions,
   getEntityFieldsDescriptions,
@@ -75,6 +76,7 @@ const nonIdpPostAggFilter = nonIdpDocumentFilter;
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
   name: `Security 'user' Entity Store Definition`,
+  fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   identityField: {
     fieldEvaluations: [
       {
@@ -186,14 +188,6 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   ],
   fields: [
     newestValue({ source: 'entity.name' }),
-    // Having multiple values in event.module or data_stream.dataset is a good feature
-    // but causes complexity for CCS extraction.
-    // That's why event.module and data_stream.dataset always use MV_FIRST on its usage
-    collect({ source: 'event.module' }),
-    // keep field length large for safety to not lose idps
-    // with many datasets
-    collect({ source: 'data_stream.dataset', fieldHistoryLength: 50 }),
-
     collect({ source: 'event.kind' }),
     collect({ source: 'event.category' }),
     collect({ source: 'event.type' }),

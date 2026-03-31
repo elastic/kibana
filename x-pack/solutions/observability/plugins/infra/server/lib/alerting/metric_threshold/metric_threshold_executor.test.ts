@@ -1007,6 +1007,44 @@ describe('The metric threshold rule type', () => {
         grouping: { host: { name: alertIdB } },
       });
     });
+
+    test('when source tags is a string, it is treated as a single tag', async () => {
+      setEvaluationResults([
+        {
+          'host-01': {
+            ...baseNonCountCriterion,
+            comparator: COMPARATORS.GREATER_THAN,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'host-01' },
+            context: {
+              tags: 'host-01_tag1',
+            },
+          },
+        },
+      ]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: alertIdA,
+        conditions: [
+          { metric: 'test.metric.1', threshold: [0.75], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason: 'test.metric.1 is 1 in the last 1 min for host-01. Alert when above 0.75.',
+        tags: ['host-01_tag1', 'ruleTag1', 'ruleTag2'],
+        groupByKeys: { host: { name: alertIdA } },
+        group: [{ field: 'host.name', value: alertIdA }],
+        ecsGroups: { 'host.name': alertIdA },
+        grouping: { host: { name: alertIdA } },
+      });
+    });
   });
 
   describe('querying without a groupBy parameter and rule tags', () => {

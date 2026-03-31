@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 export const componentStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
-      marginTop: `-${euiTheme.size.l}`,
       marginBottom: `-${euiTheme.size.l}`,
       overflow: 'hidden',
     }),

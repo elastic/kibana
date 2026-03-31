@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiPortal,
   EuiPagination,
   EuiHorizontalRule,
@@ -59,6 +60,7 @@ export interface UnifiedDocViewerFlyoutProps
   initialDocViewerState?: DocViewerProps['initialState'];
   onInitialDocViewerStateChange?: DocViewerProps['onInitialStateChange'];
   renderCustomHeader?: (props: DocViewRenderProps) => React.ReactElement;
+  renderCustomFooter?: (props: DocViewRenderProps) => React.ReactElement;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   onClose: () => void;
   onAddColumn: (column: string) => void;
@@ -100,6 +102,7 @@ export function UnifiedDocViewerFlyout({
   initialTabId,
   initialDocViewerState,
   renderCustomHeader,
+  renderCustomFooter,
   setExpandedDoc,
   onClose,
   onAddColumn,
@@ -330,6 +333,9 @@ export function UnifiedDocViewerFlyout({
             {...docViewRenderProps}
           />
         </EuiFlyoutBody>
+        {renderCustomFooter && (
+          <EuiFlyoutFooter>{renderCustomFooter(docViewRenderProps)}</EuiFlyoutFooter>
+        )}
       </EuiFlyout>
     </EuiPortal>
   );

@@ -132,7 +132,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             iconSide="left"
             onClick={previousPreviewPanel}
             data-test-subj={PREVIEW_SECTION_BACK_BUTTON_TEST_ID}

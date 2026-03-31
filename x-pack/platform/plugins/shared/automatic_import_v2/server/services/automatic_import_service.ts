@@ -331,7 +331,7 @@ export class AutomaticImportService {
       status: TASK_STATUSES.approved,
       metadata: {
         ...existing.metadata,
-        ...(categories ? { categories } : {}),
+        categories,
       },
       changelog: [changelogEntry, ...(existing.changelog ?? [])],
     };

@@ -347,10 +347,16 @@ components:
                         type: string
 
     Isolate:
-      $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          description: Details of an isolate action response.
 
     Unisolate:
-      $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          description: Details of an unisolate action response.
 
     SuspendProcess:
       allOf:

@@ -145,7 +145,10 @@ export const eqlExecutor = async ({
       const { events, sequences } = response.hits;
 
       if (events) {
+        // Collect rule execution metrics
         result.totalEventsFound = events.length;
+        result.alertsCandidateCount = events.length;
+
         if (
           isAlertSuppressionActive &&
           alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
@@ -163,7 +166,10 @@ export const eqlExecutor = async ({
           newSignals = wrapHits(sharedParams, events, buildReasonMessageForEqlAlert);
         }
       } else if (sequences) {
+        // Collect rule execution metrics
         result.totalEventsFound = sequences.length;
+        result.alertsCandidateCount = sequences.length;
+
         if (
           isAlertSuppressionActive &&
           alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
