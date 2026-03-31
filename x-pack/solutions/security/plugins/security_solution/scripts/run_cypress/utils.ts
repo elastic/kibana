@@ -254,15 +254,20 @@ export const retrieveIntegrationsConfigAware = (
       }
     }
 
-    // Phase 2: Greedy bin-pack default-config specs across remaining agents.
+    // Phase 2: Greedy bin-pack default-config specs across ALL agents.
+    // Reserved agents can absorb default specs when default-only agents are
+    // overloaded. The cost function naturally penalizes the extra config on
+    // reserved agents (+setupCostWeight), so they only receive specs once
+    // default agents exceed ~40-45 weight. This fills the underutilized
+    // reserved capacity and reduces the overall max wall-clock time.
     const defaultSpecs = specs.filter((s) => s.configKey === defaultConfigKey);
     defaultSpecs.sort((a, b) => b.weight - a.weight || a.path.localeCompare(b.path));
 
     for (const spec of defaultSpecs) {
-      let bestIdx = reservedIdx;
+      let bestIdx = 0;
       let bestCost = Infinity;
 
-      for (let i = reservedIdx; i < agents.length; i++) {
+      for (let i = 0; i < agents.length; i++) {
         const cost = getAgentCost(agents[i], spec.configKey);
         if (cost < bestCost) {
           bestCost = cost;

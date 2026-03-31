@@ -37,26 +37,26 @@ const FILTERED_RUNNER_WEIGHTS: Record<string, number> = {
  * Per-spec weight overrides for specs where `it()` count doesn't reflect actual runtime.
  * Patterns are matched against the full file path; the first match wins.
  *
- * Recalibrated from CI build 419601 runtimes. Weight ≈ actual_minutes × 3.24
- * (based on 18.5 s per weight-unit baseline), minus per-spec overhead.
+ * Calibrated from CI runtimes (builds 419356, 419601). Weights reverted from
+ * build 419680 overcorrection — the backfill approach (Phase 2 across all agents)
+ * handles redistribution better than inflating weights.
  */
 const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
   // Tamper protection: real Fleet agent ops (~4.7 min avg despite only 3 tests)
   { pattern: 'tamper_protection/', weight: 15 },
 
-  // Response actions: real Endpoint operations (~5-10 min each)
+  // Response actions: real Endpoint operations (~5-7 min each, split from endpoint_operations.cy.ts)
   { pattern: 'endpoint_operations_document_signing.cy.ts', weight: 14 },
   { pattern: 'endpoint_operations_responder.cy.ts', weight: 10 },
   { pattern: 'alerts_response_console.cy.ts', weight: 18 },
-  { pattern: 'response_console/execute_and_file_operations.cy.ts', weight: 25 },
-  { pattern: 'response_console/process_operations.cy.ts', weight: 12 },
+  { pattern: 'response_console/execute_and_file_operations.cy.ts', weight: 15 },
+  { pattern: 'response_console/process_operations.cy.ts', weight: 10 },
   { pattern: 'response_console/scan.cy.ts', weight: 8 },
-  { pattern: 'response_console/isolate.cy.ts', weight: 12 },
-  { pattern: 'response_console/release.cy.ts', weight: 8 },
+  { pattern: 'response_console/isolate.cy.ts', weight: 6 },
+  { pattern: 'response_console/release.cy.ts', weight: 6 },
   { pattern: 'response_actions/isolate.cy.ts', weight: 12 },
   { pattern: 'responder.cy.ts', weight: 12 },
   { pattern: 'response_actions/response_actions_history.cy.ts', weight: 8 },
-  { pattern: 'isolate_mocked_data.cy.ts', weight: 10 },
 
   // Standalone artifact CRUD specs (~2-3 min each, consolidated it() blocks)
   { pattern: 'artifacts/blocklist.cy.ts', weight: 9 },
@@ -65,17 +65,8 @@ const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
   { pattern: 'artifacts/host_isolation_exceptions.cy.ts', weight: 8 },
   { pattern: 'artifacts/endpoint_exceptions.cy.ts', weight: 8 },
   { pattern: 'artifacts/endpoint_exceptions.no_ff.cy.ts', weight: 5 },
-  { pattern: 'artifacts/trusted_devices.cy.ts', weight: 10 },
+  { pattern: 'artifacts/trusted_devices.cy.ts', weight: 7 },
   { pattern: 'artifacts/artifacts.cy.ts', weight: 8 },
-
-  // RBAC split specs: dynamic runner weights underestimate these significantly.
-  // The mocked-data empty-state RBAC specs run ~6 min each on ESS despite
-  // the filtered getArtifactMockedDataTests weight of 5.
-  { pattern: 'endpoints_rbac_mocked_data_empty_state', weight: 15 },
-  { pattern: 'endpoints_rbac_mocked_data_hosts_exist', weight: 12 },
-  { pattern: 'endpoints_rbac_mocked_data_policies_exist', weight: 12 },
-  // RBAC version-filtered artifact specs (~3-6 min each on SL)
-  { pattern: 'trusted_devices_rbac_siem', weight: 10 },
 
   // Automated response actions: real Fleet/Endpoint ops despite few it() blocks
   { pattern: 'automated_response_actions/automated_response_actions.cy.ts', weight: 10 },
@@ -87,12 +78,12 @@ const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
   { pattern: 'policy/policy_details_protection_updates.cy.ts', weight: 8 },
   { pattern: 'policy/policy_details_mocked_data.cy.ts', weight: 7 },
 
-  // Endpoint details (~3.6 min on SL, consolidated from 10 to 7 it() blocks)
-  { pattern: 'endpoint_details/insights.cy.ts', weight: 10 },
+  // Endpoint details (~2.5 min, consolidated from 10 to 7 it() blocks)
+  { pattern: 'endpoint_details/insights.cy.ts', weight: 8 },
 
-  // Endpoint list tests (endpoints.cy.ts: ~5.9 min ESS, endpoints_mocked_data: ~3 min)
-  { pattern: 'endpoint_list/endpoints.cy.ts', weight: 15 },
-  { pattern: 'endpoint_list/endpoints_mocked_data.cy.ts', weight: 8 },
+  // Endpoint list tests
+  { pattern: 'endpoint_list/endpoints.cy.ts', weight: 8 },
+  { pattern: 'endpoint_list/endpoints_mocked_data.cy.ts', weight: 6 },
 
   // Navigation ESS: dynamic runner (~3 min per version)
   { pattern: 'navigation_ess_siem_', weight: 8 },
@@ -109,12 +100,11 @@ const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
  * Stack setup cost expressed in weight units. Each distinct ftrConfig requires a
  * full ES + Kibana + Fleet stack setup (~4-5 min). With stack sharing enabled,
  * specs sharing a config reuse the same stack, so the penalty only applies once
- * per unique config on an agent. Value of 32 aggressively penalizes multi-config
+ * per unique config on an agent. Value of 30 aggressively penalizes multi-config
  * assignments so the LB avoids stacking heavy specs on agents that already pay
- * a double-boot cost. Bumped from 30 (build 419601) to better account for
- * actual ESS setup overhead (~8.2 min ≈ 27 weight-units at 18.5 s/unit).
+ * a double-boot cost.
  */
-const SETUP_COST_WEIGHT = 32;
+const SETUP_COST_WEIGHT = 30;
 
 /**
  * Per-spec overhead in weight units. Each additional spec on an agent adds Cypress
@@ -137,5 +127,5 @@ export const DW_LOAD_BALANCER_CONFIG: LoadBalancerConfig = {
   minSpecWeight: MIN_SPEC_WEIGHT,
   specWeightOverrides: SPEC_WEIGHT_OVERRIDES,
   isolateNonDefaultConfigs: true,
-  targetWeightPerAgent: 40,
+  targetWeightPerAgent: 45,
 };
