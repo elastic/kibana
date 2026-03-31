@@ -10,14 +10,14 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { extractEntitiesFromAlerts } from '../entity_extraction';
 import { fetchAlertsByIds, adaptWorkflowLogger } from '../utils';
-import { LiquidArraySchema, parseArrayInput } from './workflow_schema_helpers';
+// With ${{ }} syntax in YAML, arrays/objects arrive as native JS types — no parsing needed
 
 export const CaseMatchingStepId = 'security.matchAndAttachAlertsToCases';
 
 const CaseMatchingInputSchema = z.object({
-  leader_alert_ids: LiquidArraySchema,
+  leader_alert_ids: z.array(z.string()),
   index_pattern: z.string().default('.alerts-security.alerts-default'),
-  existing_cases: z.unknown().optional(),
+  existing_cases: z.array(z.object({ id: z.string(), title: z.string() }).passthrough()).optional(),
 });
 
 const AlertObjectSchema = z.object({
@@ -43,51 +43,6 @@ const CaseMatchingOutputSchema = z.object({
   alert_groups_json: z.string(),
 });
 
-/**
- * Parse existing cases from the cases.findCases step output.
- * Handles Liquid | json serialization: may be a JSON string, array of objects,
- * or Zod-wrapped single-element array with a JSON string.
- */
-const parseExistingCases = (val: unknown): Array<{ id: string; title: string }> => {
-  let cases: unknown[];
-
-  if (Array.isArray(val)) {
-    // Zod-wrapped: ["[{...},{...}]"] — single JSON string element
-    if (val.length === 1 && typeof val[0] === 'string') {
-      try {
-        const parsed = JSON.parse(val[0]);
-        cases = Array.isArray(parsed) ? parsed : [];
-      } catch {
-        cases = val;
-      }
-    } else {
-      cases = val;
-    }
-  } else if (typeof val === 'string') {
-    try {
-      const parsed = JSON.parse(val);
-      cases = Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  } else {
-    return [];
-  }
-
-  return cases
-    .filter((c): c is { id: string; title: string } => {
-      return (
-        typeof c === 'object' &&
-        c !== null &&
-        'id' in c &&
-        'title' in c &&
-        typeof (c as Record<string, unknown>).id === 'string' &&
-        typeof (c as Record<string, unknown>).title === 'string'
-      );
-    })
-    .map((c) => ({ id: c.id, title: c.title }));
-};
-
 export const caseMatchingStep = createServerStepDefinition({
   id: CaseMatchingStepId,
   category: StepCategory.Kibana,
@@ -107,7 +62,7 @@ export const caseMatchingStep = createServerStepDefinition({
     const esClient = context.contextManager.getScopedEsClient();
     const logger = adaptWorkflowLogger(context.logger);
     const { index_pattern: indexPattern } = context.input;
-    const leaderAlertIds = parseArrayInput(context.input.leader_alert_ids);
+    const leaderAlertIds = context.input.leader_alert_ids;
 
     type AlertGroup = z.infer<typeof AlertGroupSchema>;
 
@@ -199,8 +154,10 @@ export const caseMatchingStep = createServerStepDefinition({
       if (ctx && entity.typeKey === 'user') ctx.users.add(entity.value);
     }
 
-    // Parse existing cases from the cases.findCases step output
-    const existingCases = parseExistingCases(context.input.existing_cases);
+    // Existing cases from the cases.findCases step — arrives as native array via ${{ }}
+    const existingCases = (context.input.existing_cases ?? []).map(
+      (c: { id: string; title: string }) => ({ id: c.id, title: c.title })
+    );
     context.logger.info(`Received ${existingCases.length} existing pipeline cases from findCases`);
 
     // Build alert groups and match to existing cases

@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { parseArrayInput } from './workflow_schema_helpers';
+// With ${{ }} syntax in YAML, arrays arrive as native JS arrays — no parsing needed
 
 interface DiscoveryResult {
   id: string;
@@ -142,7 +142,9 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
       connector_id: connectorId,
     } = context.input;
     const caseId = String(context.input.case_id);
-    const alertIds = parseArrayInput(context.input.alert_ids);
+    const alertIds = Array.isArray(context.input.alert_ids)
+      ? context.input.alert_ids
+      : [String(context.input.alert_ids)];
 
     const fallbackTitle = `Investigation — ${alertIds.length} alert(s)`;
     const fallbackDescription = `Alert Investigation Pipeline case for ${alertIds.length} alert(s).`;

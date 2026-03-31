@@ -12,8 +12,9 @@
  * ensures exists per Kibana space. If the workflow is deleted, modified,
  * or doesn't exist yet, it gets (re)created from this definition.
  *
- * The connector_id is intentionally omitted — it should be configured
- * per-space via the Workflows UI or API after the workflow is created.
+ * Uses ${{ }} syntax for array/object values to preserve native types
+ * (arrays, objects) instead of {{ | json }} which serializes to strings.
+ * String values (case_id, comment, title) use {{ }} for interpolation.
  */
 export const PIPELINE_WORKFLOW_YAML = `
 name: Alert Investigation Pipeline
@@ -41,7 +42,7 @@ steps:
   - name: deduplicate
     type: security.deduplicateAlerts
     with:
-      alert_ids: "{{steps.fetch_alerts.output.alert_ids | json}}"
+      alert_ids: "\${{steps.fetch_alerts.output.alert_ids}}"
       index_pattern: .alerts-security.alerts-default
       similarity_threshold: 0.85
 
@@ -57,9 +58,9 @@ steps:
   - name: match_cases
     type: security.matchAndAttachAlertsToCases
     with:
-      leader_alert_ids: "{{steps.deduplicate.output.leader_alert_ids | json}}"
+      leader_alert_ids: "\${{steps.deduplicate.output.leader_alert_ids}}"
       index_pattern: .alerts-security.alerts-default
-      existing_cases: "{{steps.find_existing_cases.output.cases | json}}"
+      existing_cases: "\${{steps.find_existing_cases.output.cases}}"
 
   - name: handle_new_groups
     type: foreach
@@ -80,12 +81,12 @@ steps:
         type: cases.addAlerts
         with:
           case_id: "{{steps.create_case.output.case.id}}"
-          alerts: "{{foreach.item.alerts | json}}"
+          alerts: "\${{foreach.item.alerts}}"
       - name: trigger_ad_new
         type: security.triggerIncrementalAd
         with:
           case_id: "{{steps.create_case.output.case.id}}"
-          alert_ids: "{{foreach.item.alert_ids | json}}"
+          alert_ids: "\${{foreach.item.alert_ids}}"
           index_pattern: .alerts-security.alerts-default
           connector_id: "{{consts.connector_id}}"
           min_new_alerts: 1
@@ -110,12 +111,12 @@ steps:
         type: cases.addAlerts
         with:
           case_id: "{{foreach.item.existing_case_id}}"
-          alerts: "{{foreach.item.alerts | json}}"
+          alerts: "\${{foreach.item.alerts}}"
       - name: trigger_ad_existing
         type: security.triggerIncrementalAd
         with:
           case_id: "{{foreach.item.existing_case_id}}"
-          alert_ids: "{{foreach.item.alert_ids | json}}"
+          alert_ids: "\${{foreach.item.alert_ids}}"
           index_pattern: .alerts-security.alerts-default
           connector_id: "{{consts.connector_id}}"
           min_new_alerts: 1
@@ -134,7 +135,7 @@ steps:
   - name: tag_processed
     type: security.tagProcessedAlerts
     with:
-      alert_ids: "{{steps.fetch_alerts.output.alert_ids | json}}"
+      alert_ids: "\${{steps.fetch_alerts.output.alert_ids}}"
       index_pattern: .alerts-security.alerts-default
 `.trim();
 
@@ -142,7 +143,7 @@ steps:
  * Version hash of the bundled YAML.
  * Increment when YAML changes to trigger self-healing re-creation.
  */
-export const PIPELINE_WORKFLOW_VERSION = '1.2.0';
+export const PIPELINE_WORKFLOW_VERSION = '1.3.0';
 
 /**
  * Workflow ID prefix. Full ID is `{PREFIX}-{spaceId}`.

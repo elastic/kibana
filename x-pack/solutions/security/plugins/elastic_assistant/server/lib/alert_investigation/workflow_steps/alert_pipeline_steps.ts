@@ -14,7 +14,7 @@ import { extractEntitiesFromAlerts } from '../entity_extraction';
 import { DEFAULT_ENTITY_EXTRACTION_CONFIG } from '../types';
 import { fetchAlertsByIds, adaptWorkflowLogger } from '../utils';
 import { PIPELINE_LIMITS, SAFE_ALERTS_INDEX_PATTERN } from '../constants';
-import { LiquidArraySchema, parseArrayInput } from './workflow_schema_helpers';
+// With ${{ }} syntax in YAML, arrays arrive as native JS arrays — no parsing needed
 
 const SafeAlertIndexPattern = z
   .string()
@@ -109,9 +109,13 @@ export const fetchUnprocessedAlertsStep = createServerStepDefinition({
 export const DeduplicateAlertsStepId = 'security.deduplicateAlerts';
 
 const DedupInputSchema = z.object({
-  alert_ids: LiquidArraySchema,
+  alert_ids: z.array(z.string()),
   index_pattern: SafeAlertIndexPattern,
-  similarity_threshold: z.number().min(0).max(1).default(PIPELINE_LIMITS.JACCARD_SIMILARITY_THRESHOLD),
+  similarity_threshold: z
+    .number()
+    .min(0)
+    .max(1)
+    .default(PIPELINE_LIMITS.JACCARD_SIMILARITY_THRESHOLD),
 });
 
 const DedupOutputSchema = z.object({
@@ -136,7 +140,7 @@ export const deduplicateAlertsStep = createServerStepDefinition({
     const esClient = context.contextManager.getScopedEsClient();
     const logger = adaptWorkflowLogger(context.logger);
     const { index_pattern: indexPattern, similarity_threshold: threshold } = context.input;
-    const alertIds = parseArrayInput(context.input.alert_ids);
+    const alertIds = context.input.alert_ids;
 
     if (alertIds.length === 0) {
       return { output: { leader_alert_ids: [], total_before: 0, total_after: 0, dedup_rate: 0 } };
@@ -165,7 +169,7 @@ export const deduplicateAlertsStep = createServerStepDefinition({
 export const ExtractEntitiesStepId = 'security.extractEntities';
 
 const ExtractInputSchema = z.object({
-  alert_ids: LiquidArraySchema,
+  alert_ids: z.array(z.string()),
   index_pattern: SafeAlertIndexPattern,
 });
 
@@ -196,7 +200,7 @@ export const extractEntitiesStep = createServerStepDefinition({
     const esClient = context.contextManager.getScopedEsClient();
     const logger = adaptWorkflowLogger(context.logger);
     const { index_pattern: indexPattern } = context.input;
-    const alertIds = parseArrayInput(context.input.alert_ids);
+    const alertIds = context.input.alert_ids;
 
     if (alertIds.length === 0) {
       return { output: { entities: [], total_entities: 0 } };
@@ -231,7 +235,7 @@ export const extractEntitiesStep = createServerStepDefinition({
 export const TagProcessedAlertsStepId = 'security.tagProcessedAlerts';
 
 const TagInputSchema = z.object({
-  alert_ids: LiquidArraySchema,
+  alert_ids: z.array(z.string()),
   index_pattern: SafeAlertIndexPattern,
 });
 
@@ -255,7 +259,7 @@ export const tagProcessedAlertsStep = createServerStepDefinition({
   handler: async (context) => {
     const esClient = context.contextManager.getScopedEsClient();
     const { index_pattern: indexPattern } = context.input;
-    const validIds = parseArrayInput(context.input.alert_ids).filter(Boolean);
+    const validIds = context.input.alert_ids.filter(Boolean);
 
     if (validIds.length === 0) {
       return { output: { tagged_count: 0 } };
@@ -273,11 +277,11 @@ export const tagProcessedAlertsStep = createServerStepDefinition({
       },
       script: {
         source:
-          "if (ctx._source.kibana == null) ctx._source.kibana = new HashMap();" +
-          "if (ctx._source.kibana.alert == null) ctx._source.kibana.alert = new HashMap();" +
-          "if (ctx._source.kibana.alert.pipeline == null) ctx._source.kibana.alert.pipeline = new HashMap();" +
-          "ctx._source.kibana.alert.pipeline.processed = true;" +
-          "ctx._source.kibana.alert.pipeline.processed_at = params.now;",
+          'if (ctx._source.kibana == null) ctx._source.kibana = new HashMap();' +
+          'if (ctx._source.kibana.alert == null) ctx._source.kibana.alert = new HashMap();' +
+          'if (ctx._source.kibana.alert.pipeline == null) ctx._source.kibana.alert.pipeline = new HashMap();' +
+          'ctx._source.kibana.alert.pipeline.processed = true;' +
+          'ctx._source.kibana.alert.pipeline.processed_at = params.now;',
         params: { now: nowIso },
         lang: 'painless',
       },
