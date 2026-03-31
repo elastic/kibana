@@ -49,14 +49,14 @@ describe(
           });
         };
 
-        it('should display Artifacts on the Administration landing page', () => {
+        it('should display Artifacts in Administration page', () => {
           loginWithReadAccess();
 
           cy.visit(APP_MANAGE_PATH);
           cy.getByTestSubj('pageContainer').contains('Artifacts');
         });
 
-        it('should be able to navigate to Endpoint Exceptions from the Artifacts landing card', () => {
+        it('should be able to navigate to Endpoint Exceptions from Administration page', () => {
           loginWithReadAccess();
           cy.visit(APP_MANAGE_PATH);
           cy.getByTestSubj('pageContainer').contains('Artifacts').click();
@@ -73,7 +73,7 @@ describe(
           cy.get(essSecurityHeaders.ARTIFACTS).should('exist');
         });
 
-        it('should be able to navigate to Endpoint Exceptions from the Artifacts side nav link', () => {
+        it('should be able to navigate to Endpoint Exceptions from Manage side panel', () => {
           loginWithReadAccess();
           cy.visit(APP_PATH);
 
@@ -94,7 +94,9 @@ describe(
           cy.visit(APP_PATH);
 
           serverlessSecurityHeaders.showMoreItems();
-          serverlessSecurityHeaders.openNavigationPanelFor(serverlessSecurityHeaders.ARTIFACTS);
+          serverlessSecurityHeaders.openNavigationPanelFor(
+            serverlessSecurityHeaders.ARTIFACTS
+          );
           cy.get(serverlessSecurityHeaders.ARTIFACTS).should('exist');
         });
 

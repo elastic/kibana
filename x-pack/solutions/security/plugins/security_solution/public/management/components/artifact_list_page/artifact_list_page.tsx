@@ -324,7 +324,39 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       );
     }, [labels.pageAboutInfo, secondaryPageInfo]);
 
+    const actionsToDisplay: Action[] = useMemo(
+      () => [
+        ...(areEndpointExceptionsMovedUnderManagementFFEnabled
+          ? [
+              {
+                key: 'ImportButton',
+                icon: 'download',
+                label: labels.pageImportButtonTitle,
+                onClick: handleImport,
+                disabled: !allowCardCreateAction,
+              },
+              {
+                key: 'ExportButton',
+                icon: 'upload',
+                label: labels.pageExportButtonTitle,
+                onClick: handleExport,
+              },
+            ]
+          : []),
 
+        ...(additionalActions ?? []),
+      ],
+      [
+        additionalActions,
+        allowCardCreateAction,
+        areEndpointExceptionsMovedUnderManagementFFEnabled,
+        handleExport,
+        handleImport,
+        labels.pageExportButtonTitle,
+        labels.pageImportButtonTitle,
+      ]
+    );
+    
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
     }
@@ -422,7 +454,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                   {allowCardCreateAction && (
                     <EuiButton
                       fill
-                      iconType="plusInCircle"
+                      iconType="plusCircle"
                       isDisabled={isFlyoutOpened}
                       onClick={handleOpenCreateFlyoutClick}
                       data-test-subj={getTestId('pageAddButton')}
@@ -431,25 +463,11 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                     </EuiButton>
                   )}
 
-                  {areEndpointExceptionsMovedUnderManagementFFEnabled && (
+                  {actionsToDisplay.length > 0 && (
                     <HeaderMenu
-                      iconType="boxesHorizontal"
-                      dataTestSubj={getTestId('exportImportMenu')}
-                      actions={[
-                        {
-                          key: 'ImportButton',
-                          icon: 'importAction',
-                          label: labels.pageImportButtonTitle,
-                          onClick: handleImport,
-                          disabled: !allowCardCreateAction,
-                        },
-                        {
-                          key: 'ExportButton',
-                          icon: 'exportAction',
-                          label: labels.pageExportButtonTitle,
-                          onClick: handleExport,
-                        },
-                      ]}
+                      iconType="boxesVertical"
+                      dataTestSubj={getTestId('overflowMenu')}
+                      actions={actionsToDisplay}
                       disableActions={isLoading}
                     />
                   )}
