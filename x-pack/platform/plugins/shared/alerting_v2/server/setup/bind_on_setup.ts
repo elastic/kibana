@@ -46,9 +46,9 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
 
-    // Both getters are called lazily at task run / fetch time (after start), so the
-    // start-only bindings (core.start.elasticsearch, PluginStart taskManager) exist by then.
     if (container.isBound(usageCollectionToken)) {
+      // Both getters are called task run (after start), so the
+      // start-only bindings (esClient and taskManagerStart) exist by then.
       const getTaskManagerStart = () =>
         container.get(PluginStart<AlertingServerStartDependencies['taskManager']>('taskManager'));
       const usageCollection = container.get(usageCollectionToken);

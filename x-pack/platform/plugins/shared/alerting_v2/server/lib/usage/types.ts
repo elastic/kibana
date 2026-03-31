@@ -49,3 +49,8 @@ export interface AlertingV2Usage {
   alerts_min_timestamp?: string | null;
   alerts_index_size_bytes?: number | null;
 }
+
+export type AlertingV2UsageCollectorSchemaType = AlertingV2Usage & {
+  available: boolean;
+  enabled: boolean;
+};
