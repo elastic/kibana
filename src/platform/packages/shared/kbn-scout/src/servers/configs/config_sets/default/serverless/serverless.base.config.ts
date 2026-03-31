@@ -17,9 +17,7 @@ import {
   defineDockerServersConfig,
 } from '@kbn/test-docker-servers';
 import { getDockerFileMountPath } from '@kbn/es';
-import {
-  MOCK_IDP_REALM_NAME,
-} from '@kbn/mock-idp-utils';
+import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../../../constants';
