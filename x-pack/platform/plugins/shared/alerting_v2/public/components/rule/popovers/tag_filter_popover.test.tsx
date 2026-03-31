@@ -72,7 +72,9 @@ describe('TagsFilterPopover', () => {
   });
 
   it('shows active filter count when tags are selected', () => {
-    render(<TagsFilterPopover options={TAGS} value={['production', 'critical']} onChange={jest.fn()} />);
+    render(
+      <TagsFilterPopover options={TAGS} value={['production', 'critical']} onChange={jest.fn()} />
+    );
 
     expect(screen.getByText('2')).toBeInTheDocument();
   });
