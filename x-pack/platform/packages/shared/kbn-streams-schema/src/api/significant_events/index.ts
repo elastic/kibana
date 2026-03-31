@@ -54,7 +54,7 @@ type SignificantEventsPreviewResponse = Pick<
   'occurrences' | 'change_points' | 'esql'
 > & {
   /**
-   * For STATS queries only: how many time buckets exceeded the threshold
+   * For STATS queries only: how many threshold breaches were detected
    * during the preview window. Absent for match-type queries.
    */
   firing_count?: number;

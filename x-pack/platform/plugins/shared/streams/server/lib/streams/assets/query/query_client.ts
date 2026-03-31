@@ -173,7 +173,9 @@ function fromStorage(link: StoredQueryLink): QueryLink {
   };
 
   const esql = storageFields[QUERY_ESQL_QUERY];
-  const type: QueryType = deriveQueryType(esql);
+  const storedType = storageFields[QUERY_TYPE];
+  const type: QueryType =
+    storedType === 'match' || storedType === 'stats' ? storedType : deriveQueryType(esql);
 
   return {
     ...storageFields,
@@ -224,6 +226,7 @@ function toQueryLinkFromQuery({
   stream: string;
   ruleBacked?: boolean;
 }): QueryLink {
+  const effectiveRuleBacked = query.type === QUERY_TYPE_STATS ? false : ruleBacked;
   const assetUuid = getQueryLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id });
   return {
     'asset.uuid': assetUuid,
@@ -231,7 +234,7 @@ function toQueryLinkFromQuery({
     'asset.id': query.id,
     query,
     stream_name: stream,
-    rule_backed: ruleBacked,
+    rule_backed: effectiveRuleBacked,
     rule_id: computeRuleId(assetUuid, query.esql.query),
   };
 }
@@ -374,6 +377,7 @@ export class QueryClient {
       query: {
         bool: {
           filter,
+          must_not: termQuery(QUERY_TYPE, QUERY_TYPE_STATS),
         },
       },
     });
@@ -552,9 +556,10 @@ export class QueryClient {
     );
 
     await this.uninstallQueries([...currentQueriesToDelete, ...currentQueriesToDeleteBeforeUpdate]);
+    const ruleBackedFilter = (link: QueryLink) => link.rule_backed;
     await this.installQueries(
-      [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange],
-      nextQueriesUpdatedWithoutBreakingChange,
+      [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange].filter(ruleBackedFilter),
+      nextQueriesUpdatedWithoutBreakingChange.filter(ruleBackedFilter),
       definition
     );
 
@@ -703,7 +708,7 @@ export class QueryClient {
       .map((link) => toQueryLinkFromQuery({ query: link.query, stream: streamName }));
 
     if (toPromote.length === 0) {
-      return { promoted: 0 };
+      return { promoted: 0, skipped_stats: statsSkipped.length };
     }
 
     await this.installQueries(toPromote, [], definition);
@@ -728,7 +733,7 @@ export class QueryClient {
       throwOnFail: true,
     });
 
-    return { promoted: toPromote.length };
+    return { promoted: toPromote.length, skipped_stats: statsSkipped.length };
   }
 
   private async installQueries(

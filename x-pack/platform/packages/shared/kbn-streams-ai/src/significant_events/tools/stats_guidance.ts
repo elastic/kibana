@@ -206,13 +206,17 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
     : undefined;
 
   if (severityField && observedErrorPct != null) {
+    const isExtractedErrorPct = observedErrorPct !== DEFAULT_ERROR_PCT;
     const threshold = roundThreshold(observedErrorPct * BASELINE_MULTIPLIER);
+    const baselineNote = isExtractedErrorPct
+      ? `Extracted baseline: ~${observedErrorPct}% error rate from analysis.`
+      : `No baseline extracted from analysis; using default assumption of ${DEFAULT_ERROR_PCT}%.`;
 
     fieldSpecificPatterns.push({
       id: 'error-rate',
       title: 'Service Error Rate Degradation',
       body: [
-        `  Observed: ${severityField} ERROR at ~${observedErrorPct}%.`,
+        `  ${baselineNote}`,
         `  Suggested threshold: error_rate > ${threshold}% (${BASELINE_MULTIPLIER}x baseline).`,
         `  Template:`,
         `    FROM <stream>`,
@@ -229,15 +233,19 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
   // --- Field-specific pattern: HTTP error rate ---
   const httpStatusField = findFieldInAnalysis(analysis, HTTP_STATUS_FIELD_PATTERNS);
   if (httpStatusField) {
-    const observedHttpPct =
-      extractErrorPercentage(analysis, httpStatusField) ?? DEFAULT_HTTP_ERROR_RATE;
+    const rawHttpPct = extractErrorPercentage(analysis, httpStatusField);
+    const observedHttpPct = rawHttpPct ?? DEFAULT_HTTP_ERROR_RATE;
+    const isExtractedHttpPct = rawHttpPct != null;
     const httpThreshold = roundThreshold(observedHttpPct * BASELINE_MULTIPLIER);
+    const httpBaselineNote = isExtractedHttpPct
+      ? `Extracted baseline: ~${observedHttpPct}% 5xx responses from analysis.`
+      : `No baseline extracted from analysis; using default assumption of ${DEFAULT_HTTP_ERROR_RATE}%.`;
 
     fieldSpecificPatterns.push({
       id: 'http-error-rate',
       title: 'HTTP Error Rate',
       body: [
-        `  Observed: ${httpStatusField} present in data (~${observedHttpPct}% 5xx).`,
+        `  ${httpBaselineNote}`,
         `  Suggested threshold: error_rate > ${httpThreshold}% (${BASELINE_MULTIPLIER}x baseline).`,
         `  Template:`,
         `    FROM <stream>`,
@@ -261,12 +269,13 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
         `  Latency spikes are often the earliest user-visible symptom, preceding error rate increases.`,
         `  Template:`,
         `    FROM <stream>`,
-        `    | STATS p95 = PERCENTILE(${durationCandidate.field}, 95)`,
+        `    | STATS p95 = PERCENTILE(${durationCandidate.field}, 95), sample_count = COUNT(*)`,
         `      BY bucket = BUCKET(@timestamp, 5 minutes)`,
-        `    | WHERE p95 > <threshold_in_field_units>`,
-        `  Set <threshold_in_field_units> to 2-3x the observed typical P95. Check dataset_analysis for`,
-        `  representative values. For example, if typical P95 is 200ms and the field is in nanoseconds,`,
-        `  the threshold would be 600000000 (600ms in ns).`,
+        `    | WHERE sample_count > ${MIN_SAMPLE_SIZE} AND p95 > <threshold_in_field_units>`,
+        `  The sample_count > ${MIN_SAMPLE_SIZE} guard prevents high-variance percentiles from`,
+        `  low-traffic buckets. Set <threshold_in_field_units> to 2-3x the observed typical P95.`,
+        `  Check dataset_analysis for representative values. For example, if typical P95 is 200ms`,
+        `  and the field is in nanoseconds, the threshold would be 600000000 (600ms in ns).`,
       ].join('\n'),
     });
   }
@@ -299,7 +308,7 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
   if (entityField && severityField && observedErrorPct != null) {
     const cardinalityNote = entityCardinality
       ? `  Entity field: ${entityField} with ${entityCardinality} distinct values.`
-      : `  Entity field: ${entityField}.`;
+      : `  Entity field: ${entityField}. WARNING: cardinality unknown — verify it is below ${MAX_ENTITY_CARDINALITY} distinct values before using as a GROUP BY dimension.`;
 
     const componentThreshold = Math.max(
       DEFAULT_COMPONENT_ERROR_RATE,

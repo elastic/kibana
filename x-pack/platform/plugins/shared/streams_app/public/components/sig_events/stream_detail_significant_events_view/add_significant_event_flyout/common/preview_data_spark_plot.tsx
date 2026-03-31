@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import { hasStatsCommand } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -76,7 +77,7 @@ export function PreviewDataSparkPlot({
   });
 
   const firingCount = previewFetch.value?.firing_count;
-  const isStatsPreview = firingCount !== undefined;
+  const isStatsPreview = hasStatsCommand(query.esql.query);
   const hasTimeseriesData = sparkPlotData.timeseries.some((point) => point.y > 0);
   const noOccurrencesFound = !hasTimeseriesData;
 
@@ -165,7 +166,7 @@ export function PreviewDataSparkPlot({
               'xpack.streams.addSignificantEventFlyout.manualFlow.previewFiringCountNoChart',
               {
                 defaultMessage:
-                  '{count, plural, one {# bucket exceeded threshold} other {# buckets exceeded threshold}}',
+                  '{count, plural, one {# threshold breach} other {# threshold breaches}}',
                 values: { count: firingCount },
               }
             )}
@@ -251,11 +252,11 @@ export function PreviewDataSparkPlot({
                 {isStatsPreview && firingCount > 0 && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="hollow">
-                      {i18n.translate(
+                        {i18n.translate(
                         'xpack.streams.addSignificantEventFlyout.manualFlow.previewFiringCount',
                         {
                           defaultMessage:
-                            '{count, plural, one {# bucket exceeded threshold} other {# buckets exceeded threshold}}',
+                            '{count, plural, one {# threshold breach} other {# threshold breaches}}',
                           values: { count: firingCount },
                         }
                       )}

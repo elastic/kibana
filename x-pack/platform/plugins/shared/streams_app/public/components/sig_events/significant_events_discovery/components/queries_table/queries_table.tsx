@@ -157,10 +157,10 @@ export function QueriesTable() {
     [queryClient]
   );
 
-  const promoteAllMutation = useMutation<{ promoted: number }, Error>({
+  const promoteAllMutation = useMutation<{ promoted: number; skipped_stats: number }, Error>({
     mutationFn: promoteAll,
-    onSuccess: async ({ promoted }) => {
-      toasts.addSuccess(getPromoteAllSuccessToast(promoted));
+    onSuccess: async ({ promoted, skipped_stats: skippedStats }) => {
+      toasts.addSuccess(getPromoteAllSuccessToast(promoted, skippedStats));
       await invalidateQueriesData();
     },
     onError: (error) => {

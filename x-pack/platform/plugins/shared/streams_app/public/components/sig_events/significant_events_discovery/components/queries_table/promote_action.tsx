@@ -63,7 +63,7 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
     <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="plusCircle"
-        aria-label={PROMOTE_QUERY_ACTION_TITLE}
+        aria-label={tooltipContent}
         isLoading={promoteMutation.isLoading}
         isDisabled={item.rule_backed || isStats || promoteMutation.isLoading}
         onClick={() => {

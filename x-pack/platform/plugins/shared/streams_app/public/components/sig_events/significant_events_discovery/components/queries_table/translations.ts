@@ -7,11 +7,22 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const getPromoteAllSuccessToast = (count: number) =>
-  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteAllSuccess', {
-    defaultMessage: 'Promoted {count} {count, plural, one {query} other {queries}}',
-    values: { count },
+export const getPromoteAllSuccessToast = (promoted: number, skippedStats: number) => {
+  if (skippedStats > 0) {
+    return i18n.translate(
+      'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllSuccessWithSkipped',
+      {
+        defaultMessage:
+          'Promoted {promoted} {promoted, plural, one {query} other {queries}} ({skippedStats} STATS {skippedStats, plural, one {query} other {queries}} skipped — not yet supported as rules)',
+        values: { promoted, skippedStats },
+      }
+    );
+  }
+  return i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteAllSuccess', {
+    defaultMessage: 'Promoted {promoted} {promoted, plural, one {query} other {queries}}',
+    values: { promoted },
   });
+};
 
 export const PROMOTE_ALL_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllErrorTitle',

@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
@@ -39,6 +39,21 @@ function msToEsqlBucketSize(ms: number): string {
   if (ms >= 3_600_000 && ms % 3_600_000 === 0) return `${ms / 3_600_000}h`;
   if (ms >= 60_000 && ms % 60_000 === 0) return `${ms / 60_000}m`;
   return `${ms / 1000}s`;
+}
+
+function stripLimitCommand(esql: string): string {
+  try {
+    const { root } = Parser.parse(esql);
+    const commandsWithoutLimit = root.commands.filter(
+      (cmd) => !('name' in cmd && cmd.name === 'limit')
+    );
+    if (commandsWithoutLimit.length === root.commands.length) return esql;
+    return BasicPrettyPrinter.print(
+      Builder.expression.query(commandsWithoutLimit as ESQLCommand[])
+    );
+  } catch {
+    return esql.replace(/\|\s*LIMIT\s+\d+\s*$/i, '').trim();
+  }
 }
 
 /**
@@ -140,10 +155,11 @@ export async function previewSignificantEvents(
   },
   dependencies: {
     scopedClusterClient: IScopedClusterClient;
+    logger?: Logger;
   }
 ): Promise<SignificantEventsPreviewResponse> {
   const { esqlQuery, bucketSize, from, to, timestampField = '@timestamp' } = params;
-  const { scopedClusterClient } = dependencies;
+  const { scopedClusterClient, logger } = dependencies;
 
   const filter: QueryDslQueryContainer = {
     bool: {
@@ -158,10 +174,16 @@ export async function previewSignificantEvents(
   };
 
   if (hasStatsCommand(esqlQuery)) {
-    return previewStatsQuery({ esqlQuery, filter, from, to, bucketSize }, { scopedClusterClient });
+    return previewStatsQuery(
+      { esqlQuery, filter, from, to, bucketSize },
+      { scopedClusterClient, logger }
+    );
   }
 
-  return previewMatchQuery({ esqlQuery, filter, from, to, bucketSize }, { scopedClusterClient });
+  return previewMatchQuery(
+    { esqlQuery, filter, from, to, bucketSize },
+    { scopedClusterClient, logger }
+  );
 }
 
 async function previewMatchQuery(
@@ -172,10 +194,10 @@ async function previewMatchQuery(
     to: Date;
     bucketSize: string;
   },
-  deps: { scopedClusterClient: IScopedClusterClient }
+  deps: { scopedClusterClient: IScopedClusterClient; logger?: Logger }
 ): Promise<SignificantEventsPreviewResponse> {
   const { esqlQuery, filter, from, to, bucketSize } = params;
-  const { scopedClusterClient } = deps;
+  const { scopedClusterClient, logger } = deps;
 
   const response = await scopedClusterClient.asCurrentUser.esql.query({
     query: buildHistogramQuery(esqlQuery, bucketSize),
@@ -196,6 +218,11 @@ async function previewMatchQuery(
   }));
 
   const occurrences = fillBucketGaps(sparseOccurrences, from, to, bucketSize);
+  if (occurrences.length >= MAX_FILL_BUCKETS) {
+    logger?.debug(
+      `fillBucketGaps reached MAX_FILL_BUCKETS (${MAX_FILL_BUCKETS}); sparkline may be incomplete.`
+    );
+  }
 
   const typeIdx = response.columns.findIndex((col) => col.name === 'type');
   const pvalueIdx = response.columns.findIndex((col) => col.name === 'pvalue');
@@ -239,12 +266,12 @@ async function previewStatsQuery(
     to: Date;
     bucketSize: string;
   },
-  deps: { scopedClusterClient: IScopedClusterClient }
+  deps: { scopedClusterClient: IScopedClusterClient; logger?: Logger }
 ): Promise<SignificantEventsPreviewResponse> {
   const { esqlQuery, filter, from, to, bucketSize } = params;
-  const { scopedClusterClient } = deps;
+  const { scopedClusterClient, logger } = deps;
 
-  const queryWithoutLimit = esqlQuery.replace(/\|\s*LIMIT\s+\d+\s*$/i, '').trim();
+  const queryWithoutLimit = stripLimitCommand(esqlQuery);
 
   const response = await scopedClusterClient.asCurrentUser.esql.query({
     query: `${queryWithoutLimit} | LIMIT ${PREVIEW_STATS_LIMIT}`,
@@ -279,6 +306,11 @@ async function previewStatsQuery(
       count,
     }));
     const occurrences = fillBucketGaps(sparseOccurrences, from, to, effectiveBucketSize);
+    if (occurrences.length >= MAX_FILL_BUCKETS) {
+      logger?.debug(
+        `fillBucketGaps reached MAX_FILL_BUCKETS (${MAX_FILL_BUCKETS}); sparkline may be incomplete.`
+      );
+    }
 
     return {
       esql: { query: esqlQuery },

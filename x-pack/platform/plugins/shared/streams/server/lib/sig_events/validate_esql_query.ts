@@ -6,7 +6,7 @@
  */
 
 import { Parser, Walker } from '@elastic/esql';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, hasStatsCommand } from '@kbn/streams-schema';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { StatusError } from '../streams/errors/status_error';
 
@@ -56,7 +56,7 @@ export function validateEsqlQueryForStreamOrThrow({
     throw new EsqlQueryValidationError(`ES|QL query must use FROM ${wiredPattern}`);
   }
 
-  const isStatsQuery = Walker.match(root, { type: 'command', name: 'stats' }) !== undefined;
+  const isStatsQuery = hasStatsCommand(esqlQuery);
 
   if (!isStatsQuery) {
     const metadataOption = Walker.match(fromCmd, { type: 'option', name: 'metadata' });

@@ -55,6 +55,16 @@ function matchTimeBucket(esql: string): RegExpMatchArray | null {
   );
 }
 
+const STATS_REGEX = /\|\s*STATS\s/i;
+
+function tryParseEsql(esql: string) {
+  try {
+    return { root: Parser.parse(esql).root, parsed: true as const };
+  } catch {
+    return { root: null, parsed: false as const };
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -151,14 +161,11 @@ export function replaceFromSources(esql: string, newSources: string[]): string {
  * row-level (cause / match) query.
  */
 export function hasStatsCommand(esql: string): boolean {
-  try {
-    const { root } = Parser.parse(esql);
+  const { root, parsed } = tryParseEsql(esql);
+  if (parsed) {
     return root.commands.some((cmd) => 'name' in cmd && cmd.name === 'stats');
-  } catch {
-    // AST parse failed -- fall back to regex to avoid silently misclassifying
-    // a STATS query as match (which would skip threshold logic entirely).
-    return /\|\s*STATS\s/i.test(esql);
   }
+  return STATS_REGEX.test(esql);
 }
 
 /**
@@ -179,54 +186,58 @@ export function deriveQueryType(esql: string): QueryType {
  * functions, and merging them would couple unrelated responsibilities.
  */
 export function getStatsQueryHints(esql: string): string[] {
-  try {
-    const { root } = Parser.parse(esql);
-    const commands = root.commands.filter(
-      (cmd): cmd is ESQLCommand => 'name' in cmd
-    );
-    const isStats = commands.some((cmd) => cmd.name === 'stats');
+  const { root, parsed } = tryParseEsql(esql);
 
-    if (!isStats) {
-      const hints: string[] = [];
-      if (commands.some((cmd) => cmd.name === 'eval')) {
-        hints.push(
-          'Warning: EVAL is supported only in stats-type queries. Remove the EVAL command or convert to a STATS query.'
-        );
-      }
-      return hints;
+  if (!parsed) {
+    if (STATS_REGEX.test(esql)) {
+      return [
+        'Warning: Query could not be fully parsed; structural checks were skipped. Verify STATS syntax manually.',
+      ];
     }
-
-    const hints: string[] = [];
-    const statsIdx = commands.findIndex((cmd) => cmd.name === 'stats');
-
-    if (!matchTimeBucket(esql)) {
-      hints.push(
-        'Note: This STATS query has no temporal bucketing. Each execution produces one value per group. Consider adding BY bucket = BUCKET(@timestamp, N minutes) for time-series granularity.'
-      );
-    }
-
-    const commandsAfterStats = commands.slice(statsIdx + 1);
-    const hasWhereAfterStats = commandsAfterStats.some((cmd) => cmd.name === 'where');
-    if (!hasWhereAfterStats) {
-      hints.push(
-        'Warning: No threshold filter after STATS. For alerting, add | WHERE <metric> > <threshold> to distinguish normal from anomalous conditions.'
-      );
-    }
-
-    // These commands are disallowed in STATS queries. The check is placed on the
-    // stats branch; the system prompt independently blocks them for match queries.
-    const disallowed = ['sort', 'limit', 'keep'];
-    const found = commands.filter((cmd) => disallowed.includes(cmd.name)).map((cmd) => cmd.name.toUpperCase());
-    if (found.length > 0) {
-      hints.push(
-        `Warning: ${found.join(', ')} should not be used in STATS queries. The system manages ordering and limits.`
-      );
-    }
-
-    return hints;
-  } catch {
     return [];
   }
+
+  const commands = root.commands.filter((cmd): cmd is ESQLCommand => 'name' in cmd);
+  const isStats = commands.some((cmd) => cmd.name === 'stats');
+
+  if (!isStats) {
+    const hints: string[] = [];
+    if (commands.some((cmd) => cmd.name === 'eval')) {
+      hints.push(
+        'Warning: EVAL is supported only in stats-type queries. Remove the EVAL command or convert to a STATS query.'
+      );
+    }
+    return hints;
+  }
+
+  const hints: string[] = [];
+  const statsIdx = commands.findIndex((cmd) => cmd.name === 'stats');
+
+  if (!matchTimeBucket(esql)) {
+    hints.push(
+      'Note: This STATS query has no temporal bucketing. Each execution produces one value per group. Consider adding BY bucket = BUCKET(@timestamp, N minutes) for time-series granularity.'
+    );
+  }
+
+  const commandsAfterStats = commands.slice(statsIdx + 1);
+  const hasWhereAfterStats = commandsAfterStats.some((cmd) => cmd.name === 'where');
+  if (!hasWhereAfterStats) {
+    hints.push(
+      'Warning: No threshold filter after STATS. For alerting, add | WHERE <metric> > <threshold> to distinguish normal from anomalous conditions.'
+    );
+  }
+
+  const disallowed = ['sort', 'limit', 'keep'];
+  const found = commands
+    .filter((cmd) => disallowed.includes(cmd.name))
+    .map((cmd) => cmd.name.toUpperCase());
+  if (found.length > 0) {
+    hints.push(
+      `Warning: ${found.join(', ')} should not be used in STATS queries. The system manages ordering and limits.`
+    );
+  }
+
+  return hints;
 }
 
 /**
