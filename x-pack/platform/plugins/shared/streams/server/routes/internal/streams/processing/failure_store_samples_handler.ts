@@ -111,14 +111,11 @@ export const getFailureStoreSamples = async ({
     return { documents: [] };
   }
 
-  // 3. Only fetch ancestors and stream definition when we have documents that need processing
-  const [ancestors, stream] = await Promise.all([
-    streamsClient.getAncestors(name),
-    streamsClient.getStream(name),
-  ]);
+  // 3. Only fetch ancestors when we have documents that need processing
+  const ancestors = await streamsClient.getAncestors(name);
 
-  // 4. Collect and combine processing steps from all ancestors (root to current stream)
-  const combinedProcessing = collectAncestorProcessing(ancestors, stream);
+  // 4. Collect and combine processing steps from all ancestors (root to closest parent)
+  const combinedProcessing = collectAncestorProcessing(ancestors);
 
   // If no processing steps are configured, return the raw documents
   if (combinedProcessing.steps.length === 0) {
@@ -226,34 +223,25 @@ async function fetchFailureStoreDocuments({
 }
 
 /**
- * Collects and combines processing steps from all ancestors in order from root to current stream.
- * This ensures processors are applied in the correct order as they would be during normal ingestion.
- * Returns a combined StreamlangDSL that can be passed to simulateProcessing.
+ * Collects and combines processing steps from all ancestors in order from root to closest parent.
+ * This brings failure store documents to the state they would be in when entering the current
+ * stream's pipeline, so the simulation can accurately show what the current stream's processors
+ * do to them.
+ *
+ * The current stream's own processors are intentionally excluded — those are what the UI simulation
+ * will run, and pre-applying them here would cause docs to appear already-parsed and then fail
+ * the simulation on a second pass.
  */
-function collectAncestorProcessing(
-  ancestors: Streams.WiredStream.Definition[],
-  currentStream: Streams.all.Definition
-): StreamlangDSL {
+function collectAncestorProcessing(ancestors: Streams.WiredStream.Definition[]): StreamlangDSL {
   const allSteps: StreamlangDSL['steps'] = [];
 
   // Sort ancestors from root (shortest name) to closest parent
   const sortedAncestors = [...ancestors].sort((a, b) => a.name.length - b.name.length);
 
-  // Add processing steps from each ancestor
+  // Add processing steps from each ancestor only
   for (const ancestor of sortedAncestors) {
     if (ancestor.ingest.processing.steps.length > 0) {
       allSteps.push(...ancestor.ingest.processing.steps);
-    }
-  }
-
-  // Add processing steps from the current stream if it's a wired or classic stream
-  if (Streams.WiredStream.Definition.is(currentStream)) {
-    if (currentStream.ingest.processing.steps.length > 0) {
-      allSteps.push(...currentStream.ingest.processing.steps);
-    }
-  } else if (Streams.ClassicStream.Definition.is(currentStream)) {
-    if (currentStream.ingest.processing.steps.length > 0) {
-      allSteps.push(...currentStream.ingest.processing.steps);
     }
   }
 
