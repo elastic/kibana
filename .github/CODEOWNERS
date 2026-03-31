@@ -755,6 +755,7 @@ x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizati
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-react-hooks @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-test @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-docker-servers @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-es-server @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-kibana-server @elastic/kibana-operations @elastic/appex-qa

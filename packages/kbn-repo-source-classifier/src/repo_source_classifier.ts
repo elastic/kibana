@@ -168,6 +168,7 @@ export class RepoSourceClassifier {
 
     if (
       pkgId === '@kbn/test' ||
+      pkgId === '@kbn/test-docker-servers' ||
       pkgId === '@kbn/test-es-server' ||
       pkgId === '@kbn/test-kibana-server' ||
       pkgId === '@kbn/test-saml-auth' ||

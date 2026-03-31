@@ -7,6 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './container_logs';
-export * from './container_running';
-export * from './docker_servers_service';
+import Path from 'path';
+import globby from 'globby';
+
+export function findTestPluginPaths(dirs: string | string[]) {
+  return (Array.isArray(dirs) ? dirs : [dirs])
+    .flatMap((dir) =>
+      globby.sync('*/kibana.jsonc', {
+        cwd: dir,
+        absolute: true,
+        onlyFiles: true,
+      })
+    )
+    .map((p) => `--plugin-path=${Path.dirname(p)}`);
+}
