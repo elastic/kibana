@@ -40,7 +40,7 @@ export const ManageCustomPipelineActions: React.FC<ManageCustomPipelineProps> = 
         <EuiButtonEmpty
           buttonRef={buttonRef}
           size="s"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={onButtonClick}
         >
