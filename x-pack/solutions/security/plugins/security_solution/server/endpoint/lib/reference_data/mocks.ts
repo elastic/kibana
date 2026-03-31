@@ -10,6 +10,7 @@ import { merge } from 'lodash';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '../../../../common';
 import type { ReferenceDataClientInterface, ReferenceDataSavedObject } from './types';
 import {
   REF_DATA_KEY_INITIAL_VALUE,
@@ -71,7 +72,10 @@ const applyMocksToSoClient = (soClientMock: ReturnType<typeof savedObjectsClient
       return {
         id: key,
         type: REFERENCE_DATA_SAVED_OBJECT_TYPE,
-        attributes: REF_DATA_KEY_INITIAL_VALUE[key as keyof typeof REF_DATA_KEY_INITIAL_VALUE](),
+        attributes: REF_DATA_KEY_INITIAL_VALUE[key as keyof typeof REF_DATA_KEY_INITIAL_VALUE](
+          soClientMock,
+          {} as ExperimentalFeatures
+        ),
       } as SavedObject;
     }
 
