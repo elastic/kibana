@@ -324,7 +324,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       );
     }, [labels.pageAboutInfo, secondaryPageInfo]);
 
-
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
     }
