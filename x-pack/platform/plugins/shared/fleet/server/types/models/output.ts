@@ -366,15 +366,6 @@ const BaseSOSchemaV9 = {
   secrets: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 };
 
-// Schema representing the ingest-outputs ES SO shape at model version 9
-export const ElasticSearchSchemaV9 = schema.object({
-  ...BaseSOSchemaV9,
-  type: schema.literal(outputType.Elasticsearch),
-  hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
-  preset: schema.maybe(schema.string()),
-  write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
-});
-
 // Loose schema used for SO forwardCompatibility at model version 9.
 // Must be a plain schema.object() (not oneOf) so that .extends({}, { unknowns: 'ignore' }) works.
 // It accepts all fields that any output type may have, making all type-specific fields optional.
@@ -405,55 +396,6 @@ export const OutputSOForwardCompatSchemaV9 = schema.object({
   connection_type: schema.maybe(schema.string()),
   compression_level: schema.maybe(schema.number()),
 });
-
-// Schema representing the ingest-outputs SO shape at model version 9 (adds otel_exporter_config_yaml)
-export const OutputSchemaV9 = schema.oneOf([
-  ElasticSearchSchemaV9,
-  // Remote Elasticsearch
-  schema.object({
-    ...BaseSOSchemaV9,
-    type: schema.literal(outputType.RemoteElasticsearch),
-    hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
-    preset: schema.maybe(schema.string()),
-    service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
-  }),
-  // Logstash
-  schema.object({
-    ...BaseSOSchemaV9,
-    type: schema.literal(outputType.Logstash),
-    hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
-  }),
-  // Kafka
-  schema.object({
-    ...BaseSOSchemaV9,
-    type: schema.literal(outputType.Kafka),
-    hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
-    version: schema.maybe(schema.string()),
-    compression: schema.maybe(schema.string()),
-    compression_level: schema.maybe(schema.number()),
-    timeout: schema.maybe(schema.number()),
-    broker_timeout: schema.maybe(schema.number()),
-    required_acks: schema.maybe(schema.number()),
-    client_id: schema.maybe(schema.string()),
-    username: schema.maybe(schema.string()),
-    password: schema.maybe(schema.string()),
-    partition: schema.maybe(schema.string()),
-    topic: schema.maybe(schema.string()),
-    topics: schema.maybe(
-      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
-    ),
-    headers: schema.maybe(
-      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
-    ),
-    hash: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    round_robin: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    random: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    sasl: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    auth_type: schema.maybe(schema.string()),
-    connection_type: schema.maybe(schema.string()),
-  }),
-]);
 
 export const OutputSchema = schema.oneOf([
   schema.object({ ...ElasticSearchSchema }, { meta: { id: 'output_elasticsearch' } }),
