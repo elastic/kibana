@@ -366,7 +366,8 @@ export function QueriesTable() {
     );
   }
 
-  const isEmpty = !queriesLoading && !streamsLoading && (queriesData?.total ?? 0) === 0 && !searchQuery;
+  const isEmpty =
+    !queriesLoading && !streamsLoading && (queriesData?.total ?? 0) === 0 && !searchQuery;
   if (isEmpty) {
     return (
       <EuiEmptyPrompt
