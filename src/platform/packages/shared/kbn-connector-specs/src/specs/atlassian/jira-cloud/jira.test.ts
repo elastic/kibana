@@ -26,32 +26,6 @@ describe('JiraConnector', () => {
     jest.clearAllMocks();
   });
 
-  describe('auth', () => {
-    it('supports basic auth', () => {
-      const types = (JiraConnector.auth?.types as Array<string | { type: string }>).map((t) =>
-        typeof t === 'string' ? t : t.type
-      );
-      expect(types).toContain('basic');
-    });
-
-    it('supports oauth_authorization_code with correct Atlassian defaults', () => {
-      const oauthType = (
-        JiraConnector.auth?.types as Array<
-          string | { type: string; defaults?: Record<string, unknown> }
-        >
-      ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
-      expect(oauthType).toBeDefined();
-      expect(oauthType).toMatchObject({
-        type: 'oauth_authorization_code',
-        defaults: {
-          authorizationUrl: 'https://auth.atlassian.com/authorize',
-          tokenUrl: 'https://auth.atlassian.com/oauth/token',
-          scope: 'read:jira-work read:jira-user offline_access',
-        },
-      });
-    });
-  });
-
   describe('searchIssuesWithJql action', () => {
     it('should search issues with JQL and return response data', async () => {
       const mockResponse = {

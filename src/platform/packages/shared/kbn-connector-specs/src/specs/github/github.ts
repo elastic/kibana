@@ -82,17 +82,7 @@ export const GithubConnector: ConnectorSpec = {
   },
 
   auth: {
-    types: [
-      'bearer',
-      {
-        type: 'oauth_authorization_code',
-        defaults: {
-          authorizationUrl: 'https://github.com/login/oauth/authorize',
-          tokenUrl: 'https://github.com/login/oauth/access_token',
-          scope: 'repo',
-        },
-      },
-    ],
+    types: ['bearer'],
     headers: {
       Accept: 'application/vnd.github+json',
     },

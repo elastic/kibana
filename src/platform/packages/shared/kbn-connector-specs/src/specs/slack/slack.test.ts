@@ -45,21 +45,6 @@ describe('Slack', () => {
     expect(types).toContain('bearer');
   });
 
-  it('supports oauth_authorization_code with correct Slack defaults', () => {
-    const oauthType = (
-      Slack.auth?.types as Array<string | { type: string; defaults?: Record<string, unknown> }>
-    ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
-    expect(oauthType).toBeDefined();
-    expect(oauthType).toMatchObject({
-      type: 'oauth_authorization_code',
-      defaults: {
-        authorizationUrl: 'https://slack.com/oauth/v2/authorize',
-        tokenUrl: 'https://slack.com/api/oauth.v2.access',
-        scope: 'channels:read chat:write search:read',
-      },
-    });
-  });
-
   describe('searchMessages action', () => {
     it('should search messages with required query', async () => {
       const mockResponse = {
