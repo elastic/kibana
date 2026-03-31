@@ -6,7 +6,7 @@ import { SmlDocument, SmlToAttachmentContext } from '@kbn/agent-builder-plugin/s
 import { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { EsqlColumn } from '@elastic/elasticsearch/lib/helpers';
-import { AttachmentType, IndexAttachmentData } from '@kbn/agent-builder-common/attachments/attachment_types';
+import { AttachmentType, IndexSummaryAttachmentData } from '@kbn/agent-builder-common/attachments/attachment_types';
 
 const INDEX_SUMMARIZATION_SML_TYPE = 'index_summarization';
 
@@ -99,7 +99,6 @@ Sample documents:
 ${JSON.stringify(sampleDocuments, null, 2)}
             `;
 
-            // TODO - call out to LLM with summaryPrompt and return the response as part of SmlData
             const LLMEndpointConnector = "Anthropic-Claude-Opus-4-6";
             const actionsClient = await getActionsClient(context.request);
 
@@ -146,7 +145,7 @@ ${JSON.stringify(sampleDocuments, null, 2)}
                 fieldMappings[fieldName] = mappings[fieldName].type;
             }
 
-            const data: IndexAttachmentData = {
+            const data: IndexSummaryAttachmentData = {
                 index_name: item.origin_id,
                 summary_text: item.content,
                 field_types: fieldMappings,

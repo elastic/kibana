@@ -178,7 +178,13 @@ export interface ConnectorAttachmentData {
   }>;
 }
 
-export interface IndexAttachmentData {
+export const indexSummaryAttachmentDataSchema = z.object({
+  index_name: z.string(),
+  summary_text: z.string(),
+  field_types: z.record(z.string(), z.string()),
+});
+
+export interface IndexSummaryAttachmentData {
   index_name: string;
   summary_text: string;
   field_types: Record<string, string>;

@@ -19,6 +19,7 @@ import { registerAttachmentTypes } from './attachment_types';
 import { registerSkills } from './skills';
 import { visualizationSmlType } from './sml_types/visualization';
 import { createConnectorSmlType } from './sml_types/connector';
+import { createIndexSummarizationSmlType } from './sml_types/index_summarization';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -63,6 +64,19 @@ export class AgentBuilderPlatformPlugin
     });
     setupDeps.agentBuilder.sml.registerType(connectorSmlType);
 
+    const indexSummarySmlType = createIndexSummarizationSmlType({
+      getActionsClient: async (request) => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.actions.getActionsClientWithRequest(request);
+      },
+      getEsClient: async (request) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+      },
+      logger: this.logger.get('sml-index-summarization'),
+    });
+    setupDeps.agentBuilder.sml.registerType(indexSummarySmlType);
+  
     return {};
   }
 

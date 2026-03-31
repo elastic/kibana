@@ -13,11 +13,13 @@ import { createScreenContextAttachmentType } from './screen_context';
 import { createVisualizationAttachmentType } from './visualization';
 import { createGraphAttachmentType } from './graph';
 import { createConnectorAttachmentType } from './connector';
+
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
   PluginStartDependencies,
 } from '../types';
+import { createIndexSummarizationAttachmentType } from './index_summarization';
 
 export const registerAttachmentTypes = ({
   coreSetup,
@@ -35,6 +37,7 @@ export const registerAttachmentTypes = ({
     createVisualizationAttachmentType(),
     createGraphAttachmentType(),
     createConnectorAttachmentType(),
+    createIndexSummarizationAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {
