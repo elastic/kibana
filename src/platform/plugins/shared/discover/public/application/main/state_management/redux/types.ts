@@ -157,6 +157,15 @@ export interface DefaultProfileState {
   snapshotsByProfileId: ProfileStateSnapshotsByProfileId;
 }
 
+// This is used to identify heavy state values (e.g. long lists of nested objects)
+// that should be excluded from the Redux serializable/immutable checks to avoid
+// rendering delays when using Discover in dev builds
+export const HEAVY_STATE_KEYS = [
+  'cascadedDocumentsState',
+  'fieldListExistingFieldsInfo',
+  'renderDocumentViewMeta',
+];
+
 export interface TabState extends TabItem {
   initializationState:
     | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }

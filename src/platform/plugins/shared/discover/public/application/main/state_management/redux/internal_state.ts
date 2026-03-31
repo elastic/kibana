@@ -12,8 +12,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { isEqual, throttle } from 'lodash';
 import { from, type Observable } from 'rxjs';
 import {
+  type ImmutableStateInvariantMiddlewareOptions,
   type PayloadAction,
   type PayloadActionCreator,
+  type SerializableStateInvariantMiddlewareOptions,
   type ThunkAction,
   type ThunkDispatch,
   type TypedStartListening,
@@ -46,6 +48,7 @@ import {
   type TabState,
   type RecentlyClosedTabState,
   TabInitializationStatus,
+  HEAVY_STATE_KEYS,
 } from './types';
 import {
   loadDataViewList,
@@ -667,6 +670,21 @@ export interface InternalStateDependencies {
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
+const DEFAULT_SERIALIZABLE_IGNORED_ACTION_PATHS = ['meta.arg', 'meta.baseQueryMeta'];
+const HEAVY_STATE_PATHS = HEAVY_STATE_KEYS.map((key) => new RegExp(`(^|\\.)${key}(\\.|$)`));
+
+const immutableCheckOptions: ImmutableStateInvariantMiddlewareOptions = {
+  ignoredPaths: HEAVY_STATE_PATHS,
+};
+
+const serializableCheckOptions: SerializableStateInvariantMiddlewareOptions = {
+  // Skipped values from HEAVY_STATE_KEYS still go through RTK's isNestedFrozen
+  // cache eligibility check unless disableCache is set, which can cause noticeable
+  // rendering delays when using Discover in dev builds
+  disableCache: true,
+  ignoredActionPaths: [...DEFAULT_SERIALIZABLE_IGNORED_ACTION_PATHS, ...HEAVY_STATE_PATHS],
+  ignoredPaths: HEAVY_STATE_PATHS,
+};
 
 export const createInternalStateStore = (
   options: Omit<InternalStateDependencies, 'getInternalState$' | 'getCascadedDocumentsStateManager'>
@@ -687,7 +705,8 @@ export const createInternalStateStore = (
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         thunk: { extraArgument: optionsWithStore },
-        serializableCheck: !IS_JEST_ENVIRONMENT,
+        immutableCheck: immutableCheckOptions,
+        serializableCheck: IS_JEST_ENVIRONMENT ? false : serializableCheckOptions,
       }).prepend(createMiddleware(optionsWithStore)),
     devTools: {
       name: 'DiscoverInternalState',
