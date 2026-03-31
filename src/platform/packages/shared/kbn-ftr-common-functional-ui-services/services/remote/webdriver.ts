@@ -173,9 +173,6 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
   options.setUserPreferences(chromiumUserPrefs);
   options.setLoggingPrefs(prefs);
-  // W3C capability. Needed for ChromeDriver versions that ignore the legacy `unexpectedAlertBehaviour`
-  // capability and can throw on native `beforeunload` dialogs.
-  options.set('unhandledPromptBehavior', 'accept');
   options.set('unexpectedAlertBehaviour', 'accept');
   options.setAcceptInsecureCerts(acceptInsecureCerts);
 
