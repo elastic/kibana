@@ -82,6 +82,11 @@ export const i18nStrings = {
       defaultMessage: 'Cluster performance',
     }),
   },
+  projectPerformance: {
+    title: i18n.translate('securitySolutionPackages.navLinks.projectPerformance', {
+      defaultMessage: 'Project performance',
+    }),
+  },
   ml: {
     title: i18n.translate('securitySolutionPackages.navLinks.ml', {
       defaultMessage: 'Machine Learning',

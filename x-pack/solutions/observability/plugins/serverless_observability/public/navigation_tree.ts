@@ -509,8 +509,18 @@ export const createNavigationTree = ({
               { link: 'management:triggersActions' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
-              { link: 'management:query_activity', badgeType: 'new' },
             ],
+          },
+          {
+            id: 'project_performance',
+            title: i18n.translate(
+              'xpack.serverlessObservability.nav.projectSettings.projectPerformance',
+              {
+                defaultMessage: 'Project performance',
+              }
+            ),
+            breadcrumbStatus: 'hidden',
+            children: [{ link: 'management:query_activity', badgeType: 'new' }],
           },
           ...filterForFeatureAvailability(
             {
