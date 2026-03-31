@@ -12,6 +12,7 @@
 import { merge } from 'lodash';
 import type {
   EsWorkflowStepExecution,
+  LegacyWorkflowInput,
   StepContext,
   WorkflowExecutionDto,
   WorkflowStepExecutionDto,
@@ -23,8 +24,11 @@ import {
   parseJsPropertyAccess,
 } from '@kbn/workflows/common/utils';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import {
+  applyInputDefaults,
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import type { FlatInput } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { z } from '@kbn/zod/v4';
 import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
 
@@ -41,8 +45,7 @@ export interface StaticContextData extends Pick<StepContext, 'consts' | 'workflo
    * Used to pre-populate input fields in the test step modal.
    * Can be either legacy array format (LegacyWorkflowInput[]) or JSON Schema format.
    */
-  inputsDefinition?: FlatInput[] | JsonModelSchemaType;
-  executionContextSchema: z.ZodType;
+  inputsDefinition?: LegacyWorkflowInput[] | JsonModelSchemaType;
 }
 
 const StepContextSchemaPropertyPaths = extractSchemaPropertyPaths(StepContextSchema);
@@ -79,44 +82,31 @@ function readPropertyRecursive(
   return object;
 }
 
-function unwrapSchema(schema: z.ZodType): z.ZodType {
-  let current: z.ZodType = schema;
-  while (current instanceof z.ZodOptional || current instanceof z.ZodDefault) {
-    current = current.unwrap() as z.ZodType;
-  }
-  return current;
-}
-
 /**
- * Recursively apply default values from a Zod schema onto an object.
- * Existing values in `obj` are preserved; missing keys are filled in from
- * schema defaults or — for nested objects — by recursing into their shape.
+ * Build inputs object from workflow input definitions with their default values.
+ * This allows the test step modal to pre-populate input fields with defined defaults.
+ * Supports both legacy array format and new JSON Schema format.
+ * Uses the same logic as the exec modal to ensure consistency.
  */
-function applyZodSchemaDefaults(obj: any, schema: z.ZodType): any {
-  const inner = unwrapSchema(schema);
-
-  if (inner instanceof z.ZodObject) {
-    const result: Record<string, any> = isPlainObject(obj) ? { ...obj } : {};
-    for (const [key, fieldSchema] of Object.entries(inner.shape as Record<string, z.ZodType>)) {
-      if (result[key] !== undefined) {
-        result[key] = applyZodSchemaDefaults(result[key], fieldSchema);
-      } else if (fieldSchema instanceof z.ZodDefault) {
-        result[key] = (fieldSchema.def as { defaultValue: unknown }).defaultValue;
-      } else {
-        const nested = applyZodSchemaDefaults(undefined, fieldSchema);
-        if (nested !== undefined) {
-          result[key] = nested;
-        }
-      }
-    }
-    return result;
+function buildInputsFromDefinition(
+  inputsDefinition: LegacyWorkflowInput[] | JsonModelSchemaType | undefined
+): Record<string, unknown> | undefined {
+  if (!inputsDefinition) {
+    return undefined;
   }
 
-  if (schema instanceof z.ZodDefault && obj === undefined) {
-    return (schema.def as { defaultValue: unknown }).defaultValue;
+  // Normalize inputs to JSON Schema format (handles both legacy array and JSON Schema formats)
+  const normalizedInputs = normalizeFieldsToJsonSchema(inputsDefinition);
+
+  if (!normalizedInputs) {
+    return undefined;
   }
 
-  return obj;
+  // Use applyInputDefaults to get defaults with $ref resolution and nested object support
+  // This ensures the same behavior as the exec modal and handles all JSON Schema features
+  const defaults = applyInputDefaults(undefined, normalizedInputs);
+
+  return defaults;
 }
 
 export function buildContextOverride(
@@ -134,7 +124,10 @@ export function buildContextOverride(
   const inputsParsed = allInputsFiltered.map((input) => parseJsPropertyAccess(input));
 
   // Build the static data with inputs defaults for lookup
-  const staticDataWithInputs = applyZodSchemaDefaults({}, staticData.executionContextSchema);
+  const staticDataWithInputs = {
+    ...staticData,
+    inputs: buildInputsFromDefinition(staticData.inputsDefinition),
+  };
 
   inputsParsed.forEach((pathParts) => {
     let current = contextOverride;
