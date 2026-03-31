@@ -12,6 +12,7 @@ import { z } from '@kbn/zod/v4';
 import type { DocLinks } from '@kbn/doc-links';
 
 import { loadYaml } from '@kbn/yaml-loader';
+import type { DocLinks } from '@kbn/doc-links';
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../constants';
 
