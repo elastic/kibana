@@ -10,13 +10,32 @@ import type { EsqlData, EsqlColumn } from '../types';
 /**
  * Converts columnar ES|QL data ({ columns, values }) into an array of row objects
  * keyed by column name.
+ *
+ * Date/datetime columns are automatically converted from ISO-8601 strings to
+ * epoch-millisecond numbers so that `@elastic/charts` ScaleType.Time works.
  */
 export const toRowObjects = (data: EsqlData): Array<Record<string, unknown>> => {
   const { columns, values } = data;
+
+  // Pre-compute which column indices hold dates so we can convert once per row.
+  const dateIndices = new Set<number>();
+  columns.forEach((col, i) => {
+    if (isDateType(col.type)) {
+      dateIndices.add(i);
+    }
+  });
+
   return values.map((row) => {
     const obj: Record<string, unknown> = {};
     columns.forEach((col, i) => {
-      obj[col.name] = row[i];
+      const raw = row[i];
+      if (dateIndices.has(i) && typeof raw === 'string') {
+        // Convert ISO-8601 string → epoch ms for @elastic/charts time scales
+        const ms = new Date(raw).getTime();
+        obj[col.name] = Number.isNaN(ms) ? raw : ms;
+      } else {
+        obj[col.name] = raw;
+      }
     });
     return obj;
   });

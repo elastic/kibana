@@ -10,7 +10,7 @@ import { Chart, Settings, Partition, PartitionLayout } from '@elastic/charts';
 
 import type { TreemapState, WaffleState, MosaicState, EsqlData, EsqlColumn } from '../types';
 import { toRowObjects, colName } from './data_utils';
-import { baseTheme, transparentBackground } from './chart_theme';
+import { baseTheme, transparentBackground, partitionFillColor } from './chart_theme';
 
 interface PartitionRendererProps {
   spec: TreemapState | WaffleState | MosaicState;
@@ -58,6 +58,9 @@ export const PartitionRenderer: React.FC<PartitionRendererProps> = ({ spec, data
   const layers = groupCols.map((groupCol) => ({
     groupByRollup: (d: Record<string, unknown>) => d[groupCol] ?? 'Other',
     nodeLabel: (key: unknown) => String(key),
+    shape: {
+      fillColor: partitionFillColor,
+    },
   }));
 
   // Fallback: if no group columns, use a single layer with the metric as label
@@ -65,6 +68,9 @@ export const PartitionRenderer: React.FC<PartitionRendererProps> = ({ spec, data
     layers.push({
       groupByRollup: (_d: Record<string, unknown>) => 'All',
       nodeLabel: (key: unknown) => String(key),
+      shape: {
+        fillColor: partitionFillColor,
+      },
     });
   }
 

@@ -32,6 +32,7 @@ export const MetricRenderer: React.FC<MetricRendererProps> = ({ spec, data }) =>
   const buildMetricDatum = (row: Record<string, unknown>) => {
     const value = row[colName(primary)] as number | null;
     const datum: Record<string, unknown> = {
+      color: 'transparent',
       value: value ?? NaN,
       title: spec.title ?? colLabel(primary),
       subtitle: primary.sub_label,

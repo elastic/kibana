@@ -15,7 +15,7 @@ import {
 
 import type { PieState, EsqlData } from '../types';
 import { toRowObjects, colName, colLabel } from './data_utils';
-import { baseTheme, transparentBackground } from './chart_theme';
+import { baseTheme, transparentBackground, partitionFillColor } from './chart_theme';
 
 interface PieRendererProps {
   spec: PieState;
@@ -40,16 +40,12 @@ export const PieRenderer: React.FC<PieRendererProps> = ({ spec, data }) => {
     isDonut ? 0.45 :
     0;
 
-  const layers = groupCols.map((groupCol, idx) => ({
+  const layers = groupCols.map((groupCol) => ({
     groupByRollup: (d: Record<string, unknown>) => d[groupCol] ?? 'Other',
     nodeLabel: (key: unknown) => String(key),
-    ...(idx === 0
-      ? {
-          shape: {
-            fillColor: undefined, // let elastic/charts auto-color
-          },
-        }
-      : {}),
+    shape: {
+      fillColor: partitionFillColor,
+    },
   }));
 
   return (
