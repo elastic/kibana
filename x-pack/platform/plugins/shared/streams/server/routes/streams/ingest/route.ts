@@ -9,9 +9,11 @@ import { badData, badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import type { StreamQuery } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import { WiredIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/wired';
-import { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
-import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/classic';
+import {
+  WiredIngestUpsertRequest,
+  type ClassicIngestUpsertRequest,
+  IngestUpsertRequest,
+} from '@kbn/streams-schema';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -146,6 +148,7 @@ const readIngestRoute = createServerRoute({
     summary: 'Get ingest stream settings',
     description: 'Fetches the ingest settings of an ingest stream definition',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -185,6 +188,7 @@ const upsertIngestRoute = createServerRoute({
     summary: 'Update ingest stream settings',
     description: 'Upserts the ingest settings of an ingest stream definition',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },

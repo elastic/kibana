@@ -23,12 +23,6 @@ export interface LinksEditorProps {
 }
 
 /**
- * This editor has no context about other links, so it cannot determine order; order will be determined
- * by the **caller** (i.e. the panel editor, which contains the context about **all links**)
- */
-export type UnorderedLink = Omit<ResolvedLink, 'order'>;
-
-/**
  * @throws in case user cancels
  */
 export async function openLinkEditorFlyout({
@@ -50,8 +44,8 @@ export async function openLinkEditorFlyout({
     });
   };
 
-  return new Promise<UnorderedLink | undefined>((resolve) => {
-    const onSave = async (newLink: UnorderedLink) => {
+  return new Promise<ResolvedLink | undefined>((resolve) => {
+    const onSave = async (newLink: ResolvedLink) => {
       resolve(newLink);
       await unmountFlyout();
     };

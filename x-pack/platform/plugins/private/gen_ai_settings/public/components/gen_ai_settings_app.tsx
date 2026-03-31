@@ -14,7 +14,6 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiTitle,
   EuiLink,
   useEuiTheme,
@@ -22,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-
+import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -32,7 +31,6 @@ import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
 import { useGenAiConnectors } from '../hooks/use_genai_connectors';
-import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_connector';
 import { useSettingsContext } from '../contexts/settings_context';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
@@ -83,7 +81,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     application.capabilities.actions?.save === true;
   const canManageSpaces = application.capabilities.management.kibana.spaces;
   const connectors = useGenAiConnectors();
-  const hasElasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const hasElasticManagedLlm = (connectors.connectors || []).some(
+    (connector) => connector.isPreconfigured
+  );
 
   useEffect(() => {
     const breadcrumbs = [
@@ -316,9 +316,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 title={
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="sparkles" size="m" aria-hidden={true} />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
                       <EuiTitle size="xs">
                         <h3 data-test-subj="connectorsTitle">
                           <FormattedMessage
@@ -327,6 +324,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                           />
                         </h3>
                       </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <AiIcon iconType="sparkles" size="m" aria-hidden={true} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }

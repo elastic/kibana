@@ -18,28 +18,55 @@ export type SavedObjectStatus =
   | { status: 'loading' }
   | { status: 'resolved'; exists: boolean };
 
+// TODO: this feels very iffy, but it fixes the following flow as in edit in Dashboard, maybe we should rethink the flow?
+// 1. Open a canvas dshboard view and save the dashboard
+// 2. Go to Dashboard listing page and remove the dashboard you’ve created
+// 3. Open the Canvas again -> Edit in Dashboards
+// 4. You’re taken to the new dashboard page, but the origin is still set on the id of the removed dashboard - that’s ok, you can still edit
+// 5. Click on save in dashboard app — it will not work because we check on save if origin === previousId to not override other dashboard - this fixes it
+const getValidAttachmentOrigin = async (
+  origin: string | undefined,
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>,
+  updateOrigin: (origin: string) => Promise<unknown>
+) => {
+  if (!origin) return undefined;
+  const exists = await checkSavedDashboardExist(origin);
+  if (!exists) {
+    await updateOrigin('');
+    return undefined;
+  }
+  return origin;
+};
+
 interface UseRegisterActionButtonsParams {
   dashboardApi: DashboardApi | undefined;
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: string) => Promise<unknown>;
   timeRange: { from: string; to: string };
   dashboardState: Pick<DashboardState, 'title' | 'description' | 'panels' | 'time_range'>;
-  linkedSavedObjectId: string | undefined;
+  attachmentOrigin: string | undefined;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  isSidebar: boolean;
+  closeCanvas: () => void;
+  openSidebarConversation?: () => void;
 }
 
 export const useRegisterActionButtons = ({
   dashboardApi,
   registerActionButtons,
   updateOrigin,
+  closeCanvas,
+  openSidebarConversation,
   timeRange,
   dashboardState,
-  linkedSavedObjectId,
+  attachmentOrigin,
   checkSavedDashboardExist,
+  isSidebar,
 }: UseRegisterActionButtonsParams) => {
   const timeRangeRef = useLatest(timeRange);
-  const linkedSavedObjectIdRef = useLatest(linkedSavedObjectId);
+  const attachmentOriginRef = useLatest(attachmentOrigin);
   const dashboardStateRef = useLatest(dashboardState);
+  const openSidebarConversationRef = useLatest(openSidebarConversation);
 
   useEffect(() => {
     if (!dashboardApi) {
@@ -57,17 +84,21 @@ export const useRegisterActionButtons = ({
         }),
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          const existingDashboardId =
-            linkedSavedObjectIdRef.current &&
-            (await checkSavedDashboardExist(linkedSavedObjectIdRef.current))
-              ? linkedSavedObjectIdRef.current
-              : undefined;
+          const existingAttachmentOrigin = await getValidAttachmentOrigin(
+            attachmentOriginRef.current,
+            checkSavedDashboardExist,
+            updateOrigin
+          );
           await locator.navigate({
             ...dashboardStateRef.current,
-            dashboardId: existingDashboardId,
+            dashboardId: existingAttachmentOrigin,
             time_range: timeRangeRef.current,
             viewMode: 'edit',
           });
+          closeCanvas();
+          if (!isSidebar) {
+            openSidebarConversationRef.current?.();
+          }
         },
       });
     }
@@ -78,18 +109,18 @@ export const useRegisterActionButtons = ({
       icon: 'save',
       type: ActionButtonType.PRIMARY,
       handler: async () => {
-        const existingDashboardId =
-          linkedSavedObjectIdRef.current &&
-          (await checkSavedDashboardExist(linkedSavedObjectIdRef.current))
-            ? linkedSavedObjectIdRef.current
-            : undefined;
-        if (existingDashboardId) {
+        const existingAttachmentOrigin = await getValidAttachmentOrigin(
+          attachmentOriginRef.current,
+          checkSavedDashboardExist,
+          updateOrigin
+        );
+        if (existingAttachmentOrigin) {
           await dashboardApi.runQuickSave();
           return;
         }
         const result = await dashboardApi.runInteractiveSave();
         const nextSavedObjectId = result?.id ?? dashboardApi.savedObjectId$.value;
-        if (nextSavedObjectId && nextSavedObjectId !== existingDashboardId) {
+        if (nextSavedObjectId && nextSavedObjectId !== existingAttachmentOrigin) {
           await updateOrigin(nextSavedObjectId);
         }
       },
@@ -100,8 +131,11 @@ export const useRegisterActionButtons = ({
     registerActionButtons,
     updateOrigin,
     checkSavedDashboardExist,
+    closeCanvas,
+    openSidebarConversationRef,
     timeRangeRef,
-    linkedSavedObjectIdRef,
+    attachmentOriginRef,
     dashboardStateRef,
+    isSidebar,
   ]);
 };

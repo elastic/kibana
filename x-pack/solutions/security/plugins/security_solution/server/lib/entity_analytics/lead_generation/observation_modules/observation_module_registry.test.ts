@@ -17,7 +17,6 @@ const createMockModule = (
     id: overrides.id ?? 'test_module',
     name: overrides.id ?? 'Test Module',
     priority: 50,
-    weight: 1.0,
     ...overrides.config,
   },
   isEnabled: jest.fn().mockReturnValue(true),
@@ -76,19 +75,19 @@ describe('ObservationModuleRegistry', () => {
       registry.register(
         createMockModule({
           id: 'low',
-          config: { id: 'low', name: 'Low', priority: 10, weight: 1 },
+          config: { id: 'low', name: 'Low', priority: 10 },
         })
       );
       registry.register(
         createMockModule({
           id: 'high',
-          config: { id: 'high', name: 'High', priority: 90, weight: 1 },
+          config: { id: 'high', name: 'High', priority: 90 },
         })
       );
       registry.register(
         createMockModule({
           id: 'mid',
-          config: { id: 'mid', name: 'Mid', priority: 50, weight: 1 },
+          config: { id: 'mid', name: 'Mid', priority: 50 },
         })
       );
 
@@ -155,14 +154,14 @@ describe('ObservationModuleRegistry', () => {
       registry.register(
         createMockModule({
           id: 'failing',
-          config: { id: 'failing', name: 'Failing', priority: 100, weight: 1 },
+          config: { id: 'failing', name: 'Failing', priority: 100 },
           collect: jest.fn().mockRejectedValue(new Error('module crash')),
         })
       );
       registry.register(
         createMockModule({
           id: 'working',
-          config: { id: 'working', name: 'Working', priority: 50, weight: 1 },
+          config: { id: 'working', name: 'Working', priority: 50 },
           collect: jest.fn().mockResolvedValue([createMockObservation('user:alice', 'working')]),
         })
       );

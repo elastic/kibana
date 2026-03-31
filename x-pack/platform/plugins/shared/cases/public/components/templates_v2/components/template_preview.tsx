@@ -17,7 +17,11 @@ import * as i18n from '../translations';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
-export const TemplatePreview = () => {
+interface TemplatePreviewProps {
+  onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+}
+
+export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefaultChange }) => {
   const { control } = useFormContext();
   const values = useWatch({ control, defaultValue: { definition: '' } });
 
@@ -94,7 +98,10 @@ export const TemplatePreview = () => {
             <strong>{i18n.TEMPLATE_FIELDS_LABEL}</strong>
           </EuiText>
           <EuiSpacer size="s" />
-          <TemplateFieldRenderer parsedTemplate={parsedTemplateData} />
+          <TemplateFieldRenderer
+            parsedTemplate={parsedTemplateData}
+            onFieldDefaultChange={onFieldDefaultChange}
+          />
         </>
       )}
     </div>

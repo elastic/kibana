@@ -8,6 +8,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { buildFieldsZodValidator } from './build_fields_zod_validator';
 import {
   applyInputDefaults,
   convertLegacyFieldsToJsonSchema,
@@ -50,7 +51,6 @@ describe('convertLegacyFieldsToJsonSchema', () => {
         },
       },
       required: ['username'],
-      additionalProperties: false,
     });
   });
 
@@ -103,7 +103,6 @@ describe('convertLegacyFieldsToJsonSchema', () => {
     const result = convertLegacyFieldsToJsonSchema([]);
     expect(result).toEqual({
       properties: {},
-      additionalProperties: false,
     });
   });
 
@@ -710,5 +709,36 @@ describe('applyInputDefaults', () => {
         notifyTeams: ['SOC', 'Management'],
       },
     });
+  });
+});
+
+describe('normalizeFieldsToJsonSchema + buildFieldsZodValidator (integration)', () => {
+  it('should normalize legacy array input defs and validate payloads like the execution engine', () => {
+    const legacyInputs = [
+      { name: 'greeting', type: 'string' as const, required: true },
+      { name: 'count', type: 'number' as const, required: false },
+    ] as Array<z.infer<typeof WorkflowInputSchema>>;
+
+    const normalizedSchema = normalizeFieldsToJsonSchema(legacyInputs);
+    const validator = buildFieldsZodValidator(normalizedSchema);
+
+    expect(validator.safeParse({ greeting: 'hi' }).success).toBe(true);
+    expect(validator.safeParse({}).success).toBe(false);
+  });
+
+  it('should produce a validator consistent with the normalized JSON Schema properties', () => {
+    const inputs: JsonModelSchemaType = {
+      properties: {
+        name: { type: 'string' },
+      },
+      required: ['name'],
+    };
+
+    const normalizedSchema = normalizeFieldsToJsonSchema(inputs);
+    expect(normalizedSchema?.properties).toHaveProperty('name');
+
+    const validator = buildFieldsZodValidator(normalizedSchema);
+    expect(validator.safeParse({ name: 'hello' }).success).toBe(true);
+    expect(validator.safeParse({}).success).toBe(false);
   });
 });

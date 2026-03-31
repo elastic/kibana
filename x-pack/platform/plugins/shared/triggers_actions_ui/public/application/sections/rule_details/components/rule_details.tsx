@@ -30,7 +30,7 @@ import {
   RuleExecutionStatusErrorReasons,
   parseDuration,
 } from '@kbn/alerting-plugin/common';
-import { getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { getEditRuleRoute } from '@kbn/rule-data-utils';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/response-ops-rule-form';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
@@ -42,6 +42,7 @@ import {
   hasManageApiKeysCapability,
 } from '../../../lib/capabilities';
 import { getRulesBreadcrumbWithHref } from '../../../lib/breadcrumb';
+import { useSetBreadcrumbs } from '../../../hooks/use_set_breadcrumbs';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import type {
   Rule,
@@ -53,7 +54,6 @@ import type {
 import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/components/with_bulk_rule_api_operations';
 import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleRouteWithApi } from './rule_route';
-import { ViewInApp } from './view_in_app';
 import { ViewLinkedObject } from './view_linked_object';
 import { routeToHome } from '../../../constants';
 import { RuleSnoozeModal } from '../../rules_list/components/rule_snooze_modal';
@@ -62,7 +62,6 @@ import {
   rulesWarningReasonTranslationsMapping,
 } from '../../rules_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { runRule } from '../../../lib/run_rule';
 import {
@@ -74,6 +73,7 @@ import {
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import type { RefreshToken } from './types';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
+import { ViewInDiscover } from './view_in_discover';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -103,7 +103,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const {
     application,
     ruleTypeRegistry,
-    setBreadcrumbs,
     chrome,
     http,
     i18n: i18nStart,
@@ -111,8 +110,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     userProfile,
     notifications: { toasts },
   } = useKibana().services;
-  const { capabilities, navigateToApp, getUrlForApp } = application;
-  const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
+  const { capabilities, getUrlForApp } = application;
+  const setBreadcrumbs = useSetBreadcrumbs();
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
@@ -253,24 +252,14 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   };
 
   const onEditRuleClick = () => {
-    if (useUnifiedRulesPage) {
-      const { pathname, search, hash } = history.location;
-      const returnPath = `${pathname}${search}${hash}` || `/${rule.id}`;
-      history.push({
-        pathname: getEditRuleRoute(rule.id),
-        state: {
-          returnPath,
-        },
-      });
-    } else {
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
-        state: {
-          returnApp: 'management',
-          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-        },
-      });
-    }
+    const { pathname, search, hash } = history.location;
+    const returnPath = `${pathname}${search}${hash}` || `/${rule.id}`;
+    history.push({
+      pathname: getEditRuleRoute(rule.id),
+      state: {
+        returnPath,
+      },
+    });
   };
 
   const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
@@ -458,7 +447,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               isInternallyManaged={ruleType.isInternallyManaged}
             />
           ),
-          useUnifiedRulesPage ? <ViewLinkedObject rule={rule} /> : <ViewInApp rule={rule} />,
+          <ViewInDiscover rule={rule} />,
+          <ViewLinkedObject rule={rule} />,
         ]}
       />
       <EuiPageSection>

@@ -399,7 +399,11 @@ describe('Task Runner', () => {
         );
 
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-          ...generateRuleUpdateParams({})
+          ...generateRuleUpdateParams({
+            metrics: {
+              total_search_duration_ms: 23423,
+            },
+          })
         );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -534,7 +538,11 @@ describe('Task Runner', () => {
           { tags: ['1', 'test'] }
         );
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-          ...generateRuleUpdateParams({})
+          ...generateRuleUpdateParams({
+            metrics: {
+              total_search_duration_ms: 23423,
+            },
+          })
         );
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
         expect(
@@ -736,7 +744,11 @@ describe('Task Runner', () => {
         });
 
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-          ...generateRuleUpdateParams({})
+          ...generateRuleUpdateParams({
+            metrics: {
+              total_search_duration_ms: 23423,
+            },
+          })
         );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -827,7 +839,11 @@ describe('Task Runner', () => {
         });
 
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-          ...generateRuleUpdateParams({})
+          ...generateRuleUpdateParams({
+            metrics: {
+              total_search_duration_ms: 23423,
+            },
+          })
         );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);

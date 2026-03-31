@@ -15,7 +15,8 @@
     "server/**/*.json"
   ],
   "kbn_references": [
-    "@kbn/core","@kbn/eval-kql",
+    "@kbn/core",
+    "@kbn/eval-kql",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -52,6 +53,7 @@
     "@kbn/serverless",
     "@kbn/field-types",
     "@kbn/data-views-plugin",
+    "@kbn/kql",
     "@kbn/field-formats-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/es-query",
@@ -84,7 +86,11 @@
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/scout",
     "@kbn/agent-builder-server",
-    "@kbn/agent-builder-common"
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-browser",
+    "@kbn/share-plugin",
+    "@kbn/test",
+    "@kbn/tooling-log"
   ],
   "exclude": ["target/**/*"]
 }

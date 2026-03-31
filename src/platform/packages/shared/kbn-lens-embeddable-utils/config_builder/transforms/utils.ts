@@ -22,8 +22,11 @@ import type {
 } from '@kbn/lens-common';
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { Sha256 } from '@kbn/crypto-browser';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
+import { FILTERS, isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
+import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiAllOperations, LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
@@ -36,9 +39,10 @@ import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from '../schema/constants';
 import type { LayerSettingsSchema } from '../schema/shared';
-import type { LensApiFilterType, UnifiedSearchFilterType } from '../schema/filter';
+import type { LensApiFilterType } from '../schema/filter';
 import type { DatasetType, DatasetTypeESQL, DatasetTypeNoESQL } from '../schema/dataset';
 import type { LayerTypeESQL } from '../schema/charts/xy';
+import type { XScaleSchemaType } from '../schema/charts/shared';
 
 export type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -110,8 +114,27 @@ export function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
-function generateAdHocDataViewId(dataView: APIAdHocDataView) {
-  return `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`;
+function sha256Sync(str: string): string {
+  return new Sha256().update(str).digest('hex');
+}
+
+// Normalize whitespace and convert to lowercase to make the id more predictable and hit cache more often
+function normalizeWhitespace(str: string): string {
+  return str.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+function generateAdHocDataViewId(
+  dataView: Pick<APIAdHocDataView, 'index' | 'timeFieldName' | 'esqlQuery' | 'dataSourceType'>
+) {
+  const base = `${dataView.index}${dataView.timeFieldName ? `-${dataView.timeFieldName}` : ''}`;
+  // When timeFieldName is not explicitly provided in the query, then it is not persisted during the transformations and
+  // at runtime we fallback to @timestamp if it exists in the index.
+  // But different ES|QL queries against the same index can resolve to different time fields. See: https://github.com/elastic/kibana/pull/256764
+  // Including a hash of the query in the ID ensures each distinct query gets its own cached DataView, preventing stale time-field resolution.
+  if (dataView.dataSourceType === 'esql' && !dataView.timeFieldName && dataView.esqlQuery) {
+    return `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`;
+  }
+  return base;
 }
 
 function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
@@ -127,6 +150,7 @@ function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
     fieldAttrs: {},
     allowNoIndex: false,
     allowHidden: false,
+    ...(dataView.dataSourceType ? { type: dataView.dataSourceType } : {}),
   };
 }
 
@@ -267,6 +291,7 @@ export function getDatasetIndex(dataset: DatasetType) {
       return {
         index: getIndexPatternFromESQLQuery(dataset.query),
         timeFieldName: getTimeFieldFromESQLQuery(dataset.query),
+        esqlQuery: dataset.query,
       };
     case 'dataView':
       return {
@@ -285,22 +310,29 @@ function buildDatasourceStatesLayer(
   layer: unknown,
   i: number,
   dataset: DatasetType,
-  datasetIndex: { index: string; timeFieldName: string | undefined },
+  datasetIndex: { index: string; timeFieldName: string | undefined; esqlQuery?: string },
   buildDataLayer: (
     config: unknown,
     i: number,
     index: { index: string; timeFieldName: string | undefined }
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
-  getValueColumns: (layer: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
+  getValueColumns: (
+    layer: unknown,
+    i: number,
+    xAxisScale?: XScaleSchemaType
+  ) => TextBasedLayerColumn[], // ValueBasedLayerColumn[]
+  fullConfig: LensApiState
 ): [LensDatasourceId, DataSourceStateLayer | undefined] {
   function buildValueLayer(
     config: unknown,
     ds: NarrowByType<DatasetType, 'table'>
   ): TextBasedPersistedState['layers'][0] {
     const table = ds.table as LensDatatableDataset;
+    const xAxisScale =
+      fullConfig.type === 'xy' && fullConfig.axis?.x ? fullConfig.axis.x.scale : undefined;
     const newLayer = {
       table,
-      columns: getValueColumns(config, i),
+      columns: getValueColumns(config, i, xAxisScale),
       allColumns: table.columns.map(
         (column): TextBasedLayerColumn => ({
           fieldName: column.name,
@@ -319,12 +351,14 @@ function buildDatasourceStatesLayer(
     config: unknown,
     ds: NarrowByType<DatasetType, 'esql'>
   ): TextBasedPersistedState['layers'][0] {
-    const columns = getValueColumns(config, i);
+    const xAxisScale =
+      fullConfig.type === 'xy' && fullConfig.axis?.x ? fullConfig.axis.x.scale : undefined;
+    const columns = getValueColumns(config, i, xAxisScale);
 
     return {
-      index: datasetIndex.index,
+      index: generateAdHocDataViewId({ ...datasetIndex, dataSourceType: 'esql' }),
       query: { esql: ds.query },
-      timeField: getTimeFieldFromESQLQuery(ds.query) || undefined,
+      timeField: datasetIndex.timeFieldName || undefined,
       columns,
     };
   }
@@ -356,7 +390,7 @@ export const buildDatasourceStates = (
     i: number,
     index: { index: string; timeFieldName: string | undefined }
   ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
-  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[]
+  getValueColumns: (config: any, i: number, xAxisScale?: XScaleSchemaType) => TextBasedLayerColumn[]
 ): {
   layers: LensAttributes['state']['datasourceStates'];
   usedDataviews: Record<string, APIDataView | APIAdHocDataView>;
@@ -364,30 +398,43 @@ export const buildDatasourceStates = (
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
   // XY charts have dataset encoded per layer not at the root level
-  const mainDataset = 'dataset' in config && config.dataset;
+  const mainDataset = ('dataset' in config && config.dataset) || undefined;
   const usedDataviews: Record<string, APIDataView | APIAdHocDataView> = {};
   // a few charts types support multiple layers
   const hasMultipleLayers = 'layers' in config;
   const configLayers = hasMultipleLayers ? config.layers : [config];
 
-  for (let i = 0; i < configLayers.length; i++) {
-    const layer = configLayers[i];
-    const layerId = hasMultipleLayers && 'type' in layer ? `${layer.type}_${i}` : `layer_${i}`;
+  for (let layerPosition = 0; layerPosition < configLayers.length; layerPosition++) {
+    const layer = configLayers[layerPosition];
+    const layerId =
+      hasMultipleLayers && 'type' in layer
+        ? `${layer.type}_${layerPosition}`
+        : `layer_${layerPosition}`;
     const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
 
     if (!dataset) {
+      if ('type' in layer && layer.type === 'annotation_group' && 'group_id' in layer) {
+        // by-ref annotation layers don't require a dataset
+        continue;
+      }
       throw Error('dataset must be defined');
     }
 
-    const index = getDatasetIndex(dataset);
+    // This datasetIndex is always defined, but it can be empty if the dataset is a table
+    // TODO evaluate the table dataset type and return the correct dataset index
+    const datasetIndex = getDatasetIndex(dataset);
+    if (!datasetIndex) {
+      throw Error('dataset index must be defined');
+    }
 
     const [type, layerConfig] = buildDatasourceStatesLayer(
       layer,
-      i,
+      layerPosition,
       dataset,
-      index!,
+      datasetIndex,
       buildDataLayers,
-      getValueColumns
+      getValueColumns,
+      config
     );
     if (layerConfig) {
       layers = {
@@ -401,20 +448,21 @@ export const buildDatasourceStates = (
       };
 
       // keep record of all dataviews used by layers
-      if (index) {
-        const newLayerIds =
-          isSingleLayer(layerConfig) || Object.keys(layerConfig).length === 0
-            ? [layerId]
-            : Object.keys(layerConfig);
-        for (const id of newLayerIds) {
-          usedDataviews[id] =
-            dataset.type === 'dataView'
-              ? { type: 'dataView', id: dataset.id }
-              : {
-                  type: 'adHocDataView',
-                  ...index,
-                };
-        }
+      const newLayerIds =
+        isSingleLayer(layerConfig) || Object.keys(layerConfig).length === 0
+          ? [layerId]
+          : Object.keys(layerConfig);
+      for (const id of newLayerIds) {
+        usedDataviews[id] =
+          dataset.type === 'dataView'
+            ? { type: 'dataView', id: dataset.id }
+            : {
+                type: 'adHocDataView',
+                ...datasetIndex,
+                ...(dataset.type === 'esql'
+                  ? { dataSourceType: 'esql', esqlQuery: dataset.query }
+                  : {}),
+              };
       }
     }
   }
@@ -492,20 +540,6 @@ export const generateApiLayer = (options: PersistedIndexPatternLayer | TextBased
   };
 };
 
-export const filtersToApiFormat = (
-  filters: Filter[]
-): (LensApiFilterType | UnifiedSearchFilterType)[] => {
-  return filters.map((filter) => {
-    const { $state, meta, ...finalFilter } = filter;
-    return {
-      ...(finalFilter.query?.language ? { language: finalFilter.query?.language } : {}),
-      ...('query' in finalFilter
-        ? { query: finalFilter.query?.query ?? finalFilter.query }
-        : finalFilter),
-    };
-  });
-};
-
 export const queryToApiFormat = (query: Query): LensApiFilterType | undefined => {
   if (typeof query.query !== 'string') {
     return;
@@ -516,16 +550,73 @@ export const queryToApiFormat = (query: Query): LensApiFilterType | undefined =>
   };
 };
 
-export const filtersToLensState = (
-  filters: (LensApiFilterType | UnifiedSearchFilterType)[]
-): Required<Filter | Filter['query']>[] => {
-  return filters.map((filter) => {
+function injectFilterReferences(filters: Filter[], references: SavedObjectReference[]): Filter[] {
+  const dataViewReferences = references.filter((r) => r.type === INDEX_PATTERN_ID);
+
+  const inject = (filter: Filter): Filter => {
+    const injectedParams =
+      filter.meta.type === FILTERS.COMBINED && Array.isArray(filter.meta.params)
+        ? (filter.meta.params as unknown[]).map((p) => inject(p as Filter))
+        : filter.meta.params;
+
+    if (!filter.meta.index) {
+      return injectedParams !== undefined
+        ? { ...filter, meta: { ...filter.meta, params: injectedParams } }
+        : filter;
+    }
+
+    const reference = dataViewReferences.find((ref) => ref.name === filter.meta.index);
     return {
-      ...('query' in filter ? { query: filter.query, language: filter?.language } : filter),
-      meta: {},
+      ...filter,
+      meta: {
+        ...filter.meta,
+        // If no reference has been found, keep the current "index" property (used for ad-hoc data views)
+        index: reference ? reference.id : filter.meta.index,
+        ...(injectedParams !== undefined ? { params: injectedParams } : {}),
+      },
     };
-  });
-};
+  };
+
+  return filters.map(inject);
+}
+
+function extractFilterReferences(filters: Filter[], references: SavedObjectReference[]) {
+  const extractedReferences: SavedObjectReference[] = [];
+  const extract = (filter: Filter): Filter => {
+    const extractedParams =
+      filter.meta.type === FILTERS.COMBINED && Array.isArray(filter.meta.params)
+        ? (filter.meta.params as unknown[]).map((p) => extract(p as Filter))
+        : filter.meta.params;
+
+    if (!filter.meta.index || typeof filter.meta.index !== 'string') {
+      return extractedParams !== undefined
+        ? { ...filter, meta: { ...filter.meta, params: extractedParams } }
+        : filter;
+    }
+
+    const referenceName = `filter-ref-${filter.meta.index}`;
+    const existingRef = extractedReferences.find((r) => r.name === referenceName);
+
+    if (!existingRef) {
+      extractedReferences.push({
+        type: INDEX_PATTERN_ID,
+        name: referenceName,
+        id: filter.meta.index,
+      });
+    }
+
+    return {
+      ...filter,
+      meta: {
+        ...filter.meta,
+        index: referenceName,
+        ...(extractedParams !== undefined ? { params: extractedParams } : {}),
+      },
+    };
+  };
+
+  return { filters: filters.map(extract), references: extractedReferences };
+}
 
 export const queryToLensState = (query: LensApiFilterType): Query => {
   return { query: query.query, language: query.language as 'kuery' | 'lucene' };
@@ -534,11 +625,17 @@ export const queryToLensState = (query: LensApiFilterType): Query => {
 export const filtersAndQueryToApiFormat = (
   state: LensAttributes
 ): {
-  filters?: (LensApiFilterType | UnifiedSearchFilterType)[];
+  filters?: AsCodeFilter[];
   query?: LensApiFilterType;
 } => {
+  const injectedStoredFilters = injectFilterReferences(
+    state.state.filters ?? [],
+    state.references ?? []
+  );
+  const asCodeFilters = fromStoredFilters(injectedStoredFilters) ?? [];
+
   return {
-    ...(state.state.filters?.length ? { filters: filtersToApiFormat(state.state.filters) } : {}),
+    ...(asCodeFilters.length ? { filters: asCodeFilters } : {}),
     ...(state.state.query && !isOfAggregateQueryType(state.state.query)
       ? { query: queryToApiFormat(state.state.query) }
       : {}),
@@ -552,7 +649,7 @@ function extraQueryFromAPIState(state: LensApiState): { esql: string } | Query |
   if ('layers' in state && Array.isArray(state.layers)) {
     // pick only the first one for now
     const esqlLayer = state.layers.find(
-      (layer): layer is LayerTypeESQL => layer.dataset?.type === 'esql'
+      (layer): layer is LayerTypeESQL => 'dataset' in layer && layer.dataset?.type === 'esql'
     );
     if (esqlLayer && 'query' in esqlLayer.dataset) {
       return { esql: esqlLayer.dataset.query };
@@ -564,12 +661,22 @@ function extraQueryFromAPIState(state: LensApiState): { esql: string } | Query |
   return undefined;
 }
 
-export const filtersAndQueryToLensState = (state: LensApiState) => {
+export const filtersAndQueryToLensState = (
+  state: LensApiState,
+  references: SavedObjectReference[]
+) => {
   const query = extraQueryFromAPIState(state);
+  const convertedFilters = state.filters
+    ? toStoredFilters(state.filters as AsCodeFilter[]) ?? []
+    : [];
+  const { filters: extractedFilters, references: extractedReferences } = extractFilterReferences(
+    convertedFilters,
+    references
+  );
+
   return {
-    filters: [] satisfies Filter[],
-    // @TODO: rework on these with the shared Filter definition by Presentation team
-    ...(state.filters ? { filters: filtersToLensState(state.filters) as Filter[] } : {}),
+    references: extractedReferences,
+    filters: extractedFilters,
     ...(query ? { query } : {}),
   };
 };

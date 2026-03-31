@@ -376,7 +376,7 @@ describe('type_check orchestration', () => {
       );
     });
 
-    it('writes the HEAD SHA to the state file after a successful full pass', async () => {
+    it('writes the HEAD SHA to the state file after the full pass succeeds', async () => {
       resolveCurrentCommitSha.mockResolvedValueOnce('abc123def456');
 
       const log = createLog();
@@ -388,7 +388,15 @@ describe('type_check orchestration', () => {
       expect(writeArtifactsState).toHaveBeenCalledWith('abc123def456');
     });
 
-    it('does not write state file when the full pass fails', async () => {
+    it('writes the HEAD SHA to the state file even when the full pass fails', async () => {
+      // Writing state on failure is intentional: tsc --build writes a fresh
+      // .tsbuildinfo for every project it processes (including ones with errors).
+      // If we skip the state write, the next run will call detectStaleArtifacts
+      // from the old archive SHA, see all post-archive projects as stale, delete
+      // their .tsbuildinfo via invalidateTsBuildInfoFiles, and force tsc to
+      // rebuild them from scratch — including projects that already had 0 errors.
+      resolveCurrentCommitSha.mockResolvedValueOnce('abc123def456');
+
       const log = createLog();
       const procRunner = createProcRunner();
       const flagsReader = makeFlagsReader();
@@ -397,7 +405,7 @@ describe('type_check orchestration', () => {
 
       await expect(runCallback({ log, flagsReader, procRunner })).rejects.toThrow();
 
-      expect(writeArtifactsState).not.toHaveBeenCalled();
+      expect(writeArtifactsState).toHaveBeenCalledWith('abc123def456');
     });
 
     it('does not write state file when --project filter is used', async () => {

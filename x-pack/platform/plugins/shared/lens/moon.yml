@@ -148,6 +148,10 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/controls-constants'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/field-formats-common'
+  - '@kbn/calculate-auto'
+  - '@kbn/esql-language'
+  - '@kbn/as-code-shared-schemas'
 tags:
   - plugin
   - prod
@@ -162,26 +166,6 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

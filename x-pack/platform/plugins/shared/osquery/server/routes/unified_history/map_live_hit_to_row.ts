@@ -28,16 +28,42 @@ export const getField = (
 };
 
 export interface LiveActionHit {
-  _source?: Record<string, unknown>;
+  _source?: ActionSource;
   fields?: Record<string, unknown>;
   sort?: Array<string | number>;
 }
 
+interface ActionQuery {
+  query?: string;
+  agents?: string[];
+  id?: string;
+  ecs_mapping?: Record<string, unknown>;
+  saved_query_id?: string;
+  timeout?: number;
+}
+
+interface ActionSource {
+  '@timestamp'?: string;
+  action_id?: string;
+  pack_name?: string;
+  pack_id?: string;
+  space_id?: string;
+  user_id?: string;
+  agents?: string[];
+  agent_ids?: string[];
+  agent_all?: boolean;
+  agent_platforms?: string[];
+  agent_policy_ids?: string[];
+  alert_ids?: string[];
+  tags?: string[];
+  queries?: ActionQuery[];
+}
+
 export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
   const hitFields = (hit.fields ?? {}) as Record<string, unknown>;
-  const source = (hit._source ?? {}) as Record<string, unknown>;
+  const source: ActionSource = hit._source ?? {};
 
-  const get = (name: string) => getField(hitFields, source, name);
+  const get = (name: string) => getField(hitFields, source as Record<string, unknown>, name);
 
   const agentsRaw = hitFields.agents ?? source.agents;
   const agentsList = Array.isArray(agentsRaw) ? agentsRaw : [];
@@ -46,11 +72,7 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
   const packName = get('pack_name') as string | undefined;
   const packId = get('pack_id') as string | undefined;
 
-  const queries = (source.queries ?? []) as Array<{
-    query?: string;
-    agents?: string[];
-    id?: string;
-  }>;
+  const queries = source.queries ?? [];
   const isPack = queries.length > 1 || packId;
   const queryText = isPack ? '' : queries[0]?.query ?? '';
 
@@ -61,6 +83,15 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
 
   const alertIdsRaw = hitFields.alert_ids ?? source.alert_ids;
   const hasAlertIds = Array.isArray(alertIdsRaw) ? alertIdsRaw.length > 0 : !!alertIdsRaw;
+
+  let singleQueryDetails: Pick<LiveHistoryRow, 'ecsMapping' | 'savedQueryId' | 'timeout'> = {};
+  if (!isPack && queries[0]) {
+    singleQueryDetails = {
+      ecsMapping: queries[0].ecs_mapping,
+      savedQueryId: queries[0].saved_query_id,
+      timeout: queries[0].timeout,
+    };
+  }
 
   return {
     id: actionId,
@@ -78,6 +109,11 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
     totalRows: undefined,
     userId: get('user_id') as string | undefined,
     actionId,
-    tags: (source.tags as string[] | undefined) ?? [],
+    tags: source.tags ?? [],
+    ...singleQueryDetails,
+    agentIds: source.agent_ids,
+    agentAll: source.agent_all,
+    agentPlatforms: source.agent_platforms,
+    agentPolicyIds: source.agent_policy_ids,
   };
 };

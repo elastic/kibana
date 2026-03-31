@@ -8,11 +8,11 @@
  */
 
 import { LegendLayout, LegendSize, type XYLegendValue } from '@kbn/chart-expressions-common';
-import type { XYState as XYLensState } from '@kbn/lens-common';
+import type { XYVisualizationState } from '@kbn/lens-common';
 import type { XYState } from '../../../schema';
-import { stripUndefined } from '../utils';
+import { getLegendTruncateAfterLines, stripUndefined } from '../utils';
 
-type OutsideLegendType = Extract<Required<XYState['legend']>, { inside: false }>;
+type OutsideLegendType = Extract<Required<XYState['legend']>, { placement: 'outside' }>;
 
 type StatisticsType = OutsideLegendType['statistics'][number];
 
@@ -70,8 +70,8 @@ function extractAlignment(legend: XYState['legend']):
       horizontalAlignment: 'left' | 'right' | undefined;
     }
   | {} {
-  if (legend?.inside) {
-    const [verticalAlignment, horizontalAlignment] = (legend.alignment?.split('_') ?? [
+  if (legend?.placement === 'inside') {
+    const [verticalAlignment, horizontalAlignment] = (legend.position?.split('_') ?? [
       'top',
       'right',
     ]) as ['top' | 'bottom' | undefined, 'left' | 'right' | undefined];
@@ -82,7 +82,7 @@ function extractAlignment(legend: XYState['legend']):
 
 function getLegendSize(
   size: OutsideLegendType['size'] | undefined
-): XYLensState['legend']['legendSize'] {
+): XYVisualizationState['legend']['legendSize'] {
   switch (size) {
     case 'small':
       return LegendSize.SMALL;
@@ -98,9 +98,9 @@ function getLegendSize(
 }
 
 export function convertLegendToStateFormat(legend: XYState['legend']): {
-  legend: XYLensState['legend'];
+  legend: XYVisualizationState['legend'];
 } {
-  const newStateLegend: XYLensState['legend'] = {
+  const newStateLegend: XYVisualizationState['legend'] = {
     isVisible: legend?.visibility === 'auto' || legend?.visibility === 'visible',
     shouldTruncate: Boolean(legend?.truncate_after_lines), // 0 will be interpreted as false
     ...(legend?.truncate_after_lines ? { maxLines: legend?.truncate_after_lines } : {}),
@@ -109,7 +109,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
       : {}),
     ...extractAlignment(legend),
     ...(legend?.visibility === 'auto' ? { showSingleSeries: true } : {}),
-    ...(legend?.inside
+    ...(legend?.placement === 'inside'
       ? {
           isInside: true,
           position: DEFAULT_LEGEND_POSITON,
@@ -117,7 +117,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
         }
       : {
           position: legend?.position ?? DEFAULT_LEGEND_POSITON,
-          legendSize: legend?.size ? getLegendSize(legend.size) : LegendSize.AUTO,
+          legendSize: legend?.size ? getLegendSize(legend.size) : undefined,
           ...(legend?.layout === 'list' ? { layout: LegendLayout.List } : {}),
         }),
   };
@@ -126,7 +126,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
 }
 
 function getLegendSizeAPI(
-  size: XYLensState['legend']['legendSize'] | undefined
+  size: XYVisualizationState['legend']['legendSize'] | undefined
 ): Pick<OutsideLegendType, 'size'> | {} {
   switch (size) {
     case LegendSize.SMALL:
@@ -143,7 +143,7 @@ function getLegendSizeAPI(
 }
 
 // @TODO improve this check
-function isLegendInside(legend: XYLensState['legend']): boolean {
+function isLegendInside(legend: XYVisualizationState['legend']): boolean {
   if (legend.isInside != null) {
     return legend.isInside;
   }
@@ -155,36 +155,36 @@ function isLegendInside(legend: XYLensState['legend']): boolean {
   );
 }
 
-function getLegendAlignment(legend: XYLensState['legend']) {
+function getLegendAlignment(legend: XYVisualizationState['legend']) {
   if (!legend.verticalAlignment && !legend.horizontalAlignment) {
     return {};
   }
   return {
-    alignment: `${legend.verticalAlignment ?? 'top'}_${legend.horizontalAlignment ?? 'right'}`,
+    position: `${legend.verticalAlignment ?? 'top'}_${legend.horizontalAlignment ?? 'right'}`,
   };
 }
 
-function getLegendLayout(legend: XYLensState['legend']) {
+function getLegendLayout(legend: XYVisualizationState['legend']) {
   if (isLegendInside(legend)) {
     return {
-      inside: true,
+      placement: 'inside' as const,
       ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
       ...getLegendAlignment(legend),
     };
   }
   return {
-    inside: false,
+    placement: 'outside' as const,
     ...getLegendSizeAPI(legend.legendSize),
     ...(legend.position ? { position: legend.position } : {}),
   };
 }
 
 export function convertLegendToAPIFormat(
-  legend: XYLensState['legend']
+  legend: XYVisualizationState['legend']
 ): Pick<XYState, 'legend'> | {} {
   const legendOptions = stripUndefined({
     visibility: !legend.isVisible ? 'hidden' : legend.showSingleSeries ? 'auto' : 'visible',
-    truncate_after_lines: legend?.maxLines == null ? undefined : legend.maxLines,
+    truncate_after_lines: getLegendTruncateAfterLines(legend),
     statistics: legend?.legendStats?.length
       ? legend.legendStats.map(mapStatToSnakeCase)
       : undefined,

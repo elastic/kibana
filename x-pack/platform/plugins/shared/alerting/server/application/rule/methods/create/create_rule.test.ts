@@ -502,6 +502,7 @@ describe('create()', () => {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "pending",
         },
+        "lastEnabledAt": "2019-02-12T21:01:22.479Z",
         "legacyId": null,
         "meta": Object {
           "versionApiKeyLastmodified": "v8.0.0",
@@ -516,6 +517,7 @@ describe('create()', () => {
               "metrics": Object {
                 "duration": 0,
                 "gap_duration_s": null,
+                "gap_range": null,
                 "total_alerts_created": null,
                 "total_alerts_detected": null,
                 "total_indexing_duration_ms": null,
@@ -738,6 +740,7 @@ describe('create()', () => {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "pending",
         },
+        "lastEnabledAt": "2019-02-12T21:01:22.479Z",
         "legacyId": "123",
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
@@ -752,6 +755,7 @@ describe('create()', () => {
               "metrics": Object {
                 "duration": 0,
                 "gap_duration_s": null,
+                "gap_range": null,
                 "total_alerts_created": null,
                 "total_alerts_detected": null,
                 "total_indexing_duration_ms": null,
@@ -1216,6 +1220,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        lastEnabledAt: '2019-02-12T21:01:22.479Z',
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
@@ -1471,6 +1476,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        lastEnabledAt: '2019-02-12T21:01:22.479Z',
         legacyId: null,
         meta: {
           versionApiKeyLastmodified: 'v8.0.0',
@@ -1485,8 +1491,7 @@ describe('create()', () => {
               metrics: {
                 duration: 0,
                 gap_duration_s: null,
-                // TODO: uncomment after intermidiate release
-                // gap_range: null,
+                gap_range: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,
                 total_indexing_duration_ms: null,
@@ -1734,6 +1739,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        lastEnabledAt: '2019-02-12T21:01:22.479Z',
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
@@ -1937,6 +1943,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        lastEnabledAt: '2019-02-12T21:01:22.479Z',
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
@@ -2140,6 +2147,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        lastEnabledAt: '2019-02-12T21:01:22.479Z',
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         revision: 0,
         running: false,
@@ -2294,6 +2302,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        lastEnabledAt: '2019-02-12T21:01:22.479Z',
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         revision: 0,
         running: false,
@@ -2450,6 +2459,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        lastEnabledAt: '2019-02-12T21:01:22.479Z',
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         revision: 0,
         running: false,
@@ -2621,6 +2631,7 @@ describe('create()', () => {
           status: 'pending',
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
         },
+        lastEnabledAt: '2019-02-12T21:01:22.479Z',
         monitoring: {
           run: {
             history: [],
@@ -2632,8 +2643,7 @@ describe('create()', () => {
               metrics: {
                 duration: 0,
                 gap_duration_s: null,
-                // TODO: uncomment after intermidiate release
-                // gap_range: null,
+                gap_range: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,
                 total_indexing_duration_ms: null,
@@ -3036,6 +3046,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        lastEnabledAt: '2019-02-12T21:01:22.479Z',
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         revision: 0,
         running: false,
@@ -4109,6 +4120,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        lastEnabledAt: '2019-02-12T21:01:22.479Z',
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         revision: 0,
         running: false,
@@ -4335,6 +4347,7 @@ describe('create()', () => {
             lastExecutionDate: '2019-02-12T21:01:22.479Z',
             status: 'pending',
           },
+          lastEnabledAt: '2019-02-12T21:01:22.479Z',
           monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
           meta: { versionApiKeyLastmodified: kibanaVersion },
           muteAll: false,
@@ -4478,7 +4491,7 @@ describe('create()', () => {
 
       const data = getMockData({ actions: [], systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemActions.0.group]: definition for this key is missing]`
+        `[Error: Error validating create data - [systemActions.0.group]: Additional properties are not allowed ('group' was unexpected)]`
       );
     });
 
@@ -4497,7 +4510,7 @@ describe('create()', () => {
 
       const data = getMockData({ actions: [], systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemActions.0.frequency]: definition for this key is missing]`
+        `[Error: Error validating create data - [systemActions.0.frequency]: Additional properties are not allowed ('frequency' was unexpected)]`
       );
     });
 
@@ -4514,7 +4527,7 @@ describe('create()', () => {
 
       const data = getMockData({ systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemActions.0.alertsFilter]: definition for this key is missing]`
+        `[Error: Error validating create data - [systemActions.0.alertsFilter]: Additional properties are not allowed ('alertsFilter' was unexpected)]`
       );
     });
 

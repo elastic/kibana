@@ -82,6 +82,11 @@ export interface GenerateEsqlOptions {
    * Defaults to last 24 hours if not provided.
    */
   timeRange?: TimeRange;
+  /**
+   * If true, omits the instruction to use named parameters (?_tstart, ?_tend)
+   * for time range filtering in generated queries.
+   */
+  disableNamedParams?: boolean;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -95,6 +100,7 @@ export const generateEsql = async ({
   maxRetries = 3,
   rowLimit,
   timeRange: inputTimeRange,
+  disableNamedParams,
   model,
   esClient,
   logger,
@@ -150,6 +156,7 @@ export const generateEsql = async ({
             additionalInstructions,
             additionalContext,
             rowLimit,
+            disableNamedParams,
             timeRange,
           },
           {

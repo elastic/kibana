@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SCRIPT_TAGS } from '../service/scripts_library/constants';
+import type { SCRIPT_TAGS } from '../service/script_library/constants';
 import type { SupportedHostOsType } from '../constants';
 
 export interface EndpointScript<
