@@ -244,7 +244,11 @@ function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
         if (isShuttingDown) return;
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
         if (stats.hasErrors()) {
-          logError(`Compilation failed [${elapsed}s]`);
+          if (compilationCount === 1) {
+            logError(`Compilation failed [${elapsed}s]`);
+          } else {
+            logDebug(`Compilation failed [${elapsed}s]`);
+          }
         } else if (compilationCount === 1) {
           logInfo(`Compilation complete [${elapsed}s]`);
         } else {
@@ -357,7 +361,7 @@ export async function createSingleCompileConfig(
   const bundlesDir = Path.resolve(outputRoot, 'target/public/bundles');
 
   return {
-    name: 'kibana-plugins',
+    name: 'kibana',
     mode: dist ? 'production' : 'development',
     // Match legacy webpack optimizer: no sourcemaps in dist, cheap-source-map in dev
     devtool: dist ? false : 'cheap-source-map',
