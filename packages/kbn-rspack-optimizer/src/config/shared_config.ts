@@ -48,10 +48,6 @@ export function getSharedResolveFallback(): Record<string, false> {
     'node:net': false,
     'node:tls': false,
     'node:dns': false,
-    // Server-only packages
-    xml2js: false,
-    xmlbuilder: false,
-    sax: false,
   };
 }
 

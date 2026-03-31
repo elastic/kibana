@@ -63,16 +63,11 @@ describe('shared_config', () => {
   describe('getSharedResolveFallback', () => {
     const fallback = getSharedResolveFallback();
 
-    it('should disable Node.js built-ins for browser', () => {
-      expect(fallback.child_process).toBe(false);
-      expect(fallback.net).toBe(false);
-      expect(fallback.tls).toBe(false);
-      expect(fallback.dns).toBe(false);
-    });
-
-    it('should disable node: prefixed modules', () => {
+    it('should disable node:-prefixed modules for browser', () => {
       expect(fallback['node:child_process']).toBe(false);
       expect(fallback['node:net']).toBe(false);
+      expect(fallback['node:tls']).toBe(false);
+      expect(fallback['node:dns']).toBe(false);
     });
   });
 

@@ -11,6 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { rspack, type Configuration } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { getExternals } from './externals';
 import {
   getSharedResolveConfig,
@@ -21,9 +22,36 @@ import {
 import type { ThemeTag } from '../types';
 
 /**
+ * Pre-built DLL manifest from @kbn/ui-shared-deps-npm (same as main build).
+ * Prevents external plugins from re-bundling transitive deps already in the DLL.
+ *
+ * See the comment on DLL_MANIFEST in create_single_compile_config.ts for the
+ * full explanation of the sanitisation strategy applied here.
+ */
+const DLL_MANIFEST = (() => {
+  const raw = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
+  for (const entry of Object.values(raw.content) as Array<{
+    buildMeta?: { exportsType?: string; defaultObject?: string | boolean };
+  }>) {
+    if (entry.buildMeta) {
+      const { exportsType, defaultObject } = entry.buildMeta;
+      if (exportsType === 'namespace') {
+        entry.buildMeta = { exportsType };
+      } else if (defaultObject === 'redirect' || defaultObject === 'redirect-warn') {
+        entry.buildMeta = { exportsType: 'namespace' };
+      } else {
+        entry.buildMeta = undefined;
+      }
+    }
+  }
+  return raw;
+})();
+
+/**
  * Files that affect the external plugin RSPack build. Used as the single source
  * of truth for both getExternalPluginConfigHash (version string) and
- * buildDependencies so they stay in sync. Paths are relative to the repo root.
+ * buildDependencies so they stay in sync. Repo-relative paths are resolved
+ * against repoRoot; absolute paths (like the DLL manifest) are used as-is.
  */
 const CACHE_CONFIG_FILES = [
   'packages/kbn-rspack-optimizer/src/config/create_external_plugin_config.ts',
@@ -34,6 +62,7 @@ const CACHE_CONFIG_FILES = [
   'packages/kbn-swc-config/src/browser.ts',
   'packages/kbn-transpiler-config/src/shared_config.ts',
   'package.json',
+  UiSharedDepsNpm.dllManifestPath,
 ];
 
 function getExternalPluginConfigHash(repoRoot: string): string {
@@ -220,6 +249,10 @@ export async function createExternalPluginConfig(
     plugins: [
       // Same plugins as main build
       new NodeLibsBrowserPlugin() as any,
+      new rspack.DllReferencePlugin({
+        context: repoRoot,
+        manifest: DLL_MANIFEST,
+      }),
       new rspack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(dist ? 'production' : 'development'),
         'process.env.IS_KIBANA_DISTRIBUTABLE': JSON.stringify(dist ? 'true' : 'false'),
