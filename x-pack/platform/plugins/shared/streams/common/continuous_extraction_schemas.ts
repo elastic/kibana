@@ -6,24 +6,23 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { baseFeatureSchema } from '@kbn/streams-schema';
 
-export const featureSummarySchema = baseFeatureSchema.pick({
-  id: true,
-  title: true,
+export const featureSummarySchema = z.object({
+  id: z.string(),
+  title: z.string().optional(),
 });
 
 export const tokenCountSchema = z.object({
   prompt: z.number(),
   completion: z.number(),
   total: z.number(),
-  cached: z.number(),
+  cached: z.number().optional().default(0),
 });
 
 export const iterationResultSchema = z.object({
   iteration: z.number(),
   durationMs: z.number(),
-  state: z.string(),
+  state: z.enum(['success', 'failure']),
   tokensUsed: tokenCountSchema,
   newFeatures: z.array(featureSummarySchema),
   updatedFeatures: z.array(featureSummarySchema),

@@ -530,7 +530,7 @@ export const SettingsTab = () => {
                         ...prev,
                         intervalHours: Math.max(
                           MIN_EXTRACTION_INTERVAL_HOURS,
-                          Number(e.target.value)
+                          Number(e.target.value) || MIN_EXTRACTION_INTERVAL_HOURS
                         ),
                       }))
                     }

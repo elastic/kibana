@@ -6,7 +6,7 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import { StepCategory, type StepContext } from '@kbn/workflows';
+import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { IdentifyFeaturesResult, IterationResult } from '@kbn/streams-schema';
@@ -27,7 +27,10 @@ import {
   kiFeaturesExtractStreamInputSchema,
 } from '../../../common/continuous_extraction_schemas';
 
-const toFeatureSummary = ({ id, title }: { id: string; title?: string }) => ({ id, title });
+const toFeatureSummary = ({ id, title }: { id: string; title?: string }) => ({
+  id,
+  title: title ?? id,
+});
 
 const formatIterationsSummary = (
   iterations: IterationResult[],
@@ -76,18 +79,6 @@ const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
       { once: true }
     );
   });
-
-const parseScheduledStreams = (workflowContext: StepContext): Array<{ streamName: string }> => {
-  const raw = (workflowContext.steps?.select_streams?.output as Record<string, unknown> | undefined)
-    ?.scheduled;
-  if (!Array.isArray(raw)) return [];
-  return raw.filter(
-    (item): item is { streamName: string } =>
-      typeof item === 'object' &&
-      item !== null &&
-      typeof (item as Record<string, unknown>).streamName === 'string'
-  );
-};
 
 export const registerKiFeaturesExtractStreamStep = ({
   workflowsExtensions,
@@ -204,31 +195,21 @@ export const registerKiFeaturesExtractStreamStep = ({
       throw new Error(`Stream ${streamName}: polling timed out after ${MAX_POLL_DURATION_MS}ms`);
     },
     onCancel: async (context) => {
-      const scheduled = parseScheduledStreams(context.contextManager.getContext());
-
-      if (scheduled.length === 0) {
-        context.logger.info('onCancel: no scheduled streams to cancel');
-        return;
-      }
+      const { streamName } = kiFeaturesExtractStreamInputSchema.parse(context.input);
 
       const request = context.contextManager.getFakeRequest();
       const { taskClient } = await getScopedClients({ request });
 
-      context.logger.info(`onCancel: cancelling ${scheduled.length} scheduled tasks`);
-
-      await Promise.allSettled(
-        scheduled.map(async (item) => {
-          try {
-            await taskClient.cancel(getFeaturesIdentificationTaskId(item.streamName));
-          } catch (err) {
-            context.logger.warn(
-              `onCancel: failed to cancel task for stream ${item.streamName}: ${
-                err instanceof Error ? err.message : String(err)
-              }`
-            );
-          }
-        })
-      );
+      try {
+        await taskClient.cancel(getFeaturesIdentificationTaskId(streamName));
+        context.logger.info(`onCancel: cancelled task for stream ${streamName}`);
+      } catch (err) {
+        context.logger.warn(
+          `onCancel: failed to cancel task for stream ${streamName}: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
     },
   });
 };

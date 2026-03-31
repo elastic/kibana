@@ -76,18 +76,11 @@ export const createContinuousExtractionWorkflowService = (
             return;
           }
 
-          if (yamlChanged) {
-            await managementApi.updateWorkflow(
-              existingWorkflowId,
-              { yaml: WORKFLOW_YAML },
-              spaceId,
-              request
-            );
-          }
+          const patch: { yaml?: string; enabled?: boolean } = {};
+          if (yamlChanged) patch.yaml = WORKFLOW_YAML;
+          if (enabledChanged) patch.enabled = enabled;
 
-          if (enabledChanged) {
-            await managementApi.updateWorkflow(existingWorkflowId, { enabled }, spaceId, request);
-          }
+          await managementApi.updateWorkflow(existingWorkflowId, patch, spaceId, request);
 
           log.info(`Updated continuous extraction workflow ${existingWorkflowId}`);
           return;

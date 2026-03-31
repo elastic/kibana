@@ -91,10 +91,10 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await modelSettingsClient.updateSettings(params.body);
 
-    const { enabled } = params.body.continuousExtraction ?? {};
-    if (enabled !== undefined && continuousExtractionWorkflow) {
+    if (params.body.continuousExtraction && continuousExtractionWorkflow) {
+      const updatedSettings = await modelSettingsClient.getSettings();
       await continuousExtractionWorkflow.ensureWorkflow({
-        enabled,
+        enabled: updatedSettings.continuousExtraction?.enabled ?? false,
         request,
         spaceId: DEFAULT_SPACE_ID,
         modelSettingsClient,

@@ -152,27 +152,36 @@ export const registerKiSelectStreamsStep = ({
       const toSchedule = allCandidates.slice(0, availableSlots);
       const skipped = allCandidates.slice(availableSlots);
 
-      const scheduled: StreamCandidate[] = [];
-      const failedToSchedule: StreamCandidate[] = [];
       const end = now;
       const start = end - TWENTY_FOUR_HOURS_MS;
-      for (const candidate of toSchedule) {
-        try {
-          await taskClient.schedule({
-            task: {
-              id: getFeaturesIdentificationTaskId(candidate.streamName),
-              type: FEATURES_IDENTIFICATION_TASK_TYPE,
-              space: DEFAULT_SPACE_ID,
-            },
-            params: { start, end, streamName: candidate.streamName },
-            request,
-          });
-          scheduled.push(candidate);
-        } catch (err) {
-          failedToSchedule.push(candidate);
+
+      const results = await Promise.allSettled(
+        toSchedule.map((candidate) =>
+          taskClient
+            .schedule({
+              task: {
+                id: getFeaturesIdentificationTaskId(candidate.streamName),
+                type: FEATURES_IDENTIFICATION_TASK_TYPE,
+                space: DEFAULT_SPACE_ID,
+              },
+              params: { start, end, streamName: candidate.streamName },
+              request,
+            })
+            .then(() => candidate)
+        )
+      );
+
+      const scheduled: StreamCandidate[] = [];
+      const failedToSchedule: StreamCandidate[] = [];
+      for (let i = 0; i < results.length; i++) {
+        const result = results[i];
+        if (result.status === 'fulfilled') {
+          scheduled.push(result.value);
+        } else {
+          failedToSchedule.push(toSchedule[i]);
           context.logger.warn(
-            `Failed to schedule KI extraction for stream ${candidate.streamName}: ${
-              err instanceof Error ? err.message : String(err)
+            `Failed to schedule KI extraction for stream ${toSchedule[i].streamName}: ${
+              result.reason instanceof Error ? result.reason.message : String(result.reason)
             }`
           );
         }
