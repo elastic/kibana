@@ -28,39 +28,154 @@ describe('registerAlertingV2UsageCollector', () => {
         isReady: expect.any(Function),
         fetch: expect.any(Function),
         schema: {
-          has_errors: { type: 'boolean' },
-          error_messages: { type: 'array', items: { type: 'keyword' } },
-          count_total: { type: 'long' },
-          count_enabled: { type: 'long' },
-          count_by_kind: { DYNAMIC_KEY: { type: 'long' } },
-          count_by_schedule: { DYNAMIC_KEY: { type: 'long' } },
-          count_by_lookback: { DYNAMIC_KEY: { type: 'long' } },
-          count_with_query_condition: { type: 'long' },
-          count_with_recovery_policy: { type: 'long' },
-          count_by_recovery_policy_type: { DYNAMIC_KEY: { type: 'long' } },
-          count_with_recovery_query_condition: { type: 'long' },
-          count_by_pending_timeframe: { DYNAMIC_KEY: { type: 'long' } },
-          count_by_recovering_timeframe: { DYNAMIC_KEY: { type: 'long' } },
-          count_with_grouping: { type: 'long' },
-          avg_grouping_fields_count: { type: 'float' },
-          count_with_no_data: { type: 'long' },
-          count_by_no_data_behavior: { DYNAMIC_KEY: { type: 'long' } },
-          count_by_no_data_timeframe: { DYNAMIC_KEY: { type: 'long' } },
-          count_notification_policies: { type: 'long' },
-          min_created_at: { type: 'date' },
-          notification_policies_count: { type: 'long' },
-          notification_policies_unique_workflow_count: { type: 'long' },
-          notification_policies_count_with_matcher: { type: 'long' },
-          notification_policies_count_with_group_by: { type: 'long' },
-          notification_policies_avg_group_by_fields_count: { type: 'float' },
-          notification_policies_count_by_throttle_interval: { DYNAMIC_KEY: { type: 'long' } },
-          alerts_count: { type: 'long' },
-          alerts_count_by_kind: { DYNAMIC_KEY: { type: 'long' } },
-          alerts_count_by_source: { DYNAMIC_KEY: { type: 'long' } },
-          alerts_count_by_type: { DYNAMIC_KEY: { type: 'long' } },
-          alerts_episode_count: { type: 'long' },
-          alerts_min_timestamp: { type: 'date' },
-          alerts_index_size_bytes: { type: 'long' },
+          alerts_count: { _meta: { description: 'Total number of alert events.' }, type: 'long' },
+          alerts_count_by_kind: {
+            DYNAMIC_KEY: {
+              _meta: { description: 'Number of alert events by status.' },
+              type: 'long',
+            },
+          },
+          alerts_count_by_source: {
+            DYNAMIC_KEY: {
+              _meta: { description: 'Number of alert events by source.' },
+              type: 'long',
+            },
+          },
+          alerts_count_by_type: {
+            DYNAMIC_KEY: {
+              _meta: { description: 'Number of alert events by type.' },
+              type: 'long',
+            },
+          },
+          alerts_episode_count: {
+            _meta: { description: 'Number of unique alert episodes.' },
+            type: 'long',
+          },
+          alerts_index_size_bytes: {
+            _meta: { description: 'Size of the alert events data stream in bytes.' },
+            type: 'long',
+          },
+          alerts_min_timestamp: {
+            _meta: { description: 'Earliest alert event timestamp.' },
+            type: 'date',
+          },
+          avg_grouping_fields_count: {
+            _meta: { description: 'Average number of grouping fields per rule.' },
+            type: 'float',
+          },
+          count_by_kind: {
+            DYNAMIC_KEY: { _meta: { description: 'Number of rules by kind.' }, type: 'long' },
+          },
+          count_by_lookback: {
+            DYNAMIC_KEY: {
+              _meta: { description: 'Number of rules by lookback duration.' },
+              type: 'long',
+            },
+          },
+          count_by_no_data_behavior: {
+            DYNAMIC_KEY: {
+              _meta: { description: 'Number of rules by no data behavior.' },
+              type: 'long',
+            },
+          },
+          count_by_no_data_timeframe: {
+            DYNAMIC_KEY: {
+              _meta: { description: 'Number of rules by no data timeframe.' },
+              type: 'long',
+            },
+          },
+          count_by_pending_timeframe: {
+            DYNAMIC_KEY: {
+              _meta: { description: 'Number of rules by pending timeframe.' },
+              type: 'long',
+            },
+          },
+          count_by_recovering_timeframe: {
+            DYNAMIC_KEY: {
+              _meta: { description: 'Number of rules by recovering timeframe.' },
+              type: 'long',
+            },
+          },
+          count_by_recovery_policy_type: {
+            DYNAMIC_KEY: {
+              _meta: { description: 'Number of rules by recovery policy type.' },
+              type: 'long',
+            },
+          },
+          count_by_schedule: {
+            DYNAMIC_KEY: {
+              _meta: { description: 'Number of rules by schedule interval.' },
+              type: 'long',
+            },
+          },
+          count_enabled: {
+            _meta: { description: 'Number of enabled alerting v2 rules.' },
+            type: 'long',
+          },
+          count_notification_policies: {
+            _meta: { description: 'Total number of notification policies.' },
+            type: 'long',
+          },
+          count_total: {
+            _meta: { description: 'Total number of alerting v2 rules.' },
+            type: 'long',
+          },
+          count_with_grouping: {
+            _meta: { description: 'Number of rules with grouping enabled.' },
+            type: 'long',
+          },
+          count_with_no_data: {
+            _meta: { description: 'Number of rules with no data handling configured.' },
+            type: 'long',
+          },
+          count_with_query_condition: {
+            _meta: { description: 'Number of rules with a query condition.' },
+            type: 'long',
+          },
+          count_with_recovery_policy: {
+            _meta: { description: 'Number of rules with a recovery policy.' },
+            type: 'long',
+          },
+          count_with_recovery_query_condition: {
+            _meta: { description: 'Number of rules with a recovery query condition.' },
+            type: 'long',
+          },
+          error_messages: { items: { type: 'keyword' }, type: 'array' },
+          has_errors: {
+            _meta: {
+              description: 'Whether the telemetry task encountered errors during collection.',
+            },
+            type: 'boolean',
+          },
+          min_created_at: { _meta: { description: 'Earliest rule creation date.' }, type: 'date' },
+          notification_policies_avg_group_by_fields_count: {
+            _meta: { description: 'Average number of group by fields per notification policy.' },
+            type: 'float',
+          },
+          notification_policies_count: {
+            _meta: { description: 'Total number of notification policies.' },
+            type: 'long',
+          },
+          notification_policies_count_by_throttle_interval: {
+            DYNAMIC_KEY: {
+              _meta: { description: 'Number of notification policies by throttle interval.' },
+              type: 'long',
+            },
+          },
+          notification_policies_count_with_group_by: {
+            _meta: { description: 'Number of notification policies with group by.' },
+            type: 'long',
+          },
+          notification_policies_count_with_matcher: {
+            _meta: { description: 'Number of notification policies with a matcher.' },
+            type: 'long',
+          },
+          notification_policies_unique_workflow_count: {
+            _meta: {
+              description: 'Number of unique workflows referenced by notification policies.',
+            },
+            type: 'long',
+          },
         },
       })
     );
