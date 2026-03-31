@@ -31,3 +31,16 @@ steps:
     with:
       prefix: "${{ inputs.prefix }}"
       maxresults: ${{ inputs.maxresults }}
+  - name: set-search-result
+    type: if
+    condition: "${{ inputs.container != nil and inputs.container != '' }}"
+    steps:
+      - name: set-blobs-output
+        type: data.set
+        with:
+          result: "${{ steps['list-blobs-in-container'].output }}"
+    else:
+      - name: set-containers-output
+        type: data.set
+        with:
+          result: "${{ steps['list-containers-only'].output }}"
