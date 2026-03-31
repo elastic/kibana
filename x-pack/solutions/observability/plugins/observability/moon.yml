@@ -130,8 +130,6 @@ dependsOn:
   - '@kbn/esql'
   - '@kbn/react-query'
   - '@kbn/core-elasticsearch-server-utils'
-  - '@kbn/scout-oblt'
-  - '@kbn/scout-synthtrace'
 tags:
   - plugin
   - prod
@@ -144,7 +142,6 @@ fileGroups:
     - public/**/*
     - public/**/*.json
     - server/**/*
-    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:
