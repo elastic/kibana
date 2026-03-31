@@ -1492,6 +1492,13 @@ export const labels = {
         defaultMessage: 'Combine prompts and tools into reusable logic your agent can invoke.',
       }
     ),
+    skillsOnboardingDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.skillsOnboardingDescription',
+      {
+        defaultMessage:
+          "Turn your agent into a specialist. Skills let you define exactly how your agent approaches specific tasks, so it follows your team's process every time instead of giving generic answers.",
+      }
+    ),
     addSkill: i18n.translate('xpack.agentBuilder.overview.capabilities.addSkill', {
       defaultMessage: 'Add a skill',
     }),
@@ -1505,6 +1512,13 @@ export const labels = {
           'Add packaged sets of skills from external sources to quickly extend your agent.',
       }
     ),
+    pluginsOnboardingDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.pluginsOnboardingDescription',
+      {
+        defaultMessage:
+          'Extend your agent in one step. Plugins are ready-made packages that add a set of related skills to your agent, so you can get up and running without building each capability individually.',
+      }
+    ),
     addPlugin: i18n.translate('xpack.agentBuilder.overview.capabilities.addPlugin', {
       defaultMessage: 'Add a plugin',
     }),
@@ -1515,6 +1529,13 @@ export const labels = {
       'xpack.agentBuilder.overview.capabilities.connectorsDescription',
       {
         defaultMessage: 'Connect external services to give your agent access to data and actions.',
+      }
+    ),
+    connectorsOnboardingDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.connectorsOnboardingDescription',
+      {
+        defaultMessage:
+          'Bring your data into the conversation. Connectors let your agent reach into external systems like Slack, Jira, and PagerDuty, so responses are grounded in real data from your environment.',
       }
     ),
     addConnector: i18n.translate('xpack.agentBuilder.overview.capabilities.addConnector', {
@@ -1586,6 +1607,56 @@ export const labels = {
         defaultMessage: '{count, plural, one {Connector} other {Connectors}}',
         values: { count },
       }),
+    customizationsTitle: i18n.translate('xpack.agentBuilder.overview.customizations.title', {
+      defaultMessage: 'Customizations',
+    }),
+    customInstructionsTitle: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.instructionsTitle',
+      {
+        defaultMessage: 'Custom instructions',
+      }
+    ),
+    customInstructionsOnboardingText: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.instructionsOnboardingText',
+      {
+        defaultMessage: 'Shape how the agent responds to questions and tasks.',
+      }
+    ),
+    addInstructionsLink: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.addInstructionsLink',
+      {
+        defaultMessage: 'Add instructions',
+      }
+    ),
+    agentSettingsCardTitle: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.agentSettingsTitle',
+      {
+        defaultMessage: 'Agent settings',
+      }
+    ),
+    agentSettingsCardSubtitle: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.agentSettingsSubtitle',
+      {
+        defaultMessage: 'Control how your agent behaves.',
+      }
+    ),
+    autoIncludeInfoTooltip: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.autoIncludeInfoTooltip',
+      {
+        defaultMessage:
+          'Automatically include all current and future Elastic-built skills, plugins, and tools. Turn off to manage them manually.',
+      }
+    ),
+    enabledBadge: i18n.translate('xpack.agentBuilder.overview.customizations.enabledBadge', {
+      defaultMessage: 'Enabled',
+    }),
+    notSetBadge: i18n.translate('xpack.agentBuilder.overview.customizations.notSetBadge', {
+      defaultMessage: 'Not set',
+    }),
+    preExecutionWorkflowTitle: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.preExecutionWorkflowTitle',
+      { defaultMessage: 'Pre-execution workflows' }
+    ),
   },
   navigationAbort: {
     title: i18n.translate('xpack.agentBuilder.navigationAbort.title', {
