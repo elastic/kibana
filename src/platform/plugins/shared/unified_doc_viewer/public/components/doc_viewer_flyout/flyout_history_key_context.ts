@@ -22,9 +22,6 @@ import { createContext, useContext } from 'react';
 export const FlyoutHistoryKeyContext = createContext<symbol | null>(null);
 
 export const useFlyoutHistoryKey = () => {
-  const context = useContext(FlyoutHistoryKeyContext);
-  if (context === null) {
-    throw new Error('useFlyoutHistoryKey must be used within a FlyoutHistoryKeyContext.Provider');
-  }
-  return context;
+  // Don't be strict: if the context wasn't provided, just return null.
+  return useContext(FlyoutHistoryKeyContext);
 };
