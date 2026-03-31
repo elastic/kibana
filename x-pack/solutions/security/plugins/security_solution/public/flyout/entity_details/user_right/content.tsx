@@ -42,7 +42,6 @@ interface UserPanelContentProps {
   scopeId: string;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  navigateToGraphView: () => void;
   isPreviewMode: boolean;
   entityRecord?: Entity;
   criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
@@ -60,7 +59,6 @@ export const UserPanelContent = ({
   contextID,
   scopeId,
   openDetailsPanel,
-  navigateToGraphView,
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
@@ -69,7 +67,6 @@ export const UserPanelContent = ({
   skipRiskAndCriticality = false,
   entityStoreEntityId,
 }: UserPanelContentProps) => {
-  const entityId = entityRecord?.entity.id;
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
@@ -95,7 +92,7 @@ export const UserPanelContent = ({
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
               entityType={EntityType.user}
-              entityId={entityId}
+              entityId={entityRecord?.entity.id}
             />
             <EuiHorizontalRule />
           </>
