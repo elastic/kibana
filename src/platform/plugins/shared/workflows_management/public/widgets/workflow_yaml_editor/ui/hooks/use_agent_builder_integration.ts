@@ -31,7 +31,6 @@ interface UseAgentBuilderIntegrationParams {
 interface OpenAgentChatOptions {
   initialMessage?: string;
   autoSendInitialMessage?: boolean;
-  sessionTag?: string;
 }
 
 interface UseAgentBuilderIntegrationReturn {
@@ -265,7 +264,7 @@ export const useAgentBuilderIntegration = ({
       const currentYaml = editorRef.current?.getModel()?.getValue() ?? '';
 
       const { chatRef } = agentBuilder.openChat({
-        sessionTag: options?.sessionTag ?? `workflow-editor:${attachmentId}`,
+        sessionTag: `workflow-editor:${attachmentId}`,
         initialMessage: options?.initialMessage,
         autoSendInitialMessage: options?.autoSendInitialMessage,
         attachments: [
