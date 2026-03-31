@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiButtonEmpty, EuiButton } from '@elastic/eui';
+import { EuiPageTemplate, EuiButton, EuiLink } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../../common/translations';
 import { PLUGIN_TITLE } from '../../common/constants';
 import { docLinks } from '../../common/doc_links';
-import { useTrainedModelPageUrl } from '../hooks/use_trained_model_page_url';
+import { useKibana } from '../hooks/use_kibana';
 
 interface InferenceEndpointsHeaderProps {
   onFlyoutOpen: () => void;
@@ -18,7 +18,9 @@ interface InferenceEndpointsHeaderProps {
 export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> = ({
   onFlyoutOpen,
 }) => {
-  const trainedModelPageUrl = useTrainedModelPageUrl();
+  const {
+    services: { application },
+  } = useKibana();
 
   return (
     <EuiPageTemplate.Header
@@ -28,50 +30,38 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
       bottomBorder={true}
       rightSideItems={[
         <EuiButton
-          iconType="plusInCircle"
+          iconType="plusCircle"
           fill
-          iconSize="m"
           data-test-subj="add-inference-endpoint-header-button"
           onClick={onFlyoutOpen}
         >
           {i18n.ADD_ENDPOINT_LABEL}
         </EuiButton>,
-        <EuiButtonEmpty
+        <EuiLink
           aria-label={i18n.API_DOCUMENTATION_LINK}
-          iconType="popout"
-          iconSide="right"
-          iconSize="s"
-          flush="both"
           target="_blank"
           data-test-subj="api-documentation"
           href={docLinks.createInferenceEndpoint}
+          external
         >
           {i18n.API_DOCUMENTATION_LINK}
-        </EuiButtonEmpty>,
-        <EuiButtonEmpty
+        </EuiLink>,
+        <EuiLink
           aria-label={i18n.VIEW_YOUR_MODELS_LINK}
-          href={trainedModelPageUrl}
-          iconType="popout"
-          iconSide="right"
-          iconSize="s"
-          flush="both"
-          target="_blank"
+          onClick={() => application.navigateToApp('ml', { path: 'trained_models' })}
           data-test-subj="view-your-models"
         >
           {i18n.VIEW_YOUR_MODELS_LINK}
-        </EuiButtonEmpty>,
-        <EuiButtonEmpty
+        </EuiLink>,
+        <EuiLink
           aria-label={i18n.EIS_DOCUMENTATION_LINK}
           href={docLinks.elasticInferenceService}
-          iconType="popout"
-          iconSide="right"
-          iconSize="s"
-          flush="both"
           target="_blank"
           data-test-subj="eis-documentation"
+          external
         >
           {i18n.EIS_DOCUMENTATION_LINK}
-        </EuiButtonEmpty>,
+        </EuiLink>,
       ]}
     />
   );

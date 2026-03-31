@@ -223,6 +223,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       cascadingChanges.push({
         type: 'upsert',
         definition: {
+          type: 'wired',
           name: parentId,
           description: '',
           updated_at: now,
@@ -256,6 +257,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: routeTarget,
               description: '',
               updated_at: now,
@@ -288,9 +290,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: parentId,
               description: '',
               updated_at: now,
+              query_streams: parentStream.definition.query_streams,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
@@ -338,9 +342,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: parentId,
               description: '',
               updated_at: new Date().toISOString(),
+              query_streams: parentStream.definition.query_streams,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
@@ -629,13 +635,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     await Promise.all([
       shouldValidateSettingsWithDryRun
         ? validateSettingsWithDryRun({
-            scopedClusterClient: this.dependencies.scopedClusterClient,
+            esClient: this.dependencies.esClient,
             streamName: this._definition.name,
             settings: inheritedSettings,
             isServerless: this.dependencies.isServerless,
           })
         : Promise.resolve(),
-      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
+      validateSimulation(this._definition, this.dependencies.esClient),
     ]);
 
     return { isValid: true, errors: [] };
@@ -643,10 +649,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
   private async getMatchingDataStream() {
     try {
-      const response =
-        await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
-          name: this._definition.name,
-        });
+      const response = await this.dependencies.esClient.indices.getDataStream({
+        name: this._definition.name,
+      });
 
       if (response.data_streams.length === 0) {
         // the request didn't throw an error, but the data stream doesn't exist
@@ -704,7 +709,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     try {
-      await this.dependencies.scopedClusterClient.asCurrentUser.indices.get({
+      await this.dependencies.esClient.indices.get({
         index: name,
       });
 
@@ -742,7 +747,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       {
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: await generateIngestPipeline(
+          this._definition.name,
+          this._definition,
+          this.dependencies.esClient
+        ),
       },
       {
         type: 'upsert_ingest_pipeline',
@@ -910,7 +919,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       actions.push({
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: await generateIngestPipeline(
+          this._definition.name,
+          this._definition,
+          this.dependencies.esClient
+        ),
       });
     }
     const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).reverse();

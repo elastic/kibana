@@ -6,7 +6,7 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { AgentType, AgentVisibility } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, AgentType, AgentVisibility } from '@kbn/agent-builder-common';
 import type { UserIdAndName } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
@@ -24,9 +24,11 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
   const configuration: AgentConfigurationProperties =
     document._source.configuration ?? document._source.config;
 
+  // backward compatibility with M1 - we check the document id.
+  const resolvedId = document._source.id ?? document._id;
+
   return {
-    // backward compatibility with M1 - we check the document id.
-    id: document._source.id ?? document._id,
+    id: resolvedId,
     type: document._source.type,
     name: document._source.name,
     description: document._source.description,
@@ -44,7 +46,12 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,
+      skill_ids: configuration.skill_ids,
+      enable_elastic_capabilities:
+        configuration.enable_elastic_capabilities ??
+        (resolvedId === agentBuilderDefaultAgentId ? true : undefined),
       workflow_ids: configuration.workflow_ids,
+      plugin_ids: configuration.plugin_ids,
     },
   };
 };
@@ -75,7 +82,10 @@ export const createRequestToEs = ({
     config: {
       instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,
+      skill_ids: profile.configuration.skill_ids,
+      enable_elastic_capabilities: profile.configuration.enable_elastic_capabilities,
       workflow_ids: profile.configuration.workflow_ids,
+      plugin_ids: profile.configuration.plugin_ids,
     },
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),

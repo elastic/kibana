@@ -23,6 +23,7 @@ import type {
   AnonymizationPluginSetup,
   AnonymizationPluginStart,
   AnonymizationPolicyService,
+  AnonymizationProfileInitializer,
 } from './types';
 import { registerAnonymizationSaltSavedObjectType } from './saved_objects/register_anonymization_salt_saved_object_type';
 import { registerRoutes } from './routes';
@@ -53,6 +54,7 @@ export class AnonymizationPlugin
   private readonly logger: Logger;
   private readonly config: AnonymizationConfig;
   private policyService: AnonymizationPolicyService | undefined;
+  private readonly profileInitializers = new Map<string, AnonymizationProfileInitializer>();
 
   constructor(initializerContext: PluginInitializerContext<AnonymizationConfig>) {
     this.logger = initializerContext.logger.get();
@@ -70,8 +72,18 @@ export class AnonymizationPlugin
 
     registerAnonymizationSaltSavedObjectType(core, deps.encryptedSavedObjects);
 
+    const registerProfileInitializer = (initializer: AnonymizationProfileInitializer): void => {
+      if (this.profileInitializers.has(initializer.id)) {
+        this.logger.warn(
+          `Overwriting existing anonymization profile initializer: ${initializer.id}`
+        );
+      }
+      this.profileInitializers.set(initializer.id, initializer);
+    };
+
     return {
       isEnabled: () => this.config.active,
+      registerProfileInitializer,
     };
   }
 
@@ -95,10 +107,21 @@ export class AnonymizationPlugin
       ensureProfilesIndexReady,
       profilesRepo,
       saltService,
+      getProfileInitializers: () => Array.from(this.profileInitializers.values()),
     });
+
+    const registerProfileInitializer = (initializer: AnonymizationProfileInitializer): void => {
+      if (this.profileInitializers.has(initializer.id)) {
+        this.logger.warn(
+          `Overwriting existing anonymization profile initializer: ${initializer.id}`
+        );
+      }
+      this.profileInitializers.set(initializer.id, initializer);
+    };
 
     return {
       isEnabled: () => anonymizationEnabled,
+      registerProfileInitializer,
       getPolicyService: () => {
         if (!this.policyService) {
           throw new Error('AnonymizationPolicyService is not initialized');

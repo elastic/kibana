@@ -79,6 +79,7 @@ steps:
     depends_on:
       - build
     env:
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
@@ -117,6 +118,7 @@ steps:
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
@@ -131,6 +133,7 @@ steps:
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -261,7 +264,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -383,6 +386,7 @@ steps:
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
@@ -397,6 +401,7 @@ steps:
     label: 'Osquery Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -411,6 +416,7 @@ steps:
     label: 'Osquery Cypress Tests on Serverless'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -426,7 +432,7 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 105
+      diskSizeGb: 120
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -441,7 +447,7 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 105
+      diskSizeGb: 120
     depends_on:
       - build
     timeout_in_minutes: 75

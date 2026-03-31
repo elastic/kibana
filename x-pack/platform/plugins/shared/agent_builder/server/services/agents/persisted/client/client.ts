@@ -19,7 +19,7 @@ import {
   type ToolSelection,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
-import { hasVisibilityAccessOverrideFromRequest, getUserFromRequest } from '../../../utils';
+import { isAdminFromRequest, getUserFromRequest } from '../../../utils';
 import type {
   AgentCreateRequest,
   AgentDeleteRequest,
@@ -34,6 +34,7 @@ import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
 import { validateToolSelection } from './utils/tools';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
+import { runPluginRefCleanup } from '../plugin_reference_cleanup';
 import { SYSTEM_USER_ID } from '../../../constants';
 import {
   buildVisibilityReadFilter,
@@ -53,6 +54,8 @@ export interface AgentClient {
   delete(options: AgentDeleteRequest): Promise<boolean>;
   getAgentsUsingTools(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
   removeToolRefsFromAgents(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
+  getAgentsUsingPlugins(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult>;
+  removePluginRefsFromAgents(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult>;
 }
 
 export const createClient = async ({
@@ -76,7 +79,7 @@ export const createClient = async ({
     security,
     esClient: scopedClient.asCurrentUser,
   });
-  const hasVisibilityAccessOverride = await hasVisibilityAccessOverrideFromRequest({
+  const isAdmin = await isAdminFromRequest({
     esClient: scopedClient.asCurrentUser,
   });
   const esClient = scopedClient.asInternalUser;
@@ -85,7 +88,7 @@ export const createClient = async ({
   return new AgentClientImpl({
     storage,
     user,
-    hasVisibilityAccessOverride,
+    isAdmin,
     request,
     space,
     toolsService,
@@ -99,14 +102,14 @@ class AgentClientImpl implements AgentClient {
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
   private readonly user: UserIdAndName;
-  private readonly hasVisibilityAccessOverride: boolean;
+  private readonly isAdmin: boolean;
   private readonly logger: Logger;
 
   constructor({
     storage,
     toolsService,
     user,
-    hasVisibilityAccessOverride,
+    isAdmin,
     request,
     space,
     logger,
@@ -114,7 +117,7 @@ class AgentClientImpl implements AgentClient {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
     user: UserIdAndName;
-    hasVisibilityAccessOverride: boolean;
+    isAdmin: boolean;
     request: KibanaRequest;
     space: string;
     logger: Logger;
@@ -123,7 +126,7 @@ class AgentClientImpl implements AgentClient {
     this.toolsService = toolsService;
     this.request = request;
     this.user = user;
-    this.hasVisibilityAccessOverride = hasVisibilityAccessOverride;
+    this.isAdmin = isAdmin;
     this.space = space;
     this.logger = logger;
   }
@@ -143,6 +146,27 @@ class AgentClientImpl implements AgentClient {
       storage: this.storage,
       spaceId: this.space,
       toolIds: params.toolIds,
+      logger: this.logger,
+    });
+  }
+
+  async getAgentsUsingPlugins(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult> {
+    return runPluginRefCleanup({
+      storage: this.storage,
+      spaceId: this.space,
+      pluginIds: params.pluginIds,
+      logger: this.logger,
+      checkOnly: true,
+    });
+  }
+
+  async removePluginRefsFromAgents(params: {
+    pluginIds: string[];
+  }): Promise<AgentsUsingToolsResult> {
+    return runPluginRefCleanup({
+      storage: this.storage,
+      spaceId: this.space,
+      pluginIds: params.pluginIds,
       logger: this.logger,
     });
   }
@@ -167,7 +191,7 @@ class AgentClientImpl implements AgentClient {
 
   async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinition[]> {
     const filters = [createSpaceDslFilter(this.space)];
-    if (!this.hasVisibilityAccessOverride) {
+    if (!this.isAdmin) {
       filters.push(buildVisibilityReadFilter({ user: this.user }));
     }
 
@@ -252,7 +276,7 @@ class AgentClientImpl implements AgentClient {
         source,
         update: profileUpdate,
         user: this.user,
-        hasVisibilityAccessOverride: this.hasVisibilityAccessOverride,
+        isAdmin: this.isAdmin,
       })
     ) {
       throw createAgentNotFoundError({ agentId });
@@ -317,12 +341,12 @@ class AgentClientImpl implements AgentClient {
         ? hasReadAccess({
             source: document._source,
             user: this.user,
-            hasVisibilityAccessOverride: this.hasVisibilityAccessOverride,
+            isAdmin: this.isAdmin,
           })
         : hasWriteAccess({
             source: document._source,
             user: this.user,
-            hasVisibilityAccessOverride: this.hasVisibilityAccessOverride,
+            isAdmin: this.isAdmin,
           });
 
     if (!hasRequestedAccess) {

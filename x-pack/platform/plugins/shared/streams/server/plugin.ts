@@ -19,6 +19,9 @@ import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import type { StreamsConfig } from '../common/config';
 import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
@@ -30,7 +33,7 @@ import {
 } from '../common/constants';
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
-import { registerRules } from './lib/rules/register_rules';
+import { registerRules } from './lib/sig_events/rules/register_rules';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
@@ -42,13 +45,18 @@ import type {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
+import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
+import { ModelSettingsConfigService } from './lib/sig_events/saved_objects/model_settings_config_service';
 import { TaskService } from './lib/tasks/task_service';
-import { InsightService } from './lib/significant_events/insights/client/insight_service';
+import { InsightService } from './lib/sig_events/insights/client/insight_service';
+import { baseFields } from './lib/streams/component_templates/logs_layer';
+import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
+import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -76,6 +84,7 @@ export class StreamsPlugin
   private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
+  private patternExtractionService?: PatternExtractionService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -92,6 +101,11 @@ export class StreamsPlugin
       config: this.config,
       logger: this.logger,
     } as StreamsServer;
+
+    this.patternExtractionService = new PatternExtractionService(
+      this.config.workers.patternExtraction,
+      this.logger.get('patternExtraction')
+    );
 
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(
@@ -115,27 +129,14 @@ export class StreamsPlugin
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
+    const modelSettingsConfigService = new ModelSettingsConfigService(this.logger);
 
     const getScopedClients = async ({
       request,
     }: {
       request: KibanaRequest;
     }): Promise<RouteHandlerScopedClients> => {
-      const [
-        [coreStart, pluginsStart],
-        attachmentClient,
-        featureClient,
-        insightClient,
-        contentClient,
-        queryClient,
-      ] = await Promise.all([
-        core.getStartServices(),
-        attachmentService.getClientWithRequest({ request }),
-        featureService.getClientWithRequest({ request }),
-        insightService.getInternalClient(),
-        contentService.getClient(),
-        queryService.getClientWithRequest({ request }),
-      ]);
+      const [coreStart, pluginsStart] = await core.getStartServices();
 
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
         coreStart.savedObjects.getScopedClient(request)
@@ -152,12 +153,39 @@ export class StreamsPlugin
         this.logger
       );
 
-      const streamsClient = await streamsService.getClientWithRequest({
-        request,
+      const [attachmentClient, featureClient, insightClient, contentClient, queryClient] =
+        await Promise.all([
+          attachmentService.getClient({
+            soClient,
+            rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
+          }),
+          featureService.getClient(),
+          insightService.getInternalClient(),
+          contentService.getClient(),
+          queryService.getClient({
+            soClient,
+            rulesClient: await pluginsStart.alerting.getRulesClientWithRequestInSpace(
+              request,
+              DEFAULT_SPACE_ID
+            ),
+          }),
+        ]);
+
+      const license = await licensing.getLicense();
+      const isSecurityEnabled = license.getFeature('security').isEnabled;
+
+      const streamsClient = await streamsService.getClient({
         attachmentClient,
         queryClient,
         featureClient,
+        esClient: scopedClusterClient.asCurrentUser,
+        esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
         uiSettingsClient,
+        isSecurityEnabled,
+      });
+
+      const modelSettingsClient = modelSettingsConfigService.getClient({
+        soClient,
       });
 
       return {
@@ -174,8 +202,19 @@ export class StreamsPlugin
         licensing,
         uiSettingsClient,
         taskClient,
+        modelSettingsClient,
+        isSecurityEnabled,
       };
     };
+
+    if (plugins.agentBuilder) {
+      registerStreamsAgentBuilder({
+        agentBuilder: plugins.agentBuilder,
+        getScopedClients,
+        server: this.server,
+        logger: this.logger,
+      });
+    }
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
@@ -244,6 +283,7 @@ export class StreamsPlugin
         server: this.server,
         telemetry: telemetryClient,
         processorSuggestions: this.processorSuggestionsService,
+        patternExtractionService: this.patternExtractionService,
         getScopedClients,
       },
       core,
@@ -255,8 +295,80 @@ export class StreamsPlugin
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
-        createStreamsGlobalSearchResultProvider(core, this.logger)
+        createStreamsGlobalSearchResultProvider(core, this.logger, async () => {
+          const [, pluginsStart] = await core.getStartServices();
+          const license = await pluginsStart.licensing.getLicense();
+          return license.getFeature('security').isEnabled;
+        })
       );
+    }
+
+    if (this.config.preconfigured.enabled) {
+      core
+        .getStartServices()
+        .then(async ([coreStart]) => {
+          const esClient = coreStart.elasticsearch.client.asInternalUser;
+          const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+          // Since the RulesClient cannot be unscoped, we provide a stub client that
+          // will throw an error if rules or queries exist in the stream definition.
+          // This is a limitation of the config-based streams for now.
+          const rulesClient = {
+            bulkGetRules() {
+              throw new Error('Not implemented');
+            },
+            create() {
+              throw new Error('Not implemented');
+            },
+            update() {
+              throw new Error('Not implemented');
+            },
+          } as unknown as RulesClient;
+
+          const [attachmentClient, featureClient, queryClient] = await Promise.all([
+            attachmentService.getClient({ soClient, rulesClient }),
+            featureService.getClient(),
+            queryService.getClient({ soClient, rulesClient }),
+          ]);
+
+          const streamsClient = await streamsService.getClient({
+            attachmentClient,
+            queryClient,
+            featureClient,
+            esClient,
+            esClientAsInternalUser: esClient,
+            uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
+            isSecurityEnabled: false,
+          });
+
+          await streamsClient.enableStreams();
+
+          await streamsClient.bulkUpsert(
+            this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({
+              name,
+              request: Streams.all.UpsertRequest.parse(
+                ROOT_STREAM_NAMES.includes(name)
+                  ? {
+                      ...definition,
+                      stream: {
+                        ...definition.stream,
+                        ingest: {
+                          ...definition.stream.ingest,
+                          wired: {
+                            ...definition.stream.ingest.wired,
+                            fields: name === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields,
+                          },
+                        },
+                      },
+                    }
+                  : definition
+              ),
+            }))
+          );
+          this.logger.info('Streams preconfigured successfully');
+        })
+        .catch((error) => {
+          this.logger.error(`Error preconfiguring streams: ${error}`);
+        });
     }
 
     return {};
@@ -269,6 +381,7 @@ export class StreamsPlugin
       this.server.security = plugins.security;
       this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+      this.server.inference = plugins.inference;
       this.server.taskManager = plugins.taskManager;
     }
 
@@ -295,5 +408,7 @@ export class StreamsPlugin
     return {};
   }
 
-  public stop() {}
+  public async stop() {
+    await this.patternExtractionService?.stop();
+  }
 }

@@ -1555,7 +1555,7 @@
             "label": "task_type",
             "description": [],
             "signature": [
-              "\"completion\" | \"rerank\" | \"text_embedding\" | \"sparse_embedding\" | \"chat_completion\""
+              "\"completion\" | \"sparse_embedding\" | \"text_embedding\" | \"rerank\" | \"chat_completion\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
             "lineNumber": 17,
@@ -1744,7 +1744,7 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "; closed: boolean; pipe: { (): ",
+              "; pipe: { (): ",
               "Observable",
               "<",
               {
@@ -1964,7 +1964,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -2126,7 +2126,7 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[]; closed: boolean; pipe: { (): ",
+              "[]; pipe: { (): ",
               "Observable",
               "<",
               {
@@ -2346,7 +2346,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {

@@ -10,20 +10,20 @@
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 
-const loadJsonFile = jest.requireActual('load-json-file');
+const realFs = jest.requireActual('fs');
 const kibanaPackagePath = resolve(REPO_ROOT, 'package.json');
 
 export const mockPackage = {
   raw: { __dirname: '/tmp', name: 'kibana' } as any,
 };
 
-jest.doMock('load-json-file', () => ({
-  ...loadJsonFile,
-  sync: (path: string) => {
-    if (path === kibanaPackagePath) {
-      return mockPackage.raw;
+jest.doMock('fs', () => ({
+  ...realFs,
+  readFileSync: (filePath: string, options?: unknown) => {
+    if (filePath === kibanaPackagePath) {
+      return JSON.stringify(mockPackage.raw);
     }
-    return loadJsonFile.sync(path);
+    return realFs.readFileSync(filePath, options);
   },
 }));
 

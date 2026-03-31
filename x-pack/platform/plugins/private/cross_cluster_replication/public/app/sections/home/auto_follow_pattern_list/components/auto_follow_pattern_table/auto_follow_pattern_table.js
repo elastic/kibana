@@ -313,7 +313,7 @@ export class AutoFollowPatternTable extends PureComponent {
         <EuiButton
           {...reactRouterNavigate(routing._reactRouter.history, `/auto_follow_patterns/add`)}
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="createAutoFollowPatternButton"
         >
           <FormattedMessage

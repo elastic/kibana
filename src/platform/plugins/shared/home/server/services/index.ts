@@ -29,7 +29,7 @@ export type {
   ScopedTutorialContextFactory,
 } from './tutorials';
 
-export { EmbeddableTypes, SampleDataRegistry } from './sample_data';
+export { SampleDataRegistry } from './sample_data';
 
 export type {
   AppLinkData,

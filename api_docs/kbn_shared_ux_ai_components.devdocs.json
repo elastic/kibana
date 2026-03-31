@@ -84,15 +84,33 @@
           "\nRenders the default text AI button variants (`base` and `accent`).\nDefault variant is `'base'` when omitted."
         ],
         "signature": [
-          "(props: ",
+          "(props: Omit<Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonPropsForAnchor",
+          ", ",
+          "EuiButtonPropsForButton",
+          "> & ",
+          "EuiButtonDisplayCommonProps",
+          " & ",
+          "EuiButtonProps",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"fill\" | \"size\" | \"iconType\"> | Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonPropsForButton",
+          ", ",
+          "EuiButtonPropsForAnchor",
+          "> & ",
+          "EuiButtonProps",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"fill\" | \"size\" | \"iconType\">, RelaxKeys> & Pick<React.DOMAttributes<HTMLButtonElement | HTMLAnchorElement>, ButtonDomHandlerKeys> & { buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement> | undefined; } & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
             "docId": "kibKbnSharedUxAiComponentsPluginApi",
-            "section": "def-common.AiButtonDefaultProps",
-            "text": "AiButtonDefaultProps"
+            "section": "def-common.AiButtonIconType",
+            "text": "AiButtonIconType"
           },
-          ") => React.JSX.Element"
+          " | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_default.tsx",
         "lineNumber": 26,
@@ -110,13 +128,33 @@
               "- Props accepted by the default AI button variant."
             ],
             "signature": [
+              "Omit<Omit<",
+              "DisambiguateSet",
+              "<",
+              "EuiButtonPropsForAnchor",
+              ", ",
+              "EuiButtonPropsForButton",
+              "> & ",
+              "EuiButtonDisplayCommonProps",
+              " & ",
+              "EuiButtonProps",
+              " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"fill\" | \"size\" | \"iconType\"> | Omit<",
+              "DisambiguateSet",
+              "<",
+              "EuiButtonPropsForButton",
+              ", ",
+              "EuiButtonPropsForAnchor",
+              "> & ",
+              "EuiButtonProps",
+              " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"fill\" | \"size\" | \"iconType\">, RelaxKeys> & Pick<React.DOMAttributes<HTMLButtonElement | HTMLAnchorElement>, ButtonDomHandlerKeys> & { buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement> | undefined; } & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
               {
                 "pluginId": "@kbn/shared-ux-ai-components",
                 "scope": "common",
                 "docId": "kibKbnSharedUxAiComponentsPluginApi",
-                "section": "def-common.AiButtonDefaultProps",
-                "text": "AiButtonDefaultProps"
-              }
+                "section": "def-common.AiButtonIconType",
+                "text": "AiButtonIconType"
+              },
+              " | undefined; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_default.tsx",
             "lineNumber": 26,
@@ -139,15 +177,31 @@
           "\nRenders the empty AI button variant."
         ],
         "signature": [
-          "(props: ",
+          "(props: Omit<Omit<Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonEmptyPropsForAnchor",
+          ", ",
+          "EuiButtonEmptyPropsForButton",
+          "> & ",
+          "CommonEuiButtonEmptyProps",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>, \"iconType\"> | Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonEmptyPropsForButton",
+          ", ",
+          "EuiButtonEmptyPropsForAnchor",
+          "> & ",
+          "CommonEuiButtonEmptyProps",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>, \"iconType\">, RelaxKeys> & Pick<React.DOMAttributes<HTMLButtonElement | HTMLAnchorElement>, ButtonDomHandlerKeys> & { buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement> | undefined; } & { iconOnly?: false | undefined; variant: \"empty\" | \"outlined\"; iconType?: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
             "docId": "kibKbnSharedUxAiComponentsPluginApi",
-            "section": "def-common.AiButtonEmptyProps",
-            "text": "AiButtonEmptyProps"
+            "section": "def-common.AiButtonIconType",
+            "text": "AiButtonIconType"
           },
-          ") => React.JSX.Element"
+          " | undefined; }, \"variant\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_empty.tsx",
         "lineNumber": 26,
@@ -158,20 +212,38 @@
           {
             "parentPluginId": "@kbn/shared-ux-ai-components",
             "id": "def-common.AiButtonEmpty.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- Props accepted by the empty AI button variant."
             ],
             "signature": [
+              "Omit<Omit<Omit<",
+              "DisambiguateSet",
+              "<",
+              "EuiButtonEmptyPropsForAnchor",
+              ", ",
+              "EuiButtonEmptyPropsForButton",
+              "> & ",
+              "CommonEuiButtonEmptyProps",
+              " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>, \"iconType\"> | Omit<",
+              "DisambiguateSet",
+              "<",
+              "EuiButtonEmptyPropsForButton",
+              ", ",
+              "EuiButtonEmptyPropsForAnchor",
+              "> & ",
+              "CommonEuiButtonEmptyProps",
+              " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>, \"iconType\">, RelaxKeys> & Pick<React.DOMAttributes<HTMLButtonElement | HTMLAnchorElement>, ButtonDomHandlerKeys> & { buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement> | undefined; } & { iconOnly?: false | undefined; variant: \"empty\" | \"outlined\"; iconType?: ",
               {
                 "pluginId": "@kbn/shared-ux-ai-components",
                 "scope": "common",
                 "docId": "kibKbnSharedUxAiComponentsPluginApi",
-                "section": "def-common.AiButtonEmptyProps",
-                "text": "AiButtonEmptyProps"
-              }
+                "section": "def-common.AiButtonIconType",
+                "text": "AiButtonIconType"
+              },
+              " | undefined; }, \"variant\">"
             ],
             "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_empty.tsx",
             "lineNumber": 26,
@@ -194,15 +266,39 @@
           "\nRenders the icon-only AI button."
         ],
         "signature": [
-          "(props: ",
+          "(props: Omit<Omit<Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonIconPropsForAnchor",
+          ", ",
+          "EuiButtonIconPropsForButton",
+          "> & { type?: \"button\" | \"reset\" | \"submit\" | undefined; } & ",
+          "EuiButtonIconProps",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"iconType\" | \"display\"> | Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonIconPropsForButton",
+          ", ",
+          "EuiButtonIconPropsForAnchor",
+          "> & { type?: string | undefined; } & ",
+          "EuiButtonIconProps",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"iconType\" | \"display\">, RelaxKeys> & Pick<React.DOMAttributes<HTMLButtonElement | HTMLAnchorElement>, ButtonDomHandlerKeys> & { buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement> | undefined; } & { iconOnly: true; display?: undefined; variant?: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
             "docId": "kibKbnSharedUxAiComponentsPluginApi",
-            "section": "def-common.AiButtonIconProps",
-            "text": "AiButtonIconProps"
+            "section": "def-common.AiButtonVariant",
+            "text": "AiButtonVariant"
           },
-          ") => React.JSX.Element"
+          " | undefined; iconType: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonIconType",
+            "text": "AiButtonIconType"
+          },
+          "; 'aria-label': string; }, \"iconOnly\">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_icon.tsx",
         "lineNumber": 26,
@@ -213,20 +309,46 @@
           {
             "parentPluginId": "@kbn/shared-ux-ai-components",
             "id": "def-common.AiButtonIcon.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- Props accepted by the icon-only variant."
             ],
             "signature": [
+              "Omit<Omit<Omit<",
+              "DisambiguateSet",
+              "<",
+              "EuiButtonIconPropsForAnchor",
+              ", ",
+              "EuiButtonIconPropsForButton",
+              "> & { type?: \"button\" | \"reset\" | \"submit\" | undefined; } & ",
+              "EuiButtonIconProps",
+              " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"iconType\" | \"display\"> | Omit<",
+              "DisambiguateSet",
+              "<",
+              "EuiButtonIconPropsForButton",
+              ", ",
+              "EuiButtonIconPropsForAnchor",
+              "> & { type?: string | undefined; } & ",
+              "EuiButtonIconProps",
+              " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"iconType\" | \"display\">, RelaxKeys> & Pick<React.DOMAttributes<HTMLButtonElement | HTMLAnchorElement>, ButtonDomHandlerKeys> & { buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement> | undefined; } & { iconOnly: true; display?: undefined; variant?: ",
               {
                 "pluginId": "@kbn/shared-ux-ai-components",
                 "scope": "common",
                 "docId": "kibKbnSharedUxAiComponentsPluginApi",
-                "section": "def-common.AiButtonIconProps",
-                "text": "AiButtonIconProps"
-              }
+                "section": "def-common.AiButtonVariant",
+                "text": "AiButtonVariant"
+              },
+              " | undefined; iconType: ",
+              {
+                "pluginId": "@kbn/shared-ux-ai-components",
+                "scope": "common",
+                "docId": "kibKbnSharedUxAiComponentsPluginApi",
+                "section": "def-common.AiButtonIconType",
+                "text": "AiButtonIconType"
+              },
+              "; 'aria-label': string; }, \"iconOnly\">"
             ],
             "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_icon.tsx",
             "lineNumber": 26,
@@ -238,9 +360,123 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-ai-components",
+        "id": "def-common.AiIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "AiIcon",
+        "description": [
+          "Renders an AI icon with a gradient fill"
+        ],
+        "signature": [
+          "({ iconType, size, css: userCss, ...rest }: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiIconProps",
+            "text": "AiIconProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/ai-components/ai_icon/src/ai_icon.tsx",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-ai-components",
+            "id": "def-common.AiIcon.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ iconType, size, css: userCss, ...rest }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-ai-components",
+                "scope": "common",
+                "docId": "kibKbnSharedUxAiComponentsPluginApi",
+                "section": "def-common.AiIconProps",
+                "text": "AiIconProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/ai-components/ai_icon/src/ai_icon.tsx",
+            "lineNumber": 35,
+            "columnNumber": 24,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-ai-components",
+        "id": "def-common.AiIconProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "AiIconProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiIconProps",
+            "text": "AiIconProps"
+          },
+          " extends Omit<",
+          "EuiIconProps",
+          ", \"type\">"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/ai-components/ai_icon/src/ai_icon.tsx",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-ai-components",
+            "id": "def-common.AiIconProps.iconType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconType",
+            "description": [],
+            "signature": [
+              "\"productAgent\" | \"sparkles\" | \"aiAssistantLogo\""
+            ],
+            "path": "src/platform/packages/shared/shared-ux/ai-components/ai_icon/src/ai_icon.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-ai-components",
+            "id": "def-common.AiIconProps.size",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "\"m\" | \"s\" | \"original\" | \"l\" | \"xl\" | \"xxl\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/ai-components/ai_icon/src/ai_icon.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -253,7 +489,7 @@
           "Props for the default text AI button variants (`base` and `accent`)."
         ],
         "signature": [
-          "(Omit<",
+          "Omit<Omit<",
           "DisambiguateSet",
           "<",
           "EuiButtonPropsForAnchor",
@@ -263,15 +499,7 @@
           "EuiButtonDisplayCommonProps",
           " & ",
           "EuiButtonProps",
-          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"fill\" | \"disabled\" | \"size\" | \"iconType\"> & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
-          {
-            "pluginId": "@kbn/shared-ux-ai-components",
-            "scope": "common",
-            "docId": "kibKbnSharedUxAiComponentsPluginApi",
-            "section": "def-common.AiButtonIconType",
-            "text": "AiButtonIconType"
-          },
-          " | undefined; }) | (Omit<",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"fill\" | \"size\" | \"iconType\"> | Omit<",
           "DisambiguateSet",
           "<",
           "EuiButtonPropsForButton",
@@ -279,7 +507,7 @@
           "EuiButtonPropsForAnchor",
           "> & ",
           "EuiButtonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"fill\" | \"disabled\" | \"size\" | \"iconType\"> & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"fill\" | \"size\" | \"iconType\">, RelaxKeys> & Pick<React.DOMAttributes<HTMLButtonElement | HTMLAnchorElement>, ButtonDomHandlerKeys> & { buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement> | undefined; } & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
@@ -287,7 +515,7 @@
             "section": "def-common.AiButtonIconType",
             "text": "AiButtonIconType"
           },
-          " | undefined; })"
+          " | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_default.tsx",
         "lineNumber": 15,
@@ -306,15 +534,11 @@
           "Props for the `AiButtonEmpty` component."
         ],
         "signature": [
-          "Omit<Omit<",
-          "DisambiguateSet",
+          "{ id?: string | undefined; value?: string | number | readonly string[] | undefined; prefix?: string | undefined; type?: \"button\" | \"reset\" | \"submit\" | undefined; onError?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; name?: string | undefined; ping?: string | undefined; security?: string | undefined; defaultValue?: string | number | readonly string[] | undefined; children?: React.ReactNode; hidden?: boolean | undefined; content?: string | undefined; title?: string | undefined; className?: string | undefined; \"aria-label\"?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
+          "Interpolation",
           "<",
-          "EuiButtonEmptyPropsForAnchor",
-          ", ",
-          "EuiButtonEmptyPropsForButton",
-          "> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>, \"disabled\" | \"iconType\"> & { iconOnly?: false | undefined; variant: \"empty\" | \"outlined\"; iconType?: ",
+          "Theme",
+          ">; disabled?: boolean | undefined; defaultChecked?: boolean | undefined; suppressContentEditableWarning?: boolean | undefined; suppressHydrationWarning?: boolean | undefined; accessKey?: string | undefined; autoFocus?: boolean | undefined; contentEditable?: Booleanish | \"inherit\" | \"plaintext-only\" | undefined; contextMenu?: string | undefined; dir?: string | undefined; draggable?: Booleanish | undefined; lang?: string | undefined; nonce?: string | undefined; slot?: string | undefined; spellCheck?: Booleanish | undefined; style?: React.CSSProperties | undefined; tabIndex?: number | undefined; translate?: \"no\" | \"yes\" | undefined; radioGroup?: string | undefined; role?: React.AriaRole | undefined; about?: string | undefined; datatype?: string | undefined; inlist?: any; property?: string | undefined; rel?: string | undefined; resource?: string | undefined; rev?: string | undefined; typeof?: string | undefined; vocab?: string | undefined; autoCapitalize?: string | undefined; autoCorrect?: string | undefined; autoSave?: string | undefined; color?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; itemProp?: string | undefined; itemScope?: boolean | undefined; itemType?: string | undefined; itemID?: string | undefined; itemRef?: string | undefined; results?: number | undefined; unselectable?: \"on\" | \"off\" | undefined; inputMode?: \"search\" | \"none\" | \"text\" | \"numeric\" | \"tel\" | \"url\" | \"email\" | \"decimal\" | undefined; is?: string | undefined; \"aria-activedescendant\"?: string | undefined; \"aria-atomic\"?: Booleanish | undefined; \"aria-autocomplete\"?: \"none\" | \"list\" | \"inline\" | \"both\" | undefined; \"aria-braillelabel\"?: string | undefined; \"aria-brailleroledescription\"?: string | undefined; \"aria-busy\"?: Booleanish | undefined; \"aria-checked\"?: boolean | \"true\" | \"false\" | \"mixed\" | undefined; \"aria-colcount\"?: number | undefined; \"aria-colindex\"?: number | undefined; \"aria-colindextext\"?: string | undefined; \"aria-colspan\"?: number | undefined; \"aria-controls\"?: string | undefined; \"aria-current\"?: boolean | \"page\" | \"date\" | \"true\" | \"false\" | \"location\" | \"time\" | \"step\" | undefined; \"aria-describedby\"?: string | undefined; \"aria-description\"?: string | undefined; \"aria-details\"?: string | undefined; \"aria-disabled\"?: Booleanish | undefined; \"aria-dropeffect\"?: \"execute\" | \"link\" | \"none\" | \"copy\" | \"move\" | \"popup\" | undefined; \"aria-errormessage\"?: string | undefined; \"aria-expanded\"?: Booleanish | undefined; \"aria-flowto\"?: string | undefined; \"aria-grabbed\"?: Booleanish | undefined; \"aria-haspopup\"?: boolean | \"true\" | \"false\" | \"grid\" | \"dialog\" | \"menu\" | \"listbox\" | \"tree\" | undefined; \"aria-hidden\"?: Booleanish | undefined; \"aria-invalid\"?: boolean | \"true\" | \"false\" | \"grammar\" | \"spelling\" | undefined; \"aria-keyshortcuts\"?: string | undefined; \"aria-labelledby\"?: string | undefined; \"aria-level\"?: number | undefined; \"aria-live\"?: \"off\" | \"assertive\" | \"polite\" | undefined; \"aria-modal\"?: Booleanish | undefined; \"aria-multiline\"?: Booleanish | undefined; \"aria-multiselectable\"?: Booleanish | undefined; \"aria-orientation\"?: \"horizontal\" | \"vertical\" | undefined; \"aria-owns\"?: string | undefined; \"aria-placeholder\"?: string | undefined; \"aria-posinset\"?: number | undefined; \"aria-pressed\"?: boolean | \"true\" | \"false\" | \"mixed\" | undefined; \"aria-readonly\"?: Booleanish | undefined; \"aria-relevant\"?: \"text\" | \"all\" | \"additions\" | \"additions removals\" | \"additions text\" | \"removals\" | \"removals additions\" | \"removals text\" | \"text additions\" | \"text removals\" | undefined; \"aria-required\"?: Booleanish | undefined; \"aria-roledescription\"?: string | undefined; \"aria-rowcount\"?: number | undefined; \"aria-rowindex\"?: number | undefined; \"aria-rowindextext\"?: string | undefined; \"aria-rowspan\"?: number | undefined; \"aria-selected\"?: Booleanish | undefined; \"aria-setsize\"?: number | undefined; \"aria-sort\"?: \"none\" | \"ascending\" | \"descending\" | \"other\" | undefined; \"aria-valuemax\"?: number | undefined; \"aria-valuemin\"?: number | undefined; \"aria-valuenow\"?: number | undefined; \"aria-valuetext\"?: string | undefined; dangerouslySetInnerHTML?: { __html: string | TrustedHTML; } | undefined; onCopy?: React.ClipboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCopyCapture?: React.ClipboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCut?: React.ClipboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCutCapture?: React.ClipboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPaste?: React.ClipboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPasteCapture?: React.ClipboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCompositionEnd?: React.CompositionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCompositionEndCapture?: React.CompositionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCompositionStart?: React.CompositionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCompositionStartCapture?: React.CompositionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCompositionUpdate?: React.CompositionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCompositionUpdateCapture?: React.CompositionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onFocus?: React.FocusEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onFocusCapture?: React.FocusEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onBlur?: React.FocusEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onBlurCapture?: React.FocusEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onChange?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onChangeCapture?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onBeforeInput?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onBeforeInputCapture?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onInput?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onInputCapture?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onReset?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onResetCapture?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSubmit?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSubmitCapture?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onInvalid?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onInvalidCapture?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoad?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onErrorCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onKeyDownCapture?: React.KeyboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onKeyPress?: React.KeyboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onKeyPressCapture?: React.KeyboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onKeyUp?: React.KeyboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onKeyUpCapture?: React.KeyboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAbort?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAbortCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCanPlay?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCanPlayCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCanPlayThrough?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCanPlayThroughCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDurationChange?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDurationChangeCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onEmptied?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onEmptiedCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onEncrypted?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onEncryptedCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onEnded?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onEndedCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadedData?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadedDataCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadedMetadata?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadedMetadataCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadStart?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadStartCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPause?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPauseCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPlay?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPlayCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPlaying?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPlayingCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onProgress?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onProgressCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onRateChange?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onRateChangeCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onResize?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onResizeCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSeeked?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSeekedCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSeeking?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSeekingCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onStalled?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onStalledCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSuspend?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSuspendCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTimeUpdate?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTimeUpdateCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onVolumeChange?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onVolumeChangeCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onWaiting?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onWaitingCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAuxClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAuxClickCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onClickCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onContextMenu?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onContextMenuCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDoubleClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDoubleClickCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDrag?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragEnd?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragEndCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragEnter?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragEnterCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragExit?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragExitCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragLeave?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragLeaveCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragOver?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragOverCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragStart?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragStartCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDrop?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDropCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseDown?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseDownCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseEnter?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseLeave?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseMove?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseMoveCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseOut?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseOutCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseOver?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseOverCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseUp?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseUpCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSelect?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSelectCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchCancel?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchCancelCapture?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchEnd?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchEndCapture?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchMove?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchMoveCapture?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchStart?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchStartCapture?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerDown?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerDownCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerMove?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerMoveCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerUp?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerUpCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerCancel?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerCancelCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerEnter?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerLeave?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerOver?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerOverCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerOut?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerOutCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onGotPointerCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onGotPointerCaptureCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLostPointerCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLostPointerCaptureCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onScroll?: React.UIEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onScrollCapture?: React.UIEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onWheel?: React.WheelEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onWheelCapture?: React.WheelEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAnimationStart?: React.AnimationEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAnimationStartCapture?: React.AnimationEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAnimationEnd?: React.AnimationEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAnimationEndCapture?: React.AnimationEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAnimationIteration?: React.AnimationEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAnimationIterationCapture?: React.AnimationEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTransitionEnd?: React.TransitionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTransitionEndCapture?: React.TransitionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; form?: string | undefined; formAction?: string | undefined; formEncType?: string | undefined; formMethod?: string | undefined; formNoValidate?: boolean | undefined; formTarget?: string | undefined; size?: \"m\" | \"s\" | \"xs\" | undefined; flush?: \"right\" | \"both\" | \"left\" | undefined; iconType?: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
@@ -322,23 +546,15 @@
             "section": "def-common.AiButtonIconType",
             "text": "AiButtonIconType"
           },
-          " | undefined; }, \"variant\"> | Omit<Omit<",
-          "DisambiguateSet",
-          "<",
-          "EuiButtonEmptyPropsForButton",
-          ", ",
-          "EuiButtonEmptyPropsForAnchor",
-          "> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>, \"disabled\" | \"iconType\"> & { iconOnly?: false | undefined; variant: \"empty\" | \"outlined\"; iconType?: ",
-          {
-            "pluginId": "@kbn/shared-ux-ai-components",
-            "scope": "common",
-            "docId": "kibKbnSharedUxAiComponentsPluginApi",
-            "section": "def-common.AiButtonIconType",
-            "text": "AiButtonIconType"
-          },
-          " | undefined; }, \"variant\">"
+          " | undefined; href?: string | undefined; download?: any; hrefLang?: string | undefined; media?: string | undefined; target?: string | (string & {}) | undefined; referrerPolicy?: React.HTMLAttributeReferrerPolicy | undefined; isSelected?: boolean | undefined; isLoading?: boolean | undefined; isDisabled?: boolean | undefined; iconSize?: \"m\" | \"s\" | undefined; buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement> | undefined; contentProps?: (",
+          "CommonProps",
+          " & ",
+          "EuiButtonDisplayContentType",
+          ") | undefined; iconSide?: ",
+          "ButtonContentIconSide",
+          "; textProps?: false | (React.HTMLAttributes<HTMLSpanElement> & ",
+          "CommonProps",
+          " & { ref?: React.Ref<HTMLSpanElement> | undefined; 'data-text'?: string | undefined; }) | undefined; hasAriaDisabled?: boolean | undefined; iconOnly?: false | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_empty.tsx",
         "lineNumber": 16,
@@ -357,15 +573,7 @@
           "Props for the icon-only AI button component."
         ],
         "signature": [
-          "Omit<Omit<",
-          "DisambiguateSet",
-          "<",
-          "EuiButtonIconPropsForAnchor",
-          ", ",
-          "EuiButtonIconPropsForButton",
-          "> & { type?: \"button\" | \"reset\" | \"submit\" | undefined; } & ",
-          "EuiButtonIconProps",
-          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"disabled\" | \"iconType\" | \"display\"> & { iconOnly: true; display?: undefined; variant?: ",
+          "{ id?: string | undefined; value?: string | number | readonly string[] | undefined; prefix?: string | undefined; type?: string | undefined; onError?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; name?: string | undefined; ping?: string | undefined; security?: string | undefined; defaultValue?: string | number | readonly string[] | undefined; children?: React.ReactNode; hidden?: boolean | undefined; content?: string | undefined; title?: string | undefined; variant?: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
@@ -373,31 +581,11 @@
             "section": "def-common.AiButtonVariant",
             "text": "AiButtonVariant"
           },
-          " | undefined; iconType: ",
-          {
-            "pluginId": "@kbn/shared-ux-ai-components",
-            "scope": "common",
-            "docId": "kibKbnSharedUxAiComponentsPluginApi",
-            "section": "def-common.AiButtonIconType",
-            "text": "AiButtonIconType"
-          },
-          "; 'aria-label': string; }, \"iconOnly\"> | Omit<Omit<",
-          "DisambiguateSet",
+          " | undefined; className?: string | undefined; \"aria-label\": string; 'data-test-subj'?: string | undefined; css?: ",
+          "Interpolation",
           "<",
-          "EuiButtonIconPropsForButton",
-          ", ",
-          "EuiButtonIconPropsForAnchor",
-          "> & { type?: string | undefined; } & ",
-          "EuiButtonIconProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"disabled\" | \"iconType\" | \"display\"> & { iconOnly: true; display?: undefined; variant?: ",
-          {
-            "pluginId": "@kbn/shared-ux-ai-components",
-            "scope": "common",
-            "docId": "kibKbnSharedUxAiComponentsPluginApi",
-            "section": "def-common.AiButtonVariant",
-            "text": "AiButtonVariant"
-          },
-          " | undefined; iconType: ",
+          "Theme",
+          ">; disabled?: boolean | undefined; defaultChecked?: boolean | undefined; suppressContentEditableWarning?: boolean | undefined; suppressHydrationWarning?: boolean | undefined; accessKey?: string | undefined; autoFocus?: boolean | undefined; contentEditable?: Booleanish | \"inherit\" | \"plaintext-only\" | undefined; contextMenu?: string | undefined; dir?: string | undefined; draggable?: Booleanish | undefined; lang?: string | undefined; nonce?: string | undefined; slot?: string | undefined; spellCheck?: Booleanish | undefined; style?: React.CSSProperties | undefined; tabIndex?: number | undefined; translate?: \"no\" | \"yes\" | undefined; radioGroup?: string | undefined; role?: React.AriaRole | undefined; about?: string | undefined; datatype?: string | undefined; inlist?: any; property?: string | undefined; rel?: string | undefined; resource?: string | undefined; rev?: string | undefined; typeof?: string | undefined; vocab?: string | undefined; autoCapitalize?: string | undefined; autoCorrect?: string | undefined; autoSave?: string | undefined; color?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; itemProp?: string | undefined; itemScope?: boolean | undefined; itemType?: string | undefined; itemID?: string | undefined; itemRef?: string | undefined; results?: number | undefined; unselectable?: \"on\" | \"off\" | undefined; inputMode?: \"search\" | \"none\" | \"text\" | \"numeric\" | \"tel\" | \"url\" | \"email\" | \"decimal\" | undefined; is?: string | undefined; \"aria-activedescendant\"?: string | undefined; \"aria-atomic\"?: Booleanish | undefined; \"aria-autocomplete\"?: \"none\" | \"list\" | \"inline\" | \"both\" | undefined; \"aria-braillelabel\"?: string | undefined; \"aria-brailleroledescription\"?: string | undefined; \"aria-busy\"?: Booleanish | undefined; \"aria-checked\"?: boolean | \"true\" | \"false\" | \"mixed\" | undefined; \"aria-colcount\"?: number | undefined; \"aria-colindex\"?: number | undefined; \"aria-colindextext\"?: string | undefined; \"aria-colspan\"?: number | undefined; \"aria-controls\"?: string | undefined; \"aria-current\"?: boolean | \"page\" | \"date\" | \"true\" | \"false\" | \"location\" | \"time\" | \"step\" | undefined; \"aria-describedby\"?: string | undefined; \"aria-description\"?: string | undefined; \"aria-details\"?: string | undefined; \"aria-disabled\"?: Booleanish | undefined; \"aria-dropeffect\"?: \"execute\" | \"link\" | \"none\" | \"copy\" | \"move\" | \"popup\" | undefined; \"aria-errormessage\"?: string | undefined; \"aria-expanded\"?: Booleanish | undefined; \"aria-flowto\"?: string | undefined; \"aria-grabbed\"?: Booleanish | undefined; \"aria-haspopup\"?: boolean | \"true\" | \"false\" | \"grid\" | \"dialog\" | \"menu\" | \"listbox\" | \"tree\" | undefined; \"aria-hidden\"?: Booleanish | undefined; \"aria-invalid\"?: boolean | \"true\" | \"false\" | \"grammar\" | \"spelling\" | undefined; \"aria-keyshortcuts\"?: string | undefined; \"aria-labelledby\"?: string | undefined; \"aria-level\"?: number | undefined; \"aria-live\"?: \"off\" | \"assertive\" | \"polite\" | undefined; \"aria-modal\"?: Booleanish | undefined; \"aria-multiline\"?: Booleanish | undefined; \"aria-multiselectable\"?: Booleanish | undefined; \"aria-orientation\"?: \"horizontal\" | \"vertical\" | undefined; \"aria-owns\"?: string | undefined; \"aria-placeholder\"?: string | undefined; \"aria-posinset\"?: number | undefined; \"aria-pressed\"?: boolean | \"true\" | \"false\" | \"mixed\" | undefined; \"aria-readonly\"?: Booleanish | undefined; \"aria-relevant\"?: \"text\" | \"all\" | \"additions\" | \"additions removals\" | \"additions text\" | \"removals\" | \"removals additions\" | \"removals text\" | \"text additions\" | \"text removals\" | undefined; \"aria-required\"?: Booleanish | undefined; \"aria-roledescription\"?: string | undefined; \"aria-rowcount\"?: number | undefined; \"aria-rowindex\"?: number | undefined; \"aria-rowindextext\"?: string | undefined; \"aria-rowspan\"?: number | undefined; \"aria-selected\"?: Booleanish | undefined; \"aria-setsize\"?: number | undefined; \"aria-sort\"?: \"none\" | \"ascending\" | \"descending\" | \"other\" | undefined; \"aria-valuemax\"?: number | undefined; \"aria-valuemin\"?: number | undefined; \"aria-valuenow\"?: number | undefined; \"aria-valuetext\"?: string | undefined; dangerouslySetInnerHTML?: { __html: string | TrustedHTML; } | undefined; onCopy?: React.ClipboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCopyCapture?: React.ClipboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCut?: React.ClipboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCutCapture?: React.ClipboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPaste?: React.ClipboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPasteCapture?: React.ClipboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCompositionEnd?: React.CompositionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCompositionEndCapture?: React.CompositionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCompositionStart?: React.CompositionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCompositionStartCapture?: React.CompositionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCompositionUpdate?: React.CompositionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCompositionUpdateCapture?: React.CompositionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onFocus?: React.FocusEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onFocusCapture?: React.FocusEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onBlur?: React.FocusEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onBlurCapture?: React.FocusEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onChange?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onChangeCapture?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onBeforeInput?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onBeforeInputCapture?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onInput?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onInputCapture?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onReset?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onResetCapture?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSubmit?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSubmitCapture?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onInvalid?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onInvalidCapture?: React.FormEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoad?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onErrorCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onKeyDownCapture?: React.KeyboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onKeyPress?: React.KeyboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onKeyPressCapture?: React.KeyboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onKeyUp?: React.KeyboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onKeyUpCapture?: React.KeyboardEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAbort?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAbortCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCanPlay?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCanPlayCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCanPlayThrough?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onCanPlayThroughCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDurationChange?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDurationChangeCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onEmptied?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onEmptiedCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onEncrypted?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onEncryptedCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onEnded?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onEndedCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadedData?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadedDataCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadedMetadata?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadedMetadataCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadStart?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLoadStartCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPause?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPauseCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPlay?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPlayCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPlaying?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPlayingCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onProgress?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onProgressCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onRateChange?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onRateChangeCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onResize?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onResizeCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSeeked?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSeekedCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSeeking?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSeekingCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onStalled?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onStalledCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSuspend?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSuspendCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTimeUpdate?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTimeUpdateCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onVolumeChange?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onVolumeChangeCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onWaiting?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onWaitingCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAuxClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAuxClickCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onClickCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onContextMenu?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onContextMenuCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDoubleClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDoubleClickCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDrag?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragEnd?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragEndCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragEnter?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragEnterCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragExit?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragExitCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragLeave?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragLeaveCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragOver?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragOverCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragStart?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDragStartCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDrop?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onDropCapture?: React.DragEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseDown?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseDownCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseEnter?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseLeave?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseMove?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseMoveCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseOut?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseOutCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseOver?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseOverCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseUp?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onMouseUpCapture?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSelect?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onSelectCapture?: React.ReactEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchCancel?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchCancelCapture?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchEnd?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchEndCapture?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchMove?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchMoveCapture?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchStart?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTouchStartCapture?: React.TouchEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerDown?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerDownCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerMove?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerMoveCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerUp?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerUpCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerCancel?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerCancelCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerEnter?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerLeave?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerOver?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerOverCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerOut?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onPointerOutCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onGotPointerCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onGotPointerCaptureCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLostPointerCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onLostPointerCaptureCapture?: React.PointerEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onScroll?: React.UIEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onScrollCapture?: React.UIEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onWheel?: React.WheelEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onWheelCapture?: React.WheelEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAnimationStart?: React.AnimationEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAnimationStartCapture?: React.AnimationEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAnimationEnd?: React.AnimationEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAnimationEndCapture?: React.AnimationEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAnimationIteration?: React.AnimationEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onAnimationIterationCapture?: React.AnimationEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTransitionEnd?: React.TransitionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; onTransitionEndCapture?: React.TransitionEventHandler<HTMLButtonElement | HTMLAnchorElement> | undefined; form?: string | undefined; formAction?: string | undefined; formEncType?: string | undefined; formMethod?: string | undefined; formNoValidate?: boolean | undefined; formTarget?: string | undefined; size?: \"m\" | \"s\" | \"xs\" | undefined; iconType: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
@@ -405,7 +593,7 @@
             "section": "def-common.AiButtonIconType",
             "text": "AiButtonIconType"
           },
-          "; 'aria-label': string; }, \"iconOnly\">"
+          "; href?: string | undefined; download?: any; hrefLang?: string | undefined; media?: string | undefined; target?: React.HTMLAttributeAnchorTarget | undefined; referrerPolicy?: React.HTMLAttributeReferrerPolicy | undefined; isSelected?: boolean | undefined; isLoading?: boolean | undefined; display?: undefined; isDisabled?: boolean | undefined; iconSize?: \"m\" | \"s\" | \"original\" | \"l\" | \"xl\" | \"xxl\" | undefined; buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement> | undefined; hasAriaDisabled?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_icon.tsx",
         "lineNumber": 16,
@@ -443,7 +631,7 @@
           "Props for the `AiButton` component."
         ],
         "signature": [
-          "((Omit<",
+          "(Omit<Omit<",
           "DisambiguateSet",
           "<",
           "EuiButtonPropsForAnchor",
@@ -453,7 +641,7 @@
           "EuiButtonDisplayCommonProps",
           " & ",
           "EuiButtonProps",
-          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"fill\" | \"disabled\" | \"size\" | \"iconType\"> | Omit<",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"fill\" | \"size\" | \"iconType\"> | Omit<",
           "DisambiguateSet",
           "<",
           "EuiButtonPropsForButton",
@@ -461,7 +649,7 @@
           "EuiButtonPropsForAnchor",
           "> & ",
           "EuiButtonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"fill\" | \"disabled\" | \"size\" | \"iconType\">) & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"fill\" | \"size\" | \"iconType\">, RelaxKeys> & Pick<React.DOMAttributes<HTMLButtonElement | HTMLAnchorElement>, ButtonDomHandlerKeys> & { buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement> | undefined; } & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
@@ -469,7 +657,7 @@
             "section": "def-common.AiButtonIconType",
             "text": "AiButtonIconType"
           },
-          " | undefined; }) | ((Omit<",
+          " | undefined; }) | (Omit<Omit<",
           "DisambiguateSet",
           "<",
           "EuiButtonEmptyPropsForAnchor",
@@ -477,7 +665,7 @@
           "EuiButtonEmptyPropsForButton",
           "> & ",
           "CommonEuiButtonEmptyProps",
-          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>, \"disabled\" | \"iconType\"> | Omit<",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>, \"iconType\"> | Omit<",
           "DisambiguateSet",
           "<",
           "EuiButtonEmptyPropsForButton",
@@ -485,7 +673,7 @@
           "EuiButtonEmptyPropsForAnchor",
           "> & ",
           "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>, \"disabled\" | \"iconType\">) & { iconOnly?: false | undefined; variant: \"empty\" | \"outlined\"; iconType?: ",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>, \"iconType\">, RelaxKeys> & Pick<React.DOMAttributes<HTMLButtonElement | HTMLAnchorElement>, ButtonDomHandlerKeys> & { buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement> | undefined; } & { iconOnly?: false | undefined; variant: \"empty\" | \"outlined\"; iconType?: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
@@ -493,7 +681,7 @@
             "section": "def-common.AiButtonIconType",
             "text": "AiButtonIconType"
           },
-          " | undefined; }) | ((Omit<",
+          " | undefined; }) | (Omit<Omit<",
           "DisambiguateSet",
           "<",
           "EuiButtonIconPropsForAnchor",
@@ -501,7 +689,7 @@
           "EuiButtonIconPropsForButton",
           "> & { type?: \"button\" | \"reset\" | \"submit\" | undefined; } & ",
           "EuiButtonIconProps",
-          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"disabled\" | \"iconType\" | \"display\"> | Omit<",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"iconType\" | \"display\"> | Omit<",
           "DisambiguateSet",
           "<",
           "EuiButtonIconPropsForButton",
@@ -509,7 +697,7 @@
           "EuiButtonIconPropsForAnchor",
           "> & { type?: string | undefined; } & ",
           "EuiButtonIconProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"disabled\" | \"iconType\" | \"display\">) & { iconOnly: true; display?: undefined; variant?: ",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"iconType\" | \"display\">, RelaxKeys> & Pick<React.DOMAttributes<HTMLButtonElement | HTMLAnchorElement>, ButtonDomHandlerKeys> & { buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement> | undefined; } & { iconOnly: true; display?: undefined; variant?: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
@@ -528,7 +716,7 @@
           "; 'aria-label': string; })"
         ],
         "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/types.ts",
-        "lineNumber": 21,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

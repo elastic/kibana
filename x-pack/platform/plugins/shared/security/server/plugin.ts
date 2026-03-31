@@ -422,6 +422,10 @@ export class SecurityPlugin
         : undefined;
 
     const config = this.getConfig();
+
+    const { protocol, hostname, port } = core.http.getServerInfo();
+    const serverConfig = { protocol, hostname, port, ...config.public };
+
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
       clusterClient,
@@ -432,13 +436,17 @@ export class SecurityPlugin
       loggers: this.initializerContext.logger,
       session,
       uiam: config.uiam?.enabled
-        ? new UiamService(this.logger.get('uiam'), config.uiam, this.elasticsearchUrl)
+        ? new UiamService(this.logger.get('uiam'), config.uiam, {
+            kibanaServerURL: `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`,
+            elasticsearchUrl: this.elasticsearchUrl,
+          })
         : undefined,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
       customLogoutURL,
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
+      userActivity: core.userActivity,
     });
 
     this.authorizationService.start({

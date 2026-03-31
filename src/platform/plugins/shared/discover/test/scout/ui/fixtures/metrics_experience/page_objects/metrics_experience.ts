@@ -14,12 +14,17 @@ import type { MetricsFlyout } from './flyout';
 import { createFlyout } from './flyout';
 import type { ChartActions } from './chart_actions';
 import { createChartActions } from './chart_actions';
+import type { ChartInteractions } from './chart_interactions';
+import { createChartInteractions } from './chart_interactions';
 import type { BreakdownSelector } from './breakdown_selector';
 import { createBreakdownSelector } from './breakdown_selector';
+import type { ShareHelper } from './share_helper';
+import { createShareHelper } from './share_helper';
 
 export class MetricsExperiencePage {
   public readonly container: Locator;
   public readonly grid: Locator;
+  public readonly fullscreen: Locator;
   public readonly cards: Locator;
   public readonly pagination: PaginationLocators;
   public readonly flyout: MetricsFlyout;
@@ -27,20 +32,27 @@ export class MetricsExperiencePage {
   public readonly searchInput: Locator;
   public readonly emptyState: Locator;
   public readonly chartActions: ChartActions;
+  public readonly chartInteractions: ChartInteractions;
   public readonly breakdownSelector: BreakdownSelector;
+  public readonly share: ShareHelper;
+  public readonly fullscreenButton: Locator;
 
   constructor(page: ScoutPage) {
     // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
     this.container = page.testSubj.locator('metricsExperienceRendered');
     this.grid = page.testSubj.locator('unifiedMetricsExperienceGrid');
+    this.fullscreen = page.testSubj.locator('metricsGridWrapper-fullScreen');
     this.cards = this.grid.locator('[data-chart-index]');
     this.pagination = createGridPagination(this.container);
     this.flyout = createFlyout(page);
     this.chartActions = createChartActions(page);
+    this.chartInteractions = createChartInteractions(page, (index) => this.getCardByIndex(index));
     this.breakdownSelector = createBreakdownSelector(page);
     this.searchButton = page.testSubj.locator('metricsExperienceToolbarSearch');
     this.searchInput = page.testSubj.locator('metricsExperienceGridToolbarSearch');
     this.emptyState = page.testSubj.locator('metricsExperienceNoData');
+    this.share = createShareHelper(page);
+    this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
   }
 
   public getCardByIndex(index: number): Locator {
@@ -78,6 +90,10 @@ export class MetricsExperiencePage {
     return this.cards.count();
   }
 
+  public async toggleFullscreen(): Promise<void> {
+    await this.fullscreenButton.click();
+  }
+
   /**
    * Hovers over a metric card to reveal the panel header, then clicks the
    * context menu toggle button to open the chart actions menu.
@@ -97,5 +113,16 @@ export class MetricsExperiencePage {
   public async openInsightsFlyout(cardIndex: number): Promise<void> {
     await this.openCardContextMenu(cardIndex);
     await this.chartActions.viewDetails.click();
+  }
+
+  /**
+   * Opens the inspector flyout by triggering "Inspect" from the chart
+   * actions menu of the given card.
+   */
+  public async openInspectorFlyout(cardIndex: number): Promise<void> {
+    await this.openCardContextMenu(cardIndex);
+    await this.getCardByIndex(cardIndex)
+      .locator('[data-test-subj="embeddablePanelAction-openInspector"]')
+      .click();
   }
 }

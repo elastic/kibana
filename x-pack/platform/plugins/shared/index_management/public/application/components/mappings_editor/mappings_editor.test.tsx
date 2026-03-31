@@ -9,18 +9,137 @@ import React from 'react';
 import type { ComponentProps } from 'react';
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiComboBoxTestHarness, EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
+import SemVer from 'semver/classes/semver';
+import { docLinksServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
-import { WithAppDependencies } from './__jest__/client_integration/helpers/setup_environment';
+import { MAJOR_VERSION } from '../../../../common';
+import { useAppContext } from '../../app_context';
 import { MappingsEditor } from './mappings_editor';
-import { TYPE_DEFINITION } from './constants';
-import type { AppDependencies } from '../..';
+import { MappingsEditorProvider } from './mappings_editor_context';
+import { createKibanaReactContext } from './shared_imports';
+import { UseField } from './shared_imports';
+import { getFieldConfig } from './lib';
 
-// Helper to map type values to their display labels
-const getTypeLabel = (typeValue: string): string => {
-  const typeDef = TYPE_DEFINITION[typeValue as keyof typeof TYPE_DEFINITION];
-  return typeDef?.label || typeValue;
+jest.mock('@kbn/code-editor');
+
+jest.mock('./components/document_fields/field_parameters/type_parameter', () => {
+  const sharedImports = jest.requireActual('./shared_imports');
+  const lib = jest.requireActual('./lib');
+  const UseFieldActual = sharedImports.UseField as typeof UseField;
+  const getFieldConfigActual = lib.getFieldConfig as typeof getFieldConfig;
+
+  const options = [
+    { value: 'text', label: 'text' },
+    { value: 'semantic_text', label: 'semantic_text' },
+    { value: 'other', label: 'other' },
+    { value: 'range', label: 'range' },
+    { value: 'date_range', label: 'date_range' },
+  ];
+
+  const TypeParameter = () => (
+    <UseFieldActual path="type" config={getFieldConfigActual('type')}>
+      {(field: unknown) => {
+        const f = field as {
+          value?: Array<{ value?: string }>;
+          setValue: (value: unknown) => void;
+        };
+
+        return (
+          <select
+            data-test-subj="fieldType"
+            defaultValue={f.value?.[0]?.value ?? ''}
+            onBlur={(e) => f.setValue([{ value: e.target.value, label: e.target.value }])}
+          >
+            <option value="" />
+            {options.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        );
+      }}
+    </UseFieldActual>
+  );
+
+  return { __esModule: true, TypeParameter };
+});
+
+jest.mock('./components/document_fields/field_parameters/reference_field_selects', () => {
+  const sharedImports = jest.requireActual('./shared_imports');
+  const lib = jest.requireActual('./lib');
+  const UseFieldActual = sharedImports.UseField as typeof UseField;
+  const getFieldConfigActual = lib.getFieldConfig as typeof getFieldConfig;
+
+  const ReferenceFieldSelects = () => (
+    <UseFieldActual path="reference_field" config={getFieldConfigActual('reference_field')}>
+      {(field: unknown) => {
+        const f = field as { value?: string; setValue: (value: unknown) => void };
+        return (
+          <div data-test-subj="referenceFieldSelect">
+            <select
+              data-test-subj="referenceFieldSelectInput"
+              defaultValue={f.value ?? ''}
+              onBlur={(e) => f.setValue(e.target.value)}
+            >
+              <option value="" />
+              <option value="title">title</option>
+            </select>
+          </div>
+        );
+      }}
+    </UseFieldActual>
+  );
+
+  return { __esModule: true, ReferenceFieldSelects };
+});
+
+jest.mock('../../app_context', () => {
+  const actual = jest.requireActual('../../app_context');
+  return {
+    ...actual,
+    useAppContext: jest.fn(),
+  };
+});
+
+interface MockSelectInferenceIdContentProps {
+  dataTestSubj?: string;
+  value: string;
+  setValue: (value: string) => void;
+}
+
+const MockSelectInferenceIdContent: React.FC<MockSelectInferenceIdContentProps> = ({
+  dataTestSubj,
+  value,
+  setValue,
+}) => {
+  React.useEffect(() => {
+    if (!value) setValue(defaultInferenceEndpoints.ELSER);
+  }, [value, setValue]);
+
+  return <div data-test-subj={dataTestSubj ?? 'mockSelectInferenceId'} />;
 };
+
+function mockSelectInferenceId({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) {
+  const config = getFieldConfig('inference_id');
+  return (
+    <UseField path="inference_id" fieldConfig={config}>
+      {(field) => (
+        <MockSelectInferenceIdContent
+          dataTestSubj={dataTestSubj}
+          value={field.value as string}
+          setValue={field.setValue}
+        />
+      )}
+    </UseField>
+  );
+}
+
+jest.mock('./components/document_fields/field_parameters/select_inference_id', () => ({
+  SelectInferenceId: mockSelectInferenceId,
+}));
 
 jest.mock('../component_templates/component_templates_context', () => ({
   useComponentTemplatesContext: jest.fn().mockReturnValue({
@@ -31,12 +150,58 @@ jest.mock('../component_templates/component_templates_context', () => ({
   }),
 }));
 
+const { GlobalFlyoutProvider } = GlobalFlyout;
+const mockUseAppContext = useAppContext as unknown as jest.MockedFunction<typeof useAppContext>;
+const docLinks = docLinksServiceMock.createStartContract();
+const kibanaVersion = new SemVer(MAJOR_VERSION);
+const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+  uiSettings: uiSettingsServiceMock.createSetupContract(),
+  kibanaVersion: {
+    get: () => kibanaVersion,
+  },
+});
+const defaultAppContext = {
+  config: { enableMappingsSourceFieldSection: true },
+  canUseSyntheticSource: true,
+};
+
+type MappingsEditorTestProps = Omit<
+  ComponentProps<typeof MappingsEditor>,
+  'docLinks' | 'esNodesPlugins'
+>;
+
+const renderMappingsEditor = (
+  props: Partial<MappingsEditorTestProps>,
+  ctx: unknown = defaultAppContext
+) => {
+  mockUseAppContext.mockReturnValue(ctx as unknown as ReturnType<typeof useAppContext>);
+  const { onChange, ...restProps } = props;
+  const mergedProps = {
+    ...restProps,
+    docLinks,
+    esNodesPlugins: [],
+    onChange: onChange ?? (() => undefined),
+  } satisfies ComponentProps<typeof MappingsEditor>;
+  return render(
+    <I18nProvider>
+      <KibanaReactContextProvider>
+        <MappingsEditorProvider>
+          <GlobalFlyoutProvider>
+            <MappingsEditor {...mergedProps} />
+          </GlobalFlyoutProvider>
+        </MappingsEditorProvider>
+      </KibanaReactContextProvider>
+    </I18nProvider>
+  );
+};
+
 describe('Mappings editor', () => {
   describe('core', () => {
     interface TestMappings {
       dynamic?: boolean;
       numeric_detection?: boolean;
       date_detection?: boolean;
+      dynamic_date_formats?: unknown;
       properties?: Record<string, Record<string, unknown>>;
       dynamic_templates?: unknown[];
       _source?: { enabled?: boolean; includes?: string[]; excludes?: string[] };
@@ -48,32 +213,16 @@ describe('Mappings editor', () => {
     let data: TestMappings | undefined;
     let onChangeHandler: jest.Mock = jest.fn();
 
-    const appDependencies = {
-      core: { application: {}, http: {} },
-      services: {
-        notificationService: { toasts: {} },
-      },
-      docLinks: {
-        links: {
-          inferenceManagement: {
-            inferenceAPIDocumentation: 'https://abc.com/inference-api-create',
-          },
-        },
-      },
-      plugins: {
-        ml: { mlApi: {} },
-      },
-    } as unknown as Partial<AppDependencies>;
-
     type MappingsEditorProps = ComponentProps<typeof MappingsEditor>;
 
-    const setup = (props: Partial<MappingsEditorProps>, ctx: unknown = appDependencies) => {
-      const Component = WithAppDependencies(MappingsEditor, ctx);
-      return render(
-        <I18nProvider>
-          <Component {...props} />
-        </I18nProvider>
-      );
+    const setup = (
+      props: Partial<MappingsEditorProps>,
+      ctx: unknown = {
+        config: { enableMappingsSourceFieldSection: true },
+        canUseSyntheticSource: true,
+      }
+    ) => {
+      return renderMappingsEditor({ onChange: onChangeHandler, ...props }, ctx);
     };
 
     const selectTab = async (tabName: string) => {
@@ -98,11 +247,10 @@ describe('Mappings editor', () => {
       const nameInput = screen.getByTestId('nameParameterInput');
       fireEvent.change(nameInput, { target: { value: name } });
 
-      // Select type using EuiComboBox harness - use label, not value
-      const typeComboBox = new EuiComboBoxTestHarness('fieldType');
-      await typeComboBox.select(getTypeLabel(type));
-      // Close the combobox popover (portal) so it can't intercept later clicks/keystrokes.
-      await typeComboBox.close();
+      // Select type using a lightweight mock (avoid EuiComboBox portal cost)
+      const typeSelect = screen.getByTestId('fieldType');
+      fireEvent.change(typeSelect, { target: { value: type } });
+      fireEvent.blur(typeSelect);
 
       if (subType !== undefined && type === 'other') {
         const subTypeInput = await screen.findByTestId('fieldSubType');
@@ -111,37 +259,16 @@ describe('Mappings editor', () => {
 
       if (referenceField !== undefined) {
         // Wait for reference field to appear after semantic_text type is selected
-        await screen.findByTestId('referenceFieldSelect');
-
-        const referenceSelect = new EuiSuperSelectTestHarness('referenceFieldSelect');
-        await referenceSelect.select(`select-reference-field-${referenceField}`);
+        const referenceSelect = await screen.findByTestId('referenceFieldSelectInput');
+        fireEvent.change(referenceSelect, { target: { value: referenceField } });
+        fireEvent.blur(referenceSelect);
       }
 
       const addButton = screen.getByTestId('addButton');
       fireEvent.click(addButton);
 
-      await waitFor(() => {
-        const documentFields = screen.getByTestId('documentFields');
-        const listItems = within(documentFields).getAllByTestId((content) =>
-          content.startsWith('fieldsListItem ')
-        );
-        const found = listItems.some((it) => {
-          const fieldNameEls = within(it).queryAllByTestId(/fieldName/);
-          return fieldNameEls.some((el) => {
-            if ((el.textContent || '').trim() !== name) return false;
-
-            let node: HTMLElement | null = el as HTMLElement;
-            while (node && node !== it) {
-              const subj = node.getAttribute('data-test-subj');
-              if (typeof subj === 'string' && subj.startsWith('fieldsListItem ')) return false;
-              node = node.parentElement;
-            }
-
-            return true;
-          });
-        });
-        expect(found).toBe(true);
-      });
+      // Root-level fields use data-test-subj `fieldsListItem ${name}Field`
+      await screen.findByTestId(`fieldsListItem ${name}Field`);
 
       const cancelButton = await screen.findByTestId('cancelButton');
       fireEvent.click(cancelButton);
@@ -312,9 +439,9 @@ describe('Mappings editor', () => {
 
       const ctx = {
         config: {
-          enableMappingsSourceFieldSection: true,
+          enableMappingsSourceFieldSection: false,
         },
-        ...appDependencies,
+        canUseSyntheticSource: false,
       };
 
       test('should have 4 tabs (fields, runtime, template, advanced settings)', async () => {
@@ -332,129 +459,67 @@ describe('Mappings editor', () => {
         ]);
       });
 
-      test('should keep the changes when switching tabs', async () => {
+      const openCreateFieldForm = async () => {
+        const addFieldButton = screen.getByTestId('addFieldButton');
+        fireEvent.click(addFieldButton);
+        await screen.findByTestId('createFieldForm');
+      };
+
+      test('keeps mapped fields when switching tabs', async () => {
         setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
         await screen.findByTestId('mappingsEditor');
 
         // Start with empty fields list
-        const fieldsListItems = screen.queryAllByTestId('fieldsListItem');
-        expect(fieldsListItems).toHaveLength(0);
+        expect(screen.queryByTestId('fieldsListItem JohnField')).not.toBeInTheDocument();
 
-        // Add a new field
-        const addFieldButton = screen.getByTestId('addFieldButton');
-        fireEvent.click(addFieldButton);
-
-        await screen.findByTestId('createFieldForm');
-
+        await openCreateFieldForm();
         const newField = { name: 'John', type: 'text' };
         await addField(newField.name, newField.type);
 
-        // Verify field was added
-        await waitFor(() => {
-          const items = screen.getAllByTestId(/^fieldsListItem/);
-          expect(items).toHaveLength(1);
-        });
+        // Switch away and back
+        await selectTab('templates');
+        await selectTab('fields');
+        expect(await screen.findByTestId('fieldsListItem JohnField')).toBeInTheDocument();
+      });
 
-        await waitFor(() => {
-          const documentFields = screen.getByTestId('documentFields');
-          const listItems = within(documentFields).getAllByTestId((content) =>
-            content.startsWith('fieldsListItem ')
-          );
-          const found = listItems.some((it) => {
-            const fieldNameEls = within(it).queryAllByTestId(/fieldName/);
-            return fieldNameEls.some((el) => {
-              if ((el.textContent || '').trim() !== newField.name) return false;
+      test('keeps dynamic templates edits when switching tabs', async () => {
+        setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
+        await screen.findByTestId('mappingsEditor');
 
-              let node: HTMLElement | null = el as HTMLElement;
-              while (node && node !== it) {
-                const subj = node.getAttribute('data-test-subj');
-                if (typeof subj === 'string' && subj.startsWith('fieldsListItem ')) return false;
-                node = node.parentElement;
-              }
-
-              return true;
-            });
-          });
-          expect(found).toBe(true);
-        });
-
-        // Navigate to dynamic templates tab
         await selectTab('templates');
 
-        let templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
-        expect(templatesValue).toEqual(defaultMappings.dynamic_templates);
-
-        // Update the dynamic templates editor value
         const updatedValueTemplates = [{ after: 'bar' }];
         updateJsonEditor('dynamicTemplatesEditor', updatedValueTemplates);
+        expect(getJsonEditorValue('dynamicTemplatesEditor')).toEqual(updatedValueTemplates);
 
-        templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
-        expect(templatesValue).toEqual(updatedValueTemplates);
-
-        // Switch to advanced settings tab and make some changes
-        await selectTab('advanced');
-
-        let isDynamicMappingsEnabled = getToggleValue(
-          'advancedConfiguration.dynamicMappingsToggle.input'
-        );
-        expect(isDynamicMappingsEnabled).toBe(true);
-
-        let isNumericDetectionVisible = screen.queryByTestId('numericDetection');
-        expect(isNumericDetectionVisible).toBeInTheDocument();
-
-        // Turn off dynamic mappings
-        await toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
-
-        isDynamicMappingsEnabled = getToggleValue(
-          'advancedConfiguration.dynamicMappingsToggle.input'
-        );
-        expect(isDynamicMappingsEnabled).toBe(false);
-
-        isNumericDetectionVisible = screen.queryByTestId('numericDetection');
-        expect(isNumericDetectionVisible).not.toBeInTheDocument();
-
-        // Go back to dynamic templates tab and make sure our changes are still there
+        // Switch to a lightweight tab and back (avoid rendering advanced options)
+        await selectTab('fields');
         await selectTab('templates');
 
-        templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
-        expect(templatesValue).toEqual(updatedValueTemplates);
+        expect(getJsonEditorValue('dynamicTemplatesEditor')).toEqual(updatedValueTemplates);
+      });
 
-        // Go back to fields and make sure our created field is there
-        await selectTab('fields');
+      test('keeps advanced settings edits when switching tabs', async () => {
+        setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
+        await screen.findByTestId('mappingsEditor');
 
-        await waitFor(() => {
-          const documentFields = screen.getByTestId('documentFields');
-          const listItems = within(documentFields).getAllByTestId((content) =>
-            content.startsWith('fieldsListItem ')
-          );
-          const found = listItems.some((it) => {
-            const fieldNameEls = within(it).queryAllByTestId(/fieldName/);
-            return fieldNameEls.some((el) => {
-              if ((el.textContent || '').trim() !== newField.name) return false;
-
-              let node: HTMLElement | null = el as HTMLElement;
-              while (node && node !== it) {
-                const subj = node.getAttribute('data-test-subj');
-                if (typeof subj === 'string' && subj.startsWith('fieldsListItem ')) return false;
-                node = node.parentElement;
-              }
-
-              return true;
-            });
-          });
-          expect(found).toBe(true);
-        });
-
-        // Go back to advanced settings tab make sure dynamic mappings is disabled
         await selectTab('advanced');
 
-        isDynamicMappingsEnabled = getToggleValue(
-          'advancedConfiguration.dynamicMappingsToggle.input'
-        );
-        expect(isDynamicMappingsEnabled).toBe(false);
-        isNumericDetectionVisible = screen.queryByTestId('numericDetection');
-        expect(isNumericDetectionVisible).not.toBeInTheDocument();
-      }, 10000);
+        expect(getToggleValue('advancedConfiguration.dynamicMappingsToggle.input')).toBe(true);
+        expect(screen.queryByTestId('numericDetection')).toBeInTheDocument();
+
+        await toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
+
+        expect(getToggleValue('advancedConfiguration.dynamicMappingsToggle.input')).toBe(false);
+        expect(screen.queryByTestId('numericDetection')).not.toBeInTheDocument();
+
+        // Switch to a lightweight tab and back (avoid JSON editor work)
+        await selectTab('runtimeFields');
+        await selectTab('advanced');
+
+        expect(getToggleValue('advancedConfiguration.dynamicMappingsToggle.input')).toBe(false);
+        expect(screen.queryByTestId('numericDetection')).not.toBeInTheDocument();
+      });
 
       test('should keep default dynamic templates value when switching tabs', async () => {
         setup(
@@ -495,7 +560,6 @@ describe('Mappings editor', () => {
           enableMappingsSourceFieldSection: true,
         },
         canUseSyntheticSource: true,
-        ...appDependencies,
       };
 
       beforeEach(() => {
@@ -529,8 +593,7 @@ describe('Mappings editor', () => {
         };
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/254951
-      describe.skip('props.value and props.onChange', () => {
+      describe('props.value and props.onChange', () => {
         beforeEach(async () => {
           setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
           await screen.findByTestId('mappingsEditor');
@@ -579,22 +642,18 @@ describe('Mappings editor', () => {
           expect(isRoutingRequired).toBe(defaultMappings._routing!.required);
         });
 
-        test('props.onChange() => should forward the changes to the consumer component', async () => {
-          let updatedMappings = { ...defaultMappings };
-
-          // Mapped fields
+        test('props.onChange() => forwards mapped field changes', async () => {
           const addFieldButton = screen.getByTestId('addFieldButton');
           fireEvent.click(addFieldButton);
-
           await screen.findByTestId('createFieldForm');
 
           const newField = { name: 'someNewField', type: 'text' };
           await addField(newField.name, newField.type);
 
-          updatedMappings = {
-            ...updatedMappings,
+          const expectedMappings = {
+            ...defaultMappings,
             properties: {
-              ...updatedMappings.properties,
+              ...defaultMappings.properties,
               [newField.name]: { type: 'text' },
             },
           };
@@ -603,51 +662,52 @@ describe('Mappings editor', () => {
             expect(onChangeHandler).toHaveBeenCalled();
             const lastCall = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1][0];
             data = lastCall.getData(lastCall.isValid ?? true);
-            expect(data).toEqual(updatedMappings);
+            expect(data).toEqual(expectedMappings);
           });
+        });
 
-          // Dynamic templates
+        test('props.onChange() => forwards dynamic templates changes', async () => {
           await selectTab('templates');
 
           const updatedTemplatesValue = [{ someTemplateProp: 'updated' }];
-          updatedMappings = {
-            ...updatedMappings,
+          updateJsonEditor('dynamicTemplatesEditor', updatedTemplatesValue);
+
+          const expectedMappings = {
+            ...defaultMappings,
             dynamic_templates: updatedTemplatesValue,
           };
 
-          updateJsonEditor('dynamicTemplatesEditor', updatedTemplatesValue);
-
           await waitFor(() => {
+            expect(onChangeHandler).toHaveBeenCalled();
             const lastCall = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1][0];
             data = lastCall.getData(lastCall.isValid ?? true);
-            expect(data).toEqual(updatedMappings);
+            expect(data).toEqual(expectedMappings);
           });
+        });
 
-          // Advanced settings
+        test('props.onChange() => forwards advanced settings changes', async () => {
           await selectTab('advanced');
 
-          // Disable dynamic mappings
           await toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
 
+          const expectedMappings = {
+            ...defaultMappings,
+            dynamic: false,
+            // The "enabled": true is removed as this is the default in Es
+            _source: {
+              includes: defaultMappings._source!.includes,
+              excludes: defaultMappings._source!.excludes,
+            },
+          };
+          delete expectedMappings.date_detection;
+          delete expectedMappings.dynamic_date_formats;
+          delete expectedMappings.numeric_detection;
+
           await waitFor(() => {
+            expect(onChangeHandler).toHaveBeenCalled();
             const lastCall = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1][0];
             data = lastCall.getData(lastCall.isValid ?? true);
-
-            // When we disable dynamic mappings, we set it to "false" and remove date and numeric detections
-            updatedMappings = {
-              ...updatedMappings,
-              dynamic: false,
-              // The "enabled": true is removed as this is the default in Es
-              _source: {
-                includes: defaultMappings._source!.includes,
-                excludes: defaultMappings._source!.excludes,
-              },
-            };
-            delete updatedMappings.date_detection;
-            delete updatedMappings.dynamic_date_formats;
-            delete updatedMappings.numeric_detection;
-
-            expect(data).toEqual(updatedMappings);
+            expect(data).toEqual(expectedMappings);
           });
         });
       }); // Close inner describe for props.value and props.onChange
@@ -674,7 +734,11 @@ describe('Mappings editor', () => {
             ...updatedMappings,
             properties: {
               ...updatedMappings.properties,
-              [newField.name]: { reference_field: '', type: 'semantic_text' },
+              [newField.name]: {
+                inference_id: defaultInferenceEndpoints.ELSER,
+                reference_field: '',
+                type: 'semantic_text',
+              },
             },
           };
 
@@ -701,52 +765,17 @@ describe('Mappings editor', () => {
             referenceField: 'title',
           };
 
-          // Start adding the semantic_text field
-          const nameInput = screen.getByTestId('nameParameterInput');
-          fireEvent.change(nameInput, { target: { value: newField.name } });
-
-          // Select semantic_text type using EuiComboBox harness
-          const typeComboBox = new EuiComboBoxTestHarness('fieldType');
-          await typeComboBox.select(getTypeLabel(newField.type));
-          await typeComboBox.close();
-
-          // Wait for reference field selector to appear with the address.city option
-          await screen.findByTestId('referenceFieldSelect');
-
-          const referenceSelect = new EuiSuperSelectTestHarness('referenceFieldSelect');
-          await referenceSelect.select(`select-reference-field-${newField.referenceField}`);
-
-          const addButton = screen.getByTestId('addButton');
-          fireEvent.click(addButton);
-
-          await waitFor(() => {
-            const documentFields = screen.getByTestId('documentFields');
-            const listItems = within(documentFields).getAllByTestId((content) =>
-              content.startsWith('fieldsListItem ')
-            );
-            const found = listItems.some((it) => {
-              const fieldNameEls = within(it).queryAllByTestId(/fieldName/);
-              return fieldNameEls.some((el) => {
-                if ((el.textContent || '').trim() !== newField.name) return false;
-
-                let node: HTMLElement | null = el as HTMLElement;
-                while (node && node !== it) {
-                  const subj = node.getAttribute('data-test-subj');
-                  if (typeof subj === 'string' && subj.startsWith('fieldsListItem ')) return false;
-                  node = node.parentElement;
-                }
-
-                return true;
-              });
-            });
-            expect(found).toBe(true);
-          });
+          await addField(newField.name, newField.type, undefined, newField.referenceField);
 
           updatedMappings = {
             ...updatedMappings,
             properties: {
               ...updatedMappings.properties,
-              [newField.name]: { reference_field: 'title', type: 'semantic_text' },
+              [newField.name]: {
+                inference_id: defaultInferenceEndpoints.ELSER,
+                reference_field: 'title',
+                type: 'semantic_text',
+              },
             },
           };
 
@@ -756,7 +785,7 @@ describe('Mappings editor', () => {
             data = lastCall.getData(lastCall.isValid ?? true);
             expect(data).toEqual(updatedMappings);
           });
-        }, 6500);
+        });
       });
 
       describe('props.indexMode sets the correct default value of _source field', () => {
@@ -873,12 +902,7 @@ describe('Mappings editor', () => {
       const onChangeHandler = jest.fn();
 
       test('allow to add custom field type', async () => {
-        const Component = WithAppDependencies(MappingsEditor, {});
-        render(
-          <I18nProvider>
-            <Component onChange={onChangeHandler} indexSettings={{}} />
-          </I18nProvider>
-        );
+        renderMappingsEditor({ onChange: onChangeHandler, indexSettings: {} });
 
         await screen.findByTestId('mappingsEditor');
 
@@ -892,14 +916,12 @@ describe('Mappings editor', () => {
         const nameInput = within(createForm).getByTestId('nameParameterInput');
         fireEvent.change(nameInput, { target: { value: 'myField' } });
 
-        // Select "other" field type using EuiComboBox harness
-        const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
-        await fieldTypeComboBox.select('other');
-        await fieldTypeComboBox.close();
+        // Select "other" field type using the lightweight TypeParameter mock
+        const fieldTypeSelect = within(createForm).getByTestId('fieldType');
+        fireEvent.change(fieldTypeSelect, { target: { value: 'other' } });
+        fireEvent.blur(fieldTypeSelect);
 
-        await waitFor(() => {
-          expect(within(createForm).queryByTestId('fieldSubType')).toBeInTheDocument();
-        });
+        await within(createForm).findByTestId('fieldSubType');
 
         const customTypeInput = within(createForm).getByTestId('fieldSubType');
         fireEvent.change(customTypeInput, { target: { value: 'customType' } });
@@ -942,12 +964,11 @@ describe('Mappings editor', () => {
           },
         };
 
-        const Component = WithAppDependencies(MappingsEditor, {});
-        render(
-          <I18nProvider>
-            <Component value={defaultMappings} onChange={onChangeHandler} indexSettings={{}} />
-          </I18nProvider>
-        );
+        renderMappingsEditor({
+          value: defaultMappings,
+          onChange: onChangeHandler,
+          indexSettings: {},
+        });
 
         await screen.findByTestId('mappingsEditor');
 
@@ -957,10 +978,10 @@ describe('Mappings editor', () => {
 
         const flyout = await screen.findByTestId('mappingsEditorFieldEdit');
 
-        // Change the field type to "other" using EuiComboBox harness
-        const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
-        await fieldTypeComboBox.select('other');
-        await fieldTypeComboBox.close();
+        // Change the field type to "other" using the lightweight TypeParameter mock
+        const fieldTypeSelect = within(flyout).getByTestId('fieldType');
+        fireEvent.change(fieldTypeSelect, { target: { value: 'other' } });
+        fireEvent.blur(fieldTypeSelect);
 
         const customTypeInput = await within(flyout).findByTestId('fieldSubType');
         fireEvent.change(customTypeInput, { target: { value: 'customType' } });

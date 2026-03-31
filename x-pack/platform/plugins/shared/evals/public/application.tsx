@@ -6,13 +6,9 @@
  */
 
 import React, { useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import { EuiPanel, EuiTab, EuiTabs } from '@elastic/eui';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
-import type { CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters, ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
 import { RunsListPage } from './pages/runs_list';
@@ -20,7 +16,9 @@ import { RunDetailPage } from './pages/run_detail';
 import { DatasetsListPage } from './pages/datasets_list';
 import { DatasetDetailPage } from './pages/dataset_detail';
 
-const queryClient = new QueryClient();
+const appTitleLabel = i18n.translate('xpack.evals.app.title', {
+  defaultMessage: 'Evaluations',
+});
 
 const runsTabLabel = i18n.translate('xpack.evals.navigation.runs', {
   defaultMessage: 'Runs',
@@ -38,9 +36,35 @@ const datasetDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.dat
   defaultMessage: 'Dataset details',
 });
 
-const getBreadcrumbs = (pathname: string, coreStart: CoreStart) => {
-  const runsHref = coreStart.application.getUrlForApp('evals', { path: '/' });
-  const datasetsHref = coreStart.application.getUrlForApp('evals', { path: '/datasets' });
+const EvalsHeader: React.FC = () => {
+  return (
+    <>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="center"
+        responsive={false}
+        css={{ flexGrow: 0 }}
+      >
+        <EuiFlexItem>
+          <EuiTitle size="l">
+            <h2>{appTitleLabel}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+    </>
+  );
+};
+
+const getBreadcrumbs = ({
+  pathname,
+  getHref,
+}: {
+  pathname: string;
+  getHref: (path: string) => string;
+}): ChromeBreadcrumb[] => {
+  const runsHref = getHref('/');
+  const datasetsHref = getHref('/datasets');
 
   if (pathname.startsWith('/datasets/')) {
     return [{ text: datasetsTabLabel, href: datasetsHref }, { text: datasetDetailBreadcrumbLabel }];
@@ -63,7 +87,7 @@ const EvalsNavigation: React.FC = () => {
   const isDatasetsSelected = pathname.startsWith('/datasets');
 
   return (
-    <EuiPanel hasShadow={false} hasBorder={false} paddingSize="none">
+    <div style={{ flex: '0 0 auto' }}>
       <EuiTabs size="s">
         <EuiTab isSelected={!isDatasetsSelected} onClick={() => history.push('/')}>
           {runsTabLabel}
@@ -72,47 +96,49 @@ const EvalsNavigation: React.FC = () => {
           {datasetsTabLabel}
         </EuiTab>
       </EuiTabs>
-    </EuiPanel>
+    </div>
   );
 };
 
-const EvalsBreadcrumbs: React.FC<{ coreStart: CoreStart }> = ({ coreStart }) => {
+const EvalsBreadcrumbs: React.FC<{
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  getHref: (path: string) => string;
+  breadcrumbPrefix?: ChromeBreadcrumb[];
+}> = ({ setBreadcrumbs, getHref, breadcrumbPrefix = [] }) => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    coreStart.chrome.setBreadcrumbs(getBreadcrumbs(pathname, coreStart));
-  }, [coreStart, pathname]);
+    setBreadcrumbs([...breadcrumbPrefix, ...getBreadcrumbs({ pathname, getHref })]);
+  }, [breadcrumbPrefix, getHref, pathname, setBreadcrumbs]);
 
   return null;
 };
 
-const EvalsApp: React.FC<{ coreStart: CoreStart; history: AppMountParameters['history'] }> = ({
-  coreStart,
-  history,
-}) => {
+export const EvalsApp: React.FC<{
+  history: AppMountParameters['history'];
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  getHref: (path: string) => string;
+  breadcrumbPrefix?: ChromeBreadcrumb[];
+}> = ({ history, setBreadcrumbs, getHref, breadcrumbPrefix }) => {
   return (
-    <KibanaRenderContextProvider {...coreStart}>
-      <KibanaContextProvider services={coreStart}>
-        <QueryClientProvider client={queryClient}>
-          <Router history={history}>
-            <EvalsNavigation />
-            <EvalsBreadcrumbs coreStart={coreStart} />
-            <Routes>
-              <Route exact path="/" component={RunsListPage} />
-              <Route exact path="/datasets" component={DatasetsListPage} />
-              <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
-              <Route path="/runs/:runId" component={RunDetailPage} />
-            </Routes>
-          </Router>
-        </QueryClientProvider>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+    <Router history={history}>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <EvalsHeader />
+        <EvalsNavigation />
+        <EvalsBreadcrumbs
+          setBreadcrumbs={setBreadcrumbs}
+          getHref={getHref}
+          breadcrumbPrefix={breadcrumbPrefix}
+        />
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <Routes>
+            <Route exact path="/" component={RunsListPage} />
+            <Route exact path="/datasets" component={DatasetsListPage} />
+            <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
+            <Route path="/runs/:runId" component={RunDetailPage} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
-};
-
-export const renderApp = (coreStart: CoreStart, { element, history }: AppMountParameters) => {
-  ReactDOM.render(<EvalsApp coreStart={coreStart} history={history} />, element);
-  return () => {
-    ReactDOM.unmountComponentAtNode(element);
-  };
 };

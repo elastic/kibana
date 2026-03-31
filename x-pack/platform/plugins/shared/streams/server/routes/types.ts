@@ -21,9 +21,11 @@ import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
 import type { FeatureClient } from '../lib/streams/feature/feature_client';
 import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
+import type { IPatternExtractionService } from '../lib/pattern_extraction/pattern_extraction_service';
 import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
-import type { InsightClient } from '../lib/significant_events/insights/client/insight_client';
+import type { InsightClient } from '../lib/sig_events/insights/client/insight_client';
+import type { ModelSettingsConfigClient } from '../lib/sig_events/saved_objects/model_settings_config_service';
 
 export type GetScopedClients = ({
   request,
@@ -45,6 +47,8 @@ export interface RouteHandlerScopedClients {
   uiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   taskClient: TaskClient<StreamsTaskType>;
+  modelSettingsClient: ModelSettingsConfigClient;
+  isSecurityEnabled: boolean;
 }
 
 export interface RouteDependencies {
@@ -52,6 +56,7 @@ export interface RouteDependencies {
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
   processorSuggestions: ProcessorSuggestionsService;
+  patternExtractionService: IPatternExtractionService;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

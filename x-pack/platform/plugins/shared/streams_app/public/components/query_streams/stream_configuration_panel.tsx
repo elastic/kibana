@@ -55,6 +55,7 @@ export function StreamConfigurationPanel({
                 language="esql"
                 paddingSize="m"
                 isCopyable
+                data-test-subj="queryStreamDetailsQueryViewerCodeBlock"
                 css={css`
                   min-height: 100px;
                 `}
@@ -64,7 +65,11 @@ export function StreamConfigurationPanel({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="pencil" onClick={openEditFlyout}>
+              <EuiButton
+                iconType="pencil"
+                onClick={openEditFlyout}
+                data-test-subj="queryStreamDetailsEditQueryButton"
+              >
                 {i18n.translate('xpack.streams.streamConfigurationPanel.editQueryButtonLabel', {
                   defaultMessage: 'Edit Query with preview',
                 })}

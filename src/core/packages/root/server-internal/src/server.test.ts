@@ -91,7 +91,7 @@ test('sets service.version global context to kibana version on traditional', () 
   expect(traditionalEnv.packageInfo.buildFlavor).toBe('traditional');
   expect(loggingSystem.setGlobalContext).toHaveBeenCalledTimes(1);
   expect(loggingSystem.setGlobalContext).toHaveBeenCalledWith({
-    service: { version: traditionalEnv.packageInfo.version },
+    service: { state: 'initializing', type: 'kibana', version: traditionalEnv.packageInfo.version },
   });
 });
 
@@ -107,7 +107,11 @@ test('sets service.version global context to build sha short on serverless', () 
   expect(serverlessEnv.packageInfo.buildFlavor).toBe('serverless');
   expect(loggingSystem.setGlobalContext).toHaveBeenCalledTimes(1);
   expect(loggingSystem.setGlobalContext).toHaveBeenCalledWith({
-    service: { version: serverlessEnv.packageInfo.buildShaShort },
+    service: {
+      state: 'initializing',
+      type: 'kibana',
+      version: serverlessEnv.packageInfo.buildShaShort,
+    },
   });
 });
 

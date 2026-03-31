@@ -434,3 +434,25 @@ export const REFRESH = i18n.translate('xpack.maintenanceWindows.refreshButton', 
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.maintenanceWindows.searchPlaceholder', {
   defaultMessage: 'Search',
 });
+
+export const SAVE_WITHOUT_FILTERS_MODAL_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.saveWithoutFiltersModal.title',
+  {
+    defaultMessage: 'Save maintenance window without filters?',
+  }
+);
+
+export const SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE = i18n.translate(
+  'xpack.maintenanceWindows.saveWithoutFiltersModal.subtitle',
+  {
+    defaultMessage:
+      'This maintenance window will apply to all rules. Only use this if you intend to suppress notifications for every rule during the maintenance period.',
+  }
+);
+
+export const SAVE_WITHOUT_FILTERS_MODAL_CONFIRM = i18n.translate(
+  'xpack.maintenanceWindows.saveWithoutFiltersModal.confirm',
+  {
+    defaultMessage: 'Save without filters',
+  }
+);

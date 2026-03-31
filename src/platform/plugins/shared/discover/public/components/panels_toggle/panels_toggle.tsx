@@ -11,6 +11,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
+import { useIsWithinBreakpoints } from '@elastic/eui';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { useAppStateSelector } from '../../application/main/state_management/redux';
 import type { SidebarToggleState } from '../../application/types';
@@ -22,72 +23,97 @@ import {
 
 export interface PanelsToggleProps {
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
-  renderedFor: 'histogram' | 'prompt' | 'tabs' | 'root';
-  isChartAvailable: boolean | undefined; // it will be injected in `DiscoverMainContent` when rendering View mode tabs or in `DiscoverLayout` when rendering No results or Error prompt
+  omitChartButton?: boolean;
+  dataTestSubjSuffix?: string;
 }
 
+const getSidebarButton = ({
+  isHidden,
+  toggleSidebar,
+}: {
+  isHidden: boolean;
+  toggleSidebar: () => void;
+}) => ({
+  label: isHidden
+    ? i18n.translate('discover.panelsToggle.showSidebarButton', {
+        defaultMessage: 'Expand field list',
+      })
+    : i18n.translate('discover.panelsToggle.hideSidebarButton', {
+        defaultMessage: 'Collapse field list',
+      }),
+  iconType: isHidden ? 'transitionLeftIn' : 'transitionLeftOut',
+  'data-test-subj': isHidden ? 'dscShowSidebarButton' : 'dscHideSidebarButton',
+  'aria-expanded': !isHidden,
+  'aria-controls': 'discover-sidebar',
+  onClick: toggleSidebar,
+});
+
+const getChartButton = ({
+  isHidden,
+  toggleChart,
+}: {
+  isHidden: boolean;
+  toggleChart: () => void;
+}) => ({
+  label: isHidden
+    ? i18n.translate('discover.panelsToggle.showChartButton', {
+        defaultMessage: 'Expand visualization',
+      })
+    : i18n.translate('discover.panelsToggle.hideChartButton', {
+        defaultMessage: 'Collapse visualization',
+      }),
+  iconType: isHidden ? 'transitionTopIn' : 'transitionTopOut',
+  'data-test-subj': isHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
+  'aria-expanded': !isHidden,
+  'aria-controls': 'unifiedHistogramCollapsablePanel',
+  onClick: toggleChart,
+});
+
 /**
- * An element of this component is created in DiscoverLayout
- * @param stateContainer
  * @param sidebarToggleState$
- * @param renderedIn
- * @param isChartAvailable
+ * @param omitChartButton
+ * @param dataTestSubjSuffix
  * @constructor
  */
 export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   sidebarToggleState$,
-  renderedFor,
-  isChartAvailable,
+  omitChartButton = false,
+  dataTestSubjSuffix,
 }) => {
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
+  const sidebarToggleState = useObservable(sidebarToggleState$, sidebarToggleState$.getValue());
+  const isSidebarHidden = sidebarToggleState.isCollapsed;
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const onToggleChart = useCallback(() => {
     dispatch(updateAppState({ appState: { hideChart: !isChartHidden } }));
   }, [dispatch, isChartHidden, updateAppState]);
 
-  const sidebarToggleState = useObservable(sidebarToggleState$);
-  const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;
+  const onToggleSidebar = useCallback(() => {
+    sidebarToggleState.toggle?.(!isSidebarHidden);
+  }, [isSidebarHidden, sidebarToggleState]);
 
-  const isInsideHistogram = renderedFor === 'histogram';
-  const isInsideDiscoverContent = !isInsideHistogram;
+  const buttons = [];
 
-  const buttons = [
-    ...((isInsideHistogram && isSidebarCollapsed) ||
-    (isInsideDiscoverContent && isSidebarCollapsed && (isChartHidden || !isChartAvailable))
-      ? [
-          {
-            label: i18n.translate('discover.panelsToggle.showSidebarButton', {
-              defaultMessage: 'Show sidebar',
-            }),
-            iconType: 'transitionLeftIn',
-            'data-test-subj': 'dscShowSidebarButton',
-            'aria-expanded': !isSidebarCollapsed,
-            'aria-controls': 'discover-sidebar',
-            onClick: () => sidebarToggleState?.toggle?.(false),
-          },
-        ]
-      : []),
-    ...(isInsideHistogram || (isInsideDiscoverContent && isChartAvailable && isChartHidden)
-      ? [
-          {
-            label: isChartHidden
-              ? i18n.translate('discover.panelsToggle.showChartButton', {
-                  defaultMessage: 'Show chart',
-                })
-              : i18n.translate('discover.panelsToggle.hideChartButton', {
-                  defaultMessage: 'Hide chart',
-                }),
-            iconType: isChartHidden ? 'transitionTopIn' : 'transitionTopOut',
-            'data-test-subj': isChartHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
-            'aria-expanded': !isChartHidden,
-            'aria-controls': 'unifiedHistogramCollapsablePanel',
-            onClick: onToggleChart,
-          },
-        ]
-      : []),
-  ];
+  if (!isMobile) {
+    buttons.push(
+      getSidebarButton({
+        isHidden: isSidebarHidden,
+        toggleSidebar: onToggleSidebar,
+      })
+    );
+  }
+
+  if (!omitChartButton) {
+    buttons.push(
+      getChartButton({
+        isHidden: isChartHidden,
+        toggleChart: onToggleChart,
+      })
+    );
+  }
 
   if (!buttons.length) {
     return null;
@@ -95,7 +121,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
 
   return (
     <IconButtonGroup
-      data-test-subj={`dscPanelsToggle${isInsideHistogram ? 'InHistogram' : 'InPage'}`}
+      data-test-subj={`dscPanelsToggle${dataTestSubjSuffix ?? ''}`}
       legend={i18n.translate('discover.panelsToggle.panelsVisibilityLegend', {
         defaultMessage: 'Panels visibility',
       })}
