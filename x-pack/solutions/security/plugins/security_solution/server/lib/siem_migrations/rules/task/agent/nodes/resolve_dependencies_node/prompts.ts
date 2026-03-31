@@ -48,7 +48,7 @@ Below is an example of a Qradar custom rule exported in XML format:
   </rule>
 
 Below is the description of what this XML structure means.
-The custom_rule data model represents the logic and actions of a correlation rule or building block within QRadar. Flatenned Detection Logic include:
+The custom_rule data model represents the logic and actions of a correlation rule or building block within QRadar. Flattened Detection Logic include:
 
 - Metadata: Basic information like rule name, ID, status (enabled/disabled), type (Event, Flow, Common, Offense), scope (Local/Global), and owner.
 - Flattened Detection Logic: The core "IF" logic, consisting of one or more tests (like checking QIDs, IP addresses, categories, custom properties, matching building blocks, or applying thresholds/sequences). These tests are evaluated sequentially. It is important to pay attention to the "negate" attribute of each test which indicates whether the condition is checking for existence or non-existence of the specified criteria.
@@ -331,7 +331,7 @@ Every TCP flags condition description MUST contain all four of the following ele
 - Output of the tool has a field called content which contains the actual lookup index name.
 - To determine the final condition, it is important to consider \`negate\` attribute of the test. If negate is true, it means the condition is checking for non-existence in the reference set.
 - Lookup resources only expose a single column named \`value\`. Deduce which source field from the original rule (e.g., event IP, username, hash) is being compared against the reference set and explicitly call out that mapping. For example, your output should be: "Check if value of field \`event.source.ip\` matches the "value" column of lookup \`Blocked IPs\`."
-- In Resulting Natual Language description, include the lookup join syntax as well. There should NOT be any mention of reference set in Lookup Section or the NAME because other system except you do not understand reference sets.
+- In Resulting Natural Language description, include the lookup join syntax as well. There should NOT be any mention of reference set in Lookup Section or the NAME because other system except you do not understand reference sets.
 
 ## Rules Dependencies Guidelines
 
@@ -383,7 +383,7 @@ The downstream system does **not** understand what a "Building Block" or a "Depe
   #### Title
     - Use a single line with the main rule name.
 
-  #### Description"
+  #### Description
    - Use provided description
    - If the description is still missing, create your own plain english language SIEM rule description based on the objective of the rule derived from combined logic summary of the current rule and its dependencies.
    - It should not be more than couple of lines
