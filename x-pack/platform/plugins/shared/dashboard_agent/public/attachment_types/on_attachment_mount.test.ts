@@ -9,7 +9,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { onAttachmentMount, type OnAttachmentMountParams } from './create_attachment_mount_handler';
+import { onAttachmentMount, type OnAttachmentMountParams } from './on_attachment_mount';
 
 interface MockDashboardApi {
   savedObjectId$: BehaviorSubject<string | undefined>;

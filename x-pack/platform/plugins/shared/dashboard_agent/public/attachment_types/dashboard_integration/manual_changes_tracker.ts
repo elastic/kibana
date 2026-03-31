@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { debounceTime, filter, map, merge, skip, type Observable, type Subscription } from 'rxjs';
+import { debounceTime, filter, map, merge, skip, type Observable } from 'rxjs';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
@@ -21,24 +21,14 @@ export interface ManualChangesTrackerParams {
 type ManualChangesSourceParams = Omit<ManualChangesTrackerParams, 'addAttachment'>;
 
 /**
- * Creates a subscription that tracks manual changes to the dashboard
+ * Creates an observable that tracks manual changes to the dashboard
  * and syncs them back to the attachment.
- *
- * Manual changes include:
- * - Layout changes (panel positions, sizes)
- * - Child panel state changes
- * - Title and description changes
- * - Filter, query, and time range changes
- * - Dashboard settings changes (margins, sync options, etc.)
- *
- * Changes are debounced and only synced when:
- * - The dashboard is unsaved, OR
- * - The saved dashboard matches the attachment's origin
  */
 export const createManualChanges$ = ({
   api,
   getAttachment,
 }: ManualChangesSourceParams): Observable<AttachmentInput> => {
+  // TODO: we should get it directly from the dashboard plugin
   // Collect observables for all trackable dashboard state
   const observables: Array<Observable<unknown>> = [
     api.layout$,
@@ -84,11 +74,3 @@ export const createManualChanges$ = ({
     filter((attachment): attachment is AttachmentInput => attachment !== undefined)
   );
 };
-
-export const createManualChangesTracker = ({
-  addAttachment,
-  ...params
-}: ManualChangesTrackerParams): Subscription =>
-  createManualChanges$(params).subscribe((attachment) => {
-    addAttachment(attachment);
-  });

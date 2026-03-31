@@ -8,19 +8,20 @@
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { attachmentToDashboardState } from '@kbn/dashboard-agent-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-interface HandlePreviewInDashboardParams {
+
+interface PreviewAttachmentInDashboardParams {
   attachment: DashboardAttachment;
   dashboardApi: DashboardApi;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   updateOrigin: (origin: string) => Promise<unknown>;
 }
 
-export const handlePreviewInDashboard = async ({
+export const previewAttachmentInDashboard = async ({
   attachment,
   dashboardApi,
   checkSavedDashboardExist,
   updateOrigin,
-}: HandlePreviewInDashboardParams) => {
+}: PreviewAttachmentInDashboardParams) => {
   const dashboardState = attachmentToDashboardState(attachment);
   let attachmentLinkedSavedObjectId = attachment.origin;
   const currentSavedObjectId = dashboardApi.savedObjectId$.getValue();
