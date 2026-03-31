@@ -8,5 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const memoryUsageParamsSchema = stackMonitoringCommonSchema.extends({});
+export const memoryUsageParamsSchema = stackMonitoringCommonSchema.extends(
+  {},
+  {
+    meta: {
+      id: 'memory-usage-rule-params',
+      title: 'Memory Usage Rule Params',
+      description:
+        'The parameters for the memory usage rule. These parameters are appropriate when `rule_type_id` is `monitoring.memory_usage`.',
+    },
+  }
+);
 export type MemoryUsageParams = TypeOf<typeof memoryUsageParamsSchema>;
