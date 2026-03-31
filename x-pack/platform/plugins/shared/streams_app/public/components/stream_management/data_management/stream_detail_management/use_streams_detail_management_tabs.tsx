@@ -24,7 +24,9 @@ export function useStreamsDetailManagementTabs({
   } = useStreamsPrivileges();
 
   const isSignificantEventsEnabled = !!significantEvents?.enabled;
-  const isProcessingEnabled = Streams.ingest.all.GetResponse.is(definition);
+  const isReplicated =
+    Streams.ingest.all.GetResponse.is(definition) && definition.replicated === true;
+  const isProcessingEnabled = Streams.ingest.all.GetResponse.is(definition) && !isReplicated;
 
   return {
     isLoading,
