@@ -34,6 +34,7 @@ import {
 } from '../utils';
 
 interface SessionFlyoutProps {
+  historyKey: symbol;
   title: string;
   mainSize: 's' | 'm' | 'l' | 'fill';
   mainMaxWidth?: number;
@@ -41,8 +42,12 @@ interface SessionFlyoutProps {
   childMaxWidth?: number;
 }
 
+interface FlyoutFromComponentsProps {
+  historyKey: symbol;
+}
+
 const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
-  const { title, mainSize, childSize, mainMaxWidth, childMaxWidth } = props;
+  const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, historyKey } = props;
 
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
   const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
@@ -155,6 +160,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         <EuiFlyout
           id={`mainFlyout-${title}`}
           session="start"
+          historyKey={historyKey}
           aria-labelledby="sessionFlyoutTitle"
           size={mainSize}
           maxWidth={mainMaxWidth}
@@ -256,6 +262,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         <EuiFlyout
           id={`childFlyout-${title}-a`}
           session="inherit"
+          historyKey={historyKey}
           aria-labelledby="childFlyoutATitle"
           size={childSize}
           hasChildBackground={true}
@@ -299,6 +306,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         <EuiFlyout
           id={`childFlyout-${title}-b`}
           session="inherit"
+          historyKey={historyKey}
           aria-labelledby="childFlyoutBTitle"
           size={childSize}
           hasChildBackground={true}
@@ -421,7 +429,7 @@ const GlobalFlyout: React.FC = React.memo(() => {
 
 GlobalFlyout.displayName = 'GlobalFlyoutFromComponents';
 
-export const FlyoutWithComponent: React.FC = () => (
+export const FlyoutWithComponent: React.FC<FlyoutFromComponentsProps> = ({ historyKey }) => (
   <>
     <EuiTitle>
       <h2>
@@ -441,15 +449,26 @@ export const FlyoutWithComponent: React.FC = () => (
         listItems={[
           {
             title: 'Session J: main size = s, child size = s',
-            description: <SessionFlyout title="Session J" mainSize="s" childSize="s" />,
+            description: (
+              <SessionFlyout title="Session J" mainSize="s" childSize="s" historyKey={historyKey} />
+            ),
           },
           {
             title: 'Session K: main size = m, child size = s',
-            description: <SessionFlyout title="Session K" mainSize="m" childSize="s" />,
+            description: (
+              <SessionFlyout title="Session K" mainSize="m" childSize="s" historyKey={historyKey} />
+            ),
           },
           {
             title: 'Session L: main size = m, child size = fill',
-            description: <SessionFlyout title="Session L" mainSize="m" childSize="fill" />,
+            description: (
+              <SessionFlyout
+                title="Session L"
+                mainSize="m"
+                childSize="fill"
+                historyKey={historyKey}
+              />
+            ),
           },
         ]}
       />

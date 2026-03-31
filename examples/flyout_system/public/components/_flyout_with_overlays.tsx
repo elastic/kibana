@@ -39,11 +39,13 @@ import {
 } from '../utils';
 
 export interface FlyoutFromOverlaysProps {
+  historyKey: symbol;
   overlays: OverlayStart;
   rendering: RenderingService;
 }
 
 interface SessionFlyoutProps {
+  historyKey: symbol;
   title: string;
   mainSize: 's' | 'm' | 'l' | 'fill';
   mainMaxWidth?: number;
@@ -78,6 +80,7 @@ const ChildFlyoutContent: React.FC<Pick<SessionFlyoutProps, 'childSize' | 'child
   });
 
 interface FlyoutContentProps {
+  historyKey: symbol;
   title: string;
   flyoutType: 'overlay' | 'push';
   flyoutOwnFocus: boolean;
@@ -93,6 +96,7 @@ interface FlyoutContentProps {
 
 const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
   const {
+    historyKey,
     title,
     flyoutType,
     flyoutOwnFocus,
@@ -145,6 +149,7 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
         id: `childFlyout-${title}`,
         title: `Child flyout A of ${title}`,
         session: 'inherit',
+        historyKey,
         size: childSize,
         hasChildBackground: true,
         maxWidth: childMaxWidth,
@@ -165,7 +170,7 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
       }
     );
     setIsChildFlyoutAOpen(true);
-  }, [childSize, childMaxWidth, overlays, title, childFlyoutRefA]);
+  }, [historyKey, childSize, childMaxWidth, overlays, title, childFlyoutRefA]);
 
   const openChildFlyoutB = useCallback(() => {
     childFlyoutRefB.current = overlays.openSystemFlyout(
@@ -174,6 +179,7 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
         id: `childFlyout-${title}-B`,
         title: `Child flyout B of ${title}`,
         session: 'inherit',
+        historyKey,
         size: childSize,
         hasChildBackground: true,
         maxWidth: childMaxWidth,
@@ -194,7 +200,7 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
       }
     );
     setIsChildFlyoutBOpen(true);
-  }, [childSize, childMaxWidth, overlays, title, childFlyoutRefB]);
+  }, [historyKey, childSize, childMaxWidth, overlays, title, childFlyoutRefB]);
 
   return (
     <>
@@ -268,7 +274,7 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
 });
 
 const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
-  const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, overlays } = props;
+  const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, overlays, historyKey } = props;
 
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
   const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
@@ -301,6 +307,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   const openFlyout = useCallback(() => {
     flyoutRef.current = overlays.openSystemFlyout(
       <FlyoutContent
+        historyKey={historyKey}
         title={title}
         flyoutType={flyoutType}
         flyoutOwnFocus={flyoutOwnFocus}
@@ -325,6 +332,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         onActive: mainFlyoutOnActive,
         onClose: handleCloseFlyout,
         ['aria-labelledby']: `flyoutHeading-${title}`,
+        historyKey,
       }
     );
     setIsFlyoutOpen(true);
@@ -339,6 +347,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     handleCloseFlyout,
     overlays,
     mainFlyoutOnActive,
+    historyKey,
   ]);
 
   return (
@@ -451,7 +460,11 @@ const GlobalFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(({ overlays, 
 
 GlobalFlyout.displayName = 'GlobalFlyoutFromOverlaysService';
 
-export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays, rendering }) => (
+export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({
+  overlays,
+  rendering,
+  historyKey,
+}) => (
   <>
     <EuiTitle>
       <h2>
@@ -472,19 +485,37 @@ export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays
           {
             title: 'Session X: main size = s, child size = s',
             description: (
-              <SessionFlyout title="Session X" mainSize="s" childSize="s" overlays={overlays} />
+              <SessionFlyout
+                historyKey={historyKey}
+                title="Session X"
+                mainSize="s"
+                childSize="s"
+                overlays={overlays}
+              />
             ),
           },
           {
             title: 'Session Y: main size = m, child size = s',
             description: (
-              <SessionFlyout title="Session Y" mainSize="m" childSize="s" overlays={overlays} />
+              <SessionFlyout
+                historyKey={historyKey}
+                title="Session Y"
+                mainSize="m"
+                childSize="s"
+                overlays={overlays}
+              />
             ),
           },
           {
             title: 'Session Z: main size = m, child size = fill',
             description: (
-              <SessionFlyout title="Session Z" mainSize="m" childSize="fill" overlays={overlays} />
+              <SessionFlyout
+                historyKey={historyKey}
+                title="Session Z"
+                mainSize="m"
+                childSize="fill"
+                overlays={overlays}
+              />
             ),
           },
         ]}
