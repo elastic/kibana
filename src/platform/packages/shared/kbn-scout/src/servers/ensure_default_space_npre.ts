@@ -16,8 +16,13 @@ const DEFAULT_SPACE_NPRE = 'kibana_space_default_default';
 const DEFAULT_EXPRESSION = '_alias:*';
 
 /**
- * Ensures the default space NPRE routes to all projects in local Scout CPS setups.
- * Throws on failure to prevent tests from running in a misconfigured environment.
+ * Creates the default space NPRE (Named Project Routing Expression) for local Scout CPS setups.
+ *
+ * In real serverless, the control plane provisions NPREs during project setup. Locally there is
+ * no control plane, so we manually `PUT /_project_routing/kibana_space_default_default` with
+ * `_alias:*` to route across all projects. No-ops for non-CPS configurations.
+ *
+ * Throws on failure to prevent tests from running against a misconfigured environment.
  */
 export async function ensureDefaultSpaceNPRE(config: Config, log: ToolingLog): Promise<void> {
   const scoutConfig = config.getScoutTestConfig();
