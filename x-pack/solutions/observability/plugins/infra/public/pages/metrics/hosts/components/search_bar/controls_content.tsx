@@ -12,12 +12,17 @@ import type {
 } from '@kbn/controls-plugin/public';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { buildCustomFilter, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query-constants';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Subscription } from 'rxjs';
-import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import {
+  DATASTREAM_DATASET,
+  findInventoryModel,
+  type DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { getControlPanelConfigs } from './control_panels_config';
@@ -46,6 +51,34 @@ export const ControlsContent = ({
   schemas,
 }: Props) => {
   const controlConfigs = useMemo(() => getControlPanelConfigs(schema), [schema]);
+  const schemaFilters = useMemo(() => {
+    if (!schema || !dataView?.id) return [];
+    const inventoryModel = findInventoryModel('host');
+    const nodeFilterQueries = inventoryModel.nodeFilter?.({ schema }) ?? [];
+
+    const apmDatasetFilter: Record<string, object> =
+      schema === 'ecs'
+        ? { prefix: { [DATASTREAM_DATASET]: { value: 'apm.transaction.' } } }
+        : { wildcard: { [DATASTREAM_DATASET]: { value: 'transaction.*.otel' } } };
+
+    const shouldClauses = [...nodeFilterQueries, apmDatasetFilter];
+
+    return [
+      buildCustomFilter(
+        dataView.id!,
+        {
+          bool: {
+            should: shouldClauses,
+            minimum_should_match: 1,
+          },
+        },
+        false,
+        false,
+        null,
+        FilterStateStore.APP_STATE
+      ),
+    ];
+  }, [schema, dataView?.id]);
   const [controlPanels, setControlPanels] = useControlPanels(controlConfigs.controls, dataView);
   const controlGroupAPI = useRef<ControlGroupRendererApi | undefined>();
   const subscriptions = useRef<Subscription>(new Subscription());
@@ -138,7 +171,7 @@ export const ControlsContent = ({
         onApiAvailable={loadCompleteHandler}
         timeRange={timeRange}
         query={query}
-        filters={filters}
+        filters={[...filters, ...schemaFilters]}
       />
       <SchemaSelector
         isHostsView
