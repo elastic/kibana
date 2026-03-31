@@ -123,16 +123,12 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              <FlyoutTypeSwitch
-                // switch for flyout type: push or overlay
-                title={title}
-                flyoutType={flyoutType}
-                onChange={setFlyoutType}
-              />
+              {/* switch for flyout type (overlay vs push) */}
+              <FlyoutTypeSwitch title={title} flyoutType={flyoutType} onChange={setFlyoutType} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              {/* switch for ownFocus behavior */}
               <FlyoutOwnFocusSwitch
-                // switch for ownFocus behavior
                 title={title}
                 flyoutOwnFocus={flyoutOwnFocus}
                 onChange={setFlyoutOwnFocus}
