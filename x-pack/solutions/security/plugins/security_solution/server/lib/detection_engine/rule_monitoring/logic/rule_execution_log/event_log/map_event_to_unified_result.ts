@@ -47,9 +47,24 @@ const extractExecutionStart = (event: IValidatedEvent): string => {
 const extractOutcome = (event: IValidatedEvent): UnifiedExecutionResult['outcome'] => {
   const outcomeStatus = UnifiedExecutionStatus.parse(event?.kibana?.alerting?.outcome);
 
+  let message: string | null;
+  switch (outcomeStatus) {
+    case 'success':
+      message = 'Rule executed successfully';
+      break;
+    case 'warning':
+      message = event?.message ?? null;
+      break;
+    case 'failure':
+      message = event?.error?.message ?? null;
+      break;
+    default:
+      message = null;
+  }
+
   return {
     status: outcomeStatus,
-    message: event?.message ?? null,
+    message,
   };
 };
 
