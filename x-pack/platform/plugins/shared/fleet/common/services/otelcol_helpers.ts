@@ -20,6 +20,16 @@ export const packageInfoHasOtelInputs = (packageInfo: PackageInfo | undefined) =
     getNormalizedInputs(template).some((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
   );
 
+/**
+ * Returns true when any policy template in the package contains a registry
+ * that declares dynamic signal types (dynamic_signal_types: true).
+ *
+ * Optionally, you can scope the query to a specific policy template and input type.
+ *
+ * Covers both:
+ *   - Input-only packages (top-level `input` key on the policy template)
+ *   - Composable integration packages (nested `inputs[]` entries)
+ */
 export const hasDynamicSignalTypes = (
   packageInfo: PackageInfo | undefined,
   scope?: { policyTemplateName?: string; inputType?: string }
