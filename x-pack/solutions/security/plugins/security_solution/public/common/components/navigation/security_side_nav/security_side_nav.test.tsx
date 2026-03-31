@@ -167,7 +167,7 @@ describe('SecuritySideNav', () => {
 
   it('should render get started item', () => {
     mockUseNavLinks.mockReturnValue([
-      { id: SecurityPageName.landing, title: 'Get started', sideNavIcon: 'launch' },
+      { id: SecurityPageName.landing, title: 'Get started', sideNavIcon: 'rocket' },
     ]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
@@ -177,7 +177,7 @@ describe('SecuritySideNav', () => {
             id: SecurityPageName.landing,
             label: 'Get started',
             position: 'bottom',
-            iconType: 'launch',
+            iconType: 'rocket',
             appendSeparator: true,
           }),
         ],

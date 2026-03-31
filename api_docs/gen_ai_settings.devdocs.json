@@ -79,7 +79,17 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"GET /internal/gen_ai_settings/connectors/{connectorId}\", any, ",
+          "<\"GET /internal/gen_ai_settings/connectors/{connectorId}\", ",
+          "ZodObject",
+          "<{ path: ",
+          "ZodObject",
+          "<{ connectorId: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>, ",
           "GenAiSettingsRouteHandlerResources",
           ", ",
           {

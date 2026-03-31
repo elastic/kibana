@@ -55,7 +55,7 @@ export const EngineStatus = () => {
   useErrorToast(errorMessage, error);
 
   if (error) {
-    return <EuiCallOut announceOnMount title={errorMessage} color="danger" iconType="alert" />;
+    return <EuiCallOut announceOnMount title={errorMessage} color="danger" iconType="warning" />;
   }
 
   if (!data || isStatusAPILoading) return <EuiLoadingSpinner size="xl" />;
