@@ -29,9 +29,7 @@ import {
   kiSelectStreamsInputSchema,
 } from '../../../common/continuous_extraction_schemas';
 
-// Fixed look-back window for each extraction run; independent of the configurable
-// scheduling interval, which controls *how often* we run, not *how far back* we look.
-const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+const DEFAULT_LOOKBACK_HOURS = 24;
 
 type StreamCandidate = z.infer<typeof streamCandidateSchema>;
 
@@ -68,9 +66,11 @@ export const registerKiSelectStreamsStep = ({
     inputSchema: kiSelectStreamsInputSchema,
     outputSchema,
     handler: async (context) => {
-      const { maxScheduledStreams = MAX_SCHEDULED_STREAMS } = kiSelectStreamsInputSchema.parse(
-        context.input ?? {}
-      );
+      const {
+        maxScheduledStreams = MAX_SCHEDULED_STREAMS,
+        lookbackHours = DEFAULT_LOOKBACK_HOURS,
+        extractionIntervalHours,
+      } = kiSelectStreamsInputSchema.parse(context.input ?? {});
       const request = context.contextManager.getFakeRequest();
       const { streamsClient, taskClient, modelSettingsClient, uiSettingsClient } =
         await getScopedClients({ request });
@@ -114,7 +114,10 @@ export const registerKiSelectStreamsStep = ({
 
       // Walk tasks in ES-sorted order (null last_completed_at first, then oldest).
       // This preserves the sort for the candidates list without an in-memory re-sort.
-      const intervalHours = continuousExtraction.intervalHours ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
+      const intervalHours =
+        extractionIntervalHours ??
+        continuousExtraction.intervalHours ??
+        DEFAULT_EXTRACTION_INTERVAL_HOURS;
       const intervalMs = intervalHours * 3_600_000;
       const now = Date.now();
       const alreadyRunning: Array<{ streamName: string; scheduledAt: string | null }> = [];
@@ -153,7 +156,7 @@ export const registerKiSelectStreamsStep = ({
       const skipped = allCandidates.slice(availableSlots);
 
       const end = now;
-      const start = end - TWENTY_FOUR_HOURS_MS;
+      const start = end - lookbackHours * 3_600_000;
 
       const results = await Promise.allSettled(
         toSchedule.map((candidate) =>

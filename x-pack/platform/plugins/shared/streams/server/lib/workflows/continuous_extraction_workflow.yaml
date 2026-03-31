@@ -15,11 +15,22 @@ inputs:
   - name: maxScheduledStreams
     type: number
     default: 5
+    description: "Max streams to schedule per run; remaining eligible streams are skipped."
+  - name: lookbackHours
+    type: number
+    default: 24
+    description: "Hours of data to sample when identifying KIs."
+  - name: extractionIntervalHours
+    type: number
+    default: 12
+    description: "Min hours between extractions for a stream. Use 0 to always extract."
 steps:
   - name: select_streams
     type: streams.ki_select_streams
     with:
       maxScheduledStreams: "{{ inputs.maxScheduledStreams }}"
+      lookbackHours: "{{ inputs.lookbackHours }}"
+      extractionIntervalHours: "{{ inputs.extractionIntervalHours }}"
   - name: has_scheduled_streams
     type: if
     condition: "steps.select_streams.output.scheduled[0].streamName:*"

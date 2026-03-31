@@ -35,6 +35,8 @@ export const streamCandidateSchema = z.object({
 
 export const kiSelectStreamsInputSchema = z.object({
   maxScheduledStreams: z.coerce.number().optional(),
+  lookbackHours: z.coerce.number().optional(),
+  extractionIntervalHours: z.coerce.number().optional(),
 });
 
 export const kiFeaturesExtractStreamInputSchema = z.object({

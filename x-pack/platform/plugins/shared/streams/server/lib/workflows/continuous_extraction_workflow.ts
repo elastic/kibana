@@ -16,6 +16,7 @@ import {
   KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
   COORDINATOR_INTERVAL_MINUTES,
   MAX_SCHEDULED_STREAMS,
+  DEFAULT_EXTRACTION_INTERVAL_HOURS,
 } from '../../../common/constants';
 
 const WORKFLOW_YAML = readFileSync(
@@ -43,6 +44,16 @@ assertYamlInSync(
   WORKFLOW_YAML,
   `name: maxScheduledStreams\n    type: number\n    default: ${MAX_SCHEDULED_STREAMS}`,
   'maxScheduledStreams input'
+);
+assertYamlInSync(
+  WORKFLOW_YAML,
+  `name: lookbackHours\n    type: number\n    default: 24`,
+  'lookbackHours input'
+);
+assertYamlInSync(
+  WORKFLOW_YAML,
+  `name: extractionIntervalHours\n    type: number\n    default: ${DEFAULT_EXTRACTION_INTERVAL_HOURS}`,
+  'extractionIntervalHours input'
 );
 
 export interface ContinuousExtractionWorkflowService {
