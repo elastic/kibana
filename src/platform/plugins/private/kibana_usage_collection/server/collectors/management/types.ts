@@ -55,7 +55,6 @@ export interface UsageStats {
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:connectorsEnabled': boolean;
-  'agentBuilder:topSnippetsEnabled': boolean;
   'dataSources:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'workflows:aiAgent:enabled': boolean;

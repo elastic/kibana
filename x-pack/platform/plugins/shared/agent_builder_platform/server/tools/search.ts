@@ -10,7 +10,7 @@ import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { TopSnippetsConfig } from '@kbn/agent-builder-genai-utils/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
-import { AGENT_BUILDER_TOP_SNIPPETS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { resolveTimeRange } from './screen_context_utils';
 
@@ -42,6 +42,15 @@ export const searchTool = ({
   coreSetup: CoreSetup;
   topSnippetsDefaults: TopSnippetsConfig;
 }): BuiltinToolDefinition<typeof searchSchema> => {
+  // Cache the start services promise so it is resolved at most once.
+  let startServicesPromise: ReturnType<CoreSetup['getStartServices']> | undefined;
+  const getStartServices = () => {
+    if (!startServicesPromise) {
+      startServicesPromise = coreSetup.getStartServices();
+    }
+    return startServicesPromise;
+  };
+
   return {
     id: platformCoreTools.search,
     type: ToolType.builtin,
@@ -75,17 +84,17 @@ Note:
       // Resolve top snippets config from UI setting + server config defaults
       let topSnippetsConfig: TopSnippetsConfig | undefined;
       try {
-        const [coreStart] = await coreSetup.getStartServices();
+        const [coreStart] = await getStartServices();
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
         const isEnabled = await uiSettingsClient.get<boolean>(
-          AGENT_BUILDER_TOP_SNIPPETS_ENABLED_SETTING_ID
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
         if (isEnabled) {
           topSnippetsConfig = topSnippetsDefaults;
         }
       } catch (error) {
         logger.debug(
-          `Failed to read topSnippetsEnabled setting, falling back to highlighting: ${
+          `Failed to read experimentalFeatures setting, falling back to highlighting: ${
             error instanceof Error ? error.message : String(error)
           }`
         );

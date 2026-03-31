@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { TopSnippetsConfig } from '@kbn/agent-builder-genai-utils';
 import type { RunToolFn, RunAgentFn } from '@kbn/agent-builder-server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -182,12 +183,7 @@ export interface PluginsSetup {
 /**
  * Setup contract of the agentBuilder plugin.
  */
-export interface TopSnippetsConfig {
-  /** Maximum number of snippets per document. */
-  numSnippets: number;
-  /** Maximum number of words per snippet. */
-  numWords: number;
-}
+export type { TopSnippetsConfig };
 
 export interface AgentBuilderPluginSetup {
   /**

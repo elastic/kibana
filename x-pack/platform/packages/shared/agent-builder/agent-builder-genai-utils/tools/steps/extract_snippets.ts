@@ -78,8 +78,10 @@ export const extractSnippetsBatch = async ({
   const idList = docIds.map((id) => `"${escapeEsqlString(id)}"`).join(', ');
   const mvAppendExpr = buildMvAppendExpression(fields);
 
+  const escapedIndex = index.includes(' ') ? `\`${index}\`` : index;
+
   const query = [
-    `FROM ${index} METADATA _id`,
+    `FROM ${escapedIndex} METADATA _id`,
     `| WHERE _id IN (${idList})`,
     `| EVAL doc = MV_DEDUPE(${mvAppendExpr})`,
     `| EVAL snippets = TOP_SNIPPETS(doc, "${escapedTerm}", {"num_snippets": ${config.numSnippets}, "num_words": ${config.numWords}})`,
@@ -104,7 +106,7 @@ export const extractSnippetsBatch = async ({
       return new Map();
     }
 
-    const snippetsByDocId = new Map<string, string[]>();
+    const snippetSets = new Map<string, Set<string>>();
 
     for (const row of response.values) {
       const docId = row[idColIdx] as string;
@@ -114,15 +116,17 @@ export const extractSnippetsBatch = async ({
         continue;
       }
 
-      const existing = snippetsByDocId.get(docId);
+      const existing = snippetSets.get(docId);
       if (existing) {
-        // Deduplicate within a document
-        if (!existing.includes(snippet)) {
-          existing.push(snippet);
-        }
+        existing.add(snippet);
       } else {
-        snippetsByDocId.set(docId, [snippet]);
+        snippetSets.set(docId, new Set([snippet]));
       }
+    }
+
+    const snippetsByDocId = new Map<string, string[]>();
+    for (const [docId, snippets] of snippetSets) {
+      snippetsByDocId.set(docId, [...snippets]);
     }
 
     return snippetsByDocId;

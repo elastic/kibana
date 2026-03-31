@@ -12,7 +12,7 @@ import type { TopSnippetsConfig } from '@kbn/agent-builder-genai-utils';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import { AGENT_BUILDER_TOP_SNIPPETS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ToolTypeDefinition } from '../definitions';
 import { validateConfig } from './validate_configuration';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
@@ -50,14 +50,14 @@ export const getIndexSearchToolType = (
               const soClient = deps.savedObjects.getScopedClient(request);
               const uiSettingsClient = deps.uiSettings.asScopedToClient(soClient);
               const isEnabled = await uiSettingsClient.get<boolean>(
-                AGENT_BUILDER_TOP_SNIPPETS_ENABLED_SETTING_ID
+                AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
               );
               if (isEnabled) {
                 topSnippetsConfig = deps.topSnippetsDefaults;
               }
             } catch (error) {
               logger.debug(
-                `Failed to read topSnippetsEnabled setting, falling back to highlighting: ${
+                `Failed to read experimentalFeatures setting, falling back to highlighting: ${
                   error instanceof Error ? error.message : String(error)
                 }`
               );
