@@ -90,7 +90,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'streams.ki_select_streams',
-    handlerHash: '0407dbed1efed5ab8f160ca3a9755e94dc54c31dd5167f7bb4fc9a80942a1aa0',
+    handlerHash: '4465649dd5069e054d729239c2a2325afbb185c745b90d069e7228ecb8662f87',
   },
   {
     id: 'cases.createCase',

@@ -130,12 +130,10 @@ export const registerKiSelectStreamsStep = ({
         if (task.status === TaskStatus.InProgress && !isStale(task.created_at)) {
           alreadyRunning.push({ streamName, scheduledAt: task.created_at || null });
         } else {
-          // Tasks that never completed (failed/stale) default to epoch 0,
-          // so they are always eligible for rescheduling.
-          const completedAt = task.last_completed_at
-            ? new Date(task.last_completed_at).getTime()
-            : 0;
-          if (now - completedAt >= intervalMs) {
+          const lastActivityAt =
+            task.status === TaskStatus.Failed ? task.last_failed_at : task.last_completed_at;
+          const lastActivityMs = lastActivityAt ? new Date(lastActivityAt).getTime() : 0;
+          if (now - lastActivityMs >= intervalMs) {
             candidates.push({ streamName, lastCompletedAt: task.last_completed_at ?? null });
           } else {
             upToDate.push({ streamName, lastCompletedAt: task.last_completed_at ?? null });
