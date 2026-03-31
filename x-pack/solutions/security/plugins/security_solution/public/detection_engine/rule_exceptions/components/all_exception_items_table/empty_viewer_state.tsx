@@ -50,7 +50,7 @@ const ExeptionItemsViewerEmptyPromptsComponent = ({
         return (
           <EuiEmptyPrompt
             color={'subdued'}
-            iconType={'plusInCircle'}
+            iconType={'plusCircle'}
             iconColor={euiTheme.colors.darkestShade}
             title={
               <h2 data-test-subj="exceptionsEmptyPromptTitle">
@@ -68,7 +68,7 @@ const ExeptionItemsViewerEmptyPromptsComponent = ({
               <EuiButton
                 data-test-subj="exceptionsEmptyPromptButton"
                 onClick={onCreateExceptionListItem}
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 color="primary"
                 isDisabled={isReadOnly}
                 fill

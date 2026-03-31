@@ -52,7 +52,7 @@ describe('Treemap Schema', () => {
           {
             operation: 'terms',
             fields: ['category'],
-            size: 5,
+            limit: 5,
           },
         ],
       };
@@ -82,17 +82,18 @@ describe('Treemap Schema', () => {
           {
             operation: 'terms',
             fields: ['category'],
-            size: 5,
+            limit: 5,
           },
         ],
         legend: {
           nested: true,
           truncate_after_lines: 3,
-          visible: 'auto',
-          size: 'large',
+          visibility: 'auto',
+          size: 'l',
         },
-        label_position: 'visible',
-        value_display: {
+        labels: { visible: true },
+        values: {
+          visible: true,
           mode: 'absolute',
         },
       };
@@ -100,8 +101,9 @@ describe('Treemap Schema', () => {
       const validated = treemapStateSchema.validate(input);
       expect(validated.title).toBe('Sales Treemap');
       expect(validated.legend?.nested).toBe(true);
-      expect(validated.label_position).toBe('visible');
-      expect(validated.value_display?.mode).toBe('absolute');
+      expect(validated.labels?.visible).toBe(true);
+      expect(validated.values?.visible).toBe(true);
+      expect(validated.values?.mode).toBe('absolute');
     });
 
     it('validates configuration with two group_by dimensions', () => {
@@ -117,12 +119,12 @@ describe('Treemap Schema', () => {
           {
             operation: 'terms',
             fields: ['category'],
-            size: 5,
+            limit: 5,
           },
           {
             operation: 'terms',
             fields: ['subcategory'],
-            size: 5,
+            limit: 5,
           },
         ],
       };
@@ -144,7 +146,7 @@ describe('Treemap Schema', () => {
           {
             operation: 'terms',
             fields: ['category'],
-            size: 5,
+            limit: 5,
             color: {
               mode: 'categorical',
               palette: 'default',
@@ -205,12 +207,12 @@ describe('Treemap Schema', () => {
             operation: 'terms',
             fields: ['region'],
             collapse_by: 'sum',
-            size: 5,
+            limit: 5,
           },
           {
             operation: 'terms',
             fields: ['category'],
-            size: 5,
+            limit: 5,
           },
         ],
       };
@@ -244,29 +246,6 @@ describe('Treemap Schema', () => {
       expect(() => treemapStateSchema.validate(input)).toThrow();
     });
 
-    it('throws on invalid label position', () => {
-      const input: TreemapStateNoESQL = {
-        ...baseTreemapConfig,
-        metrics: [
-          {
-            operation: 'count',
-            empty_as_null: false,
-          },
-        ],
-        group_by: [
-          {
-            operation: 'terms',
-            fields: ['category'],
-            size: 5,
-          },
-        ],
-        // @ts-expect-error - invalid label position
-        label_position: 'invalid',
-      };
-
-      expect(() => treemapStateSchema.validate(input)).toThrow();
-    });
-
     describe('Grouping Validation', () => {
       describe('Single Metric Scenarios', () => {
         it('allows single metric with single non-collapsed breakdown', () => {
@@ -282,7 +261,7 @@ describe('Treemap Schema', () => {
               {
                 operation: 'terms',
                 fields: ['category'],
-                size: 5,
+                limit: 5,
               },
             ],
           };
@@ -303,12 +282,12 @@ describe('Treemap Schema', () => {
               {
                 operation: 'terms',
                 fields: ['category'],
-                size: 5,
+                limit: 5,
               },
               {
                 operation: 'terms',
                 fields: ['subcategory'],
-                size: 5,
+                limit: 5,
               },
             ],
           };
@@ -330,23 +309,23 @@ describe('Treemap Schema', () => {
                 operation: 'terms',
                 fields: ['region'],
                 collapse_by: 'sum',
-                size: 5,
+                limit: 5,
               },
               {
                 operation: 'terms',
                 fields: ['country'],
                 collapse_by: 'avg',
-                size: 5,
+                limit: 5,
               },
               {
                 operation: 'terms',
                 fields: ['category'],
-                size: 5,
+                limit: 5,
               },
               {
                 operation: 'terms',
                 fields: ['subcategory'],
-                size: 5,
+                limit: 5,
               },
             ],
           };
@@ -367,17 +346,17 @@ describe('Treemap Schema', () => {
               {
                 operation: 'terms',
                 fields: ['category'],
-                size: 5,
+                limit: 5,
               },
               {
                 operation: 'terms',
                 fields: ['subcategory'],
-                size: 5,
+                limit: 5,
               },
               {
                 operation: 'terms',
                 fields: ['region'],
-                size: 5,
+                limit: 5,
               },
             ],
           };
@@ -426,7 +405,7 @@ describe('Treemap Schema', () => {
               {
                 operation: 'terms',
                 fields: ['category'],
-                size: 5,
+                limit: 5,
               },
             ],
           };
@@ -453,7 +432,7 @@ describe('Treemap Schema', () => {
                 operation: 'terms',
                 fields: ['region'],
                 collapse_by: 'sum',
-                size: 5,
+                limit: 5,
               },
               {
                 operation: 'date_histogram',
@@ -466,7 +445,7 @@ describe('Treemap Schema', () => {
               {
                 operation: 'terms',
                 fields: ['category'],
-                size: 5,
+                limit: 5,
               },
             ],
           };
@@ -492,12 +471,12 @@ describe('Treemap Schema', () => {
               {
                 operation: 'terms',
                 fields: ['category'],
-                size: 5,
+                limit: 5,
               },
               {
                 operation: 'terms',
                 fields: ['subcategory'],
-                size: 5,
+                limit: 5,
               },
             ],
           };
@@ -530,17 +509,17 @@ describe('Treemap Schema', () => {
                 operation: 'terms',
                 fields: ['region'],
                 collapse_by: 'sum',
-                size: 5,
+                limit: 5,
               },
               {
                 operation: 'terms',
                 fields: ['category'],
-                size: 5,
+                limit: 5,
               },
               {
                 operation: 'terms',
                 fields: ['subcategory'],
-                size: 5,
+                limit: 5,
               },
             ],
           };
@@ -661,14 +640,14 @@ describe('Treemap Schema', () => {
         ],
         legend: {
           nested: false,
-          visible: 'show',
+          visibility: 'visible',
         },
-        label_position: 'visible',
+        labels: { visible: true },
       };
 
       const validated = treemapStateSchema.validate(input);
       expect(validated.title).toBe('Sales Treemap');
-      expect(validated.label_position).toBe('visible');
+      expect(validated.labels?.visible).toBe(true);
     });
   });
 });

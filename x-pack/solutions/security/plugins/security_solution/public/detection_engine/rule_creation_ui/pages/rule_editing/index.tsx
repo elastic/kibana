@@ -23,7 +23,11 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
+import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
@@ -80,14 +84,15 @@ import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
+  const { application, triggersActionsUi, cps } = useKibana().services;
+  const { navigateToApp } = application;
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
-  const { application, triggersActionsUi } = useKibana().services;
-  const { navigateToApp } = application;
 
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
   const canEditRule = isRulesCustomizationEnabled || !rule.immutable;
@@ -528,6 +533,18 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     [defineStepForm]
   );
 
+  const isEndpointExceptionListLinked: boolean = useMemo(
+    () =>
+      rule?.exceptions_list?.some(
+        (list) => list.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+      ) ?? false,
+    [rule]
+  );
+
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
+  const shouldShowEndpointExceptionsCannotBeAddedToRuleCallout =
+    endpointPerPolicyOptIn?.status === true && endpointPerPolicyOptIn.reason === 'userOptedIn';
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -561,6 +578,23 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
+                      {shouldShowEndpointExceptionsCannotBeAddedToRuleCallout &&
+                        isEndpointExceptionListLinked && (
+                          <EndpointExceptionsMovedCallout
+                            id="ruleEdit-whenEndpointExceptionListLinked"
+                            dismissable
+                            title="noLongerEvaluatedOnRules"
+                          />
+                        )}
+                      {shouldShowEndpointExceptionsCannotBeAddedToRuleCallout &&
+                        !isEndpointExceptionListLinked && (
+                          <EndpointExceptionsMovedCallout
+                            id="ruleEdit-whenEndpointExceptionListNotLinked"
+                            dismissable
+                            title="cannotBeAddedToRules"
+                          />
+                        )}
+
                       <CustomHeaderPageMemo
                         backOptions={backOptions}
                         isLoading={isLoading}

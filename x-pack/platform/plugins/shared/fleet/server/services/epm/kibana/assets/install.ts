@@ -98,8 +98,12 @@ export function createSavedObjectKibanaAsset(
     spaceId?: string;
   }
 ): SavedObjectToBe {
+  // Rewrite IDs for dashboards and multiple-isolated SO types (e.g. alerting_rule_template)
+  // to avoid conflicts when installing in additional spaces.
   const rewriteId =
-    options?.installAsAdditionalSpace && asset.type === KibanaSavedObjectType.dashboard;
+    options?.installAsAdditionalSpace &&
+    (asset.type === KibanaSavedObjectType.dashboard ||
+      asset.type === KibanaSavedObjectType.alertingRuleTemplate);
   // convert that to an object
   const so: Partial<SavedObjectToBe> = {
     type: asset.type,

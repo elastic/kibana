@@ -10,6 +10,7 @@
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { registerEmitEventRoute } from './routes/emit_event';
+import { registerEmitLoopRoute } from './routes/emit_loop';
 import type { ExampleRequestHandlerContext } from './request_context';
 import { registerStepDefinitions } from './step_types';
 import { registerTriggers } from './triggers';
@@ -52,6 +53,7 @@ export class WorkflowsExtensionsExamplePlugin
 
     const router = core.http.createRouter<ExampleRequestHandlerContext>();
     registerEmitEventRoute(router);
+    registerEmitLoopRoute(router);
 
     return {};
   }
