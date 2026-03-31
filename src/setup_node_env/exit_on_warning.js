@@ -107,6 +107,11 @@ var IGNORE_WARNINGS = [
     messageContains:
       'Keys with collection values will be stringified due to JS Object restrictions',
   },
+  // url.parse deprecated. migrate to WHATWG URL API.
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0169',
+  },
 ];
 
 if (process.noProcessWarnings !== true) {
