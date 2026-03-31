@@ -7,7 +7,8 @@
 
 import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/react';
-import { AwsFlyout } from './aws_flyout';
+import { IntegrationDetailsFlyout } from './integration_details_flyout';
+import { AWS_SERVICES } from './aws_services_data';
 import integrationsHeaderImg from './assets/integrations-header.png';
 import {
   EuiBadge,
@@ -172,9 +173,25 @@ const IntegrationCard: React.FC<{
   logoDomain: string;
   logoUrl?: string;
   badge?: string;
+  catalogue?: boolean;
   onClick?: () => void;
-}> = ({ name, description, logoUrl, badge, onClick }) => {
+}> = ({ name, description, logoUrl, badge, catalogue, onClick }) => {
   const { euiTheme } = useEuiTheme();
+  const titleNode = catalogue ? (
+    <span>
+      {name}{' '}
+      <EuiBadge
+        color="hollow"
+        css={css`
+          vertical-align: middle;
+          font-size: 10px;
+          margin-left: 2px;
+        `}
+      >
+        catalogue
+      </EuiBadge>
+    </span>
+  ) : name;
   return (
     <div style={{ position: 'relative', height: '100%' }}>
       {badge && (
@@ -186,7 +203,7 @@ const IntegrationCard: React.FC<{
         </EuiBadge>
       )}
       <EuiCard
-        title={name}
+        title={titleNode}
         titleElement="h4"
         titleSize="xs"
         description={description ? undefined : ''}
@@ -226,12 +243,14 @@ const IntegrationCard: React.FC<{
 
 // ─── Data (copied from ingest_hub_data.ts) ───────────────────────────────────
 
-interface IntegrationTile {
+export interface IntegrationTile {
   id: string;
   name: string;
   description: string;
   logoDomain: string;
   logoUrl?: string;
+  /** When true, renders a small "catalogue" suffix badge on the card */
+  catalogue?: boolean;
 }
 
 interface TaggedTile extends IntegrationTile {
@@ -249,8 +268,8 @@ const SECTIONS: IntegrationSection[] = [
     title: 'Cloud',
     description: 'Monitor your cloud infrastructure',
     tiles: [
-      { id: 'aws', name: 'Amazon Web Services', description: 'Collect logs and metrics from AWS services.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_aws.svg` },
-      { id: 'gcp', name: 'Google Cloud Platform', description: 'Monitor Google Cloud operations and resources.', logoDomain: 'cloud.google.com', logoUrl: `${ELASTIC_LOGOS}/gcp/img/logo_gcp.svg` },
+      { id: 'aws', name: 'Amazon Web Services', description: 'Collect logs and metrics from AWS services.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_aws.svg`, catalogue: true },
+      { id: 'gcp', name: 'Google Cloud Platform', description: 'Monitor Google Cloud operations and resources.', logoDomain: 'cloud.google.com', logoUrl: `${ELASTIC_LOGOS}/gcp/img/logo_gcp.svg`, catalogue: true },
       { id: 'azure', name: 'Azure', description: 'Centralize Azure monitoring and alerting.', logoDomain: 'azure.microsoft.com', logoUrl: `${ELASTIC_LOGOS}/azure/img/logo_azure.svg` },
     ],
   },
@@ -289,17 +308,17 @@ const SAAS_TILES: IntegrationTile[] = [
   { id: 'slack', name: 'Slack', description: 'Monitor Slack workspace audit logs and messages.', logoDomain: 'slack.com', logoUrl: `${ELASTIC_LOGOS}/slack/img/slack.svg` },
 ];
 
+const AWS_INTEGRATION_TILES: IntegrationTile[] = AWS_SERVICES.map((s) => ({
+  id: s.id,
+  name: s.name,
+  description: s.useCase,
+  logoDomain: 'aws.amazon.com',
+  logoUrl: s.logoUrl,
+}));
+
 const ALL_INTEGRATIONS: IntegrationTile[] = [
   { id: 'activemq', name: 'ActiveMQ', description: 'Collect ActiveMQ logs and metrics.', logoDomain: 'activemq.apache.org', logoUrl: `${ELASTIC_LOGOS}/activemq/img/logo_activemq.svg` },
-  { id: 'amazon_bedrock', name: 'Amazon Bedrock', description: 'Track Bedrock model invocations and metrics.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws_bedrock/img/logo_bedrock.svg` },
-  { id: 'amazon_cloudfront', name: 'Amazon CloudFront', description: 'Collect CloudFront access logs.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_cloudfront.svg` },
-  { id: 'amazon_dynamodb', name: 'Amazon DynamoDB', description: 'Collect DynamoDB table metrics.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_dynamodb.svg` },
-  { id: 'amazon_ec2', name: 'Amazon EC2', description: 'Collect EC2 instance logs and metrics.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_ec2.svg` },
-  { id: 'amazon_ecs', name: 'Amazon ECS', description: 'Monitor ECS container service metrics.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_ecs.svg` },
-  { id: 'amazon_guardduty', name: 'Amazon GuardDuty', description: 'Ingest GuardDuty threat findings.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_guardduty.svg` },
-  { id: 'amazon_rds', name: 'Amazon RDS', description: 'Collect RDS database metrics.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_rds.svg` },
-  { id: 'amazon_s3', name: 'Amazon S3', description: 'Monitor S3 bucket metrics and access logs.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_s3.svg` },
-  { id: 'amazon_vpc_flow', name: 'Amazon VPC Flow Logs', description: 'Collect VPC network flow logs.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_vpcflow.svg` },
+  ...AWS_INTEGRATION_TILES,
   { id: 'apache', name: 'Apache HTTP Server', description: 'Monitor Apache server logs and metrics.', logoDomain: 'httpd.apache.org', logoUrl: `${ELASTIC_LOGOS}/apache/img/logo_apache.svg` },
   { id: 'apm', name: 'APM', description: 'Monitor app performance with traces and metrics.', logoDomain: 'elastic.co', logoUrl: `${ELASTIC_LOGOS}/apm/img/logo_apm.svg` },
   { id: 'azure_monitor', name: 'Azure Monitor', description: 'Collect Azure Monitor metrics and logs.', logoDomain: 'azure.microsoft.com', logoUrl: `${ELASTIC_LOGOS}/azure/img/logo_azure.svg` },
@@ -703,6 +722,7 @@ export function DataSourcesCatalogFlyout({
               logoDomain={tile.logoDomain}
               logoUrl={tile.logoUrl}
               badge={tile.badge}
+              catalogue={tile.catalogue}
               onClick={() => handleTileClick(tile)}
             />
           ))}
@@ -739,7 +759,7 @@ export function DataSourcesCatalogFlyout({
   const showRecommended = selectedCategory === 'all' && !rawQ;
 
   return (
-    <>
+  <>
     <EuiFlyout
       onClose={onClose}
       ownFocus
@@ -747,7 +767,7 @@ export function DataSourcesCatalogFlyout({
       session="start"
       flyoutMenuProps={{ title: 'Add data to Elastic Observability' }}
       css={css`
-        inline-size: 72vw !important;
+        inline-size: 60vw !important;
         animation-duration: 0s !important;
         transition-duration: 0s !important;
         .euiFlyout__closeButton { z-index: 10; }
@@ -947,62 +967,19 @@ export function DataSourcesCatalogFlyout({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutBody>
+
     </EuiFlyout>
-    {selectedTile && (selectedTile.id === 'aws' || selectedTile.id.startsWith('amazon_')) && (
-      <AwsFlyout
-        logoUrl={selectedTile.logoUrl ?? ''}
-        isChild
+
+    {selectedTile && (
+      <IntegrationDetailsFlyout
+        tile={selectedTile}
         onClose={() => setSelectedTile(null)}
-        onSeeMyData={() => {
-          onDataConnected();
+        onDataConnected={onDataConnected}
+        onCloseAll={() => {
           setSelectedTile(null);
           onClose();
         }}
       />
-    )}
-    {selectedTile && selectedTile.id !== 'aws' && !selectedTile.id.startsWith('amazon_') && (
-      <EuiFlyout
-        onClose={() => setSelectedTile(null)}
-        aria-labelledby="childTileTitle"
-        session="start"
-        flyoutMenuProps={{ title: selectedTile.name }}
-        css={css`
-          inline-size: 74vw !important;
-          animation-duration: 0s !important;
-          transition-duration: 0s !important;
-          [class*="euiFlyoutMenu__container"] {
-            animation-duration: 0s !important;
-            transition-duration: 0s !important;
-          }
-        `}
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <CardLogoIcon src={selectedTile.logoUrl ?? ''} alt={`${selectedTile.name} logo`} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="m">
-                <h2 id="childTileTitle">{selectedTile.name}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          {selectedTile.description ? (
-            <EuiText><p>{selectedTile.description}</p></EuiText>
-          ) : (
-            <EuiText color="subdued"><p>No additional details available for this integration.</p></EuiText>
-          )}
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButton fill>Add {selectedTile.name}</EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
     )}
   </>
   );

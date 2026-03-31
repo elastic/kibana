@@ -41,7 +41,37 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { CardLogoIcon } from './data_sources_catalog_flyout';
+const CARD_LOGO_SIZE = 24;
+const CARD_LOGO_BG_PADDING = 8;
+
+const CardLogoIcon: React.FC<{ src: string; alt: string }> = ({ src, alt }) => {
+  const { euiTheme } = useEuiTheme();
+  const [errored, setErrored] = React.useState(false);
+  const style: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: CARD_LOGO_SIZE + CARD_LOGO_BG_PADDING * 2,
+    height: CARD_LOGO_SIZE + CARD_LOGO_BG_PADDING * 2,
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    borderRadius: 12,
+    border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+  };
+  return (
+    <div style={style}>
+      {errored ? (
+        <EuiIcon type="logoElastic" size="m" color="text" />
+      ) : (
+        <img
+          src={src}
+          alt={alt}
+          style={{ width: CARD_LOGO_SIZE, height: CARD_LOGO_SIZE, objectFit: 'contain' }}
+          onError={() => setErrored(true)}
+        />
+      )}
+    </div>
+  );
+};
 
 interface AwsFlyoutProps {
   logoUrl: string;
@@ -822,12 +852,12 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
       aria-labelledby="awsFlyoutTitle"
       {...(isChild
         ? {
-            session: 'start' as const,
+            session: 'inherit' as const,
             flyoutMenuProps: { title: 'Add Amazon Web Services', hideCloseButton },
           }
         : {})}
       css={css`
-        inline-size: ${isChild ? '74vw' : '50vw'} !important;
+        inline-size: ${isChild ? '36vw' : '50vw'} !important;
         ${
           isChild
             ? `
@@ -855,33 +885,37 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
         }
       `}
     >
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
             <CardLogoIcon src={logoUrl} alt="AWS logo" />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="m">
-              <h2 id="awsFlyoutTitle">Add Amazon Web Services</h2>
+          <EuiFlexItem style={{ minWidth: 0 }}>
+            <EuiTitle size="s">
+              <h2 id="awsFlyoutTitle" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Add Amazon Web Services</h2>
             </EuiTitle>
-            <EuiText size="s" color="subdued">
-              Collect logs and metrics from your AWS services.
-            </EuiText>
+            <div style={{ height: 22, marginTop: 4, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
+              <EuiText size="xs" color="subdued" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                Collect logs and metrics from your AWS services.
+              </EuiText>
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        {/* Tabs sit at the top of the body, flush with the edges */}
         <div
           css={css`
-            margin-inline: -32px;
-            inline-size: calc(100% + 64px);
-            max-inline-size: none;
+            margin-inline: -48px;
+            margin-block-start: -24px;
+            padding-inline: 48px;
+            margin-block-end: 24px;
+            border-bottom: 1px solid;
+            border-color: inherit;
           `}
         >
-          <EuiTabs
-            css={css`
-              padding-inline: 32px;
-            `}
-          >
+          <EuiTabs size="m" bottomBorder={false}>
             <EuiTab
               isSelected={selectedTab === 'metrics'}
               onClick={() => setSelectedTab('metrics')}
@@ -896,9 +930,6 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
             </EuiTab>
           </EuiTabs>
         </div>
-      </EuiFlyoutHeader>
-
-      <EuiFlyoutBody>
         {selectedTab === 'metrics' ? (
           <>
             <EuiTitle size="xs">
@@ -1011,9 +1042,7 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
               disabled={!terminalComplete}
               onClick={onSeeMyData ?? onClose}
             >
-              {i18n.translate('xpack.streams.awsFlyout.continueButton', {
-                defaultMessage: 'Continue',
-              })}
+              See my data
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
