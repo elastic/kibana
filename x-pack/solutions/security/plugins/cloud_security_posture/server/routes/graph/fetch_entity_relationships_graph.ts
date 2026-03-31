@@ -61,6 +61,7 @@ const buildRelationshipsEsqlQuery = ({
 | RENAME _source_type = entity.type
 | RENAME _source_sub_type = entity.sub_type
 | RENAME _source_host_ip = host.ip
+| RENAME _source_engine_metadata_type = entity.EngineMetadata.Type
 // Lookup target entity metadata
 | EVAL entity.id = _target_id
 | LOOKUP JOIN ${indexName} ON entity.id
@@ -68,12 +69,14 @@ const buildRelationshipsEsqlQuery = ({
 | RENAME _target_type = entity.type
 | RENAME _target_sub_type = entity.sub_type
 | RENAME _target_host_ip = host.ip
+| RENAME _target_engine_metadata_type = entity.EngineMetadata.Type
 // Restore source entity fields
 | RENAME entity.id = _source_id
 | RENAME entity.name = _source_name
 | RENAME entity.type = _source_type
 | RENAME entity.sub_type = _source_sub_type
-| RENAME host.ip = _source_host_ip`;
+| RENAME host.ip = _source_host_ip
+| RENAME entity.EngineMetadata.Type = _source_engine_metadata_type`;
 
   return `FROM ${indexName}
 ${coalesceStatements}
@@ -93,6 +96,11 @@ ${enrichmentSection}
         ${concatJsonObjectPropertyEsqlExprAsString('type', 'entity.type')}), ""),
       CASE(entity.sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
         ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'entity.sub_type')}), ""),
+      CASE(entity.EngineMetadata.Type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString(
+          'engine_type',
+          'entity.EngineMetadata.Type'
+        )}), ""),
       CASE(
         host.ip IS NOT NULL,
         CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
@@ -127,6 +135,11 @@ ${enrichmentSection}
         ${JSON_OBJECT_END}),
       ""
     ),
+    CASE(_target_engine_metadata_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+      ${concatJsonObjectPropertyEsqlExprAsString(
+        'engine_type',
+        '_target_engine_metadata_type'
+      )}), ""),
     ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
       ${concatJsonObjectPropertyEsqlExprAsString('entity.id', '_target_id')},
     ${JSON_OBJECT_END},
@@ -295,6 +308,11 @@ export const fetchEntities = async ({
           ${concatJsonObjectPropertyEsqlExprAsString('type', 'entity.type')}), ""),
         CASE(entity.sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
           ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'entity.sub_type')}), ""),
+        CASE(entity.EngineMetadata.Type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+          ${concatJsonObjectPropertyEsqlExprAsString(
+            'engine_type',
+            'entity.EngineMetadata.Type'
+          )}), ""),
         CASE(
           host.ip IS NOT NULL,
           CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},

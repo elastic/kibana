@@ -37,7 +37,7 @@ import {
   GENERIC_ENTITY_PREVIEW_BANNER,
 } from '../../document_details/preview/constants';
 import { useToasts } from '../../../common/lib/kibana';
-import { GenericEntityPanelKey } from '../../entity_details/shared/constants';
+import { GenericEntityPanelKey, EntityPanelKeyByType } from '../../entity_details/shared/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
 const GraphInvestigationLazy = React.lazy(() =>
@@ -123,15 +123,46 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
       const docMode = getNodeDocumentMode(node);
       const documentsData = (node.documentsData ?? []) as NodeDocumentDataModel[];
 
-      const showEntityPreview = (item: { id: string; entity?: unknown }) => {
+      const showEntityPreview = (item: {
+        id: string;
+        entity?: NodeDocumentDataModel['entity'];
+      }) => {
+        const engineType = item.entity?.engine_type;
+        const panelId =
+          engineType && engineType in EntityPanelKeyByType
+            ? EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType]
+            : GenericEntityPanelKey;
+
+        if (!panelId) {
+          toasts.addDanger({
+            title: i18n.translate(
+              'xpack.securitySolution.flyout.shared.components.graphVisualization.errorInvalidEntityPanel',
+              {
+                defaultMessage: 'Unable to open entity preview',
+              }
+            ),
+          });
+          return;
+        }
+
+        const params =
+          engineType === 'host'
+            ? { hostName: item.entity?.name }
+            : engineType === 'user'
+            ? { userName: item.entity?.name }
+            : engineType === 'service'
+            ? { serviceName: item.entity?.name }
+            : {};
+
         openPreviewPanel({
-          id: GenericEntityPanelKey,
+          id: panelId,
           params: {
             entityId: item.id,
             scopeId,
             isPreviewMode: true,
             banner: GENERIC_ENTITY_PREVIEW_BANNER,
             isEngineMetadataExist: !!item.entity,
+            ...params,
           },
         });
       };
