@@ -17,7 +17,7 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { executeEsqlQuery } from './execute_esql_query';
+import { executeEsqlQuery, getErrorMessageFromEsqlResponse } from './execute_esql_query';
 import { getMetricsExecutionContext } from './execution_context';
 
 jest.mock('@kbn/esql-utils', () => ({
@@ -176,5 +176,53 @@ describe('executeEsqlQuery', () => {
         filter: undefined,
       })
     );
+  });
+
+  describe('getErrorMessageFromEsqlResponse', () => {
+    it('returns message from error type and reason', () => {
+      const result = getErrorMessageFromEsqlResponse({
+        error: { type: 'remote_transport_exception', reason: 'ccs query failed' },
+      });
+
+      expect(result).toBe('remote_transport_exception: ccs query failed');
+    });
+
+    it('returns message from root_cause when type and reason are missing', () => {
+      const result = getErrorMessageFromEsqlResponse({
+        error: {
+          root_cause: [{ type: 'index_not_found_exception', reason: 'no such index [metrics-*]' }],
+        },
+      });
+
+      expect(result).toBe('index_not_found_exception: no such index [metrics-*]');
+    });
+
+    it('returns generic message for empty error object', () => {
+      const result = getErrorMessageFromEsqlResponse({
+        error: {},
+      });
+
+      expect(result).toBe('Elasticsearch returned an error');
+    });
+  });
+
+  it('does not throw when response has no error object (happy path)', async () => {
+    await expect(
+      executeEsqlQuery({
+        esqlQuery: 'TS metrics-* | METRICS_INFO',
+        search: mockSearch,
+        dataView: dataViewWithAtTimefieldMock,
+        uiSettings: mockUiSettings,
+      })
+    ).resolves.toStrictEqual([
+      {
+        metric_name: 'metric.name',
+        data_stream: 'metrics-stream-1',
+        unit: 'ms',
+        metric_type: 'counter',
+        field_type: 'gauge',
+        dimension_fields: 'host',
+      },
+    ]);
   });
 });

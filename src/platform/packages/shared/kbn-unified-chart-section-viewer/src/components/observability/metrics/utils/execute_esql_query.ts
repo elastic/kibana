@@ -33,7 +33,7 @@ export interface ExecuteEsqlParams {
   uiSettings: IUiSettingsClient;
 }
 
-function getErrorMessageFromEsqlResponse(response: object): string | undefined {
+export function getErrorMessageFromEsqlResponse(response: object): string | undefined {
   if (!('error' in response) || response.error == null || typeof response.error !== 'object') {
     return undefined;
   }
