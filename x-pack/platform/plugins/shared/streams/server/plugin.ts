@@ -33,7 +33,7 @@ import {
 } from '../common/constants';
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
-import { registerRules } from './lib/rules/register_rules';
+import { registerRules } from './lib/sig_events/rules/register_rules';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
@@ -51,9 +51,9 @@ import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wire
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
-import { ModelSettingsConfigService } from './lib/saved_objects/significant_events/model_settings_config_service';
+import { ModelSettingsConfigService } from './lib/sig_events/saved_objects/model_settings_config_service';
 import { TaskService } from './lib/tasks/task_service';
-import { InsightService } from './lib/significant_events/insights/client/insight_service';
+import { InsightService } from './lib/sig_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
