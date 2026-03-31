@@ -50,17 +50,15 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
 
     <EuiFlexItem grow={2}>
       <EuiFlexGroup direction="column" gutterSize="l">
-        {isExperimentalFeaturesEnabled && (
-          <CapabilityRow
-            count={skillsCount}
-            label={overviewLabels.skillsLabel(skillsCount)}
-            description={overviewLabels.skillsDescription}
-            actionLabel={
-              enableElasticCapabilities ? overviewLabels.addSkill : overviewLabels.customizeSkills
-            }
-            onAction={onNavigateToSkills}
-          />
-        )}
+        <CapabilityRow
+          count={skillsCount}
+          label={overviewLabels.skillsLabel(skillsCount)}
+          description={overviewLabels.skillsDescription}
+          actionLabel={
+            enableElasticCapabilities ? overviewLabels.addSkill : overviewLabels.customizeSkills
+          }
+          onAction={onNavigateToSkills}
+        />
 
         {isExperimentalFeaturesEnabled && (
           <CapabilityRow

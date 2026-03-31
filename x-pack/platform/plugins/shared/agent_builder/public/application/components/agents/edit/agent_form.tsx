@@ -59,7 +59,6 @@ import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
 import { SkillsTab } from './tabs/skills_tab';
 import { PluginsTab } from './tabs/plugins_tab';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useCurrentUser } from '../../../hooks/agents/use_current_user';
@@ -89,9 +88,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { services } = useKibana();
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { manageAgents, isAdmin } = useUiPrivileges();
-  const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
+  const { currentUser } = useCurrentUser();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
@@ -157,8 +155,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   const canEditAgent = !manageAgents
     ? false
-    : !isExperimentalFeaturesEnabled
-    ? true
     : hasAgentWriteAccess({
         visibility: agentState?.visibility,
         owner: agentState?.created_by,
@@ -300,62 +296,58 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           </EuiNotificationBadge>
         ),
       },
-      ...(isExperimentalFeaturesEnabled
-        ? [
-            {
-              id: 'skills',
-              name: i18n.translate('xpack.agentBuilder.agents.form.skillsTab', {
-                defaultMessage: 'Skills',
-              }),
-              content: (
-                <SkillsTab
-                  control={control}
-                  skills={skills}
-                  isLoading={isLoading}
-                  isFormDisabled={isFormDisabled || !manageAgents}
-                />
-              ),
-              append: (
-                <EuiNotificationBadge
-                  color="subdued"
-                  css={css`
-                    block-size: 20px;
-                    min-inline-size: ${euiTheme.size.l};
-                    padding: 0 ${euiTheme.size.xs};
-                  `}
-                >
-                  {activeSkillsCount}
-                </EuiNotificationBadge>
-              ),
-            },
-            {
-              id: 'plugins',
-              name: i18n.translate('xpack.agentBuilder.agents.form.pluginsTab', {
-                defaultMessage: 'Plugins',
-              }),
-              content: (
-                <PluginsTab
-                  control={control}
-                  plugins={plugins}
-                  isLoading={isLoading}
-                  isFormDisabled={isFormDisabled || !manageAgents}
-                />
-              ),
-              append: (
-                <EuiNotificationBadge
-                  color="subdued"
-                  css={css`
-                    block-size: 20px;
-                    min-inline-size: ${euiTheme.size.l};
-                    padding: 0 ${euiTheme.size.xs};
-                  `}
-                >
-                  {activePluginsCount}
-                </EuiNotificationBadge>
-              ),
-            },
-          ]
-        : []),
+      {
+        id: 'skills',
+        name: i18n.translate('xpack.agentBuilder.agents.form.skillsTab', {
+          defaultMessage: 'Skills',
+        }),
+        content: (
+          <SkillsTab
+            control={control}
+            skills={skills}
+            isLoading={isLoading}
+            isFormDisabled={isFormDisabled || !manageAgents}
+          />
+        ),
+        append: (
+          <EuiNotificationBadge
+            color="subdued"
+            css={css`
+              block-size: 20px;
+              min-inline-size: ${euiTheme.size.l};
+              padding: 0 ${euiTheme.size.xs};
+            `}
+          >
+            {activeSkillsCount}
+          </EuiNotificationBadge>
+        ),
+      },
+      {
+        id: 'plugins',
+        name: i18n.translate('xpack.agentBuilder.agents.form.pluginsTab', {
+          defaultMessage: 'Plugins',
+        }),
+        content: (
+          <PluginsTab
+            control={control}
+            plugins={plugins}
+            isLoading={isLoading}
+            isFormDisabled={isFormDisabled || !manageAgents}
+          />
+        ),
+        append: (
+          <EuiNotificationBadge
+            color="subdued"
+            css={css`
+              block-size: 20px;
+              min-inline-size: ${euiTheme.size.l};
+              padding: 0 ${euiTheme.size.xs};
+            `}
+          >
+            {activePluginsCount}
+          </EuiNotificationBadge>
+        ),
+      },
     ],
     [
       control,
@@ -374,7 +366,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       activeSkillsCount,
       activePluginsCount,
       manageAgents,
-      isExperimentalFeaturesEnabled,
     ]
   );
 
