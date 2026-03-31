@@ -72,7 +72,8 @@ export function registerUpdateRoute(
           getCachedDashboardStateSchema(),
           req.params.id,
           req.body,
-          isDashboardAppRequest
+          isDashboardAppRequest,
+          req.serverTiming
         );
         return res.ok({ body: result });
       } catch (e) {

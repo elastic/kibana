@@ -9,6 +9,7 @@
 
 import Boom from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestTiming } from '@kbn/core-http-server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardCreateRequestBody, DashboardCreateRequestParams } from './types';
@@ -22,11 +23,13 @@ export async function create(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardCreateRequestBody,
   createParams?: DashboardCreateRequestParams,
-  isDashboardAppRequest: boolean = false
+  isDashboardAppRequest: boolean = false,
+  serverTiming?: RequestTiming
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = createBody;
 
+  const transformInTimer = serverTiming?.start('transform-dashboard-in');
   const {
     attributes: soAttributes,
     references: soReferences,
@@ -35,11 +38,13 @@ export async function create(
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
+  transformInTimer?.end();
 
   const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
     DASHBOARD_SAVED_OBJECT_TYPE
   );
 
+  const savedObjectTimer = serverTiming?.start('create-saved-object');
   const savedObject = await core.savedObjects.client.create<DashboardSavedObjectAttributes>(
     DASHBOARD_SAVED_OBJECT_TYPE,
     soAttributes,
@@ -54,11 +59,16 @@ export async function create(
         }),
     }
   );
+  savedObjectTimer?.end();
 
-  return getDashboardCRUResponseBody(
+  const transformOutTimer = serverTiming?.start('transform-dashboard-out');
+  const response = getDashboardCRUResponseBody(
     savedObject,
     'create',
     dashboardStateSchema,
     isDashboardAppRequest
   );
+  transformOutTimer?.end();
+
+  return response;
 }

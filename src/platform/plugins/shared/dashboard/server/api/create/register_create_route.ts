@@ -69,7 +69,8 @@ export function registerCreateRoute(
           getCachedDashboardStateSchema(),
           req.body,
           req.params,
-          isDashboardAppRequest
+          isDashboardAppRequest,
+          req.serverTiming
         );
         return res.created({ body: result });
       } catch (e) {

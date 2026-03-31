@@ -9,6 +9,7 @@
 
 import Boom from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestTiming } from '@kbn/core-http-server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
@@ -21,11 +22,13 @@ export async function update(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   updateBody: DashboardUpdateRequestBody,
-  isDashboardAppRequest: boolean = false
+  isDashboardAppRequest: boolean = false,
+  serverTiming?: RequestTiming
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = updateBody;
 
+  const transformInTimer = serverTiming?.start('transform-dashboard-in');
   const {
     attributes: soAttributes,
     references: soReferences,
@@ -34,7 +37,9 @@ export async function update(
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
+  transformInTimer?.end();
 
+  const savedObjectTimer = serverTiming?.start('update-saved-object');
   const savedObject = await core.savedObjects.client.update<DashboardSavedObjectAttributes>(
     DASHBOARD_SAVED_OBJECT_TYPE,
     id,
@@ -45,11 +50,16 @@ export async function update(
       mergeAttributes: false,
     }
   );
+  savedObjectTimer?.end();
 
-  return getDashboardCRUResponseBody(
+  const transformOutTimer = serverTiming?.start('transform-dashboard-out');
+  const response = getDashboardCRUResponseBody(
     savedObject,
     'update',
     dashboardStateSchema,
     isDashboardAppRequest
   );
+  transformOutTimer?.end();
+
+  return response;
 }
