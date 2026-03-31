@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../../../scenarios';
+import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 
@@ -58,7 +58,7 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
               .expect(200);
           });
 
-          it('should return rules with gaps in given time range', async () => {
+          it('should not return the rule id of a deleted rule', async () => {
             // Create 2 rules
             const rresponse1 = await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
@@ -68,13 +68,14 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             const ruleId1 = rresponse1.body.id;
             objectRemover.add(apiOptions.spaceId, ruleId1, 'rule', 'alerting');
 
-            const rresponse2 = await supertest
+            const response2 = await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
               .set('kbn-xsrf', 'foo')
               .send(getRule())
               .expect(200);
-            const ruleId2 = rresponse2.body.id;
-            objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
+            // This rule is intended to be removed during the test.
+            // However it is added to the object remover when not applicable
+            const ruleId2 = response2.body.id;
 
             // Create gaps for both rules
             await supertest
@@ -97,7 +98,7 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
                 spaceId: apiOptions.spaceId,
               });
 
-            const response = await supertestWithoutAuth
+            let response = await supertestWithoutAuth
               .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
               .set('kbn-xsrf', 'foo')
               .auth(apiOptions.username, apiOptions.password)
@@ -109,6 +110,7 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             switch (scenario.id) {
               case 'no_kibana_privileges at space1':
               case 'space_1_all at space2':
+                objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
                 expect(response.statusCode).to.eql(403);
                 expect(response.body).to.eql({
                   error: 'Forbidden',
@@ -116,7 +118,7 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
                     'Failed to find rules with gaps: Unauthorized to find rules for any rule types',
                   statusCode: 403,
                 });
-                break;
+                return;
 
               case 'global_read at space1':
               case 'space_1_all_alerts_none_actions at space1':
@@ -133,205 +135,29 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
               default:
                 throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
             }
-          });
 
-          it('should return rules ordered by oldest gap first by default', async () => {
-            const rresponse1 = await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+            // Delete rule 2.
+            const deleteResponse = await supertestWithoutAuth
+              .delete(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule/${ruleId2}`)
               .set('kbn-xsrf', 'foo')
-              .send(getRule())
-              .expect(200);
-            const ruleId1 = rresponse1.body.id;
-            objectRemover.add(apiOptions.spaceId, ruleId1, 'rule', 'alerting');
+              .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password);
 
-            const rresponse2 = await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
-              .set('kbn-xsrf', 'foo')
-              .send(getRule())
-              .expect(200);
-            const ruleId2 = rresponse2.body.id;
-            objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
-
-            await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                ruleId: ruleId1,
-                start: gap1Start,
-                end: gap1End,
-                spaceId: apiOptions.spaceId,
-              });
-            // Additional gap for rule 1 (later than first)
-            await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                ruleId: ruleId1,
-                start: '2024-01-08T00:00:00.000Z',
-                end: '2024-01-09T00:00:00.000Z',
-                spaceId: apiOptions.spaceId,
-              });
-
-            await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                ruleId: ruleId2,
-                start: gap2Start,
-                end: gap2End,
-                spaceId: apiOptions.spaceId,
-              });
-            // Additional gap for rule 2 (later than first)
-            await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                ruleId: ruleId2,
-                start: '2024-01-18T00:00:00.000Z',
-                end: '2024-01-19T00:00:00.000Z',
-                spaceId: apiOptions.spaceId,
-              });
-
-            const response = await supertestWithoutAuth
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
-              .set('kbn-xsrf', 'foo')
-              .auth(apiOptions.username, apiOptions.password)
-              .send({ start: searchStart, end: searchEnd });
-
-            switch (scenario.id) {
-              case 'global_read at space1':
-              case 'space_1_all_alerts_none_actions at space1':
-              case 'superuser at space1':
-              case 'space_1_all at space1':
-              case 'space_1_all_with_restricted_fixture at space1':
-                expect(response.statusCode).to.eql(200);
-                expect(response.body.rule_ids).to.eql([ruleId1, ruleId2]);
-                break;
-              case 'no_kibana_privileges at space1':
-              case 'space_1_all at space2':
-                expect(response.statusCode).to.eql(403);
-                break;
-              default:
-                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+            if (deleteResponse.statusCode !== 204) {
+              objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
             }
-          });
 
-          it('should return rules ordered by newest gap first when sort_order is desc', async () => {
-            const rresponse1 = await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
-              .set('kbn-xsrf', 'foo')
-              .send(getRule())
-              .expect(200);
-            const ruleId1 = rresponse1.body.id;
-            objectRemover.add(apiOptions.spaceId, ruleId1, 'rule', 'alerting');
+            expect(deleteResponse.statusCode).to.eql(204);
 
-            const rresponse2 = await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
-              .set('kbn-xsrf', 'foo')
-              .send(getRule())
-              .expect(200);
-            const ruleId2 = rresponse2.body.id;
-            objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
-
-            await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                ruleId: ruleId1,
-                start: gap1Start,
-                end: gap1End,
-                spaceId: apiOptions.spaceId,
-              });
-            // Additional gap for rule 1 (later than first)
-            await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                ruleId: ruleId1,
-                start: '2024-01-08T00:00:00.000Z',
-                end: '2024-01-09T00:00:00.000Z',
-                spaceId: apiOptions.spaceId,
-              });
-
-            await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                ruleId: ruleId2,
-                start: gap2Start,
-                end: gap2End,
-                spaceId: apiOptions.spaceId,
-              });
-            // Additional gap for rule 2 (later than first)
-            await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                ruleId: ruleId2,
-                start: '2024-01-18T00:00:00.000Z',
-                end: '2024-01-19T00:00:00.000Z',
-                spaceId: apiOptions.spaceId,
-              });
-
-            const response = await supertestWithoutAuth
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
-              .set('kbn-xsrf', 'foo')
-              .auth(apiOptions.username, apiOptions.password)
-              .send({ start: searchStart, end: searchEnd, sort_order: 'desc' });
-
-            switch (scenario.id) {
-              case 'global_read at space1':
-              case 'space_1_all_alerts_none_actions at space1':
-              case 'superuser at space1':
-              case 'space_1_all at space1':
-              case 'space_1_all_with_restricted_fixture at space1':
-                expect(response.statusCode).to.eql(200);
-                expect(response.body.rule_ids).to.eql([ruleId2, ruleId1]);
-                break;
-              case 'no_kibana_privileges at space1':
-              case 'space_1_all at space2':
-                expect(response.statusCode).to.eql(403);
-                break;
-              default:
-                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-            }
-          });
-
-          it('should filter rules by unfilled gap status', async () => {
-            const ruleResponse = await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
-              .set('kbn-xsrf', 'foo')
-              .send(getRule())
-              .expect(200);
-            const ruleId = ruleResponse.body.id;
-            objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
-
-            await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                ruleId,
-                start: gap1Start,
-                end: gap1End,
-                spaceId: apiOptions.spaceId,
-              });
-
-            const response = await supertestWithoutAuth
+            response = await supertestWithoutAuth
               .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
               .set('kbn-xsrf', 'foo')
               .auth(apiOptions.username, apiOptions.password)
               .send({
                 start: searchStart,
                 end: searchEnd,
-                statuses: ['unfilled'],
               });
 
             switch (scenario.id) {
-              case 'no_kibana_privileges at space1':
-              case 'space_1_all at space2':
-                expect(response.statusCode).to.eql(403);
-                break;
-
               case 'global_read at space1':
               case 'space_1_all_alerts_none_actions at space1':
               case 'superuser at space1':
@@ -339,7 +165,8 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
               case 'space_1_all_with_restricted_fixture at space1':
                 expect(response.statusCode).to.eql(200);
                 expect(response.body.total).to.eql(1);
-                expect(response.body.rule_ids).to.eql([ruleId]);
+                expect(response.body.rule_ids).to.have.length(1);
+                expect(response.body.rule_ids).to.contain(ruleId1);
                 break;
 
               default:
@@ -347,7 +174,8 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             }
           });
 
-          it('should return empty result when filtering by filled gap status', async () => {
+          it('should return empty result when no gaps exist', async () => {
+            // Create a rule without gaps
             const ruleResponse = await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
               .set('kbn-xsrf', 'foo')
@@ -356,16 +184,6 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             const ruleId = ruleResponse.body.id;
             objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
 
-            await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                ruleId,
-                start: gap1Start,
-                end: gap1End,
-                spaceId: apiOptions.spaceId,
-              });
-
             const response = await supertestWithoutAuth
               .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
               .set('kbn-xsrf', 'foo')
@@ -373,7 +191,6 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
               .send({
                 start: searchStart,
                 end: searchEnd,
-                statuses: ['filled'],
               });
 
             switch (scenario.id) {
@@ -397,7 +214,8 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             }
           });
 
-          it('should filter rules by aggregated unfilled status', async () => {
+          it('should return latest gap timestamp when gaps exist', async () => {
+            // Create a rule
             const ruleResponse = await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
               .set('kbn-xsrf', 'foo')
@@ -406,13 +224,32 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             const ruleId = ruleResponse.body.id;
             objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
 
+            // Create gaps with different timestamps
+            const earlyGapStart = '2024-01-05T00:00:00.000Z';
+            const earlyGapEnd = '2024-01-06T00:00:00.000Z';
+            const lateGapStart = '2024-01-25T00:00:00.000Z';
+            const lateGapEnd = '2024-01-26T00:00:00.000Z';
+
+            // Report early gap first
             await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
               .set('kbn-xsrf', 'foo')
               .send({
                 ruleId,
-                start: gap1Start,
-                end: gap1End,
+                start: earlyGapStart,
+                end: earlyGapEnd,
+                spaceId: apiOptions.spaceId,
+              });
+
+            // Report late gap second (this should have the latest ingestion timestamp)
+            const lateGapReportTime = Date.now();
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId,
+                start: lateGapStart,
+                end: lateGapEnd,
                 spaceId: apiOptions.spaceId,
               });
 
@@ -423,7 +260,6 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
               .send({
                 start: searchStart,
                 end: searchEnd,
-                highest_priority_gap_fill_statuses: ['unfilled'],
               });
 
             switch (scenario.id) {
@@ -440,6 +276,10 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
                 expect(response.statusCode).to.eql(200);
                 expect(response.body.total).to.eql(1);
                 expect(response.body.rule_ids).to.eql([ruleId]);
+                expect(response.body.latest_gap_timestamp).to.be.a('number');
+                // The latest gap timestamp should be the ingestion time of the most recently reported gap
+                // Since we reported the late gap last, it should have the latest ingestion timestamp
+                expect(response.body.latest_gap_timestamp).to.be.greaterThan(lateGapReportTime);
                 break;
 
               default:
@@ -447,7 +287,8 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             }
           });
 
-          it('should return empty result when filtering by aggregated filled status', async () => {
+          it('should not return latest gap timestamp when no gaps exist', async () => {
+            // Create a rule without gaps
             const ruleResponse = await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
               .set('kbn-xsrf', 'foo')
@@ -456,16 +297,6 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             const ruleId = ruleResponse.body.id;
             objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
 
-            await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
-              .set('kbn-xsrf', 'foo')
-              .send({
-                ruleId,
-                start: gap1Start,
-                end: gap1End,
-                spaceId: apiOptions.spaceId,
-              });
-
             const response = await supertestWithoutAuth
               .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
               .set('kbn-xsrf', 'foo')
@@ -473,7 +304,6 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
               .send({
                 start: searchStart,
                 end: searchEnd,
-                highest_priority_gap_fill_statuses: ['filled'],
               });
 
             switch (scenario.id) {
@@ -490,10 +320,45 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
                 expect(response.statusCode).to.eql(200);
                 expect(response.body.total).to.eql(0);
                 expect(response.body.rule_ids).to.eql([]);
+                expect(response.body.latest_gap_timestamp).to.eql(undefined);
                 break;
 
               default:
                 throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+            }
+          });
+
+          it('should handle invalid parameters', async () => {
+            const invalidBodies = [
+              {
+                body: {
+                  start: 'invalid-date',
+                  end: searchEnd,
+                },
+                expectedError: '[request body]: [start]: query start must be valid date',
+              },
+              {
+                body: {
+                  start: searchStart,
+                  end: 'invalid-date',
+                },
+                expectedError: '[request body]: [end]: query end must be valid date',
+              },
+            ];
+
+            for (const { body, expectedError } of invalidBodies) {
+              const response = await supertestWithoutAuth
+                .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
+                .set('kbn-xsrf', 'foo')
+                .auth(apiOptions.username, apiOptions.password)
+                .send(body);
+
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: expectedError,
+              });
             }
           });
         });
