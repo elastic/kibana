@@ -85,30 +85,34 @@ export const getInfrastructureData = async ({
     response.aggregations?.podNames?.buckets.map((bucket) => bucket.key as string) ?? [];
 
   if (podNames.length > 0 && isOtel) {
-    const containersByPodResponse = await apmEventClient.search('get_container_ids_by_pod_names', {
-      apm: {
-        events: [ProcessorEvent.metric],
-      },
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            ...kqlQuery(kuery),
-            ...termsQuery(k8sFilterField, podNames),
-          ],
+    const containersByPodResponse = await apmEventClient.search(
+      'get_container_ids_by_pod_names',
+      {
+        apm: {
+          events: [ProcessorEvent.metric],
         },
-      },
-      aggs: {
-        containerIds: {
-          terms: {
-            field: CONTAINER_ID,
-            size: 500,
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...rangeQuery(start, end),
+              ...kqlQuery(kuery),
+              ...termsQuery(k8sFilterField, podNames),
+            ],
+          },
+        },
+        aggs: {
+          containerIds: {
+            terms: {
+              field: CONTAINER_ID,
+              size: 500,
+            },
           },
         },
       },
-    });
+      { skipProcessorEventFilter: true }
+    );
     containerIds =
       containersByPodResponse.aggregations?.containerIds?.buckets.map(
         (bucket) => bucket.key as string
