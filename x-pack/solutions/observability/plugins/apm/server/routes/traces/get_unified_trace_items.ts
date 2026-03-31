@@ -93,6 +93,7 @@ export async function getUnifiedTraceItems({
   start,
   end,
   serviceName,
+  ecsOnly = false,
 }: {
   apmEventClient: APMEventClient;
   logsClient: LogsClient;
@@ -101,6 +102,7 @@ export async function getUnifiedTraceItems({
   start: number;
   end: number;
   serviceName?: string;
+  ecsOnly?: boolean;
 }): Promise<{
   traceItems: TraceItem[];
   unifiedTraceErrors: UnifiedTraceErrors;
@@ -122,6 +124,7 @@ export async function getUnifiedTraceItems({
       start,
       end,
       serviceName,
+      ecsOnly,
     }),
     getSpanLinksCountById({
       traceId,

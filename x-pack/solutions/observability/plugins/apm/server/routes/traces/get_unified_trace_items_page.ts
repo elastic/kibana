@@ -47,10 +47,9 @@ import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
 
 export const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
-export const optionalFields = asMutableArray([
+export const ecsOnlyOptionalFields = asMutableArray([
   SPAN_ID,
   SPAN_NAME,
-  DURATION,
   SPAN_DURATION,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
@@ -58,14 +57,11 @@ export const optionalFields = asMutableArray([
   TRANSACTION_RESULT,
   PROCESSOR_EVENT,
   PARENT_ID,
-  STATUS_CODE,
   TIMESTAMP_US,
   EVENT_OUTCOME,
   SPAN_TYPE,
   SPAN_SUBTYPE,
   SPAN_SYNC,
-  KIND,
-  OTEL_SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_TRACE_ID,
   AGENT_NAME,
   FAAS_COLDSTART,
@@ -73,6 +69,14 @@ export const optionalFields = asMutableArray([
   SPAN_COMPOSITE_SUM,
   SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SERVICE_ENVIRONMENT,
+] as const);
+
+export const optionalFields = asMutableArray([
+  ...ecsOnlyOptionalFields,
+  DURATION,
+  STATUS_CODE,
+  KIND,
+  OTEL_SPAN_LINKS_TRACE_ID,
   ATTRIBUTE_HTTP_SCHEME,
   ATTRIBUTE_HTTP_STATUS_CODE,
 ] as const);
@@ -85,6 +89,7 @@ async function getUnifiedTraceItemsPage({
   end,
   serviceName,
   searchAfter,
+  ecsOnly,
 }: {
   apmEventClient: APMEventClient;
   size: number;
@@ -93,16 +98,20 @@ async function getUnifiedTraceItemsPage({
   end: number;
   serviceName?: string;
   searchAfter?: SortResults;
+  ecsOnly: boolean;
 }) {
-  const response = await apmEventClient.search(
-    'get_unified_trace_items',
-    {
-      apm: {
-        events: [ProcessorEvent.span, ProcessorEvent.transaction],
-      },
-      track_total_hits: true,
-      size,
-      query: {
+  const query = ecsOnly
+    ? {
+        bool: {
+          filter: [
+            ...termQuery(TRACE_ID, traceId),
+            ...rangeQuery(start, end),
+            ...termQuery(SERVICE_NAME, serviceName),
+          ],
+          should: { exists: { field: PARENT_ID } },
+        },
+      }
+    : {
         bool: {
           must: [
             {
@@ -122,8 +131,22 @@ async function getUnifiedTraceItemsPage({
           ],
           minimum_should_match: 1,
         },
+      };
+
+  const sortScript = ecsOnly
+    ? `$('${TRANSACTION_DURATION}', $('${SPAN_DURATION}', 0))`
+    : `$('${TRANSACTION_DURATION}', $('${SPAN_DURATION}', $('${DURATION}', 0)))`;
+
+  const response = await apmEventClient.search(
+    'get_unified_trace_items',
+    {
+      apm: {
+        events: [ProcessorEvent.span, ProcessorEvent.transaction],
       },
-      fields: [...fields, ...optionalFields],
+      track_total_hits: true,
+      size,
+      query,
+      fields: [...fields, ...(ecsOnly ? ecsOnlyOptionalFields : optionalFields)],
       _source: [TRANSACTION_MARKS_AGENT],
       sort: [
         { _score: 'asc' },
@@ -132,7 +155,7 @@ async function getUnifiedTraceItemsPage({
             type: 'number',
             script: {
               lang: 'painless',
-              source: `$('${TRANSACTION_DURATION}', $('${SPAN_DURATION}', $('${DURATION}', 0)))`,
+              source: sortScript,
             },
             order: 'desc',
           },
@@ -142,7 +165,7 @@ async function getUnifiedTraceItemsPage({
       ] as Sort,
       ...(searchAfter ? { search_after: searchAfter } : {}),
     },
-    { skipProcessorEventFilter: true }
+    ecsOnly ? {} : { skipProcessorEventFilter: true }
   );
 
   return {
@@ -163,6 +186,7 @@ async function paginate({
   hits,
   seenIds,
   searchAfter,
+  ecsOnly,
 }: {
   apmEventClient: APMEventClient;
   maxTraceItems: number;
@@ -173,6 +197,7 @@ async function paginate({
   hits: PageHits;
   seenIds: Set<string>;
   searchAfter?: SortResults;
+  ecsOnly: boolean;
 }): Promise<{ hits: PageHits; total: number }> {
   const size = Math.min(maxTraceItems - hits.length, MAX_ITEMS_PER_PAGE);
   const response = await getUnifiedTraceItemsPage({
@@ -183,6 +208,7 @@ async function paginate({
     end,
     serviceName,
     searchAfter,
+    ecsOnly,
   });
 
   // A document can be indexed in multiple indices (e.g. traces-apm and apm-*) and appear
@@ -223,6 +249,7 @@ async function paginate({
     hits: truncatedHits,
     seenIds,
     searchAfter: lastSort as SortResults,
+    ecsOnly,
   });
 }
 
@@ -233,6 +260,7 @@ export function getUnifiedTraceItemsPaginated({
   start,
   end,
   serviceName,
+  ecsOnly = false,
 }: {
   apmEventClient: APMEventClient;
   maxTraceItems: number;
@@ -240,6 +268,7 @@ export function getUnifiedTraceItemsPaginated({
   start: number;
   end: number;
   serviceName?: string;
+  ecsOnly?: boolean;
 }) {
   return paginate({
     apmEventClient,
@@ -250,5 +279,6 @@ export function getUnifiedTraceItemsPaginated({
     serviceName,
     hits: [],
     seenIds: new Set(),
+    ecsOnly,
   });
 }
