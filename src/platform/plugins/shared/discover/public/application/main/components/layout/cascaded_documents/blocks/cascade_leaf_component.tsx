@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   getRenderCustomToolbarWithElements,
   UnifiedDataTable,
@@ -17,7 +16,10 @@ import {
   DataGridDensity,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import type { DataCascadeRowCellProps } from '@kbn/shared-ux-document-data-cascade';
+import {
+  type DataCascadeRowCellProps,
+  useConnectedChildVirtualizer,
+} from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
@@ -37,21 +39,20 @@ interface ESQLDataCascadeLeafCellProps
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
-      'getScrollElement' | 'getScrollMargin' | 'getScrollOffset' | 'preventSizeChangePropagation'
+      'virtualizerController'
     > {
   cellData: DataTableRecord[];
   cellId: string;
+  rowIndex: number;
 }
 
 interface CustomCascadeGridBodyProps
   extends EuiDataGridCustomBodyProps,
-    Pick<
-      ESQLDataCascadeLeafCellProps,
-      'getScrollElement' | 'getScrollMargin' | 'preventSizeChangePropagation'
-    > {
+    Pick<ESQLDataCascadeLeafCellProps, 'virtualizerController'> {
   data: DataTableRecord[];
   isFullScreenMode?: boolean;
-  initialOffset: () => number;
+  cellId: string;
+  rowIndex: number;
 }
 
 const EMPTY_SORT: SortOrder[] = [];
@@ -59,19 +60,13 @@ const EMPTY_SORT: SortOrder[] = [];
 /**
  * A custom grid body implementation for the unified data table to be used in the cascade leaf cells
  * that allows for nested cascade virtualization that's compatible with the EUI Data Grid.
- *
- * Key optimizations:
- * - Fixed row heights prevent measurement-triggered recalculations
- * - Stable scroll margin captured once to prevent position jumps
- * - Total size calculated from fixed heights (count * ROW_HEIGHT) for stability
  */
 export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody({
   isFullScreenMode,
-  initialOffset,
   data,
-  getScrollElement,
-  getScrollMargin,
-  preventSizeChangePropagation,
+  virtualizerController,
+  cellId,
+  rowIndex,
   Cell,
   visibleColumns,
   visibleRowData,
@@ -82,6 +77,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
     [data, visibleRowData.startRow, visibleRowData.endRow]
   );
+
   const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
@@ -91,59 +87,29 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     [euiTheme]
   );
 
-  // create scroll element reference for custom nested virtualized grid
-  const virtualizerScrollElementRef = useRef<Element | null>(getScrollElement());
-
-  const scrollElementGetter = useCallback(() => virtualizerScrollElementRef.current, []);
-
-  useEffect(() => {
-    const defaultScrollElement = getScrollElement();
-
-    if (
-      isFullScreenMode &&
-      customGridBodyScrollContainerRef.current &&
-      !virtualizerScrollElementRef.current?.isSameNode(customGridBodyScrollContainerRef.current)
-    ) {
-      // assign the custom grid body element as scrollable element in full screen mode
-      virtualizerScrollElementRef.current = customGridBodyScrollContainerRef.current;
-    } else if (
-      !isFullScreenMode &&
-      !virtualizerScrollElementRef.current?.isSameNode(defaultScrollElement)
-    ) {
-      // when exiting full screen mode we ensure the scroll element is reset to the default scroll container
-      virtualizerScrollElementRef.current = defaultScrollElement;
-    }
-  }, [getScrollElement, isFullScreenMode]);
-
-  const virtualizer = useVirtualizer({
-    count: visibleRows.length,
-    estimateSize: () => 50,
-    overscan: 10, // use a larger overscan since we are expecting large number of rows to be rendered
-    initialOffset,
-    scrollMargin: getScrollMargin(),
-    getScrollElement: scrollElementGetter,
+  const { virtualizer, handle, isDetached } = useConnectedChildVirtualizer({
+    controller: virtualizerController,
+    cellId,
+    rowIndex,
+    // @ts-expect-error - required to allow the use of the visibleRows array
+    rows: visibleRows,
+    estimatedRowHeight: 65,
+    overscan: 10,
+    privateScrollElement: customGridBodyScrollContainerRef,
   });
 
-  /**
-   * Register/unregister this nested virtualizer with the parent based on fullscreen mode.
-   * When registered (not fullscreen), the parent won't adjust scroll position when this row resizes.
-   * When unregistered (fullscreen), scroll adjustments don't matter since we have our own scroll container.
-   */
-  useEffect(() => {
-    let unregister: (() => void) | null = null;
-
-    if (virtualizer.scrollElement?.isSameNode(scrollElementGetter())) {
-      // Only register when using the parent's scroll element (not in fullscreen mode)
-      unregister = preventSizeChangePropagation();
+  useLayoutEffect(() => {
+    if (isFullScreenMode && !isDetached) {
+      handle.detachScrollElement();
+    } else if (!isFullScreenMode && isDetached) {
+      handle.reattachScrollElement();
     }
-
-    return () => unregister?.();
-  }, [preventSizeChangePropagation, scrollElementGetter, virtualizer.scrollElement]);
+  }, [isFullScreenMode, isDetached, handle]);
 
   const items = virtualizer.getVirtualItems();
 
-  // Calculate transform using current scroll margin (now reactive from parent)
-  const translateY = items.length > 0 ? items[0].start - getScrollMargin() : 0;
+  const scrollMargin = isDetached ? 0 : virtualizer.measurementsCache[0]?.start ?? 0;
+  const translateY = items.length > 0 ? items[0].start - scrollMargin : 0;
 
   return (
     <div
@@ -198,10 +164,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
     showKeyboardShortcuts,
     renderDocumentView,
     externalCustomRenderers,
-    getScrollElement,
-    getScrollMargin,
-    getScrollOffset,
-    preventSizeChangePropagation,
+    virtualizerController,
+    rowIndex,
     onUpdateDataGridDensity,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
@@ -243,7 +207,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
             </EuiText>
           ),
         }),
-      [cellData]
+      [cellData.length]
     );
 
     const renderCustomCascadeGridBodyCallback = useCallback<
@@ -267,23 +231,14 @@ export const ESQLDataCascadeLeafCell = React.memo(
           headerRow={headerRow}
           footerRow={footerRow}
           gridWidth={gridWidth}
-          getScrollMargin={getScrollMargin}
           setCustomGridBodyProps={setCustomGridBodyProps}
-          getScrollElement={getScrollElement}
-          preventSizeChangePropagation={preventSizeChangePropagation}
-          initialOffset={getScrollOffset}
+          virtualizerController={virtualizerController}
+          cellId={cellId}
+          rowIndex={rowIndex}
           isFullScreenMode={isCellInFullScreenMode}
         />
       ),
-      [
-        cellData,
-        cellId,
-        preventSizeChangePropagation,
-        getScrollElement,
-        getScrollMargin,
-        getScrollOffset,
-        isCellInFullScreenMode,
-      ]
+      [virtualizerController, isCellInFullScreenMode, cellId, cellData, rowIndex]
     );
 
     return (
