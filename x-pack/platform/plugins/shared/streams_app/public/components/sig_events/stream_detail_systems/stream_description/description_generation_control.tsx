@@ -110,7 +110,6 @@ export function DescriptionGenerationControl({
         <EuiFlexItem grow={false}>
           <EuiButton
             iconType="sparkle"
-            iconSide="right"
             isLoading={true}
             data-test-subj="generate_description_button"
           >
@@ -145,7 +144,6 @@ export function DescriptionGenerationControl({
         buttonProps={{
           size: 'm',
           iconType: 'sparkles',
-          iconSide: 'right',
           isDisabled: true,
           isLoading: true,
           'data-test-subj': 'cancel_description_generation_button',

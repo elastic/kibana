@@ -148,6 +148,26 @@ describe('StreamDescription', () => {
       );
     });
 
+    it('should pass enableGeneration=false when aiFeatures is present but not enabled', () => {
+      const disabledAiFeatures: AIFeatures = {
+        ...mockAiFeatures,
+        enabled: false,
+      };
+
+      renderWithProviders(
+        <StreamDescription
+          definition={createMockDefinition()}
+          refreshDefinition={jest.fn()}
+          aiFeatures={disabledAiFeatures}
+        />
+      );
+
+      expect(mockUseStreamDescriptionApi).toHaveBeenCalledWith(
+        expect.objectContaining({ enableGeneration: false })
+      );
+      expect(screen.queryByText('Generate description mock')).not.toBeInTheDocument();
+    });
+
     it('should show the markdown editor when there is an existing description', () => {
       mockUseStreamDescriptionApi.mockReturnValue({
         ...defaultApiReturn,

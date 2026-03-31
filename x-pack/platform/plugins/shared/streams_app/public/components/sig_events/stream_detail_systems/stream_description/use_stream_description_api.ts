@@ -198,7 +198,8 @@ export const useStreamDescriptionApi = ({
   }, [definition.stream.name, enableGeneration, signal, streams.streamsRepositoryClient]);
 
   const [{ loading: isTaskLoading, value: task, error: taskError }, refreshTask] = useAsyncFn(
-    getDescriptionGenerationStatus
+    getDescriptionGenerationStatus,
+    [getDescriptionGenerationStatus]
   );
 
   const onCancelEdit = useCallback(() => {

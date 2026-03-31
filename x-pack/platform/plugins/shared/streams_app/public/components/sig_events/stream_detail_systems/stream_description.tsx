@@ -90,7 +90,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
   refreshDefinition,
   aiFeatures,
 }) => {
-  const hasAiFeatures = aiFeatures !== null;
+  const hasAiFeatures = aiFeatures !== null && aiFeatures.enabled;
   const {
     description,
     isUpdating,
