@@ -107,6 +107,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   stream_type: getStreamTypeFromDefinition(stream),
                   input_tokens_used: result.tokensUsed.prompt,
                   output_tokens_used: result.tokensUsed.completion,
+                  cached_tokens_used: result.tokensUsed.cached ?? 0,
                   tool_usage: result.toolUsage,
                 });
 

@@ -89,6 +89,27 @@ describe('EbtTelemetryClient', () => {
       client.trackDescriptionGenerated({
         input_tokens_used: 200,
         output_tokens_used: 100,
+        cached_tokens_used: 50,
+        stream_name: 'test-stream',
+        stream_type: 'classic',
+      });
+
+      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
+        STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
+        {
+          input_tokens_used: 200,
+          output_tokens_used: 100,
+          cached_tokens_used: 50,
+          stream_name: 'test-stream',
+          stream_type: 'classic',
+        }
+      );
+    });
+
+    it('tracks description generated events without cached tokens', () => {
+      client.trackDescriptionGenerated({
+        input_tokens_used: 200,
+        output_tokens_used: 100,
         stream_name: 'test-stream',
         stream_type: 'classic',
       });
@@ -107,6 +128,53 @@ describe('EbtTelemetryClient', () => {
 
   describe('trackSignificantEventsQueriesGenerated', () => {
     it('tracks significant events queries generated events', () => {
+      client.trackSignificantEventsQueriesGenerated({
+        count: 5,
+        input_tokens_used: 300,
+        output_tokens_used: 150,
+        cached_tokens_used: 75,
+        stream_name: 'test-stream',
+        stream_type: 'wired',
+        tool_usage: {
+          get_stream_features: {
+            calls: 1,
+            failures: 0,
+            latency_ms: 100,
+          },
+          add_queries: {
+            calls: 1,
+            failures: 0,
+            latency_ms: 100,
+          },
+        },
+      });
+
+      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
+        STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
+        {
+          count: 5,
+          input_tokens_used: 300,
+          output_tokens_used: 150,
+          cached_tokens_used: 75,
+          stream_name: 'test-stream',
+          stream_type: 'wired',
+          tool_usage: {
+            get_stream_features: {
+              calls: 1,
+              failures: 0,
+              latency_ms: 100,
+            },
+            add_queries: {
+              calls: 1,
+              failures: 0,
+              latency_ms: 100,
+            },
+          },
+        }
+      );
+    });
+
+    it('tracks significant events queries generated events without cached tokens', () => {
       client.trackSignificantEventsQueriesGenerated({
         count: 5,
         input_tokens_used: 300,

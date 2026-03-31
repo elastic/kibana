@@ -312,6 +312,13 @@ const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSign
         description: 'The number of output tokens used for the generation request',
       },
     },
+    cached_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of cached tokens used for the generation request',
+        optional: true,
+      },
+    },
     count: {
       type: 'long',
       _meta: {

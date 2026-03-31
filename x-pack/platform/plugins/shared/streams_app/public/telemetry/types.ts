@@ -105,6 +105,7 @@ interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
   duration_ms: number;
   input_tokens_used: number;
   output_tokens_used: number;
+  cached_tokens_used?: number;
   count: number;
   features_selected: number;
   features_total: number;

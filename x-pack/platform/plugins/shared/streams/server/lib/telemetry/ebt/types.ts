@@ -26,6 +26,7 @@ interface StreamsStateErrorProps {
 interface StreamsDescriptionGeneratedProps {
   input_tokens_used: number;
   output_tokens_used: number;
+  cached_tokens_used?: number;
   stream_name: string;
   stream_type: StreamType;
 }
@@ -33,6 +34,7 @@ interface StreamsSignificantEventsQueriesGeneratedProps {
   count: number;
   input_tokens_used: number;
   output_tokens_used: number;
+  cached_tokens_used?: number;
   stream_name: string;
   stream_type: StreamType;
   tool_usage: SignificantEventsToolUsage;

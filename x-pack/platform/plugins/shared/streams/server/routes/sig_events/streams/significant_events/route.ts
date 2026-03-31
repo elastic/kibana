@@ -243,6 +243,7 @@ const generateSignificantEventsRoute = createServerRoute({
           stream_type: getStreamTypeFromDefinition(definition),
           input_tokens_used: tokensUsed.prompt,
           output_tokens_used: tokensUsed.completion,
+          cached_tokens_used: tokensUsed.cached ?? 0,
           tool_usage: toolUsage,
         });
 
