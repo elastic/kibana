@@ -29,6 +29,8 @@ export default function graphBasicTests({ getService }: FtrProviderContext) {
   };
 
   describe('POST /internal/cloud_security_posture/graph - Basic license', () => {
+    // FIPS mode overrides the license to trial, so license-based 403 checks will not work
+    this.tags('skipFIPS');
     it('should return 403 when license is below platinum', async () => {
       await postGraph(supertest, {
         query: {
