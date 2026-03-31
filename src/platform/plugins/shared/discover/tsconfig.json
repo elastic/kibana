@@ -131,6 +131,7 @@
     "@kbn/alerting-v2-plugin",
     "@kbn/cps-utils",
     "@kbn/as-code-data-views-schema",
+    "@kbn/aiops-log-rate-analysis",
   ],
   "exclude": ["target/**/*"]
 }
