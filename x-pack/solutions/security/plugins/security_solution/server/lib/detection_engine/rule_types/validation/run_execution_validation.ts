@@ -67,8 +67,9 @@ export const runExecutionValidation = async (
   const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
 
   try {
-    const { matchedIndexPatterns, matchedIndices } =
-      await indexPatterns.getIndexPatternsWithMatches(inputIndex);
+    const { matchedIndexPatterns, matchedIndices } = await indexPatterns.getIndexPatternMatches(
+      inputIndex
+    );
 
     // Collect rule execution metrics
     ruleExecutionLogger.logMetric('matched_indices_count', matchedIndices?.length);
@@ -88,7 +89,7 @@ export const runExecutionValidation = async (
       const {
         matchedIndexPatterns: matchedThreatIndexPatterns,
         matchedIndices: matchedThreatIndices,
-      } = await indexPatterns.getIndexPatternsWithMatches(params.threatIndex);
+      } = await indexPatterns.getIndexPatternMatches(params.threatIndex);
 
       // Collect rule execution metrics
       ruleExecutionLogger.logMetric(

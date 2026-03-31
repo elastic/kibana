@@ -48,6 +48,11 @@ interface IndexPatternsFetcherOptionalParams {
   rollupsEnabled?: boolean;
 }
 
+interface GetIndexPatternMatchesResult {
+  matchedIndexPatterns: string[];
+  matchedIndices?: string[];
+}
+
 export class IndexPatternsFetcher {
   private readonly uiSettingsClient?: IUiSettingsClient;
   private readonly allowNoIndices: boolean;
@@ -159,13 +164,15 @@ export class IndexPatternsFetcher {
   }
 
   /**
-   * Get existing index pattern list by providing string array index pattern list.
-   * @param indexPatterns - index pattern list
-   * @returns index pattern list of index patterns that match indices
+   * For each input pattern, checks whether it resolves to at least one backing index.
+   *
+   * @param indexPatterns - Index patterns to check (may include wildcards and negated entries).
+   * @returns Resolves to {@link GetIndexPatternMatchesResult}:
+   *   - `matchedIndexPatterns`: input patterns that matched at least one index.
+   *   - `matchedIndices`: deduplicated concrete index names across all matches (omitted if the
+   *     operation fails; then `matchedIndexPatterns` is the original `indexPatterns` list).
    */
-  async getIndexPatternsWithMatches(
-    indexPatterns: string[]
-  ): Promise<{ matchedIndexPatterns: string[]; matchedIndices?: string[] }> {
+  async getIndexPatternMatches(indexPatterns: string[]): Promise<GetIndexPatternMatchesResult> {
     const indexPatternsObs = indexPatterns.map((indexPattern) => {
       // when checking a negative pattern, check if the positive pattern exists
       const indexToQuery = indexPattern.trim().startsWith('-')
@@ -185,7 +192,7 @@ export class IndexPatternsFetcher {
       );
     });
 
-    return new Promise<{ matchedIndexPatterns: string[]; matchedIndices?: string[] }>((resolve) => {
+    return new Promise<GetIndexPatternMatchesResult>((resolve) => {
       rateLimitingForkJoin(indexPatternsObs, 3, {
         fields: [],
         indices: [],

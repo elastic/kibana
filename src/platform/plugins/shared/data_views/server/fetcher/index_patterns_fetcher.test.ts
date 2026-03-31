@@ -101,32 +101,33 @@ describe('Index Pattern Fetcher - server', () => {
     expect(esClient.rollup.getRollupIndexCaps).toHaveBeenCalledTimes(0);
   });
 
-  describe('getExistingIndices', () => {
-    test('getExistingIndices returns the valid matched indices', async () => {
+  describe('getIndexPatternMatches', () => {
+    test('returns the valid matched indices', async () => {
       indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
       indexPatterns.getFieldsForWildcard = jest
         .fn()
         .mockResolvedValueOnce({ indices: ['length'] })
         .mockResolvedValue({ indices: [] });
-      const result = await indexPatterns.getIndexPatternsWithMatches([
-        'packetbeat-*',
-        'filebeat-*',
-      ]);
+      const result = await indexPatterns.getIndexPatternMatches(['packetbeat-*', 'filebeat-*']);
       expect(indexPatterns.getFieldsForWildcard).toBeCalledTimes(2);
-      expect(result.length).toBe(1);
+      expect(result.matchedIndexPatterns.length).toBe(1);
+      expect(result.matchedIndices?.length).toBe(1);
     });
 
-    test('getExistingIndices checks the positive pattern if provided with a negative pattern', async () => {
+    test('checks the positive pattern if provided with a negative pattern', async () => {
       indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
       const mockFn = jest.fn().mockResolvedValue({ indices: ['length'] });
       indexPatterns.getFieldsForWildcard = mockFn;
-      const result = await indexPatterns.getIndexPatternsWithMatches(['-filebeat-*', 'filebeat-*']);
+      const result = await indexPatterns.getIndexPatternMatches(['-filebeat-*', 'filebeat-*']);
       expect(mockFn.mock.calls[0][0].pattern).toEqual('filebeat-*');
       expect(mockFn.mock.calls[1][0].pattern).toEqual('filebeat-*');
-      expect(result).toEqual(['-filebeat-*', 'filebeat-*']);
+      expect(result).toEqual({
+        matchedIndexPatterns: ['-filebeat-*', 'filebeat-*'],
+        matchedIndices: ['length'],
+      });
     });
 
-    test('getExistingIndices handles an error', async () => {
+    test('handles an error', async () => {
       indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
       indexPatterns.getFieldsForWildcard = jest
         .fn()
@@ -134,11 +135,8 @@ describe('Index Pattern Fetcher - server', () => {
           throw new DataViewMissingIndices('Catch me if you can!');
         })
         .mockImplementation(() => Promise.resolve({ indices: ['length'] }));
-      const result = await indexPatterns.getIndexPatternsWithMatches([
-        'packetbeat-*',
-        'filebeat-*',
-      ]);
-      expect(result).toEqual(['filebeat-*']);
+      const result = await indexPatterns.getIndexPatternMatches(['packetbeat-*', 'filebeat-*']);
+      expect(result).toEqual({ matchedIndexPatterns: ['filebeat-*'], matchedIndices: ['length'] });
     });
   });
 });
