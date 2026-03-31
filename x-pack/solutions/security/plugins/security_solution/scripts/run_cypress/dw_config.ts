@@ -143,11 +143,10 @@ export const DW_LOAD_BALANCER_CONFIG: LoadBalancerConfig = {
  * on one agent. Target of 20 (slightly above the 12-agent avg of ~17)
  * activates the penalty early enough to spread specs evenly.
  *
- * SL also doesn't need config isolation since all SL specs use the default
- * ftrConfig (no license overrides or experimental kbnServerArgs).
+ * Config isolation stays enabled — SL has productTypes-based non-default
+ * configs (essentials, complete+experimental) that need dedicated agents.
  */
 export const DW_SERVERLESS_LOAD_BALANCER_CONFIG: LoadBalancerConfig = {
   ...DW_LOAD_BALANCER_CONFIG,
-  isolateNonDefaultConfigs: false,
   targetWeightPerAgent: 20,
 };
