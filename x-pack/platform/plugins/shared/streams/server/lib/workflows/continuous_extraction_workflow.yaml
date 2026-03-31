@@ -45,3 +45,4 @@ steps:
             type: streams.ki_features_extract_stream
             with:
               streamName: "{{ foreach.item.streamName }}"
+              scheduledStreams: "${{ steps.select_streams.output.scheduled }}"

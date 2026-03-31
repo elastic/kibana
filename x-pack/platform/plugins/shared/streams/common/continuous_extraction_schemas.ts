@@ -41,4 +41,5 @@ export const kiSelectStreamsInputSchema = z.object({
 
 export const kiFeaturesExtractStreamInputSchema = z.object({
   streamName: z.string(),
+  scheduledStreams: z.array(z.object({ streamName: z.string() })),
 });

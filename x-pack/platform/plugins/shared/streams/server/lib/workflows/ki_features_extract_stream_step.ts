@@ -195,21 +195,25 @@ export const registerKiFeaturesExtractStreamStep = ({
       throw new Error(`Stream ${streamName}: polling timed out after ${MAX_POLL_DURATION_MS}ms`);
     },
     onCancel: async (context) => {
-      const { streamName } = kiFeaturesExtractStreamInputSchema.parse(context.input);
+      const { scheduledStreams } = kiFeaturesExtractStreamInputSchema.parse(context.input);
 
       const request = context.contextManager.getFakeRequest();
       const { taskClient } = await getScopedClients({ request });
 
-      try {
-        await taskClient.cancel(getFeaturesIdentificationTaskId(streamName));
-        context.logger.info(`onCancel: cancelled task for stream ${streamName}`);
-      } catch (err) {
-        context.logger.warn(
-          `onCancel: failed to cancel task for stream ${streamName}: ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
-      }
+      const results = await Promise.allSettled(
+        scheduledStreams.map(({ streamName }) =>
+          taskClient.cancel(getFeaturesIdentificationTaskId(streamName))
+        )
+      );
+
+      const succeeded = results.filter((r) => r.status === 'fulfilled').length;
+      const failed = results.filter((r) => r.status === 'rejected').length;
+
+      context.logger.info(
+        `onCancel: cancelled ${succeeded}/${scheduledStreams.length} extraction task(s)${
+          failed > 0 ? `, ${failed} failed` : ''
+        }`
+      );
     },
   });
 };
