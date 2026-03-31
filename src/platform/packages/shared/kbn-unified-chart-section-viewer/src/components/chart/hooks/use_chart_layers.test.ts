@@ -87,7 +87,7 @@ describe('useChartLayers', () => {
     );
     const [layer] = result.current;
     expect(layer.yAxis[0]).toHaveProperty('format');
-    expect(layer.yAxis[0]).toHaveProperty('format');
+    expect(layer.yAxis[0].format).toBe('bytes');
   });
 
   it('should normalize denormalized units like "byte" to "bytes"', () => {
