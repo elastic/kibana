@@ -11,7 +11,7 @@ import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-ty
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { SearchIndexManagementApp } from './components/index_management/index_management_app';
 
 export const renderIndexManagementApp = async (
@@ -28,16 +28,16 @@ export const renderIndexManagementApp = async (
     ...depsStart,
     history,
   };
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...coreStart, ...services }}>
         <I18nProvider>
           <SearchIndexManagementApp indexManagement={indexManagement} />
         </I18nProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -16,6 +15,7 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { wrapWithTheme } from '@kbn/react-kibana-context-theme';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { createRoot } from 'react-dom/client';
 import { GenAiSettingsApp } from '../components/gen_ai_settings_app';
 import { EnabledFeaturesContextProvider } from '../contexts/enabled_features_context';
 import type { GenAiSettingsConfigType } from '../../common/config';
@@ -59,9 +59,10 @@ export const mountManagementSection = async ({
     </QueryClientProvider>
   );
 
-  ReactDOM.render(wrapWithTheme(<GenAiSettingsAppWithContext />, core.theme), element);
+  const root = createRoot(element);
+  root.render(wrapWithTheme(<GenAiSettingsAppWithContext />, core.theme));
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

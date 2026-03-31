@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
@@ -21,6 +20,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { createRoot } from 'react-dom/client';
 import PageNotFound from '../pages/404';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
@@ -87,7 +87,8 @@ export const renderApp = ({
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <ApplicationUsageTrackingProvider>
         <KibanaThemeProvider {...{ theme: { theme$ } }}>
@@ -131,8 +132,7 @@ export const renderApp = ({
           </CloudProvider>
         </KibanaThemeProvider>
       </ApplicationUsageTrackingProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
   return () => {
     // This needs to be present to fix https://github.com/elastic/kibana/issues/155704
@@ -140,6 +140,6 @@ export const renderApp = ({
     // via the ExploratoryView app, which uses search sessions. Therefore on unmounting we need to clear
     // these sessions.
     plugins.data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

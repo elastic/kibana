@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/chart-expressions-common'
   - '@kbn/visualizations-common'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

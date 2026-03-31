@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import type { EventEmitter } from 'events';
 import type {
   Vis,
@@ -24,6 +25,8 @@ import type { TimeseriesVisParams } from '../types';
 export const TSVB_EDITOR_NAME = 'tsvbEditor';
 
 export class EditorController implements IEditorController {
+  private root?: Root;
+
   constructor(
     private el: HTMLElement,
     private vis: Vis<TimeseriesVisParams>,
@@ -34,7 +37,8 @@ export class EditorController implements IEditorController {
   async render({ timeRange, uiState, filters, query }: EditorRenderProps) {
     const defaultIndexPattern = (await getDataViewsStart().getDefault()) || undefined;
 
-    render(
+    this.root ??= createRoot(this.el);
+    this.root.render(
       <KibanaRenderContextProvider {...getCoreStart()}>
         <VisEditor
           config={getUISettings()}
@@ -47,12 +51,12 @@ export class EditorController implements IEditorController {
           query={query}
           defaultIndexPattern={defaultIndexPattern}
         />
-      </KibanaRenderContextProvider>,
-      this.el
+      </KibanaRenderContextProvider>
     );
   }
 
   destroy() {
-    unmountComponentAtNode(this.el);
+    this.root?.unmount();
+    this.root = undefined;
   }
 }

@@ -8,7 +8,6 @@
  */
 
 import React, { createRef } from 'react';
-import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { CoreStart } from '@kbn/core/public';
 import type { RenderingService } from '@kbn/core-rendering-browser';
@@ -37,6 +36,7 @@ interface ShareMenuManagerStartDeps {
 export class ShareMenuManager {
   private isOpen = false;
   private container = document.createElement('div');
+  private unmount?: () => void;
 
   start({ core, resolveShareItemsForShareContext, isServerless }: ShareMenuManagerStartDeps) {
     return {
@@ -228,7 +228,9 @@ export class ShareMenuManager {
   }
 
   private onClose = () => {
-    ReactDOM.unmountComponentAtNode(this.container);
+    this.unmount?.();
+    this.unmount = undefined;
+    this.container.remove();
     this.isOpen = false;
   };
 
@@ -263,8 +265,6 @@ export class ShareMenuManager {
     document.body.appendChild(this.container);
 
     // initialize variable that will hold reference for unmount
-    let unmount: ReturnType<ReturnType<typeof toMountPoint>>;
-
     const mount = toMountPoint(
       React.createElement(asExport ? ExportMenu : ShareMenu, {
         shareContext: {
@@ -282,7 +282,8 @@ export class ShareMenuManager {
           shareMenuItems: menuItems,
           onClose: () => {
             onClose();
-            unmount();
+            this.unmount?.();
+            this.unmount = undefined;
           },
           onSave,
         },
@@ -291,7 +292,7 @@ export class ShareMenuManager {
     );
 
     const openModal = () => {
-      unmount = mount(this.container);
+      this.unmount = mount(this.container);
       this.isOpen = true;
     };
 

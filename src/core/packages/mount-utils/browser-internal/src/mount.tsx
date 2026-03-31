@@ -8,9 +8,8 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import { render, unmountComponentAtNode, type MountPoint } from '@kbn/core-mount-utils-browser';
 
 const defaultWrapperClass = 'kbnMountWrapper';
 
@@ -46,5 +45,7 @@ export const mountReactNode =
   (node: React.ReactNode): MountPoint =>
   (element: HTMLElement) => {
     render(<I18nProvider>{node}</I18nProvider>, element);
-    return () => unmountComponentAtNode(element);
+    return () => {
+      unmountComponentAtNode(element);
+    };
   };

@@ -10,9 +10,9 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import { SectionRegistry } from '@kbn/management-settings-section-registry';
-import ReactDOM from 'react-dom';
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { createRoot } from 'react-dom/client';
 import type {
   AdvancedSettingsSetup,
   AdvancedSettingsStart,
@@ -58,7 +58,8 @@ export class AdvancedSettingsPlugin
         docTitle.change(title);
         setBreadcrumbs([{ text: title }]);
 
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           coreStart.rendering.addContext(
             <KibanaSettingsApplication
               {...{
@@ -68,12 +69,11 @@ export class AdvancedSettingsPlugin
                 sectionRegistry: sectionRegistryStart,
               }}
             />
-          ),
-          element
+          )
         );
         return () => {
           docTitle.reset();
-          ReactDOM.unmountComponentAtNode(element);
+          root.unmount();
         };
       },
     });

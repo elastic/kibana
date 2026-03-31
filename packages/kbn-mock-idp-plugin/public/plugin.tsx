@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core-plugins-browser';
@@ -49,18 +49,18 @@ export const plugin: PluginInitializer<
           import('./login_page'),
         ]);
 
-        ReactDOM.render(
+        const root = createRoot(params.element);
+        root.render(
           <KibanaThemeProvider {...coreStart}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
                 <LoginPage config={initializerContext.config.get()} />
               </I18nProvider>
             </KibanaContextProvider>
-          </KibanaThemeProvider>,
-          params.element
+          </KibanaThemeProvider>
         );
 
-        return () => ReactDOM.unmountComponentAtNode(params.element);
+        return () => root.unmount();
       },
     });
   },

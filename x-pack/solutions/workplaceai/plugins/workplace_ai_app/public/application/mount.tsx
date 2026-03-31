@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -14,6 +13,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { Router } from '@kbn/shared-ux-router';
+import { createRoot } from 'react-dom/client';
 import type { WorkplaceAIServices } from '../services';
 import type { WorkplaceAIAppPluginStartDependencies } from '../types';
 import { WorkplaceAIAppRoutes } from './routes';
@@ -33,7 +33,8 @@ export const mountApp = async ({
 }) => {
   const kibanaServices = { ...core, plugins, workplaceAIServices: services };
   const queryClient = new QueryClient();
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={kibanaServices}>
         <I18nProvider>
@@ -46,9 +47,8 @@ export const mountApp = async ({
           </QueryClientProvider>
         </I18nProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
+import { createRoot } from 'react-dom/client';
 import { KibanaRenderContextProvider } from './shared_imports';
 import type { AppDeps } from './app';
 import { App } from './app';
@@ -23,7 +23,8 @@ export const renderApp = (bootDeps: BootDeps) => {
 
   setHttpClient(appDeps.http);
 
-  render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...appDeps}>
       <KibanaContextProvider
         services={{
@@ -34,11 +35,10 @@ export const renderApp = (bootDeps: BootDeps) => {
       >
         <App {...appDeps} />
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

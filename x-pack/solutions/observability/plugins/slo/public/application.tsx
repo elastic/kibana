@@ -19,7 +19,7 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
 import { usePluginContext } from './hooks/use_plugin_context';
@@ -90,7 +90,8 @@ export const renderApp = ({
     ],
   });
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <ApplicationUsageTrackingProvider>
         <CloudProvider>
@@ -129,8 +130,7 @@ export const renderApp = ({
           </KibanaContextProvider>
         </CloudProvider>
       </ApplicationUsageTrackingProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
@@ -140,7 +140,7 @@ export const renderApp = ({
     // these sessions.
     plugins.data.search.session.clear();
     unregisterPrompts?.();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { createRoot } from 'react-dom/client';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from './client/attachment_framework/unified_attachment_registry';
@@ -24,10 +24,11 @@ export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
   const { element } = mountParams;
 
-  ReactDOM.render(<App deps={deps} />, element);
+  const root = createRoot(element);
+  root.render(<App deps={deps} />);
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

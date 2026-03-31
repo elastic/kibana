@@ -8,13 +8,13 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { createRoot } from 'react-dom/client';
 import { MyPluginComponent } from './app';
 
 interface SetupDeps {
@@ -34,15 +34,15 @@ export class EsoModelVersionExample implements Plugin<void, void, SetupDeps, Sta
       title: 'ESO Model Version Example',
       async mount({ element }: AppMountParameters) {
         const [coreStart] = await coreSetup.getStartServices();
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <KibanaPageTemplate>
             <KibanaContextProvider services={{ ...coreStart, ...deps }}>
               <MyPluginComponent />
             </KibanaContextProvider>
-          </KibanaPageTemplate>,
-          element
+          </KibanaPageTemplate>
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
     deps.developerExamples.register({

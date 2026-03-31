@@ -8,8 +8,8 @@
 import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { type CoreSetup, type Plugin } from '@kbn/core/public';
 import { createAppService } from '@kbn/ai-assistant';
-import ReactDOM from 'react-dom';
 import React from 'react';
+import { createRoot } from 'react-dom/client';
 import type {
   SearchAssistantPluginSetup,
   SearchAssistantPluginStart,
@@ -63,18 +63,17 @@ export class SearchAssistantPlugin
 
     coreStart.chrome.navControls.registerRight({
       mount: (element) => {
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <NavControlInitiator
             appService={appService}
             coreStart={coreStart}
             pluginsStart={pluginsStart}
-          />,
-          element,
-          () => {}
+          />
         );
 
         return () => {
-          ReactDOM.unmountComponentAtNode(element);
+          root.unmount();
         };
       },
       // right before the user profile

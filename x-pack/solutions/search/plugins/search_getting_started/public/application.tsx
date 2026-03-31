@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import type { QueryClient } from '@kbn/react-query';
 import { QueryClientProvider } from '@kbn/react-query';
+import { createRoot } from 'react-dom/client';
 import type { SearchGettingStartedServicesContextDeps } from './types';
 import { SearchGettingStartedPage } from './components/search_getting_started';
 import { UsageTrackerContextProvider } from './contexts/usage_tracker_context';
@@ -24,7 +24,8 @@ export const renderApp = async (
   queryClient: QueryClient,
   kibanaVersion: string
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     core.rendering.addContext(
       <KibanaContextProvider services={{ ...core, ...services, kibanaVersion }}>
         <UsageTrackerContextProvider usageCollection={services.usageCollection}>
@@ -37,9 +38,8 @@ export const renderApp = async (
           </QueryClientProvider>
         </UsageTrackerContextProvider>
       </KibanaContextProvider>
-    ),
-    element
+    )
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

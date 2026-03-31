@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { NewsfeedApiEndpoint } from '@kbn/newsfeed-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { createRoot } from 'react-dom/client';
 import type { AppPluginStartDependencies } from './types';
 import { KibanaOverviewApp } from './components/app';
 
@@ -30,7 +30,8 @@ export const renderApp = (
     { text: i18n.translate('kibanaOverview.breadcrumbs.title', { defaultMessage: 'Analytics' }) },
   ]);
 
-  core.chrome.navLinks.getNavLinks$().subscribe((navLinks) => {
+  const root = createRoot(element);
+  const navLinksSubscription = core.chrome.navLinks.getNavLinks$().subscribe((navLinks) => {
     const solutions = home.featureCatalogue
       .getSolutions()
       .filter(({ id }) => id !== 'kibana')
@@ -40,7 +41,7 @@ export const renderApp = (
         )
       );
 
-    ReactDOM.render(
+    root.render(
       core.rendering.addContext(
         <KibanaContextProvider services={{ ...core, ...deps }}>
           <KibanaOverviewApp
@@ -48,10 +49,12 @@ export const renderApp = (
             {...{ notifications, http, navigation, newsfeed$, solutions, features$ }}
           />
         </KibanaContextProvider>
-      ),
-      element
+      )
     );
   });
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => {
+    navLinksSubscription.unsubscribe();
+    root.unmount();
+  };
 };

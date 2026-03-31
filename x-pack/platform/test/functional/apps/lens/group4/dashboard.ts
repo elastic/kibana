@@ -174,10 +174,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardAddPanel.clickCreateNewLink();
       await header.waitUntilLoadingHasFinished();
-      const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
-      expect(hasGeoDestFilter).to.be(false);
-      const hasGeoSrcFilter = await filterBar.hasFilter('geo.src', 'US', true, true);
-      expect(hasGeoSrcFilter).to.be(true);
+      await retry.try(async () => {
+        const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
+        expect(hasGeoDestFilter).to.be(false);
+        const hasGeoSrcFilter = await filterBar.hasFilter('geo.src', 'US', true, true);
+        expect(hasGeoSrcFilter).to.be(true);
+      });
     });
 
     it('CSV export action exists in panel context menu', async () => {

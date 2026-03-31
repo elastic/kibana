@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { render } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 import { UserBannerService } from './user_banner_service';
 import { overlayBannersServiceMock } from './banners_service.test.mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -47,21 +50,37 @@ describe('OverlayBannersService', () => {
     });
   };
 
-  afterEach(() => service.stop());
+  beforeEach(() => {
+    mockReactDomRender.mockClear();
+    mockReactDomUnmount.mockClear();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    service.stop();
+  });
 
   it('does not add banner if setting is unspecified', () => {
     startService();
     expect(banners.replace).not.toHaveBeenCalled();
   });
 
-  it('adds banner if setting is specified', () => {
+  it('adds banner if setting is specified', async () => {
     startService('testing banner!');
     expect(banners.replace).toHaveBeenCalled();
 
     const mount = banners.replace.mock.calls[0][1];
     const div = document.createElement('div');
     mount(div);
-    expect(div.querySelector('.euiCallOut')).toBeInstanceOf(HTMLDivElement);
+    let container: HTMLElement | undefined;
+    await act(async () => {
+      ({ container } = render(mockReactDomRender.mock.calls[0][0]));
+      await Promise.resolve();
+    });
+    if (!container) {
+      throw new Error('Expected banner container to be rendered');
+    }
+    expect(container.querySelector('.euiCallOut')).toBeInstanceOf(HTMLDivElement);
   });
 
   it('dismisses banner after timeout', async () => {

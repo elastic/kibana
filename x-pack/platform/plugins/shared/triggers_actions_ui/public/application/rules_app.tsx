@@ -15,7 +15,6 @@ import type {
   ScopedHistory,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { render, unmountComponentAtNode } from 'react-dom';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -46,6 +45,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import { createRoot } from 'react-dom/client';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { Section } from './constants';
@@ -99,9 +99,10 @@ export interface TriggersAndActionsUiServices extends CoreStart {
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
   const { element } = deps;
-  render(<App deps={deps} />, element);
+  const root = createRoot(element);
+  root.render(<App deps={deps} />);
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

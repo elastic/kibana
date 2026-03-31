@@ -37,7 +37,9 @@ export const DiscoverHistogramLayout = ({
   );
 
   if (!layoutProps) {
-    return null;
+    // Histogram layout props are published asynchronously from the chart portal subtree.
+    // Render the main content immediately so Discover never blanks the page while waiting.
+    return <DiscoverMainContent {...mainContentProps} sidebarToggleState$={sidebarToggleState$} />;
   }
 
   return (

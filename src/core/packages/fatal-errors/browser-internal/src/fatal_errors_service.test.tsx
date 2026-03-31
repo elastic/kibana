@@ -8,7 +8,6 @@
  */
 
 import React, { type ReactElement, type ReactNode } from 'react';
-import ReactDOM from 'react-dom';
 import { render } from '@testing-library/react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
@@ -17,6 +16,14 @@ import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 
 import { FatalErrorsService } from './fatal_errors_service';
+
+const mockCreateRootRender = jest.fn();
+jest.mock('react-dom/client', () => ({
+  createRoot: jest.fn(() => ({
+    render: mockCreateRootRender,
+    unmount: jest.fn(),
+  })),
+}));
 
 describe('FatalErrorsService', () => {
   let fatalErrorsSetup: FatalErrorsSetup;
@@ -38,6 +45,10 @@ describe('FatalErrorsService', () => {
     const fatalErrorsService = new FatalErrorsService(rootDomElement, stopCoreSystem);
 
     fatalErrorsSetup = fatalErrorsService.setup({ analytics, injectedMetadata, i18n, theme });
+  });
+
+  afterEach(() => {
+    mockCreateRootRender.mockClear();
   });
 
   describe('add', () => {
@@ -62,13 +73,9 @@ describe('FatalErrorsService', () => {
         handler = jest.fn(() => <div data-test-subj="customError" />);
         fatalErrorsSetup.catch(condition, handler);
 
-        const renderSpy = jest.spyOn(ReactDOM, 'render').mockImplementation(() => {});
+        mockCreateRootRender.mockClear();
         expect(() => fatalErrorsSetup.add(new Error('foo'))).toThrowError();
-        [element] = renderSpy.mock.lastCall as unknown as [ReactElement];
-      });
-
-      afterEach(() => {
-        jest.resetAllMocks();
+        [element] = mockCreateRootRender.mock.lastCall as unknown as [ReactElement];
       });
 
       it('should clean up the root element', async () => {
@@ -84,8 +91,8 @@ describe('FatalErrorsService', () => {
       });
 
       it('should render a custom error', async () => {
-        expect(() => fatalErrorsSetup.add(new Error('bar'))).toThrowError();
         condition.mockReturnValue(true);
+        expect(() => fatalErrorsSetup.add(new Error('bar'))).toThrowError();
         expect(render(element).queryByTestId('customError')).toBeTruthy();
         expect(condition).toHaveBeenCalledTimes(2);
         expect(condition).toHaveBeenNthCalledWith(
@@ -104,8 +111,8 @@ describe('FatalErrorsService', () => {
       });
 
       it('should not render a custom error when errors are ambiguous', () => {
-        expect(() => fatalErrorsSetup.add(new Error('bar'))).toThrowError();
         condition.mockReturnValueOnce(true);
+        expect(() => fatalErrorsSetup.add(new Error('bar'))).toThrowError();
         expect(render(element).queryByTestId('customError')).toBeFalsy();
       });
     });

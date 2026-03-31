@@ -7,10 +7,10 @@
 
 import React from 'react';
 import type { Store } from 'redux';
-import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import type { BehaviorSubject } from 'rxjs';
+import { createRoot } from 'react-dom/client';
 
 import '@kbn/flot-charts';
 import { includes, remove } from 'lodash';
@@ -62,7 +62,8 @@ export const renderApp = ({
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
         <LegacyServicesProvider providers={services}>
@@ -71,11 +72,10 @@ export const renderApp = ({
           </Provider>
         </LegacyServicesProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
     canvasStore.dispatch(appUnload());
   };
 };

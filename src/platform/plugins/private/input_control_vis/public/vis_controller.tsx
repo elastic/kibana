@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { isEqual } from 'lodash';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { Subscription } from 'rxjs';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -36,6 +36,7 @@ export const createInputControlVisController = (
   el: Element
 ) => {
   let isLoaded = false;
+  const root = createRoot(el);
 
   return new (class InputControlVisController {
     controls: Array<RangeControl | ListControl>;
@@ -79,12 +80,12 @@ export const createInputControlVisController = (
     destroy() {
       this.updateSubsciption.unsubscribe();
       this.timeFilterSubscription.unsubscribe();
-      unmountComponentAtNode(el);
+      root.unmount();
       this.controls.forEach((control) => control.destroy());
     }
 
     drawVis = () => {
-      render(
+      root.render(
         <KibanaRenderContextProvider {...coreStart}>
           <VisualizationContainer handlers={handlers}>
             <InputControlVis
@@ -100,8 +101,7 @@ export const createInputControlVisController = (
               isDarkMode={this.isDarkMode}
             />
           </VisualizationContainer>
-        </KibanaRenderContextProvider>,
-        el
+        </KibanaRenderContextProvider>
       );
     };
 

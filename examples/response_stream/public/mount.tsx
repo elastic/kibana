@@ -8,10 +8,10 @@
  */
 
 import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import type { CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { createRoot } from 'react-dom/client';
 import { PLUGIN_NAME } from '../common/constants';
 import type { ResponseStreamStartPlugins } from './plugin';
 import { App } from './containers/app';
@@ -49,6 +49,7 @@ export const mount =
         </KibanaContextProvider>
       </KibanaRenderContextProvider>
     );
-    render(reactElement, element);
-    return () => unmountComponentAtNode(element);
+    const root = createRoot(element);
+    root.render(reactElement);
+    return () => root.unmount();
   };

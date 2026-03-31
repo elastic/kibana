@@ -21,7 +21,7 @@ import {
   EuiFlexItem,
   type UseEuiTheme,
 } from '@elastic/eui';
-import ReactDOM from 'react-dom';
+import * as ReactDOM from '@kbn/core-mount-utils-browser';
 import { NameInput } from '@kbn/visualization-ui-components';
 import type {
   GenericIndexPatternColumn,

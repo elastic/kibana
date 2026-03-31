@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import * as ReactDOM from 'react-dom';
 import type { HtmlPortalNode } from 'react-reverse-portal';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import type { CommentServiceActions } from '@kbn/elastic-assistant-shared-state';

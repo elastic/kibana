@@ -10,7 +10,6 @@
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
 import { Subject, combineLatest, debounceTime, map, take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -38,6 +37,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
+import { createRoot } from 'react-dom/client';
 import { GridLayoutOptions } from './grid_layout_options';
 import {
   clearSerializedDashboardState,
@@ -298,9 +298,10 @@ export const renderGridExampleApp = (
   element: AppMountParameters['element'],
   deps: { uiActions: UiActionsStart; coreStart: CoreStart }
 ) => {
-  ReactDOM.render(<GridExample {...deps} />, element);
+  const root = createRoot(element);
+  root.render(<GridExample {...deps} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };
 
 const customLayoutStyles = ({ euiTheme }: UseEuiTheme) => {

@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import type { HtmlPortalNode } from 'react-reverse-portal';
 import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
-import ReactDOM from 'react-dom';
+import * as ReactDOM from 'react-dom';
 import type { Conversation } from '@kbn/elastic-assistant';
 import { analyzeMarkdown } from '@kbn/elastic-assistant';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';

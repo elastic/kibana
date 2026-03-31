@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { coreServices } from '../services/kibana_services';
 import { LinkEditor } from '../components/editor/link_editor';
@@ -31,6 +31,8 @@ export async function openLinkEditorFlyout({
   mainFlyoutId, // used to manage the focus of this flyout after inidividual link editor flyout is closed
   parentDashboardId,
 }: LinksEditorProps) {
+  const root = ref.current ? createRoot(ref.current) : undefined;
+
   const unmountFlyout = async () => {
     if (ref.current) {
       ref.current.children[1].className = 'linkEditor out';
@@ -38,7 +40,7 @@ export async function openLinkEditorFlyout({
     await new Promise(() => {
       // wait for close animation before unmounting
       setTimeout(() => {
-        if (ref.current) ReactDOM.unmountComponentAtNode(ref.current);
+        root?.unmount();
         focusMainFlyout(mainFlyoutId);
       }, 180);
     });
@@ -55,7 +57,7 @@ export async function openLinkEditorFlyout({
       await unmountFlyout();
     };
 
-    ReactDOM.render(
+    root?.render(
       <KibanaRenderContextProvider {...coreServices}>
         <LinkEditor
           link={link}
@@ -63,8 +65,7 @@ export async function openLinkEditorFlyout({
           onClose={onCancel}
           parentDashboardId={parentDashboardId}
         />
-      </KibanaRenderContextProvider>,
-      ref.current
+      </KibanaRenderContextProvider>
     );
   });
 }

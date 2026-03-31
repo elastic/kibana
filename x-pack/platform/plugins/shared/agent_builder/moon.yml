@@ -119,6 +119,7 @@ dependsOn:
   - '@kbn/fs'
   - '@kbn/react-hooks'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

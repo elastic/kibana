@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createRoot } from 'react-dom/client';
 import type { AppDependencies } from '..';
 import { SearchSessionsMgmtMain } from '../components/main';
 
@@ -27,16 +27,16 @@ export const renderApp = (
     uiSettings,
   });
 
-  render(
+  const root = createRoot(elem);
+  root.render(
     <KibanaRenderContextProvider {...homeDeps.core}>
       <KibanaReactContextProvider>
         <SearchSessionsMgmtMain {...homeDeps} timezone={uiSettings.get('dateFormat:tz')} />
       </KibanaReactContextProvider>
-    </KibanaRenderContextProvider>,
-    elem
+    </KibanaRenderContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(elem);
+    root.unmount();
   };
 };

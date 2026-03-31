@@ -8,9 +8,9 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type {
   Datatable,
   ExpressionRenderDefinition,

@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
+import { createRoot } from 'react-dom/client';
 import { SourcesPage } from './pages/sources_page';
 import type { DataSourcesPluginStart, DataSourcesPluginStartDependencies } from '../types';
 
@@ -27,7 +27,8 @@ export const renderApp = ({ core, plugins, services, params }: DataSourcesMountP
   const { element } = params;
   const queryClient = new QueryClient();
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     core.rendering.addContext(
       <KibanaContextProvider services={kibanaServices}>
         <I18nProvider>
@@ -38,8 +39,7 @@ export const renderApp = ({ core, plugins, services, params }: DataSourcesMountP
           </QueryClientProvider>
         </I18nProvider>
       </KibanaContextProvider>
-    ),
-    element
+    )
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

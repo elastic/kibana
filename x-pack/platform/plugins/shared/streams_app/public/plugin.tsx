@@ -21,7 +21,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { from, map, switchMap } from 'rxjs';
 import { css } from '@emotion/css';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type {
   ConfigSchema,
   StreamsAppPublicSetup,
@@ -62,18 +62,18 @@ export const renderApp = ({
   const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
   appWrapperElement.classList.add(appWrapperClassName);
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <StreamsApplication
       coreStart={coreStart}
       pluginsStart={pluginsStart}
       services={services}
       isServerless={isServerless}
       appMountParameters={appMountParameters}
-    />,
-    element
+    />
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
     appWrapperElement.classList.remove(APP_WRAPPER_CLASS);
   };
 };

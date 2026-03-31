@@ -8,13 +8,13 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { createRoot } from 'react-dom/client';
 import type { AppPluginStartDependencies } from './types';
 import type { ExampleLink } from './common/example_page';
 import { SearchExamplePage } from './common/example_page';
@@ -46,7 +46,8 @@ export const renderApp = (
   { data, navigation, unifiedSearch }: AppPluginStartDependencies,
   { element, history }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <I18nProvider>
         <RedirectAppLinks
@@ -88,12 +89,11 @@ export const renderApp = (
           </SearchExamplePage>
         </RedirectAppLinks>
       </I18nProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
     data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

@@ -26,18 +26,22 @@ describe('renderApp', () => {
     basePath = new BasePath({ basePath: '' });
     element = document.createElement('div');
     history = createMemoryHistory();
-    unmount = renderApp(
-      applicationServiceMock.createAppMountParameters({
-        element,
-        history: new CoreScopedHistory(history, '/'),
-      }),
-      {
-        basePath,
-      }
-    );
+    act(() => {
+      unmount = renderApp(
+        applicationServiceMock.createAppMountParameters({
+          element,
+          history: new CoreScopedHistory(history, '/'),
+        }),
+        {
+          basePath,
+        }
+      );
+    });
   });
 
-  afterEach(() => unmount());
+  afterEach(() => {
+    act(() => unmount());
+  });
 
   it('renders generic errors', () => {
     act(() => {

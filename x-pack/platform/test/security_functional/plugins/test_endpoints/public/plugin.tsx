@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { debounce, filter, first, timer } from 'rxjs';
 
 import type { CoreSetup, Plugin } from '@kbn/core/public';
+import * as ReactDOM from '@kbn/core-mount-utils-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 export interface PluginStartDependencies {

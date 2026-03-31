@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import {
   EuiPage,
   EuiPageHeader,
@@ -32,6 +31,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { createRoot } from 'react-dom/client';
 import { RunExpressionsExample } from './run_expressions';
 import { RenderExpressionsExample } from './render_expressions';
 
@@ -100,7 +100,8 @@ const ExpressionsExplorer = ({
 };
 
 export const renderApp = (props: Props, { element }: AppMountParameters) => {
-  ReactDOM.render(<ExpressionsExplorer {...props} />, element);
+  const root = createRoot(element);
+  root.render(<ExpressionsExplorer {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

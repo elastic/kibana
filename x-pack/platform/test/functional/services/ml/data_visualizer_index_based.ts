@@ -199,12 +199,14 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       await retry.tryForTime(5000, async () => {
         await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerViewInDiscoverCard');
         await PageObjects.discover.waitForDiscoverAppOnScreen();
+        await PageObjects.discover.waitUntilTabIsLoaded();
       });
     },
 
     async assertDiscoverPageQuery(expectedQueryString: string) {
       await PageObjects.discover.waitForDiscoverAppOnScreen();
-      await retry.tryForTime(5000, async () => {
+      await PageObjects.discover.waitUntilTabIsLoaded();
+      await retry.try(async () => {
         const queryString = await queryBar.getQueryString();
         expect(queryString).to.eql(
           expectedQueryString,
@@ -215,7 +217,8 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async assertDiscoverHitCount(expectedHitCountFormatted: string) {
       await PageObjects.discover.waitForDiscoverAppOnScreen();
-      await retry.tryForTime(5000, async () => {
+      await PageObjects.discover.waitUntilTabIsLoaded();
+      await retry.try(async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         expect(hitCount).to.eql(
           expectedHitCountFormatted,

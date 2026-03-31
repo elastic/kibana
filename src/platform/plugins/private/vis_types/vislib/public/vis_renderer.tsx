@@ -8,8 +8,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-common';

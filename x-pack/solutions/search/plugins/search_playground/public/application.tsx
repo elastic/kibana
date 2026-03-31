@@ -6,19 +6,20 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
+import { createRoot } from 'react-dom/client';
 import type { AppServices } from './types';
 import { queryClient } from './utils/query_client';
 
 export const renderApp = async (core: CoreStart, services: AppServices, element: HTMLElement) => {
   const { PlaygroundRouter } = await import('./playground_router');
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     core.rendering.addContext(
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
@@ -29,9 +30,8 @@ export const renderApp = async (core: CoreStart, services: AppServices, element:
           </Router>
         </I18nProvider>
       </KibanaContextProvider>
-    ),
-    element
+    )
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mockReactDomUnmount } from '../overlay.test.mocks';
 import { SystemFlyoutRef } from './system_flyout_ref';
 
+const mockRoot = { render: jest.fn(), unmount: jest.fn() } as any;
+
 beforeEach(() => {
-  mockReactDomUnmount.mockClear();
+  mockRoot.unmount.mockClear();
 });
 
 describe('SystemFlyoutRef', () => {
@@ -31,25 +32,25 @@ describe('SystemFlyoutRef', () => {
 
   describe('constructor', () => {
     it('creates a ref with onClose promise', () => {
-      const ref = new SystemFlyoutRef(container);
+      const ref = new SystemFlyoutRef(container, mockRoot);
       expect(ref.onClose).toBeInstanceOf(Promise);
     });
   });
 
   describe('close()', () => {
     it('unmounts the component and removes the container', async () => {
-      const ref = new SystemFlyoutRef(container);
-      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+      const ref = new SystemFlyoutRef(container, mockRoot);
+      expect(mockRoot.unmount).not.toHaveBeenCalled();
       expect(document.body.contains(container)).toBe(true);
 
       await ref.close();
 
-      expect(mockReactDomUnmount).toHaveBeenCalledWith(container);
+      expect(mockRoot.unmount).toHaveBeenCalled();
       expect(document.body.contains(container)).toBe(false);
     });
 
     it('resolves the onClose Promise', async () => {
-      const ref = new SystemFlyoutRef(container);
+      const ref = new SystemFlyoutRef(container, mockRoot);
       const onCloseComplete = jest.fn();
       ref.onClose.then(onCloseComplete);
 
@@ -59,7 +60,7 @@ describe('SystemFlyoutRef', () => {
     });
 
     it('can be called multiple times without error', async () => {
-      const ref = new SystemFlyoutRef(container);
+      const ref = new SystemFlyoutRef(container, mockRoot);
 
       const result1 = await ref.close();
       const result2 = await ref.close();
@@ -67,11 +68,11 @@ describe('SystemFlyoutRef', () => {
       // Both should return the same promise
       expect(result1).toBe(result2);
       // Unmount should only happen once
-      expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
+      expect(mockRoot.unmount).toHaveBeenCalledTimes(1);
     });
 
     it('returns the onClose promise', async () => {
-      const ref = new SystemFlyoutRef(container);
+      const ref = new SystemFlyoutRef(container, mockRoot);
       const closePromise = ref.close();
 
       expect(closePromise).toBe(ref.onClose);
@@ -79,7 +80,7 @@ describe('SystemFlyoutRef', () => {
     });
 
     it('only completes the onClose promise once', async () => {
-      const ref = new SystemFlyoutRef(container);
+      const ref = new SystemFlyoutRef(container, mockRoot);
       const onCloseComplete = jest.fn();
       ref.onClose.then(onCloseComplete);
 

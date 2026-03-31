@@ -13,7 +13,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
 import type {
@@ -91,9 +91,10 @@ interface RenderAppProps {
 export const renderApp = (props: RenderAppProps) => {
   const { element } = props.appMountParameters;
 
-  ReactDOM.render(<ObservabilityOnboardingAppRoot {...props} />, element);
+  const root = createRoot(element);
+  root.render(<ObservabilityOnboardingAppRoot {...props} />);
   return () => {
     props.corePlugins.data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

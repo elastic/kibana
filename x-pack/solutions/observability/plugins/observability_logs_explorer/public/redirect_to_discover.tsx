@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { safeDecode } from '@kbn/rison';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { createRoot } from 'react-dom/client';
 import {
   normalizeUrlState,
   hydrateDataSourceSelection,
@@ -28,15 +28,15 @@ export const renderDiscoverRedirect = (
   discover: DiscoverStart,
   appParams: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(appParams.element);
+  root.render(
     <Router history={appParams.history}>
       <DiscoverRedirect core={core} discover={discover} />
-    </Router>,
-    appParams.element
+    </Router>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(appParams.element);
+    root.unmount();
   };
 };
 

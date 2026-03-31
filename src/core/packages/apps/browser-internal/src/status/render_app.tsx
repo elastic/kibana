@@ -8,12 +8,12 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import type { AppMountParameters } from '@kbn/core-application-browser';
+import { createRoot } from 'react-dom/client';
 import { StatusApp } from './status_app';
 
 interface Deps {
@@ -25,16 +25,16 @@ export const renderApp = (
   { element, theme$ }: AppMountParameters,
   { http, notifications }: Deps
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <I18nProvider>
       <KibanaThemeProvider theme={{ theme$ }}>
         <StatusApp http={http} notifications={notifications} />
       </KibanaThemeProvider>
-    </I18nProvider>,
-    element
+    </I18nProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

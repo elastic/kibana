@@ -94,6 +94,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/object-utils'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

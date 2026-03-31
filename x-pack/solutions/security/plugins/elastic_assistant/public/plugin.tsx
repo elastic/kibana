@@ -6,7 +6,6 @@
  */
 
 import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
 import React, { Suspense } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AssistantOverlay } from '@kbn/elastic-assistant';
@@ -14,6 +13,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { createRoot } from 'react-dom/client';
 import type {
   ElasticAssistantPublicPluginSetupDependencies,
   ElasticAssistantPublicPluginStartDependencies,
@@ -94,7 +94,8 @@ export class ElasticAssistantPublicPlugin
     services: StartServices
   ) {
     const { openChat$, completeOpenChat } = services.aiAssistantManagementSelection;
-    ReactDOM.render(
+    const root = createRoot(targetDomElement);
+    root.render(
       <I18nProvider>
         <KibanaContextProvider
           services={{
@@ -121,11 +122,10 @@ export class ElasticAssistantPublicPlugin
             </NavigationProvider>
           </KibanaThemeProvider>
         </KibanaContextProvider>
-      </I18nProvider>,
-      targetDomElement
+      </I18nProvider>
     );
 
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+    return () => root.unmount();
   }
 
   public stop() {

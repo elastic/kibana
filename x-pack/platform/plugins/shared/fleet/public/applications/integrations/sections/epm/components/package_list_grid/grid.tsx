@@ -6,7 +6,7 @@
  */
 
 import React, { useRef, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { findDOMNode } from 'react-dom';
 import type { ListRowRenderer } from 'react-virtualized';
 import { List as VirtualizedList, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import { css } from '@emotion/react';
@@ -67,7 +67,7 @@ export const GridColumn = ({
   useEffect(() => {
     const scrollerNode = windowScrollerRef.current;
     if (!scrollerNode) return;
-    const element = ReactDOM.findDOMNode(scrollerNode) as Element | null;
+    const element = findDOMNode(scrollerNode) as Element | null;
     if (!element?.parentElement) return;
 
     const observer = new ResizeObserver(() => {

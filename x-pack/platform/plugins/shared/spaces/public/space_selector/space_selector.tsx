@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { Observable } from 'rxjs';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -311,15 +311,15 @@ export const renderSpaceSelectorApp = (
 ) => {
   const queryClient = new QueryClient();
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     services.rendering.addContext(
       <QueryClientProvider client={queryClient}>
         <SpaceSelector {...props} />
       </QueryClientProvider>
-    ),
-    element
+    )
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };
 
 // portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners

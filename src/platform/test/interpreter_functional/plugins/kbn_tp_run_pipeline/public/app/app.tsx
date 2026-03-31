@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import type { AppMountParameters } from '@kbn/core/public';
+import { createRoot } from 'react-dom/client';
 import { Main } from './components/main';
 
 export const renderApp = ({ element }: AppMountParameters) => {
-  render(<Main />, element);
-  return () => unmountComponentAtNode(element);
+  const root = createRoot(element);
+  root.render(<Main />);
+  return () => root.unmount();
 };

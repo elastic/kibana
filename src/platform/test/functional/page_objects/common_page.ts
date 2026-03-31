@@ -388,13 +388,20 @@ export class CommonPageObject extends FtrService {
   }
 
   async getSharedItemTitleAndDescription() {
-    const cssSelector = '[data-shared-item][data-title][data-description]';
-    const element = await this.find.byCssSelector(cssSelector);
+    return await this.retry.try(async () => {
+      const element = await this.find.byCssSelector('[data-shared-item][data-title]');
+      const title = await element.getAttribute('data-title');
+      const description = await element.getAttribute('data-description');
 
-    return {
-      title: await element.getAttribute('data-title'),
-      description: await element.getAttribute('data-description'),
-    };
+      if (!title) {
+        throw new Error('Shared item title is not available yet');
+      }
+
+      return {
+        title,
+        description,
+      };
+    });
   }
 
   async getSharedItemContainers() {

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import {
   EuiPageTemplate,
   EuiFlexGrid,
@@ -22,6 +21,7 @@ import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { createRoot } from 'react-dom/client';
 
 export interface RenderAppProps {
   mountParams: AppMountParameters;
@@ -124,7 +124,8 @@ export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
   const { element } = mountParams;
 
-  ReactDOM.render(<CasesFixtureApp deps={deps} />, element);
+  const root = createRoot(element);
+  root.render(<CasesFixtureApp deps={deps} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

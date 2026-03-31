@@ -48,6 +48,7 @@
     "@kbn/visualizations-common",
     "@kbn/es-types",
     "@kbn/esql-utils",
+    "@kbn/core-mount-utils-browser",
   ],
   "exclude": [
     "target/**/*",

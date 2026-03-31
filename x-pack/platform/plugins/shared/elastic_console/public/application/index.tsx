@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { createRoot } from 'react-dom/client';
 import { SetupPage } from './setup_page';
 
 export const renderApp = ({
@@ -20,16 +20,16 @@ export const renderApp = ({
 }) => {
   const { element } = params;
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     coreStart.rendering.addContext(
       <KibanaContextProvider services={coreStart}>
         <SetupPage />
       </KibanaContextProvider>
-    ),
-    element
+    )
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

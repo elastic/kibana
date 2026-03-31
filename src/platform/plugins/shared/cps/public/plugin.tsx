@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { type ICPSManager, type CPSAppAccessResolver } from '@kbn/cps-utils';
+import { createRoot } from 'react-dom/client';
 import type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
 import { CPSManager } from './services/cps_manager';
 
@@ -51,16 +51,15 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
         import('@kbn/cps-utils').then(({ ProjectPickerContainer }) => {
           core.chrome.navControls.registerLeft({
             mount: (element) => {
-              ReactDOM.render(
+              const root = createRoot(element);
+              root.render(
                 <I18nProvider>
                   <ProjectPickerContainer cpsManager={manager} />
-                </I18nProvider>,
-                element,
-                () => {}
+                </I18nProvider>
               );
 
               return () => {
-                ReactDOM.unmountComponentAtNode(element);
+                root.unmount();
               };
             },
             order: 1000,

@@ -7,8 +7,7 @@
 
 import React, { lazy } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { render, unmountComponentAtNode } from 'react-dom';
-
+import { createRoot } from 'react-dom/client';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 import { setDataViewsService } from '../common/lib/data_apis';
@@ -19,9 +18,10 @@ const StackAlertsPage = lazy(() => import('./sections/alerts_page'));
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
   const { element } = deps;
-  render(<App deps={deps} />, element);
+  const root = createRoot(element);
+  root.render(<App deps={deps} />);
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

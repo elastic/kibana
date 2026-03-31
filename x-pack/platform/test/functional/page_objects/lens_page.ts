@@ -1472,6 +1472,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param count - expected count of metric
      */
     async assertLegacyMetric(title: string, count: string) {
+      await this.waitForVisualization('legacyMtrVis');
       await this.assertExactText('[data-test-subj="metric_label"]', title);
       await this.assertExactText('[data-test-subj="metric_value"]', count);
     },
@@ -1644,22 +1645,47 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async waitForVisualization(visDataTestSubj?: string) {
-      async function getRenderingCount() {
-        const visualizationContainer = await testSubjects.find(
-          visDataTestSubj || 'lnsVisualizationContainer'
+      const hasWorkspaceContainer = async () => {
+        return await find.existsByCssSelector(
+          `${testSubjects.getCssSelector('lnsWorkspace')} [data-shared-items-container]`,
+          1000
         );
-        const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
-        return Number(renderingCount);
+      };
+
+      async function isWorkspaceRenderComplete() {
+        const workspaceContainer = await find.byCssSelector(
+          `${testSubjects.getCssSelector('lnsWorkspace')} [data-shared-items-container]`
+        );
+        return (await workspaceContainer.getAttribute('data-render-complete')) === 'true';
       }
+
       await header.waitUntilLoadingHasFinished();
-      await retry.waitFor('rendering count to stabilize', async () => {
-        const firstCount = await getRenderingCount();
+      await retry.waitFor('visualization render to stabilize', async () => {
+        if (await hasWorkspaceContainer()) {
+          if (!(await isWorkspaceRenderComplete())) {
+            return false;
+          }
 
-        await common.sleep(1000);
+          await common.sleep(1000);
 
-        const secondCount = await getRenderingCount();
+          if (!(await isWorkspaceRenderComplete())) {
+            return false;
+          }
+        }
 
-        return firstCount === secondCount;
+        if (!visDataTestSubj) {
+          return (
+            (await testSubjects.exists('legacyMtrVis', { timeout: 1000 })) ||
+            (await testSubjects.exists('mtrVis', { timeout: 1000 })) ||
+            (await testSubjects.exists('xyVisChart', { timeout: 1000 })) ||
+            (await testSubjects.exists('partitionVisChart', { timeout: 1000 })) ||
+            (await testSubjects.exists('heatmapChart', { timeout: 1000 })) ||
+            (await testSubjects.exists('gaugeChart', { timeout: 1000 })) ||
+            (await testSubjects.exists('lnsDataTable', { timeout: 1000 }))
+          );
+        }
+
+        return await testSubjects.exists(visDataTestSubj, { timeout: 1000 });
       });
     },
 

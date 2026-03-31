@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/unified-field-list'
   - '@kbn/ui-actions-plugin'
   - '@kbn/react-kibana-context-theme'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

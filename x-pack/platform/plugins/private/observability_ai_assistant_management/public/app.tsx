@@ -7,7 +7,6 @@
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/public';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { createRoot } from 'react-dom/client';
 import type {
   StartDependencies,
   AiAssistantManagementObservabilityPluginStart,
@@ -46,7 +46,8 @@ export const mountManagementSection = async ({ core, mountParams, config }: Moun
 
   const queryClient = new QueryClient();
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     wrapWithTheme(
       <RedirectToHomeIfUnauthorized coreStart={coreStart} cloud={startDeps?.cloud}>
         <I18nProvider>
@@ -65,12 +66,11 @@ export const mountManagementSection = async ({ core, mountParams, config }: Moun
         </I18nProvider>
       </RedirectToHomeIfUnauthorized>,
       theme$
-    ),
-    element
+    )
   );
 
   return () => {
     coreStart.chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

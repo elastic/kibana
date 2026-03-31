@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { isEqual } from 'lodash';
 import type { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
@@ -102,7 +102,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
     return () => {
       setIsSecondSlotVisible(false);
       if (secondSlotContainer) {
-        ReactDOM.unmountComponentAtNode(secondSlotContainer);
+        unmountComponentAtNode(secondSlotContainer);
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

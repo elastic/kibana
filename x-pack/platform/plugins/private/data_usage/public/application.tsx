@@ -8,11 +8,11 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { createRoot } from 'react-dom/client';
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';
 import type { DataUsageStartDependencies, DataUsagePublicStart } from './types';
 import { PLUGIN_ID } from '../common';
@@ -25,13 +25,11 @@ export const renderApp = (
   pluginStart: DataUsagePublicStart,
   params: ManagementAppMountParams
 ) => {
-  ReactDOM.render(
-    <App params={params} core={core} plugins={plugins} pluginStart={pluginStart} />,
-    params.element
-  );
+  const root = createRoot(params.element);
+  root.render(<App params={params} core={core} plugins={plugins} pluginStart={pluginStart} />);
 
   return () => {
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
   };
 };
 

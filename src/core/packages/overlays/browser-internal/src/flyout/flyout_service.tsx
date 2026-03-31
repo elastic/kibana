@@ -11,13 +11,17 @@
 
 import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
+import {
+  render,
+  unmountComponentAtNode,
+  type MountPoint,
+  type OverlayRef,
+} from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions, OverlayFlyoutStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { OverlayMountWrapper } from '../overlay_mount_wrapper';
@@ -135,7 +139,7 @@ export class FlyoutService {
           >
             {getWrapper(<OverlayMountWrapper mount={mount} />)}
           </KibanaRenderContextProvider>,
-          this.targetDomElement
+          this.targetDomElement as HTMLElement
         );
 
         return flyout;

@@ -9,7 +9,6 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { lazy, Suspense } from 'react';
-import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -17,6 +16,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createRoot } from 'react-dom/client';
 import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import type { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { getAllowedTypes } from '../lib';
@@ -69,7 +69,8 @@ export const mountManagementSection = async ({
 
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext(coreStart);
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaReactContextProvider>
         <Router history={history}>
@@ -105,12 +106,11 @@ export const mountManagementSection = async ({
           </Routes>
         </Router>
       </KibanaReactContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
     coreStart.chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

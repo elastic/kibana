@@ -8,14 +8,13 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
 import { v4 as uuidV4 } from 'uuid';
 
 import type { EuiFlyoutMenuProps } from '@elastic/eui';
 import { EuiFlyout, getFlyoutManagerStore } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import { render, unmountComponentAtNode, type OverlayRef } from '@kbn/core-mount-utils-browser';
 import type {
   OverlaySystemFlyoutOpenOptions,
   OverlaySystemFlyoutStart,
@@ -63,7 +62,11 @@ export class SystemFlyoutService {
         flyoutContainer.setAttribute('data-system-flyout', flyoutId);
         this.targetDomElement!.appendChild(flyoutContainer);
 
-        const flyoutRef = new SystemFlyoutRef(flyoutContainer);
+        const flyoutRef = new SystemFlyoutRef(flyoutContainer, {
+          unmount: () => {
+            unmountComponentAtNode(flyoutContainer);
+          },
+        });
         this.activeFlyouts.set(flyoutId, flyoutRef);
 
         // Handle close events

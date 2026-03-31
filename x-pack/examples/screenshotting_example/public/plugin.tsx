@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
+import { createRoot } from 'react-dom/client';
 import { App, AppContext } from './app';
 
 interface SetupDeps {
@@ -29,13 +29,13 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void> {
         const [{ http, analytics, i18n, theme, userProfile }] = await getStartServices();
         const startServices = { analytics, http, i18n, theme, userProfile };
 
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <AppContext.Provider value={startServices}>
             <App />
-          </AppContext.Provider>,
-          element
+          </AppContext.Provider>
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
 

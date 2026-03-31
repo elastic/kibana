@@ -7,7 +7,6 @@
 
 import React, { lazy } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { QueryClientProvider } from '@kbn/react-query';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import {
@@ -17,6 +16,7 @@ import {
   ruleLogsRoute,
   editRuleRoute,
 } from '@kbn/rule-data-utils';
+import { createRoot } from 'react-dom/client';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
@@ -32,9 +32,10 @@ const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'))
 
 export const renderRulesPageApp = (deps: TriggersAndActionsUiServices) => {
   const { element } = deps;
-  render(<RulesPageApp deps={deps} />, element);
+  const root = createRoot(element);
+  root.render(<RulesPageApp deps={deps} />);
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

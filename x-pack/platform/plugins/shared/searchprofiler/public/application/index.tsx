@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import type { HttpStart as Http, ToastsSetup } from '@kbn/core/public';
 import type { RouteComponentProps } from 'react-router-dom';
 
+import { createRoot } from 'react-dom/client';
 import type { LicenseStatus } from '../../common';
 import { KibanaRenderContextProvider } from '../shared_imports';
 import { App } from './app';
@@ -34,7 +34,8 @@ export const renderApp = ({
   location,
   startServices,
 }: AppDependencies) => {
-  render(
+  const root = createRoot(el);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <AppContextProvider
         args={{ initialLicenseStatus, notifications, http, location, ...startServices }}
@@ -43,9 +44,8 @@ export const renderApp = ({
           <App />
         </ProfileContextProvider>
       </AppContextProvider>
-    </KibanaRenderContextProvider>,
-    el
+    </KibanaRenderContextProvider>
   );
 
-  return () => unmountComponentAtNode(el);
+  return () => root.unmount();
 };

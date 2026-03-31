@@ -17,7 +17,7 @@ pageLoadAssetSize:
   charts: 40269
   cloud: 10648
   cloudConnect: 9149
-  cloudDataMigration: 5687
+  cloudDataMigration: 5606
   cloudDefend: 8146
   cloudExperiments: 103984
   cloudFullStory: 4752
@@ -55,7 +55,7 @@ pageLoadAssetSize:
   embeddable: 16634
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
-  entityStore: 9718
+  entityStore: 9420
   esql: 21193
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -64,9 +64,9 @@ pageLoadAssetSize:
   eventAnnotationListing: 13164
   exploratoryView: 45042
   expressionGauge: 15748
-  expressionHeatmap: 17563
-  expressionLegacyMetricVis: 11834
-  expressionMetricVis: 18100
+  expressionHeatmap: 19329
+  expressionLegacyMetricVis: 13028
+  expressionMetricVis: 19961
   expressionPartitionVis: 29826
   expressions: 105076
   expressionTagcloud: 14009
@@ -193,7 +193,7 @@ pageLoadAssetSize:
   uptime: 48171
   urlDrilldown: 5852
   urlForwarding: 7349
-  usageCollection: 5655
+  usageCollection: 5638
   ux: 8376
   visDefaultEditor: 35080
   visTypeGauge: 13006
@@ -204,7 +204,7 @@ pageLoadAssetSize:
   visTypeTable: 18999
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
-  visTypeTimeseries: 20000
+  visTypeTimeseries: 22149
   visTypeVega: 38538
   visTypeVislib: 14679
   visTypeXy: 32342

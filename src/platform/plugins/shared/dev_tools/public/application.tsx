@@ -8,7 +8,6 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
@@ -23,6 +22,7 @@ import type {
 } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { css } from '@emotion/react';
+import { createRoot } from 'react-dom/client';
 import type { DocTitleService, BreadcrumbService } from './services';
 
 import type { DevToolApp } from './dev_tool';
@@ -212,7 +212,8 @@ export function renderApp(
 
   setBadge(application, chrome);
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <Router>
         <Routes>
@@ -241,8 +242,7 @@ export function renderApp(
           </Route>
         </Routes>
       </Router>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   // dispatch synthetic hash change event to update hash history objects
@@ -253,7 +253,7 @@ export function renderApp(
 
   return () => {
     chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
     unlisten();
   };
 }

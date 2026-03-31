@@ -33,9 +33,11 @@ const mockSearchSessionId = '123';
 const setup = async ({
   noSearchSessionId,
   hideTable = false,
+  usePortalsRenderer = true,
 }: {
   noSearchSessionId?: boolean;
   hideTable?: boolean;
+  usePortalsRenderer?: boolean;
 } = {}) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
   const services = createDiscoverServicesMock();
@@ -108,7 +110,7 @@ const setup = async ({
   };
 
   render(
-    <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer>
+    <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer={usePortalsRenderer}>
       <DiscoverHistogramLayout {...props} />
     </DiscoverToolkitTestProvider>
   );
@@ -122,6 +124,11 @@ describe('Discover histogram layout component', () => {
     it('should not render chart if there is no search session', async () => {
       await setup({ noSearchSessionId: true });
       expect(screen.queryByTestId('unifiedHistogramRendered')).not.toBeInTheDocument();
+    });
+
+    it('should render the main content before histogram layout props are ready', async () => {
+      await setup({ usePortalsRenderer: false });
+      expect(screen.queryByTestId('dscMainContent')).toBeInTheDocument();
     });
 
     it('should render chart if there is a search session', async () => {

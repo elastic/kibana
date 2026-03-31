@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { css } from '@emotion/react';

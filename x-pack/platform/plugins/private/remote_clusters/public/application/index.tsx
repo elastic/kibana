@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import type { CoreStart, ScopedHistory, ExecutionContextStart } from '@kbn/core/public';
 
+import { createRoot } from 'react-dom/client';
 import { KibanaRenderContextProvider, useExecutionContext } from '../shared_imports';
 import { App } from './app';
 import { remoteClustersStore } from './store';
@@ -35,7 +35,8 @@ export const renderApp = (
   history: ScopedHistory,
   startServices: CoreStart
 ) => {
-  render(
+  const root = createRoot(elem);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <Provider store={remoteClustersStore}>
         <AppContextProvider context={appDependencies}>
@@ -45,8 +46,7 @@ export const renderApp = (
           />
         </AppContextProvider>
       </Provider>
-    </KibanaRenderContextProvider>,
-    elem
+    </KibanaRenderContextProvider>
   );
-  return () => unmountComponentAtNode(elem);
+  return () => root.unmount();
 };

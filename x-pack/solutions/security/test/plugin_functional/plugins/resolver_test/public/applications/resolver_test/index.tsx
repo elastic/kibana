@@ -8,7 +8,6 @@
 import { Router } from '@kbn/shared-ux-router';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import React, { useMemo } from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import styled from 'styled-components';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,6 +16,7 @@ import type {
   DataAccessLayer,
   ResolverPluginSetup,
 } from '@kbn/security-solution-plugin/public/resolver/types';
+import { createRoot } from 'react-dom/client';
 
 /**
  * Render the Resolver Test app. Returns a cleanup function.
@@ -32,17 +32,17 @@ export function renderApp(
   parameters.element.style.display = 'flex';
   parameters.element.style.flexGrow = '1';
 
-  ReactDOM.render(
+  const root = createRoot(parameters.element);
+  root.render(
     <AppRoot
       coreStart={coreStart}
       parameters={parameters}
       resolverPluginSetup={resolverPluginSetup}
-    />,
-    parameters.element
+    />
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(parameters.element);
+    root.unmount();
   };
 }
 

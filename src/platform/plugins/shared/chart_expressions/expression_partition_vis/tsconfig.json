@@ -33,7 +33,8 @@
     "@kbn/ebt-tools",
     "@kbn/react-kibana-context-theme",
     "@kbn/field-formats-common",
-    "@kbn/visualizations-common"
+    "@kbn/visualizations-common",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": [
     "target/**/*",

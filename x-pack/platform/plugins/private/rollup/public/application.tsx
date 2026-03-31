@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 
 import type { CoreSetup, ExecutionContextStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { createRoot } from 'react-dom/client';
 import {
   KibanaContextProvider,
   KibanaRenderContextProvider,
@@ -50,17 +50,17 @@ export const renderApp = async (
     setBreadcrumbs,
   };
 
-  render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={services}>
         <Provider store={rollupJobsStore}>
           <AppWithExecutionContext executionContext={core.executionContext} history={history} />
         </Provider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

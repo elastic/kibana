@@ -8,8 +8,6 @@
  */
 
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
-
 import {
   EuiText,
   EuiPageTemplate,
@@ -25,6 +23,7 @@ import {
 } from '@elastic/eui';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { RenderingService } from '@kbn/core-rendering-browser';
+import { createRoot } from 'react-dom/client';
 import type { ExampleDefinition } from './types';
 
 interface Props {
@@ -110,7 +109,8 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp, rendering }:
 }
 
 export const renderApp = (props: Props, element: AppMountParameters['element']) => {
-  ReactDOM.render(<DeveloperExamples {...props} />, element);
+  const root = createRoot(element);
+  root.render(<DeveloperExamples {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

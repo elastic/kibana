@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
@@ -14,6 +13,7 @@ import { wrapWithTheme } from '@kbn/react-kibana-context-theme';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import { createRoot } from 'react-dom/client';
 import { PLUGIN_NAME } from '../../common';
 import { EvalsApp } from '../application';
 
@@ -64,9 +64,10 @@ export const mountManagementSection = async ({
     </div>
   );
 
-  ReactDOM.render(wrapWithTheme(<App />, core.theme), element);
+  const root = createRoot(element);
+  root.render(wrapWithTheme(<App />, core.theme));
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

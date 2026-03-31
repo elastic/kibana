@@ -81,7 +81,8 @@
     "@kbn/visualizations-common",
     "@kbn/shared-ux-utility",
     "@kbn/saved-search-plugin",
-    "@kbn/lens-common"
+    "@kbn/lens-common",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": ["target/**/*"]
 }

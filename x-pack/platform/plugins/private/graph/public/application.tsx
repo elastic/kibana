@@ -18,7 +18,6 @@ import type {
   Capabilities,
   ScopedHistory,
 } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
 import React from 'react';
 import type { DataPlugin } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -37,6 +36,7 @@ import type {
 } from '@kbn/content-management-plugin/public';
 
 import type { KqlPluginStart } from '@kbn/kql/public';
+import { createRoot } from 'react-dom/client';
 import type { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
 import { checkLicense } from '../common/check_license';
@@ -130,11 +130,12 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
       </TableListViewKibanaProvider>
     </KibanaRenderContextProvider>
   );
-  ReactDOM.render(app, element);
+  const root = createRoot(element);
+  root.render(app);
 
   return () => {
     licenseSubscription.unsubscribe();
     unlistenParentHistory();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

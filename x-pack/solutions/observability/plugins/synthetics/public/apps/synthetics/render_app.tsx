@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { i18n as i18nFormatter } from '@kbn/i18n';
 import type { AppMountParameters } from '@kbn/core-application-browser';
+import { createRoot } from 'react-dom/client';
 import { kibanaService } from '../../utils/kibana_service';
 import type { SyntheticsAppProps } from './contexts';
 import { getIntegratedAppAvailability } from './utils/adapters';
@@ -68,11 +68,12 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
 export function renderApp(appMountParameters: AppMountParameters) {
   const props: SyntheticsAppProps = getSyntheticsAppProps();
 
-  ReactDOM.render(<SyntheticsApp {...props} />, appMountParameters.element);
+  const root = createRoot(appMountParameters.element);
+  root.render(<SyntheticsApp {...props} />);
 
   return () => {
     props.startPlugins.data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(appMountParameters.element);
+    root.unmount();
   };
 }
 

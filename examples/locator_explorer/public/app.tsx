@@ -8,7 +8,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
 import {
   EuiPage,
   EuiButton,
@@ -28,6 +27,7 @@ import type {
   HelloLocatorV2Params,
 } from '@kbn/locator-examples-plugin/public';
 import { HELLO_LOCATOR } from '@kbn/locator-examples-plugin/public';
+import { createRoot } from 'react-dom/client';
 
 interface Props {
   share: SharePluginSetup;
@@ -191,7 +191,8 @@ const ActionsExplorer = ({ share }: Props) => {
 };
 
 export const renderApp = (props: Props, { element }: AppMountParameters) => {
-  ReactDOM.render(<ActionsExplorer {...props} />, element);
+  const root = createRoot(element);
+  root.render(<ActionsExplorer {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

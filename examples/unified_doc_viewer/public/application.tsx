@@ -9,7 +9,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import ReactDOM from 'react-dom';
 import { EuiThemeProvider } from '@elastic/eui';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -17,6 +16,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { createRoot } from 'react-dom/client';
 import type { StartDeps } from './plugin';
 
 export const renderApp = (
@@ -24,17 +24,17 @@ export const renderApp = (
   { data }: StartDeps,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <EuiThemeProvider>
       <IntlProvider locale="en">
         <UnifiedDocViewerExamplesApp data={data} />
       </IntlProvider>
-    </EuiThemeProvider>,
-    element
+    </EuiThemeProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

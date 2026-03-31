@@ -11,7 +11,7 @@ import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageSection, EuiPageTemplate } 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { ControlsExampleStartDeps } from '../plugin';
 import { ControlGroupRendererExamples } from './control_group_renderer_examples';
 
@@ -44,7 +44,8 @@ export const renderApp = (
   deps: ControlsExampleStartDeps,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(<App core={core} {...deps} />, element);
+  const root = createRoot(element);
+  root.render(<App core={core} {...deps} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

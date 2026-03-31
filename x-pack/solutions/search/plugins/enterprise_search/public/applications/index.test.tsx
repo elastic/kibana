@@ -33,38 +33,55 @@ import { KibanaLogic } from './shared/kibana';
 import { renderApp, renderHeaderActions } from '.';
 
 describe('renderApp', () => {
-  const kibanaDeps = {
-    core: coreMock.createStart(),
-    params: coreMock.createAppMountParameters(),
-    plugins: {
-      charts: chartPluginMock.createStartContract(),
-      contentConnectors: searchConnectorsMock.createStart(),
-      data: dataPluginMock.createStartContract(),
-      indexManagement: {
-        getIndexMappingComponent: jest.fn(),
-      },
-      lens: lensPluginMock.createStartContract(),
-      licensing: licensingMock.createStart(),
-      navigation: navigationPluginMock.createStartContract(),
-      searchNavigation: searchNavigationMock.createStart(),
-      security: securityMock.createStart(),
-      share: sharePluginMock.createStartContract(),
-      ml: mlPluginMock.createStartContract(),
-      uiActions: uiActionsPluginMock.createStartContract(),
-      user: {},
-    },
-    updateSideNavDefinition: jest.fn(),
-  } as any;
-  const pluginData = {
-    config: {},
-    data: {},
-  } as any;
+  let kibanaDeps: any;
+  let pluginData: any;
+  let mockContainer: HTMLElement;
+  let unmount: undefined | (() => void);
+  let unmountHeaderActions: undefined | (() => void);
 
   beforeEach(() => {
     jest.clearAllMocks();
+    kibanaDeps = {
+      core: coreMock.createStart(),
+      params: coreMock.createAppMountParameters(),
+      plugins: {
+        charts: chartPluginMock.createStartContract(),
+        contentConnectors: searchConnectorsMock.createStart(),
+        data: dataPluginMock.createStartContract(),
+        indexManagement: {
+          getIndexMappingComponent: jest.fn(),
+        },
+        lens: lensPluginMock.createStartContract(),
+        licensing: licensingMock.createStart(),
+        ml: mlPluginMock.createStartContract(),
+        navigation: navigationPluginMock.createStartContract(),
+        searchNavigation: searchNavigationMock.createStart(),
+        security: securityMock.createStart(),
+        share: sharePluginMock.createStartContract(),
+        uiActions: uiActionsPluginMock.createStartContract(),
+        user: {},
+      },
+      updateSideNavDefinition: jest.fn(),
+    } as any;
+    pluginData = {
+      config: {},
+      data: {},
+    } as any;
+    mockContainer = kibanaDeps.params.element;
+    unmount = undefined;
+    unmountHeaderActions = undefined;
   });
 
-  const mockContainer = kibanaDeps.params.element;
+  afterEach(() => {
+    if (unmountHeaderActions) {
+      act(() => unmountHeaderActions?.());
+      unmountHeaderActions = undefined;
+    }
+    if (unmount) {
+      act(() => unmount?.());
+      unmount = undefined;
+    }
+  });
   const MockApp = () => (
     <div className="hello-world">
       {i18n.translate('xpack.enterpriseSearch.mockApp.div.helloWorldLabel', {
@@ -74,23 +91,26 @@ describe('renderApp', () => {
   );
 
   it('mounts and unmounts UI', () => {
-    const unmount = renderApp(MockApp, kibanaDeps, pluginData);
+    act(() => {
+      unmount = renderApp(MockApp, kibanaDeps, pluginData);
+    });
     expect(mockContainer.querySelector('.hello-world')).not.toBeNull();
 
-    act(() => unmount());
+    act(() => unmount?.());
+    unmount = undefined;
     expect(mockContainer.innerHTML).toEqual('');
   });
 
   /**
    * Helper for automatically mounting and unmounting future tests
    */
-  let unmount: any;
   const mount = (App: React.FC) => {
-    unmount = renderApp(App, kibanaDeps, pluginData);
+    act(() => {
+      unmount = renderApp(App, kibanaDeps, pluginData);
+    });
   };
 
   describe('renderHeaderActions', () => {
-    const mockHeaderEl = document.createElement('header');
     const MockHeaderActions = () => (
       <button className="hello-world">
         <FormattedMessage
@@ -101,32 +121,41 @@ describe('renderApp', () => {
     );
 
     it('mounts and unmounts any HeaderActions component', () => {
+      const mockHeaderEl = document.createElement('header');
       const store = getContext().store;
 
-      const unmountHeader = renderHeaderActions(
-        MockHeaderActions,
-        store,
-        { theme$: new Observable() } as any,
-        mockHeaderEl
-      );
+      act(() => {
+        unmountHeaderActions = renderHeaderActions(
+          MockHeaderActions,
+          store,
+          { theme$: new Observable() } as any,
+          mockHeaderEl
+        );
+      });
       expect(mockHeaderEl.querySelector('.hello-world')).not.toBeNull();
 
-      unmountHeader();
+      act(() => unmountHeaderActions?.());
+      unmountHeaderActions = undefined;
       expect(mockHeaderEl.innerHTML).toEqual('');
     });
 
     it('passes a renderHeaderActions helper to KibanaLogic, which can be used by our apps to render HeaderActions', () => {
+      const mockHeaderEl = document.createElement('header');
       // Setup
-      kibanaDeps.params.setHeaderActionMenu.mockImplementationOnce((cb: any) => cb(mockHeaderEl));
+      kibanaDeps.params.setHeaderActionMenu.mockImplementationOnce((cb: any) => {
+        unmountHeaderActions = cb(mockHeaderEl);
+        return unmountHeaderActions;
+      });
       mount(MockApp);
 
       // Call KibanaLogic's renderHeaderActions, which should call params.setHeaderActionMenu
-      KibanaLogic.values.renderHeaderActions(MockHeaderActions);
+      act(() => {
+        KibanaLogic.values.renderHeaderActions(MockHeaderActions);
+      });
       expect(kibanaDeps.params.setHeaderActionMenu).toHaveBeenCalled();
 
       // renderHeaderActions should have been called and generated the correct DOM
       expect(mockHeaderEl.querySelector('.hello-world')).not.toBeNull();
-      unmount();
     });
   });
 });

@@ -186,6 +186,14 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.missingOrFail('discoverDataGridUpdating', {
       timeout: this.defaultFindTimeout * 10,
     });
+    await this.retry.waitFor('discover content to render', async () => {
+      return (
+        (await this.testSubjects.exists('discoverDocTable', { timeout: 1000 })) ||
+        (await this.testSubjects.exists('discoverNoResults', { timeout: 1000 })) ||
+        (await this.testSubjects.exists('discoverQueryHits', { timeout: 1000 })) ||
+        (await this.testSubjects.exists('discoverQueryHitsPartial', { timeout: 1000 }))
+      );
+    });
   }
 
   public async getColumnHeaders() {
@@ -233,8 +241,14 @@ export class DiscoverPageObject extends FtrService {
 
   public async clickNewSearchButton() {
     await this.testSubjects.click('discoverNewButton');
-    await this.testSubjects.moveMouseTo('dscHideSidebarButton'); // cancel tooltips
-    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilTabIsLoaded();
+
+    // Cancel any lingering tooltips once the new search view is stable.
+    if (await this.testSubjects.exists('dscHideSidebarButton', { timeout: 1000 })) {
+      await this.testSubjects.moveMouseTo('dscHideSidebarButton');
+    } else if (await this.testSubjects.exists('dscShowSidebarButton', { timeout: 1000 })) {
+      await this.testSubjects.moveMouseTo('dscShowSidebarButton');
+    }
   }
 
   public async clickSaveSearchButton() {
@@ -541,11 +555,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getDocTableRows() {
-    await this.header.waitUntilLoadingHasFinished();
+    await this.waitForDocTableLoadingComplete();
     return await this.dataGrid.getBodyRows();
   }
 
   public async getDocTableIndex(index: number, visibleText = false) {
+    await this.waitForDocTableLoadingComplete();
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
     const result = await Promise.all(
       row.map(async (cell) => {
@@ -565,6 +580,7 @@ export class DiscoverPageObject extends FtrService {
     const usedDefaultCellIdx = await this.dataGrid.getControlColumnsCount();
     const usedCellIdx = cellIdx === -1 ? usedDefaultCellIdx : cellIdx;
 
+    await this.waitForDocTableLoadingComplete();
     await this.testSubjects.click('dataGridFullScreenButton');
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
     const result = await Promise.all(row.map(async (cell) => (await cell.getVisibleText()).trim()));
@@ -826,11 +842,31 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async waitForDocTableLoadingComplete() {
-    await this.testSubjects.waitForAttributeToChange(
-      'discoverDocTable',
-      'data-render-complete',
-      'true'
-    );
+    await this.waitUntilTabIsLoaded();
+
+    if (await this.testSubjects.exists('discoverNoResultsViewAllMatches', { timeout: 1000 })) {
+      await this.expandTimeRangeAsSuggestedInNoResultsMessage();
+      await this.waitUntilTabIsLoaded();
+    }
+
+    await this.retry.waitFor('discover doc table to appear', async () => {
+      return await this.testSubjects.exists('discoverDocTable', {
+        timeout: this.defaultFindTimeout,
+      });
+    });
+
+    await this.retry.waitFor('discover doc table to finish rendering', async () => {
+      const isRenderComplete = await this.testSubjects.getAttribute(
+        'discoverDocTable',
+        'data-render-complete',
+        {
+          findTimeout: this.defaultFindTimeout,
+          tryTimeout: this.defaultFindTimeout * 10,
+        }
+      );
+
+      return isRenderComplete === 'true';
+    });
   }
   public async getNrOfFetches() {
     const el = await this.find.byCssSelector('[data-fetch-counter]');
@@ -853,6 +889,7 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('Discover app on screen', async () => {
       return await this.isDiscoverAppOnScreen();
     });
+    await this.waitUntilTabIsLoaded();
   }
 
   public async showAllFilterActions() {

@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter, useSearchParams } from 'react-router-dom-v5-compat';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -19,6 +19,7 @@ import type { StartServices } from '../..';
 import { LOGOUT_REASON_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { LogoutReason } from '../../../common/types';
 import { AuthenticationStatePage, formMessages, renderMessage } from '../components';
+
 interface Props {
   basePath: IBasePath;
   customBranding: CustomBrandingStart;
@@ -55,14 +56,14 @@ export function renderLoggedOutPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     services.rendering.addContext(
       <BrowserRouter>
         <LoggedOutPage {...props} />
       </BrowserRouter>
-    ),
-    element
+    )
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 }

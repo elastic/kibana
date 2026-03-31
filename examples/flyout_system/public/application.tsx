@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
+import { createRoot } from 'react-dom/client';
 import { App } from './components/app';
 
 export const renderApp = (core: CoreStart, { appBasePath, element }: AppMountParameters) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     core.rendering.addContext(
       <App
         // AppDeps
@@ -22,9 +23,8 @@ export const renderApp = (core: CoreStart, { appBasePath, element }: AppMountPar
         overlays={core.overlays}
         rendering={core.rendering}
       />
-    ),
-    element
+    )
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -16,7 +16,7 @@ import type { Logger } from '@kbn/logging';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject } from 'rxjs';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import * as ReactDOM from '@kbn/core-mount-utils-browser';
 import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';

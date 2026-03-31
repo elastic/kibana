@@ -8,19 +8,19 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { createRoot } from 'react-dom/client';
 import { SseExampleApp } from './components/app';
 
 export const renderApp = (coreStart: CoreStart, { element }: AppMountParameters) => {
   const { http } = coreStart;
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...coreStart}>
       <SseExampleApp http={http} />
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

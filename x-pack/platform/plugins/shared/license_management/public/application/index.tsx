@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 
+import { createRoot } from 'react-dom/client';
 import type { AppDependencies } from './app_context';
 import { AppProviders } from './app_providers';
 // @ts-ignore
@@ -21,19 +21,19 @@ const AppWithRouter = (props: { [key: string]: any }) => (
 );
 
 export const renderApp = (element: Element, dependencies: AppDependencies) => {
-  render(
+  const root = createRoot(element);
+  root.render(
     <AppProviders appDependencies={dependencies}>
       <AppWithRouter
         telemetry={dependencies.plugins.telemetry}
         history={dependencies.services.history}
         executionContext={dependencies.core.executionContext}
       />
-    </AppProviders>,
-    element
+    </AppProviders>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

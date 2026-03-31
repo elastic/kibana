@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import { render, type MountPoint, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { KibanaRenderContextProviderProps } from '@kbn/react-kibana-context-render';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 /**
  * @deprecated Pass RenderingService as the second parameter to toMountPoint instead
@@ -37,22 +36,26 @@ function isParamsUsingPreferred(params?: ToMountPointParams): params is Renderin
  * @param params services needed for rendering fully-featured React nodes in Kibana
  */
 export const toMountPoint = (node: React.ReactNode, params: ToMountPointParams): MountPoint => {
-  let mount: ((element: HTMLElement) => () => boolean) & {
+  let mount: ((element: HTMLElement) => () => void) & {
     __reactMount__?: React.ReactNode;
   };
 
   if (isParamsUsingPreferred(params)) {
     mount = (element: HTMLElement) => {
-      ReactDOM.render(params.addContext(node), element);
-      return () => ReactDOM.unmountComponentAtNode(element);
+      render(params.addContext(node), element);
+      return () => {
+        unmountComponentAtNode(element);
+      };
     };
   } else {
     mount = (element: HTMLElement) => {
-      ReactDOM.render(
+      render(
         <KibanaRenderContextProvider {...params}>{node}</KibanaRenderContextProvider>,
         element
       );
-      return () => ReactDOM.unmountComponentAtNode(element);
+      return () => {
+        unmountComponentAtNode(element);
+      };
     };
   }
 

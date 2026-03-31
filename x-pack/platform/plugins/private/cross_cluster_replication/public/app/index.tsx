@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 
 import type {
@@ -17,6 +16,7 @@ import type {
   ExecutionContextStart,
   CoreStart,
 } from '@kbn/core/public';
+import { createRoot } from 'react-dom/client';
 import { KibanaRenderContextProvider, useExecutionContext } from '../shared_imports';
 import type { SetBreadcrumbs } from './services/breadcrumbs';
 import { init as initBreadcrumbs } from './services/breadcrumbs';
@@ -50,7 +50,8 @@ const renderApp = (
   getUrlForApp: ApplicationStart['getUrlForApp'],
   executionContext: ExecutionContextStart
 ): UnmountCallback => {
-  render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <Provider store={ccrStore}>
         <AppWithExecutionContext
@@ -59,11 +60,10 @@ const renderApp = (
           executionContext={executionContext}
         />
       </Provider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };
 
 export async function mountApp({

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
@@ -18,6 +17,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import { licenseService } from './hooks';
 import type { UIExtensionsStorage } from './types';
 import { AppRoutes, FleetAppContext, WithPermissionsAndSetup } from './app';
+import { createRoot } from 'react-dom/client';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -70,7 +70,8 @@ export function renderApp(
   kibanaVersion: string,
   extensions: UIExtensionsStorage
 ) {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <FleetApp
       startServices={startServices}
       config={config}
@@ -78,12 +79,11 @@ export function renderApp(
       kibanaVersion={kibanaVersion}
       extensions={extensions}
       setHeaderActionMenu={setHeaderActionMenu}
-    />,
-    element
+    />
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 }
 

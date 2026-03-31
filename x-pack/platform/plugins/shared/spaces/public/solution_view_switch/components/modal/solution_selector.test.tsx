@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
@@ -23,7 +23,7 @@ describe('SolutionSelector', () => {
     // Open the EuiSuperSelect popover
     await user.click(screen.getByTestId('solutionViewSwitchSelect'));
     // Pick an option
-    await user.click(await screen.findByText('Observability'));
+    fireEvent.click(await screen.findByText('Observability'));
 
     expect(onSolutionChange).toHaveBeenCalledWith('oblt');
   });

@@ -8,11 +8,11 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { createRoot } from 'react-dom/client';
 import { KbnUrlStateStorageFromRouterProvider } from './utils/kbn_url_state_context';
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';
 import type { AppPluginStartDependencies, DataQualityPluginStart } from './types';
@@ -25,13 +25,11 @@ export const renderApp = (
   pluginStart: DataQualityPluginStart,
   params: ManagementAppMountParams
 ) => {
-  ReactDOM.render(
-    <App params={params} core={core} plugins={plugins} pluginStart={pluginStart} />,
-    params.element
-  );
+  const root = createRoot(params.element);
+  root.render(<App params={params} core={core} plugins={plugins} pluginStart={pluginStart} />);
 
   return () => {
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
   };
 };
 

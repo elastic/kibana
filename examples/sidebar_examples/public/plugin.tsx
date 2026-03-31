@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { SidebarAppUpdater } from '@kbn/core-chrome-sidebar';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { createRoot } from 'react-dom/client';
 import { counterAppId } from './counter_app';
 import { tabSelectionAppId, tabSelectionStore } from './tab_selection_app';
 import { textInputAppId, textInputStore } from './text_input_app';
@@ -51,8 +51,9 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
         const [coreStart] = await core.getStartServices();
         const { App } = await import('./app');
 
-        ReactDOM.render(coreStart.rendering.addContext(<App />), element);
-        return () => ReactDOM.unmountComponentAtNode(element);
+        const root = createRoot(element);
+        root.render(coreStart.rendering.addContext(<App />));
+        return () => root.unmount();
       },
     });
 

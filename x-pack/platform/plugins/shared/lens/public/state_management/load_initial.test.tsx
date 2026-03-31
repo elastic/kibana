@@ -167,6 +167,14 @@ describe('Initializing the store', () => {
       });
     });
 
+    it('clears app filters when opening a new editor without incoming filters', async () => {
+      const { store, deps } = makeLensStore({ preloadedState });
+
+      await loadInitialAppState(store, { ...defaultProps, initialInput: undefined });
+
+      expect(deps.lensServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([]);
+    });
+
     it('cleans datasource and visualization state properly when reloading', async () => {
       const { store, deps } = makeLensStore({
         preloadedState: {

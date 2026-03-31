@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient } from '@kbn/react-query';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
@@ -24,6 +23,7 @@ import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { createRoot } from 'react-dom/client';
 import type { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -273,7 +273,8 @@ export const renderApp = (
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     core.rendering.addContext(
       <KibanaContextProvider
         services={{
@@ -301,9 +302,8 @@ export const renderApp = (
           </IntlProvider>
         </QueryClientProvider>
       </KibanaContextProvider>
-    ),
-    element
+    )
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

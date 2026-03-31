@@ -10,14 +10,28 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
 
+  const waitForDiscoverQueryHits = async () => {
+    await retry.waitFor('Discover query hits to render', async () => {
+      return (
+        (await testSubjects.exists('discoverQueryHits', { timeout: 1000 })) ||
+        (await testSubjects.exists('discoverQueryHitsPartial', { timeout: 1000 }))
+      );
+    });
+
+    return (await testSubjects.exists('discoverQueryHits', { timeout: 1000 }))
+      ? 'discoverQueryHits'
+      : 'discoverQueryHitsPartial';
+  };
+
   return {
     async assertDiscoverQueryHits(expectedDiscoverQueryHits: string) {
-      await testSubjects.existOrFail('discoverQueryHits');
+      const queryHitsTestSubj = await waitForDiscoverQueryHits();
 
-      const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText(queryHitsTestSubj);
 
       expect(actualDiscoverQueryHits).to.eql(
         expectedDiscoverQueryHits,
@@ -26,9 +40,9 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
     },
 
     async assertDiscoverQueryHitsMoreThanZero() {
-      await testSubjects.existOrFail('discoverQueryHits');
+      const queryHitsTestSubj = await waitForDiscoverQueryHits();
 
-      const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText(queryHitsTestSubj);
 
       const hits = parseInt(actualDiscoverQueryHits, 10);
       expect(hits).to.greaterThan(0, `Discover query hits should be more than 0, got ${hits}`);

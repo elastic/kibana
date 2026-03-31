@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
@@ -98,7 +98,7 @@ describe('ResolveAllConflicts', () => {
     await openPopover();
     expect(onRetriesChange).not.toHaveBeenCalled();
 
-    await userEvent.click(screen.getByTestId('cts-resolve-all-conflicts-overwrite'));
+    fireEvent.click(screen.getByTestId('cts-resolve-all-conflicts-overwrite'));
     expect(onRetriesChange).toHaveBeenCalledWith([
       { type: 'type-1', id: 'id-1', overwrite: false },
       { type: 'type-5', id: 'id-5', overwrite: true, destinationId: 'dest-5b' },
@@ -115,7 +115,7 @@ describe('ResolveAllConflicts', () => {
     expect(onRetriesChange).not.toHaveBeenCalled();
     expect(onDestinationMapChange).not.toHaveBeenCalled();
 
-    await userEvent.click(screen.getByTestId('cts-resolve-all-conflicts-skip'));
+    fireEvent.click(screen.getByTestId('cts-resolve-all-conflicts-skip'));
     expect(onRetriesChange).toHaveBeenCalledWith([
       { type: 'type-1', id: 'id-1', overwrite: false },
     ]);

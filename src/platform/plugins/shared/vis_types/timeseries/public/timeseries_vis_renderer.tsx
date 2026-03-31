@@ -9,7 +9,8 @@
 
 import React, { lazy } from 'react';
 import { get } from 'lodash';
-import { render, unmountComponentAtNode } from 'react-dom';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { CoreSetup, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 
@@ -25,6 +26,25 @@ import { isVisTableData } from '../common/vis_data_utils';
 
 import type { TimeseriesVisParams } from './types';
 import type { TimeseriesRenderValue } from './metrics_fn';
+
+const roots = new WeakMap<Element, Root>();
+
+const getRoot = (domNode: Element) => {
+  const existingRoot = roots.get(domNode);
+
+  if (existingRoot) {
+    return existingRoot;
+  }
+
+  const root = createRoot(domNode);
+  roots.set(domNode, root);
+  return root;
+};
+
+const unmountRoot = (domNode: Element) => {
+  roots.get(domNode)?.unmount();
+  roots.delete(domNode);
+};
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')
@@ -62,7 +82,7 @@ export const getTimeseriesVisRenderer: (deps: {
   render: async (domNode, config, handlers) => {
     const [startServices] = await core.getStartServices();
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      unmountRoot(domNode);
     });
     const {
       visParams: model,
@@ -97,7 +117,7 @@ export const getTimeseriesVisRenderer: (deps: {
       handlers.done();
     };
 
-    render(
+    getRoot(domNode).render(
       <KibanaRenderContextProvider {...startServices}>
         <VisualizationContainer
           data-test-subj="timeseriesVis"
@@ -119,8 +139,7 @@ export const getTimeseriesVisRenderer: (deps: {
             initialRender={renderComplete}
           />
         </VisualizationContainer>
-      </KibanaRenderContextProvider>,
-      domNode
+      </KibanaRenderContextProvider>
     );
   },
 });

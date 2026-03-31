@@ -9,11 +9,11 @@
 
 import React, { useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
-import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { BrowserRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
+import { createRoot } from 'react-dom/client';
 import { Overview } from './overview';
 import { RegisterEmbeddable } from './register_embeddable';
 import { RenderExamples } from './render_examples';
@@ -98,7 +98,8 @@ const App = ({
 };
 
 export const renderApp = (core: CoreStart, deps: StartDeps, mountParams: AppMountParameters) => {
-  ReactDOM.render(<App core={core} deps={deps} mountParams={mountParams} />, mountParams.element);
+  const root = createRoot(mountParams.element);
+  root.render(<App core={core} deps={deps} mountParams={mountParams} />);
 
-  return () => ReactDOM.unmountComponentAtNode(mountParams.element);
+  return () => root.unmount();
 };

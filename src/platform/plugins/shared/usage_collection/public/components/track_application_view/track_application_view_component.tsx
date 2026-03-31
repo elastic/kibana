@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import * as ReactDOM from 'react-dom';
 import type { IApplicationUsageTracker } from '../../plugin';
 import type { TrackApplicationViewProps } from './types';
 

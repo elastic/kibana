@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

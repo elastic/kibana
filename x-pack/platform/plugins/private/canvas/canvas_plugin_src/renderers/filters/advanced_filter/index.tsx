@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import * as ReactDOM from '@kbn/core-mount-utils-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { StartInitializer } from '../../../plugin';
 import type { RendererFactory } from '../../../../types';

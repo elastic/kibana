@@ -8,8 +8,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-
 import {
   EuiButton,
   EuiCallOut,
@@ -20,6 +18,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -120,6 +119,8 @@ export function ErrorToast({ title, error, toastMessage, openModal, rendering }:
 }
 
 const mount = (component: React.ReactElement) => (container: HTMLElement) => {
-  ReactDOM.render(component, container);
-  return () => ReactDOM.unmountComponentAtNode(container);
+  render(component, container);
+  return () => {
+    unmountComponentAtNode(container);
+  };
 };

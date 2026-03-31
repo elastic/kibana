@@ -8,14 +8,15 @@
  */
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { PageProps } from './components/page';
 import { Page } from './components/page';
 
 export const render = (container: HTMLElement, props: PageProps) => {
-  ReactDOM.render(React.createElement(Page, props), container);
+  const root = createRoot(container);
+  root.render(React.createElement(Page, props));
 
   return () => {
-    ReactDOM.unmountComponentAtNode(container);
+    root.unmount();
   };
 };

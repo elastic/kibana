@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { unmountComponentAtNode } from 'react-dom';
 import { useCasesAddToExistingCaseModal } from '../../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   getMockApplications$,
   getMockCurrentAppId$,
@@ -17,7 +17,7 @@ import {
   getMockServices,
 } from './mocks';
 import { useKibana } from '../../../../common/lib/kibana';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { openModal } from './open_modal';
 import type { CasesActionContextProps } from './types';
 
@@ -43,16 +43,19 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('react-dom', () => {
-  const original = jest.requireActual('react-dom');
-  return { ...original, unmountComponentAtNode: jest.fn() };
-});
+jest.mock('@kbn/react-kibana-mount', () => ({
+  ...jest.requireActual('@kbn/react-kibana-mount'),
+  toMountPoint: jest.fn(jest.requireActual('@kbn/react-kibana-mount').toMountPoint),
+}));
 
 jest.mock('./action_wrapper');
 
 describe('openModal', () => {
   const mockUseCasesAddToExistingCaseModal = useCasesAddToExistingCaseModal as jest.Mock;
+  const mockToMountPoint = toMountPoint as jest.Mock;
+  const actualToMountPoint = jest.requireActual('@kbn/react-kibana-mount').toMountPoint;
   const mockOpenModal = jest.fn();
+  const mockUnmount = jest.fn();
 
   beforeAll(() => {
     jest.useFakeTimers({ now: new Date('2024-01-01T00:00:00.000Z') });
@@ -70,6 +73,18 @@ describe('openModal', () => {
     mockUseCasesAddToExistingCaseModal.mockReturnValue({
       open: mockOpenModal,
     });
+    mockToMountPoint.mockImplementation((node, params) => {
+      const mount = actualToMountPoint(node, params);
+
+      return (targetElement: HTMLElement) => {
+        const cleanup = mount(targetElement);
+
+        return () => {
+          mockUnmount();
+          cleanup();
+        };
+      };
+    });
 
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -83,13 +98,13 @@ describe('openModal', () => {
     jest.clearAllMocks();
   });
 
-  it('should open modal with an attachment with the time range as relative values', async () => {
-    openModal(
-      getMockLensApi(),
-      'myAppId',
-      {} as unknown as CasesActionContextProps,
-      getMockServices()
+  const renderOpenModal = (lensApi = getMockLensApi()) =>
+    act(() =>
+      openModal(lensApi, 'myAppId', {} as unknown as CasesActionContextProps, getMockServices())
     );
+
+  it('should open modal with an attachment with the time range as relative values', async () => {
+    renderOpenModal();
 
     await waitFor(() => {
       expect(mockOpenModal).toHaveBeenCalled();
@@ -113,71 +128,48 @@ describe('openModal', () => {
   });
 
   it('should have correct onClose handler - when close modal clicked', async () => {
-    openModal(
-      getMockLensApi(),
-      'myAppId',
-      {} as unknown as CasesActionContextProps,
-      getMockServices()
-    );
+    renderOpenModal();
 
     await waitFor(() => {
       const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
       onClose();
-      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+      expect(mockUnmount).toHaveBeenCalled();
     });
   });
 
   it('should have correct onClose handler - when case selected', async () => {
-    openModal(
-      getMockLensApi(),
-      'myAppId',
-      {} as unknown as CasesActionContextProps,
-      getMockServices()
-    );
+    renderOpenModal();
 
     await waitFor(() => {
       const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
       onClose({ id: 'case-id', title: 'case-title' });
-      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+      expect(mockUnmount).toHaveBeenCalled();
     });
   });
 
   it('should have correct onClose handler - when case created', async () => {
-    openModal(
-      getMockLensApi(),
-      'myAppId',
-      {} as unknown as CasesActionContextProps,
-      getMockServices()
-    );
+    renderOpenModal();
 
     await waitFor(() => {
       const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
       onClose(null, true);
-      expect(unmountComponentAtNode as jest.Mock).not.toHaveBeenCalled();
+      expect(mockUnmount).not.toHaveBeenCalled();
     });
   });
 
   it('should have correct onSuccess handler', async () => {
-    openModal(
-      getMockLensApi(),
-      'myAppId',
-      {} as unknown as CasesActionContextProps,
-      getMockServices()
-    );
+    renderOpenModal();
 
     await waitFor(() => {
       const onSuccess = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess;
       onSuccess();
-      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+      expect(mockUnmount).toHaveBeenCalled();
     });
   });
 
   it('should open modal with an attachment with the time range in absolute values', async () => {
-    openModal(
-      getMockLensApi({ from: '2024-01-09T00:00:00.000Z', to: '2024-01-10T00:00:00.000Z' }),
-      'myAppId',
-      {} as unknown as CasesActionContextProps,
-      getMockServices()
+    renderOpenModal(
+      getMockLensApi({ from: '2024-01-09T00:00:00.000Z', to: '2024-01-10T00:00:00.000Z' })
     );
 
     await waitFor(() => {
@@ -202,12 +194,7 @@ describe('openModal', () => {
   });
 
   it('should open modal with an attachment with the time range in absolute and relative values', async () => {
-    openModal(
-      getMockLensApi({ from: '2023-12-01T00:00:00.000Z', to: 'now' }),
-      'myAppId',
-      {} as unknown as CasesActionContextProps,
-      getMockServices()
-    );
+    renderOpenModal(getMockLensApi({ from: '2023-12-01T00:00:00.000Z', to: 'now' }));
 
     await waitFor(() => {
       expect(mockOpenModal).toHaveBeenCalled();

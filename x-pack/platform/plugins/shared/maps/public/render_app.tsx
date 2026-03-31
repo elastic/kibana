@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
@@ -17,6 +16,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
+import { createRoot } from 'react-dom/client';
 import {
   getCoreChrome,
   getMapsCapabilities,
@@ -102,7 +102,8 @@ export async function renderApp(
     );
   }
 
-  render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...getCore()}>
       <AppUsageTracker>
         <TableListViewKibanaProvider
@@ -135,11 +136,10 @@ export async function renderApp(
           </Router>
         </TableListViewKibanaProvider>
       </AppUsageTracker>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 }

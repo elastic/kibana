@@ -6,8 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import ReactDOM from 'react-dom';
 import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { Redirect } from 'react-router-dom';
@@ -18,6 +16,7 @@ import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { createRoot } from 'react-dom/client';
 import { DualDashboardsExample } from './dual_dashboards_example';
 import type { StartDeps } from './plugin';
 import { StaticByValueExample } from './static_by_value_example';
@@ -32,17 +31,17 @@ export const renderApp = async (
   { data, dashboard, uiActions }: StartDeps,
   { element, history }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <PortableDashboardsDemos
       coreStart={coreStart}
       data={data}
       history={history}
       dashboard={dashboard}
       uiActions={uiActions}
-    />,
-    element
+    />
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };
 
 const PortableDashboardsDemos = ({

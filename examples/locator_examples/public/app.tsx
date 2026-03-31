@@ -8,13 +8,12 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-
 import { EuiPageBody, EuiPageTemplate, EuiPageSection, EuiText } from '@elastic/eui';
 import { Redirect, useLocation } from 'react-router-dom';
 import { Router, Routes as RouterRoutes, Route } from '@kbn/shared-ux-router';
 import { createBrowserHistory } from 'history';
 import type { AppMountParameters } from '@kbn/core/public';
+import { createRoot } from 'react-dom/client';
 
 function useQuery() {
   const { search } = useLocation();
@@ -71,7 +70,8 @@ export const LinksExample: React.FC<{
 };
 
 export const renderApp = (props: { appBasePath: string }, { element }: AppMountParameters) => {
-  ReactDOM.render(<LinksExample {...props} />, element);
+  const root = createRoot(element);
+  root.render(<LinksExample {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

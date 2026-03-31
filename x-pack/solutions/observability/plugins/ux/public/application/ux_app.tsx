@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +21,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
 import { InspectorContextProvider, useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { createRoot } from 'react-dom/client';
 import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
 import { DASHBOARD_LABEL, RumHome } from '../components/app/rum_dashboard/rum_home';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
@@ -200,7 +200,8 @@ export const renderApp = ({
     console.log('Error creating static data view', e);
   });
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <UXAppRoot
       appMountParameters={appMountParameters}
       core={core}
@@ -208,11 +209,10 @@ export const renderApp = ({
       corePlugins={corePlugins}
       isDev={isDev}
       spaceId={spaceId}
-    />,
-    element
+    />
   );
   return () => {
     corePlugins.data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

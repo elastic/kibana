@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
@@ -18,6 +17,7 @@ import { licenseService } from '../../hooks';
 import type { UIExtensionsStorage } from '../../types';
 
 import { AppRoutes, IntegrationsAppContext } from './app';
+import { createRoot } from 'react-dom/client';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -73,7 +73,8 @@ export function renderApp(
   extensions: UIExtensionsStorage,
   UsageTracker: React.FC<{ children: React.ReactNode }>
 ) {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <UsageTracker>
       <IntegrationsApp
         basepath={appBasePath}
@@ -84,12 +85,11 @@ export function renderApp(
         extensions={extensions}
         setHeaderActionMenu={setHeaderActionMenu}
       />
-    </UsageTracker>,
-    element
+    </UsageTracker>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 }
 

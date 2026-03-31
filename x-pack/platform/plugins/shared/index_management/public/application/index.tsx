@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, unmountComponentAtNode } from 'react-dom';
 import type SemVer from 'semver/classes/semver';
 
 import type { CoreStart, CoreSetup, ApplicationStart } from '@kbn/core/public';
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { createRoot } from 'react-dom/client';
 import { API_BASE_PATH } from '../../common';
 import {
   createKibanaReactContext,
@@ -108,15 +108,15 @@ export const renderApp = (
   }
   const { history } = dependencies;
 
-  render(
+  const root = createRoot(elem);
+  root.render(
     <IndexManagementAppContext core={core} dependencies={dependencies}>
       <App history={history} />
-    </IndexManagementAppContext>,
-    elem
+    </IndexManagementAppContext>
   );
 
   return () => {
-    unmountComponentAtNode(elem);
+    root.unmount();
   };
 };
 

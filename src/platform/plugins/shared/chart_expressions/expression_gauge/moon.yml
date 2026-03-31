@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/ebt-tools'
   - '@kbn/visualizations-common'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

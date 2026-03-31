@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import type { Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { type CoreSetup, type CoreStart } from '@kbn/core/public';
@@ -23,6 +22,7 @@ import { BehaviorSubject, combineLatest } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { createRoot } from 'react-dom/client';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
@@ -227,7 +227,8 @@ export class AIAssistantManagementPlugin
     ) {
       coreStart.chrome.navControls.registerRight({
         mount: (element) => {
-          ReactDOM.render(
+          const root = createRoot(element);
+          root.render(
             coreStart.rendering.addContext(
               <NavControlInitiator
                 isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
@@ -238,12 +239,11 @@ export class AIAssistantManagementPlugin
                 }
                 spaces={spaces}
               />
-            ),
-            element
+            )
           );
 
           return () => {
-            ReactDOM.unmountComponentAtNode(element);
+            root.unmount();
           };
         },
         // before the user profile

@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { createRoot } from 'react-dom/client';
 import { SCREENSHOTTING_APP_ID } from '../common';
 import { App, ScreenshotModeContext } from './app';
 
@@ -27,13 +27,13 @@ export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
         visibleIn: [],
         chromeless: true,
         mount: async ({ element }: AppMountParameters) => {
-          ReactDOM.render(
+          const root = createRoot(element);
+          root.render(
             <ScreenshotModeContext.Provider value={screenshotMode}>
               <App />
-            </ScreenshotModeContext.Provider>,
-            element
+            </ScreenshotModeContext.Provider>
           );
-          return () => ReactDOM.unmountComponentAtNode(element);
+          return () => root.unmount();
         },
       });
     }

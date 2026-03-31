@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { i18n as i18nFormatter } from '@kbn/i18n';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { createRoot } from 'react-dom/client';
 import { getIntegratedAppAvailability } from '../lib/adapters/framework/capabilities_adapter';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES, INTEGRATED_SOLUTIONS } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/config';
@@ -71,10 +71,11 @@ export function renderApp(
     setBreadcrumbs: core.chrome.setBreadcrumbs,
   };
 
-  ReactDOM.render(<UptimeApp {...props} />, appMountParameters.element);
+  const root = createRoot(appMountParameters.element);
+  root.render(<UptimeApp {...props} />);
 
   return () => {
     startPlugins.data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(appMountParameters.element);
+    root.unmount();
   };
 }

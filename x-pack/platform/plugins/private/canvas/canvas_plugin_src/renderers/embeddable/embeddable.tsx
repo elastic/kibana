@@ -10,7 +10,7 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import * as ReactDOM from '@kbn/core-mount-utils-browser';
 import { omit } from 'lodash';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';

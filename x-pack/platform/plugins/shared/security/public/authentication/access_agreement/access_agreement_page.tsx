@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/react';
 import type { FormEvent, MouseEvent } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import ReactMarkdown from 'react-markdown';
 
 import type {
@@ -158,7 +158,8 @@ export function renderAccessAgreementPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  ReactDOM.render(services.rendering.addContext(<AccessAgreementPage {...props} />), element);
+  const root = createRoot(element);
+  root.render(services.rendering.addContext(<AccessAgreementPage {...props} />));
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 }

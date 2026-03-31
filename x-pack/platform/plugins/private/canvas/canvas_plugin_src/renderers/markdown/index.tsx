@@ -7,7 +7,7 @@
 
 import type { CSSProperties } from 'react';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import * as ReactDOM from '@kbn/core-mount-utils-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Markdown } from '@kbn/kibana-react-plugin/public';

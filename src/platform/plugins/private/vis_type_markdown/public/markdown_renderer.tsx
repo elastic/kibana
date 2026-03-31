@@ -8,7 +8,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 
 import { VisualizationContainer } from '@kbn/visualizations-common';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';

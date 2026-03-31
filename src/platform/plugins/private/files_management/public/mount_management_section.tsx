@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
 import { FormattedRelative } from '@kbn/i18n-react';
@@ -16,6 +15,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { createRoot } from 'react-dom/client';
 import type { StartDependencies } from './types';
 import { App } from './app';
 import { FilesManagementAppContextProvider } from './context';
@@ -31,7 +31,8 @@ export const mountManagementSection = (
     files: { filesClientFactory, getAllFindKindDefinitions, getFileKindDefinition },
   } = startDeps;
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     coreStart.rendering.addContext(
       <QueryClientProvider client={queryClient}>
         <TableListViewKibanaProvider {...{ core: coreStart, FormattedRelative }}>
@@ -46,11 +47,10 @@ export const mountManagementSection = (
           </FilesManagementAppContextProvider>
         </TableListViewKibanaProvider>
       </QueryClientProvider>
-    ),
-    element
+    )
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

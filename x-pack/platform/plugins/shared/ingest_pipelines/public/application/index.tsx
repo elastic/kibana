@@ -7,8 +7,6 @@
 
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-
 import type { ApplicationStart } from '@kbn/core/public';
 import type {
   NotificationsStart,
@@ -22,6 +20,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
+import { createRoot } from 'react-dom/client';
 import { KibanaContextProvider, KibanaRenderContextProvider } from '../shared_imports';
 import type { Config, ILicense } from '../types';
 
@@ -69,7 +68,8 @@ export const renderApp = (
   services: AppServices,
   coreServices: CoreServices
 ) => {
-  render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...coreServices}>
       <AuthorizationProvider
         privilegesEndpoint={`${API_BASE_PATH}/privileges/ingest_pipelines`}
@@ -79,11 +79,10 @@ export const renderApp = (
           <App />
         </KibanaContextProvider>
       </AuthorizationProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

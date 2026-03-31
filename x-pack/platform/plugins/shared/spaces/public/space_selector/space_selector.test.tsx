@@ -24,8 +24,11 @@ function getSpacesManager(spaces: Space[] = []) {
   return manager;
 }
 
+const queryClients: QueryClient[] = [];
+
 const renderScreen = (props: SpaceSelectorProps) => {
   const queryClient = new QueryClient();
+  queryClients.push(queryClient);
 
   return renderWithI18n(
     <QueryClientProvider client={queryClient}>
@@ -34,7 +37,11 @@ const renderScreen = (props: SpaceSelectorProps) => {
   );
 };
 
-test('it renders without crashing', () => {
+afterEach(() => {
+  queryClients.splice(0).forEach((queryClient) => queryClient.clear());
+});
+
+test('it renders without crashing', async () => {
   const spacesManager = getSpacesManager();
   const customBranding$ = of({});
   renderScreen({
@@ -44,9 +51,12 @@ test('it renders without crashing', () => {
   });
 
   expect(screen.getByTestId('kibanaSpaceSelector')).toBeInTheDocument();
+  await waitFor(() => {
+    expect(screen.queryByTestId('spacesLoadingSpinner')).not.toBeInTheDocument();
+  });
 });
 
-test('it renders with custom logo', () => {
+test('it renders with custom logo', async () => {
   const spacesManager = getSpacesManager();
   const customBranding$ = of({ logo: 'img.jpg' });
   renderScreen({
@@ -57,6 +67,9 @@ test('it renders with custom logo', () => {
 
   expect(screen.getByTestId('kibanaSpaceSelector')).toMatchSnapshot();
   expect(screen.getByAltText('Custom logo')).toBeInTheDocument();
+  await waitFor(() => {
+    expect(screen.queryByTestId('spacesLoadingSpinner')).not.toBeInTheDocument();
+  });
 });
 
 test('it queries for spaces when loaded', async () => {

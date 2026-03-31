@@ -38,6 +38,7 @@
     "@kbn/visualizations-common",
     "@kbn/vis-type-timeseries-plugin",
     "@kbn/safer-lodash-set",
+    "@kbn/core-mount-utils-browser",
   ],
   "exclude": [
     "target/**/*",

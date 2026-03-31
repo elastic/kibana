@@ -8,11 +8,11 @@
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { createRoot } from 'react-dom/client';
 import { AgentBuilderRoutes } from './routes';
 import type { AgentBuilderInternalService } from '../services';
 import type { AgentBuilderStartDependencies } from '../types';
@@ -39,7 +39,8 @@ export const mountApp = async ({
   const queryClient = new QueryClient();
   await services.accessChecker.initAccess();
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     core.rendering.addContext(
       <KibanaContextProvider services={kibanaServices}>
         <I18nProvider>
@@ -58,11 +59,10 @@ export const mountApp = async ({
           </QueryClientProvider>
         </I18nProvider>
       </KibanaContextProvider>
-    ),
-    element
+    )
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';

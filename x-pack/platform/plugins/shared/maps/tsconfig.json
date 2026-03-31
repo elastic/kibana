@@ -101,7 +101,8 @@
     "@kbn/crypto-browser",
     "@kbn/cps",
     "@kbn/kql",
-    "@kbn/cps-utils"
+    "@kbn/cps-utils",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": ["target/**/*"]
 }

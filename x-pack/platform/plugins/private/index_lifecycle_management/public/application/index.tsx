@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import type { ScopedHistory, ApplicationStart, UnmountCallback, CoreStart } from '@kbn/core/public';
 import type { DocLinksStart, ExecutionContextStart } from '@kbn/core/public';
 
+import { createRoot } from 'react-dom/client';
 import type { CloudSetup, ILicense } from '../shared_imports';
 import {
   KibanaContextProvider,
@@ -34,7 +34,8 @@ export const renderApp = (
   const { navigateToUrl, getUrlForApp, capabilities } = application;
   const { overlays, http } = startServices;
 
-  render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <div className={APP_WRAPPER_CLASS}>
         <RedirectAppLinks
@@ -61,9 +62,8 @@ export const renderApp = (
           </KibanaContextProvider>
         </RedirectAppLinks>
       </div>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };

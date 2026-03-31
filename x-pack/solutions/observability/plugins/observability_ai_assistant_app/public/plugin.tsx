@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { lazy } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   type AppMountParameters,
   DEFAULT_APP_CATEGORIES,
@@ -92,14 +92,14 @@ export class ObservabilityAIAssistantAppPlugin
 
         const { Application } = await import('./application');
 
-        ReactDOM.render(
+        const root = createRoot(appMountParameters.element);
+        root.render(
           <Application
             {...appMountParameters}
             service={this.appService!}
             coreStart={coreStart}
             pluginsStart={pluginsStart as ObservabilityAIAssistantAppPluginStartDependencies}
-          />,
-          appMountParameters.element
+          />
         );
 
         const subscription = chatExperience$.subscribe((chatExperience) => {
@@ -110,7 +110,7 @@ export class ObservabilityAIAssistantAppPlugin
 
         return () => {
           subscription.unsubscribe();
-          ReactDOM.unmountComponentAtNode(appMountParameters.element);
+          root.unmount();
         };
       },
     });
@@ -131,19 +131,18 @@ export class ObservabilityAIAssistantAppPlugin
     if (isEnabled) {
       coreStart.chrome.navControls.registerRight({
         mount: (element) => {
-          ReactDOM.render(
+          const root = createRoot(element);
+          root.render(
             <NavControlInitiator
               appService={appService}
               coreStart={coreStart}
               pluginsStart={pluginsStart}
               isServerless={this.isServerless}
-            />,
-            element,
-            () => {}
+            />
           );
 
           return () => {
-            ReactDOM.unmountComponentAtNode(element);
+            root.unmount();
           };
         },
         // right before the user profile

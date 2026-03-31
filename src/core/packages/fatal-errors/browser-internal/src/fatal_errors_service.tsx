@@ -8,7 +8,7 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { ReplaySubject, first, tap } from 'rxjs';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -97,7 +97,8 @@ export class FatalErrorsService {
     const container = document.createElement('div');
     this.rootDomElement.appendChild(container);
 
-    render(
+    const root = createRoot(container);
+    root.render(
       <KibanaRootContextProvider
         analytics={analytics}
         i18n={i18n}
@@ -115,8 +116,7 @@ export class FatalErrorsService {
             )
           }
         </FatalErrorScreen>
-      </KibanaRootContextProvider>,
-      container
+      </KibanaRootContextProvider>
     );
   }
 

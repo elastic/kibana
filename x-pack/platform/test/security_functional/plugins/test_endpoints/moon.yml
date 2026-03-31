@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-http-server'
   - '@kbn/core-http-server-utils'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

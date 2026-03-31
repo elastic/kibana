@@ -156,6 +156,23 @@ export const EditSpaceProviderRoot = ({
     resolveSecurityLicense();
   }, [resolveSecurityLicense]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    getIsRoleManagementEnabled().then((isEnabledFunction) => {
+      if (!isMounted) {
+        return;
+      }
+
+      const result = isEnabledFunction();
+      setIsRoleManagementEnabled(typeof result === 'undefined' || result);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [getIsRoleManagementEnabled]);
+
   const createInitialState = useCallback((state: IEditSpaceStoreState) => {
     return state;
   }, []);
@@ -178,11 +195,6 @@ export const EditSpaceProviderRoot = ({
     },
     [resolveAPIClients, services.spacesManager]
   );
-
-  getIsRoleManagementEnabled().then((isEnabledFunction) => {
-    const result = isEnabledFunction();
-    setIsRoleManagementEnabled(typeof result === 'undefined' || result);
-  });
 
   return (
     <EditSpaceProvider

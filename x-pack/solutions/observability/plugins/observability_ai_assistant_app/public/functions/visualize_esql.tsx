@@ -39,7 +39,7 @@ import {
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getLensAttributesFromSuggestion, ChartType } from '@kbn/visualization-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -214,7 +214,7 @@ export function VisualizeESQL({
           });
           chatFlyoutSecondSlotHandler?.setVisibility?.(false);
           if (chatFlyoutSecondSlotHandler?.container) {
-            ReactDOM.unmountComponentAtNode(chatFlyoutSecondSlotHandler.container);
+            unmountComponentAtNode(chatFlyoutSecondSlotHandler.container);
           }
         },
         onCancel: () => {
@@ -225,7 +225,7 @@ export function VisualizeESQL({
           });
           chatFlyoutSecondSlotHandler?.setVisibility?.(false);
           if (chatFlyoutSecondSlotHandler?.container) {
-            ReactDOM.unmountComponentAtNode(chatFlyoutSecondSlotHandler.container);
+            unmountComponentAtNode(chatFlyoutSecondSlotHandler.container);
           }
         },
         container: chatFlyoutSecondSlotHandler?.container,

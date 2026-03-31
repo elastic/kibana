@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { createRoot } from 'react-dom/client';
 import { IntegrationManagement } from './components/integration_management/integration_management';
 import type { Services } from './services/types';
 import type { AIV2TelemetryService } from './services/telemetry';
@@ -38,7 +38,8 @@ export const renderApp = ({
     telemetry: telemetryService,
   };
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     coreStart.rendering.addContext(
       <QueryClientProvider client={queryClient}>
         <KibanaContextProvider services={services}>
@@ -54,11 +55,10 @@ export const renderApp = ({
           </TelemetryContextProvider>
         </KibanaContextProvider>
       </QueryClientProvider>
-    ),
-    element
+    )
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { createRoot } from 'react-dom/client';
 import { EntityStoreApp } from './components/app';
 
 export const renderApp = (coreStart: CoreStart, { element }: AppMountParameters) => {
   const { http, rendering } = coreStart;
 
-  ReactDOM.render(rendering.addContext(<EntityStoreApp http={http} />), element);
+  const root = createRoot(element);
+  root.render(rendering.addContext(<EntityStoreApp http={http} />));
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -8,7 +8,8 @@
  */
 
 import React, { Suspense, lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import type { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
@@ -21,6 +22,8 @@ import { getCoreStart } from './services';
 const DefaultEditor = lazy(() => import('./default_editor'));
 
 class DefaultEditorController implements IEditorController {
+  private root?: Root;
+
   constructor(
     private el: HTMLElement,
     private vis: Vis,
@@ -29,7 +32,8 @@ class DefaultEditorController implements IEditorController {
   ) {}
 
   render(props: EditorRenderProps) {
-    render(
+    this.root ??= createRoot(this.el);
+    this.root.render(
       <KibanaRenderContextProvider {...getCoreStart()}>
         <EuiErrorBoundary>
           <Suspense
@@ -54,13 +58,13 @@ class DefaultEditorController implements IEditorController {
             />
           </Suspense>
         </EuiErrorBoundary>
-      </KibanaRenderContextProvider>,
-      this.el
+      </KibanaRenderContextProvider>
     );
   }
 
   destroy() {
-    unmountComponentAtNode(this.el);
+    this.root?.unmount();
+    this.root = undefined;
   }
 }
 

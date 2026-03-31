@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { useParams } from 'react-router-dom';
 
 import type { BuildFlavor } from '@kbn/config';
@@ -114,7 +114,8 @@ export const rolesManagementApp = Object.freeze({
           );
         };
 
-        render(
+        const root = createRoot(element);
+        root.render(
           startServices.rendering.addContext(
             <KibanaContextProvider services={startServices}>
               <Router history={history}>
@@ -148,12 +149,11 @@ export const rolesManagementApp = Object.freeze({
                 </BreadcrumbsProvider>
               </Router>
             </KibanaContextProvider>
-          ),
-          element
+          )
         );
 
         return () => {
-          unmountComponentAtNode(element);
+          root.unmount();
         };
       },
     } as RegisterManagementAppArgs;

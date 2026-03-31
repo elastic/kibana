@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { createRoot } from 'react-dom/client';
 import type { StartDeps } from '../types';
 import { TodoApp } from './todos';
 import { MSearchApp } from './msearch';
@@ -23,7 +23,8 @@ export const renderApp = (
   { contentManagement, savedObjectsTaggingOss }: StartDeps,
   { element, history }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     core.rendering.addContext(
       <Router history={history}>
         <EuiPageTemplate offset={0}>
@@ -82,9 +83,8 @@ export const renderApp = (
           </EuiPageTemplate.Section>
         </EuiPageTemplate>
       </Router>
-    ),
-    element
+    )
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

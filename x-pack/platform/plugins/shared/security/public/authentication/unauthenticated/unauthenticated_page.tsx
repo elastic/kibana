@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -56,7 +56,8 @@ export function renderUnauthenticatedPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  render(services.rendering.addContext(<UnauthenticatedPage {...props} />), element);
+  const root = createRoot(element);
+  root.render(services.rendering.addContext(<UnauthenticatedPage {...props} />));
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 }

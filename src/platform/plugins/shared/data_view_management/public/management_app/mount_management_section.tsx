@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
@@ -19,6 +18,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { NoDataViewsPromptKibanaProvider } from '@kbn/shared-ux-prompt-no-data-views';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { createRoot } from 'react-dom/client';
 import {
   EditIndexPatternContainer,
   CreateEditFieldContainer,
@@ -126,7 +126,8 @@ export async function mountManagementSection(
   const createPath = '/dataView/:id/create-field/';
   const createEditPath = dataViews.scriptedFieldsEnabled ? [editPath, createPath] : [editPath];
 
-  ReactDOM.render(
+  const root = createRoot(params.element);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <KibanaContextProvider services={deps}>
         <NoDataViewsPromptKibanaProvider
@@ -153,12 +154,11 @@ export async function mountManagementSection(
           </Router>
         </NoDataViewsPromptKibanaProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    params.element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
     chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
   };
 }

@@ -10,12 +10,11 @@
 import { EuiButton, EuiProvider } from '@elastic/eui';
 
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
-
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { createRoot } from 'react-dom/client';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -78,7 +77,8 @@ export class ErrorBoundaryExamplePlugin implements Plugin<void, void, SetupDeps>
       async mount({ element }: AppMountParameters) {
         // Using the "EuiProvider" here rather than KibanaRenderContextProvider, because KibanaRenderContextProvider
         // wraps KibanaErrorBoundaryProvider and KibanaErrorBoundary and we want to test it directly, not a wrapper.
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <EuiProvider highContrastMode={false}>
             <KibanaErrorBoundaryProvider analytics={core.analytics}>
               <KibanaErrorBoundary>
@@ -96,10 +96,9 @@ export class ErrorBoundaryExamplePlugin implements Plugin<void, void, SetupDeps>
                 </KibanaPageTemplate>
               </KibanaErrorBoundary>
             </KibanaErrorBoundaryProvider>
-          </EuiProvider>,
-          element
+          </EuiProvider>
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
 

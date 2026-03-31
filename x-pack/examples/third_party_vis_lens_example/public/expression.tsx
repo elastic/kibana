@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { css, keyframes } from '@emotion/css';
 import type {
   Datatable,
@@ -16,6 +17,25 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import type { RotatingNumberState } from '../common/types';
+
+const roots = new WeakMap<Element, Root>();
+
+const getRoot = (domNode: Element) => {
+  const existingRoot = roots.get(domNode);
+
+  if (existingRoot) {
+    return existingRoot;
+  }
+
+  const root = createRoot(domNode);
+  roots.set(domNode, root);
+  return root;
+};
+
+const unmountRoot = (domNode: Element) => {
+  roots.get(domNode)?.unmount();
+  roots.delete(domNode);
+};
 
 export const getRotatingNumberRenderer = (
   formatFactory: Promise<FormatFactory>
@@ -30,14 +50,11 @@ export const getRotatingNumberRenderer = (
     config: RotatingNumberChartProps,
     handlers: IInterpreterRenderHandlers
   ) => {
-    ReactDOM.render(
-      <RotatingNumberChart {...config} formatFactory={await formatFactory} />,
-      domNode,
-      () => {
-        handlers.done();
-      }
+    getRoot(domNode).render(
+      <RotatingNumberChart {...config} formatFactory={await formatFactory} />
     );
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    handlers.done();
+    handlers.onDestroy(() => unmountRoot(domNode));
   },
 });
 

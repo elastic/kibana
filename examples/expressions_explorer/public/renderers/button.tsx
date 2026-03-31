@@ -7,12 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ReactDOM from 'react-dom';
 import React from 'react';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { EuiButton } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
+
+const roots = new WeakMap<Element, Root>();
+
+const getRoot = (domNode: Element) => {
+  const existingRoot = roots.get(domNode);
+
+  if (existingRoot) {
+    return existingRoot;
+  }
+
+  const root = createRoot(domNode);
+  roots.set(domNode, root);
+  return root;
+};
+
+const unmountRoot = (domNode: Element) => {
+  roots.get(domNode)?.unmount();
+  roots.delete(domNode);
+};
 
 export const getButtonRenderer = (core: CoreSetup) => {
   const buttonRenderer: ExpressionRenderDefinition<any> = {
@@ -49,9 +69,10 @@ export const getButtonRenderer = (core: CoreSetup) => {
         </KibanaRenderContextProvider>
       );
 
-      ReactDOM.render(renderDebug(), domNode, () => handlers.done());
+      getRoot(domNode).render(renderDebug());
+      handlers.done();
 
-      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+      handlers.onDestroy(() => unmountRoot(domNode));
     },
   };
 

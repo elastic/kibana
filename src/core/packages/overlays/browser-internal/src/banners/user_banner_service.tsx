@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { filter } from 'rxjs';
 import type { Subscription } from 'rxjs';
 
@@ -19,6 +18,7 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayBannersStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -65,7 +65,7 @@ export class UserBannerService {
       id = banners.replace(
         id,
         (el) => {
-          ReactDOM.render(
+          render(
             <KibanaRenderContextProvider {...startServices}>
               <EuiCallOut
                 title={
@@ -99,7 +99,9 @@ export class UserBannerService {
 
           timeout = setTimeout(dismiss, lifetime);
 
-          return () => ReactDOM.unmountComponentAtNode(el);
+          return () => {
+            unmountComponentAtNode(el);
+          };
         },
         100
       );

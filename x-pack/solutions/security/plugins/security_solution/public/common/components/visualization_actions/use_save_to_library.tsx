@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { unmountComponentAtNode } from 'react-dom';
 import type { SaveModalContainerProps } from '@kbn/lens-plugin/public/async_services';
 import { useKibana } from '../../lib/kibana';
 import type { LensAttributes } from './types';
@@ -30,11 +29,12 @@ export const useSaveToLibrary = ({
 
   const openSaveVisualizationFlyout = useCallback(() => {
     const targetDomElement = document.createElement('div');
+    const closeSaveVisualizationFlyout = () => unmount();
     const mount = toMountPoint(
       <SaveModalComponent
         initialInput={{ attributes } as SaveModalContainerProps['initialInput']}
-        onSave={() => unmountComponentAtNode(targetDomElement)}
-        onClose={() => unmountComponentAtNode(targetDomElement)}
+        onSave={closeSaveVisualizationFlyout}
+        onClose={closeSaveVisualizationFlyout}
         originatingApp={APP_UI_ID}
         getOriginatingPath={(dashboardId) =>
           `${SecurityPageName.dashboards}/${getEditOrCreateDashboardPath(dashboardId)}`
@@ -46,7 +46,7 @@ export const useSaveToLibrary = ({
       startServices
     );
 
-    mount(targetDomElement);
+    const unmount = mount(targetDomElement);
   }, [SaveModalComponent, attributes, getEditOrCreateDashboardPath, redirectTo, startServices]);
 
   const disableVisualizations = useMemo(

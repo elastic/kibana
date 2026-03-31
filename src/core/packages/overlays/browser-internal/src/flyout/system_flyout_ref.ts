@@ -8,8 +8,11 @@
  */
 
 import { Subject, firstValueFrom } from 'rxjs';
-import { unmountComponentAtNode } from 'react-dom';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+
+interface UnmountableRoot {
+  unmount: () => void;
+}
 
 /**
  * A SystemFlyoutRef is a reference to an opened system flyout panel.
@@ -20,9 +23,11 @@ export class SystemFlyoutRef implements OverlayRef {
   private _isClosed = false;
   private closeSubject = new Subject<void>();
   private container: HTMLElement;
+  private root: UnmountableRoot;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, root: UnmountableRoot) {
     this.container = container;
+    this.root = root;
     this.onClose = firstValueFrom(this.closeSubject);
   }
 
@@ -33,7 +38,7 @@ export class SystemFlyoutRef implements OverlayRef {
   public close(): Promise<void> {
     if (!this._isClosed) {
       this._isClosed = true;
-      unmountComponentAtNode(this.container);
+      this.root.unmount();
       this.container.remove();
 
       this.closeSubject.next();

@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/ebt-tools'
   - '@kbn/chart-test-jest-helpers'
   - '@kbn/visualizations-common'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

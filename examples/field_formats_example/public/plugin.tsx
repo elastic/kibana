@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
@@ -18,6 +17,7 @@ import type {
   IndexPatternFieldEditorSetup,
 } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { createRoot } from 'react-dom/client';
 import { registerExampleFormat } from './examples/2_creating_custom_formatter';
 import { App } from './app';
 import { registerExampleFormatEditor } from './examples/3_creating_custom_format_editor';
@@ -76,11 +76,11 @@ export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, 
       visibleIn: [],
       async mount({ element }: AppMountParameters) {
         const [, plugins] = await core.getStartServices();
-        ReactDOM.render(
-          <App deps={{ fieldFormats: plugins.fieldFormats, openDateViewNumberFieldEditor }} />,
-          element
+        const root = createRoot(element);
+        root.render(
+          <App deps={{ fieldFormats: plugins.fieldFormats, openDateViewNumberFieldEditor }} />
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
 

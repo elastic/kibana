@@ -8,7 +8,7 @@
 import type { History } from 'history';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -47,7 +47,8 @@ export const apiKeysManagementApp = Object.freeze({
           import('./api_keys_grid/api_keys_grid_page'),
         ]);
 
-        render(
+        const root = createRoot(element);
+        root.render(
           coreStart.rendering.addContext(
             <Providers
               services={coreStart}
@@ -64,12 +65,11 @@ export const apiKeysManagementApp = Object.freeze({
                 <APIKeysGridPage />
               </Breadcrumb>
             </Providers>
-          ),
-          element
+          )
         );
 
         return () => {
-          unmountComponentAtNode(element);
+          root.unmount();
         };
       },
     } as RegisterManagementAppArgs;

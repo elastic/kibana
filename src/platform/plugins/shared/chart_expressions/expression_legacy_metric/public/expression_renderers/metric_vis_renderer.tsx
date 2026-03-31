@@ -8,8 +8,8 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { VisualizationContainer } from '@kbn/visualizations-common';

@@ -14,10 +14,10 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import type { ParsedQuery } from 'query-string';
 import { parse } from 'query-string';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import type { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Redirect } from 'react-router-dom';
 
+import { createRoot } from 'react-dom/client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import type { RedirectToProps } from './types';
 import { coreServices, dataService, embeddableService } from '../services/kibana_services';
@@ -205,11 +205,12 @@ export async function mountApp({
       iconType: 'glasses',
     });
   }
-  render(app, element);
+  const root = createRoot(element);
+  root.render(app);
   return () => {
     dataService.search.session.clear();
     unlistenParentHistory();
-    unmountComponentAtNode(element);
+    root.unmount();
     appUnMounted();
   };
 }

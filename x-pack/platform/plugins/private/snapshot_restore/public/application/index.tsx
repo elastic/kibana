@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
+import { createRoot } from 'react-dom/client';
 import { App } from './app';
 import { AppProviders } from './app_providers';
 import type { AppDependencies } from './app_context';
@@ -26,7 +26,8 @@ const AppWithRouter = ({ history }: AppWithRouterProps) => (
 );
 
 export const renderApp = (elem: Element, dependencies: AppDependencies) => {
-  render(
+  const root = createRoot(elem);
+  root.render(
     <KibanaContextProvider
       services={{
         uiSettings: dependencies.services.uiSettings,
@@ -37,12 +38,11 @@ export const renderApp = (elem: Element, dependencies: AppDependencies) => {
       <AppProviders appDependencies={dependencies}>
         <AppWithRouter history={dependencies.services.history} />
       </AppProviders>
-    </KibanaContextProvider>,
-    elem
+    </KibanaContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(elem);
+    root.unmount();
   };
 };
 

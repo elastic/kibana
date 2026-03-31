@@ -40,6 +40,7 @@ export class DataGridService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
+  private readonly retryOnStale = this.ctx.getService('retryOnStale');
 
   async getDataGridTableData(): Promise<TabbedGridData> {
     const table = await this.find.byCssSelector('.euiDataGrid');
@@ -470,32 +471,35 @@ export class DataGridService extends FtrService {
     const testSubj = options.isAnchorRow
       ? 'docTableExpandToggleColumnAnchor'
       : 'docTableExpandToggleColumn';
-
-    let toggle: WebElementWrapper | undefined;
+    const rowIndex = options.rowIndex || 0;
 
     await this.retry.try(async () => {
-      toggle = await this.find.byCssSelector(
-        `${
-          options.isAnchorRow
-            ? ''
-            : `.euiDataGridRow[data-grid-visible-row-index="${options.rowIndex || 0}"] `
-        }[data-test-subj="${testSubj}"]`
-      );
+      await this.retryOnStale(async () => {
+        const toggles = await this.find.allByCssSelector(`[data-test-subj="${testSubj}"]`);
+        const toggle = toggles[rowIndex];
+
+        if (!toggle) {
+          throw new Error(`Unable to find row toggle ${testSubj} at row index ${rowIndex}`);
+        }
+
+        await toggle.scrollIntoViewIfNecessary();
+        await toggle.moveMouseTo();
+        await toggle.click();
+      });
     });
 
-    if (toggle) {
-      await toggle.scrollIntoViewIfNecessary();
-      await toggle.moveMouseTo();
-      await toggle.click();
-      await this.retry.waitFor('doc viewer to open', async () => {
-        return this.isShowingDocViewer();
-      });
-    } else {
-      throw new Error('Unable to find row toggle element');
-    }
+    await this.retry.waitFor('doc viewer to open', async () => {
+      return this.isShowingDocViewer();
+    });
 
     if (defaultTabId !== false) {
-      await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+      const tabId = defaultTabId ?? 'doc_view_table';
+      await this.retryOnStale(async () => {
+        await this.clickDocViewerTab(tabId);
+      });
+      await this.retry.waitFor(`doc viewer tab ${tabId} to be selected`, async () => {
+        return await this.isDocViewerTabSelected(tabId);
+      });
     }
   }
 

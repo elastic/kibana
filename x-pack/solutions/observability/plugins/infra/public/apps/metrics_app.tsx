@@ -8,11 +8,11 @@ import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import type { History } from 'history';
 import type { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { AppMountParameters } from '@kbn/core/public';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { createRoot } from 'react-dom/client';
 import type { InfraPublicConfig } from '../../common/plugin_config_types';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
@@ -37,7 +37,8 @@ export const renderApp = (
 
   prepareMountElement(element, METRICS_APP_DATA_TEST_SUBJ);
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <MetricsApp
       core={core}
       history={history}
@@ -48,14 +49,13 @@ export const renderApp = (
       storage={storage}
       theme$={theme$}
       kibanaEnvironment={kibanaEnvironment}
-    />,
-    element
+    />
   );
 
   return () => {
     plugins.data.search.session.clear();
     core.chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

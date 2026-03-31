@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/ui-theme'
   - '@kbn/react-kibana-context-render'
   - '@kbn/i18n'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

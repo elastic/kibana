@@ -7,11 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
+
 export const mockReactDomRender = jest.fn();
 export const mockReactDomUnmount = jest.fn();
 export const mockReactDomCreatePortal = jest.fn().mockImplementation((component) => component);
+export const mockReactDomCreateRoot = jest.fn().mockImplementation((container) => ({
+  render: (component: ReactNode) => mockReactDomRender(component, container),
+  unmount: () => mockReactDomUnmount(container),
+}));
+
 jest.doMock('react-dom', () => ({
   render: mockReactDomRender,
   createPortal: mockReactDomCreatePortal,
   unmountComponentAtNode: mockReactDomUnmount,
+}));
+
+jest.doMock('react-dom/client', () => ({
+  createRoot: mockReactDomCreateRoot,
 }));

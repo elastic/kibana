@@ -8,9 +8,9 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VisualizationContainer } from '@kbn/visualizations-common';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';

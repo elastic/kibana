@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import type {
   HttpSetup,
   NotificationsSetup,
@@ -23,6 +22,7 @@ import { Redirect, useLocation } from 'react-router-dom';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { createRoot } from 'react-dom/client';
 import { CONFIG_TAB_ID, HISTORY_TAB_ID, SHELL_TAB_ID } from './containers/main';
 import type { AutocompleteInfo } from '../services';
 import { createStorage, createHistory, createSettings, setStorage } from '../services';
@@ -86,7 +86,8 @@ export async function renderApp({
 
   autocompleteInfo.mapping.setup(http, settings);
 
-  render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <ServicesContextProvider
         value={{
@@ -134,9 +135,8 @@ export async function renderApp({
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 }

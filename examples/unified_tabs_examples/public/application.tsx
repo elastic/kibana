@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { createRoot } from 'react-dom/client';
 import type { AppPluginStartDependencies } from './types';
 import { UnifiedTabsExampleApp } from './example_app';
 
@@ -20,7 +20,8 @@ export const renderApp = (
   deps: AppPluginStartDependencies,
   { element, setHeaderActionMenu }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <I18nProvider>
       <KibanaThemeProvider {...core}>
         <UnifiedTabsExampleApp
@@ -31,11 +32,10 @@ export const renderApp = (
           setHeaderActionMenu={setHeaderActionMenu}
         />
       </KibanaThemeProvider>
-    </I18nProvider>,
-    element
+    </I18nProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

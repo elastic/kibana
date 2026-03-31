@@ -8,9 +8,8 @@
  */
 
 import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-
 import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
+import { createRoot } from 'react-dom/client';
 import type { StartDependencies } from './plugin';
 
 export const mount =
@@ -27,10 +26,11 @@ export const mount =
       </i18nCore.Context>
     );
 
-    render(reactElement, element);
+    const root = createRoot(element);
+    root.render(reactElement);
 
     return () => {
-      unmountComponentAtNode(element);
+      root.unmount();
       plugins.data.search.session.clear();
     };
   };

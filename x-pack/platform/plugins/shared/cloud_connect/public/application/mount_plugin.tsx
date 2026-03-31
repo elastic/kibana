@@ -6,8 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
+import { createRoot } from 'react-dom/client';
 import { CloudConnectedAppContextProvider } from './app_context';
 import { CloudConnectedAppMain } from './app';
 import type { CloudConnectedAppComponentProps, CloudConnectedStartDeps } from '../types';
@@ -63,7 +63,8 @@ export const CloudConnectedApp = (
   telemetryService: CloudConnectTelemetryService,
   apiService: CloudConnectApiService
 ) => {
-  ReactDOM.render(
+  const root = createRoot(params.element);
+  root.render(
     core.rendering.addContext(
       <CloudConnectedAppComponent
         chrome={core.chrome}
@@ -77,9 +78,8 @@ export const CloudConnectedApp = (
         apiService={apiService}
         licensing={plugins.licensing}
       />
-    ),
-    params.element
+    )
   );
 
-  return () => ReactDOM.unmountComponentAtNode(params.element);
+  return () => root.unmount();
 };

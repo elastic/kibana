@@ -433,6 +433,8 @@ export async function loadInitial(
 
     if (newFilters) {
       data.query.filterManager.setAppFilters(newFilters);
+    } else if (!initialStateFromLocator?.filters) {
+      data.query.filterManager.setAppFilters([]);
     }
 
     try {
@@ -452,6 +454,10 @@ export async function loadInitial(
       });
       return redirectCallback?.();
     }
+  }
+
+  if (!initialStateFromLocator?.filters) {
+    data.query.filterManager.setAppFilters([]);
   }
 
   try {

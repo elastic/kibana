@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import ReactDOM from 'react-dom';
+import * as ReactDOM from '@kbn/core-mount-utils-browser';
 import React from 'react';
 import { toExpression } from '@kbn/interpreter';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';

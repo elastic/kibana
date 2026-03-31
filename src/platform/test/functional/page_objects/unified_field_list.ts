@@ -299,27 +299,29 @@ export class UnifiedFieldListPageObject extends FtrService {
     | 'exampleValues'
     | 'unknown'
   > {
-    if (await this.testSubjects.exists('unifiedFieldStats-buttonGroup')) {
-      return 'topValuesAndDistribution';
-    }
+    return await this.retry.try(async () => {
+      if (await this.testSubjects.exists('unifiedFieldStats-buttonGroup')) {
+        return 'topValuesAndDistribution';
+      }
 
-    if (await this.testSubjects.exists('unifiedFieldStats-timeDistribution')) {
-      return 'timeDistribution';
-    }
+      if (await this.testSubjects.exists('unifiedFieldStats-timeDistribution')) {
+        return 'timeDistribution';
+      }
 
-    if (await this.testSubjects.exists('unifiedFieldStats-histogram')) {
-      return 'histogram';
-    }
+      if (await this.testSubjects.exists('unifiedFieldStats-histogram')) {
+        return 'histogram';
+      }
 
-    if (await this.testSubjects.exists('unifiedFieldStats-topValueBuckets')) {
-      return 'topValues';
-    }
+      if (await this.testSubjects.exists('unifiedFieldStats-topValueBuckets')) {
+        return 'topValues';
+      }
 
-    if (await this.testSubjects.exists('unifiedFieldStats-exampleValueBuckets')) {
-      return 'exampleValues';
-    }
+      if (await this.testSubjects.exists('unifiedFieldStats-exampleValueBuckets')) {
+        return 'exampleValues';
+      }
 
-    return 'unknown';
+      throw new Error('Field stats view type is not available yet');
+    });
   }
 
   public async getFieldStatsDocsCount() {

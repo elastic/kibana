@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 
 import { BannersList } from './banners_list';
@@ -66,24 +66,26 @@ describe('BannersList', () => {
       </Wrapper>
     );
 
-    banners$.next([
-      {
-        id: '1',
-        mount: (el: HTMLElement) => {
-          el.innerHTML = '<h1>First Banner!</h1>';
-          return () => (el.innerHTML = '');
+    act(() => {
+      banners$.next([
+        {
+          id: '1',
+          mount: (el: HTMLElement) => {
+            el.innerHTML = '<h1>First Banner!</h1>';
+            return () => (el.innerHTML = '');
+          },
+          priority: 1,
         },
-        priority: 1,
-      },
-      {
-        id: '2',
-        mount: (el: HTMLElement) => {
-          el.innerHTML = '<h1>Second banner!</h1>';
-          return () => (el.innerHTML = '');
+        {
+          id: '2',
+          mount: (el: HTMLElement) => {
+            el.innerHTML = '<h1>Second banner!</h1>';
+            return () => (el.innerHTML = '');
+          },
+          priority: 0,
         },
-        priority: 0,
-      },
-    ]);
+      ]);
+    });
 
     // Wait for the component to re-render with new banners
     await waitFor(() => {

@@ -9,7 +9,7 @@ import type { Ast } from '@kbn/interpreter';
 import { fromExpression, toExpression } from '@kbn/interpreter';
 import { get } from 'lodash';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import * as ReactDOM from '@kbn/core-mount-utils-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
 import type { RendererFactory } from '../../../../types';

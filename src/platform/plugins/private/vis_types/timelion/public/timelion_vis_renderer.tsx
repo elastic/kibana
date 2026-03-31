@@ -8,9 +8,8 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { RangeFilterParams } from '@kbn/es-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -107,7 +106,6 @@ export const getTimelionVisRenderer: (
           </KibanaContextProvider>
         </VisualizationContainer>
       </KibanaRenderContextProvider>,
-
       domNode
     );
   },

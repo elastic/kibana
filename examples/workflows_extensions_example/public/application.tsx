@@ -8,15 +8,15 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { createRoot } from 'react-dom/client';
 import { WorkflowsExtensionsExampleApp } from './components/app';
 
 export const renderApp = (coreStart: CoreStart, { element }: AppMountParameters): (() => void) => {
-  ReactDOM.render(
-    coreStart.rendering.addContext(<WorkflowsExtensionsExampleApp http={coreStart.http} />),
-    element
+  const root = createRoot(element);
+  root.render(
+    coreStart.rendering.addContext(<WorkflowsExtensionsExampleApp http={coreStart.http} />)
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

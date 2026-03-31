@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { createRoot } from 'react-dom/client';
 import type { AppPluginStartDependencies } from './types';
 import { FilesExampleApp } from './components/app';
 import { FilesContext } from './imports';
@@ -22,14 +22,14 @@ export const renderApp = (
   { files }: AppPluginStartDependencies,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <QueryClientProvider client={queryClient}>
       <FilesContext client={files.unscoped}>
         <FilesExampleApp files={files} notifications={notifications} />
       </FilesContext>
-    </QueryClientProvider>,
-    element
+    </QueryClientProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

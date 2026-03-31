@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
+import { createRoot } from 'react-dom/client';
 import type { AppPluginStartDependencies } from './types';
 import { ElasticInferenceService } from './components/elastic_inference_service';
 import { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
@@ -20,7 +20,8 @@ export const renderElasticInferenceServiceApp = async (
   services: AppPluginStartDependencies,
   element: HTMLElement
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     core.rendering.addContext(
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
@@ -31,11 +32,10 @@ export const renderElasticInferenceServiceApp = async (
           </InferenceEndpointsProvider>
         </I18nProvider>
       </KibanaContextProvider>
-    ),
-    element
+    )
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

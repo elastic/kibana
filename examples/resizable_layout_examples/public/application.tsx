@@ -12,7 +12,6 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
@@ -21,6 +20,7 @@ import {
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { createRoot } from 'react-dom/client';
 
 const ResizableSection = ({
   direction,
@@ -98,7 +98,8 @@ const ResizableSection = ({
 };
 
 export const renderApp = (coreStart: CoreStart, { element }: AppMountParameters) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <I18nProvider>
       <KibanaThemeProvider {...coreStart}>
         <div
@@ -151,11 +152,10 @@ export const renderApp = (coreStart: CoreStart, { element }: AppMountParameters)
           />
         </div>
       </KibanaThemeProvider>
-    </I18nProvider>,
-    element
+    </I18nProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

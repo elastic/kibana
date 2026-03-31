@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -18,6 +17,7 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { BuildFlavor } from '@kbn/config';
 import type { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { createRoot } from 'react-dom/client';
 import type { StartDependencies, AIAssistantManagementSelectionPluginPublicStart } from '../plugin';
 import { aIAssistantManagementSelectionRouter } from '../routes/config';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
@@ -48,7 +48,8 @@ export const mountManagementSection = async ({
     })
   );
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     wrapWithTheme(
       <RedirectToHomeIfUnauthorized coreStart={coreStart}>
         <I18nProvider>
@@ -72,12 +73,11 @@ export const mountManagementSection = async ({
         </I18nProvider>
       </RedirectToHomeIfUnauthorized>,
       theme$
-    ),
-    element
+    )
   );
 
   return () => {
     coreStart.chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

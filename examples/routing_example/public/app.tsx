@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import {
   EuiPageTemplate,
@@ -18,6 +17,7 @@ import {
   EuiListGroup,
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { createRoot } from 'react-dom/client';
 import { RandomNumberRouteExample } from './random_number_example';
 import { RandomNumberBetweenRouteExample } from './random_number_between_example';
 import type { Services } from './services';
@@ -89,7 +89,8 @@ function RoutingExplorer({
 }
 
 export const renderApp = (props: Props, element: AppMountParameters['element']) => {
-  ReactDOM.render(<RoutingExplorer {...props} />, element);
+  const root = createRoot(element);
+  root.render(<RoutingExplorer {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

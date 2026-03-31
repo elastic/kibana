@@ -6,12 +6,12 @@
  */
 
 import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiCallOut } from '@elastic/eui';
 
 import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { createRoot } from 'react-dom/client';
 import type { StartDependencies } from './plugin';
 
 export const mount =
@@ -55,6 +55,7 @@ export const mount =
       </KibanaRenderContextProvider>
     );
 
-    render(reactElement, element);
-    return () => unmountComponentAtNode(element);
+    const root = createRoot(element);
+    root.render(reactElement);
+    return () => root.unmount();
   };

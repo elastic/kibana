@@ -12,7 +12,8 @@ import type { Subscription } from 'rxjs';
 import { ReplaySubject, mergeMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { render } from 'react-dom';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { EuiLoadingChart, type UseEuiTheme } from '@elastic/eui';
 import type { Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { onlyDisabledFiltersChanged } from '@kbn/es-query';
@@ -55,6 +56,25 @@ import type { AttributeService } from './attribute_service';
 import type { VisualizationsStartDeps } from '../../plugin';
 import { Embeddable } from './embeddable';
 import type { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
+
+const roots = new WeakMap<Element, Root>();
+
+const getRoot = (domNode: Element) => {
+  const existingRoot = roots.get(domNode);
+
+  if (existingRoot) {
+    return existingRoot;
+  }
+
+  const root = createRoot(domNode);
+  roots.set(domNode, root);
+  return root;
+};
+
+const unmountRoot = (domNode: Element) => {
+  roots.get(domNode)?.unmount();
+  roots.delete(domNode);
+};
 
 export interface VisualizeEmbeddableDeps {
   start: StartServicesGetter<
@@ -358,13 +378,12 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     if (this.warningDomNode) {
       const { core } = this.deps.start();
-      render(
+      getRoot(this.warningDomNode).render(
         <KibanaRenderContextProvider {...core}>
           <div css={warningStyles}>
             <Warnings warnings={warnings || []} />
           </div>
-        </KibanaRenderContextProvider>,
-        this.warningDomNode
+        </KibanaRenderContextProvider>
       );
     }
   }
@@ -451,13 +470,12 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     super.render(this.domNode);
     const { core } = this.deps.start();
 
-    render(
+    getRoot(this.domNode).render(
       <KibanaRenderContextProvider {...core}>
         <div className="visChart__spinner" css={visContainerStyle}>
           <EuiLoadingChart size="l" />
         </div>
-      </KibanaRenderContextProvider>,
-      this.domNode
+      </KibanaRenderContextProvider>
     );
 
     const hasCompatibleActions = async (event: ExpressionRendererEvent) => {
@@ -539,7 +557,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         const { error } = this.getOutput();
 
         if (error) {
-          render(this.renderError(error), this.domNode);
+          getRoot(this.domNode).render(this.renderError(error));
         }
       })
     );
@@ -576,6 +594,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.subscriptions.forEach((s) => s.unsubscribe());
     this.vis.uiState.off('change', this.uiStateChangeHandler);
     this.vis.uiState.off('reload', this.reload);
+
+    if (this.warningDomNode) {
+      unmountRoot(this.warningDomNode);
+    }
+    if (this.domNode) {
+      unmountRoot(this.domNode);
+    }
 
     if (this.handler) {
       this.handler.destroy();

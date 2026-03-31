@@ -24,7 +24,8 @@
     "@kbn/ui-theme",
     "@kbn/chart-expressions-common",
     "@kbn/react-kibana-context-render",
-    "@kbn/visualizations-common"
+    "@kbn/visualizations-common",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": [
     "target/**/*",

@@ -7,9 +7,9 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { CoreSetup, ApplicationStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { createRoot } from 'react-dom/client';
 import { getTagsCapabilities } from '../../common';
 import type { SavedObjectTaggingPluginStart } from '../types';
 import type { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
@@ -51,7 +51,8 @@ export const mountSection = async ({
   const assignableTypes = await assignmentService.getAssignableTypes();
   coreStart.chrome.docTitle.change(title);
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     coreStart.rendering.addContext(
       <RedirectToHomeIfUnauthorized applications={coreStart.application}>
         <TagManagementPage
@@ -64,12 +65,11 @@ export const mountSection = async ({
           assignableTypes={assignableTypes}
         />
       </RedirectToHomeIfUnauthorized>
-    ),
-    element
+    )
   );
 
   return () => {
     coreStart.chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

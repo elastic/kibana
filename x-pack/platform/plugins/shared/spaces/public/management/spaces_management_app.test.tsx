@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
+
 jest.mock('./spaces_grid', () => ({
   SpacesGridPage: (props: any) => `Spaces Page: ${JSON.stringify(props)}`,
 }));
@@ -66,27 +68,31 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
   const [coreStart, pluginsStart] = await coreMock.createSetup().getStartServices();
   (pluginsStart as PluginsStart).features = featuresPluginMock.createStart();
 
-  const unmount = await spacesManagementApp
-    .create({
-      spacesManager,
-      getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
-      config,
-      logger,
-      getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
-      getRolesAPIClient: jest.fn(),
-      getPrivilegesAPIClient: jest.fn(),
-      getSecurityLicense: jest.fn(),
-      eventTracker,
-      isServerless: false,
-    })
-    .mount({
-      basePath,
-      element: container,
-      setBreadcrumbs,
-      history: scopedHistoryMock.create({ pathname }),
-      theme: coreStart.theme,
-      theme$: themeServiceMock.createTheme$(), // needed as a deprecated field in ManagementAppMountParams
-    });
+  let unmount!: () => void;
+  await act(async () => {
+    unmount = await spacesManagementApp
+      .create({
+        spacesManager,
+        getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
+        config,
+        logger,
+        getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
+        getRolesAPIClient: jest.fn(),
+        getPrivilegesAPIClient: jest.fn(),
+        getSecurityLicense: jest.fn(),
+        eventTracker,
+        isServerless: false,
+      })
+      .mount({
+        basePath,
+        element: container,
+        setBreadcrumbs,
+        history: scopedHistoryMock.create({ pathname }),
+        theme: coreStart.theme,
+        theme$: themeServiceMock.createTheme$(), // needed as a deprecated field in ManagementAppMountParams
+      });
+    await Promise.resolve();
+  });
 
   return { unmount, container, setBreadcrumbs, docTitle: coreStart.chrome.docTitle };
 }
@@ -134,7 +140,7 @@ describe('spacesManagementApp', () => {
       </div>
     `);
 
-    unmount();
+    act(() => unmount());
 
     expect(docTitle.reset).toHaveBeenCalledTimes(1);
     expect(container).toMatchInlineSnapshot(`<div />`);
@@ -161,7 +167,7 @@ describe('spacesManagementApp', () => {
       </div>
     `);
 
-    unmount();
+    act(() => unmount());
     expect(docTitle.reset).toHaveBeenCalledTimes(1);
 
     expect(container).toMatchInlineSnapshot(`<div />`);
@@ -194,7 +200,7 @@ describe('spacesManagementApp', () => {
       </div>
     `);
 
-    unmount();
+    act(() => unmount());
     expect(docTitle.reset).toHaveBeenCalledTimes(1);
 
     expect(container).toMatchInlineSnapshot(`<div />`);

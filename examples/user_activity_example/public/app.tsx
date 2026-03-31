@@ -8,7 +8,6 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import {
   EuiPageTemplate,
@@ -20,6 +19,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { createRoot } from 'react-dom/client';
 import { TRACK_ACTION_ROUTE } from '../common';
 
 interface Props {
@@ -95,6 +95,7 @@ function UserActivityExample({ coreStart }: Props) {
 }
 
 export const renderApp = (coreStart: CoreStart, element: AppMountParameters['element']) => {
-  ReactDOM.render(<UserActivityExample coreStart={coreStart} />, element);
-  return () => ReactDOM.unmountComponentAtNode(element);
+  const root = createRoot(element);
+  root.render(<UserActivityExample coreStart={coreStart} />);
+  return () => root.unmount();
 };

@@ -13,11 +13,10 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { QueryClient } from '@kbn/react-query';
 import { QueryClientProvider } from '@kbn/react-query';
-
-import ReactDOM from 'react-dom';
 import React from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Router } from '@kbn/shared-ux-router';
+import { createRoot } from 'react-dom/client';
 import type { ServerlessSearchContext } from './hooks/use_kibana';
 
 export async function renderApp(
@@ -28,7 +27,8 @@ export async function renderApp(
 ) {
   const { ConnectorsRouter } = await import('./components/connectors_router');
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <QueryClientProvider client={queryClient}>
@@ -40,8 +40,7 @@ export async function renderApp(
           </I18nProvider>
         </QueryClientProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 }

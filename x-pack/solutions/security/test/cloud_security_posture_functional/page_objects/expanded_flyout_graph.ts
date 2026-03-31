@@ -192,11 +192,13 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async hideEventsOfSameAction(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
-    const btnText = await this.testSubjects.getVisibleText(
-      GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
-    );
-    expect(btnText).to.be('Hide related events');
+    await this.retry.try(async () => {
+      await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
+      const btnText = await this.testSubjects.getVisibleText(
+        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
+      );
+      expect(btnText).to.be('Hide related events');
+    });
     await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }

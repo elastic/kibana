@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/visualizations-common'
   - '@kbn/chart-expressions-common'
   - '@kbn/lens-common'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

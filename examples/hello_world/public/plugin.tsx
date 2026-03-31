@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { createRoot } from 'react-dom/client';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -23,8 +23,9 @@ export class HelloWorldPlugin implements Plugin<void, void, SetupDeps> {
       id: 'helloWorld',
       title: 'Hello World',
       async mount({ element }: AppMountParameters) {
-        ReactDOM.render(<div data-test-subj="helloWorldDiv">Hello World!</div>, element);
-        return () => ReactDOM.unmountComponentAtNode(element);
+        const root = createRoot(element);
+        root.render(<div data-test-subj="helloWorldDiv">Hello World!</div>);
+        return () => root.unmount();
       },
     });
 

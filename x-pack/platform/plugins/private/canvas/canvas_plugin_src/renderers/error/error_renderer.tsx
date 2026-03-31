@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 
 import type { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';

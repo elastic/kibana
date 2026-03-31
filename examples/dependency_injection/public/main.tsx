@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { inject, injectable } from 'inversify';
 import type { AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
 import type { CoreDiServiceStart } from '@kbn/core-di';
 import { ApplicationParameters, Context, CoreStart } from '@kbn/core-di-browser';
+import { createRoot } from 'react-dom/client';
 import { App } from './app';
 
 @injectable()
@@ -28,13 +28,13 @@ export class Main {
 
   mount(): AppUnmount {
     const { element } = this.params;
-    ReactDOM.render(
+    const root = createRoot(element);
+    root.render(
       <Context.Provider value={this.di.getContainer()}>
         <App />
-      </Context.Provider>,
-      element
+      </Context.Provider>
     );
 
-    return () => ReactDOM.unmountComponentAtNode(element);
+    return () => root.unmount();
   }
 }

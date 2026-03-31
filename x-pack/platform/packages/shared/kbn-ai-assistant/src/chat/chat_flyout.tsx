@@ -18,7 +18,7 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { Conversation, Message } from '@kbn/observability-ai-assistant-plugin/common';
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
+import { unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { ApplicationStart } from '@kbn/core/public';
 import { navigateToConnectorsManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
@@ -200,7 +200,7 @@ export function ChatFlyout({
           onClose();
           setIsSecondSlotVisible(false);
           if (secondSlotContainer) {
-            ReactDOM.unmountComponentAtNode(secondSlotContainer);
+            unmountComponentAtNode(secondSlotContainer);
           }
         }}
       >

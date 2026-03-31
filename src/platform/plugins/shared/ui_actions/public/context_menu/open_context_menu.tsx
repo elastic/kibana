@@ -8,15 +8,17 @@
  */
 
 import React from 'react';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
-import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getAnalytics, getI18n, getTheme, getUserProfile } from '../services';
 
 let activeSession: ContextMenuSession | null = null;
+let activeRoot: Root | null = null;
 
 const CONTAINER_ID = 'contextMenu-container';
 
@@ -136,7 +138,8 @@ class ContextMenuSession extends EventEmitter {
     if (activeSession === this) {
       const container = document.getElementById(CONTAINER_ID);
       if (container) {
-        ReactDOM.unmountComponentAtNode(container);
+        activeRoot?.unmount();
+        activeRoot = null;
         this.emit('closed');
       }
     }
@@ -171,7 +174,8 @@ export function openContextMenu(
     session.close();
   };
 
-  ReactDOM.render(
+  activeRoot = createRoot(container);
+  activeRoot.render(
     <KibanaRenderContextProvider
       analytics={getAnalytics()}
       i18n={getI18n()}
@@ -193,8 +197,7 @@ export function openContextMenu(
           data-test-subj={props['data-test-subj']}
         />
       </EuiPopover>
-    </KibanaRenderContextProvider>,
-    container
+    </KibanaRenderContextProvider>
   );
 
   return session;

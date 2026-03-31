@@ -8,11 +8,11 @@
 import type { History } from 'history';
 import type { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
+import { createRoot } from 'react-dom/client';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
 import { LogsPage } from '../pages/logs';
 import type { InfraClientStartDeps, InfraClientStartExports } from '../types';
@@ -31,7 +31,8 @@ export const renderApp = (
 
   prepareMountElement(element, 'infraLogsPage');
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <LogsApp
       core={core}
       storage={storage}
@@ -41,12 +42,11 @@ export const renderApp = (
       setHeaderActionMenu={setHeaderActionMenu}
       theme$={theme$}
       isLogsExplorerAccessible={isLogsExplorerAccessible}
-    />,
-    element
+    />
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

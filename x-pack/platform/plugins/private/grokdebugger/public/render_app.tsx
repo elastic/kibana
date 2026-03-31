@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-
 import type { CoreStart } from '@kbn/core/public';
 import type { ILicense } from '@kbn/licensing-types';
 
+import { createRoot } from 'react-dom/client';
 import { KibanaContextProvider, KibanaRenderContextProvider } from './shared_imports';
 import { GrokDebugger } from './components/grok_debugger';
 import { GrokdebuggerService } from './services/grokdebugger/grokdebugger_service';
@@ -29,7 +28,8 @@ export function renderApp(license: ILicense, element: HTMLElement, coreStart: Co
     </KibanaRenderContextProvider>
   );
 
-  render(content, element);
+  const root = createRoot(element);
+  root.render(content);
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 }

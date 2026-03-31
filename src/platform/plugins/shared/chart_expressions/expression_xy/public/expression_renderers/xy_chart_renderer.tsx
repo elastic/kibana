@@ -10,8 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import {
   createPerformanceTracker,
   PERFORMANCE_TRACKER_MARKS,
@@ -225,7 +225,7 @@ export const getXyChartRenderer = ({
       import('../helpers'),
     ]);
 
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    handlers.onDestroy(() => unmountComponentAtNode(domNode));
     const onClickValue = (data: FilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
     };
@@ -281,7 +281,7 @@ export const getXyChartRenderer = ({
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
-    ReactDOM.render(
+    render(
       <KibanaRenderContextProvider {...deps.startServices}>
         <div css={chartContainerStyle} data-test-subj="xyVisChart">
           <XYChartReportable

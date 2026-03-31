@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { unmountComponentAtNode } from 'react-dom';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { apiPublishesTimeRange, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -65,7 +64,7 @@ export function openModal(
 
   const cleanupDom = (shouldCleanup?: boolean) => {
     if (targetDomElement != null && shouldCleanup) {
-      unmountComponentAtNode(targetDomElement);
+      unmount();
     }
   };
 
@@ -94,5 +93,5 @@ export function openModal(
     services.core
   );
 
-  mount(targetDomElement);
+  const unmount = mount(targetDomElement);
 }

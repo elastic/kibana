@@ -8,7 +8,7 @@
 import * as Rx from 'rxjs';
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';

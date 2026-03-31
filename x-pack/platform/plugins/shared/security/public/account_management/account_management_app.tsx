@@ -8,7 +8,7 @@
 import type { History } from 'history';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type {
   ApplicationSetup,
@@ -51,7 +51,8 @@ export const accountManagementApp = Object.freeze({
           import('./account_management_page'),
         ]);
 
-        render(
+        const root = createRoot(element);
+        root.render(
           coreStart.rendering.addContext(
             <Providers
               services={coreStart}
@@ -61,11 +62,10 @@ export const accountManagementApp = Object.freeze({
             >
               <AccountManagementPage />
             </Providers>
-          ),
-          element
+          )
         );
 
-        return () => unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
   },

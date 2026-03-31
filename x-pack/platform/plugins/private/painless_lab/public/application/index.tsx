@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import type { CoreSetup, CoreStart, HttpSetup, ChromeStart } from '@kbn/core/public';
 
+import { createRoot } from 'react-dom/client';
 import { createKibanaReactContext, KibanaRenderContextProvider } from '../shared_imports';
 
 import type { Links } from '../links';
@@ -36,16 +36,15 @@ export function renderApp(
     uiSettings,
     settings,
   });
-  render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <KibanaReactContextProvider>
         <AppContextProvider value={{ http, links, chrome }}>
           <Main />
         </AppContextProvider>
       </KibanaReactContextProvider>
-    </KibanaRenderContextProvider>,
-
-    element
+    </KibanaRenderContextProvider>
   );
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 }

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { EuiPage } from '@elastic/eui';
@@ -14,6 +13,7 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { createRoot } from 'react-dom/client';
 import { Page } from './components/page';
 import { DocumentationPage } from './components/documentation';
 import { ViewAlertPage } from './components/view_alert';
@@ -74,16 +74,16 @@ export const renderApp = (
   { appBasePath, element }: AppMountParameters
 ) => {
   const { http } = core;
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaContextProvider services={{ ...core, ...deps }}>
       <AlertingExampleApp
         basename={appBasePath}
         http={http}
         triggersActionsUi={deps.triggersActionsUi}
       />
-    </KibanaContextProvider>,
-    element
+    </KibanaContextProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

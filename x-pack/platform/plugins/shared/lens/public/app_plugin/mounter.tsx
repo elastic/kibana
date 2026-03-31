@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
 import type { History } from 'history';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import {
@@ -41,6 +40,7 @@ import type {
 import { LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { App } from './app';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import type { LensPluginStartDependencies } from '../plugin';

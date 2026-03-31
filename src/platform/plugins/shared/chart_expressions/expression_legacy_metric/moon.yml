@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/chart-expressions-common'
   - '@kbn/react-kibana-context-render'
   - '@kbn/visualizations-common'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

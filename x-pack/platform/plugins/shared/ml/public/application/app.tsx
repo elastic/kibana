@@ -6,7 +6,6 @@
  */
 
 import React, { type FC, useMemo } from 'react';
-import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -20,6 +19,7 @@ import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { createRoot } from 'react-dom/client';
 import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '../../common/constants/app';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
@@ -189,7 +189,8 @@ export const renderApp = (
 ) => {
   appMountParams.onAppLeave((actions) => actions.default());
 
-  ReactDOM.render(
+  const root = createRoot(appMountParams.element);
+  root.render(
     <App
       coreStart={coreStart}
       deps={deps}
@@ -198,12 +199,11 @@ export const renderApp = (
       mlFeatures={mlFeatures}
       experimentalFeatures={experimentalFeatures}
       nlpSettings={nlpSettings}
-    />,
-    appMountParams.element
+    />
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(appMountParams.element);
+    root.unmount();
     deps.data.search.session.clear();
   };
 };

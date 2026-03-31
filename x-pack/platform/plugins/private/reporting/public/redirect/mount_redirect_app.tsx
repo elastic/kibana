@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 
 import type { ReportingAPIClient } from '@kbn/reporting-public';
+import { createRoot } from 'react-dom/client';
 import { RedirectApp } from './redirect_app';
 
 interface MountParams extends AppMountParameters {
@@ -25,7 +24,8 @@ export const mountRedirectApp = (
   coreStart: CoreStart,
   { element, apiClient, history, screenshotMode, share }: MountParams
 ) => {
-  render(
+  const root = createRoot(element);
+  root.render(
     coreStart.rendering.addContext(
       <RedirectApp
         apiClient={apiClient}
@@ -33,11 +33,10 @@ export const mountRedirectApp = (
         screenshotMode={screenshotMode}
         share={share}
       />
-    ),
-    element
+    )
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

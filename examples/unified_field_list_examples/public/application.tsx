@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { AppPluginStartDependencies } from './types';
 import { UnifiedFieldListExampleApp } from './example_app';
 
@@ -20,7 +20,7 @@ export const renderApp = (
   deps: AppPluginStartDependencies,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  render(
     <I18nProvider>
       <KibanaThemeProvider {...core}>
         <UnifiedFieldListExampleApp
@@ -35,6 +35,6 @@ export const renderApp = (
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    unmountComponentAtNode(element);
   };
 };

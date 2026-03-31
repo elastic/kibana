@@ -15,9 +15,9 @@ import { Route, Routes, Router } from '@kbn/shared-ux-router';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ConnectorDefinition } from '@kbn/search-connectors';
+import { createRoot } from 'react-dom/client';
 import { CONNECTORS_PATH, ROOT_PATH } from './components/routes';
 import { ConnectorsRouter } from './components/connectors/connectors_router';
 import type { SearchConnectorsPluginStart, SearchConnectorsPluginStartDependencies } from './types';
@@ -42,7 +42,8 @@ export const renderApp = (
     notifications: core.notifications,
     history: params.history,
   });
-  ReactDOM.render(
+  const root = createRoot(params.element);
+  root.render(
     <App
       params={params}
       core={core}
@@ -51,12 +52,11 @@ export const renderApp = (
       connectorTypes={connectorTypes}
       store={store}
       kibanaVersion={kibanaVersion}
-    />,
-    params.element
+    />
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
     unmountFlashMessagesLogic();
   };
 };

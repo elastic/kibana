@@ -14,7 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type {
   AnalyticsServiceStart,
@@ -98,7 +98,8 @@ export const insecureClusterAlertText = (deps: Deps, onDismiss: (persist: boolea
       );
     };
 
-    render(startServices.rendering.addContext(<AlertText />), e);
+    const root = createRoot(e);
+    root.render(startServices.rendering.addContext(<AlertText />));
 
-    return () => unmountComponentAtNode(e);
+    return () => root.unmount();
   }) as MountPoint;

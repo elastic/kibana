@@ -31,8 +31,11 @@ jest.mock('@kbn/react-kibana-mount', () => ({
 }));
 
 const mockUseKibana = useKibana as jest.Mock;
+const mockToMountPoint = toMountPoint as jest.Mock;
 
 describe('useSaveToLibrary hook', () => {
+  const mockUnmount = jest.fn();
+  const mockMount = jest.fn().mockReturnValue(mockUnmount);
   const mockStartServices = {
     application: { capabilities: { visualize_v2: { save: true } } },
     lens: { SaveModalComponent: jest.fn() },
@@ -40,6 +43,7 @@ describe('useSaveToLibrary hook', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockToMountPoint.mockReturnValue(mockMount);
     mockUseKibana.mockReturnValue({ services: mockStartServices });
   });
 
@@ -53,6 +57,25 @@ describe('useSaveToLibrary hook', () => {
     });
 
     expect(toMountPoint).toHaveBeenCalled();
+  });
+
+  it('should use the mount cleanup callback when the save modal closes', () => {
+    const { result } = renderHook(() =>
+      useSaveToLibrary({ attributes: kpiHostMetricLensAttributes })
+    );
+
+    act(() => {
+      result.current.openSaveVisualizationFlyout();
+    });
+
+    const saveModal = mockToMountPoint.mock.calls[0][0];
+
+    act(() => {
+      saveModal.props.onSave();
+      saveModal.props.onClose();
+    });
+
+    expect(mockUnmount).toHaveBeenCalledTimes(2);
   });
 
   it('should disable visualizations if user cannot save', () => {

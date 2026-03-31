@@ -12,13 +12,17 @@
 import { i18n as t } from '@kbn/i18n';
 import { EuiModal, EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
+import {
+  render,
+  unmountComponentAtNode,
+  type MountPoint,
+  type OverlayRef,
+} from '@kbn/core-mount-utils-browser';
 import type {
   OverlayModalConfirmOptions,
   OverlayModalOpenOptions,
@@ -97,7 +101,7 @@ export class ModalService {
               <OverlayMountWrapper mount={mount} />
             </EuiModal>
           </KibanaRenderContextProvider>,
-          targetDomElement
+          targetDomElement as HTMLElement
         );
 
         return modal;
@@ -157,7 +161,7 @@ export class ModalService {
                 {...props}
               />
             </KibanaRenderContextProvider>,
-            targetDomElement
+            targetDomElement as HTMLElement
           );
         });
       },

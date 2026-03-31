@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { createRoot } from 'react-dom/client';
 import type { ConfigSchema } from '..';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps, ApmServices } from '../plugin';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
@@ -77,7 +77,8 @@ export const renderApp = ({
   // add .kbnAppWrappers class to root element
   element.classList.add(APP_WRAPPER_CLASS);
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaThemeProvider
         theme={{ theme$ }}
@@ -96,10 +97,9 @@ export const renderApp = ({
           />
         </QueryClientProvider>
       </KibanaThemeProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

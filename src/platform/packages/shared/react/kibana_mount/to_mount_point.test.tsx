@@ -13,6 +13,7 @@ import { act } from 'react-dom/test-utils';
 import { of, BehaviorSubject } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
+import { unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import { toMountPoint } from './to_mount_point';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -48,7 +49,9 @@ describe('toMountPoint', () => {
     const mount = toMountPoint(<InnerComponent />, { theme, i18n, analytics, userProfile });
 
     const targetEl = document.createElement('div');
-    mount(targetEl);
+    act(() => {
+      mount(targetEl);
+    });
 
     await flushPromises();
 
@@ -66,7 +69,9 @@ describe('toMountPoint', () => {
     });
 
     const targetEl = document.createElement('div');
-    mount(targetEl);
+    act(() => {
+      mount(targetEl);
+    });
 
     await flushPromises();
 
@@ -78,5 +83,25 @@ describe('toMountPoint', () => {
     await flushPromises();
 
     expect(euiTheme!.colorMode).toEqual('LIGHT');
+  });
+
+  it('renders synchronously and registers the mount for shared cleanup', () => {
+    const mount = toMountPoint(<div data-test-subj="syncMount">foo</div>, {
+      theme: { theme$: of<CoreTheme>({ darkMode: true, name: 'borealis' }) },
+      i18n,
+      analytics,
+      userProfile,
+    });
+
+    const targetEl = document.createElement('div');
+    act(() => {
+      mount(targetEl);
+    });
+
+    expect(targetEl.querySelector('[data-test-subj="syncMount"]')?.textContent).toBe('foo');
+    act(() => {
+      expect(unmountComponentAtNode(targetEl)).toBe(true);
+    });
+    expect(targetEl.innerHTML).toBe('');
   });
 });
