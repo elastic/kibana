@@ -29,10 +29,11 @@ describe('HmrServer', () => {
   });
 
   it('starts and listens on the requested port', async () => {
+    const expectedPort = Number(process.env.KBN_HMR_PORT) || 5678;
     server = new HmrServer();
     const port = await server.start();
-    expect(port).toBe(5678);
-    expect(server.port).toBe(5678);
+    expect(port).toBe(expectedPort);
+    expect(server.port).toBe(expectedPort);
   });
 
   it('returns correct SSE headers', async () => {
@@ -162,49 +163,66 @@ describe('HmrServer', () => {
     }
   });
 
-  it('sends basePath welcome message on client connect', async () => {
-    server = new HmrServer('/abc');
-    const port = await server.start();
-    const { res, data } = await connectClient(port);
+  describe('basePath welcome message', () => {
+    let originalPort: string | undefined;
 
-    await new Promise((r) => setTimeout(r, 50));
+    beforeEach(() => {
+      originalPort = process.env.KBN_HMR_PORT;
+      process.env.KBN_HMR_PORT = '35678';
+    });
 
-    const combined = data.join('');
-    expect(combined).toContain('data: {"basePath":"/abc"}');
+    afterEach(() => {
+      if (originalPort === undefined) {
+        delete process.env.KBN_HMR_PORT;
+      } else {
+        process.env.KBN_HMR_PORT = originalPort;
+      }
+    });
 
-    res.destroy();
-  });
+    it('sends basePath on client connect', async () => {
+      server = new HmrServer('/abc');
+      const port = await server.start();
+      const { res, data } = await connectClient(port);
 
-  it('sends empty basePath when constructed without one', async () => {
-    server = new HmrServer();
-    const port = await server.start();
-    const { res, data } = await connectClient(port);
+      await new Promise((r) => setTimeout(r, 50));
 
-    await new Promise((r) => setTimeout(r, 50));
+      const combined = data.join('');
+      expect(combined).toContain('data: {"basePath":"/abc"}');
 
-    const combined = data.join('');
-    expect(combined).toContain('data: {"basePath":""}');
+      res.destroy();
+    });
 
-    res.destroy();
-  });
+    it('sends empty basePath when constructed without one', async () => {
+      server = new HmrServer();
+      const port = await server.start();
+      const { res, data } = await connectClient(port);
 
-  it('sends basePath welcome before replay message', async () => {
-    server = new HmrServer('/xyz');
-    const port = await server.start();
+      await new Promise((r) => setTimeout(r, 50));
 
-    server.broadcast('hash123');
+      const combined = data.join('');
+      expect(combined).toContain('data: {"basePath":""}');
 
-    const { res, data } = await connectClient(port);
+      res.destroy();
+    });
 
-    await new Promise((r) => setTimeout(r, 50));
+    it('sends basePath before replay message', async () => {
+      server = new HmrServer('/xyz');
+      const port = await server.start();
 
-    const combined = data.join('');
-    const basePathIdx = combined.indexOf('"basePath":"/xyz"');
-    const replayIdx = combined.indexOf('"replay":true');
-    expect(basePathIdx).toBeGreaterThan(-1);
-    expect(replayIdx).toBeGreaterThan(-1);
-    expect(basePathIdx).toBeLessThan(replayIdx);
+      server.broadcast('hash123');
 
-    res.destroy();
+      const { res, data } = await connectClient(port);
+
+      await new Promise((r) => setTimeout(r, 50));
+
+      const combined = data.join('');
+      const basePathIdx = combined.indexOf('"basePath":"/xyz"');
+      const replayIdx = combined.indexOf('"replay":true');
+      expect(basePathIdx).toBeGreaterThan(-1);
+      expect(replayIdx).toBeGreaterThan(-1);
+      expect(basePathIdx).toBeLessThan(replayIdx);
+
+      res.destroy();
+    });
   });
 });
