@@ -22,7 +22,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import type {
-  SecuritySolutionAlertFlyoutFooterTitleFeature,
+  SecuritySolutionAlertFlyoutFooterFeature,
   SecuritySolutionAlertFlyoutHeaderTitleFeature,
   SecuritySolutionAlertFlyoutOverviewTabFeature,
   SecuritySolutionCellRendererFeature,
@@ -423,8 +423,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const { AlertFlyoutFooter } = await this.getLazyDiscoverSharedDeps();
       return { default: AlertFlyoutFooter };
     });
-    const headerFooterFeature: SecuritySolutionAlertFlyoutFooterTitleFeature = {
-      id: 'security-solution-alert-flyout-footer-title',
+    const headerFooterFeature: SecuritySolutionAlertFlyoutFooterFeature = {
+      id: 'security-solution-alert-flyout-footer',
       renderFooter: (hit) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);

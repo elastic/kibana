@@ -35,7 +35,7 @@ describe('EnhancedAlertFlyoutFooter', () => {
         features: {
           registry: {
             getById: jest.fn().mockReturnValue({
-              id: 'security-solution-alert-flyout-footer-title',
+              id: 'security-solution-alert-flyout-footer',
               renderFooter: renderFooterFeature,
             }),
           },

@@ -8,14 +8,14 @@
 import React, { memo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
-export interface HeaderProps {
+export interface FooterProps {
   /**
    * The document to display
    */
   hit: DataTableRecord;
 }
 
-export const Footer = memo(({ hit }: HeaderProps) => {
+export const Footer = memo(({ hit }: FooterProps) => {
   return <></>;
 });
 

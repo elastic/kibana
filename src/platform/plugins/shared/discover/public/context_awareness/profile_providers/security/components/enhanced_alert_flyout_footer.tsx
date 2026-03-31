@@ -23,7 +23,7 @@ export const EnhancedAlertFlyoutFooter = ({
   ...docViewProps
 }: EnhancedAlertFlyoutFooterProps) => {
   const alertFlyoutFooterFeature = providerServices.discoverShared.features.registry.getById(
-    'security-solution-alert-flyout-footer-title'
+    'security-solution-alert-flyout-footer'
   );
 
   const renderFooter = alertFlyoutFooterFeature?.renderFooter;
