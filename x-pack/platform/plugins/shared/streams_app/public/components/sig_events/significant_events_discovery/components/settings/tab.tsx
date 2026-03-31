@@ -52,7 +52,7 @@ export const SettingsTab = () => {
   const { signal: abortSignal } = useAbortController();
   const genAiConnectors = useGenAIConnectors({
     streamsRepositoryClient: streams.streamsRepositoryClient,
-    uiSettings: core.uiSettings,
+    uiSettings: core.settings.client,
   });
 
   const defaultConnectorFetch = useStreamsAppFetch(
@@ -379,6 +379,7 @@ export const SettingsTab = () => {
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.streams.significantEventsDiscovery.settings.saveErrorTitle',
               { defaultMessage: 'Failed to save settings' }

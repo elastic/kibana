@@ -34,6 +34,7 @@ import { css } from '@emotion/css';
 import { v4 } from 'uuid';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useBoolean } from '@kbn/react-hooks';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
@@ -334,22 +335,19 @@ export function AddSignificantEventFlyout({
                       taskError={
                         task?.status === 'failed' ? (
                           task.errorCode === CONNECTOR_NOT_CONFIGURED_ERROR_CODE ? (
-                            <>
-                              {i18n.translate(
-                                'xpack.streams.streamDetailView.addSignificantEventFlyout.connectorNotConfiguredDescription',
-                                {
-                                  defaultMessage:
-                                    'No AI connector is configured. Please configure one in the settings page.',
-                                }
-                              )}{' '}
-                              <EuiLink href={settingsHref}>{CONFIGURE_SETTINGS_LINK_LABEL}</EuiLink>
-                            </>
+                            <FormattedMessage
+                              id="xpack.streams.significantEventsDiscovery.addFlyout.connectorNotConfiguredCta"
+                              defaultMessage="No AI connector is configured. {settingsLink}"
+                              values={{
+                                settingsLink: (
+                                  <EuiLink href={settingsHref}>
+                                    {CONFIGURE_SETTINGS_LINK_LABEL}
+                                  </EuiLink>
+                                ),
+                              }}
+                            />
                           ) : (
-                            <>
-                              {task.error}
-                              <EuiSpacer size="s" />
-                              <EuiLink href={settingsHref}>{CONFIGURE_SETTINGS_LINK_LABEL}</EuiLink>
-                            </>
+                            task.error
                           )
                         ) : undefined
                       }

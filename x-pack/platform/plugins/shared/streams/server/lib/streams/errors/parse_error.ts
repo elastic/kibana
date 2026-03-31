@@ -6,6 +6,8 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { CONNECTOR_NOT_CONFIGURED_ERROR_CODE, type TaskErrorCode } from '@kbn/streams-schema';
+import { ConnectorNotConfiguredError } from './connector_not_configured_error';
 
 /**
  * Parsed error information extracted from unknown caught errors.
@@ -19,6 +21,8 @@ export interface ParsedError {
   type?: string;
   /** HTTP status code from Elasticsearch ResponseError */
   statusCode?: number;
+  /** Task error code for well-known error types */
+  errorCode?: TaskErrorCode;
   /** The original error for chaining/debugging */
   cause: unknown;
 }
@@ -47,6 +51,9 @@ export interface ParsedError {
  * ```
  */
 export function parseError(error: unknown): ParsedError {
+  const errorCode =
+    error instanceof ConnectorNotConfiguredError ? CONNECTOR_NOT_CONFIGURED_ERROR_CODE : undefined;
+
   // Handle Elasticsearch ResponseError
   if (error instanceof errors.ResponseError) {
     const { message, statusCode, body } = error;
@@ -56,6 +63,7 @@ export function parseError(error: unknown): ParsedError {
       message,
       type: typeof type === 'string' ? type : undefined,
       statusCode,
+      errorCode,
       cause: error,
     };
   }
@@ -64,6 +72,7 @@ export function parseError(error: unknown): ParsedError {
   if (error instanceof Error) {
     return {
       message: error.message,
+      errorCode,
       cause: error,
     };
   }
@@ -71,6 +80,7 @@ export function parseError(error: unknown): ParsedError {
   // Handle non-Error values
   return {
     message: String(error),
+    errorCode,
     cause: error,
   };
 }

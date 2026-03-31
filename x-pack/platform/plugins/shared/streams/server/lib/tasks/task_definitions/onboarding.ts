@@ -18,7 +18,6 @@ import {
   OnboardingStep,
   TaskStatus,
   CONNECTOR_NOT_CONFIGURED_ERROR_CODE,
-  type TaskErrorCode,
 } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
@@ -226,11 +225,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   { error } as LogMeta
                 );
 
-                const connectorErrorCode: TaskErrorCode | undefined =
-                  error instanceof ConnectorNotConfiguredError
-                    ? CONNECTOR_NOT_CONFIGURED_ERROR_CODE
-                    : undefined;
-
                 await taskClient.fail<OnboardingTaskParams>(
                   _task,
                   {
@@ -241,7 +235,9 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     saveQueries,
                   },
                   errorMessage,
-                  connectorErrorCode
+                  error instanceof ConnectorNotConfiguredError
+                    ? CONNECTOR_NOT_CONFIGURED_ERROR_CODE
+                    : undefined
                 );
                 return getDeleteTaskRunResult();
               }
@@ -274,6 +270,9 @@ async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>
     const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
 
     if (result.status === TaskStatus.Failed) {
+      if (result.errorCode === CONNECTOR_NOT_CONFIGURED_ERROR_CODE) {
+        throw new ConnectorNotConfiguredError();
+      }
       throw new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`);
     }
 

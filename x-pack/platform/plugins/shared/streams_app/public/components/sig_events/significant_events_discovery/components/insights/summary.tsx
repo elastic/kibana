@@ -27,6 +27,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { Insight, InsightImpactLevel } from '@kbn/streams-schema';
 import { AssetImage } from '../../../../asset_image';
+import { ConnectorNotConfiguredCallout } from '../../../connector_not_configured_callout';
+import { useConnectorIdSettings } from '../../../../../hooks/sig_events/use_connector_id_settings';
 import { useInsightsDiscoveryApi } from '../../../../../hooks/sig_events/use_insights_discovery_api';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTaskPolling } from '../../../../../hooks/use_task_polling';
@@ -40,6 +42,8 @@ export function Summary({ count }: { count: number }) {
     core: { notifications },
   } = useKibana();
   const { euiTheme } = useEuiTheme();
+
+  const { isDiscoveryConnectorConfigured } = useConnectorIdSettings();
 
   const {
     scheduleInsightsDiscoveryTask,
@@ -241,7 +245,7 @@ export function Summary({ count }: { count: number }) {
                   size="s"
                   iconType="sparkles"
                   onClick={onRunDiscoveryClick}
-                  isDisabled={isSchedulingTask}
+                  isDisabled={isSchedulingTask || !isDiscoveryConnectorConfigured}
                   isLoading={isSchedulingTask}
                   data-test-subj="significant_events_run_discovery_button"
                 >
@@ -252,6 +256,11 @@ export function Summary({ count }: { count: number }) {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+          {!isDiscoveryConnectorConfigured && (
+            <EuiFlexItem grow={false}>
+              <ConnectorNotConfiguredCallout />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiBasicTable
               data-test-subj="streamsInsightsTable"
@@ -321,7 +330,7 @@ export function Summary({ count }: { count: number }) {
                   size="m"
                   iconType="sparkles"
                   onClick={() => scheduleTask()}
-                  isDisabled={isTaskPending}
+                  isDisabled={isTaskPending || !isDiscoveryConnectorConfigured}
                   isLoading={isTaskPending}
                   data-test-subj="significant_events_generate_insights_button"
                 >
@@ -350,6 +359,11 @@ export function Summary({ count }: { count: number }) {
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
+            {!isDiscoveryConnectorConfigured && (
+              <EuiFlexItem grow={false} css={{ width: '100%' }}>
+                <ConnectorNotConfiguredCallout />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>

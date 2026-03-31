@@ -9,10 +9,7 @@ import { StatusError } from './status_error';
 
 export class ConnectorNotConfiguredError extends StatusError {
   constructor() {
-    super(
-      'No connector ID provided and no default AI connector configured. Please provide a connectorId or configure a default AI connector in settings.',
-      400
-    );
+    super('No connector ID provided and no default AI connector configured', 400);
     this.name = 'ConnectorNotConfiguredError';
   }
 }

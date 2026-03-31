@@ -12,7 +12,7 @@ import {
   type SignificantEventsQueriesGenerationResult,
 } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { getErrorMessage } from '../../streams/errors/parse_error';
+import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import type { TaskContext } from '../../tasks/task_definitions';
@@ -143,7 +143,8 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 await taskClient.fail<SignificantEventsQueriesGenerationTaskParams>(
                   _task,
                   { start, end, sampleDocsSize, streamName },
-                  errorMessage
+                  errorMessage,
+                  parseError(error).errorCode
                 );
 
                 return getDeleteTaskRunResult();

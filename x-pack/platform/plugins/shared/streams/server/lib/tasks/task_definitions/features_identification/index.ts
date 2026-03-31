@@ -503,7 +503,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 await taskClient.fail<FeaturesIdentificationTaskParams>(
                   _task,
                   { start, end, streamName },
-                  errorMessage
+                  errorMessage,
+                  parseError(error).errorCode
                 );
 
                 if (!hasTrackedIteration) {

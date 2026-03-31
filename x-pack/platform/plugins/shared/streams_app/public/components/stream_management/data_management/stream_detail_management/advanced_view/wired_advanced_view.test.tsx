@@ -16,10 +16,6 @@ jest.mock('@kbn/ebt-tools', () => ({
   usePerformanceContext: () => ({ onPageReady: jest.fn() }),
 }));
 
-jest.mock('../../../../../hooks/use_ai_features', () => ({
-  useAIFeatures: () => null,
-}));
-
 // Mock the useStreamsPrivileges hook
 jest.mock('../../../../../hooks/use_streams_privileges');
 
@@ -66,6 +62,19 @@ jest.mock('../../../../../hooks/sig_events/use_stream_features_api', () => ({
     cancelFeaturesIdentificationTask: jest.fn(),
     deleteFeature: jest.fn(),
     deleteFeaturesInBulk: jest.fn(),
+  }),
+}));
+
+jest.mock('../../../../../hooks/sig_events/use_connector_id_settings', () => ({
+  useConnectorIdSettings: () => ({
+    isOnboardingConnectorConfigured: true,
+    isRuleGenerationConnectorConfigured: true,
+    isKnowledgeIndicatorExtractionConnectorConfigured: true,
+    isDiscoveryConnectorConfigured: true,
+    loading: false,
+    value: undefined,
+    error: undefined,
+    refresh: jest.fn(),
   }),
 }));
 

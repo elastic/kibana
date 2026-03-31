@@ -37,7 +37,7 @@ export function useAIFeatures(): AIFeatures | null {
 
   const genAiConnectors = useGenAIConnectors({
     streamsRepositoryClient: streams.streamsRepositoryClient,
-    uiSettings: core.uiSettings,
+    uiSettings: core.settings.client,
   });
   const license = useObservable(licensing.license$);
   const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(

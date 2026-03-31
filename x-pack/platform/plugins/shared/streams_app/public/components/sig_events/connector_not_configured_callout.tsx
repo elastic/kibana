@@ -18,8 +18,7 @@ const CALLOUT_TITLE = i18n.translate(
 const CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEvents.connectorNotConfigured.description',
   {
-    defaultMessage:
-      'Configure an AI connector for this feature in the Significant events settings.',
+    defaultMessage: 'Configure an AI connector in the Significant events settings.',
   }
 );
 
