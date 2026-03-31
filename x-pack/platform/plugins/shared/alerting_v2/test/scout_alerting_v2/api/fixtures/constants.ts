@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-export const INTERNAL_API_HEADERS = {
+export const API_HEADERS = {
   'kbn-xsrf': 'true',
-  'x-elastic-internal-origin': 'kibana',
 };
 
-export const RULE_API_PATH = '/internal/alerting/v2/rule';
+export { ALERTING_V2_RULE_API_PATH as RULE_API_PATH } from '@kbn/alerting-v2-constants';
 export const ALERTING_EVENTS_INDEX = '.rule-events';
