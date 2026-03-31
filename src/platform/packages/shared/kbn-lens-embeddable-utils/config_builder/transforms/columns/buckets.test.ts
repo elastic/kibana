@@ -100,7 +100,7 @@ describe('Buckets Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
-        size: 5,
+        limit: 5,
       };
       const result = fromBucketLensApiToLensState(input, metricColumns);
       if (!isLensStateColumnOfType<TermsIndexPatternColumn>('terms', result)) {
@@ -238,7 +238,7 @@ describe('Buckets Transforms', () => {
       }
       expect(result.operation).toBe('terms');
       expect(result.fields).toEqual(['status']);
-      expect(result.size).toBe(5);
+      expect(result.limit).toBe(5);
     });
 
     it('should throw for unsupported operation', () => {
