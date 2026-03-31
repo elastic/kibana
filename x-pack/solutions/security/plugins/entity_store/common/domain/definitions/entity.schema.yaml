@@ -30,7 +30,9 @@ components:
         sub_type:
           type: string
         source:
-          type: string
+          type: array
+          items:
+            type: string
         EngineMetadata:
           $ref: '#/components/schemas/EngineMetadata'
         attributes:

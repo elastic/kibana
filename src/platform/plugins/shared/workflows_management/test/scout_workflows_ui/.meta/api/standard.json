@@ -1,5 +1,5 @@
 {
-  "sha1": "49e0ba785b87dfa8bc84d913851db1424cf67d2c",
+  "sha1": "e54e78ac77d51b3023ff58c9fda4797f0face865",
   "tests": [
     {
       "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 40,
+        "line": 38,
         "column": 10
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 55,
+        "line": 53,
         "column": 10
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 74,
+        "line": 72,
         "column": 10
       }
     },
@@ -53,13 +53,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 96,
+        "line": 94,
         "column": 10
       }
     },
     {
-      "id": "b2eaaaa0cf33c26-c26bae7ee5b0379",
-      "title": "Workflows Import/Export API should export workflows as a ZIP archive",
+      "id": "b2eaaaa0cf33c26-983ffa0afc2cdb0",
+      "title": "Workflows Import/Export API should export workflows as JSON with entries and manifest",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 122,
+        "line": 120,
         "column": 10
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 149,
+        "line": 148,
         "column": 10
       }
     },
@@ -95,7 +95,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 162,
+        "line": 161,
         "column": 10
       }
     },
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 211,
+        "line": 202,
         "column": 10
       }
     },
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 224,
+        "line": 215,
         "column": 10
       }
     },
@@ -137,7 +137,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 237,
+        "line": 228,
         "column": 10
       }
     },
@@ -151,7 +151,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 258,
+        "line": 249,
         "column": 10
       }
     },
@@ -165,7 +165,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 276,
+        "line": 267,
         "column": 10
       }
     },

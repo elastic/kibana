@@ -7,6 +7,7 @@
 
 import { useCallback, useRef } from 'react';
 import { usePrefetchSkills } from './menus/skills/use_prefetch_skills';
+import { usePrefetchSml } from './menus/sml/use_prefetch_sml';
 
 /**
  * Prefetches data for all command menus on first invocation.
@@ -15,6 +16,7 @@ import { usePrefetchSkills } from './menus/skills/use_prefetch_skills';
 export const useCommandMenuPrefetch = () => {
   const hasPrefetched = useRef(false);
   const prefetchSkills = usePrefetchSkills();
+  const prefetchSml = usePrefetchSml();
 
   return useCallback(() => {
     if (hasPrefetched.current) {
@@ -22,5 +24,6 @@ export const useCommandMenuPrefetch = () => {
     }
     hasPrefetched.current = true;
     prefetchSkills();
-  }, [prefetchSkills]);
+    prefetchSml();
+  }, [prefetchSkills, prefetchSml]);
 };
