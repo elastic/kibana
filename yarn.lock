@@ -4719,6 +4719,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-fixture@link:x-pack/platform/test/api_integration_deployment_agnostic/plugins/alerting_v2_fixture":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-v2-plugin@link:x-pack/platform/plugins/shared/alerting_v2":
   version "0.0.0"
   uid ""
