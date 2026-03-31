@@ -28,7 +28,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     await kbnClient.savedObjects.clean({ types: ['markdown'] });
   });
 
-  apiTest('should create a markdown panel', async ({ apiClient }) => {
+  apiTest('should create a markdown library item', async ({ apiClient }) => {
     const content = '# Hello world';
     const title = `Test title ${Date.now()}`;
     const response = await apiClient.post(MARKDOWN_API_PATH, {
@@ -38,6 +38,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
       },
       body: {
         content,
+        description: 'some description',
         title,
       },
       responseType: 'json',
@@ -46,33 +47,12 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(201);
     expect(response.body.data).toMatchObject({
       content,
+      description: 'some description',
       title,
     });
   });
 
-  apiTest('can create a markdown panel with all attributes', async ({ apiClient }) => {
-    const response = await apiClient.post(MARKDOWN_API_PATH, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {
-        title: 'My Markdown Panel',
-        description: 'A description of this panel',
-        content: '## Heading\n\nSome **bold** text',
-      },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(201);
-    expect(response.body.data).toMatchObject({
-      title: 'My Markdown Panel',
-      description: 'A description of this panel',
-      content: '## Heading\n\nSome **bold** text',
-    });
-  });
-
-  apiTest('should create a markdown panel in a specific space', async ({ apiClient }) => {
+  apiTest('should create a markdown library item in a specific space', async ({ apiClient }) => {
     const content = '# Space-scoped markdown';
     const title = `Space-scoped markdown ${Date.now()}`;
     const response = await apiClient.post(`s/${spaceId}/${MARKDOWN_API_PATH}`, {
@@ -95,8 +75,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     'markdown created in a space should not be accessible from the default space',
     async ({ apiClient }) => {
       const content = `Isolated content`;
-      const id = `isolated-markdown-panel`;
-      const title = `Isolated markdown panel ${Date.now()}`;
+      const title = 'Isolated markdown library item';
 
       const createResponse = await apiClient.post(`s/${spaceId}/${MARKDOWN_API_PATH}`, {
         headers: {
@@ -180,7 +159,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
   );
 
   apiTest(
-    'authorization - returns error when user does not have permission to create markdown panels',
+    'authorization - returns error when user does not have permission to create library item',
     async ({ apiClient }) => {
       const response = await apiClient.post(MARKDOWN_API_PATH, {
         headers: {
