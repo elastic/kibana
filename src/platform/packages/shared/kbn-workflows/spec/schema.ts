@@ -12,6 +12,7 @@ import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { TriggerSchema } from './schema/triggers';
 import { WorkflowInputSchema } from './schema/triggers/manual_trigger_schema';
+import { BaseEventSchema } from './schema/common/base_event';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -805,15 +806,6 @@ export const WorkflowDataContextSchema = z.object({
   spaceId: z.string(),
 });
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
-
-/**
- * Base fields present on every trigger event (injected by the platform).
- * Custom trigger event schemas are merged on top of this for workflow context and autocomplete.
- * Timestamp is only present for event-driven (custom) triggers; see EventTimestampSchema.
- */
-export const BaseEventSchema = z.object({
-  spaceId: z.string().describe('The space where the event was emitted.'),
-});
 
 /**
  * Timestamp injected by the platform for event-driven (custom) trigger events only.

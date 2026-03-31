@@ -16,10 +16,14 @@ import {
   AlertEventSchema,
   isAlertTrigger,
 } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
-import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import {
+  isManualTrigger,
+  ManualTriggerEventSchema,
+} from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { z } from '@kbn/zod/v4';
 import { inferZodType } from '../../../../common/lib/zod';
 import { triggerSchemas } from '../../../trigger_schemas';
+import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
 
 // Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
 export type WorkflowDefinitionForContext = WorkflowYaml;
@@ -46,7 +50,7 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): {
     if (isAlertTrigger(trigger)) {
       triggerEventSchemas.push(AlertEventSchema);
     } else if (isManualTrigger(trigger)) {
-      const eventShape: Record<string, z.ZodType> = {};
+      const eventShape: Record<string, z.ZodType> = ManualTriggerEventSchema.shape;
 
       if (trigger.inputs) {
         const inputs = normalizeFieldsToJsonSchema(trigger.inputs);
@@ -70,7 +74,7 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): {
 
   if (triggerEventSchemas.length === 0) {
     return {
-      eventSchema: z.unknown().optional(),
+      eventSchema: BaseEventSchema.optional(),
       inputsSchema: undefined,
     };
   }

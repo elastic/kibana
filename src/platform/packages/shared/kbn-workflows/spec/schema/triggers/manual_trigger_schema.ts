@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 
+import { BaseEventSchema } from '../common/base_event';
 import { JsonModelSchema } from '../common/json_model_schema';
 
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
@@ -71,7 +72,7 @@ export const ManualTriggerSchema = z.object({
 });
 export type ManualTrigger = z.infer<typeof ManualTriggerSchema>;
 
-export const ManualTriggerEventSchema = z.object({
+export const ManualTriggerEventSchema = BaseEventSchema.extend({
   inputs: z.unknown().optional(),
 });
 export type ManualTriggerEvent = z.infer<typeof ManualTriggerEventSchema>;

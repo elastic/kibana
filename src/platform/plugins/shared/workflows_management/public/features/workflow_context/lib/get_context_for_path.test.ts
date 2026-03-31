@@ -11,6 +11,7 @@ import type { Step, WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema, ForEachContextSchema, WhileContextSchema } from '@kbn/workflows';
 import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import { ManualTriggerEventSchema } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { z } from '@kbn/zod/v4';
 import { getContextSchemaForPath } from './get_context_for_path';
 
@@ -85,6 +86,7 @@ describe('getContextSchemaForPath', () => {
     expectZodSchemaEqual(
       context,
       DynamicStepContextSchema.extend({
+        event: ManualTriggerEventSchema,
         inputs: z.object({}),
         consts: z.object({
           test: z.literal('test'),
@@ -105,6 +107,7 @@ describe('getContextSchemaForPath', () => {
     expectZodSchemaEqual(
       context,
       DynamicStepContextSchema.extend({
+        event: ManualTriggerEventSchema,
         inputs: z.object({}),
         steps: z.object({
           'first-step': z.object({
