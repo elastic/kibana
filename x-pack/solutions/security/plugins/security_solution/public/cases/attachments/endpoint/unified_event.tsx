@@ -24,7 +24,10 @@ const UnifiedAttachmentEvent = ({ metadata }: UnifiedReferenceAttachmentViewProp
   const { getAppUrl, navigateTo } = useNavigation();
 
   const command = metadata?.command as string;
-  const targets = useMemo(() => (metadata?.targets ?? []) as EndpointTarget[], [metadata?.targets]);
+  const targets = useMemo(
+    () => (metadata?.targets ?? []) as unknown as EndpointTarget[],
+    [metadata?.targets]
+  );
 
   const endpointDetailsHref = getAppUrl({
     path: getEndpointDetailsPath({

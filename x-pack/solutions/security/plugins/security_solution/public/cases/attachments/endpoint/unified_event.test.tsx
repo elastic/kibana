@@ -28,6 +28,7 @@ describe('UnifiedAttachmentEvent', () => {
 
   const defaultProps = {
     attachmentId: 'action-123',
+    savedObjectId: 'so-123',
     caseData: { id: 'case-1', title: 'Test Case' },
     metadata: {
       command: 'isolate',
