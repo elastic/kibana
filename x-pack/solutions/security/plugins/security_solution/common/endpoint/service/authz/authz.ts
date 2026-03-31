@@ -106,7 +106,6 @@ export const calculateEndpointAuthz = (
 
   const canReadEndpointExceptions = hasAuth('showEndpointExceptions');
   const canWriteEndpointExceptions = hasAuth('crudEndpointExceptions');
-  const canOptInPerPolicyEndpointExceptions = hasSuperuserPrivileges;
 
   const canManageGlobalArtifacts = hasAuth('writeGlobalArtifacts');
 
@@ -185,7 +184,6 @@ export const calculateEndpointAuthz = (
     canReadEventFilters,
     canReadEndpointExceptions,
     canWriteEndpointExceptions,
-    canOptInPerPolicyEndpointExceptions,
     canManageGlobalArtifacts,
 
     // ---------------------------------------------------------
@@ -261,7 +259,6 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadEventFilters: false,
     canReadEndpointExceptions: false,
     canWriteEndpointExceptions: false,
-    canOptInPerPolicyEndpointExceptions: false,
     canManageGlobalArtifacts: false,
     canReadWorkflowInsights: false,
     canWriteWorkflowInsights: false,

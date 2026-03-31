@@ -324,27 +324,24 @@ describe('Endpoint Authz service', () => {
       }
     );
 
-    describe.each(['canReadAdminData', 'canWriteAdminData', 'canOptInPerPolicyEndpointExceptions'])(
-      '%s',
-      (privilege) => {
-        it.each`
-          isServerless | expectedResult | roles                      | description
-          ${false}     | ${true}        | ${['superuser', 'role-2']} | ${'user has superuser role on ESS'}
-          ${false}     | ${false}       | ${['role-2', 'admin']}     | ${'user does NOT have superuser role on ESS'}
-          ${true}      | ${true}        | ${['admin', 'role-2']}     | ${'user has admin role on Serverless'}
-          ${true}      | ${false}       | ${['role-2', 'superuser']} | ${'user does NOT have admin role on Serverless'}
-        `(
-          `should set '${privilege}' to '$expectedResult' when $description`,
-          ({ expectedResult, roles, isServerless }) => {
-            expect(
-              calculateEndpointAuthz(licenseService, fleetAuthz, roles, isServerless)[
-                privilege as keyof EndpointAuthz
-              ]
-            ).toEqual(expectedResult);
-          }
-        );
-      }
-    );
+    describe.each(['canReadAdminData', 'canWriteAdminData'])('%s', (privilege) => {
+      it.each`
+        isServerless | expectedResult | roles                      | description
+        ${false}     | ${true}        | ${['superuser', 'role-2']} | ${'user has superuser role on ESS'}
+        ${false}     | ${false}       | ${['role-2', 'admin']}     | ${'user does NOT have superuser role on ESS'}
+        ${true}      | ${true}        | ${['admin', 'role-2']}     | ${'user has admin role on Serverless'}
+        ${true}      | ${false}       | ${['role-2', 'superuser']} | ${'user does NOT have admin role on Serverless'}
+      `(
+        `should set '${privilege}' to '$expectedResult' when $description`,
+        ({ expectedResult, roles, isServerless }) => {
+          expect(
+            calculateEndpointAuthz(licenseService, fleetAuthz, roles, isServerless)[
+              privilege as keyof EndpointAuthz
+            ]
+          ).toEqual(expectedResult);
+        }
+      );
+    });
   });
 
   describe('getEndpointAuthzInitialState()', () => {
@@ -393,7 +390,6 @@ describe('Endpoint Authz service', () => {
         canReadEventFilters: false,
         canReadEndpointExceptions: false,
         canWriteEndpointExceptions: false,
-        canOptInPerPolicyEndpointExceptions: false,
         canReadAdminData: false,
         canWriteAdminData: false,
         canReadScriptsLibrary: false,

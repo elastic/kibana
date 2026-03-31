@@ -59,7 +59,7 @@ describe('When on the endpoint exceptions page', () => {
         mockUserPrivileges.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({
             canWriteEndpointExceptions: true,
-            canOptInPerPolicyEndpointExceptions: false,
+            canWriteAdminData: false,
           }),
         });
       });
@@ -80,7 +80,7 @@ describe('When on the endpoint exceptions page', () => {
         mockUserPrivileges.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({
             canWriteEndpointExceptions: false,
-            canOptInPerPolicyEndpointExceptions: false,
+            canWriteAdminData: false,
           }),
         });
       });
@@ -130,7 +130,7 @@ describe('When on the endpoint exceptions page', () => {
       mockUserPrivileges.mockReturnValue({
         endpointPrivileges: getEndpointAuthzInitialStateMock({
           canWriteEndpointExceptions: true,
-          canOptInPerPolicyEndpointExceptions: true,
+          canWriteAdminData: true,
         }),
       });
     });
@@ -323,12 +323,12 @@ describe('When on the endpoint exceptions page', () => {
       });
 
       describe('RBAC', () => {
-        describe('when user has the `canOptInPerPolicyEndpointExceptions` privilege', () => {
+        describe('when user has the `canWriteAdminData` privilege', () => {
           beforeEach(() => {
             mockUserPrivileges.mockReturnValue({
               endpointPrivileges: getEndpointAuthzInitialStateMock({
                 canWriteEndpointExceptions: true,
-                canOptInPerPolicyEndpointExceptions: true,
+                canWriteAdminData: true,
               }),
             });
           });
@@ -355,12 +355,12 @@ describe('When on the endpoint exceptions page', () => {
           });
         });
 
-        describe('when user does not have the `canOptInPerPolicyEndpointExceptions` privilege', () => {
+        describe('when user does not have the `canWriteAdminData` privilege', () => {
           beforeEach(() => {
             mockUserPrivileges.mockReturnValue({
               endpointPrivileges: getEndpointAuthzInitialStateMock({
                 canWriteEndpointExceptions: true,
-                canOptInPerPolicyEndpointExceptions: false,
+                canWriteAdminData: false,
               }),
             });
           });

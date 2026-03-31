@@ -99,8 +99,6 @@ export interface EndpointAuthz {
   canReadEndpointExceptions: boolean;
   /** if the user has read permissions for endpoint exceptions */
   canWriteEndpointExceptions: boolean;
-  /** if the user has permissions to opt-in to per-policy endpoint exceptions */
-  canOptInPerPolicyEndpointExceptions: boolean;
 
   /** If user is allowed to manage global artifacts. Introduced support for spaces feature */
   canManageGlobalArtifacts: boolean;
