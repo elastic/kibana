@@ -6,8 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskResult } from '@kbn/streams-schema';
+import type { GetScopedClients } from '../../types';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type {
@@ -30,6 +31,14 @@ import {
   type MemoryConsolidationTaskParams,
   type MemoryConsolidationTaskResult,
 } from '../../../lib/tasks/task_definitions/memory_consolidation';
+
+const assertMemoryEnabled = async (getScopedClients: GetScopedClients, request: KibanaRequest) => {
+  const { modelSettingsClient } = await getScopedClients({ request });
+  const settings = await modelSettingsClient.getSettings();
+  if (!settings.useMemory) {
+    throw new Error('Memory is disabled. Enable useMemory in settings to use this feature.');
+  }
+};
 
 const getMemoryService = (server: StreamsServer, logger: Logger) => {
   return new MemoryServiceImpl({
@@ -57,7 +66,8 @@ const createEntryRoute = createServerRoute({
       tags: z.array(z.string()).optional(),
     }),
   }),
-  handler: async ({ params, request, server, logger }): Promise<MemoryEntry> => {
+  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
+    await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -85,7 +95,8 @@ const getEntryRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
   }),
-  handler: async ({ params, request, server, logger }): Promise<MemoryEntry> => {
+  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
+    await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
     return memory.get({ id: params.path.id });
@@ -106,7 +117,8 @@ const getEntryByPathRoute = createServerRoute({
   params: z.object({
     query: z.object({ path: z.string() }),
   }),
-  handler: async ({ params, request, server, logger }): Promise<MemoryEntry> => {
+  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
+    await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
     const entry = await memory.getByPath({ path: params.query.path });
@@ -138,7 +150,8 @@ const updateEntryRoute = createServerRoute({
       change_summary: z.string().optional(),
     }),
   }),
-  handler: async ({ params, request, server, logger }): Promise<MemoryEntry> => {
+  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
+    await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -167,7 +180,14 @@ const deleteEntryRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
   }),
-  handler: async ({ params, request, server, logger }): Promise<{ deleted: boolean }> => {
+  handler: async ({
+    params,
+    request,
+    server,
+    logger,
+    getScopedClients,
+  }): Promise<{ deleted: boolean }> => {
+    await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -193,7 +213,8 @@ const moveEntryRoute = createServerRoute({
     path: z.object({ id: z.string() }),
     body: z.object({ new_path: z.string() }),
   }),
-  handler: async ({ params, request, server, logger }): Promise<MemoryEntry> => {
+  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
+    await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -231,7 +252,9 @@ const searchRoute = createServerRoute({
     request,
     server,
     logger,
+    getScopedClients,
   }): Promise<{ results: MemorySearchResult[] }> => {
+    await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
     const results = await memory.search({
@@ -256,7 +279,13 @@ const getTreeRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ request, server, logger }): Promise<{ tree: MemoryTreeNode[] }> => {
+  handler: async ({
+    request,
+    server,
+    logger,
+    getScopedClients,
+  }): Promise<{ tree: MemoryTreeNode[] }> => {
+    await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
     const tree = await memory.getTree();
@@ -289,7 +318,9 @@ const getHistoryRoute = createServerRoute({
     request,
     server,
     logger,
+    getScopedClients,
   }): Promise<{ history: MemoryVersionRecord[] }> => {
+    await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
     const history = await memory.getHistory({
@@ -317,7 +348,14 @@ const getVersionRoute = createServerRoute({
       version: z.coerce.number(),
     }),
   }),
-  handler: async ({ params, request, server, logger }): Promise<MemoryVersionRecord> => {
+  handler: async ({
+    params,
+    request,
+    server,
+    logger,
+    getScopedClients,
+  }): Promise<MemoryVersionRecord> => {
+    await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
     return memory.getVersion({
@@ -342,7 +380,8 @@ const rollbackRoute = createServerRoute({
     path: z.object({ id: z.string() }),
     body: z.object({ version: z.number() }),
   }),
-  handler: async ({ params, request, server, logger }): Promise<MemoryEntry> => {
+  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
+    await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -380,7 +419,9 @@ const recentChangesRoute = createServerRoute({
     request,
     server,
     logger,
+    getScopedClients,
   }): Promise<{ changes: MemoryVersionRecord[] }> => {
+    await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
     const changes = await memory.getRecentChanges({

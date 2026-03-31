@@ -66,7 +66,7 @@ export function SignificantEventsDiscoveryPage() {
     [streams.streamsRepositoryClient]
   );
 
-  const isMemoryEnabled = settingsFetch.loading ? true : settingsFetch.value?.useMemory ?? false;
+  const isMemoryEnabled = !settingsFetch.loading && settingsFetch.value?.useMemory === true;
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -159,6 +159,10 @@ export function SignificantEventsDiscoveryPage() {
   }
 
   if (!isValidDiscoveryTab(tab)) {
+    return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
+  }
+
+  if (tab === 'memory' && !isMemoryEnabled) {
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }
 

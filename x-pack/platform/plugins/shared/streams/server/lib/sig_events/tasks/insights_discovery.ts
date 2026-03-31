@@ -138,7 +138,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   { insights, tokensUsed: result.tokens_used }
                 );
 
-                if (insights.length > 0 && runContext.fakeRequest) {
+                if (insights.length > 0 && settings.useMemory && runContext.fakeRequest) {
                   try {
                     await taskClient.schedule<MemoryGenerationTaskParams>({
                       task: {

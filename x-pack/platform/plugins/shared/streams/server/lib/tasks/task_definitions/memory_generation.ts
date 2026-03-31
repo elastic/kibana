@@ -70,6 +70,17 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
               );
 
               const settings = await modelSettingsClient.getSettings();
+
+              if (!settings.useMemory) {
+                taskLogger.info('Memory is disabled, skipping memory generation');
+                await taskClient.complete<MemoryGenerationTaskParams, MemoryGenerationTaskResult>(
+                  _task,
+                  { insights, features, queries },
+                  { streamsProcessed: 0 }
+                );
+                return;
+              }
+
               const connectorId = await resolveConnectorId({
                 connectorId: settings.connectorIdDiscovery,
                 uiSettingsClient,

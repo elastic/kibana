@@ -213,7 +213,8 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   (memoryParams.features?.length ?? 0) > 0 ||
                   (memoryParams.queries?.length ?? 0) > 0;
 
-                if (hasMemoryInputs && runContext.fakeRequest) {
+                const onboardingSettings = await modelSettingsClient.getSettings();
+                if (hasMemoryInputs && onboardingSettings.useMemory && runContext.fakeRequest) {
                   try {
                     await taskClient.schedule<MemoryGenerationTaskParams>({
                       task: {
