@@ -56,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // ensure we're logged out so we can login as the appropriate users
-      await security.forceLogout();
+      await security.forceLogout({ waitForLoginPage: false });
 
       await securityService.role.create('dashboard_write_vis_read', {
         elasticsearch: {
@@ -91,7 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await security.forceLogout();
+      await security.forceLogout({ waitForLoginPage: false });
 
       await securityService.role.delete('dashboard_write_vis_read');
       await securityService.user.delete('dashboard_write_vis_read_user');
