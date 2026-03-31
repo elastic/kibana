@@ -75,16 +75,16 @@ export const euid = {
     getEuidEvaluation: euidModule.getEuidEsqlEvaluation,
 
     /**
-     * ESQL predicate that locates documents matching one sample document’s identity (mirrors per-doc DSL).
+     * ESQL predicate that locates documents matching one sample document's identity (mirrors per-doc DSL).
      * Input: entity type and sample document; output: parenthesized boolean expression or `undefined` if not buildable.
      */
     getEuidFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
 
     /**
-     * ESQL EVAL fragment for all field evaluations of the given entity type (e.g. computing `entity.namespace`).
-     * Returns `undefined` when there are no field evaluations. Prepend with `| EVAL` in a pipeline.
+     * Returns the ESQL `EVAL` expressions for field evaluations (e.g. entity.namespace derivation).
+     * Input: entity type. Output: ESQL expression string for `EVAL`, or `undefined` if none defined.
      */
-    getFieldEvaluationsEsql: euidModule.getFieldEvaluationsEsql,
+    getFieldEvaluations: euidModule.getFieldEvaluationsEsql,
   },
 
   /**
