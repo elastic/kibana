@@ -62,6 +62,11 @@ export interface DeleteWorkflowsResponse {
     id: string;
     error: string;
   }>;
+  /**
+   * Workflow ids successfully soft-deleted in Elasticsearch. Used server-side for audit logging;
+   * bulk delete route omits this field from the HTTP JSON body so the public API shape is unchanged.
+   */
+  successfulIds?: string[];
 }
 
 export interface GetWorkflowExecutionLogsParams {
