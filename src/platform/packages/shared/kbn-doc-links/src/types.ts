@@ -590,6 +590,7 @@ export interface DocLinks {
     elasticAgentStandaloneDownload: string;
     elasticAgentStandaloneLoggingConfig: string;
     agentPolicyLogLevel: string;
+    elasticAgentLogFileRetention: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

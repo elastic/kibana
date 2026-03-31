@@ -119,7 +119,7 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
           defaultMessage: 'The frequency of logging the internal Elastic Agent metrics.',
         }
       ),
-    learnMoreLink: docLinks?.elasticAgentStandaloneLoggingConfig,
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: zodStringWithDurationValidation,
     example_value: '10m',
   },
@@ -156,7 +156,7 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     api_field: {
       name: 'agent_logging_to_files',
     },
-    learnMoreLink: docLinks?.elasticAgentStandaloneLoggingConfig,
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: z.boolean().default(true),
     example_value: true,
   },
@@ -174,7 +174,7 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     api_field: {
       name: 'agent_logging_files_rotateeverybytes',
     },
-    learnMoreLink: docLinks?.elasticAgentStandaloneLoggingConfig,
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: z.number().int().min(0),
     example_value: 10,
   },
@@ -192,7 +192,7 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     api_field: {
       name: 'agent_logging_files_keepfiles',
     },
-    learnMoreLink: docLinks?.elasticAgentStandaloneLoggingConfig,
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: z.number().int().min(0),
     example_value: 10,
   },
@@ -213,7 +213,7 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     api_field: {
       name: 'agent_logging_files_interval',
     },
-    learnMoreLink: docLinks?.elasticAgentStandaloneLoggingConfig,
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: zodStringWithDurationValidation,
     example_value: '10m',
   },
