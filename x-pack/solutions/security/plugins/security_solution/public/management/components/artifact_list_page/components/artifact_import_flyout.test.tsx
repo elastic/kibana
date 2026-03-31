@@ -98,7 +98,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     expect(mockedTrustedAppApi.responseProvider.trustedAppImportList).toHaveBeenCalledWith(
       expect.objectContaining({
         version: '2023-10-31',
-        query: { overwrite: true } as HttpFetchOptionsWithPath['query'],
+        query: { overwrite: false, as_new_list: false } as HttpFetchOptionsWithPath['query'],
       })
     );
   });
