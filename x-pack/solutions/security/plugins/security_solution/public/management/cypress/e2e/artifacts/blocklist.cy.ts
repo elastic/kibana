@@ -86,7 +86,8 @@ describe(
     };
 
     describe('Renders blocklist fields', () => {
-      it('Correctly renders all blocklist fields for different OSs', () => {
+      it('Correctly renders fields for different OSs, modifies value format, and validates input', () => {
+        // --- Renders all blocklist fields for different OSs ---
         openBlocklist({ create: true });
 
         selectOs('windows');
@@ -111,9 +112,8 @@ describe(
         expectSingleOperator('Path');
         selectHashField();
         expectSingleOperator('Hash');
-      });
 
-      it('Correctly modifies value format based on field selection', () => {
+        // --- Modifies value format based on field selection ---
         openBlocklist({ create: true });
         // Start with default is one of operator
         selectSignatureField();
@@ -128,9 +128,8 @@ describe(
         selectPathField();
         expectSingleOperator('Path');
         validateMultiValue();
-      });
 
-      it('Correctly validates value input', () => {
+        // --- Validates value input ---
         openBlocklist({ create: true });
         fillOutBlocklistFlyout();
         selectSignatureField();
@@ -181,7 +180,8 @@ describe(
         removeExceptionsList(ENDPOINT_ARTIFACT_LISTS.blocklists.id);
       });
 
-      it('Create a blocklist item with single operator', () => {
+      it('Create blocklist items with single and multi operators', () => {
+        // --- Single operator ---
         openBlocklist({ create: true });
         fillOutBlocklistFlyout();
         selectSignatureField();
@@ -190,9 +190,11 @@ describe(
         submitBlocklist();
         validateSuccessPopup('create');
         validateRenderedCondition(IS_EXPECTED_CONDITION);
-      });
 
-      it('Create a blocklist item with multi operator', () => {
+        // Clean up for next creation
+        removeExceptionsList(ENDPOINT_ARTIFACT_LISTS.blocklists.id);
+
+        // --- Multi operator ---
         openBlocklist({ create: true });
         fillOutBlocklistFlyout();
         selectSignatureField();

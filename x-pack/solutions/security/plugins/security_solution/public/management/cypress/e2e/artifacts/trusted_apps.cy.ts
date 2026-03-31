@@ -127,8 +127,9 @@ describe(
         removeExceptionsList(ENDPOINT_ARTIFACT_LISTS.trustedApps.id);
       });
 
-      it('Correctly creates a trusted app with a single signature field on Mac', () => {
-        const expectedCondition = /AND\s*process\.code_signature\s*IS\s*TestSignature/;
+      it('Correctly creates trusted apps with single and multiple conditions on Mac', () => {
+        // --- Single signature field ---
+        const singleExpectedCondition = /AND\s*process\.code_signature\s*IS\s*TestSignature/;
 
         openTrustedApps({ create: true });
         fillOutTrustedAppsFlyout();
@@ -138,7 +139,38 @@ describe(
         fillOutValueField('TestSignature');
         submitForm();
         validateSuccessPopup('create');
-        validateRenderedCondition(expectedCondition);
+        validateRenderedCondition(singleExpectedCondition);
+
+        // Clean up for next creation
+        removeExceptionsList(ENDPOINT_ARTIFACT_LISTS.trustedApps.id);
+
+        // --- Multiple conditions ---
+        const multiExpectedCondition =
+          /\s*OSIS\s*Mac\s*AND\s*process\.code_signature\s*IS\s*TestSignature\s*AND\s*process\.hash\.\*\s*IS\s*323769d194406183912bb903e7fe738221543348\s*AND\s*process\.executable\.caselessIS\s*\/dev\/null\s*/;
+
+        openTrustedApps({ create: true });
+        fillOutTrustedAppsFlyout();
+        selectOs('macos');
+        // Set signature field
+        openFieldSelector();
+        selectField();
+        fillOutValueField('TestSignature');
+        // Add another condition
+        clickAndConditionButton();
+        // Set hash field
+        openFieldSelector(1, 1);
+        selectField('Hash', 1, 1);
+        fillOutValueField('323769d194406183912bb903e7fe738221543348', 1, 1);
+        // Add another condition
+        clickAndConditionButton();
+        // Set path field
+        openFieldSelector(1, 2);
+        selectField('Path', 1, 2);
+        fillOutValueField('/dev/null', 1, 2);
+
+        submitForm();
+        validateSuccessPopup('create');
+        validateRenderedConditions(multiExpectedCondition);
       });
 
       describe('Correctly updates and deletes Mac os trusted app with single signature field', () => {
@@ -167,35 +199,6 @@ describe(
           deleteTrustedAppItem();
           validateSuccessPopup('delete');
         });
-      });
-
-      it('Correctly creates a trusted app with a multiple conditions on Mac', () => {
-        const expectedCondition =
-          /\s*OSIS\s*Mac\s*AND\s*process\.code_signature\s*IS\s*TestSignature\s*AND\s*process\.hash\.\*\s*IS\s*323769d194406183912bb903e7fe738221543348\s*AND\s*process\.executable\.caselessIS\s*\/dev\/null\s*/;
-
-        openTrustedApps({ create: true });
-        fillOutTrustedAppsFlyout();
-        selectOs('macos');
-        // Set signature field
-        openFieldSelector();
-        selectField();
-        fillOutValueField('TestSignature');
-        // Add another condition
-        clickAndConditionButton();
-        // Set hash field
-        openFieldSelector(1, 1);
-        selectField('Hash', 1, 1);
-        fillOutValueField('323769d194406183912bb903e7fe738221543348', 1, 1);
-        // Add another condition
-        clickAndConditionButton();
-        // Set path field
-        openFieldSelector(1, 2);
-        selectField('Path', 1, 2);
-        fillOutValueField('/dev/null', 1, 2);
-
-        submitForm();
-        validateSuccessPopup('create');
-        validateRenderedConditions(expectedCondition);
       });
 
       describe('Correctly updates and deletes Mac os trusted app with multiple conditions', () => {

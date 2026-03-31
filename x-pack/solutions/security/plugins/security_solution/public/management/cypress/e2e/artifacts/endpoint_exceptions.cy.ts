@@ -37,36 +37,22 @@ describe(
         });
       };
 
-      it('should display Endpoint Exceptions in Administration page', () => {
+      it('should display and navigate to Endpoint Exceptions from Administration page', () => {
         loginWithReadAccess();
 
-        cy.visit(APP_MANAGE_PATH);
-        cy.getByTestSubj('pageContainer').contains('Endpoint exceptions');
-      });
-
-      it('should be able to navigate to Endpoint Exceptions from Administration page', () => {
-        loginWithReadAccess();
         cy.visit(APP_MANAGE_PATH);
         cy.getByTestSubj('pageContainer').contains('Endpoint exceptions').click();
 
         cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
       });
 
-      it('should display Endpoint Exceptions in Manage side panel', () => {
+      it('should display and navigate to Endpoint Exceptions from Manage side panel', () => {
         loginWithReadAccess();
 
         cy.visit(APP_PATH);
 
         essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ENDPOINT_EXCEPTIONS);
-        cy.get(essSecurityHeaders.ENDPOINT_EXCEPTIONS).should('exist');
-      });
-
-      it('should be able to navigate to Endpoint Exceptions from Manage side panel', () => {
-        loginWithReadAccess();
-        cy.visit(APP_PATH);
-
-        essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ENDPOINT_EXCEPTIONS);
-        cy.get(essSecurityHeaders.ENDPOINT_EXCEPTIONS).click();
+        cy.get(essSecurityHeaders.ENDPOINT_EXCEPTIONS).should('exist').click();
 
         cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
       });

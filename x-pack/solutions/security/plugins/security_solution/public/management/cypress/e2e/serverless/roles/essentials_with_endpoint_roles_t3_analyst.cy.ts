@@ -62,33 +62,27 @@ describe.skip(
         login(ROLE.t3_analyst);
       });
 
-      it('should have access to Endpoint list page', () => {
+      it('should have access to Endpoint list, Policy Management, and all artifact pages', () => {
         ensureEndpointListPageAuthzAccess('all', true);
-      });
 
-      it('should have read access to Endpoint Policy Management', () => {
         ensurePolicyListPageAuthzAccess('read', true);
         ensurePolicyDetailsPageAuthzAccess(
           loadedEndpoints.data.integrationPolicies[0].id,
           'read',
           true
         );
+
+        for (const { id } of artifactPagesFullAccess) {
+          ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
+        }
       });
 
-      for (const { title, id } of artifactPagesFullAccess) {
-        it(`should have CRUD access to: ${title}`, () => {
-          ensureArtifactPageAuthzAccess('all', id as EndpointArtifactPageId);
-        });
-      }
-
-      it(`should NOT have access to Host Isolation Exceptions`, () => {
+      it('should NOT have access to Host Isolation Exceptions or Fleet', () => {
         ensureArtifactPageAuthzAccess(
           'none',
           pageById.hostIsolationExceptions.id as EndpointArtifactPageId
         );
-      });
 
-      it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
         ensureFleetPermissionDeniedScreen();
       });
