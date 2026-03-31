@@ -38,7 +38,7 @@ const getValidAttachmentOrigin = async (
   return origin;
 };
 
-interface UseRegisterActionButtonsParams {
+interface UseRegisterCanvasActionButtonsParams {
   dashboardApi: DashboardApi | undefined;
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: string) => Promise<unknown>;
@@ -51,7 +51,7 @@ interface UseRegisterActionButtonsParams {
   openSidebarConversation?: () => void;
 }
 
-export const useRegisterActionButtons = ({
+export const useRegisterCanvasActionButtons = ({
   dashboardApi,
   registerActionButtons,
   updateOrigin,
@@ -62,7 +62,7 @@ export const useRegisterActionButtons = ({
   attachmentOrigin,
   checkSavedDashboardExist,
   isSidebar,
-}: UseRegisterActionButtonsParams) => {
+}: UseRegisterCanvasActionButtonsParams) => {
   const timeRangeRef = useLatest(timeRange);
   const attachmentOriginRef = useLatest(attachmentOrigin);
   const dashboardStateRef = useLatest(dashboardState);
@@ -116,6 +116,7 @@ export const useRegisterActionButtons = ({
         );
         if (existingAttachmentOrigin) {
           await dashboardApi.runQuickSave();
+          await updateOrigin(existingAttachmentOrigin);
           return;
         }
         const result = await dashboardApi.runInteractiveSave();
