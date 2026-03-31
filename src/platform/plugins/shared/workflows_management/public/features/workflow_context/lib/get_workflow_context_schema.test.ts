@@ -25,55 +25,60 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
       settings: undefined,
       enabled: true,
       tags: undefined,
-      triggers: [{ type: 'manual' }],
-      inputs: {
-        properties: {
-          threatIndicator: {
-            type: 'object',
-            description: 'Threat indicator to investigate',
+      triggers: [
+        {
+          type: 'manual',
+          inputs: {
             properties: {
-              type: {
-                type: 'string',
-                enum: ['ip', 'domain', 'hash', 'url', 'email'],
-                description: 'Type of threat indicator',
+              threatIndicator: {
+                type: 'object',
+                description: 'Threat indicator to investigate',
+                properties: {
+                  type: {
+                    type: 'string',
+                    enum: ['ip', 'domain', 'hash', 'url', 'email'],
+                    description: 'Type of threat indicator',
+                  },
+                  value: {
+                    type: 'string',
+                    description: 'The indicator value',
+                  },
+                  severity: {
+                    type: 'string',
+                    enum: ['low', 'medium', 'high', 'critical'],
+                    default: 'medium',
+                    description: 'Threat severity level',
+                  },
+                },
+                required: ['type', 'value', 'severity'],
+                additionalProperties: false,
               },
-              value: {
-                type: 'string',
-                description: 'The indicator value',
-              },
-              severity: {
-                type: 'string',
-                enum: ['low', 'medium', 'high', 'critical'],
-                default: 'medium',
-                description: 'Threat severity level',
+              analyst: {
+                type: 'object',
+                description: 'Security analyst handling the incident',
+                properties: {
+                  email: {
+                    type: 'string',
+                    format: 'email',
+                    description: 'Analyst email address',
+                  },
+                  name: {
+                    type: 'string',
+                    minLength: 2,
+                    maxLength: 100,
+                    description: 'Analyst full name',
+                  },
+                },
+                required: ['email', 'name'],
+                additionalProperties: false,
               },
             },
-            required: ['type', 'value', 'severity'],
-            additionalProperties: false,
-          },
-          analyst: {
-            type: 'object',
-            description: 'Security analyst handling the incident',
-            properties: {
-              email: {
-                type: 'string',
-                format: 'email',
-                description: 'Analyst email address',
-              },
-              name: {
-                type: 'string',
-                minLength: 2,
-                maxLength: 100,
-                description: 'Analyst full name',
-              },
-            },
-            required: ['email', 'name'],
+            required: ['threatIndicator', 'analyst'],
             additionalProperties: false,
           },
         },
-        required: ['threatIndicator', 'analyst'],
-        additionalProperties: false,
-      },
+      ],
+
       consts: undefined,
       steps: [{ name: 'step1', type: 'console' }],
     };
@@ -127,67 +132,77 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
       settings: undefined,
       enabled: true,
       tags: undefined,
-      triggers: [{ type: 'manual' }],
-      inputs: {
-        properties: {
-          analyst: {
-            type: 'object',
+      triggers: [
+        {
+          type: 'manual',
+          inputs: {
             properties: {
-              email: { type: 'string', format: 'email' },
-              name: { type: 'string' },
-              team: {
-                type: 'string',
-                enum: ['SOC', 'Threat Intelligence', 'Incident Response', 'Forensics'],
-              },
-            },
-            required: ['email', 'name', 'team'],
-            additionalProperties: false,
-          },
-          threatIndicator: {
-            type: 'object',
-            properties: {
-              type: {
-                type: 'string',
-                enum: ['ip', 'domain', 'hash', 'url', 'email'],
-              },
-              value: { type: 'string' },
-              severity: {
-                type: 'string',
-                enum: ['low', 'medium', 'high', 'critical'],
-                default: 'medium',
-              },
-            },
-            required: ['type', 'value', 'severity'],
-            additionalProperties: false,
-          },
-          incidentMetadata: {
-            type: 'object',
-            properties: {
-              incidentId: { type: 'string', pattern: '^INC-\\d{8}-\\d{4}$' },
-              source: {
-                type: 'string',
-                enum: ['SIEM Alert', 'Threat Intelligence Feed', 'Manual Report', 'EDR Detection'],
-              },
-              enrichment: {
+              analyst: {
                 type: 'object',
                 properties: {
-                  reputation: {
+                  email: { type: 'string', format: 'email' },
+                  name: { type: 'string' },
+                  team: {
                     type: 'string',
-                    enum: ['unknown', 'clean', 'suspicious', 'malicious'],
-                    default: 'unknown',
+                    enum: ['SOC', 'Threat Intelligence', 'Incident Response', 'Forensics'],
                   },
-                  confidence: { type: 'number', minimum: 0, maximum: 100 },
                 },
+                required: ['email', 'name', 'team'],
+                additionalProperties: false,
+              },
+              threatIndicator: {
+                type: 'object',
+                properties: {
+                  type: {
+                    type: 'string',
+                    enum: ['ip', 'domain', 'hash', 'url', 'email'],
+                  },
+                  value: { type: 'string' },
+                  severity: {
+                    type: 'string',
+                    enum: ['low', 'medium', 'high', 'critical'],
+                    default: 'medium',
+                  },
+                },
+                required: ['type', 'value', 'severity'],
+                additionalProperties: false,
+              },
+              incidentMetadata: {
+                type: 'object',
+                properties: {
+                  incidentId: { type: 'string', pattern: '^INC-\\d{8}-\\d{4}$' },
+                  source: {
+                    type: 'string',
+                    enum: [
+                      'SIEM Alert',
+                      'Threat Intelligence Feed',
+                      'Manual Report',
+                      'EDR Detection',
+                    ],
+                  },
+                  enrichment: {
+                    type: 'object',
+                    properties: {
+                      reputation: {
+                        type: 'string',
+                        enum: ['unknown', 'clean', 'suspicious', 'malicious'],
+                        default: 'unknown',
+                      },
+                      confidence: { type: 'number', minimum: 0, maximum: 100 },
+                    },
+                    additionalProperties: false,
+                  },
+                },
+                required: ['incidentId', 'source'],
                 additionalProperties: false,
               },
             },
-            required: ['incidentId', 'source'],
+            required: ['analyst', 'threatIndicator', 'incidentMetadata'],
             additionalProperties: false,
           },
         },
-        required: ['analyst', 'threatIndicator', 'incidentMetadata'],
-        additionalProperties: false,
-      },
+      ],
+
       consts: undefined,
       steps: [{ name: 'step1', type: 'console' }],
     };
@@ -226,14 +241,18 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
         settings: undefined,
         enabled: true,
         tags: undefined,
-        triggers: [{ type: 'manual' }],
-        inputs: {
-          properties: {
-            name: null,
-            email: { type: 'string', format: 'email' },
-            age: null,
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              properties: {
+                name: null,
+                email: { type: 'string', format: 'email' },
+                age: null,
+              },
+            } as any,
           },
-        } as any,
+        ],
         consts: undefined,
         steps: [{ name: 'step1', type: 'console' }],
       };
@@ -253,13 +272,17 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
         settings: undefined,
         enabled: true,
         tags: undefined,
-        triggers: [{ type: 'manual' }],
-        inputs: {
-          properties: {
-            name: undefined,
-            email: { type: 'string', format: 'email' },
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              properties: {
+                name: undefined,
+                email: { type: 'string', format: 'email' },
+              },
+            } as any,
           },
-        } as any,
+        ],
         consts: undefined,
         steps: [{ name: 'step1', type: 'console' }],
       };
@@ -279,13 +302,17 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
         settings: undefined,
         enabled: true,
         tags: undefined,
-        triggers: [{ type: 'manual' }],
-        inputs: {
-          properties: {
-            name: 'invalid string schema',
-            email: { type: 'string', format: 'email' },
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              properties: {
+                name: 'invalid string schema',
+                email: { type: 'string', format: 'email' },
+              },
+            } as any,
           },
-        } as any,
+        ],
         consts: undefined,
         steps: [{ name: 'step1', type: 'console' }],
       };
@@ -307,8 +334,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     settings: undefined,
     enabled: true,
     tags: undefined,
-    triggers: [{ type: 'manual' }],
-    inputs: undefined,
+    triggers: [{ type: 'manual', inputs: undefined }],
     consts: undefined,
     steps: [{ name: 'step1', type: 'console' }],
   };
