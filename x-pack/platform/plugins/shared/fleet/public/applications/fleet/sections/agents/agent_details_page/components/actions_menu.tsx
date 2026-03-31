@@ -219,7 +219,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           anchorPosition="downLeft"
           button={{
             props: {
-              iconType: 'arrowDown',
+              iconType: 'chevronSingleDown',
               iconSide: 'right',
               color: 'primary',
             },

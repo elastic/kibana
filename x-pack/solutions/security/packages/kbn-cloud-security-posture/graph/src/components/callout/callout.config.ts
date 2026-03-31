@@ -10,13 +10,10 @@ import {
   ENRICH_GRAPH_EXPERIENCE_TITLE,
   UNAVAILABLE_ENTITY_INFO_TITLE,
   UNKNOWN_ENTITY_TYPE_TITLE,
-  MISSING_ALL_REQUIREMENTS_MESSAGE,
   MISSING_INTEGRATION_MESSAGE,
-  MISSING_ENTITY_STORE_MESSAGE,
   UNAVAILABLE_ENTITY_INFO_MESSAGE,
   UNKNOWN_ENTITY_TYPE_MESSAGE,
   INSTALL_CLOUD_ASSET_DISCOVERY_TEXT,
-  ENABLE_ENTITY_STORE_TEXT,
   VERIFY_CLOUD_ASSET_DISCOVERY_DATA_TEXT,
 } from './callout.translations';
 
@@ -24,37 +21,20 @@ import {
  * Get the callout configuration for a specific variant with provided URLs.
  *
  * @param variant - The callout variant to retrieve configuration for
- * @param links - Object containing URLs for integration, entity store, and discover
+ * @param links - Object containing URLs for integration and discover
  * @returns The callout configuration
  */
 export const getCalloutConfig = (
   variant: CalloutVariant,
   links: {
     integrationUrl: string;
-    entityStoreUrl: string;
     discoverUrl: string;
   }
 ): CalloutConfig => {
-  const { integrationUrl, entityStoreUrl, discoverUrl } = links;
+  const { integrationUrl, discoverUrl } = links;
 
   // Build complete CalloutConfig objects based on variant
   switch (variant) {
-    case 'missingAllRequirements':
-      return {
-        title: ENRICH_GRAPH_EXPERIENCE_TITLE,
-        message: MISSING_ALL_REQUIREMENTS_MESSAGE,
-        links: [
-          {
-            text: INSTALL_CLOUD_ASSET_DISCOVERY_TEXT,
-            href: integrationUrl,
-          },
-          {
-            text: ENABLE_ENTITY_STORE_TEXT,
-            href: entityStoreUrl,
-          },
-        ],
-      };
-
     case 'uninstalledIntegration':
       return {
         title: ENRICH_GRAPH_EXPERIENCE_TITLE,
@@ -63,18 +43,6 @@ export const getCalloutConfig = (
           {
             text: INSTALL_CLOUD_ASSET_DISCOVERY_TEXT,
             href: integrationUrl,
-          },
-        ],
-      };
-
-    case 'disabledEntityStore':
-      return {
-        title: ENRICH_GRAPH_EXPERIENCE_TITLE,
-        message: MISSING_ENTITY_STORE_MESSAGE,
-        links: [
-          {
-            text: ENABLE_ENTITY_STORE_TEXT,
-            href: entityStoreUrl,
           },
         ],
       };

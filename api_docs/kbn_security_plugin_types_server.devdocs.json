@@ -4727,6 +4727,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
               }
             ]
           },
@@ -4855,6 +4859,10 @@
                 "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
               },
               {
+                "plugin": "alertingVTwo",
+                "path": "x-pack/platform/plugins/shared/alerting_v2/server/lib/tasks/invalidate_pending_api_keys/task_runner.ts"
+              },
+              {
                 "plugin": "entityManager",
                 "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
               },
@@ -4955,12 +4963,12 @@
                 "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/api_key_routes.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/auth/api_key.ts"
-              },
-              {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/plugin.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/auth/api_key.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",

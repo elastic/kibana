@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
@@ -29,6 +29,7 @@ import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { TraceWarning } from './trace_warning';
 import { WaterfallLegends } from './waterfall_legends';
 import { WaterfallAccordionButton } from './waterfall_accordion_button';
+import { WaterfallSizeWarning } from './waterfall_size_warning';
 
 /** Base props shared by all TraceWaterfall variants */
 interface BaseTraceWaterfallProps {
@@ -50,6 +51,9 @@ interface BaseTraceWaterfallProps {
   onShowCriticalPathChange?: (value: boolean) => void;
   children?: React.ReactNode;
   entryTransactionId?: string;
+  traceDocsTotal?: number;
+  maxTraceItems?: number;
+  discoverHref?: string;
 }
 
 /** Default: 'window' (page scroll). Use 'parent' for flyout. */
@@ -79,10 +83,14 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
     onShowCriticalPathChange,
     children,
     entryTransactionId,
+    traceDocsTotal = 0,
+    maxTraceItems = 0,
+    discoverHref,
   } = props;
   const highlightedSpanId = props.highlightedSpanId;
   const scrollToHighlightedOnMount =
     props.scrollStrategy === 'parent' ? props.scrollToHighlightedOnMount : undefined;
+  const exceedMax = traceDocsTotal > maxTraceItems;
 
   return (
     <TraceWaterfallContextProvider
@@ -107,6 +115,16 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
       entryTransactionId={entryTransactionId}
       scrollToHighlightedOnMount={scrollToHighlightedOnMount}
     >
+      {exceedMax && (
+        <>
+          <WaterfallSizeWarning
+            traceDocsTotal={traceDocsTotal}
+            maxTraceItems={maxTraceItems}
+            discoverHref={discoverHref}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <TraceWarning>
         <TraceWaterfallComponent />
       </TraceWarning>

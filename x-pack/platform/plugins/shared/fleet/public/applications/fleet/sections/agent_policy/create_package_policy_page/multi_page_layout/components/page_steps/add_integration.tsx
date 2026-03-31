@@ -48,7 +48,7 @@ const ExpandableAdvancedSettings: React.FC<{ children?: React.ReactNode }> = ({ 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
-                iconType={isShowingAdvanced ? 'arrowUp' : 'arrowDown'}
+                iconType={isShowingAdvanced ? 'chevronSingleUp' : 'chevronSingleDown'}
                 iconSide="right"
                 onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                 flush="left"

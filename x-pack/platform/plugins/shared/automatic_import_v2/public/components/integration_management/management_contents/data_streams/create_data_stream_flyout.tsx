@@ -30,7 +30,12 @@ import {
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { css } from '@emotion/react';
 import { useParams } from 'react-router-dom';
-import type { DataStream, InputType } from '../../../../../common';
+import {
+  normalizeLogSamplesFromFileContent,
+  UPLOAD_SAMPLES_MAX_LINES,
+  type DataStream,
+  type InputType,
+} from '../../../../../common';
 import type { LogsSourceOption } from '../../forms/types';
 import { useIntegrationForm } from '../../forms/integration_form';
 import * as i18n from './translations';
@@ -269,10 +274,17 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
 
     try {
       if (logsSourceOption === 'file' && logSample) {
-        const samples = logSample
-          .split('\n')
-          .map((line) => line.trim())
-          .filter((line) => line.length > 0);
+        const { samples, linesOmittedOverLimit } = normalizeLogSamplesFromFileContent(logSample);
+
+        if (linesOmittedOverLimit > 0) {
+          notifications.toasts.addWarning({
+            title: i18n.SAMPLES_NORMALIZED_WARNING_TITLE,
+            text: i18n.SAMPLES_NORMALIZED_WARNING_LINES_OMITTED(
+              linesOmittedOverLimit,
+              UPLOAD_SAMPLES_MAX_LINES
+            ),
+          });
+        }
 
         await uploadSamplesMutation.mutateAsync({
           integrationId,

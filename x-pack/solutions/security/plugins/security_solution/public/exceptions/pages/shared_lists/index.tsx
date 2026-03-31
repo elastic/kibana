@@ -28,6 +28,7 @@ import type { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-i
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -102,13 +103,10 @@ export const SharedLists = React.memo(() => {
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const {
-    services: {
-      http,
-      notifications,
-      timelines,
-      application: { navigateToApp },
-    },
+    services: { http, application, cps, notifications, timelines },
   } = useKibana();
+  const { navigateToApp } = application;
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
@@ -408,7 +406,7 @@ export const SharedLists = React.memo(() => {
     <EuiButtonEmpty
       size="xs"
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onRowSizeButtonClick}
     >
@@ -492,7 +490,7 @@ export const SharedLists = React.memo(() => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiButtonIcon
-                    iconType="popout"
+                    iconType="external"
                     aria-label="go-to-rules"
                     color="primary"
                     onClick={() =>
@@ -519,7 +517,7 @@ export const SharedLists = React.memo(() => {
                   buttonRef={(node: HTMLButtonElement | null) => {
                     createButtonRef.current = node;
                   }}
-                  iconType={'arrowDown'}
+                  iconType="chevronSingleDown"
                   onClick={onCreateButtonClick}
                 >
                   {i18n.CREATE_BUTTON}
@@ -557,7 +555,7 @@ export const SharedLists = React.memo(() => {
           (canEditExceptions || canWriteEndpointExceptions) && (
             <EuiButton
               data-test-subj="importSharedExceptionList"
-              iconType={'importAction'}
+              iconType={'download'}
               onClick={() => setDisplayImportListFlyout(true)}
             >
               {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
