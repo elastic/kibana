@@ -51,7 +51,7 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  apiTest('should return 404 for a non-existent markdown panel', async ({ apiClient }) => {
+  apiTest('should return 404 for a non-existent markdown library item', async ({ apiClient }) => {
     const response = await apiClient.delete(`${MARKDOWN_API_PATH}/non-existent-markdown`, {
       headers: {
         ...COMMON_HEADERS,
@@ -63,7 +63,7 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(404);
   });
 
-  apiTest('should return 204 if the markdown panel is deleted', async ({ apiClient }) => {
+  apiTest('should return 204 when a markdown library item is deleted', async ({ apiClient }) => {
     const response = await apiClient.delete(`${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -76,7 +76,7 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
   });
 
   apiTest(
-    'should return 204 if the markdown panel is deleted in a specific space',
+    'should return 204 when deleted in a specific space',
     async ({ apiClient }) => {
       const response = await apiClient.delete(
         `s/${spaceId}/${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID_IN_SPACE}`,
@@ -94,7 +94,7 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
   );
 
   apiTest(
-    'authorization - returns error when user does not have permission to delete markdown panels',
+    'authorization - returns error when user does not have permission to delete library item',
     async ({ apiClient }) => {
       const response = await apiClient.delete(`${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID}`, {
         headers: {
