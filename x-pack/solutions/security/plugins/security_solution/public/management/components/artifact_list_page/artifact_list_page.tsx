@@ -356,7 +356,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         labels.pageImportButtonTitle,
       ]
     );
-    
+
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
     }
