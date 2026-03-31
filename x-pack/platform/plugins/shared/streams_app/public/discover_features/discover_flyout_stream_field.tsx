@@ -43,6 +43,7 @@ function DiscoverFlyoutStreamFieldContent({
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
     doc,
+    cpsHasLinkedProjects: renderCpsWarning,
   });
 
   if (loading) return <EuiLoadingSpinner size="s" />;
