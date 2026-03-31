@@ -19,6 +19,7 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import { createChildVirtualizerController } from '@kbn/shared-ux-document-data-cascade/src/lib/core/virtualizer/child_virtualizer_controller';
 import { createDiscoverServicesMock } from '../../../../../../__mocks__/services';
 import { DiscoverTestProvider } from '../../../../../../__mocks__/test_provider';
 import { dataViewWithTimefieldMock } from '../../../../../../__mocks__/data_view_with_timefield';
@@ -45,7 +46,9 @@ const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewWithTimefieldMoc
 const nextExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewWithTimefieldMock);
 const cellData = [expandedDoc, nextExpandedDoc];
 const cellId = 'leaf-1';
-const scrollElement = document.createElement('div');
+
+const createVirtualizerController = () =>
+  createChildVirtualizerController({ getRootVirtualizer: () => undefined });
 
 const createCascadedDocumentsFetcher = (services: DiscoverServices) => {
   const stateManager: CascadedDocumentsStateManager = {
@@ -66,25 +69,27 @@ const renderLeafCellWithContext = ({
 }: {
   contextValue: CascadedDocumentsContext;
   services: DiscoverServices;
-}) => (
-  <DiscoverTestProvider services={services}>
-    <CascadedDocumentsProvider value={contextValue}>
-      <ESQLDataCascadeLeafCell
-        cellData={cellData}
-        cellId={cellId}
-        dataGridDensityState={DataGridDensity.COMPACT}
-        showTimeCol={true}
-        dataView={dataViewWithTimefieldMock}
-        showKeyboardShortcuts={false}
-        getScrollElement={() => scrollElement}
-        getScrollMargin={() => 0}
-        getScrollOffset={() => 0}
-        preventSizeChangePropagation={jest.fn(() => () => undefined)}
-        onUpdateDataGridDensity={jest.fn()}
-      />
-    </CascadedDocumentsProvider>
-  </DiscoverTestProvider>
-);
+}) => {
+  const virtualizerController = createVirtualizerController();
+
+  return (
+    <DiscoverTestProvider services={services}>
+      <CascadedDocumentsProvider value={contextValue}>
+        <ESQLDataCascadeLeafCell
+          cellData={cellData}
+          cellId={cellId}
+          rowIndex={0}
+          virtualizerController={virtualizerController}
+          dataGridDensityState={DataGridDensity.COMPACT}
+          showTimeCol={true}
+          dataView={dataViewWithTimefieldMock}
+          showKeyboardShortcuts={false}
+          onUpdateDataGridDensity={jest.fn()}
+        />
+      </CascadedDocumentsProvider>
+    </DiscoverTestProvider>
+  );
+};
 
 const createContextValue = ({
   currentOwner,
