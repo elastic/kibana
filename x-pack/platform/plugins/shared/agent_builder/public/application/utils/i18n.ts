@@ -633,6 +633,610 @@ export const labels = {
       defaultMessage: 'Experimental',
     }),
   },
+  agentSkills: {
+    pageDescription: i18n.translate('xpack.agentBuilder.agentSkills.pageDescription', {
+      defaultMessage:
+        'Capabilities that help the agent analyze data, generate queries, and perform tasks.',
+    }),
+    addSkillButton: i18n.translate('xpack.agentBuilder.agentSkills.addSkillButton', {
+      defaultMessage: 'Add skill',
+    }),
+    importFromLibraryMenuItem: i18n.translate(
+      'xpack.agentBuilder.agentSkills.importFromLibraryMenuItem',
+      {
+        defaultMessage: 'Import from skill library',
+      }
+    ),
+    createSkillMenuItem: i18n.translate('xpack.agentBuilder.agentSkills.createSkillMenuItem', {
+      defaultMessage: 'Create a skill',
+    }),
+    createFromChatButton: i18n.translate('xpack.agentBuilder.agentSkills.createFromChatButton', {
+      defaultMessage: 'Create from chat',
+    }),
+    searchActiveSkillsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.agentSkills.searchActiveSkillsPlaceholder',
+      {
+        defaultMessage: 'Search active skills',
+      }
+    ),
+    addSkillFromLibraryTitle: i18n.translate(
+      'xpack.agentBuilder.agentSkills.addSkillFromLibraryTitle',
+      {
+        defaultMessage: 'Add skill from library',
+      }
+    ),
+    manageSkillLibraryLink: i18n.translate(
+      'xpack.agentBuilder.agentSkills.manageSkillLibraryLink',
+      {
+        defaultMessage: 'Manage skill library',
+      }
+    ),
+    searchAvailableSkillsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.agentSkills.searchAvailableSkillsPlaceholder',
+      {
+        defaultMessage: 'Search available skills',
+      }
+    ),
+    availableSkillsSummary: (showing: number, total: number) =>
+      i18n.translate('xpack.agentBuilder.agentSkills.availableSkillsSummary', {
+        defaultMessage:
+          'Showing {showing} of {total} {total, plural, one {Available skill} other {Available skills}}',
+        values: { showing, total },
+      }),
+    addButtonLabel: i18n.translate('xpack.agentBuilder.agentSkills.addButtonLabel', {
+      defaultMessage: 'Add',
+    }),
+    editSkillAriaLabel: i18n.translate('xpack.agentBuilder.agentSkills.editSkillAriaLabel', {
+      defaultMessage: 'Edit skill',
+    }),
+    removeSkillAriaLabel: i18n.translate('xpack.agentBuilder.agentSkills.removeSkillAriaLabel', {
+      defaultMessage: 'Remove skill from agent',
+    }),
+    noActiveSkillsMessage: i18n.translate('xpack.agentBuilder.agentSkills.noActiveSkillsMessage', {
+      defaultMessage: 'No skills assigned to this agent yet. Add skills from the library.',
+    }),
+    noActiveSkillsMatchMessage: i18n.translate(
+      'xpack.agentBuilder.agentSkills.noActiveSkillsMatchMessage',
+      {
+        defaultMessage: 'No active skills match your search.',
+      }
+    ),
+    noAvailableSkillsMessage: i18n.translate(
+      'xpack.agentBuilder.agentSkills.noAvailableSkillsMessage',
+      {
+        defaultMessage: 'All skills have been added to this agent.',
+      }
+    ),
+    noAvailableSkillsMatchMessage: i18n.translate(
+      'xpack.agentBuilder.agentSkills.noAvailableSkillsMatchMessage',
+      {
+        defaultMessage: 'No available skills match your search.',
+      }
+    ),
+    removeSkillSuccessToast: (skillName: string) =>
+      i18n.translate('xpack.agentBuilder.agentSkills.removeSkillSuccessToast', {
+        defaultMessage: 'Skill "{skillName}" removed from agent',
+        values: { skillName },
+      }),
+    addSkillSuccessToast: (skillName: string) =>
+      i18n.translate('xpack.agentBuilder.agentSkills.addSkillSuccessToast', {
+        defaultMessage: 'Skill "{skillName}" added to agent',
+        values: { skillName },
+      }),
+    updateSkillsErrorToast: i18n.translate(
+      'xpack.agentBuilder.agentSkills.updateSkillsErrorToast',
+      {
+        defaultMessage: 'Unable to update agent skills',
+      }
+    ),
+    editSkillFlyoutTitle: i18n.translate('xpack.agentBuilder.agentSkills.editSkillFlyoutTitle', {
+      defaultMessage: 'Edit skill',
+    }),
+    createSkillFlyoutTitle: i18n.translate(
+      'xpack.agentBuilder.agentSkills.createSkillFlyoutTitle',
+      {
+        defaultMessage: 'Create skill',
+      }
+    ),
+    viewSkillLibraryLink: i18n.translate('xpack.agentBuilder.agentSkills.viewSkillLibraryLink', {
+      defaultMessage: 'View skill library',
+    }),
+    sharedSkillWarning: i18n.translate('xpack.agentBuilder.agentSkills.sharedSkillWarning', {
+      defaultMessage:
+        'You are editing a shared skill. Changes will affect all users using this skill.',
+    }),
+    newSkillLibraryInfo: i18n.translate('xpack.agentBuilder.agentSkills.newSkillLibraryInfo', {
+      defaultMessage:
+        'This skill will be added to your library and be available for other agents to use.',
+    }),
+    advancedOptionsLabel: i18n.translate('xpack.agentBuilder.agentSkills.advancedOptionsLabel', {
+      defaultMessage: 'Advanced options',
+    }),
+    allSkillsSummary: (showing: number, total: number) =>
+      i18n.translate('xpack.agentBuilder.agentSkills.allSkillsSummary', {
+        defaultMessage: 'Showing {showing} of {total} {total, plural, one {Skill} other {Skills}}',
+        values: { showing, total },
+      }),
+    removeSkillButtonLabel: i18n.translate(
+      'xpack.agentBuilder.agentSkills.removeSkillButtonLabel',
+      {
+        defaultMessage: 'Remove',
+      }
+    ),
+    skillDetailInstructionsLabel: i18n.translate(
+      'xpack.agentBuilder.agentSkills.skillDetailInstructionsLabel',
+      {
+        defaultMessage: 'Instructions',
+      }
+    ),
+    instructionsViewModeLegend: i18n.translate(
+      'xpack.agentBuilder.agentSkills.instructionsViewModeLegend',
+      {
+        defaultMessage: 'Instructions view mode',
+      }
+    ),
+    instructionsViewRenderedLabel: i18n.translate(
+      'xpack.agentBuilder.agentSkills.instructionsViewRenderedLabel',
+      {
+        defaultMessage: 'Rendered',
+      }
+    ),
+    instructionsViewRawLabel: i18n.translate(
+      'xpack.agentBuilder.agentSkills.instructionsViewRawLabel',
+      {
+        defaultMessage: 'Raw',
+      }
+    ),
+    noSkillSelectedMessage: i18n.translate(
+      'xpack.agentBuilder.agentSkills.noSkillSelectedMessage',
+      {
+        defaultMessage: 'Select a skill to view details.',
+      }
+    ),
+    removeSkillConfirmTitle: (skillName: string) =>
+      i18n.translate('xpack.agentBuilder.agentSkills.removeSkillConfirmTitle', {
+        defaultMessage: 'Remove "{skillName}" from agent?',
+        values: { skillName },
+      }),
+    removeSkillConfirmBody: i18n.translate(
+      'xpack.agentBuilder.agentSkills.removeSkillConfirmBody',
+      {
+        defaultMessage: 'The skill will no longer be available to this agent.',
+      }
+    ),
+    removeSkillConfirmButton: i18n.translate(
+      'xpack.agentBuilder.agentSkills.removeSkillConfirmButton',
+      {
+        defaultMessage: 'Remove',
+      }
+    ),
+    removeSkillCancelButton: i18n.translate(
+      'xpack.agentBuilder.agentSkills.removeSkillCancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
+    elasticCapabilitiesManagedTooltip: i18n.translate(
+      'xpack.agentBuilder.agentSkills.elasticCapabilitiesManagedTooltip',
+      {
+        defaultMessage:
+          'This built-in skill is automatically included because Elastic Capabilities is enabled for this agent.',
+      }
+    ),
+    elasticCapabilitiesReadOnlyBadge: i18n.translate(
+      'xpack.agentBuilder.agentSkills.elasticCapabilitiesReadOnlyBadge',
+      {
+        defaultMessage: 'Auto',
+      }
+    ),
+    readOnlyBadge: i18n.translate('xpack.agentBuilder.agentSkills.readOnlyBadge', {
+      defaultMessage: 'Read only',
+    }),
+    autoIncludedBadgeLabel: i18n.translate(
+      'xpack.agentBuilder.agentSkills.autoIncludedBadgeLabel',
+      {
+        defaultMessage: 'Auto-included',
+      }
+    ),
+    autoIncludedTooltipTitle: i18n.translate(
+      'xpack.agentBuilder.agentSkills.autoIncludedTooltipTitle',
+      {
+        defaultMessage: 'Added automatically from agent settings',
+      }
+    ),
+    autoIncludedTooltipBody: i18n.translate(
+      'xpack.agentBuilder.agentSkills.autoIncludedTooltipBody',
+      {
+        defaultMessage: 'Turn off auto-include built-in skills to manage it yourself',
+      }
+    ),
+    elasticCapabilitiesCallout: i18n.translate(
+      'xpack.agentBuilder.agentSkills.elasticCapabilitiesCallout',
+      {
+        defaultMessage:
+          'Built-in skills are automatically included while Elastic Capabilities is enabled.',
+      }
+    ),
+    manageAllSkills: i18n.translate('xpack.agentBuilder.agentSkills.manageAllSkillsLink', {
+      defaultMessage: 'Manage all skills',
+    }),
+  },
+  agentPlugins: {
+    pageDescription: i18n.translate('xpack.agentBuilder.agentPlugins.pageDescription', {
+      defaultMessage: 'Pre-built packages that bundle multiple capabilities into a single install.',
+    }),
+    installPluginButton: i18n.translate('xpack.agentBuilder.agentPlugins.installPluginButton', {
+      defaultMessage: 'Install plugin',
+    }),
+    fromUrlOrZipMenuItem: i18n.translate('xpack.agentBuilder.agentPlugins.fromUrlOrZipMenuItem', {
+      defaultMessage: 'From URL or ZIP',
+    }),
+    fromLibraryMenuItem: i18n.translate('xpack.agentBuilder.agentPlugins.fromLibraryMenuItem', {
+      defaultMessage: 'From library',
+    }),
+    searchActivePluginsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.searchActivePluginsPlaceholder',
+      {
+        defaultMessage: 'Search active plugins',
+      }
+    ),
+    noActivePluginsMessage: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.noActivePluginsMessage',
+      {
+        defaultMessage:
+          'No plugins assigned to this agent yet. Install or add plugins from the library.',
+      }
+    ),
+    noActivePluginsMatchMessage: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.noActivePluginsMatchMessage',
+      {
+        defaultMessage: 'No active plugins match your search.',
+      }
+    ),
+    removePluginButtonLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.removePluginButtonLabel',
+      {
+        defaultMessage: 'Remove',
+      }
+    ),
+    removePluginAriaLabel: i18n.translate('xpack.agentBuilder.agentPlugins.removePluginAriaLabel', {
+      defaultMessage: 'Remove plugin from agent',
+    }),
+    removePluginConfirmTitle: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.agentPlugins.removePluginConfirmTitle', {
+        defaultMessage: 'Remove "{pluginName}" from agent?',
+        values: { pluginName },
+      }),
+    removePluginConfirmBody: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.removePluginConfirmBody',
+      {
+        defaultMessage: 'The plugin and its skills will no longer be available to this agent.',
+      }
+    ),
+    removePluginConfirmButton: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.removePluginConfirmButton',
+      {
+        defaultMessage: 'Remove',
+      }
+    ),
+    removePluginCancelButton: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.removePluginCancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
+    addPluginSuccessToast: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.agentPlugins.addPluginSuccessToast', {
+        defaultMessage: 'Plugin "{pluginName}" added to agent',
+        values: { pluginName },
+      }),
+    removePluginSuccessToast: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.agentPlugins.removePluginSuccessToast', {
+        defaultMessage: 'Plugin "{pluginName}" removed from agent',
+        values: { pluginName },
+      }),
+    updatePluginsErrorToast: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.updatePluginsErrorToast',
+      {
+        defaultMessage: 'Unable to update agent plugins',
+      }
+    ),
+    noPluginSelectedMessage: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.noPluginSelectedMessage',
+      {
+        defaultMessage: 'Select a plugin to view details.',
+      }
+    ),
+    skillsCountBadge: (count: number) =>
+      i18n.translate('xpack.agentBuilder.agentPlugins.skillsCountBadge', {
+        defaultMessage: '{count} {count, plural, one {Skill} other {Skills}}',
+        values: { count },
+      }),
+    addPluginFromLibraryTitle: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.addPluginFromLibraryTitle',
+      {
+        defaultMessage: 'Add plugin from library',
+      }
+    ),
+    managePluginLibraryLink: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.managePluginLibraryLink',
+      {
+        defaultMessage: 'Manage plugin library',
+      }
+    ),
+    searchAvailablePluginsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.searchAvailablePluginsPlaceholder',
+      {
+        defaultMessage: 'Search available plugins',
+      }
+    ),
+    availablePluginsSummary: (showing: number, total: number) =>
+      i18n.translate('xpack.agentBuilder.agentPlugins.availablePluginsSummary', {
+        defaultMessage:
+          'Showing {showing} of {total} {total, plural, one {Available plugin} other {Available plugins}}',
+        values: { showing, total },
+      }),
+    noAvailablePluginsMatchMessage: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.noAvailablePluginsMatchMessage',
+      {
+        defaultMessage: 'No available plugins match your search.',
+      }
+    ),
+    noAvailablePluginsMessage: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.noAvailablePluginsMessage',
+      {
+        defaultMessage: 'All plugins have been added to this agent.',
+      }
+    ),
+    skillDetailInstalledVia: (source: string) =>
+      i18n.translate('xpack.agentBuilder.agentPlugins.skillDetailInstalledVia', {
+        defaultMessage: 'Installed via {source}',
+        values: { source },
+      }),
+    pluginDetailIdLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailIdLabel', {
+      defaultMessage: 'ID',
+    }),
+    pluginDetailNameLabel: i18n.translate('xpack.agentBuilder.agentPlugins.pluginDetailNameLabel', {
+      defaultMessage: 'Name',
+    }),
+    pluginDetailDescriptionLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailDescriptionLabel',
+      {
+        defaultMessage: 'Description',
+      }
+    ),
+    pluginDetailSkillsLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailSkillsLabel',
+      {
+        defaultMessage: 'Skills',
+      }
+    ),
+    pluginDetailAuthorLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailAuthorLabel',
+      {
+        defaultMessage: 'Author',
+      }
+    ),
+    pluginDetailSourceLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.pluginDetailSourceLabel',
+      {
+        defaultMessage: 'Source',
+      }
+    ),
+    installPluginFlyoutTitle: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.installPluginFlyoutTitle',
+      {
+        defaultMessage: 'Install plugin...',
+      }
+    ),
+    installPluginUrlTab: i18n.translate('xpack.agentBuilder.agentPlugins.installPluginUrlTab', {
+      defaultMessage: 'URL',
+    }),
+    installPluginUploadTab: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.installPluginUploadTab',
+      {
+        defaultMessage: 'Upload ZIP',
+      }
+    ),
+    autoBadge: i18n.translate('xpack.agentBuilder.agentPlugins.autoBadge', {
+      defaultMessage: 'Auto',
+    }),
+    autoPluginManagedTooltip: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.autoPluginManagedTooltip',
+      {
+        defaultMessage:
+          'This plugin is automatically included while Elastic Capabilities is enabled.',
+      }
+    ),
+    autoIncludedBadgeLabel: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.autoIncludedBadgeLabel',
+      {
+        defaultMessage: 'Auto-included',
+      }
+    ),
+    autoIncludedTooltipTitle: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.autoIncludedTooltipTitle',
+      {
+        defaultMessage: 'Added automatically from agent settings',
+      }
+    ),
+    autoIncludedTooltipBody: i18n.translate(
+      'xpack.agentBuilder.agentPlugins.autoIncludedTooltipBody',
+      {
+        defaultMessage: 'Turn off auto-include built-in plugins to manage it yourself',
+      }
+    ),
+    manageAllPlugins: i18n.translate('xpack.agentBuilder.agentPlugins.manageAllSkillsLink', {
+      defaultMessage: 'Manage all plugins',
+    }),
+  },
+  agentTools: {
+    pageDescription: i18n.translate('xpack.agentBuilder.agentTools.pageDescription', {
+      defaultMessage:
+        'Modular, reusable Elasticsearch operations. Agents use them to search, retrieve, and analyze your data.',
+    }),
+    addToolButton: i18n.translate('xpack.agentBuilder.agentTools.addToolButton', {
+      defaultMessage: 'Add tool',
+    }),
+    fromLibraryMenuItem: i18n.translate('xpack.agentBuilder.agentTools.fromLibraryMenuItem', {
+      defaultMessage: 'From library',
+    }),
+    createNewToolMenuItem: i18n.translate('xpack.agentBuilder.agentTools.createNewToolMenuItem', {
+      defaultMessage: 'Create new tool',
+    }),
+    searchActiveToolsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.agentTools.searchActiveToolsPlaceholder',
+      {
+        defaultMessage: 'Search active tools',
+      }
+    ),
+    noActiveToolsMessage: i18n.translate('xpack.agentBuilder.agentTools.noActiveToolsMessage', {
+      defaultMessage:
+        'No tools assigned to this agent yet. Add tools from the library or create a new one.',
+    }),
+    noActiveToolsMatchMessage: i18n.translate(
+      'xpack.agentBuilder.agentTools.noActiveToolsMatchMessage',
+      {
+        defaultMessage: 'No active tools match your search.',
+      }
+    ),
+    removeToolButtonLabel: i18n.translate('xpack.agentBuilder.agentTools.removeToolButtonLabel', {
+      defaultMessage: 'Remove',
+    }),
+    removeToolAriaLabel: i18n.translate('xpack.agentBuilder.agentTools.removeToolAriaLabel', {
+      defaultMessage: 'Remove tool from agent',
+    }),
+    removeToolConfirmTitle: (toolId: string) =>
+      i18n.translate('xpack.agentBuilder.agentTools.removeToolConfirmTitle', {
+        defaultMessage: 'Remove "{toolId}" from agent?',
+        values: { toolId },
+      }),
+    removeToolConfirmBody: i18n.translate('xpack.agentBuilder.agentTools.removeToolConfirmBody', {
+      defaultMessage: 'The tool will no longer be available to this agent.',
+    }),
+    removeToolConfirmButton: i18n.translate(
+      'xpack.agentBuilder.agentTools.removeToolConfirmButton',
+      {
+        defaultMessage: 'Remove',
+      }
+    ),
+    removeToolCancelButton: i18n.translate('xpack.agentBuilder.agentTools.removeToolCancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+    addToolSuccessToast: (toolId: string) =>
+      i18n.translate('xpack.agentBuilder.agentTools.addToolSuccessToast', {
+        defaultMessage: 'Tool "{toolId}" added to agent',
+        values: { toolId },
+      }),
+    removeToolSuccessToast: (toolId: string) =>
+      i18n.translate('xpack.agentBuilder.agentTools.removeToolSuccessToast', {
+        defaultMessage: 'Tool "{toolId}" removed from agent',
+        values: { toolId },
+      }),
+    updateToolsErrorToast: i18n.translate('xpack.agentBuilder.agentTools.updateToolsErrorToast', {
+      defaultMessage: 'Unable to update agent tools',
+    }),
+    noToolSelectedMessage: i18n.translate('xpack.agentBuilder.agentTools.noToolSelectedMessage', {
+      defaultMessage: 'Select a tool to view details.',
+    }),
+    readOnlyBadge: i18n.translate('xpack.agentBuilder.agentTools.readOnlyBadge', {
+      defaultMessage: 'Read only',
+    }),
+    addToolFromLibraryTitle: i18n.translate(
+      'xpack.agentBuilder.agentTools.addToolFromLibraryTitle',
+      {
+        defaultMessage: 'Add tool from library',
+      }
+    ),
+    manageToolLibraryLink: i18n.translate('xpack.agentBuilder.agentTools.manageToolLibraryLink', {
+      defaultMessage: 'Manage tool library',
+    }),
+    editInLibraryLink: i18n.translate('xpack.agentBuilder.agentTools.editInLibraryLink', {
+      defaultMessage: 'Edit in library',
+    }),
+    searchAvailableToolsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.agentTools.searchAvailableToolsPlaceholder',
+      {
+        defaultMessage: 'Search available tools',
+      }
+    ),
+    availableToolsSummary: (showing: number, total: number) =>
+      i18n.translate('xpack.agentBuilder.agentTools.availableToolsSummary', {
+        defaultMessage: 'Showing {showing} of {total} {total, plural, one {Tool} other {Tools}}',
+        values: { showing, total },
+      }),
+    noAvailableToolsMatchMessage: i18n.translate(
+      'xpack.agentBuilder.agentTools.noAvailableToolsMatchMessage',
+      {
+        defaultMessage: 'No available tools match your search.',
+      }
+    ),
+    noAvailableToolsMessage: i18n.translate(
+      'xpack.agentBuilder.agentTools.noAvailableToolsMessage',
+      {
+        defaultMessage: 'All tools have been added to this agent.',
+      }
+    ),
+    toolDetailIdLabel: i18n.translate('xpack.agentBuilder.agentTools.toolDetailIdLabel', {
+      defaultMessage: 'ID',
+    }),
+    toolDetailTypeLabel: i18n.translate('xpack.agentBuilder.agentTools.toolDetailTypeLabel', {
+      defaultMessage: 'Type',
+    }),
+    toolDetailDescriptionLabel: i18n.translate(
+      'xpack.agentBuilder.agentTools.toolDetailDescriptionLabel',
+      {
+        defaultMessage: 'Description',
+      }
+    ),
+    toolDetailTagsLabel: i18n.translate('xpack.agentBuilder.agentTools.toolDetailTagsLabel', {
+      defaultMessage: 'Tags',
+    }),
+    noTagsLabel: i18n.translate('xpack.agentBuilder.agentTools.noTagsLabel', {
+      defaultMessage: 'No tags',
+    }),
+    autoIncludedTooltip: i18n.translate('xpack.agentBuilder.agentTools.autoIncludedTooltip', {
+      defaultMessage: 'This tool is automatically included and cannot be removed.',
+    }),
+    autoIncludedBadgeLabel: i18n.translate('xpack.agentBuilder.agentTools.autoIncludedBadgeLabel', {
+      defaultMessage: 'Auto-included',
+    }),
+    autoIncludedTooltipTitle: i18n.translate(
+      'xpack.agentBuilder.agentTools.autoIncludedTooltipTitle',
+      {
+        defaultMessage: 'Added automatically from agent settings',
+      }
+    ),
+    autoIncludedTooltipBody: i18n.translate(
+      'xpack.agentBuilder.agentTools.autoIncludedTooltipBody',
+      {
+        defaultMessage: 'Turn off auto-include built-in tools to manage it yourself',
+      }
+    ),
+    elasticCapabilitiesManagedTooltip: i18n.translate(
+      'xpack.agentBuilder.agentTools.elasticCapabilitiesManagedTooltip',
+      {
+        defaultMessage:
+          'This built-in tool is automatically included because Elastic Capabilities is enabled for this agent.',
+      }
+    ),
+    elasticCapabilitiesReadOnlyBadge: i18n.translate(
+      'xpack.agentBuilder.agentTools.elasticCapabilitiesReadOnlyBadge',
+      {
+        defaultMessage: 'Auto',
+      }
+    ),
+    elasticCapabilitiesCallout: i18n.translate(
+      'xpack.agentBuilder.agentTools.elasticCapabilitiesCallout',
+      {
+        defaultMessage:
+          'Built-in tools are automatically included while Elastic Capabilities is enabled.',
+      }
+    ),
+    manageAllTools: i18n.translate('xpack.agentBuilder.agentTools.manageAllToolsLink', {
+      defaultMessage: 'Manage all tools',
+    }),
+  },
   plugins: {
     title: i18n.translate('xpack.agentBuilder.plugins.title', { defaultMessage: 'Plugins' }),
     pluginsTableCaption: (pluginsCount: number) =>
@@ -875,6 +1479,144 @@ export const labels = {
         }
       ),
     },
+  },
+  agentOverview: {
+    autoIncludeEnabledToast: i18n.translate(
+      'xpack.agentBuilder.overview.autoInclude.enabledToast',
+      {
+        defaultMessage: 'Built-in capabilities enabled',
+      }
+    ),
+    autoIncludeDisabledToast: i18n.translate(
+      'xpack.agentBuilder.overview.autoInclude.disabledToast',
+      {
+        defaultMessage: 'Built-in capabilities disabled',
+      }
+    ),
+    autoIncludeErrorToast: i18n.translate('xpack.agentBuilder.overview.autoInclude.errorToast', {
+      defaultMessage: 'Unable to update capabilities setting',
+    }),
+    instructionsSavedToast: i18n.translate('xpack.agentBuilder.overview.instructions.savedToast', {
+      defaultMessage: 'Instructions saved',
+    }),
+    instructionsErrorToast: i18n.translate('xpack.agentBuilder.overview.instructions.errorToast', {
+      defaultMessage: 'Unable to save instructions',
+    }),
+    docsLink: i18n.translate('xpack.agentBuilder.overview.docsLink', {
+      defaultMessage: 'Docs',
+    }),
+    editDetailsButton: i18n.translate('xpack.agentBuilder.overview.editDetailsButton', {
+      defaultMessage: 'Edit details',
+    }),
+    capabilitiesTitle: i18n.translate('xpack.agentBuilder.overview.capabilities.title', {
+      defaultMessage: 'Capabilities',
+    }),
+    capabilitiesDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.description',
+      {
+        defaultMessage: 'Manage the capabilities this agent uses to perform tasks and activities.',
+      }
+    ),
+    skillsDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.skillsDescription',
+      {
+        defaultMessage: 'Combine prompts and tools into reusable logic your agent can invoke.',
+      }
+    ),
+    addSkill: i18n.translate('xpack.agentBuilder.overview.capabilities.addSkill', {
+      defaultMessage: 'Add a skill',
+    }),
+    customizeSkills: i18n.translate('xpack.agentBuilder.overview.capabilities.customizeSkills', {
+      defaultMessage: 'Customize',
+    }),
+    pluginsDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.pluginsDescription',
+      {
+        defaultMessage:
+          'Add packaged sets of skills from external sources to quickly extend your agent.',
+      }
+    ),
+    addPlugin: i18n.translate('xpack.agentBuilder.overview.capabilities.addPlugin', {
+      defaultMessage: 'Add a plugin',
+    }),
+    customizePlugins: i18n.translate('xpack.agentBuilder.overview.capabilities.customizePlugins', {
+      defaultMessage: 'Customize',
+    }),
+    connectorsDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.connectorsDescription',
+      {
+        defaultMessage: 'Connect external services to give your agent access to data and actions.',
+      }
+    ),
+    addConnector: i18n.translate('xpack.agentBuilder.overview.capabilities.addConnector', {
+      defaultMessage: 'Add a connector',
+    }),
+    settingsTitle: i18n.translate('xpack.agentBuilder.overview.settings.title', {
+      defaultMessage: 'Settings',
+    }),
+    settingsDescription: i18n.translate('xpack.agentBuilder.overview.settings.description', {
+      defaultMessage: 'Configure how this agent behaves and how its capabilities are managed.',
+    }),
+    autoIncludeTitle: i18n.translate('xpack.agentBuilder.overview.settings.autoIncludeTitle', {
+      defaultMessage: 'Include built-in capabilities automatically',
+    }),
+    autoIncludeDescription: i18n.translate(
+      'xpack.agentBuilder.overview.settings.autoIncludeDescription',
+      {
+        defaultMessage:
+          'Automatically include all current and future Elastic-built skills, plugins, and tools. Turn off to manage them manually.',
+      }
+    ),
+    autoIncludeLabel: i18n.translate('xpack.agentBuilder.overview.settings.autoIncludeLabel', {
+      defaultMessage: 'Include built-in capabilities automatically',
+    }),
+    instructionsTitle: i18n.translate('xpack.agentBuilder.overview.settings.instructionsTitle', {
+      defaultMessage: 'Use custom instructions',
+    }),
+    instructionsDescription: i18n.translate(
+      'xpack.agentBuilder.overview.settings.instructionsDescription',
+      {
+        defaultMessage:
+          'Define how the agent should behave, what it should prioritize, and any rules it should follow when responding.',
+      }
+    ),
+    instructionsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.overview.settings.instructionsPlaceholder',
+      {
+        defaultMessage: 'No custom instructions.',
+      }
+    ),
+    saveInstructionsButton: i18n.translate(
+      'xpack.agentBuilder.overview.settings.saveInstructionsButton',
+      {
+        defaultMessage: 'Save instructions',
+      }
+    ),
+    byAuthor: (author: string) =>
+      i18n.translate('xpack.agentBuilder.overview.byAuthor', {
+        defaultMessage: 'By {author}',
+        values: { author },
+      }),
+    agentId: (id: string) =>
+      i18n.translate('xpack.agentBuilder.overview.agentId', {
+        defaultMessage: 'ID {id}',
+        values: { id },
+      }),
+    skillsLabel: (count: number) =>
+      i18n.translate('xpack.agentBuilder.overview.capabilities.skills', {
+        defaultMessage: '{count, plural, one {Skill} other {Skills}}',
+        values: { count },
+      }),
+    pluginsLabel: (count: number) =>
+      i18n.translate('xpack.agentBuilder.overview.capabilities.plugins', {
+        defaultMessage: '{count, plural, one {Plugin} other {Plugins}}',
+        values: { count },
+      }),
+    connectorsLabel: (count: number) =>
+      i18n.translate('xpack.agentBuilder.overview.capabilities.connectors', {
+        defaultMessage: '{count, plural, one {Connector} other {Connectors}}',
+        values: { count },
+      }),
   },
   navigationAbort: {
     title: i18n.translate('xpack.agentBuilder.navigationAbort.title', {
