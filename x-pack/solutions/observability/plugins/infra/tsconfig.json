@@ -130,7 +130,8 @@
     "@kbn/fleet-plugin",
     "@kbn/observability-agent-builder-plugin",
     "@kbn/presentation-publishing",
-    "@kbn/inspector-plugin"
+    "@kbn/inspector-plugin",
+    "@kbn/es-query-constants"
   ],
   "exclude": ["target/**/*"]
 }
