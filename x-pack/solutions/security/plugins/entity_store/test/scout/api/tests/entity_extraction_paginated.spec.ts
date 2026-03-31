@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout-security/api';
 import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { expectedHostEntities } from '../fixtures/entity_extraction_expected';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 
 apiTest.describe(
   'Entity Store Logs Extraction with pagination (max 5 docs per page)',
@@ -46,13 +47,14 @@ apiTest.describe(
       );
     });
 
-    apiTest.afterAll(async ({ apiClient }) => {
+    apiTest.afterAll(async ({ apiClient, esClient }) => {
       const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
       });
       expect(response.statusCode).toBe(200);
+      await clearEntityStoreIndices(esClient);
     });
 
     apiTest(
