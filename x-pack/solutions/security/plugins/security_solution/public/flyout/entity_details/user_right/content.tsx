@@ -26,6 +26,7 @@ import type { UserItem } from '../../../../common/search_strategy';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
+import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -48,6 +49,7 @@ interface UserPanelContentProps {
   onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
+  entityStoreEntityId?: string;
 }
 
 export const UserPanelContent = ({
@@ -65,6 +67,7 @@ export const UserPanelContent = ({
   criticalityFromEntityStore,
   onSaveAssetCriticalityViaEntityStore,
   skipRiskAndCriticality = false,
+  entityStoreEntityId,
 }: UserPanelContentProps) => {
   const entityId = entityRecord?.entity.id;
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
@@ -97,6 +100,12 @@ export const UserPanelContent = ({
             <EuiHorizontalRule />
           </>
         )}
+      {entityStoreEntityId && !isPreviewMode && (
+        <>
+          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
+          <EuiHorizontalRule />
+        </>
+      )}
       {!skipRiskAndCriticality && (
         <AssetCriticalityAccordion
           entity={{ name: userName, type: EntityType.user }}
@@ -112,10 +121,10 @@ export const UserPanelContent = ({
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.user}
       />
-      {entityId && (
+      {entityStoreEntityId && (
         <>
           <VisualizationsSection
-            entityId={entityId}
+            entityId={entityStoreEntityId}
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
             onExpandGraph={navigateToGraphView}

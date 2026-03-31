@@ -9,8 +9,8 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { get } from 'lodash/fp';
 import {
-  GRAPH_ACTOR_ENTITY_FIELDS,
-  GRAPH_TARGET_ENTITY_FIELDS,
+  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
+  GRAPH_TARGET_EUID_SOURCE_FIELDS,
 } from '@kbn/cloud-security-posture-common';
 import type { GetFieldsData } from './use_get_fields_data';
 import { getField, getFieldArray } from '../utils';
@@ -93,16 +93,16 @@ export const useGraphPreview = ({
   const eventId = getFieldsData('event.id');
   const eventIds = originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId);
 
-  // Get actor IDs from new ECS schema fields only
+  // Get actor IDs from EUID source fields (raw ECS fields used to compute actor EUIDs)
   const actorIds: string[] = [];
-  GRAPH_ACTOR_ENTITY_FIELDS.forEach((field) => {
+  GRAPH_ACTOR_EUID_SOURCE_FIELDS.forEach((field) => {
     const fieldValues = getFieldArray(getFieldsData(field));
     actorIds.push(...fieldValues);
   });
 
-  // Get target IDs from new ECS schema fields only
+  // Get target IDs from EUID source fields (raw ECS fields used to compute target EUIDs)
   const targetIds: string[] = [];
-  GRAPH_TARGET_ENTITY_FIELDS.forEach((field) => {
+  GRAPH_TARGET_EUID_SOURCE_FIELDS.forEach((field) => {
     const fieldValues = getFieldArray(getFieldsData(field));
     targetIds.push(...fieldValues);
   });

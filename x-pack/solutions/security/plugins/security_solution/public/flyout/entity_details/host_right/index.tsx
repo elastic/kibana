@@ -235,6 +235,10 @@ export const HostPanel = ({
     [http, queryClient, calculateEntityRiskScore]
   );
 
+  const entityStoreEntityId = entityStoreV2Enabled
+    ? observedHost.entityRecord?.entity?.id
+    : undefined;
+
   const openDetailsPanel = useNavigateToHostDetails({
     hostName,
     entityId: panelDisplayEntityId,
@@ -245,16 +249,26 @@ export const HostPanel = ({
     hasNonClosedAlerts,
     isPreviewMode,
     contextID: safeContextID,
+    entityStoreEntityId,
   });
 
+  const defaultTab = useMemo(() => {
+    if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;
+    if (hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts)
+      return EntityDetailsLeftPanelTab.CSP_INSIGHTS;
+    if (entityStoreEntityId) return EntityDetailsLeftPanelTab.RESOLUTION_GROUP;
+    return EntityDetailsLeftPanelTab.RISK_INPUTS;
+  }, [
+    isRiskScoreExist,
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings,
+    hasNonClosedAlerts,
+    entityStoreEntityId,
+  ]);
+
   const openDefaultPanel = useCallback(
-    () =>
-      openDetailsPanel({
-        tab: isRiskScoreExist
-          ? EntityDetailsLeftPanelTab.RISK_INPUTS
-          : EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-      }),
-    [isRiskScoreExist, openDetailsPanel]
+    () => openDetailsPanel({ tab: defaultTab }),
+    [openDetailsPanel, defaultTab]
   );
 
   const noEntityInStore =
@@ -281,7 +295,8 @@ export const HostPanel = ({
           hasMisconfigurationFindings ||
           hasVulnerabilitiesFindings ||
           hasNonClosedAlerts ||
-          hasGraphView
+          hasGraphView ||
+          !!entityStoreEntityId
         }
         expandDetails={openDefaultPanel}
         isPreviewMode={isPreviewMode}
@@ -324,6 +339,7 @@ export const HostPanel = ({
             : undefined
         }
         skipRiskAndCriticality={noEntityInStore}
+        entityStoreEntityId={entityStoreEntityId}
       />
       {isPreviewMode && (
         <HostPreviewPanelFooter

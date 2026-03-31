@@ -75,20 +75,6 @@ const buildRelationshipsEsqlQuery = ({
 | RENAME entity.sub_type = _source_sub_type
 | RENAME host.ip = _source_host_ip`;
 
-  // The ecsParentField hint is needed to later query actions done TO this entity
-  // (e.g., to find events where this entity is the target).
-  //
-  // Currently we only query the generic entities index which uses entity.id,
-  // so ecsParentField is always 'entity'.
-  //
-  // When entity-specific indices are added (user, host, service), we would use
-  // generateFieldHintCases similar to actorEntityFieldHint/targetEntityFieldHint to detect:
-  // - user.entity.id -> ecsParentField: 'user'
-  // - host.entity.id -> ecsParentField: 'host'
-  // - service.entity.id -> ecsParentField: 'service'
-  // - entity.id -> ecsParentField: 'entity'
-  const ecsParentFieldValue = 'entity';
-
   return `FROM ${indexName}
 ${coalesceStatements}
 | FORK
@@ -101,25 +87,24 @@ ${enrichmentSection}
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
     ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":", ${JSON_OBJECT_START},
       ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
-      ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString(
-    'ecsParentField',
-    ecsParentFieldValue
-  )},
       ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprSafe('name', 'entity.name')},
       ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprSafe('type', 'entity.type')},
       ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprSafe(
     'sub_type',
     'entity.sub_type'
   )},
-      CASE(
-        host.ip IS NOT NULL,
-        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-          "\\"ip\\":\\"", TO_STRING(host.ip), "\\"",
-          ${JSON_OBJECT_END}),
-        ""
-      ),
+    CASE(
+      host.ip IS NOT NULL,
+      CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
+        "\\"ip\\":\\"", TO_STRING(host.ip), "\\"",
+        ${JSON_OBJECT_END}),
+      ""
+    ),
+    ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyEsqlExprSafe('entity.id', 'entity.id')},
     ${JSON_OBJECT_END},
-  ${JSON_OBJECT_END})
+  ${JSON_OBJECT_END},
+${JSON_OBJECT_END})
 // Build enriched targets doc data with entity metadata
 | EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprSafe('id', '_target_id')},
@@ -129,10 +114,6 @@ ${enrichmentSection}
       'availableInEntityStore',
       'CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false")'
     )},
-    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString(
-    'ecsParentField',
-    ecsParentFieldValue
-  )},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprSafe('name', '_target_name')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprSafe('type', '_target_type')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprSafe(
@@ -146,8 +127,11 @@ ${enrichmentSection}
         ${JSON_OBJECT_END}),
       ""
     ),
+    ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
+      ${concatJsonObjectPropertyEsqlExprSafe('entity.id', '_target_id')},
     ${JSON_OBJECT_END},
-  ${JSON_OBJECT_END})
+  ${JSON_OBJECT_END},
+${JSON_OBJECT_END})
 // Group by actor entity, relationship, and target type/subtype (for target grouping)
 // This ensures targets with the same type are grouped together
 | STATS badge = COUNT(*),

@@ -27,6 +27,7 @@ export enum EntityDetailsLeftPanelTab {
   CSP_INSIGHTS = 'csp_insights',
   FIELDS_TABLE = 'fields_table',
   GRAPH_VIEW = 'graph_view',
+  RESOLUTION_GROUP = 'resolution_group',
 }
 
 export enum CspInsightLeftPanelSubTab {
