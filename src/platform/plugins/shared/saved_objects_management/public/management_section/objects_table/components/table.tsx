@@ -329,7 +329,7 @@ export class Table extends PureComponent<TableProps, TableState> {
               }
             ),
             type: 'icon',
-            icon: 'kqlSelector',
+            icon: 'querySelector',
             onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
@@ -375,7 +375,7 @@ export class Table extends PureComponent<TableProps, TableState> {
 
     const button = (
       <EuiButton
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={this.toggleExportPopoverVisibility}
         isDisabled={selectedSavedObjects.length === 0}
@@ -473,7 +473,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                 />
               </EuiFormRow>
               <EuiFormRow>
-                <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
+                <EuiButton key="exportSO" iconType="upload" onClick={this.onExportClick} fill>
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                     defaultMessage="Export"
