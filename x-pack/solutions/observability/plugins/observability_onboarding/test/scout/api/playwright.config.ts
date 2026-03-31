@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { defaultShapeParameters } from './shape_datatype.test';
-export { defaultTextParameters } from './text_datatype.test';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
