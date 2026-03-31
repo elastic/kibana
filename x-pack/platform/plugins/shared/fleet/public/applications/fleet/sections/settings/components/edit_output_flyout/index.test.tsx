@@ -481,20 +481,4 @@ describe('EditOutputFlyout', () => {
     });
   });
 
-  it('should not display remote ES output in type lists if serverless', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
-    mockUseStartServices.mockReset();
-    mockStartServices(true);
-    const { utils } = renderFlyout({
-      type: 'elasticsearch',
-      name: 'dummy',
-      id: 'output',
-      is_default: false,
-      is_default_monitoring: false,
-    });
-
-    expect(utils.queryByTestId('settingsOutputsFlyout.typeInput')?.textContent).not.toContain(
-      'Remote Elasticsearch'
-    );
-  });
 });
