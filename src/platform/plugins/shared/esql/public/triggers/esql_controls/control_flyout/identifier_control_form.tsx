@@ -15,9 +15,9 @@ import { isEqual } from 'lodash';
 import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 import type { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable, StaticESQLControl } from '@kbn/esql-types';
 import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
-import type { OptionsListESQLControlState, StaticESQLControlState } from '@kbn/controls-schemas';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { aggFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
@@ -157,7 +157,7 @@ export function IdentifierControlForm({
       title: label || variableNameWithoutQuestionmark,
       variable_name: variableNameWithoutQuestionmark,
       variable_type: variableType,
-      control_type: EsqlControlType.STATIC_VALUES as StaticESQLControlState['control_type'],
+      control_type: EsqlControlType.STATIC_VALUES as StaticESQLControl['control_type'],
     };
     if (!isEqual(state, initialState)) {
       setControlState(state);
