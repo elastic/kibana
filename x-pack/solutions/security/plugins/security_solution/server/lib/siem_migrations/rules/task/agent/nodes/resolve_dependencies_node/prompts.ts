@@ -240,7 +240,7 @@ For all flow types: extract the time window from the original QRadar rule's test
 - com.q1labs.semsources.cre.tests.TCPFlags
 - com.q1labs.semsources.cre.tests.TCPFlagsCombo
 
-TCP Flags tests check source or destination TCP flag combinations (e.g., SR, SF, FUP, SRAFU, FUPSAR78). In the target schema, source and destination TCP flags are represented in a single integer field (not separate per-direction fields). In your flattened logic, give the full path of **the TCP control bits field**; it must match the **Data Sources** you list for this rule. **Do not** assume a fixed integration prefix (e.g. \`netflow.*\`) or default to Netflow as a data source unless the QRadar rule, log sources, or dependencies explicitly indicate it.
+TCP Flags tests check source or destination TCP flag combinations (e.g., SR, SF, FUP, SRAFU, FUPSAR78). In the target schema, source and destination TCP flags are represented in a single integer field (not separate per-direction fields). In your flattened logic, give the full path of **the TCP control bits field**; it must match the **Data Sources** you list for this rule. **Do not** assume a fixed integration-specific field prefix or a default data source for flow or TCP tests unless the QRadar rule, log sources, or dependencies explicitly indicate them.
 
 In bitwise expressions below, **value** means the integer read from the TCP control bits field.
 
@@ -280,7 +280,7 @@ The TCP control bits field stores all TCP control flags in one integer. Each fla
 Every TCP flags condition description MUST contain all four of the following elements:
 
 1. **Direction** — state whether it is source or destination TCP flags.
-2. **Field name** — give the full path of the TCP control bits field that matches your **Data Sources** for this rule; do not hardcode a Netflow-specific field. The following names do not exist and must never appear: \`tcp.flags\`, \`source.tcp.flags\`, \`destination.tcp.flags\`, or any boolean subfield such as \`source.tcp.flags.syn\` or \`destination.tcp.flags.ack\`.
+2. **Field name** — give the full path of the TCP control bits field that matches your **Data Sources** for this rule; do not hardcode a field path from one integration when the rule implies another. The following names do not exist and must never appear: \`tcp.flags\`, \`source.tcp.flags\`, \`destination.tcp.flags\`, or any boolean subfield such as \`source.tcp.flags.syn\` or \`destination.tcp.flags.ack\`.
 3. **Values and derivation** — for each distinct QRadar combination involved, show the step-by-step sum of bit values that yields that combination's encoded integer (one mask per combination). For “any of” multiple combinations, list each combination's mask separately — do **not** add those integers together into one number.
 4. **Check type** — state explicitly what kind of check is being performed: exact equality to a single value; **OR** of equalities or per-mask \`(value & mask) === mask\` tests for “any of” (using **value** as defined above); bitwise AND for absence; or combined bitwise check only when a **single** mask describes one intended flag set. Never describe the check as a range or boundary comparison.
 
@@ -308,7 +308,7 @@ Every TCP flags condition description MUST contain all four of the following ele
 - **Do not omit per-combination derivation:** when several combinations are listed, show how each mask is derived, not a single bogus total.
 - **Do not use invented field names:** "where \`source.tcp.flags\` contains SR" or "where \`tcp.flags\` is SF" — these fields do not exist.
 - **Do not use boolean subfields:** "where \`source.tcp.flags.syn\` is true" — TCP flag subfields do not exist.
-- **Do not default to Netflow for data source:** a TCP flags test does not by itself imply Netflow—tie **Data Sources** and the TCP control bits field path to what the rule implies.
+- **Do not infer data source from test type alone:** a TCP flags test does not by itself pick an index or integration—tie **Data Sources** and the TCP control bits field path to what the rule and its dependencies imply.
 
 
 
@@ -392,7 +392,7 @@ The downstream system does **not** understand what a "Building Block" or a "Depe
     - Bullet list of data source names.
     - Use only data sources that are clearly implied by the rule and its dependencies.
     - Pay special attention to Software Entity names as data sources. For example Cloudflare, Zcaler.
-    - Infer data sources from the rule's domains, log source types, event categories, software entities, and field references. Do not assume a network-flow integration (e.g. Netflow) unless the rule and its dependencies clearly imply it.
+    - Infer data sources from the rule's domains, log source types, event categories, software entities, and field references. Do not assume a particular network-flow or packet-capture pipeline unless the rule and its dependencies clearly imply it.
 
   #### Flattened Detection Logic ( including the negate attribute handling)
     - This is the plain English \`combined\` detection logic of current rule and its dependencies, which means precise and detailed detection logic of dependencies should be included here.
