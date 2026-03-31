@@ -18,7 +18,7 @@ export class IfVertex extends Vertex {
   }
 
   get iconType() {
-    return 'logstashIf';
+    return 'if';
   }
 
   get title() {
