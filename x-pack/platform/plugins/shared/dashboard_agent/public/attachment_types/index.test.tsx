@@ -69,7 +69,6 @@ const createMockDashboardApi = (
 ): DashboardApi & {
   setSavedObjectId: (id: string | undefined) => void;
   setState: jest.Mock;
-  scrollToBottom: jest.Mock;
   getSerializedState: jest.Mock;
 } => {
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
@@ -91,7 +90,6 @@ const createMockDashboardApi = (
     useMargins$: new BehaviorSubject<boolean>(true),
   };
   const setState = jest.fn();
-  const scrollToBottom = jest.fn();
   const getSerializedState = jest.fn().mockReturnValue({ attributes: { title: '', panels: [] } });
   return {
     savedObjectId$,
@@ -107,13 +105,11 @@ const createMockDashboardApi = (
     children$,
     settings,
     setState,
-    scrollToBottom,
     getSerializedState,
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
   } as unknown as DashboardApi & {
     setSavedObjectId: (id: string | undefined) => void;
     setState: jest.Mock;
-    scrollToBottom: jest.Mock;
     getSerializedState: jest.Mock;
   };
 };
@@ -293,7 +289,6 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         expect.objectContaining({ title: 'Updated Dashboard' })
       );
       jest.runAllTimers();
-      expect(mockApi.scrollToBottom).toHaveBeenCalled();
 
       // Created operation also triggers
       mockApi.setState.mockClear();
