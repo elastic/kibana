@@ -36,7 +36,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { QUERY_TYPE_MATCH } from '@kbn/streams-schema';
+import { QUERY_TYPE_MATCH, deriveQueryType } from '@kbn/streams-schema';
 import React, { useEffect, useMemo, useState } from 'react';
 import { StreamsESQLEditor } from '../../../../esql_query_editor';
 import type { SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
@@ -119,12 +119,14 @@ export function QueryDetailsFlyout({
     setSeverityScore(item.query.severity_score);
   };
   const handleSaveQuery = async () => {
+    const trimmedEsql = query.trim();
     await onSave(
       {
         ...item.query,
         title: title.trim(),
         description: description.trim(),
-        esql: { query: query.trim() },
+        esql: { query: trimmedEsql },
+        type: deriveQueryType(trimmedEsql),
         severity_score: severityScore,
       },
       item.stream_name
@@ -302,7 +304,9 @@ export function QueryDetailsFlyout({
                     >
                       <AssetImage type="barChart" size="xs" />
                       <EuiText color="subdued" size="s" textAlign="center">
-                        {NO_OCCURRENCES_DESCRIPTION}
+                        {queryType === 'stats'
+                          ? NO_OCCURRENCES_STATS_DESCRIPTION
+                          : NO_OCCURRENCES_DESCRIPTION}
                       </EuiText>
                     </EuiFlexGroup>
                   )}
@@ -502,5 +506,13 @@ const NO_OCCURRENCES_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       "We currently don't detect any events. You can leave it, as it might happen later or modify the query.",
+  }
+);
+
+const NO_OCCURRENCES_STATS_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.noOccurrencesStatsDescription',
+  {
+    defaultMessage:
+      'No threshold breaches detected. The condition may not have been met in the observed time range.',
   }
 );

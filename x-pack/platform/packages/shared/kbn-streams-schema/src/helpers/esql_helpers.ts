@@ -51,7 +51,7 @@ function printWithUpdatedFrom(
  */
 function matchTimeBucket(esql: string): RegExpMatchArray | null {
   return esql.match(
-    /(?:BUCKET|TBUCKET)\s*\(\s*@timestamp\s*,\s*(\d+)\s*(seconds?|minutes?|hours?|days?|[smhd])\s*\)/i
+    /(?:BUCKET|TBUCKET)\s*\(\s*[\w@.]+\s*,\s*(\d+)\s*(seconds?|minutes?|hours?|days?|[smhd])\s*\)/i
   );
 }
 
@@ -155,7 +155,9 @@ export function hasStatsCommand(esql: string): boolean {
     const { root } = Parser.parse(esql);
     return root.commands.some((cmd) => 'name' in cmd && cmd.name === 'stats');
   } catch {
-    return false;
+    // AST parse failed -- fall back to regex to avoid silently misclassifying
+    // a STATS query as match (which would skip threshold logic entirely).
+    return /\|\s*STATS\s/i.test(esql);
   }
 }
 
@@ -266,6 +268,66 @@ export function extractStatsGroupColumns(esql: string): string[] {
     return names.sort();
   } catch {
     return [];
+  }
+}
+
+/**
+ * Extracts the output column name for the temporal BUCKET/TBUCKET call
+ * in the STATS command's BY clause. Returns `null` when no aliased
+ * bucket call is found, signaling the caller to fall back to type-based
+ * column detection.
+ */
+export function extractBucketColumnName(esql: string): string | null {
+  try {
+    const { root } = Parser.parse(esql);
+    const statsCmd = root.commands.find(
+      (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'stats'
+    );
+    if (!statsCmd) return null;
+
+    const byOption = statsCmd.args.find(
+      (arg) =>
+        !Array.isArray(arg) &&
+        'type' in arg &&
+        arg.type === 'option' &&
+        'name' in arg &&
+        arg.name === 'by'
+    );
+    if (!byOption || Array.isArray(byOption) || !('args' in byOption)) return null;
+
+    for (const arg of (byOption as { args: ESQLCommand['args'] }).args) {
+      if (Array.isArray(arg)) continue;
+      if (!('type' in arg)) continue;
+
+      if (arg.type === 'function' && 'name' in arg && arg.name === '=') {
+        const rhs = (arg as { args: ESQLCommand['args'] }).args[1];
+        if (
+          rhs &&
+          !Array.isArray(rhs) &&
+          'type' in rhs &&
+          rhs.type === 'function' &&
+          'name' in rhs
+        ) {
+          const fnName = (rhs.name as string).toLowerCase();
+          if (fnName === 'bucket' || fnName === 'tbucket') {
+            const lhs = (arg as { args: ESQLCommand['args'] }).args[0];
+            if (
+              lhs &&
+              !Array.isArray(lhs) &&
+              'type' in lhs &&
+              lhs.type === 'column' &&
+              'name' in lhs
+            ) {
+              return lhs.name as string;
+            }
+          }
+        }
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
   }
 }
 

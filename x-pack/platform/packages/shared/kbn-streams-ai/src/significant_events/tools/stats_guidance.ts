@@ -11,7 +11,7 @@ import type { LlmFeature } from './features_tool';
 // Field detection patterns
 // ---------------------------------------------------------------------------
 
-const SEVERITY_FIELD_PATTERNS = ['log.level', 'log.severity', 'severity', 'level'];
+const SEVERITY_FIELD_PATTERNS = ['log.level', 'log.severity', 'event.severity'];
 const HTTP_STATUS_FIELD_PATTERNS = ['http.response.status_code', 'http.status_code'];
 const ENTITY_FIELD_PATTERNS = [
   'service.name',
@@ -94,9 +94,10 @@ function extractErrorPercentage(analysis: string, severityField: string): number
   if (fieldSection.length < 2) return undefined;
 
   const afterField = fieldSection[1].substring(0, FIELD_SECTION_SCAN_LENGTH);
-  const errorMatch = afterField.match(/error[^0-9]*?(\d+(?:\.\d+)?)\s*%/i);
+  const errorMatch = afterField.match(/\berror\b[^0-9]*?(\d+(?:\.\d+)?)\s*%/i);
   if (errorMatch) {
-    return parseFloat(errorMatch[1]);
+    const pct = parseFloat(errorMatch[1]);
+    if (pct > 0 && pct <= 100) return pct;
   }
   return undefined;
 }
@@ -200,22 +201,27 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
 
   // --- Field-specific pattern: Error rate ---
   const severityField = findFieldInAnalysis(analysis, SEVERITY_FIELD_PATTERNS);
-  if (severityField) {
-    const observedPct = extractErrorPercentage(analysis, severityField) ?? DEFAULT_ERROR_PCT;
-    const threshold = roundThreshold(observedPct * BASELINE_MULTIPLIER);
+  const observedErrorPct = severityField
+    ? extractErrorPercentage(analysis, severityField) ?? DEFAULT_ERROR_PCT
+    : undefined;
+
+  if (severityField && observedErrorPct != null) {
+    const threshold = roundThreshold(observedErrorPct * BASELINE_MULTIPLIER);
 
     fieldSpecificPatterns.push({
       id: 'error-rate',
       title: 'Service Error Rate Degradation',
       body: [
-        `  Observed: ${severityField} ERROR at ~${observedPct}%.`,
+        `  Observed: ${severityField} ERROR at ~${observedErrorPct}%.`,
         `  Suggested threshold: error_rate > ${threshold}% (${BASELINE_MULTIPLIER}x baseline).`,
         `  Template:`,
         `    FROM <stream>`,
-        `    | STATS errors = COUNT(*) WHERE ${severityField} == "ERROR", total = COUNT(*)`,
+        `    | STATS errors = COUNT(*) WHERE ${severityField} IN ("ERROR", "error"), total = COUNT(*)`,
         `      BY bucket = BUCKET(@timestamp, 5 minutes)`,
         `    | EVAL error_rate = errors * 100.0 / total`,
         `    | WHERE total > ${MIN_SAMPLE_SIZE} AND error_rate > ${threshold}`,
+        `  NOTE: Adjust the ${severityField} filter values based on dataset_analysis.`,
+        `  Some datasets use lowercase ("error"), numeric levels (3, 4), or other conventions.`,
       ].join('\n'),
     });
   }
@@ -290,10 +296,15 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
     }
   }
 
-  if (entityField && severityField) {
+  if (entityField && severityField && observedErrorPct != null) {
     const cardinalityNote = entityCardinality
       ? `  Entity field: ${entityField} with ${entityCardinality} distinct values.`
       : `  Entity field: ${entityField}.`;
+
+    const componentThreshold = Math.max(
+      DEFAULT_COMPONENT_ERROR_RATE,
+      roundThreshold(observedErrorPct * BASELINE_MULTIPLIER)
+    );
 
     fieldSpecificPatterns.push({
       id: 'component-degradation',
@@ -301,13 +312,15 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
       body: [
         cardinalityNote,
         `  Per-component sample size is lower (${COMPONENT_MIN_SAMPLE_SIZE}) because each entity receives fewer events.`,
+        `  Suggested threshold: error_rate > ${componentThreshold}% (${BASELINE_MULTIPLIER}x baseline, min ${DEFAULT_COMPONENT_ERROR_RATE}%).`,
         `  Template:`,
         `    FROM <stream>`,
-        `    | STATS errors = COUNT(*) WHERE ${severityField} IN ("ERROR", "CRITICAL"),`,
+        `    | STATS errors = COUNT(*) WHERE ${severityField} IN ("ERROR", "error", "CRITICAL", "critical"),`,
         `            total = COUNT(*)`,
         `      BY ${entityField}, bucket = BUCKET(@timestamp, 5 minutes)`,
         `    | EVAL error_rate = errors * 100.0 / total`,
-        `    | WHERE total > ${COMPONENT_MIN_SAMPLE_SIZE} AND error_rate > ${DEFAULT_COMPONENT_ERROR_RATE}`,
+        `    | WHERE total > ${COMPONENT_MIN_SAMPLE_SIZE} AND error_rate > ${componentThreshold}`,
+        `  NOTE: Adjust filter values based on dataset_analysis.`,
       ].join('\n'),
     });
   }

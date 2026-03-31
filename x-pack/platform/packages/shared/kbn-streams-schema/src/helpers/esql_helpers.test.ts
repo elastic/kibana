@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { ensureMetadata, extractBucketIntervalMs, extractStatsGroupColumns, extractWhereExpression } from './esql_helpers';
+import {
+  deriveQueryType,
+  ensureMetadata,
+  extractBucketColumnName,
+  extractBucketIntervalMs,
+  extractStatsGroupColumns,
+  extractWhereExpression,
+  getStatsQueryHints,
+  hasStatsCommand,
+} from './esql_helpers';
 
 describe('extractWhereExpression', () => {
   it('returns the WHERE expression when present', () => {
@@ -137,8 +146,121 @@ describe('extractBucketIntervalMs', () => {
     expect(extractBucketIntervalMs(query)).toBeNull();
   });
 
-  it('returns null when bucket is not on @timestamp', () => {
+  it('extracts bucket interval from non-@timestamp fields', () => {
     const query = 'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(event.created, 5 minutes)';
-    expect(extractBucketIntervalMs(query)).toBeNull();
+    expect(extractBucketIntervalMs(query)).toBe(300_000);
+  });
+});
+
+describe('hasStatsCommand', () => {
+  it('returns true for STATS queries', () => {
+    expect(hasStatsCommand('FROM logs | STATS c = COUNT(*) BY service.name')).toBe(true);
+  });
+
+  it('returns false for match queries', () => {
+    expect(hasStatsCommand('FROM logs | WHERE x > 1')).toBe(false);
+  });
+
+  it('returns false on parse failure', () => {
+    expect(hasStatsCommand('NOT VALID {{{')).toBe(false);
+  });
+});
+
+describe('deriveQueryType', () => {
+  it('returns stats for STATS queries', () => {
+    expect(deriveQueryType('FROM logs | STATS c = COUNT(*) BY service.name')).toBe('stats');
+  });
+
+  it('returns match for queries without STATS', () => {
+    expect(deriveQueryType('FROM logs | WHERE log.level == "ERROR"')).toBe('match');
+  });
+
+  it('returns match for unparseable queries', () => {
+    expect(deriveQueryType('INVALID QUERY {{{')).toBe('match');
+  });
+});
+
+describe('getStatsQueryHints', () => {
+  it('warns about missing temporal bucketing', () => {
+    const hints = getStatsQueryHints('FROM logs | STATS c = COUNT(*) BY service.name | WHERE c > 10');
+    expect(hints).toEqual(
+      expect.arrayContaining([expect.stringContaining('no temporal bucketing')])
+    );
+  });
+
+  it('warns about missing threshold filter after STATS', () => {
+    const hints = getStatsQueryHints(
+      'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 5m)'
+    );
+    expect(hints).toEqual(
+      expect.arrayContaining([expect.stringContaining('No threshold filter')])
+    );
+  });
+
+  it('returns no hints for well-formed STATS queries', () => {
+    const hints = getStatsQueryHints(
+      'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | WHERE c > 10'
+    );
+    expect(hints).toEqual([]);
+  });
+
+  it('warns about disallowed commands in STATS queries', () => {
+    const hints = getStatsQueryHints(
+      'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | WHERE c > 10 | SORT c | LIMIT 100'
+    );
+    expect(hints).toEqual(
+      expect.arrayContaining([expect.stringContaining('SORT, LIMIT')])
+    );
+  });
+
+  it('warns about EVAL in non-STATS queries', () => {
+    const hints = getStatsQueryHints('FROM logs | EVAL x = 1');
+    expect(hints).toEqual(
+      expect.arrayContaining([expect.stringContaining('EVAL is supported only')])
+    );
+  });
+
+  it('returns empty array on parse failure', () => {
+    expect(getStatsQueryHints('INVALID {{{')).toEqual([]);
+  });
+});
+
+describe('extractBucketColumnName', () => {
+  it('extracts aliased bucket column name', () => {
+    expect(
+      extractBucketColumnName(
+        'FROM logs | STATS c = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes)'
+      )
+    ).toBe('bucket');
+  });
+
+  it('extracts custom alias names', () => {
+    expect(
+      extractBucketColumnName(
+        'FROM logs | STATS c = COUNT(*) BY ts = BUCKET(@timestamp, 1h)'
+      )
+    ).toBe('ts');
+  });
+
+  it('handles TBUCKET syntax', () => {
+    expect(
+      extractBucketColumnName(
+        'FROM logs | STATS c = COUNT(*) BY time_bucket = TBUCKET(@timestamp, 10m)'
+      )
+    ).toBe('time_bucket');
+  });
+
+  it('returns null for STATS without BUCKET', () => {
+    expect(
+      extractBucketColumnName('FROM logs | STATS c = COUNT(*) BY service.name')
+    ).toBeNull();
+  });
+
+  it('returns null for match queries', () => {
+    expect(extractBucketColumnName('FROM logs | WHERE x > 1')).toBeNull();
+  });
+
+  it('returns null on parse failure', () => {
+    expect(extractBucketColumnName('INVALID {{{')).toBeNull();
   });
 });

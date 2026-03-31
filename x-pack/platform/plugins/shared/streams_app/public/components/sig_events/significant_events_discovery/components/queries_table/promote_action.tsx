@@ -8,13 +8,21 @@
 import React from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { useQueryClient, useMutation } from '@kbn/react-query';
+import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../../hooks/sig_events/use_fetch_discovery_queries';
+import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
 import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../../hooks/sig_events/use_unbacked_queries_count';
 import { useFetchErrorToast } from '../../../../../hooks/use_fetch_error_toast';
 import { type SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../../hooks/sig_events/use_queries_api';
-import { PROMOTE_QUERY_ACTION_TITLE, getPromoteQuerySuccessToast } from './translations';
+import {
+  PROMOTE_QUERY_ACTION_TITLE,
+  PROMOTE_QUERY_ALREADY_PROMOTED,
+  PROMOTED_TOOLTIP_CONTENT,
+  STATS_PROMOTE_DISABLED_TOOLTIP,
+  getPromoteQuerySuccessToast,
+} from './translations';
 
 export function PromoteAction({ item }: { item: SignificantEventItem }) {
   const queryClient = useQueryClient();
@@ -30,14 +38,26 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
     onSuccess: (result) => {
       if (result.promoted > 0) {
         toasts.addSuccess(getPromoteQuerySuccessToast(item.query.title));
+      } else {
+        toasts.addInfo(PROMOTE_QUERY_ALREADY_PROMOTED);
       }
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY });
     },
     onError: showFetchErrorToast,
   });
 
-  const tooltipContent = !item.rule_backed ? PROMOTE_QUERY_ACTION_TITLE : '';
+  const isStats = item.query.type === QUERY_TYPE_STATS;
+
+  let tooltipContent: string;
+  if (isStats) {
+    tooltipContent = STATS_PROMOTE_DISABLED_TOOLTIP;
+  } else if (item.rule_backed) {
+    tooltipContent = PROMOTED_TOOLTIP_CONTENT;
+  } else {
+    tooltipContent = PROMOTE_QUERY_ACTION_TITLE;
+  }
 
   return (
     <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
@@ -45,7 +65,7 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
         iconType="plusCircle"
         aria-label={PROMOTE_QUERY_ACTION_TITLE}
         isLoading={promoteMutation.isLoading}
-        isDisabled={item.rule_backed || promoteMutation.isLoading}
+        isDisabled={item.rule_backed || isStats || promoteMutation.isLoading}
         onClick={() => {
           promoteMutation.mutate({
             queryIds: [item.query.id],

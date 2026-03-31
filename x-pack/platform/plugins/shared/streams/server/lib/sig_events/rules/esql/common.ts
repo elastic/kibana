@@ -7,4 +7,3 @@
 
 export const MAX_ALERTS_PER_EXECUTION = 1_000;
 export const MATCH_LOOKBACK_MINUTES = 2;
-export const DEFAULT_STATS_LOOKBACK_MINUTES = 10;

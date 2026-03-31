@@ -189,16 +189,26 @@ export function PreviewDataSparkPlot({
         );
       }
 
+      const noDataMessage = isStatsPreview
+        ? i18n.translate(
+            'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartNoThresholdBreaches',
+            {
+              defaultMessage:
+                'No threshold breaches detected in the selected time range',
+            }
+          )
+        : i18n.translate(
+            'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartNoData',
+            {
+              defaultMessage: 'No events found, make sure to review your query',
+            }
+          );
+
       return (
         <>
           <AssetImage type="barChart" size="xs" />
           <EuiText color="subdued" size="s" textAlign="center">
-            {i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartNoData',
-              {
-                defaultMessage: 'No events found, make sure to review your query',
-              }
-            )}
+            {noDataMessage}
           </EuiText>
         </>
       );
@@ -209,23 +219,21 @@ export function PreviewDataSparkPlot({
       { defaultMessage: 'Open in Discover' }
     );
 
+    const timeseriesTotal = sparkPlotData.timeseries.reduce((acc, point) => acc + point.y, 0);
+
     const titleLabel = isStatsPreview
       ? i18n.translate(
           'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartThresholdBreaches',
           {
             defaultMessage: 'Threshold breaches ({count})',
-            values: {
-              count: sparkPlotData.timeseries.reduce((acc, point) => acc + point.y, 0),
-            },
+            values: { count: firingCount ?? timeseriesTotal },
           }
         )
       : i18n.translate(
           'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
           {
             defaultMessage: 'Detected event occurrences ({count})',
-            values: {
-              count: sparkPlotData.timeseries.reduce((acc, point) => acc + point.y, 0),
-            },
+            values: { count: timeseriesTotal },
           }
         );
 

@@ -63,6 +63,7 @@ export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
   esql: esqlQuerySchema,
+  type: queryTypeSchema.optional(),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
   description: z.string().default(''),

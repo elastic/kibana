@@ -62,6 +62,7 @@ export {
   buildMetadataOption,
   deriveQueryType,
   ensureMetadata,
+  extractBucketColumnName,
   extractBucketIntervalMs,
   extractStatsGroupColumns,
   extractWhereExpression,

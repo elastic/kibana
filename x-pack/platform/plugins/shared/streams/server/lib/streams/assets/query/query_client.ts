@@ -16,7 +16,6 @@ import {
   type QueryType,
   QUERY_TYPE_STATS,
   deriveQueryType,
-  extractBucketIntervalMs,
 } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
@@ -27,6 +26,7 @@ import {
   type QueryUnlinkRequest,
 } from '../../../../../common/queries';
 import type { EsqlRuleParams } from '../../../sig_events/rules/esql/types';
+
 import { AssetNotFoundError } from '../../errors/asset_not_found_error';
 import type { QUERY_FEATURE_TYPE } from '../fields';
 import {
@@ -537,8 +537,6 @@ export class QueryClient {
         nextQueriesUpdatedWithBreakingChange.push(link);
         allNextQueryLinks.push(link);
       } else {
-        // Non-breaking update: installQueries calls toUpdateRuleParams → buildRuleParams,
-        // which transparently upgrades legacy STATS rule params (adds type + lookbackMinutes).
         const link = { ...currentLink, query };
         nextQueriesUpdatedWithoutBreakingChange.push(link);
         allNextQueryLinks.push(link);
@@ -693,9 +691,16 @@ export class QueryClient {
     const idSet = new Set(queryIds);
     const candidates = unbacked.filter((link) => idSet.has(link.query.id));
 
-    const toPromote = candidates.map((link) =>
-      toQueryLinkFromQuery({ query: link.query, stream: streamName })
-    );
+    const statsSkipped = candidates.filter((link) => link.query.type === QUERY_TYPE_STATS);
+    if (statsSkipped.length > 0) {
+      this.dependencies.logger.debug(
+        `Skipping ${statsSkipped.length} STATS queries from promotion (not yet supported as rules).`
+      );
+    }
+
+    const toPromote = candidates
+      .filter((link) => link.query.type !== QUERY_TYPE_STATS)
+      .map((link) => toQueryLinkFromQuery({ query: link.query, stream: streamName }));
 
     if (toPromote.length === 0) {
       return { promoted: 0 };
@@ -783,22 +788,6 @@ export class QueryClient {
       });
   }
 
-  private buildRuleParams(query: StreamQuery): EsqlRuleParams {
-    const base: EsqlRuleParams = {
-      timestampField: '@timestamp',
-      query: query.esql.query,
-      type: query.type === QUERY_TYPE_STATS ? 'stats' : 'match',
-    };
-
-    if (query.type === QUERY_TYPE_STATS) {
-      const bucketMs = extractBucketIntervalMs(query.esql.query);
-      const bucketMinutes = bucketMs ? bucketMs / 60_000 : 5;
-      base.lookbackMinutes = Math.ceil(2 * bucketMinutes);
-    }
-
-    return base;
-  }
-
   private toCreateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
     const { rule_id: ruleId, query } = queryLink;
 
@@ -808,7 +797,10 @@ export class QueryClient {
         consumer: 'streams',
         alertTypeId: 'streams.rules.esql',
         actions: [],
-        params: this.buildRuleParams(query),
+        params: {
+          timestampField: '@timestamp',
+          query: query.esql.query,
+        },
         enabled: true,
         tags: ['streams', definition.name],
         schedule: {
@@ -829,7 +821,10 @@ export class QueryClient {
       data: {
         name: query.title,
         actions: [],
-        params: this.buildRuleParams(query),
+        params: {
+          timestampField: '@timestamp',
+          query: query.esql.query,
+        },
         tags: ['streams', definition.name],
         schedule: {
           interval: '1m',

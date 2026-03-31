@@ -10,7 +10,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
-import { hasStatsCommand, extractBucketIntervalMs } from '@kbn/streams-schema';
+import { hasStatsCommand, extractBucketColumnName, extractBucketIntervalMs } from '@kbn/streams-schema';
 
 const PREVIEW_STATS_LIMIT = 10_000;
 
@@ -103,6 +103,8 @@ function buildHistogramQuery(esqlQuery: string, bucketSize: string): string {
  * ES|QL BUCKET does not emit empty buckets (unlike date_histogram with
  * extended_bounds). Fill the gaps so the sparkline receives a contiguous series.
  */
+const MAX_FILL_BUCKETS = 10_000;
+
 function fillBucketGaps(
   occurrences: Array<{ date: string; count: number }>,
   from: Date,
@@ -117,7 +119,7 @@ function fillBucketGaps(
   let current = Math.floor(from.getTime() / intervalMs) * intervalMs;
   const endMs = to.getTime();
 
-  while (current <= endMs) {
+  while (current <= endMs && result.length < MAX_FILL_BUCKETS) {
     result.push({
       date: new Date(current).toISOString(),
       count: existingBuckets.get(current) ?? 0,
@@ -134,12 +136,13 @@ export async function previewSignificantEvents(
     from: Date;
     to: Date;
     bucketSize: string;
+    timestampField?: string;
   },
   dependencies: {
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsPreviewResponse> {
-  const { esqlQuery, bucketSize, from, to } = params;
+  const { esqlQuery, bucketSize, from, to, timestampField = '@timestamp' } = params;
   const { scopedClusterClient } = dependencies;
 
   const filter: QueryDslQueryContainer = {
@@ -147,7 +150,7 @@ export async function previewSignificantEvents(
       filter: [
         {
           range: {
-            '@timestamp': { gte: from.toISOString(), lte: to.toISOString() },
+            [timestampField]: { gte: from.toISOString(), lte: to.toISOString() },
           },
         },
       ],
@@ -183,6 +186,10 @@ async function previewMatchQuery(
   const countIdx = response.columns.findIndex((col) => col.name === 'count');
   const bucketIdx = response.columns.findIndex((col) => col.name === 'bucket');
 
+  if (countIdx === -1 || bucketIdx === -1) {
+    return { esql: { query: esqlQuery }, change_points: { type: {} }, occurrences: [] };
+  }
+
   const sparseOccurrences = response.values.map((row) => ({
     date: row[bucketIdx] as string,
     count: (row[countIdx] as number) ?? 0,
@@ -203,6 +210,8 @@ async function previewMatchQuery(
         type: {
           [cpRow[typeIdx] as string]: {
             p_value: cpRow[pvalueIdx] as number,
+            // Falls back to index 0 when the change-point bucket lands
+            // outside the gap-filled range (e.g., rounding mismatch).
             change_point: cpIndex >= 0 ? cpIndex : 0,
           },
         },
@@ -235,19 +244,20 @@ async function previewStatsQuery(
   const { esqlQuery, filter, from, to, bucketSize } = params;
   const { scopedClusterClient } = deps;
 
+  const queryWithoutLimit = esqlQuery.replace(/\|\s*LIMIT\s+\d+\s*$/i, '').trim();
+
   const response = await scopedClusterClient.asCurrentUser.esql.query({
-    query: `${esqlQuery} | LIMIT ${PREVIEW_STATS_LIMIT}`,
+    query: `${queryWithoutLimit} | LIMIT ${PREVIEW_STATS_LIMIT}`,
     filter,
     drop_null_columns: true,
   });
 
   const firingCount = response.values.length;
 
-  // ES|QL's BUCKET(@timestamp, ...) produces a column named "bucket" with type "date".
-  // We rely on this convention to identify temporal results.
-  const bucketCol = response.columns.find(
-    (col) => col.type === 'date' && col.name === 'bucket'
-  );
+  const astBucketName = extractBucketColumnName(esqlQuery);
+  const bucketCol = astBucketName
+    ? response.columns.find((col) => col.name === astBucketName)
+    : response.columns.find((col) => col.type === 'date');
 
   if (bucketCol) {
     const bucketIdx = response.columns.indexOf(bucketCol);
@@ -258,6 +268,8 @@ async function previewStatsQuery(
     const queryBucketMs = extractBucketIntervalMs(esqlQuery);
     const effectiveBucketSize = queryBucketMs ? msToEsqlBucketSize(queryBucketMs) : bucketSize;
 
+    // Multiple groups firing in the same bucket are summed, showing total
+    // firing density (how active the threshold was) rather than unique buckets.
     const aggregatedByBucket = new Map<string, number>();
     for (const date of firingDates) {
       aggregatedByBucket.set(date, (aggregatedByBucket.get(date) ?? 0) + 1);

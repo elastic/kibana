@@ -96,7 +96,11 @@ export class QueryService {
           migrated = { ...migrated, [QUERY_TYPE]: derivedType };
 
           if (derivedType !== QUERY_TYPE_STATS) {
-            migrated = { ...migrated, [QUERY_ESQL_QUERY]: ensureMetadata(esqlQuery) };
+            try {
+              migrated = { ...migrated, [QUERY_ESQL_QUERY]: ensureMetadata(esqlQuery) };
+            } catch {
+              // Corrupt ES|QL that can't be parsed; leave unchanged to avoid blocking migration.
+            }
           }
 
           // Back-fill rule_id for pre-existing documents using the KQL query as the hash

@@ -133,7 +133,7 @@ export function QueriesTable() {
     setSelectedQuery((prev) => {
       if (!prev) return prev;
       const refreshed = queriesData.queries.find((item) => item.query.id === prev.query.id);
-      return refreshed ?? prev;
+      return refreshed ?? null;
     });
   }, [queriesData]);
 
