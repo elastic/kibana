@@ -72,7 +72,7 @@ function FlyoutActions({
           <EuiButtonEmpty
             size="s"
             iconSize="s"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             flush="left"
             data-test-subj="docViewerMobileActionsButton"

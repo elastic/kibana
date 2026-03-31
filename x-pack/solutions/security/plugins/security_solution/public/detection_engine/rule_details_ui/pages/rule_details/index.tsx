@@ -39,6 +39,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
@@ -158,6 +159,7 @@ import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_up
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { CpsMlRuleCallout } from '../../../rule_management_ui/components/cps_ml_rule_callout/callout';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { FiltersGlobal } from '../../../../common/components/filters_global';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -239,13 +241,17 @@ export const RuleDetailsPage = connector(
       analytics,
       i18n: i18nStart,
       theme,
-      application: {
-        navigateToApp,
-        capabilities: { actions },
-      },
+      application,
+      cps,
       timelines: timelinesUi,
       spaces: spacesApi,
     } = useKibana().services;
+    const {
+      navigateToApp,
+      capabilities: { actions },
+    } = application;
+
+    useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
     const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
@@ -850,12 +856,14 @@ export const RuleDetailsPage = connector(
                     {canReadAlerts && (
                       <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                         <>
-                          <SiemSearchBar
-                            dataView={experimentalDataView}
-                            pollForSignalIndex={pollForSignalIndex}
-                            id={InputsModelId.global}
-                            sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-                          />
+                          <FiltersGlobal>
+                            <SiemSearchBar
+                              dataView={experimentalDataView}
+                              pollForSignalIndex={pollForSignalIndex}
+                              id={InputsModelId.global}
+                              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+                            />
+                          </FiltersGlobal>
                           <EuiSpacer />
                           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                             <EuiFlexItem grow={false}>
