@@ -2448,6 +2448,9 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/zendesk/** @elastic/w
 src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_server/** @elastic/workchat-eng
 
+# Connector Agent Skills
+src/platform/packages/shared/kbn-connector-specs/.claude/skills @elastic/workchat-eng
+
 # Connector Workflow Tests
 src/platform/plugins/shared/workflows_management/test/connector_workflows @elastic/workchat-eng
 
