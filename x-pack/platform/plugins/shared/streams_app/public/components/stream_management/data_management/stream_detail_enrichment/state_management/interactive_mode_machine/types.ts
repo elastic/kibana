@@ -114,12 +114,18 @@ export type InteractiveModeEvent =
   | {
       type: 'step.addProcessor';
       processor?: StreamlangProcessorDefinition;
-      options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+      options?: {
+        parentId: StreamlangStepWithUIAttributes['parentId'];
+        branch?: 'if' | 'else';
+      };
     }
   | {
       type: 'step.addCondition';
       condition?: StreamlangConditionBlock;
-      options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+      options?: {
+        parentId: StreamlangStepWithUIAttributes['parentId'];
+        branch?: 'if' | 'else';
+      };
     }
   | { type: 'step.duplicateProcessor'; processorStepId: string }
   | { type: 'step.filterByCondition'; conditionId: string }

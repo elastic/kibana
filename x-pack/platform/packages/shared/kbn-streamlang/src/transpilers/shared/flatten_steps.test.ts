@@ -117,4 +117,80 @@ describe('flattenSteps', () => {
       },
     ]);
   });
+
+  it('should flatten else branch steps with negated condition', () => {
+    const steps = [
+      {
+        condition: {
+          field: 'status',
+          eq: 200,
+          steps: [{ action: 'set', to: 'success', value: 'true' }],
+          else: [{ action: 'set', to: 'success', value: 'false' }],
+        },
+      },
+    ] as StreamlangStep[];
+
+    expect(flattenSteps(steps)).toEqual([
+      { action: 'set', to: 'success', value: 'true', where: { field: 'status', eq: 200 } },
+      {
+        action: 'set',
+        to: 'success',
+        value: 'false',
+        where: { not: { field: 'status', eq: 200 } },
+      },
+    ]);
+  });
+
+  it('should flatten else branch with parent condition', () => {
+    const steps = [
+      {
+        condition: {
+          field: 'env',
+          eq: 'prod',
+          steps: [
+            {
+              condition: {
+                field: 'status',
+                eq: 200,
+                steps: [{ action: 'set', to: 'result', value: 'ok' }],
+                else: [{ action: 'set', to: 'result', value: 'error' }],
+              },
+            },
+          ],
+        },
+      },
+    ] as StreamlangStep[];
+
+    expect(flattenSteps(steps)).toEqual([
+      {
+        action: 'set',
+        to: 'result',
+        value: 'ok',
+        where: { and: [{ field: 'env', eq: 'prod' }, { field: 'status', eq: 200 }] },
+      },
+      {
+        action: 'set',
+        to: 'result',
+        value: 'error',
+        where: { and: [{ field: 'env', eq: 'prod' }, { not: { field: 'status', eq: 200 } }] },
+      },
+    ]);
+  });
+
+  it('should handle empty else branch', () => {
+    const steps = [
+      {
+        condition: {
+          field: 'foo',
+          eq: 'bar',
+          steps: [{ action: 'set', to: 'a', value: 'b' }],
+          else: [],
+        },
+      },
+    ] as StreamlangStep[];
+
+    expect(flattenSteps(steps)).toEqual([
+      { action: 'set', to: 'a', value: 'b', where: { field: 'foo', eq: 'bar' } },
+    ]);
+  });
 });

@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,6 +32,7 @@ import { getStepPanelColour } from '../../../utils';
 import type { StepConfigurationProps } from '../../steps_list';
 import { StepsListItem } from '../../steps_list';
 import { BlockDisableOverlay } from '../block_disable_overlay';
+import { CreateStepButton } from '../../../create_step_button';
 import { WhereBlockConfiguration } from './configuration';
 import { ConnectedNodesList } from './connected_nodes_list';
 import { NestedChildrenProcessingSummary } from './nested_children_processing_summary';
@@ -60,9 +62,16 @@ export const WhereBlock = (props: StepConfigurationProps) => {
       (ref) => ref.getSnapshot().context.step.parentId === step.customIdentifier
     )
   );
+  const ifBranchSteps = childSteps.filter(
+    (ref) => ref.getSnapshot().context.step.branch !== 'else'
+  );
+  const elseBranchSteps = childSteps.filter(
+    (ref) => ref.getSnapshot().context.step.branch === 'else'
+  );
   const { filterSimulationByCondition, clearSimulationConditionFilter } =
     useStreamEnrichmentEvents();
   const hasChildren = childSteps.length > 0;
+  const hasElseBranch = elseBranchSteps.length > 0;
 
   const filteringEnabled = useConditionFilteringEnabled(step.customIdentifier);
 
@@ -197,7 +206,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
           <>
             <EuiSpacer size="s" />
             <ConnectedNodesList>
-              {childSteps.map((childStep, index) => (
+              {ifBranchSteps.map((childStep, index) => (
                 <li key={childStep.id}>
                   <StepsListItem
                     stepRef={childStep}
@@ -206,12 +215,65 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                     rootLevelMap={rootLevelMap}
                     stepsProcessingSummaryMap={stepsProcessingSummaryMap}
                     isFirstStepInLevel={index === 0}
-                    isLastStepInLevel={index === childSteps.length - 1}
+                    isLastStepInLevel={
+                      index === ifBranchSteps.length - 1 && !hasElseBranch
+                    }
                     readOnly={props.readOnly}
                   />
                 </li>
               ))}
             </ConnectedNodesList>
+            {hasElseBranch && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiBadge color="hollow">
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.elseBranchLabel',
+                    { defaultMessage: 'Else' }
+                  )}
+                </EuiBadge>
+                <EuiSpacer size="s" />
+                <ConnectedNodesList>
+                  {elseBranchSteps.map((childStep, index) => (
+                    <li key={childStep.id}>
+                      <StepsListItem
+                        stepRef={childStep}
+                        level={level + 1}
+                        stepUnderEdit={stepUnderEdit}
+                        rootLevelMap={rootLevelMap}
+                        stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+                        isFirstStepInLevel={index === 0}
+                        isLastStepInLevel={index === elseBranchSteps.length - 1}
+                        readOnly={props.readOnly}
+                      />
+                    </li>
+                  ))}
+                </ConnectedNodesList>
+              </>
+            )}
+            {!props.readOnly && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <CreateStepButton
+                      parentId={step.customIdentifier}
+                      branch="if"
+                      mode="inline"
+                      nestingDisabled={level >= 1}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <CreateStepButton
+                      parentId={step.customIdentifier}
+                      branch="else"
+                      mode="inline"
+                      nestingDisabled={level >= 1}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
           </>
         )}
       </EuiPanel>

@@ -55,7 +55,10 @@ export const useStreamEnrichmentEvents = () => {
       },
       addProcessor: (
         step?: StreamlangProcessorDefinition,
-        options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
+        options?: {
+          parentId: StreamlangStepWithUIAttributes['parentId'];
+          branch?: 'if' | 'else';
+        }
       ) => {
         service.send({ type: 'step.addProcessor', step, options });
       },
@@ -64,7 +67,10 @@ export const useStreamEnrichmentEvents = () => {
       },
       addCondition: (
         step?: StreamlangConditionBlock,
-        options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
+        options?: {
+          parentId: StreamlangStepWithUIAttributes['parentId'];
+          branch?: 'if' | 'else';
+        }
       ) => {
         service.send({ type: 'step.addCondition', step, options });
       },

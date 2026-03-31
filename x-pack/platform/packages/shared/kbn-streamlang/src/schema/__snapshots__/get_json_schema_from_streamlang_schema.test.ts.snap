@@ -106,6 +106,12 @@ Object {
         Object {
           "additionalProperties": false,
           "properties": Object {
+            "else": Object {
+              "items": Object {
+                "$ref": "#/definitions/StreamlangStep",
+              },
+              "type": "array",
+            },
             "steps": Object {
               "items": Object {
                 "$ref": "#/definitions/StreamlangStep",
@@ -337,6 +343,22 @@ Object {
           },
           "description": "Execute steps if any condition is true",
           "label": "Condition block (OR)",
+        },
+        Object {
+          "body": Object {
+            "condition": Object {
+              "else": Array [
+                "\${4}",
+              ],
+              "eq": "\${2:value}",
+              "field": "\${1:field.name}",
+              "steps": Array [
+                "\${3}",
+              ],
+            },
+          },
+          "description": "Conditional step execution with if and else branches",
+          "label": "Condition block with else",
         },
       ],
       "id": "StreamlangConditionBlock",

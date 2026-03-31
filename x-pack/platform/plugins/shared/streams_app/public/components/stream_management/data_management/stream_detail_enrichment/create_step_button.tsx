@@ -54,12 +54,14 @@ const createText = i18n.translate(
 
 interface AddStepProps {
   parentId?: string;
+  branch?: 'if' | 'else';
   mode: 'inline' | 'subdued' | 'prominent';
   nestingDisabled?: boolean;
 }
 
 export const CreateStepButton: React.FC<AddStepProps> = ({
   parentId,
+  branch,
   mode,
   nestingDisabled = false,
 }) => {
@@ -86,7 +88,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       disabled={nestingDisabled}
       onClick={() => {
         togglePopover(false);
-        addCondition(undefined, { parentId: parentId ?? null });
+        addCondition(undefined, { parentId: parentId ?? null, branch });
       }}
     >
       {createConditionText}
@@ -98,7 +100,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       icon="processor"
       onClick={() => {
         togglePopover(false);
-        addProcessor(undefined, { parentId: parentId ?? null });
+        addProcessor(undefined, { parentId: parentId ?? null, branch });
       }}
     >
       {createProcessorText}

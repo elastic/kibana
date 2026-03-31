@@ -35,6 +35,7 @@ export const stepMachine = setup({
           ...params.step,
           customIdentifier: context.step.customIdentifier,
           parentId: context.step.parentId,
+          branch: context.step.branch,
         };
 
         return {
@@ -74,18 +75,21 @@ export const stepMachine = setup({
         isUpdated: true,
       };
     }),
-    changeParent: assign(({ context }, { parentId }: { parentId: string | null }) => {
-      const updatedStep = {
-        ...context.step,
-        parentId,
-      };
+    changeParent: assign(
+      ({ context }, { parentId, branch }: { parentId: string | null; branch?: 'if' | 'else' }) => {
+        const updatedStep = {
+          ...context.step,
+          parentId,
+          ...(branch !== undefined ? { branch } : {}),
+        };
 
-      return {
-        step: updatedStep,
-        previousStep: updatedStep,
-        isUpdated: true,
-      };
-    }),
+        return {
+          step: updatedStep,
+          previousStep: updatedStep,
+          isUpdated: true,
+        };
+      }
+    ),
     resetToPrevious: assign(({ context }) => ({
       step: context.previousStep,
     })),

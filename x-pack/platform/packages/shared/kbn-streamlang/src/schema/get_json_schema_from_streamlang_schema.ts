@@ -92,6 +92,16 @@ function inlineStepsItemsRef(schema: StreamlangJsonSchema): void {
   if (steps) {
     steps.items = JSON.parse(JSON.stringify(resolved));
   }
+
+  // Also inline else.items.$ref if present
+  const elseArr = schemaProps?.else as Record<string, unknown> | undefined;
+  const elseItems = elseArr?.items as (Record<string, unknown> & { $ref?: string }) | undefined;
+  if (elseItems && typeof elseItems.$ref === 'string') {
+    const resolvedElse = resolveJsonPointer(schema, elseItems.$ref);
+    if (resolvedElse && elseArr) {
+      elseArr.items = JSON.parse(JSON.stringify(resolvedElse));
+    }
+  }
 }
 
 /**
@@ -462,6 +472,28 @@ function enhanceConditionBlockSchema(
             },
           ],
           steps: ['${5}'],
+        },
+      },
+    },
+    {
+      label: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.conditionBlockElse.label',
+        {
+          defaultMessage: 'Condition block with else',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.streams.streamlangSchema.snippets.conditionBlockElse.description',
+        {
+          defaultMessage: 'Conditional step execution with if and else branches',
+        }
+      ),
+      body: {
+        condition: {
+          field: '${1:field.name}',
+          eq: '${2:value}',
+          steps: ['${3}'],
+          else: ['${4}'],
         },
       },
     },

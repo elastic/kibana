@@ -83,7 +83,10 @@ export const interactiveModeMachine = setup({
           options,
         }: {
           processor?: StreamlangProcessorDefinition;
-          options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+          options?: {
+            parentId: StreamlangStepWithUIAttributes['parentId'];
+            branch?: 'if' | 'else';
+          };
         }
       ) => {
         if (!processor) {
@@ -106,7 +109,8 @@ export const interactiveModeMachine = setup({
         );
         const insertIndex = findInsertIndex(
           assignArgs.context.stepRefs,
-          conversionOptions.parentId
+          conversionOptions.parentId,
+          conversionOptions.branch ?? 'if'
         );
 
         // If the processor is created under a condition block, automatically select that condition.
@@ -165,7 +169,10 @@ export const interactiveModeMachine = setup({
           options,
         }: {
           condition?: StreamlangConditionBlock;
-          options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+          options?: {
+            parentId: StreamlangStepWithUIAttributes['parentId'];
+            branch?: 'if' | 'else';
+          };
         }
       ) => {
         if (!condition) {
@@ -194,7 +201,8 @@ export const interactiveModeMachine = setup({
         );
         const insertIndex = findInsertIndex(
           assignArgs.context.stepRefs,
-          conversionOptions.parentId
+          conversionOptions.parentId,
+          conversionOptions.branch ?? 'if'
         );
 
         // Automatically filter the simulation by the newly created condition.
@@ -254,15 +262,18 @@ export const interactiveModeMachine = setup({
           return;
         }
 
-        // Determine the new parentId for the source step
+        // Determine the new parentId and branch for the source step
         let newParentId: string | null;
+        let newBranch: 'if' | 'else';
 
         // Nested inside a where block
         if (params.operation === 'inside') {
           newParentId = params.targetStepId;
+          newBranch = 'if';
         } else {
-          // Use sibling's parentId
+          // Use sibling's parentId and branch
           newParentId = targetStep.parentId ?? null;
+          newBranch = targetStep.branch ?? 'if';
         }
 
         // Reorder the steps
@@ -278,15 +289,18 @@ export const interactiveModeMachine = setup({
           stepRefs: [...reorderedStepRefs],
         });
 
-        // Update the source step actor's parentId
+        // Update the source step actor's parentId and branch
         const sourceStepRef = reorderedStepRefs.find((ref) => ref.id === params.sourceStepId);
 
         if (sourceStepRef) {
-          const currentParentId = sourceStepRef.getSnapshot().context.step.parentId;
+          const currentStep = sourceStepRef.getSnapshot().context.step;
 
-          if (currentParentId !== newParentId) {
-            // Send event to child actor to update its parentId
-            enqueue.sendTo(sourceStepRef, { type: 'step.changeParent', parentId: newParentId });
+          if (currentStep.parentId !== newParentId || currentStep.branch !== newBranch) {
+            enqueue.sendTo(sourceStepRef, {
+              type: 'step.changeParent',
+              parentId: newParentId,
+              branch: newBranch,
+            });
           }
         }
       }

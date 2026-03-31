@@ -59,6 +59,7 @@ export type StepEvent =
   | {
       type: 'step.changeParent';
       parentId: string | null;
+      branch?: 'if' | 'else';
     }
   | { type: 'step.delete' }
   | { type: 'step.edit' }

@@ -169,28 +169,43 @@ function findNewSiblingStepIndex(stepRefs: StepActorRef[], parentId: string): nu
   return -1;
 }
 
-/* Find insert index based on step hierarchy */
-export function findInsertIndex(stepRefs: StepActorRef[], parentId: string | null): number {
+/* Find insert index based on step hierarchy and branch */
+export function findInsertIndex(
+  stepRefs: StepActorRef[],
+  parentId: string | null,
+  branch: 'if' | 'else' = 'if'
+): number {
   // Find the index of the parent step
   const parentIndex = parentId ? stepRefs.findIndex((step) => step.id === parentId) : -1;
 
-  // Find the last index of any step with the same parentId
-  let newSiblingIndex = -1;
+  if (parentId !== null && parentIndex !== -1) {
+    // Find the last descendant in the target branch
+    const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
+    const directChildren = steps.filter((s) => s.parentId === parentId);
 
-  if (parentId !== null) {
-    newSiblingIndex = findNewSiblingStepIndex(stepRefs, parentId);
-  }
+    if (branch === 'if') {
+      // Find last direct if-branch child and its descendants
+      const lastIfChild = [...directChildren].reverse().find((s) => s.branch !== 'else');
+      if (lastIfChild) {
+        const descendants = collectDescendantStepIds(steps, lastIfChild.customIdentifier);
+        const lastDescId = Array.from(descendants).at(-1) ?? lastIfChild.customIdentifier;
+        const idx = stepRefs.findIndex((ref) => ref.id === lastDescId);
+        return idx + 1;
+      }
+      // No if-branch children yet, insert right after parent
+      return parentIndex + 1;
+    }
 
-  if (newSiblingIndex !== -1) {
-    // Insert after the last sibling with the same parentId
-    return newSiblingIndex;
-  } else if (parentIndex !== -1) {
-    // Insert right after the parent if no siblings
+    // else branch: insert at end of all descendants
+    const newSiblingIndex = findNewSiblingStepIndex(stepRefs, parentId);
+    if (newSiblingIndex !== -1) {
+      return newSiblingIndex;
+    }
     return parentIndex + 1;
-  } else {
-    // No parent, insert at the end
-    return stepRefs.length;
   }
+
+  // No parent, insert at the end
+  return stepRefs.length;
 }
 
 export function insertAtIndex<T>(array: T[], item: T, index: number): T[] {

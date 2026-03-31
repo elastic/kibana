@@ -16,12 +16,15 @@ export interface UIAttributes {
   /* Usually an optional property within Streamlang blocks, but in the UI we will always
   assign and use these */
   customIdentifier: string;
+  /* Indicates which branch of a parent condition block this step belongs to.
+  'if' for the main branch (default), 'else' for the else branch. */
+  branch?: 'if' | 'else';
 }
 
 export type StreamlangProcessorDefinitionWithUIAttributes = StreamlangProcessorDefinition &
   UIAttributes;
 
-export type StreamlangConditionWithoutSteps = Omit<ConditionWithSteps, 'steps'>;
+export type StreamlangConditionWithoutSteps = Omit<ConditionWithSteps, 'steps' | 'else'>;
 export type StreamlangConditionBlockWithUIAttributes = Omit<
   StreamlangConditionBlock,
   'condition'

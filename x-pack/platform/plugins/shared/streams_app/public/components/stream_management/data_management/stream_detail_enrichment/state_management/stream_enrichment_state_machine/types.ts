@@ -124,7 +124,10 @@ export type StreamEnrichmentEvent =
   | {
       type: 'step.addProcessor';
       step?: StreamlangProcessorDefinition;
-      options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+      options?: {
+        parentId: StreamlangStepWithUIAttributes['parentId'];
+        branch?: 'if' | 'else';
+      };
     }
   | {
       type: 'step.duplicateProcessor';
@@ -133,7 +136,10 @@ export type StreamEnrichmentEvent =
   | {
       type: 'step.addCondition';
       step?: StreamlangConditionBlock;
-      options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+      options?: {
+        parentId: StreamlangStepWithUIAttributes['parentId'];
+        branch?: 'if' | 'else';
+      };
     }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
   | {
