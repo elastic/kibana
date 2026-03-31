@@ -27,6 +27,12 @@ import getBlobWorkflow from './workflows/get_blob.yaml';
 
 const AZURE_BLOB_API_VERSION = '2021-06-08';
 
+/**
+ * Default maximum blob size that can be downloaded (128 kilobytes).
+ * Blobs larger than this will be rejected to avoid memory issues.
+ */
+const MAX_BLOB_DOWNLOAD_SIZE_BYTES = 128 * 1024;
+
 function encodePathSegment(segment: string): string {
   return encodeURIComponent(segment).replace(/%2F/gi, '/');
 }
@@ -177,22 +183,38 @@ export const AzureBlob: ConnectorSpec = {
       input: z.object({
         container: z.string(),
         blobName: z.string(),
+        maximumDownloadSizeBytes: z
+          .number()
+          .positive()
+          .optional()
+          .describe(
+            'Maximum blob size in bytes that can be downloaded. Defaults to 131072 (128 KB). Requests for blobs larger than this will fail.'
+          ),
       }),
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
         const container = encodePathSegment(input.container);
         const blobName = encodePathSegment(input.blobName);
-        const response = await ctx.client.get(`${baseUrl}/${container}/${blobName}`, {
-          responseType: 'arraybuffer',
-        });
+        const blobUrl = `${baseUrl}/${container}/${blobName}`;
+
+        const maxSize = input.maximumDownloadSizeBytes ?? MAX_BLOB_DOWNLOAD_SIZE_BYTES;
+        const headResponse = await ctx.client.head(blobUrl);
+        const rawLength = headResponse.headers['content-length'];
+        const contentLength = rawLength ? parseInt(String(rawLength), 10) : undefined;
+        if (contentLength !== undefined && contentLength > maxSize) {
+          throw new Error(
+            `Blob size (${contentLength} bytes) exceeds maximum downloadable size (${maxSize} bytes).`
+          );
+        }
+
+        const response = await ctx.client.get(blobUrl, { responseType: 'arraybuffer' });
         const buffer = response.data as ArrayBuffer;
         const contentBase64 = Buffer.from(buffer).toString('base64');
         const contentType = response.headers['content-type'] as string | undefined;
-        const contentLength = response.headers['content-length'] as string | undefined;
         return {
           contentBase64,
           contentType,
-          contentLength: contentLength ? parseInt(contentLength, 10) : undefined,
+          contentLength,
         };
       },
     },
