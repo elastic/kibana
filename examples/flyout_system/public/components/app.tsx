@@ -16,6 +16,7 @@ import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 
 import { FlyoutWithComponent } from './_flyout_with_component';
 import { FlyoutWithOverlays } from './_flyout_with_overlays';
+import { NonSessionFlyouts } from './_non_session_flyouts';
 
 interface AppDeps {
   basename: string;
@@ -49,9 +50,12 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
       </EuiPageTemplate.Section>
 
       <EuiPageTemplate.Section grow={false} alignment="top">
-        <FlyoutWithOverlays historyKey={historyKey} overlays={overlays} rendering={rendering} />
+        <FlyoutWithOverlays historyKey={historyKey} overlays={overlays} />
       </EuiPageTemplate.Section>
 
+      <EuiPageTemplate.Section grow={false} alignment="top">
+        <NonSessionFlyouts overlays={overlays} rendering={rendering} />
+      </EuiPageTemplate.Section>
       <EuiPageTemplate.Section grow={true} alignment="top">
         <EuiText>
           <p>

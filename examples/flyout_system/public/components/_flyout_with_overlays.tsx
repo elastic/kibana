@@ -27,9 +27,6 @@ import {
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core/public';
 
-import type { RenderingService } from '@kbn/core-rendering-browser';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-
 import {
   createChildFlyoutDescriptionItems,
   createMainFlyoutDescriptionItems,
@@ -41,7 +38,6 @@ import {
 export interface FlyoutFromOverlaysProps {
   historyKey: symbol;
   overlays: OverlayStart;
-  rendering: RenderingService;
 }
 
 interface SessionFlyoutProps {
@@ -384,87 +380,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
 
 SessionFlyout.displayName = 'SessionFlyoutFromOverlaysService';
 
-const GlobalFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(({ overlays, rendering }) => {
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
-  const flyoutRef = useRef<OverlayRef | null>(null);
-
-  // Ref for manual focus management - return focus to trigger button
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  const openFlyout = useCallback(() => {
-    // Create a handler that will be called to close the flyout
-    const handleClose = () => {
-      if (flyoutRef.current) {
-        flyoutRef.current.close();
-        flyoutRef.current = null;
-      }
-      setIsFlyoutOpen(false);
-
-      // Return focus to trigger button after closing flyout
-      setTimeout(() => {
-        triggerRef.current?.focus();
-      }, 100);
-    };
-
-    const ref = overlays.openFlyout(
-      toMountPoint(
-        <>
-          <EuiFlyoutHeader>
-            <EuiTitle>
-              <h2 id="globalFlyoutHeading">Global Flyout</h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiText>
-              <p>
-                This flyout is opened using the non-session aware <EuiCode>openFlyout</EuiCode> API.
-              </p>
-            </EuiText>
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={handleClose} aria-label="Close">
-                  Close
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </>,
-        rendering
-      ),
-      {
-        id: 'globalFlyout',
-        container: null,
-        size: 'm',
-        ['aria-labelledby']: 'globalFlyoutHeading',
-        type: 'overlay',
-        ownFocus: true,
-        onClose: handleClose,
-      }
-    );
-    flyoutRef.current = ref;
-    setIsFlyoutOpen(true);
-  }, [overlays, rendering]);
-
-  return (
-    <EuiFlexGroup gutterSize="m" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiButton buttonRef={triggerRef} onClick={openFlyout} disabled={isFlyoutOpen}>
-          Open Global Flyout
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
-
-GlobalFlyout.displayName = 'GlobalFlyoutFromOverlaysService';
-
-export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({
-  overlays,
-  rendering,
-  historyKey,
-}) => (
+export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays, historyKey }) => (
   <>
     <EuiTitle>
       <h2>
@@ -517,24 +433,6 @@ export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({
                 overlays={overlays}
               />
             ),
-          },
-        ]}
-      />
-
-      <EuiSpacer size="m" />
-
-      <EuiTitle size="s">
-        <h3>
-          With <EuiCode>core.overlays.openFlyout</EuiCode>
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiDescriptionList
-        type="column"
-        listItems={[
-          {
-            title: 'Global flyout: size = m',
-            description: <GlobalFlyout overlays={overlays} rendering={rendering} />,
           },
         ]}
       />
