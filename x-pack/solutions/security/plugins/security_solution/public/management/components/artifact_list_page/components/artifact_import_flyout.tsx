@@ -27,6 +27,7 @@ import type { ArtifactListPageLabels } from '../translations';
 import { useImportArtifactList } from '../../../hooks/artifacts/use_import_artifact_list';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { ArtifactImportConfirmModal } from './artifact_import_confirm_modal';
 
 export interface ArtifactImportFlyoutProps {
   onCancel: () => void;
@@ -47,10 +48,19 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
   const getTestId = useTestIdGenerator(dataTestSubj);
 
   const [file, setFile] = React.useState<File | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
 
   const { isLoading, mutate } = useImportArtifactList(apiClient);
 
-  const handleOnSubmit = useCallback(async () => {
+  const handleOnSubmit = useCallback(() => {
+    setShowConfirmModal(true);
+  }, []);
+
+  const handleOnCancelModal = useCallback(() => {
+    setShowConfirmModal(false);
+  }, []);
+
+  const handleOnConfirmModal = useCallback(async () => {
     if (file !== null) {
       const listIds = await parseListIdsFromImportedFile(file);
 
@@ -58,6 +68,8 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
         toasts.addError(new Error(labels.pageImportOnlyCurrentArtifactCanBeImportedError), {
           title: labels.pageImportErrorToastTitle,
         });
+        setShowConfirmModal(false);
+
         return;
       }
 
@@ -69,6 +81,7 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
               title: labels.pageImportErrorToastTitle,
               toastMessage: error.body?.message || error.message,
             });
+            setShowConfirmModal(false);
           },
           onSuccess: (response) => {
             toasts.addSuccess({
@@ -87,6 +100,7 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
               }`,
               toastLifeTimeMs: 60_000,
             });
+            setShowConfirmModal(false);
             onSuccess();
           },
         }
@@ -117,6 +131,15 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
       aria-labelledby={importEndpointArtifactListFlyoutTitleId}
       data-test-subj={getTestId()}
     >
+      {showConfirmModal && (
+        <ArtifactImportConfirmModal
+          onCancel={handleOnCancelModal}
+          onConfirm={handleOnConfirmModal}
+          isLoading={isLoading}
+          data-test-subj={getTestId('confirmModal')}
+        />
+      )}
+
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={importEndpointArtifactListFlyoutTitleId}>{labels.pageImportButtonTitle}</h2>

@@ -168,6 +168,11 @@ export const getArtifactImportFlyoutUiMocks = (
   const queryImportFlyout = () => renderResult.queryByTestId(dataTestSubj);
   const getCancelButton = () => renderResult.getByTestId(`${dataTestSubj}-cancelButton`);
   const getImportButton = () => renderResult.getByTestId(`${dataTestSubj}-importButton`);
+  const queryConfirmModal = () => renderResult.queryByTestId(`${dataTestSubj}-confirmModal`);
+  const getConfirmModalConfirmButton = () =>
+    renderResult.getByTestId(`${dataTestSubj}-confirmModal-confirmButton`);
+  const getConfirmModalCancelButton = () =>
+    renderResult.getByTestId(`${dataTestSubj}-confirmModal-cancelButton`);
 
   const uploadFile = (listIds: string[]) =>
     userEvent.upload(
@@ -179,5 +184,13 @@ export const getArtifactImportFlyoutUiMocks = (
       )
     );
 
-  return { queryImportFlyout, getCancelButton, getImportButton, uploadFile };
+  return {
+    queryImportFlyout,
+    getCancelButton,
+    getImportButton,
+    queryConfirmModal,
+    getConfirmModalConfirmButton,
+    getConfirmModalCancelButton,
+    uploadFile,
+  };
 };

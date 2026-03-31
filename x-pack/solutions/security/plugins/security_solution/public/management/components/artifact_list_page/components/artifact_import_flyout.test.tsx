@@ -89,11 +89,32 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     expect(ui.getImportButton()).toBeEnabled();
   });
 
-  it('should call the import API when `Import` button is clicked', async () => {
+  it('should show a confirmation modal when `Import` button is clicked', async () => {
     await render();
 
     await ui.uploadFile([currentListId]);
     await userEvent.click(ui.getImportButton());
+
+    expect(ui.queryConfirmModal()).toBeInTheDocument();
+  });
+
+  it("should close the confirmation modal but keep the flyout open when the modal's cancel button is clicked", async () => {
+    await render();
+
+    await ui.uploadFile([currentListId]);
+    await userEvent.click(ui.getImportButton());
+    await userEvent.click(ui.getConfirmModalCancelButton());
+
+    expect(ui.queryConfirmModal()).not.toBeInTheDocument();
+    expect(ui.queryImportFlyout()).toBeInTheDocument();
+  });
+
+  it('should call the import API when the modal is confirmed', async () => {
+    await render();
+
+    await ui.uploadFile([currentListId]);
+    await userEvent.click(ui.getImportButton());
+    await userEvent.click(ui.getConfirmModalConfirmButton());
 
     expect(mockedTrustedAppApi.responseProvider.trustedAppImportList).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -103,7 +124,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     );
   });
 
-  it('should disable `Import` button while the import is in progress', async () => {
+  it('should disable `Import` button on the modal and the flyout while the import is in progress', async () => {
     const deferrable = getDeferred();
     mockedTrustedAppApi.responseProvider.trustedAppImportList.mockDelay.mockReturnValue(
       deferrable.promise
@@ -113,8 +134,10 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     await ui.uploadFile([currentListId]);
     await userEvent.click(ui.getImportButton());
+    await userEvent.click(ui.getConfirmModalConfirmButton());
 
     expect(ui.getImportButton()).toBeDisabled();
+    expect(ui.getConfirmModalConfirmButton()).toBeDisabled();
   });
 
   it('should show a success toast and call `onSuccess` after a successful import', async () => {
@@ -122,6 +145,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     await ui.uploadFile([currentListId]);
     await userEvent.click(ui.getImportButton());
+    await userEvent.click(ui.getConfirmModalConfirmButton());
 
     expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       text: '2 artifacts imported.',
@@ -131,11 +155,12 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     expect(props.onSuccess).toHaveBeenCalled();
   });
 
-  it('should show an error toast if another list is being imported', async () => {
+  it('should show an error toast and close the modal if another list is being imported', async () => {
     await render();
 
     await ui.uploadFile(['some-other-list-id']);
     await userEvent.click(ui.getImportButton());
+    await userEvent.click(ui.getConfirmModalConfirmButton());
 
     expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
       expect.objectContaining(
@@ -143,6 +168,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       ),
       { title: artifactListPageLabels.pageImportErrorToastTitle }
     );
+    expect(ui.queryConfirmModal()).not.toBeInTheDocument();
   });
 
   it('should show an error toast if not only the current artifact type is included in the import file', async () => {
@@ -150,6 +176,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     await ui.uploadFile(['some-other-list-id', currentListId]);
     await userEvent.click(ui.getImportButton());
+    await userEvent.click(ui.getConfirmModalConfirmButton());
 
     expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
       expect.objectContaining(
@@ -157,6 +184,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       ),
       { title: artifactListPageLabels.pageImportErrorToastTitle }
     );
+    expect(ui.queryConfirmModal()).not.toBeInTheDocument();
   });
 
   it('should show an error toast if the import API fails', async () => {
@@ -168,10 +196,12 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     await ui.uploadFile([currentListId]);
     await userEvent.click(ui.getImportButton());
+    await userEvent.click(ui.getConfirmModalConfirmButton());
 
     expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
       expect.objectContaining(new Error('Fail message from server')),
       { title: 'Artifact list import failed', toastMessage: 'Fail message from server' }
     );
+    expect(ui.queryConfirmModal()).not.toBeInTheDocument();
   });
 });
