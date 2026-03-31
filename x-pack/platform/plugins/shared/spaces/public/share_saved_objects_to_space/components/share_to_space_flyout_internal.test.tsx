@@ -142,6 +142,7 @@ const setup = async (opts: SetupOpts = {}) => {
   const shareableReferencesResult = {
     objects: [
       {
+        // this is the result for the saved object target; by default, it has no references
         type: savedObjectToShare.type,
         id: savedObjectToShare.id,
         spaces: savedObjectToShare.namespaces,
@@ -635,28 +636,33 @@ describe('ShareToSpaceFlyout', () => {
 
     const mockSpaces = [
       {
+        // normal "fully authorized" space selection option -- not the active space
         id: 'space-1',
         name: 'Space 1',
         disabledFeatures: [],
       },
       {
+        // normal "fully authorized" space selection option, with a disabled feature -- not the active space
         id: 'space-2',
         name: 'Space 2',
         disabledFeatures: [mockFeatureId],
       },
       {
+        // "partially authorized" space selection option -- not the active space
         id: 'space-3',
         name: 'Space 3',
         disabledFeatures: [],
         authorizedPurposes: { shareSavedObjectsIntoSpace: false },
       },
       {
+        // "partially authorized" space selection option, with a disabled feature -- not the active space
         id: 'space-4',
         name: 'Space 4',
         disabledFeatures: [mockFeatureId],
         authorizedPurposes: { shareSavedObjectsIntoSpace: false },
       },
       {
+        // "active space" selection option (determined by an ID that matches the result of `getActiveSpace`, mocked at top)
         id: 'my-active-space',
         name: 'my active space',
         disabledFeatures: [],
@@ -679,6 +685,7 @@ describe('ShareToSpaceFlyout', () => {
           This space
         </EuiBadge>
       `);
+      // by definition, the active space will always be checked
       expect(option.checked).toEqual('on');
       expect(option.disabled).toEqual(true);
     };
@@ -758,7 +765,7 @@ describe('ShareToSpaceFlyout', () => {
 
     describe('with behaviorContext="within-space" (default)', () => {
       it('correctly defines space selection options', async () => {
-        const namespaces = ['my-active-space', 'space-1', 'space-3'];
+        const namespaces = ['my-active-space', 'space-1', 'space-3']; // the saved object's current namespaces
         await setup({ mockSpaces, namespaces });
 
         const options = getSelectableOptions();
@@ -772,7 +779,7 @@ describe('ShareToSpaceFlyout', () => {
 
       describe('with a SpacesContext for a specific feature', () => {
         it('correctly defines space selection options when affected spaces are not selected', async () => {
-          const namespaces = ['my-active-space'];
+          const namespaces = ['my-active-space']; // the saved object's current namespaces
           await setup({ mockSpaces, namespaces, mockFeatureId });
 
           const options = getSelectableOptions();
@@ -784,7 +791,7 @@ describe('ShareToSpaceFlyout', () => {
         });
 
         it('correctly defines space selection options when affected spaces are already selected', async () => {
-          const namespaces = ['my-active-space', 'space-1', 'space-2', 'space-3', 'space-4'];
+          const namespaces = ['my-active-space', 'space-1', 'space-2', 'space-3', 'space-4']; // the saved object's current namespaces
           await setup({ mockSpaces, namespaces, mockFeatureId });
 
           const options = getSelectableOptions();
@@ -807,7 +814,7 @@ describe('ShareToSpaceFlyout', () => {
       const behaviorContext = 'outside-space';
 
       it('correctly defines space selection options', async () => {
-        const namespaces = ['my-active-space', 'space-1', 'space-3'];
+        const namespaces = ['my-active-space', 'space-1', 'space-3']; // the saved object's current namespaces
         await setup({ behaviorContext, mockSpaces, namespaces });
 
         const options = getSelectableOptions();
@@ -823,16 +830,17 @@ describe('ShareToSpaceFlyout', () => {
 
   describe('alias list', () => {
     it('shows only aliases for spaces that exist', async () => {
-      const namespaces = ['my-active-space'];
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
       await setup({
         namespaces,
         additionalShareableReferences: [
+          // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
           {
             type: 'foo',
             id: '1',
             spaces: namespaces,
             inboundReferences: [],
-            spacesWithMatchingAliases: ['space-1', 'some-space-that-does-not-exist'],
+            spacesWithMatchingAliases: ['space-1', 'some-space-that-does-not-exist'], // space-1 exists, it is mocked at the top
           },
         ],
       });
@@ -844,6 +852,7 @@ describe('ShareToSpaceFlyout', () => {
       expect(lastAliasCall[0].aliasesToDisable).toEqual([
         { targetType: 'foo', sourceId: '1', targetSpace: 'space-1', spaceExists: true },
         {
+          // this alias is present, and it will be disabled, but it is not displayed in the table below due to the 'spaceExists' field
           targetType: 'foo',
           sourceId: '1',
           targetSpace: 'some-space-that-does-not-exist',
@@ -855,16 +864,17 @@ describe('ShareToSpaceFlyout', () => {
     });
 
     it('shows only aliases for selected spaces', async () => {
-      const namespaces = ['my-active-space'];
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
       await setup({
         namespaces,
         additionalShareableReferences: [
+          // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
           {
             type: 'foo',
             id: '1',
             spaces: namespaces,
             inboundReferences: [],
-            spacesWithMatchingAliases: ['space-1', 'space-2'],
+            spacesWithMatchingAliases: ['space-1', 'space-2'], // space-1 and space-2 both exist, they are mocked at the top
           },
         ],
       });
@@ -884,20 +894,21 @@ describe('ShareToSpaceFlyout', () => {
 
   describe('footer', () => {
     it('does not show a description of relatives (references) if there are none', async () => {
-      const namespaces = ['my-active-space'];
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
       await setup({ namespaces });
 
       expect(screen.queryByText(/related.*will also change/)).not.toBeInTheDocument();
     });
 
     it('shows a description of filtered relatives (references)', async () => {
-      const namespaces = ['my-active-space'];
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
       await setup({
         namespaces,
         additionalShareableReferences: [
-          { type: 'foo', id: '1', spaces: [], inboundReferences: [] }, // not counted because spaces is empty
-          { type: 'foo', id: '2', spaces: namespaces, inboundReferences: [], isMissing: true }, // not counted because isMissing
-          { type: 'foo', id: '3', spaces: namespaces, inboundReferences: [] }, // counted
+          // the saved object target is already included in the mock results by default; it will not be counted
+          { type: 'foo', id: '1', spaces: [], inboundReferences: [] }, // this will not be counted because spaces is empty (it may not be a shareable type)
+          { type: 'foo', id: '2', spaces: namespaces, inboundReferences: [], isMissing: true }, // this will not be counted because isMissing === true
+          { type: 'foo', id: '3', spaces: namespaces, inboundReferences: [] }, // this will be counted
         ],
       });
 
@@ -915,7 +926,7 @@ describe('ShareToSpaceFlyout', () => {
     }
 
     it('shows a save button if there are no legacy URL aliases to disable', async () => {
-      const namespaces = ['my-active-space'];
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
       await setup({ namespaces });
 
       changeSpaceSelection(['*']);
@@ -923,10 +934,11 @@ describe('ShareToSpaceFlyout', () => {
     });
 
     it('shows a save button if there are legacy URL aliases to disable, but none for existing spaces', async () => {
-      const namespaces = ['my-active-space'];
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
       await setup({
         namespaces,
         additionalShareableReferences: [
+          // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
           {
             type: 'foo',
             id: '1',
@@ -942,16 +954,17 @@ describe('ShareToSpaceFlyout', () => {
     });
 
     it('shows a continue button if there are legacy URL aliases to disable for existing spaces', async () => {
-      const namespaces = ['my-active-space'];
+      const namespaces = ['my-active-space']; // the saved object's current namespaces
       await setup({
         namespaces,
         additionalShareableReferences: [
+          // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
           {
             type: 'foo',
             id: '1',
             spaces: namespaces,
             inboundReferences: [],
-            spacesWithMatchingAliases: ['space-1', 'some-space-that-does-not-exist'],
+            spacesWithMatchingAliases: ['space-1', 'some-space-that-does-not-exist'], // space-1 exists, it is mocked at the top
           },
         ],
       });
