@@ -2365,8 +2365,24 @@ module.exports = {
             ],
             patterns: [
               {
-                group: ['@kbn/scout-*', '@playwright/test/**', 'playwright/**'],
-                message: "Platform tests should import only from '@kbn/scout'.",
+                group: [
+                  '@kbn/scout-oblt',
+                  '@kbn/scout-oblt/**',
+                  '@kbn/scout-search',
+                  '@kbn/scout-search/**',
+                  '@kbn/scout-security',
+                  '@kbn/scout-security/**',
+                  '@kbn/scout-info',
+                  '@kbn/scout-info/**',
+                  '@kbn/scout-reporting',
+                  '@kbn/scout-reporting/**',
+                  '@kbn/scout-release-testing',
+                  '@kbn/scout-release-testing/**',
+                  '@playwright/test/**',
+                  'playwright/**',
+                ],
+                message:
+                  "Platform tests should import from '@kbn/scout' (and '@kbn/scout-synthtrace' if you need synthtrace).",
               },
             ],
           },

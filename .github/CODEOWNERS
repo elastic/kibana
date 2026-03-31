@@ -569,6 +569,7 @@ src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-re
 src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
 src/platform/packages/shared/kbn-saved-search-component @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-scout @elastic/appex-qa
+src/platform/packages/shared/kbn-scout-synthtrace @elastic/appex-qa
 src/platform/packages/shared/kbn-search-api-panels @elastic/search-kibana
 src/platform/packages/shared/kbn-search-connectors @elastic/search-kibana
 src/platform/packages/shared/kbn-search-errors @elastic/kibana-data-discovery
@@ -597,7 +598,11 @@ src/platform/packages/shared/kbn-storybook @elastic/kibana-operations
 src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-assistant
 src/platform/packages/shared/kbn-telemetry-config @elastic/kibana-core
 src/platform/packages/shared/kbn-test @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-docker-servers @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-es-server @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-kibana-server @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-saml-auth @elastic/appex-qa
 src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-timerange @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-tooling-log @elastic/kibana-operations
