@@ -93,13 +93,33 @@ function inlineStepsItemsRef(schema: StreamlangJsonSchema): void {
     steps.items = JSON.parse(JSON.stringify(resolved));
   }
 
-  // Also inline else.items.$ref if present
-  const elseArr = schemaProps?.else as Record<string, unknown> | undefined;
+  // Also inline else.items.$ref if present inside the condition property
+  const conditionProp = schemaProps?.condition as Record<string, unknown> | undefined;
+  const conditionProps = conditionProp?.properties as Record<string, unknown> | undefined;
+  const elseArr = conditionProps?.else as Record<string, unknown> | undefined;
   const elseItems = elseArr?.items as (Record<string, unknown> & { $ref?: string }) | undefined;
   if (elseItems && typeof elseItems.$ref === 'string') {
     const resolvedElse = resolveJsonPointer(schema, elseItems.$ref);
     if (resolvedElse && elseArr) {
       elseArr.items = JSON.parse(JSON.stringify(resolvedElse));
+    }
+  }
+
+  // Also check condition's anyOf variants for else.items.$ref
+  const conditionAnyOf = conditionProp?.anyOf as Array<Record<string, unknown>> | undefined;
+  if (Array.isArray(conditionAnyOf)) {
+    for (const variant of conditionAnyOf) {
+      const variantProps = variant?.properties as Record<string, unknown> | undefined;
+      const variantElse = variantProps?.else as Record<string, unknown> | undefined;
+      const variantElseItems = variantElse?.items as
+        | (Record<string, unknown> & { $ref?: string })
+        | undefined;
+      if (variantElseItems && typeof variantElseItems.$ref === 'string') {
+        const resolvedVariantElse = resolveJsonPointer(schema, variantElseItems.$ref);
+        if (resolvedVariantElse && variantElse) {
+          variantElse.items = JSON.parse(JSON.stringify(resolvedVariantElse));
+        }
+      }
     }
   }
 }
@@ -476,12 +496,9 @@ function enhanceConditionBlockSchema(
       },
     },
     {
-      label: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.conditionBlockElse.label',
-        {
-          defaultMessage: 'Condition block with else',
-        }
-      ),
+      label: i18n.translate('xpack.streams.streamlangSchema.snippets.conditionBlockElse.label', {
+        defaultMessage: 'Condition block with else',
+      }),
       description: i18n.translate(
         'xpack.streams.streamlangSchema.snippets.conditionBlockElse.description',
         {
@@ -535,6 +552,19 @@ function enhanceConditionPropertyForEditor(
   const properties = whereBlockOption?.properties as Record<string, unknown> | undefined;
   const conditionProperty = properties?.condition as Record<string, unknown> | undefined;
 
+  // Resolve $ref if the condition property is a reference (Zod v4 may emit $ref for named schemas)
+  if (conditionProperty && typeof conditionProperty.$ref === 'string') {
+    const resolved = resolveJsonPointer(rootSchema, conditionProperty.$ref) as
+      | Record<string, unknown>
+      | undefined;
+    if (resolved) {
+      // Replace the $ref with the resolved schema (mutate in-place so Monaco sees the full schema)
+      const resolvedClone = JSON.parse(JSON.stringify(resolved)) as Record<string, unknown>;
+      Object.keys(conditionProperty).forEach((k) => delete conditionProperty![k]);
+      Object.assign(conditionProperty, resolvedClone);
+    }
+  }
+
   // Validate the condition property has the expected allOf structure
   if (!isAllOfIntersection(conditionProperty)) {
     return;
@@ -565,8 +595,10 @@ function enhanceConditionPropertyForEditor(
 
   // Clone and augment the condition schema with the steps property
   const augmentedConditionSchema = cloneAndAddStepsToCondition(
+    rootSchema,
     conditionSchema,
     stepsInfo.stepsPropertySchema,
+    stepsInfo.elsePropertySchema,
     stepsInfo.shouldRequireSteps
   );
 
@@ -578,12 +610,13 @@ function enhanceConditionPropertyForEditor(
   const conditionProp = conditionProperty as Record<string, unknown>;
   flattenIntersectionToUnion(conditionProp, augmentedConditionSchema);
 
-  // Add steps property to the flattened schema
+  // Add steps and else properties to the flattened schema
   const conditionProps = conditionProp.properties as Record<string, unknown> | undefined;
   conditionProp.type = 'object';
   conditionProp.properties = {
     ...(conditionProps ?? {}),
     steps: stepsInfo.stepsPropertySchema,
+    ...(stepsInfo.elsePropertySchema ? { else: stepsInfo.elsePropertySchema } : {}),
   };
 
   if (stepsInfo.shouldRequireSteps) {
@@ -616,9 +649,13 @@ function extractConditionRef(candidate: unknown): string | undefined {
 /**
  * Extract steps property schema and required flag from an allOf element.
  */
-function extractStepsInfo(
-  candidate: unknown
-): { stepsPropertySchema: Record<string, unknown>; shouldRequireSteps: boolean } | undefined {
+function extractStepsInfo(candidate: unknown):
+  | {
+      stepsPropertySchema: Record<string, unknown>;
+      elsePropertySchema?: Record<string, unknown>;
+      shouldRequireSteps: boolean;
+    }
+  | undefined {
   const cand = candidate as Record<string, unknown>;
   const candProps = cand?.properties as Record<string, unknown> | undefined;
   if (!candidate || typeof candidate !== 'object' || !candProps?.steps) {
@@ -627,8 +664,10 @@ function extractStepsInfo(
 
   const required = cand.required;
   const stepsSchema = candProps.steps;
+  const elseSchema = candProps.else;
   return {
     stepsPropertySchema: stepsSchema as Record<string, unknown>,
+    elsePropertySchema: elseSchema as Record<string, unknown> | undefined,
     shouldRequireSteps: Array.isArray(required) && (required as string[]).includes('steps'),
   };
 }
@@ -677,8 +716,10 @@ function resolveJsonPointer(root: unknown, pointer: string): unknown {
  * add `steps` to each branch for Monaco to show proper autocomplete.
  */
 function cloneAndAddStepsToCondition(
+  rootSchema: StreamlangJsonSchema,
   conditionSchema: Record<string, unknown>,
   stepsPropertySchema: Record<string, unknown>,
+  elsePropertySchema: Record<string, unknown> | undefined,
   shouldRequireSteps: boolean
 ): Record<string, unknown> | undefined {
   if (!conditionSchema || typeof conditionSchema !== 'object') {
@@ -689,7 +730,9 @@ function cloneAndAddStepsToCondition(
   const enhanced = recursivelyAddStepsProperty(
     clonedSchema,
     stepsPropertySchema,
-    shouldRequireSteps
+    elsePropertySchema,
+    shouldRequireSteps,
+    rootSchema
   );
 
   // Add defaultSnippets for filter condition operators to help Monaco suggest them
@@ -1034,10 +1077,28 @@ function addOperatorSnippetsToFilterCondition(
 function recursivelyAddStepsProperty(
   node: Record<string, unknown>,
   stepsPropertySchema: Record<string, unknown>,
-  shouldRequireSteps: boolean
+  elsePropertySchema: Record<string, unknown> | undefined,
+  shouldRequireSteps: boolean,
+  rootSchema?: StreamlangJsonSchema
 ): Record<string, unknown> {
   if (!node || typeof node !== 'object') {
     return node;
+  }
+
+  // Resolve $ref pointers so we can add steps/else to the referenced schema
+  if (typeof node.$ref === 'string' && rootSchema) {
+    const resolved = resolveJsonPointer(rootSchema, node.$ref) as
+      | Record<string, unknown>
+      | undefined;
+    if (resolved) {
+      return recursivelyAddStepsProperty(
+        JSON.parse(JSON.stringify(resolved)),
+        stepsPropertySchema,
+        elsePropertySchema,
+        shouldRequireSteps,
+        rootSchema
+      );
+    }
   }
 
   // Recursively process union/intersection schemas
@@ -1047,7 +1108,13 @@ function recursivelyAddStepsProperty(
     return {
       ...node,
       [unionType]: (options ?? []).map((option) =>
-        recursivelyAddStepsProperty(option, stepsPropertySchema, shouldRequireSteps)
+        recursivelyAddStepsProperty(
+          option,
+          stepsPropertySchema,
+          elsePropertySchema,
+          shouldRequireSteps,
+          rootSchema
+        )
       ),
     };
   }
@@ -1057,8 +1124,13 @@ function recursivelyAddStepsProperty(
     return node;
   }
 
-  // Add the steps property to this object variant
-  return addStepsPropertyToObject(node, stepsPropertySchema, shouldRequireSteps);
+  // Add the steps and else properties to this object variant
+  return addStepsPropertyToObject(
+    node,
+    stepsPropertySchema,
+    elsePropertySchema,
+    shouldRequireSteps
+  );
 }
 
 /**
@@ -1089,6 +1161,7 @@ function isObjectSchema(node: Record<string, unknown>): boolean {
 function addStepsPropertyToObject(
   node: Record<string, unknown>,
   stepsPropertySchema: Record<string, unknown>,
+  elsePropertySchema: Record<string, unknown> | undefined,
   shouldRequireSteps: boolean
 ): Record<string, unknown> {
   const nodeProps = node.properties as Record<string, unknown> | undefined;
@@ -1097,6 +1170,7 @@ function addStepsPropertyToObject(
     properties: {
       ...(nodeProps ?? {}),
       steps: stepsPropertySchema,
+      ...(elsePropertySchema ? { else: elsePropertySchema } : {}),
     },
   };
 

@@ -77,7 +77,7 @@ async function buildSimulationProcessorsFromSteps({
   for (const step of steps) {
     if (isConditionBlock(step)) {
       const conditionId = step.customIdentifier;
-      const { steps: nestedSteps, ...restCondition } = step.condition;
+      const { steps: nestedSteps, else: elseSteps, ...restCondition } = step.condition;
       const combinedCondition = combineConditionsAsAnd(parentCondition, restCondition);
 
       // Only emit no-op processors for identified condition blocks
@@ -89,6 +89,7 @@ async function buildSimulationProcessorsFromSteps({
         );
       }
 
+      // Process if-branch steps
       processors.push(
         ...(await buildSimulationProcessorsFromSteps({
           steps: nestedSteps,
@@ -96,6 +97,20 @@ async function buildSimulationProcessorsFromSteps({
           resolverOptions,
         }))
       );
+
+      // Process else-branch steps with negated condition
+      if (elseSteps && elseSteps.length > 0) {
+        const negatedCondition = combinedCondition
+          ? combineConditionsAsAnd(parentCondition, { not: restCondition })
+          : undefined;
+        processors.push(
+          ...(await buildSimulationProcessorsFromSteps({
+            steps: elseSteps,
+            parentCondition: negatedCondition,
+            resolverOptions,
+          }))
+        );
+      }
 
       continue;
     }

@@ -113,13 +113,21 @@ export const interactiveModeMachine = setup({
           conversionOptions.branch ?? 'if'
         );
 
-        // If the processor is created under a condition block, automatically select that condition.
+        // If the processor is created under a condition block without an else branch,
+        // automatically select that condition to filter the simulation preview.
+        // When a condition has both if and else branches, all documents are covered,
+        // so filtering would not be useful.
         const parentId = conversionOptions.parentId;
         if (parentId) {
           const parentStep = assignArgs.context.stepRefs
             .find((ref) => ref.id === parentId)
             ?.getSnapshot()?.context.step;
-          if (parentStep && isConditionBlock(parentStep)) {
+          const hasElseBranch = assignArgs.context.stepRefs.some(
+            (ref) =>
+              ref.getSnapshot()?.context.step.parentId === parentId &&
+              ref.getSnapshot()?.context.step.branch === 'else'
+          );
+          if (parentStep && isConditionBlock(parentStep) && !hasElseBranch) {
             assignArgs.context.parentRef.send({
               type: 'simulation.filterByConditionAuto',
               conditionId: parentId,
@@ -229,7 +237,12 @@ export const interactiveModeMachine = setup({
 
       const parentStep = context.stepRefs.find((ref) => ref.id === parentId)?.getSnapshot()
         ?.context.step;
-      if (parentStep && isConditionBlock(parentStep)) {
+      const hasElseBranch = context.stepRefs.some(
+        (ref) =>
+          ref.getSnapshot()?.context.step.parentId === parentId &&
+          ref.getSnapshot()?.context.step.branch === 'else'
+      );
+      if (parentStep && isConditionBlock(parentStep) && !hasElseBranch) {
         context.parentRef.send({ type: 'simulation.filterByConditionAuto', conditionId: parentId });
       }
     },

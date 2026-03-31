@@ -18,11 +18,16 @@ export function stripCustomIdentifiers(dsl: StreamlangDSL): StreamlangDSL {
     return steps.map((step) => {
       if (isConditionBlock(step)) {
         const { customIdentifier: _, ...restOfStep } = step;
+        const strippedElse =
+          step.condition.else && step.condition.else.length > 0
+            ? stripFromSteps(step.condition.else)
+            : undefined;
         return {
           ...restOfStep,
           condition: {
             ...step.condition,
             steps: stripFromSteps(step.condition.steps),
+            ...(strippedElse ? { else: strippedElse } : {}),
           },
         };
       } else {

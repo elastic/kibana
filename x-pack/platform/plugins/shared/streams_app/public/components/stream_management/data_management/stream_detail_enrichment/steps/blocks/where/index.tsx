@@ -215,63 +215,63 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                     rootLevelMap={rootLevelMap}
                     stepsProcessingSummaryMap={stepsProcessingSummaryMap}
                     isFirstStepInLevel={index === 0}
-                    isLastStepInLevel={
-                      index === ifBranchSteps.length - 1 && !hasElseBranch
-                    }
+                    isLastStepInLevel={index === ifBranchSteps.length - 1 && !hasElseBranch}
                     readOnly={props.readOnly}
                   />
                 </li>
               ))}
             </ConnectedNodesList>
-            {hasElseBranch && (
+            {(hasElseBranch || !props.readOnly) && (
               <>
                 <EuiSpacer size="s" />
-                <EuiBadge color="hollow">
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.elseBranchLabel',
-                    { defaultMessage: 'Else' }
-                  )}
-                </EuiBadge>
-                <EuiSpacer size="s" />
-                <ConnectedNodesList>
-                  {elseBranchSteps.map((childStep, index) => (
-                    <li key={childStep.id}>
-                      <StepsListItem
-                        stepRef={childStep}
-                        level={level + 1}
-                        stepUnderEdit={stepUnderEdit}
-                        rootLevelMap={rootLevelMap}
-                        stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-                        isFirstStepInLevel={index === 0}
-                        isLastStepInLevel={index === elseBranchSteps.length - 1}
-                        readOnly={props.readOnly}
+                <EuiFlexGroup
+                  gutterSize="s"
+                  alignItems="center"
+                  css={css`
+                    position: relative;
+                    z-index: 1;
+                  `}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">
+                      {i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.enrichment.elseBranchLabel',
+                        { defaultMessage: 'Else' }
+                      )}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                  {!props.readOnly && (
+                    <EuiFlexItem grow={false}>
+                      <CreateStepButton
+                        parentId={step.customIdentifier}
+                        branch="else"
+                        mode="inline"
+                        nestingDisabled={level >= 1}
                       />
-                    </li>
-                  ))}
-                </ConnectedNodesList>
-              </>
-            )}
-            {!props.readOnly && (
-              <>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <CreateStepButton
-                      parentId={step.customIdentifier}
-                      branch="if"
-                      mode="inline"
-                      nestingDisabled={level >= 1}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <CreateStepButton
-                      parentId={step.customIdentifier}
-                      branch="else"
-                      mode="inline"
-                      nestingDisabled={level >= 1}
-                    />
-                  </EuiFlexItem>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
+                {hasElseBranch && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <ConnectedNodesList>
+                      {elseBranchSteps.map((childStep, index) => (
+                        <li key={childStep.id}>
+                          <StepsListItem
+                            stepRef={childStep}
+                            level={level + 1}
+                            stepUnderEdit={stepUnderEdit}
+                            rootLevelMap={rootLevelMap}
+                            stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+                            isFirstStepInLevel={index === 0}
+                            isLastStepInLevel={index === elseBranchSteps.length - 1}
+                            readOnly={props.readOnly}
+                          />
+                        </li>
+                      ))}
+                    </ConnectedNodesList>
+                  </>
+                )}
               </>
             )}
           </>

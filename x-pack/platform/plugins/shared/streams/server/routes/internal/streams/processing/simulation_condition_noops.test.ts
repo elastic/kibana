@@ -113,6 +113,50 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
     expect(childSetIf).toBe(conditionToPainless({ and: [parentCondition, childCondition] }));
   });
 
+  it('processes else-branch steps with negated condition', async () => {
+    const dsl: StreamlangDSL = {
+      steps: [
+        {
+          customIdentifier: 'cond-1',
+          condition: {
+            field: 'foo',
+            eq: 'bar',
+            steps: [
+              {
+                customIdentifier: 'proc-if',
+                action: 'set',
+                to: 'target',
+                value: 'matched',
+              },
+            ],
+            else: [
+              {
+                customIdentifier: 'proc-else',
+                action: 'set',
+                to: 'target',
+                value: 'not_matched',
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    const processors = await buildSimulationProcessorsWithConditionNoops(dsl);
+
+    // Expect: condition noop (set + remove), if-branch proc, else-branch proc = 4
+    expect(processors).toHaveLength(4);
+    // First two: condition noop
+    expect(processors[0]!.set?.tag).toBe('cond-1');
+    expect(processors[1]!.remove?.tag).toBe('cond-1:noop-cleanup');
+    // If-branch processor with original condition
+    expect(processors[2]!.set?.tag).toBe('proc-if');
+    expect(processors[2]!.set?.if).toBe(conditionToPainless({ field: 'foo', eq: 'bar' }));
+    // Else-branch processor with negated condition
+    expect(processors[3]!.set?.tag).toBe('proc-else');
+    expect(processors[3]!.set?.if).toBe(conditionToPainless({ not: { field: 'foo', eq: 'bar' } }));
+  });
+
   it('transpiles enrich steps when an enrich policy resolver is provided', async () => {
     const enrichResolverOptions: StreamlangResolverOptions = {
       enrich: async () =>
