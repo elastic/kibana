@@ -40,14 +40,14 @@ export interface TimeSeriesQueryParameters {
 export async function fetchDataViewBase(
   esClient: ElasticsearchClient,
   index: string | string[],
-  fieldNames?: string[]
+  fieldNames: string[]
 ): Promise<DataViewBase> {
   const indices = Array.isArray(index) ? index : [index];
   const title = indices.join(',');
 
   const fieldCapsResponse = await esClient.fieldCaps({
     index: indices,
-    fields: fieldNames?.length ? fieldNames : ['*'],
+    fields: fieldNames,
     ignore_unavailable: true,
     allow_no_indices: true,
   });
@@ -98,13 +98,15 @@ export async function timeSeriesQuery(
   if (filterKuery) {
     const kueryNode = fromKueryExpression(filterKuery);
     let dataView: DataViewBase | undefined;
-    try {
-      const fieldNames = getKqlFieldNames(kueryNode);
-      dataView = await fetchDataViewBase(esClient, index, fieldNames);
-    } catch (err) {
-      logger.warn(
-        `indexThreshold timeSeriesQuery: failed to fetch field caps for filter, falling back to untyped conversion: ${err.message}`
-      );
+    const fieldNames = getKqlFieldNames(kueryNode);
+    if (fieldNames.length > 0) {
+      try {
+        dataView = await fetchDataViewBase(esClient, index, fieldNames);
+      } catch (err) {
+        logger.warn(
+          `indexThreshold timeSeriesQuery: failed to fetch field caps for filter, falling back to untyped conversion: ${err.message}`
+        );
+      }
     }
     filterQuery = [toElasticsearchQuery(kueryNode, dataView)];
   }

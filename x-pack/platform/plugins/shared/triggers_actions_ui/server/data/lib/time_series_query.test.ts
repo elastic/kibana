@@ -836,7 +836,7 @@ describe('fetchDataViewBase', () => {
       },
     } as estypes.FieldCapsResponse);
 
-    const result = await fetchDataViewBase(esClient, 'my-index');
+    const result = await fetchDataViewBase(esClient, 'my-index', ['host.name', 'message']);
 
     expect(result.title).toBe('my-index');
     expect(result.fields).toEqual(
@@ -864,7 +864,7 @@ describe('fetchDataViewBase', () => {
       fields: {},
     } as estypes.FieldCapsResponse);
 
-    const result = await fetchDataViewBase(esClient, ['index-a', 'index-b']);
+    const result = await fetchDataViewBase(esClient, ['index-a', 'index-b'], ['some-field']);
     expect(result.title).toBe('index-a,index-b');
     expect(result.fields).toEqual([]);
   });
