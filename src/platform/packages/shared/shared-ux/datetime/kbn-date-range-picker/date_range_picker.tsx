@@ -75,7 +75,7 @@ export interface DateRangePickerProps {
   defaultValue?: string;
   /** Callback for when the time changes */
   onChange: (props: DateRangePickerOnChangeProps) => void;
-  /** Custom format for displaying (and parsing?) dates */
+  /** Additional format string for parsing absolute dates (does not affect display). */
   dateFormat?: string;
   /** Show invalid state */
   isInvalid?: boolean;

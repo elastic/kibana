@@ -60,8 +60,9 @@ export interface TimeRangeTransformOptions {
   /** Additional accepted delimiter (on top of the built-in `'to'`, `'until'`, and `'-'`) */
   delimiter?: string;
   /**
-   * Format string used for both displaying and parsing absolute dates.
-   * Prepended to built-in formats so custom-formatted dates round-trip correctly.
+   * Additional format string for parsing absolute dates.
+   * Prepended to built-in formats so the parser recognises custom-formatted input.
+   * Does not affect how dates are displayed.
    */
   dateFormat?: string;
   /**

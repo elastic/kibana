@@ -196,12 +196,12 @@ export function DateRangePickerProvider({
   );
   const timePrecision = settings.timePrecision ?? 's';
   const displayText = useMemo(
-    () => timeRangeToDisplayText(timeRange, { dateFormat, timePrecision }),
-    [dateFormat, timeRange, timePrecision]
+    () => timeRangeToDisplayText(timeRange, { timePrecision }),
+    [timeRange, timePrecision]
   );
   const displayFullFormattedText = useMemo(
-    () => timeRangeToFullFormattedText(timeRange, { dateFormat, timePrecision: 'ms' }),
-    [timeRange, dateFormat]
+    () => timeRangeToFullFormattedText(timeRange, { timePrecision: 'ms' }),
+    [timeRange]
   );
   const duration =
     timeRange.startDate && timeRange.endDate
