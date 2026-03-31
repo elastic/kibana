@@ -291,12 +291,11 @@ async function runWatchBuild(
             for (const asset of result.assets ?? []) {
               previousAssetSizes.set(asset.name, asset.size);
             }
-            copyBundlesToPluginDirs(repoRoot, log);
+            log?.debug('Bundles ready at target/public/bundles/');
             if (stats.hash && hmrServer) {
               hmrServer.broadcast(stats.hash);
               cleanupStaleHotUpdates(stats.hash);
             }
-            log?.info('Watching for changes... (Ctrl+C to stop)');
           } else if (hmrServer && result.errors?.length) {
             hmrServer.broadcastErrors(result.errors);
           }
@@ -319,12 +318,12 @@ async function runWatchBuild(
           if (hmrServer && result.errors?.length) {
             hmrServer.broadcastErrors(result.errors);
           }
-          log?.error(`Rebuild failed in ${rebuildTime}s - waiting for changes...`);
+          log?.error(`Rebuild failed in ${rebuildTime}s — waiting for changes to fix errors...`);
         } else {
           const timings = stats.toJson({ timings: true, assets: false, errors: false, warnings: false, modules: false, chunks: false });
           const rebuildTime = timings.time ? (timings.time / 1000).toFixed(1) : '?';
 
-          copyBundlesToPluginDirs(repoRoot, log, true);
+          log?.debug('Bundles ready at target/public/bundles/');
           if (stats.hash && hmrServer) {
             const changedFiles = compiler.modifiedFiles
               ? [...compiler.modifiedFiles]
@@ -387,7 +386,7 @@ function processStats(
 
   if (hasErrors) {
     const output = stats.toString({
-      colors: false,
+      colors: true,
       errors: true,
       errorDetails: true,
       warnings: false,
@@ -396,16 +395,19 @@ function processStats(
       chunks: false,
     });
 
-    log?.error('Build errors:');
-    // eslint-disable-next-line no-console
-    console.error(output);
+    for (const line of output.split('\n')) {
+      // Filter out "Entrypoint" stats lines — not useful for diagnosing errors
+      if (line.trim() && !line.startsWith('Entrypoint ')) {
+        log?.error(line);
+      }
+    }
 
     const errorInfo = stats.toJson({ errors: true, warnings: false, assets: false, modules: false, chunks: false });
     const errorMessages = errorInfo.errors?.map((e) => e.message) ?? [];
 
     return {
       success: false,
-      errors: errorMessages.length > 0 ? errorMessages : ['Build failed with errors - see output above'],
+      errors: errorMessages.length > 0 ? errorMessages : ['Build failed with errors'],
       duration,
     };
   }
@@ -441,11 +443,8 @@ function processStats(
   const compilationTime = info.time ? info.time / 1000 : undefined;
 
   if (!quiet) {
-    log?.success(`Built ${entryCount} entries, total size: ${formatSize(totalSize)}`);
-
-    if (duration) {
-      log?.info(`Build time: ${duration.toFixed(2)}s`);
-    }
+    const entryLabel = entryCount === 1 ? 'entry' : 'entries';
+    log?.debug(`${entryCount} ${entryLabel}, ${formatSize(totalSize)}`);
   }
 
   return {
@@ -458,32 +457,7 @@ function processStats(
   };
 }
 
-/**
- * Copy built bundles from central output to each plugin's target/public directory.
- * This is needed because Kibana serves bundles from each plugin's own directory.
- */
-function copyBundlesToPluginDirs(repoRoot: string, log: ToolingLog | undefined, quiet = false) {
-  const bundlesDir = Path.resolve(repoRoot, 'target/public/bundles');
-
-  if (!Fs.existsSync(bundlesDir)) {
-    log?.warning('Bundles directory not found, skipping copy');
-    return;
-  }
-
-  const pluginDirs = Fs.readdirSync(bundlesDir, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => d.name);
-
-  if (quiet) {
-    log?.debug(`Distributing bundles to ${pluginDirs.length} plugin directories...`);
-    log?.debug('Bundles ready at target/public/bundles/');
-  } else {
-    log?.info(`Distributing bundles to ${pluginDirs.length} plugin directories...`);
-    log?.info('Bundles ready at target/public/bundles/');
-  }
-}
-
-function formatSize(bytes: number): string {
+export function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;

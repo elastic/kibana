@@ -17,10 +17,10 @@
  * Communication with parent process via IPC:
  * - Parent sends: { type: 'start', options: {...} }
  * - Worker sends: { type: 'progress', percent: number, stage: string }
- * - Worker sends: { type: 'done', success: boolean, errors?: string[] }
+ * - Worker sends: { type: 'done', success: boolean, summary?: string, errors?: string[] }
  */
 
-import { runBuild } from './run_build';
+import { runBuild, formatSize } from './run_build';
 import type { ThemeTag } from './types';
 
 interface StartMessage {
@@ -66,7 +66,9 @@ async function handleStart(options: StartMessage['options']) {
     });
 
     if (result.success) {
-      process.send?.({ type: 'done', success: true });
+      const entryLabel = result.entryCount === 1 ? 'entry' : 'entries';
+      const summary = `${result.entryCount} ${entryLabel}, ${formatSize(result.totalSize)}`;
+      process.send?.({ type: 'done', success: true, summary });
     } else {
       process.send?.({ type: 'done', success: false, errors: result.errors });
     }

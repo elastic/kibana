@@ -151,18 +151,15 @@ export class RspackOptimizer {
             if (message.success) {
               this.phase$.next('success');
               this.ready$.next(true);
-              log.success('RSPack build completed');
+              const summary = message.summary ? ` — ${message.summary}` : '';
+              log.success(`RSPack build completed${summary}`);
 
               if (this.options.watch) {
-                log.info('Watching for changes...');
+                log.info('Watching for changes... (Ctrl+C to stop)');
               }
             } else {
               this.phase$.next('issue');
               this.ready$.next(true);
-              log.error('Build errors:');
-              for (const error of message.errors ?? []) {
-                log.error(error);
-              }
 
               if (this.options.watch) {
                 log.info('Waiting for changes to fix errors...');
