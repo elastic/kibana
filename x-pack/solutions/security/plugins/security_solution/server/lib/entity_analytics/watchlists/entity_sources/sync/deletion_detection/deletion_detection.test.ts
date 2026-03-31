@@ -42,7 +42,11 @@ const { applyBulkRemoveSource } = jest.requireMock('../../bulk/soft_delete') as 
 describe('DeletionDetectionService', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.createLogger();
-  const targetIndex = '.entity-analytics.watchlists.test-default';
+  const watchlist = {
+    id: 'test-watchlist-id',
+    name: 'test-watchlist',
+    index: '.entity-analytics.watchlists.test-default',
+  };
 
   const createService = () => {
     const descriptorClient = new WatchlistEntitySourceClient({
@@ -53,9 +57,8 @@ describe('DeletionDetectionService', () => {
       esClient,
       crudClient: createMockCrudClient(),
       logger,
-      targetIndex,
       descriptorClient,
-      watchlistName: 'test-watchlist',
+      watchlist,
     });
   };
 
@@ -96,10 +99,13 @@ describe('DeletionDetectionService', () => {
 
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: targetIndex,
+          index: watchlist.index,
           query: {
             bool: {
-              must: [{ term: { 'labels.source_ids': 'source-idx' } }],
+              must: [
+                { term: { 'labels.source_ids': 'source-idx' } },
+                { term: { 'watchlist.id': watchlist.id } },
+              ],
               must_not: [{ terms: { 'entity.id': ['euid-1', 'euid-2'] } }],
             },
           },
@@ -129,7 +135,7 @@ describe('DeletionDetectionService', () => {
             { docId: 'doc-stale-2', sourceId: 'source-idx' },
           ],
           sourceType: 'index',
-          targetIndex,
+          watchlist,
         })
       );
     });
@@ -142,7 +148,10 @@ describe('DeletionDetectionService', () => {
         expect.objectContaining({
           query: {
             bool: {
-              must: [{ term: { 'labels.source_ids': 'source-idx' } }],
+              must: [
+                { term: { 'labels.source_ids': 'source-idx' } },
+                { term: { 'watchlist.id': watchlist.id } },
+              ],
             },
           },
         })
@@ -156,7 +165,9 @@ describe('DeletionDetectionService', () => {
       // detectNewFullSync queries the sync marker index — should not happen for index sources
       // The only search call should be the stale entity query on the target index
       expect(esClient.search).toHaveBeenCalledTimes(1);
-      expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ index: targetIndex }));
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: watchlist.index })
+      );
     });
   });
 

@@ -108,7 +108,7 @@ describe('createEntitySourcesService', () => {
     expect(mockWatchlistGet).toHaveBeenCalledWith('watchlist-1');
     expect(mockGetEntitySourceIds).toHaveBeenCalledWith('watchlist-1');
     expect(mockListEntitySources).toHaveBeenCalledWith({});
-    expect(mockGetIndexForWatchlist).toHaveBeenCalledWith('VIP Users', namespace);
+    expect(mockGetIndexForWatchlist).toHaveBeenCalledWith(namespace);
 
     expect(mockListEntityStoreEntities).toHaveBeenCalledTimes(2);
     expect(mockListEntityStoreEntities).toHaveBeenNthCalledWith(1, {
