@@ -12,7 +12,7 @@ import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { SIGNAL_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { getEnrichedFieldInfo } from '../../document_details/right/utils/enriched_field_info';
 
-import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
+import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import type {
   EnrichedFieldInfo,

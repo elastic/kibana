@@ -97,7 +97,7 @@ export const EntitiesOverview: React.FC = () => {
             />
           ),
           link,
-          iconType: !isPreviewMode ? 'arrowStart' : undefined,
+          iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
         }}
         data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
       >

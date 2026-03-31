@@ -2447,7 +2447,9 @@
         "@grpc/grpc-js",
         "@elastic/opentelemetry-node",
         "@opentelemetry/api",
+        "@opentelemetry/api-logs",
         "@opentelemetry/context-async-hooks",
+        "@opentelemetry/exporter-logs-otlp-http",
         "@opentelemetry/exporter-metrics-otlp-http",
         "@opentelemetry/exporter-metrics-otlp-grpc",
         "@opentelemetry/exporter-metrics-otlp-proto",
@@ -2459,6 +2461,7 @@
         "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
+        "@opentelemetry/sdk-logs",
         "@opentelemetry/semantic-conventions"
       ],
       "reviewers": [
