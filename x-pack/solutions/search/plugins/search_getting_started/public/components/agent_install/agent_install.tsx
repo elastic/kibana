@@ -75,19 +75,6 @@ export const AgentInstallSection = () => {
     });
   }, [closePopover, selectedUseCase, services.agentBuilder]);
 
-  const launchButton = (
-    <EuiButton
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={togglePopover}
-      data-test-subj="agentInstallLaunchBtn"
-    >
-      {i18n.translate('xpack.gettingStarted.agentInstall.launchButton', {
-        defaultMessage: 'Open in...',
-      })}
-    </EuiButton>
-  );
-
   return (
     <>
       <SearchGettingStartedSectionHeading
@@ -124,7 +111,18 @@ export const AgentInstallSection = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
-            button={launchButton}
+            button={
+              <EuiButton
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={togglePopover}
+                data-test-subj="agentInstallLaunchBtn"
+              >
+                {i18n.translate('xpack.gettingStarted.agentInstall.launchButton', {
+                  defaultMessage: 'Open in...',
+                })}
+              </EuiButton>
+            }
             isOpen={isPopoverOpen}
             closePopover={closePopover}
             panelPaddingSize="none"
