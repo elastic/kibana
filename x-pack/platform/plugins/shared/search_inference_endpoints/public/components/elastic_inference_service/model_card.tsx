@@ -25,9 +25,10 @@ import { getProviderKeyForCreator, TASK_TYPE_DISPLAY_NAME } from '../../utils/ei
 
 interface ModelCardProps {
   model: GroupedModel;
+  onClick: () => void;
 }
 
-export const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
+export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
   const { modelName, modelCreator, taskTypes, categories } = model;
   const providerKey = getProviderKeyForCreator(modelCreator);
   const provider = providerKey ? SERVICE_PROVIDERS[providerKey] : undefined;
@@ -35,7 +36,12 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
   const taskTypeLabels = taskTypes.map((tt) => TASK_TYPE_DISPLAY_NAME[tt] ?? tt).join(', ');
 
   return (
-    <EuiPanel paddingSize="l" data-test-subj={`eisModelCard-${modelName}`} hasBorder>
+    <EuiPanel
+      paddingSize="l"
+      data-test-subj={`eisModelCard-${modelName}`}
+      hasBorder
+      onClick={onClick}
+    >
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiAvatar
