@@ -14,10 +14,10 @@ import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { LensApi } from '@kbn/lens-common-2';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
 import { generateId } from '../../id_generator';
 import { mountInlinePanel } from '../../react_embeddable/mount';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_ESQL_CHART;

@@ -12,14 +12,12 @@ import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LensApi } from '@kbn/lens-common-2';
 import type { DrilldownDefinition } from '@kbn/embeddable-plugin/public';
 import { apiIsOfType, type EmbeddableApiContext } from '@kbn/presentation-publishing';
-import {
-  DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS,
-} from '../../common/constants';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS } from '../../common/constants';
 import { DiscoverDrilldownEditor } from './editor';
 import type { DiscoverDrilldownState } from '../../server';
 import type { DiscoverAppLocator } from '../trigger_actions/open_in_discover_helpers';
 import { getHref, getLocation, isCompatible } from '../trigger_actions/open_in_discover_helpers';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 export type ExecutionContext = ApplyGlobalFilterActionContext & {
   embeddable: LensApi;

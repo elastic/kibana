@@ -6,8 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { AttachmentPanel } from '../types';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import type { AttachmentPanel } from '../types';
 
 export interface VisualizationContent {
   type: string;

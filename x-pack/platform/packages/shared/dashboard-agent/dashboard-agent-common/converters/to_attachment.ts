@@ -15,9 +15,9 @@ import {
   type LensApiSchemaType,
   type LensAttributes,
 } from '@kbn/lens-embeddable-utils/config_builder';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { AttachmentPanel, DashboardSection as DashboardAttachmentSection } from '../types';
 import type { DashboardAttachmentData } from '../types';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 /**
  * Type guard to check if attributes are in LensAttributes format (internal).

@@ -10,6 +10,7 @@ import { fromExpression, toExpression } from '@kbn/interpreter';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { TimeRange } from '@kbn/es-query';
 import { transformType } from '@kbn/embeddable-plugin/server';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { EmbeddableTypes } from '../../canvas_plugin_src/expression_types';
 import { DEFAULT_TIME_RANGE } from '../../common/lib';
 import { encode, decode } from '../../common/lib/embeddable_dataurl';
@@ -17,7 +18,6 @@ import type { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
 import { embeddableService, logger } from '../kibana_services';
 import { getReferencesForElement } from './get_references_for_element';
 import { ensureLibraryReference } from './ensure_library_reference';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const embeddableFunctions = ['embeddable', 'savedLens', 'savedVisualization', 'savedMap'];
 

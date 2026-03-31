@@ -10,8 +10,8 @@ import type {
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/server';
 
-import type { LensRuntimeState } from '../../public';
 import type { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import type { LensRuntimeState } from '../../public';
 
 export type LensEmbeddableStateWithType = EmbeddableStateWithType &
   LensRuntimeState & {
