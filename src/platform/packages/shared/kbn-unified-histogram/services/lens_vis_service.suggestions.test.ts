@@ -86,7 +86,6 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      isTransformationalESQL: true,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(UnifiedHistogramSuggestionType.unsupported);
@@ -115,7 +114,6 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
@@ -153,7 +151,6 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
@@ -191,7 +188,6 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
@@ -229,7 +225,6 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      isTransformationalESQL: true,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(UnifiedHistogramSuggestionType.unsupported);
@@ -258,7 +253,6 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(UnifiedHistogramSuggestionType.unsupported);
@@ -287,7 +281,6 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(UnifiedHistogramSuggestionType.unsupported);
@@ -321,7 +314,6 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
@@ -372,7 +364,6 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: allSuggestionsMock,
-      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
@@ -403,7 +394,6 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(

@@ -49,6 +49,8 @@ export const getDiscoverSession = async (
       chartInterval: tab.attributes.chartInterval,
       density: tab.attributes.density as DataGridDensity,
       visContext: tab.attributes.visContext,
+      secondaryVisContext: tab.attributes.secondaryVisContext,
+      esqlTransformationalChartMode: tab.attributes.esqlTransformationalChartMode,
       controlGroupJson: tab.attributes.controlGroupJson,
     })),
     managed: Boolean(so.item.managed),

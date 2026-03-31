@@ -119,7 +119,6 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
       breakdownField: fetchParams.breakdown?.field,
       columns: [],
       allSuggestions,
-      isTransformationalESQL,
     })
   ).lensService;
 

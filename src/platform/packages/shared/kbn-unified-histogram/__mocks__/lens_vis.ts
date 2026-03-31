@@ -33,7 +33,6 @@ export const getLensVisMock = async ({
   breakdownField,
   dataView,
   allSuggestions,
-  isTransformationalESQL,
   table,
   externalVisContext,
   getModifiedVisAttributes,
@@ -48,7 +47,6 @@ export const getLensVisMock = async ({
   timeRange?: TimeRange | null;
   breakdownField: DataViewField | undefined;
   allSuggestions?: Suggestion[];
-  isTransformationalESQL?: boolean;
   table?: Datatable;
   externalVisContext?: UnifiedHistogramVisContext;
   getModifiedVisAttributes?: Parameters<LensVisService['update']>[0]['getModifiedVisAttributes'];
@@ -66,12 +64,13 @@ export const getLensVisMock = async ({
           const context = params[0];
           const preferredChartType = params[3];
           onLensSuggestionsApiCall?.(preferredChartType);
+          // Same query object as the test's Discover query → simulate Lens suggestions for the table result.
           if ('query' in context && context.query === query) {
             return allSuggestions;
           }
-          return !isTransformationalESQL && dataView.isTimeBased()
-            ? [histogramESQLSuggestionMock]
-            : [];
+          // Histogram path passes a new `{ esql }` with appended STATS/BUCKET; it never matches `query` above.
+          // Any other time-based follow-up call should return the histogram suggestion mock.
+          return dataView.isTimeBased() ? [histogramESQLSuggestionMock] : [];
         }
       : lensApi.suggestions,
   });

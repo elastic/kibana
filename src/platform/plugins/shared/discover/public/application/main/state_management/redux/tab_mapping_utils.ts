@@ -50,6 +50,8 @@ export const fromSavedObjectTabToTabState = ({
     breakdownField: tab.breakdownField,
     interval: tab.chartInterval,
     density: tab.density,
+    esqlTransformationalChartMode:
+      tab.esqlTransformationalChartMode as DiscoverAppState['esqlTransformationalChartMode'],
   };
 
   const globalState = {
@@ -74,6 +76,7 @@ export const fromSavedObjectTabToTabState = ({
       ...DEFAULT_TAB_STATE.attributes,
       timeRestore: tab.timeRestore ?? false,
       visContext: tab.visContext,
+      secondaryVisContext: tab.secondaryVisContext,
       controlGroupState: tab.controlGroupJson
         ? parseControlGroupJson(tab.controlGroupJson)
         : undefined,
@@ -188,6 +191,8 @@ export const fromTabStateToSavedObjectTab = ({
     chartInterval: tab.appState.interval,
     density: tab.appState.density,
     visContext: tab.attributes.visContext,
+    secondaryVisContext: tab.attributes.secondaryVisContext,
+    esqlTransformationalChartMode: tab.appState.esqlTransformationalChartMode,
     controlGroupJson: tab.attributes.controlGroupState
       ? JSON.stringify(tab.attributes.controlGroupState)
       : undefined,

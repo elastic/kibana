@@ -66,6 +66,7 @@ export const processFetchParams = ({
       breakdownField,
     }),
     timeInterval: params.timeInterval ?? DEFAULT_TIME_INTERVAL,
+    esqlTransformationalChartMode: params.esqlTransformationalChartMode,
   };
 };
 

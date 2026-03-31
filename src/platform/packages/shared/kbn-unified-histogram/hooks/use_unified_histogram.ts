@@ -15,6 +15,7 @@ import type {
   UnifiedHistogramServices,
   UnifiedHistogramVisContext,
   UnifiedHistogramFetchParamsExternal,
+  EsqlTransformationalChartToggleMode,
 } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
 import type {
@@ -65,6 +66,10 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
     nextVisContext: UnifiedHistogramVisContext | undefined,
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
   ) => void;
+  /**
+   * ES|QL transformational chart: switch between Lens result chart and time histogram.
+   */
+  onEsqlTransformationalChartModeChange?: (mode: EsqlTransformationalChartToggleMode) => void;
 };
 
 export type UnifiedHistogramApi = {

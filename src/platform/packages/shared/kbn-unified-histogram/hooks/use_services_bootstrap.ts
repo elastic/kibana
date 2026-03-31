@@ -120,6 +120,7 @@ export const useServicesBootstrap = (
             isPlainRecord: nextFetchParams.isESQLQuery,
             columns: nextFetchParams.columns,
             columnsMap: nextFetchParams.columnsMap,
+            esqlTransformationalChartMode: nextFetchParams.esqlTransformationalChartMode,
           },
           timeInterval:
             !nextFetchParams.isTimeBased && !nextFetchParams.isESQLQuery

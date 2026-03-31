@@ -226,6 +226,10 @@ function getDefaultAppState({
   if (persistedTab?.density) {
     defaultState.density = persistedTab.density;
   }
+  if (persistedTab?.esqlTransformationalChartMode) {
+    defaultState.esqlTransformationalChartMode =
+      persistedTab.esqlTransformationalChartMode as DiscoverAppState['esqlTransformationalChartMode'];
+  }
 
   return defaultState;
 }
