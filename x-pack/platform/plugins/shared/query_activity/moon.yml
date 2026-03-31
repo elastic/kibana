@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/query_activity
 dependsOn:
   - '@kbn/core'
+  - '@kbn/es-query'
   - '@kbn/i18n'
   - '@kbn/management-plugin'
   - '@kbn/i18n-react'
