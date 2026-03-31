@@ -231,6 +231,11 @@ export const CompactIntegrationCard: React.FC<{
         }
         .euiCard__content {
           min-width: 0;
+          overflow: hidden;
+        }
+        .euiCard__main {
+          min-width: 0;
+          overflow: hidden;
         }
         .euiCard__content,
         .euiCard__children {
@@ -238,9 +243,13 @@ export const CompactIntegrationCard: React.FC<{
           padding-bottom: 0;
         }
         .euiCard__title {
+          min-width: 0;
+          overflow: hidden;
           font-family: ${euiTheme.font.family};
           font-weight: ${euiTheme.font.weight.bold};
           color: ${euiTheme.colors.text};
+        }
+        .euiCard__title h4 {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
