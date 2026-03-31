@@ -707,6 +707,37 @@ export const labels = {
           'This will permanently remove the plugin and all its managed skills. This cannot be undone.',
       }
     ),
+    deletePluginUsedByAgentsTitle: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.deletePluginUsedByAgentsTitle', {
+        defaultMessage: 'Plugin "{pluginName}" is used by agents',
+        values: { pluginName },
+      }),
+    deletePluginUsedByAgentsDescription: i18n.translate(
+      'xpack.agentBuilder.plugins.deletePluginUsedByAgentsDescription',
+      {
+        defaultMessage:
+          "Remove this plugin's skills from all agents that use them and delete the plugin?",
+      }
+    ),
+    deletePluginUsedByAgentsAgentListLabel: i18n.translate(
+      'xpack.agentBuilder.plugins.deletePluginUsedByAgentsAgentListLabel',
+      {
+        defaultMessage: 'Agents using this plugin',
+      }
+    ),
+    deletePluginUsedByAgentsAgentList: (agentNames: string[]) => agentNames.join(', '),
+    deletePluginUsedByAgentsConfirmButton: i18n.translate(
+      'xpack.agentBuilder.plugins.deletePluginUsedByAgentsConfirmButton',
+      {
+        defaultMessage: 'Yes, remove and delete',
+      }
+    ),
+    deletePluginUsedByAgentsCancelButton: i18n.translate(
+      'xpack.agentBuilder.plugins.deletePluginUsedByAgentsCancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
     pluginContextMenuButtonLabel: i18n.translate(
       'xpack.agentBuilder.plugins.pluginContextMenuButtonLabel',
       {
