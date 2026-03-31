@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/serverless'
   - '@kbn/core-plugins-browser'
   - '@kbn/deeplinks-search'
+  - '@kbn/spaces-plugin'
 tags:
   - plugin
   - prod
