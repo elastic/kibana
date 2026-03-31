@@ -388,4 +388,3 @@ export const listStreamsResponse: { streams: Streams.all.Definition[] } = {
     },
   ],
 };
-
