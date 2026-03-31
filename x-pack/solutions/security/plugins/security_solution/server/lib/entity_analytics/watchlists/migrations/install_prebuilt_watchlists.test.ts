@@ -60,8 +60,7 @@ const buildEmptySpacesResponse = () => ({
   saved_objects: [],
 });
 
-describe('installPrebuiltWatchlists', function (this: any) {
-  this.tags(['skipServerless']);
+describe('installPrebuiltWatchlists', function () {
   const mockGetStartServices = jest.fn();
   const mockAuditLogger = auditLoggerMock.create();
   const mockLogger = loggingSystemMock.createLogger();
