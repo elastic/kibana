@@ -256,6 +256,19 @@ export const EntityAnalyticsManagementPage = () => {
             defaultMessage="Asset Criticality"
           />
         </EuiTab>
+        {isWatchlistsEnabled && (
+          <EuiTab
+            key={TabId.Watchlists}
+            isSelected={selectedTabId === TabId.Watchlists}
+            onClick={() => handleTabChange(TabId.Watchlists)}
+            data-test-subj={WATCHLISTS_TAB_TEST_ID}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.watchlists.tabTitle"
+              defaultMessage="Watchlists"
+            />
+          </EuiTab>
+        )}
         {isEntityStoreV2Enabled && (
           <EuiTab
             key={TabId.EntityResolution}
@@ -313,6 +326,9 @@ export const EntityAnalyticsManagementPage = () => {
       {isWatchlistsEnabled && (
         <div hidden={selectedTabId !== TabId.Watchlists}>
           <WatchlistsTab />
+        </div>
+      )}
+
       {isEntityStoreV2Enabled && (
         <div hidden={selectedTabId !== TabId.EntityResolution}>
           <EntityResolutionTab />
