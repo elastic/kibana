@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/document/header';
+import { NotesDetails } from '../../flyout_v2/notes';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 
@@ -34,8 +36,29 @@ export const AlertFlyoutHeader = ({
   storePromise,
   onAlertUpdated,
 }: AlertFlyoutHeaderProps) => {
+  const history = useHistory();
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
+  const openNotesFlyout = useCallback(() => {
+    if (!services || !store) {
+      return;
+    }
+
+    services.overlays?.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <NotesDetails hit={hit} isTimelineFlyout={false} />,
+      }),
+      {
+        ownFocus: false,
+        resizable: true,
+        size: 'm',
+        type: 'overlay',
+      }
+    );
+  }, [history, hit, services, store]);
 
   useEffect(() => {
     let isCanceled = false;
@@ -73,6 +96,7 @@ export const AlertFlyoutHeader = ({
         hit={hit}
         renderCellActions={noopCellActionRenderer}
         onAlertUpdated={onAlertUpdated}
+        onOpenNotesTab={openNotesFlyout}
       />
     ),
   });

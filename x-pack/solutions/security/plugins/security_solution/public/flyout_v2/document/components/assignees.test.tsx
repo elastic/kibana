@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
@@ -60,11 +60,12 @@ const renderAssignees = (
   props: Partial<Parameters<typeof Assignees>[0]> = {},
   assignedUserIds: string[] = ['user-id-1']
 ) => {
-  const assignedProfiles = mockUserProfiles.filter((user) => assignedUserIds.includes(user.uid));
-  (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
-    isLoading: false,
-    data: assignedProfiles,
-  });
+  (useBulkGetUserProfiles as jest.Mock).mockImplementation(
+    ({ uids }: { uids: Set<string> | undefined }) => ({
+      isLoading: false,
+      data: mockUserProfiles.filter((user) => uids?.has(user.uid)),
+    })
+  );
 
   return render(
     <TestProviders>
@@ -105,7 +106,7 @@ describe('<Assignees />', () => {
 
   it('applies updated assignees and calls the success callback', async () => {
     const onAssigneesUpdated = jest.fn();
-    const { getByTestId, getByText } = renderAssignees({ onAssigneesUpdated });
+    const { getByTestId, getByText, queryByTestId } = renderAssignees({ onAssigneesUpdated });
 
     fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
     fireEvent.click(getByText('User 3'));
@@ -125,6 +126,11 @@ describe('<Assignees />', () => {
     onSuccess();
 
     expect(onAssigneesUpdated).toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();
+    });
+    expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
   });
 
   it('renders the empty state when assignees are hidden', () => {

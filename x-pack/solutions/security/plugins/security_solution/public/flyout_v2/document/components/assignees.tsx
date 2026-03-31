@@ -7,7 +7,7 @@
 
 import { noop } from 'lodash';
 import type { FC } from 'react';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -74,7 +74,7 @@ export interface AssigneesProps {
 export const Assignees = memo(
   ({ hit, onAssigneesUpdated, showAssignees = true }: AssigneesProps) => {
     const eventId = useMemo(() => hit.raw._id ?? hit.id, [hit]);
-    const assignedUserIds = useMemo(() => {
+    const initialAssignedUserIds = useMemo(() => {
       const value = getFieldValue(hit, ALERT_WORKFLOW_ASSIGNEE_IDS) as string[] | string | null;
 
       if (Array.isArray(value)) {
@@ -83,6 +83,7 @@ export const Assignees = memo(
 
       return value ? [value] : [];
     }, [hit]);
+    const [assignedUserIds, setAssignedUserIds] = useState(initialAssignedUserIds);
 
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
@@ -95,13 +96,9 @@ export const Assignees = memo(
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const searchInputId = useGeneratedHtmlId({ prefix: 'searchInput' });
 
-    const onSuccess = useCallback<
-      NonNullable<Parameters<NonNullable<typeof setAlertAssignees>>[2]>
-    >(() => {
-      if (onAssigneesUpdated) {
-        onAssigneesUpdated();
-      }
-    }, [onAssigneesUpdated]);
+    useEffect(() => {
+      setAssignedUserIds(initialAssignedUserIds);
+    }, [initialAssignedUserIds]);
 
     const togglePopover = useCallback(() => {
       setIsPopoverOpen((value) => !value);
@@ -115,9 +112,22 @@ export const Assignees = memo(
           return;
         }
 
+        const onSuccess = () => {
+          setAssignedUserIds((currentAssignedUserIds) => {
+            const remainingAssignees = currentAssignedUserIds.filter(
+              (uid) => !assignees.remove.includes(uid)
+            );
+            const newAssignees = assignees.add.filter((uid) => !remainingAssignees.includes(uid));
+
+            return [...remainingAssignees, ...newAssignees];
+          });
+
+          onAssigneesUpdated?.();
+        };
+
         await setAlertAssignees(assignees, [eventId], onSuccess, noop);
       },
-      [eventId, onSuccess, setAlertAssignees]
+      [eventId, onAssigneesUpdated, setAlertAssignees]
     );
 
     const isUpdateDisabled = !eventId || !hasAlertsUpdate || !isPlatinumPlus;
@@ -125,6 +135,12 @@ export const Assignees = memo(
     const updateAssigneesPopover = useMemo(
       () => (
         <EuiPopover
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.document.header.assignees.updatePopoverAriaLabel',
+            {
+              defaultMessage: 'Update assignees',
+            }
+          )}
           panelPaddingSize="none"
           initialFocus={`[id="${searchInputId}"]`}
           button={
