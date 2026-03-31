@@ -95,10 +95,15 @@ export function registerBundleRoutes({
       isDist,
     });
 
-    // External plugins have standalone bundles in their own directories.
-    // Internal plugins are compiled into the unified kibana.bundle.js and
-    // do NOT have individual .plugin.js files in their directories.
+    // External plugins live in the plugins/ directory and have standalone bundles
+    // built by kbn-plugin-helpers. Only check that directory — internal plugins are
+    // compiled into kibana.bundle.js and their directories may contain leftover
+    // webpack bundles that must not be loaded separately.
+    const externalPluginsDir = fromRoot('plugins');
     [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
+      if (!publicTargetDir.startsWith(externalPluginsDir)) {
+        return;
+      }
       const standaloneBundle = Path.join(publicTargetDir, `${id}.plugin.js`);
       if (Fs.existsSync(standaloneBundle)) {
         const pluginBundlesPath = `/bundles/plugin/${id}/${version}/`;

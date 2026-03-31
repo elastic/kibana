@@ -12,6 +12,7 @@ import Path from 'path';
 import { createHash } from 'crypto';
 import type { BehaviorSubject } from 'rxjs';
 import type { PackageInfo } from '@kbn/config';
+import { fromRoot } from '@kbn/repo-info';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import {
   type DarkModeValue,
@@ -75,11 +76,17 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   const useHMR = !packageInfo.dist && process.env.KBN_HMR !== 'false';
 
   // Detect external plugins once at startup (not per-request).
-  // External plugins have a standalone ${pluginId}.plugin.js in their target/public dir,
-  // while internal plugins are compiled into the unified kibana.bundle.js.
+  // External plugins live in the plugins/ directory and have standalone bundles
+  // built by kbn-plugin-helpers. Only check that directory — internal plugins are
+  // compiled into kibana.bundle.js and their directories may contain leftover
+  // webpack bundles that must not be loaded separately.
   const externalPluginIds = new Set<string>();
   if (useRspack) {
+    const externalPluginsDir = fromRoot('plugins');
     for (const [pluginId, { publicTargetDir }] of uiPlugins.internal.entries()) {
+      if (!publicTargetDir.startsWith(externalPluginsDir)) {
+        continue;
+      }
       const standaloneBundle = Path.join(publicTargetDir, `${pluginId}.plugin.js`);
       if (Fs.existsSync(standaloneBundle)) {
         externalPluginIds.add(pluginId);
