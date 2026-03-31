@@ -7,6 +7,7 @@
 
 // Observability-specific test framework
 export { test, apiTest, spaceTest } from './src/playwright';
+export { sloDataFixture } from './src/playwright/fixtures/worker';
 
 // re-exported test framework from @kbn/scout
 export { lighthouseTest, tags } from '@kbn/scout';
