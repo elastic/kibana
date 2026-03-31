@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+expect(toArray(getField(source, 'entity.relationships.accesses_frequently'))).toStrictEqual([]);
+expect(toArray(getField(source, 'entity.relationships.accesses_infrequently'))).toStrictEqual([
+  testConfig.expectedInfrequentHost,
+]);
+
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { INTEGRATION_CONFIGS } from '../../../../server/lib/entity_analytics/maintainers/accesses/integrations';
@@ -379,11 +384,7 @@ for (const integration of INTEGRATION_CONFIGS) {
     apiTest('Should classify user-b as accesses_infrequently', async ({ esClient }) => {
       const entities = await esClient.search({
         index: LATEST_INDEX,
-        query: {
-          bool: {
-            filter: { term: { 'entity.id': expectedUserBId } },
-          },
-        },
+        query: { bool: { filter: { term: { 'entity.id': expectedUserBId } } } },
         size: 1,
       });
 
@@ -399,4 +400,5 @@ for (const integration of INTEGRATION_CONFIGS) {
       );
     });
   });
+}
 }
