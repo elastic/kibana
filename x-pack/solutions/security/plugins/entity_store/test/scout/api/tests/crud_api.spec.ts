@@ -203,19 +203,22 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(await countEntitiesByID(esClient, LATEST_INDEX, 'host:this-is-update')).toBe(1);
 
     // Update the entity with the same ID
-    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true', {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {
-        entity: {
-          id: entityObj.entity!.id!,
-          name: 'this-is-update',
+    const update = await apiClient.put(
+      ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true',
+      {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          entity: {
+            id: entityObj.entity!.id!,
+            name: 'this-is-update',
+          },
+          host: {
+            name: 'this-is-update',
+          },
         },
-        host: {
-          name: 'this-is-update',
-        },
-      },
-    });
+      }
+    );
     expect(update.statusCode).toBe(200);
 
     const entities = await esClient.search({
@@ -250,16 +253,19 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(create.statusCode).toBe(200);
 
       // Update using only entity.id (no host.name identity field)
-      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true', {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          entity: {
-            id: 'host:update-id-only',
-            name: 'updated-name',
+      const update = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true',
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            entity: {
+              id: 'host:update-id-only',
+              name: 'updated-name',
+            },
           },
-        },
-      });
+        }
+      );
       expect(update.statusCode).toBe(200);
 
       const entities = await esClient.search({
@@ -288,18 +294,21 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(create.statusCode).toBe(200);
 
       // Update using only identity fields (host.name), no entity.id
-      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true', {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          entity: {
-            name: 'updated-via-identity',
+      const update = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true',
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            entity: {
+              name: 'updated-via-identity',
+            },
+            host: {
+              name: 'update-identity-only',
+            },
           },
-          host: {
-            name: 'update-identity-only',
-          },
-        },
-      });
+        }
+      );
       expect(update.statusCode).toBe(200);
 
       const entities = await esClient.search({
@@ -397,11 +406,14 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       'entity.name': 'flat-updated-name',
       'host.name': 'flat-update',
     };
-    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true', {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: flatUpdateDoc,
-    });
+    const update = await apiClient.put(
+      ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true',
+      {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: flatUpdateDoc,
+      }
+    );
     expect(update.statusCode).toBe(200);
 
     const entities = await esClient.search({
@@ -632,7 +644,8 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
     const searchAfter = JSON.stringify(firstPage.body.nextSearchAfter);
     const secondPage = await apiClient.get(
-      ENTITY_STORE_ROUTES.public.CRUD_GET + `?size=1&searchAfter=${encodeURIComponent(searchAfter)}`,
+      ENTITY_STORE_ROUTES.public.CRUD_GET +
+        `?size=1&searchAfter=${encodeURIComponent(searchAfter)}`,
       {
         headers: defaultHeaders,
         responseType: 'json',

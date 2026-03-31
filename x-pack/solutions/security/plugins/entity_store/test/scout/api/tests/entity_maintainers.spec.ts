@@ -157,11 +157,14 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
       body: {},
     });
 
-    const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
-      headers: internalHeaders,
-      responseType: 'json',
-      body: {},
-    });
+    const initResponse = await apiClient.post(
+      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
+      {
+        headers: internalHeaders,
+        responseType: 'json',
+        body: {},
+      }
+    );
 
     expect(initResponse.statusCode).toBe(400);
     expect(initResponse.body.message).toBe(

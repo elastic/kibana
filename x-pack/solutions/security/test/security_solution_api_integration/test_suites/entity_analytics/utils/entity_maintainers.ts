@@ -35,7 +35,9 @@ export const entityMaintainerRouteHelpersFactory = (
 ) => {
   const getMaintainers = async (expectStatusCode: number = 200) => {
     const response = await withHeaders(
-      supertest.get(routeWithNamespace(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET, namespace))
+      supertest.get(
+        routeWithNamespace(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET, namespace)
+      )
     ).expect(expectStatusCode);
     return response as SuperTest.Response & {
       body: { maintainers: EntityMaintainerResponse[] };
@@ -47,7 +49,9 @@ export const entityMaintainerRouteHelpersFactory = (
 
     initMaintainers: async (expectStatusCode: number = 200) => {
       const response = await withHeaders(
-        supertest.post(routeWithNamespace(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, namespace))
+        supertest.post(
+          routeWithNamespace(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, namespace)
+        )
       )
         .send()
         .expect((res) => {

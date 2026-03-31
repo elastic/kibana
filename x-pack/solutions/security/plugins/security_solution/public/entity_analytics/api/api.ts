@@ -115,13 +115,16 @@ export const useEntityAnalyticsRoutes = () => {
 
   return useMemo(() => {
     const fetchEntityMaintainers = (ids?: string[]) =>
-      http.fetch<GetEntityMaintainersResponse>(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET, {
-        method: 'GET',
-        query: {
-          ...ENTITY_STORE_V2_QUERY,
-          ...(ids && ids.length > 0 ? { ids } : {}),
-        },
-      });
+      http.fetch<GetEntityMaintainersResponse>(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET,
+        {
+          method: 'GET',
+          query: {
+            ...ENTITY_STORE_V2_QUERY,
+            ...(ids && ids.length > 0 ? { ids } : {}),
+          },
+        }
+      );
 
     const fetchRiskScoreMaintainer = async (): Promise<
       EntityMaintainerResponseItem | undefined

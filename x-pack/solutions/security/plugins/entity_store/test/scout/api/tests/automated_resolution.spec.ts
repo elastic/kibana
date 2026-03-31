@@ -55,11 +55,14 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
     });
     expect([200, 201]).toContain(installResponse.statusCode);
 
-    const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
-      headers: internalHeaders,
-      responseType: 'json',
-      body: {},
-    });
+    const initResponse = await apiClient.post(
+      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
+      {
+        headers: internalHeaders,
+        responseType: 'json',
+        body: {},
+      }
+    );
     expect([200, 201]).toContain(initResponse.statusCode);
   });
 

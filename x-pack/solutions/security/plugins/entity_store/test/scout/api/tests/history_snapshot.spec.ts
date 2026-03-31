@@ -69,11 +69,14 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         '2026-01-20T13:00:00Z'
       );
 
-      const snapshotResponse = await apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT, {
-        headers: internalHeaders,
-        responseType: 'json',
-        body: {},
-      });
+      const snapshotResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: {},
+        }
+      );
       expect(snapshotResponse.statusCode).toBe(200);
       const body = snapshotResponse.body as {
         ok: boolean;
