@@ -64,6 +64,8 @@ export interface InferenceFeatureResponse {
   taskType: string;
   maxNumberOfEndpoints?: number;
   recommendedEndpoints: string[];
+  isBeta?: boolean;
+  isTechPreview?: boolean;
 }
 
 export type InferenceEndpointWithMetadata = InferenceAPIConfigResponse & {

@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/discover-utils'
   - '@kbn/controls-schemas'
   - '@kbn/kql'
+  - '@kbn/cps'
   - '@kbn/inspector-plugin'
   - '@kbn/inference-plugin'
   - '@kbn/actions-plugin'
