@@ -198,22 +198,6 @@ export const NonSessionFlyouts: React.FC<NonSessionFlyoutsProps> = ({ overlays, 
     <EuiPanel>
       <EuiTitle size="s">
         <h3>
-          With <EuiCode>core.overlays.openFlyout</EuiCode>
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiDescriptionList
-        type="column"
-        listItems={[
-          {
-            title: 'Global flyout: size = m',
-            description: <OverlaysFlyout overlays={overlays} rendering={rendering} />,
-          },
-        ]}
-      />
-      <EuiSpacer size="m" />
-      <EuiTitle size="s">
-        <h3>
           With <EuiCode>{'session="never"'}</EuiCode>
         </h3>
       </EuiTitle>
@@ -224,6 +208,22 @@ export const NonSessionFlyouts: React.FC<NonSessionFlyoutsProps> = ({ overlays, 
           {
             title: 'Global flyout: size = m',
             description: <SessionNeverFlyout />,
+          },
+        ]}
+      />
+      <EuiSpacer size="m" />
+      <EuiTitle size="s">
+        <h3>
+          With <EuiCode>core.overlays.openFlyout</EuiCode>
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiDescriptionList
+        type="column"
+        listItems={[
+          {
+            title: 'Global flyout: size = m',
+            description: <OverlaysFlyout overlays={overlays} rendering={rendering} />,
           },
         ]}
       />
