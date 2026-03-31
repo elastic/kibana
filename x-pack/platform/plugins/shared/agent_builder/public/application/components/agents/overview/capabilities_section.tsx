@@ -6,9 +6,12 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { labels } from '../../../utils/i18n';
-import { CapabilityRow } from './capability_row';
+import { CapabilityCard } from './capability_card';
+import skillsImage from './assets/connected-power-plug.svg';
+import pluginsImage from './assets/projects-folder.svg';
+import connectorsImage from './assets/handshake.svg';
 
 const { agentOverview: overviewLabels } = labels;
 
@@ -20,6 +23,9 @@ export interface CapabilitiesSectionProps {
   isExperimentalFeaturesEnabled: boolean;
   isConnectorsEnabled: boolean;
   hasConnectorsPrivileges: boolean;
+  skillsHref: string;
+  pluginsHref: string;
+  connectorsHref: string;
   onNavigateToSkills: () => void;
   onNavigateToPlugins: () => void;
   onNavigateToConnectors: () => void;
@@ -29,61 +35,63 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
   skillsCount,
   pluginsCount,
   connectorsCount,
-  enableElasticCapabilities,
   isExperimentalFeaturesEnabled,
   isConnectorsEnabled,
   hasConnectorsPrivileges,
+  skillsHref,
+  pluginsHref,
+  connectorsHref,
   onNavigateToSkills,
   onNavigateToPlugins,
   onNavigateToConnectors,
 }) => (
-  <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
-    <EuiFlexItem grow={1}>
-      <EuiTitle size="s">
-        <h2>{overviewLabels.capabilitiesTitle}</h2>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        {overviewLabels.capabilitiesDescription}
-      </EuiText>
-    </EuiFlexItem>
-
-    <EuiFlexItem grow={2}>
-      <EuiFlexGroup direction="column" gutterSize="l">
-        {isExperimentalFeaturesEnabled && (
-          <CapabilityRow
+  <>
+    <EuiTitle size="s">
+      <h2>{overviewLabels.capabilitiesTitle}</h2>
+    </EuiTitle>
+    <EuiSpacer size="l" />
+    <EuiFlexGroup gutterSize="m" alignItems="stretch">
+      {isExperimentalFeaturesEnabled && (
+        <EuiFlexItem grow={1}>
+          <CapabilityCard
             count={skillsCount}
-            label={overviewLabels.skillsLabel(skillsCount)}
+            title={overviewLabels.skillsLabel(skillsCount)}
             description={overviewLabels.skillsDescription}
-            actionLabel={
-              enableElasticCapabilities ? overviewLabels.addSkill : overviewLabels.customizeSkills
-            }
-            onAction={onNavigateToSkills}
+            emptyDescription={overviewLabels.skillsOnboardingDescription}
+            image={skillsImage}
+            href={skillsHref}
+            onClick={onNavigateToSkills}
           />
-        )}
+        </EuiFlexItem>
+      )}
 
-        {isExperimentalFeaturesEnabled && (
-          <CapabilityRow
+      {isExperimentalFeaturesEnabled && (
+        <EuiFlexItem grow={1}>
+          <CapabilityCard
             count={pluginsCount}
-            label={overviewLabels.pluginsLabel(pluginsCount)}
+            title={overviewLabels.pluginsLabel(pluginsCount)}
             description={overviewLabels.pluginsDescription}
-            actionLabel={
-              enableElasticCapabilities ? overviewLabels.addPlugin : overviewLabels.customizePlugins
-            }
-            onAction={onNavigateToPlugins}
+            emptyDescription={overviewLabels.pluginsOnboardingDescription}
+            image={pluginsImage}
+            href={pluginsHref}
+            onClick={onNavigateToPlugins}
           />
-        )}
+        </EuiFlexItem>
+      )}
 
-        {isConnectorsEnabled && (
-          <CapabilityRow
+      {isConnectorsEnabled && (
+        <EuiFlexItem grow={1}>
+          <CapabilityCard
             count={connectorsCount}
-            label={overviewLabels.connectorsLabel(connectorsCount)}
+            title={overviewLabels.connectorsLabel(connectorsCount)}
             description={overviewLabels.connectorsDescription}
-            actionLabel={overviewLabels.addConnector}
-            onAction={hasConnectorsPrivileges ? onNavigateToConnectors : undefined}
+            emptyDescription={overviewLabels.connectorsOnboardingDescription}
+            image={connectorsImage}
+            href={hasConnectorsPrivileges ? connectorsHref : undefined}
+            onClick={hasConnectorsPrivileges ? onNavigateToConnectors : undefined}
           />
-        )}
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  </>
 );
