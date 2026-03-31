@@ -7,8 +7,6 @@
 
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import type { OpeningAndClosingTags } from 'mustache';
-import Mustache from 'mustache';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -20,27 +18,26 @@ import {
   COORDINATOR_INTERVAL_MINUTES,
 } from '../../../common/constants';
 
-const TEMPLATE_DELIMITERS: OpeningAndClosingTags = ['<%=', '%>'];
+const renderTemplate = (template: string, vars: Record<string, string>): string =>
+  Object.entries(vars).reduce(
+    (result, [key, value]) => result.replaceAll(`<%= ${key} %>`, value),
+    template
+  );
 
 const WORKFLOW_TEMPLATE = readFileSync(
   resolve(__dirname, 'continuous_extraction_workflow.yaml'),
   'utf-8'
 );
 
-const WORKFLOW_YAML = Mustache.render(
-  WORKFLOW_TEMPLATE,
-  {
-    description: i18n.translate('xpack.streams.continuousExtraction.workflowDescription', {
-      defaultMessage: 'This workflow is used by the system and should not be modified.',
-    }),
-    timeout: `${COORDINATOR_INTERVAL_MINUTES - 1}m`,
-    coordinatorInterval: `${COORDINATOR_INTERVAL_MINUTES}m`,
-    kiSelectStreamsStepType: KI_SELECT_STREAMS_STEP_TYPE,
-    kiFeaturesExtractStreamStepType: KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
-  },
-  {},
-  TEMPLATE_DELIMITERS
-);
+const WORKFLOW_YAML = renderTemplate(WORKFLOW_TEMPLATE, {
+  description: i18n.translate('xpack.streams.continuousExtraction.workflowDescription', {
+    defaultMessage: 'This workflow is used by the system and should not be modified.',
+  }),
+  timeout: `${COORDINATOR_INTERVAL_MINUTES - 1}m`,
+  coordinatorInterval: `${COORDINATOR_INTERVAL_MINUTES}m`,
+  kiSelectStreamsStepType: KI_SELECT_STREAMS_STEP_TYPE,
+  kiFeaturesExtractStreamStepType: KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
+});
 
 export interface ContinuousExtractionWorkflowService {
   ensureWorkflow(params: {
