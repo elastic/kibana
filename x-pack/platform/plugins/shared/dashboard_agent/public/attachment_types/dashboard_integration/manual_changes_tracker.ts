@@ -15,10 +15,7 @@ import { childrenUnsavedChanges$ } from '@kbn/presentation-publishing';
 export interface ManualChangesTrackerParams {
   api: DashboardApi;
   getAttachment: () => DashboardAttachment | undefined;
-  addAttachment: (attachment: AttachmentInput) => void;
 }
-
-type ManualChangesSourceParams = Omit<ManualChangesTrackerParams, 'addAttachment'>;
 
 /**
  * Creates an observable that tracks manual changes to the dashboard
@@ -27,7 +24,7 @@ type ManualChangesSourceParams = Omit<ManualChangesTrackerParams, 'addAttachment
 export const createManualChanges$ = ({
   api,
   getAttachment,
-}: ManualChangesSourceParams): Observable<AttachmentInput> => {
+}: ManualChangesTrackerParams): Observable<AttachmentInput> => {
   // TODO: we should get it directly from the dashboard plugin
   // Collect observables for all trackable dashboard state
   const observables: Array<Observable<unknown>> = [

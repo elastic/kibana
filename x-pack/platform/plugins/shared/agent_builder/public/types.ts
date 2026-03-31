@@ -126,6 +126,13 @@ export interface AgentBuilderPluginStart {
    */
   addAttachment: (attachment: AttachmentInput) => void;
   /**
+   * Removes an attachment from the active conversation sidebar by id.
+   * If no sidebar is open, the attachment is ignored.
+   *
+   * @param attachmentId - The id of the attachment to remove
+   */
+  removeAttachment: (attachmentId: string) => void;
+  /**
    * Updates the origin of an attachment in a conversation.
    * Use this after saving a by-value attachment to link it to its persistent store.
    *

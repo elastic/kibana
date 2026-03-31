@@ -78,6 +78,8 @@ export class AgentBuilderPlugin
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
+    removeAttachment: (attachmentId: string) => void;
+    updateAttachmentOrigin: (attachmentId: string, origin: string) => Promise<void>;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
@@ -235,6 +237,11 @@ export class AgentBuilderPlugin
           this.sidebarCallbacks.addAttachment(attachment);
         }
       },
+      removeAttachment: (attachmentId: string) => {
+        if (this.sidebarCallbacks) {
+          this.sidebarCallbacks.removeAttachment(attachmentId);
+        }
+      },
       setChatConfig: (config: EmbeddableConversationProps) => {
         // Set config until sidebar is next opened
         this.conversationActiveConfig = config;
@@ -247,8 +254,10 @@ export class AgentBuilderPlugin
       clearChatConfig: () => {
         this.conversationActiveConfig = {};
         if (this.activeSidebarRef && this.sidebarCallbacks) {
-          // Removes stale browserApiTools from the sidebar
-          this.sidebarCallbacks.resetBrowserApiTools();
+          this.sidebarCallbacks.updateProps({
+            browserApiTools: undefined,
+            onConversationChange: undefined,
+          });
         }
       },
       openChat: (options?: OpenConversationSidebarOptions) => {
@@ -267,7 +276,16 @@ export class AgentBuilderPlugin
 
         openSidebarInternal(options);
       },
-      updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
+      updateAttachmentOrigin: async (
+        conversationId: string,
+        attachmentId: string,
+        origin: string
+      ) => {
+        if (this.sidebarCallbacks) {
+          await this.sidebarCallbacks.updateAttachmentOrigin(attachmentId, origin);
+          return { success: true };
+        }
+        // Fallback to direct API call if sidebar is not open
         return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
       },
     };

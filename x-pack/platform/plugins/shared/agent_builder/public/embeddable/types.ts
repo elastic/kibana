@@ -7,12 +7,25 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderInternalService } from '../services';
 
 export interface EmbeddableConversationDependencies {
   services: AgentBuilderInternalService;
   coreStart: CoreStart;
+}
+
+export interface EmbeddableConversationChange {
+  /**
+   * Active conversation id, if one already exists.
+   * Undefined means the sidebar is currently bound to a new conversation.
+   */
+  id?: string;
+  /**
+   * Existing attachments in the conversation we changed to.
+   * Only present when switching to an existing conversation (when id is defined).
+   */
+  attachments?: VersionedAttachment[];
 }
 
 export interface EmbeddableConversationProps {
@@ -71,6 +84,13 @@ export interface EmbeddableConversationProps {
   attachments?: AttachmentInput[];
 
   /**
+   * Optional lifecycle callback fired whenever the sidebar binds to a conversation.
+   * This includes the initial sidebar open, switching between conversations, and
+   * creating a new conversation from the current binding.
+   */
+  onConversationChange?: (conversation: EmbeddableConversationChange) => void;
+
+  /**
    * Browser API tools that the agent can use to interact with the page.
    * Tools are executed browser-side when the LLM requests them.
    *
@@ -103,6 +123,8 @@ export interface EmbeddableConversationSidebarProps {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
+    removeAttachment: (attachmentId: string) => void;
+    updateAttachmentOrigin: (attachmentId: string, origin: string) => Promise<void>;
   }) => void;
 }
 

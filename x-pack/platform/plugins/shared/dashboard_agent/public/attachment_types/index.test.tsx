@@ -12,57 +12,12 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
-import type { ChatEvent, RoundCompleteEvent, ConversationRound } from '@kbn/agent-builder-common';
-import { ChatEventType } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_OPERATION } from '@kbn/agent-builder-common/attachments';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ChatEvent } from '@kbn/agent-builder-common';
 import { registerDashboardAttachmentUiDefinition } from '.';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardRenderer: jest.fn(() => null),
 }));
-
-const updateOrigin = jest.fn();
-
-const createMockRoundCompleteEvent = (
-  attachments: VersionedAttachment[],
-  attachmentRefs: { attachment_id: string; operation: string }[]
-): RoundCompleteEvent => ({
-  type: ChatEventType.roundComplete,
-  data: {
-    round: {
-      input: {
-        attachment_refs: attachmentRefs.map((ref) => ({
-          attachment_id: ref.attachment_id,
-          version: 1,
-          operation: ref.operation as typeof ATTACHMENT_REF_OPERATION.updated,
-        })),
-      },
-    } as ConversationRound,
-    attachments,
-  },
-});
-
-const createMockVersionedAttachment = (
-  id: string,
-  origin?: string,
-  hasVersions = true
-): VersionedAttachment<typeof DASHBOARD_ATTACHMENT_TYPE> => ({
-  id,
-  type: DASHBOARD_ATTACHMENT_TYPE,
-  versions: hasVersions
-    ? [
-        {
-          version: 1,
-          data: { title: 'Updated Dashboard', description: '', panels: [] },
-          created_at: new Date().toISOString(),
-          content_hash: 'hash123',
-        },
-      ]
-    : [],
-  current_version: hasVersions ? 1 : 0,
-  origin,
-});
 
 const createMockDashboardApi = (
   savedObjectId?: string
@@ -115,24 +70,14 @@ const createMockDashboardApi = (
 };
 
 const createMockAttachment = (id: string, origin?: string) => {
-  let currentOrigin = origin;
   const attachment: DashboardAttachment = {
     id,
     type: DASHBOARD_ATTACHMENT_TYPE,
     data: { title: 'Test Dashboard', description: '', panels: [] },
-    origin: currentOrigin,
+    origin,
     hidden: false,
   };
-  return {
-    attachment,
-    getAttachment: (): DashboardAttachment => ({
-      ...attachment,
-      origin: currentOrigin,
-    }),
-    setOrigin: (newOrigin: string | undefined) => {
-      currentOrigin = newOrigin;
-    },
-  };
+  return { attachment };
 };
 
 describe('registerDashboardAttachmentUiDefinition', () => {
@@ -146,14 +91,19 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const dashboardAppClientApi$ = new Subject<DashboardApi | undefined>();
     const addAttachmentType = jest.fn();
     const updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
+    const setChatConfig = jest.fn();
+    const clearChatConfig = jest.fn();
+    const addAttachment = jest.fn();
+    const removeAttachment = jest.fn();
     const findDashboardsService = jest.fn().mockResolvedValue({
       findById: jest.fn().mockResolvedValue({ status: 'success' }),
     });
-
-    const mockAddAttachment = jest.fn();
     const agentBuilder: AgentBuilderPluginStart = {
       attachments: { addAttachmentType },
-      addAttachment: mockAddAttachment,
+      setChatConfig,
+      clearChatConfig,
+      addAttachment,
+      removeAttachment,
       updateAttachmentOrigin,
       events: { chat$ },
     } as unknown as AgentBuilderPluginStart;
@@ -174,6 +124,10 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       dashboardLocator: undefined,
       dashboardAppClientApi$,
       addAttachmentType,
+      setChatConfig,
+      clearChatConfig,
+      addAttachment,
+      removeAttachment,
       updateAttachmentOrigin,
       chat$,
     };
@@ -196,235 +150,34 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       expect.objectContaining({
         getLabel: expect.any(Function),
         getIcon: expect.any(Function),
-        onAttachmentMount: expect.any(Function),
         renderCanvasContent: expect.any(Function),
         getActionButtons: expect.any(Function),
       })
     );
   });
 
-  describe('onAttachmentMount - origin sync', () => {
-    it('updates origin when new dashboard is saved', () => {
-      const { getAttachment } = createMockAttachment('attachment-1');
-      const mockApi = createMockDashboardApi();
+  it('registers chat config only while a dashboard api is available', () => {
+    const mockApi = createMockDashboardApi();
 
-      const cleanup = uiDefinition.onAttachmentMount!({
-        getAttachment,
-        updateOrigin,
-      });
-      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+    expect(deps.setChatConfig).not.toHaveBeenCalled();
+    expect(deps.clearChatConfig).not.toHaveBeenCalled();
 
-      // First save triggers update
-      mockApi.setSavedObjectId('new-dashboard-id');
-      expect(updateOrigin).toHaveBeenCalledWith('new-dashboard-id');
+    deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+    expect(deps.setChatConfig).toHaveBeenCalledTimes(1);
 
-      // Undefined doesn't trigger
-      updateOrigin.mockClear();
-      mockApi.setSavedObjectId(undefined);
-      expect(updateOrigin).not.toHaveBeenCalled();
-
-      cleanup?.();
-    });
-
-    it('does not update origin when attachment is linked to a different dashboard', () => {
-      const { getAttachment } = createMockAttachment('attachment-1', 'original-dashboard-id');
-      const mockApi = createMockDashboardApi('different-dashboard-id');
-
-      const cleanup = uiDefinition.onAttachmentMount!({
-        getAttachment,
-        updateOrigin,
-      });
-      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-      mockApi.setSavedObjectId('newly-saved-id');
-
-      expect(updateOrigin).not.toHaveBeenCalled();
-      cleanup?.();
-    });
-
-    it('cleans up subscriptions properly', () => {
-      const { getAttachment } = createMockAttachment('attachment-1');
-      const mockApi = createMockDashboardApi();
-
-      const cleanup = uiDefinition.onAttachmentMount!({
-        getAttachment,
-        updateOrigin,
-      });
-      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-      cleanup?.();
-
-      mockApi.setSavedObjectId('new-id-after-cleanup');
-      expect(updateOrigin).not.toHaveBeenCalled();
-    });
+    deps.dashboardAppClientApi$.next(undefined);
+    expect(deps.clearChatConfig).toHaveBeenCalledTimes(1);
   });
 
-  describe('onAttachmentMount - live changes from chat$', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
+  it('re-registers chat config when the dashboard api changes', () => {
+    const firstApi = createMockDashboardApi('first-dashboard');
+    const secondApi = createMockDashboardApi('second-dashboard');
 
-    afterEach(() => {
-      jest.useRealTimers();
-    });
+    deps.dashboardAppClientApi$.next(firstApi as unknown as DashboardApi);
+    deps.dashboardAppClientApi$.next(secondApi as unknown as DashboardApi);
 
-    it('updates dashboard state on roundComplete with updated/created attachment', () => {
-      const { getAttachment } = createMockAttachment('attachment-1');
-      const mockApi = createMockDashboardApi();
-
-      const cleanup = uiDefinition.onAttachmentMount!({
-        getAttachment,
-        updateOrigin,
-      });
-      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-
-      // Updated operation triggers state update
-      const versionedAttachment = createMockVersionedAttachment('attachment-1');
-      chat$.next(
-        createMockRoundCompleteEvent(
-          [versionedAttachment],
-          [{ attachment_id: 'attachment-1', operation: ATTACHMENT_REF_OPERATION.updated }]
-        )
-      );
-
-      expect(mockApi.setState).toHaveBeenCalledWith(
-        expect.objectContaining({ title: 'Updated Dashboard' })
-      );
-      jest.runAllTimers();
-
-      // Created operation also triggers
-      mockApi.setState.mockClear();
-      chat$.next(
-        createMockRoundCompleteEvent(
-          [versionedAttachment],
-          [{ attachment_id: 'attachment-1', operation: ATTACHMENT_REF_OPERATION.created }]
-        )
-      );
-      expect(mockApi.setState).toHaveBeenCalled();
-
-      cleanup?.();
-    });
-
-    it('does not update state for read-only operations or missing attachments', () => {
-      const { getAttachment } = createMockAttachment('attachment-1');
-      const mockApi = createMockDashboardApi();
-
-      const cleanup = uiDefinition.onAttachmentMount!({
-        getAttachment,
-        updateOrigin,
-      });
-      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-
-      // Read operation - no update
-      chat$.next(
-        createMockRoundCompleteEvent(
-          [createMockVersionedAttachment('attachment-1')],
-          [{ attachment_id: 'attachment-1', operation: ATTACHMENT_REF_OPERATION.read }]
-        )
-      );
-      expect(mockApi.setState).not.toHaveBeenCalled();
-
-      // No attachment in event - no update
-      chat$.next(
-        createMockRoundCompleteEvent(
-          [],
-          [{ attachment_id: 'attachment-1', operation: ATTACHMENT_REF_OPERATION.updated }]
-        )
-      );
-      expect(mockApi.setState).not.toHaveBeenCalled();
-
-      // Attachment without versions - no update
-      chat$.next(
-        createMockRoundCompleteEvent(
-          [createMockVersionedAttachment('attachment-1', undefined, false)],
-          [{ attachment_id: 'attachment-1', operation: ATTACHMENT_REF_OPERATION.updated }]
-        )
-      );
-      expect(mockApi.setState).not.toHaveBeenCalled();
-
-      cleanup?.();
-    });
-
-    it('respects dashboard origin matching', () => {
-      // Different dashboard - no update
-      const { getAttachment: getAttachment1 } = createMockAttachment(
-        'attachment-1',
-        'original-dashboard-id'
-      );
-      const mockApi1 = createMockDashboardApi('different-dashboard-id');
-
-      const cleanup1 = uiDefinition.onAttachmentMount!({
-        getAttachment: getAttachment1,
-        updateOrigin,
-      });
-      deps.dashboardAppClientApi$.next(mockApi1 as unknown as DashboardApi);
-
-      chat$.next(
-        createMockRoundCompleteEvent(
-          [createMockVersionedAttachment('attachment-1', 'original-dashboard-id')],
-          [{ attachment_id: 'attachment-1', operation: ATTACHMENT_REF_OPERATION.updated }]
-        )
-      );
-      expect(mockApi1.setState).not.toHaveBeenCalled();
-      cleanup1?.();
-
-      // Same dashboard - updates
-      deps = createMockDeps();
-      unregister();
-      unregister = registerDashboardAttachmentUiDefinition(deps);
-      uiDefinition = deps.addAttachmentType.mock.calls[0][1];
-
-      const { getAttachment: getAttachment2 } = createMockAttachment(
-        'attachment-1',
-        'same-dashboard-id'
-      );
-      const mockApi2 = createMockDashboardApi('same-dashboard-id');
-
-      const cleanup2 = uiDefinition.onAttachmentMount!({
-        getAttachment: getAttachment2,
-        updateOrigin,
-      });
-      deps.dashboardAppClientApi$.next(mockApi2 as unknown as DashboardApi);
-
-      chat$.next(
-        createMockRoundCompleteEvent(
-          [createMockVersionedAttachment('attachment-1', 'same-dashboard-id')],
-          [{ attachment_id: 'attachment-1', operation: ATTACHMENT_REF_OPERATION.updated }]
-        )
-      );
-      expect(mockApi2.setState).toHaveBeenCalled();
-      cleanup2?.();
-    });
-
-    it('cleans up chat$ subscription on cleanup or API unavailable', () => {
-      const { getAttachment } = createMockAttachment('attachment-1');
-      const mockApi = createMockDashboardApi();
-
-      const cleanup = uiDefinition.onAttachmentMount!({
-        getAttachment,
-        updateOrigin,
-      });
-      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-
-      // API becomes unavailable
-      deps.dashboardAppClientApi$.next(undefined);
-      chat$.next(
-        createMockRoundCompleteEvent(
-          [createMockVersionedAttachment('attachment-1')],
-          [{ attachment_id: 'attachment-1', operation: ATTACHMENT_REF_OPERATION.updated }]
-        )
-      );
-      expect(mockApi.setState).not.toHaveBeenCalled();
-
-      // After cleanup
-      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
-      cleanup?.();
-      chat$.next(
-        createMockRoundCompleteEvent(
-          [createMockVersionedAttachment('attachment-1')],
-          [{ attachment_id: 'attachment-1', operation: ATTACHMENT_REF_OPERATION.updated }]
-        )
-      );
-      expect(mockApi.setState).not.toHaveBeenCalled();
-    });
+    expect(deps.setChatConfig).toHaveBeenCalledTimes(2);
+    expect(deps.clearChatConfig).toHaveBeenCalledTimes(1);
   });
 
   describe('getLabel', () => {

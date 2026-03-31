@@ -37,12 +37,20 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Track current props, starting with initial props
   const [currentProps, setCurrentProps] = useState<EmbeddableConversationProps>(contextProps);
 
+  // Refs to allow callbacks to access latest values
+  const conversationIdRef = useRef<string | undefined>(undefined);
+  const invalidateConversationRef = useRef<(() => void) | null>(null);
+
   // Register callbacks to allow parent to update props and clear browserApiTools
   const onRegisterCallbacks = contextProps.onRegisterCallbacks;
   useEffect(() => {
     if (onRegisterCallbacks) {
       onRegisterCallbacks({
-        updateProps: (newProps) => setCurrentProps(newProps),
+        updateProps: (newProps) =>
+          setCurrentProps((prevProps) => ({
+            ...prevProps,
+            ...newProps,
+          })),
         resetBrowserApiTools: () =>
           setCurrentProps((prevProps) => ({ ...prevProps, browserApiTools: undefined })),
         addAttachment: (attachment) =>
@@ -50,9 +58,24 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
             ...prevProps,
             attachments: upsertAttachmentsIntoList(prevProps.attachments, [attachment]),
           })),
+        removeAttachment: (attachmentId) =>
+          setCurrentProps((prevProps) => ({
+            ...prevProps,
+            attachments: prevProps.attachments?.filter(
+              (attachment) => attachment.id !== attachmentId
+            ),
+          })),
+        updateAttachmentOrigin: async (attachmentId: string, origin: string) => {
+          const currentConversationId = conversationIdRef.current;
+          if (!currentConversationId) {
+            return;
+          }
+          await services.attachmentsService.updateOrigin(currentConversationId, attachmentId, origin);
+          invalidateConversationRef.current?.();
+        },
       });
     }
-  }, [onRegisterCallbacks]);
+  }, [onRegisterCallbacks, services.attachmentsService]);
 
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
@@ -149,6 +172,37 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     onConversationCreated,
     onDeleteConversation,
   });
+
+  // Keep refs updated for use in callbacks
+  useEffect(() => {
+    conversationIdRef.current = conversationId;
+  }, [conversationId]);
+
+  useEffect(() => {
+    invalidateConversationRef.current = conversationActions.invalidateConversation;
+  }, [conversationActions.invalidateConversation]);
+
+  const { onConversationChange } = currentProps;
+
+  useEffect(() => {
+    if (!onConversationChange) {
+      return;
+    }
+
+    if (!conversationId) {
+      onConversationChange({ id: undefined });
+      return;
+    }
+
+    services.conversationsService
+      .get({ conversationId })
+      .then((conversation) => {
+        onConversationChange({ id: conversationId, attachments: conversation.attachments });
+      })
+      .catch(() => {
+        onConversationChange({ id: conversationId });
+      });
+  }, [conversationId, onConversationChange, services.conversationsService]);
 
   // Resets the {initialMessage} and {autoSendInitialMessage} flags after an initial message has been sent or set in the {ConversationInput} component
   const resetInitialMessage = useCallback(() => {
