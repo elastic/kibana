@@ -154,7 +154,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             id: 'example-custom-action4',
             order: 101,
             label: 'Create SLO (Custom action)',
-            iconType: 'visGauge',
+            iconType: 'chartGauge',
             testId: 'example-custom-action-under-alerts',
             run: ({ context: { onFinishAction } }) => {
               // This is an example of a custom action that opens a flyout or any other custom modal.
@@ -188,7 +188,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
 
       return [
         ...additionalControls,
-        ...['visBarVerticalStacked', 'heart', 'inspect'].map(
+        ...['chartBarVerticalStack', 'heart', 'inspect'].map(
           (iconType): RowControlColumn => ({
             id: `exampleControl_${iconType}`,
             render: (Control, rowProps) => {
