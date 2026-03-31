@@ -925,7 +925,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
             </span>
             <span
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="chevronSingleDown"
             />
           </span>
         </button>

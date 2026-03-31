@@ -6891,6 +6891,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-significant-events@link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-streams@link:x-pack/platform/packages/shared/kbn-evals-suite-streams":
   version "0.0.0"
   uid ""
@@ -9344,6 +9348,10 @@
   uid ""
 
 "@kbn/telemetry@link:src/platform/packages/shared/kbn-telemetry":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-docker-servers@link:src/platform/packages/shared/kbn-test-docker-servers":
   version "0.0.0"
   uid ""
 
@@ -27416,10 +27424,10 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@2.12.10:
-  version "2.12.10"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.10.tgz#6d3ca80f6d13715d2b65da03f9f07b46647c3e20"
-  integrity sha512-G3VUymSE0/iegFnuipujpwyTM2GuZAKXNeerUSrG2+Eg391wW63xFs5ixWsK9MWzr1AGoSkYGmyAzNgbR3+urw==
+msw@2.12.11:
+  version "2.12.11"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.11.tgz#e36754a5f58589eb19b705bc87db82fb0638d035"
+  integrity sha512-dVg20zi2I2EvnwH/+WupzsOC2mCa7qsIhyMAWtfRikn6RKtwL9+7SaF1IQ5LyZry4tlUtf6KyTVhnlQiZXozTQ==
   dependencies:
     "@inquirer/confirm" "^5.0.0"
     "@mswjs/interceptors" "^0.41.2"
@@ -36191,10 +36199,10 @@ zod-to-json-schema@^3.24.3, zod-to-json-schema@^3.25.1:
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.25.1.tgz#7f24962101a439ddade2bf1aeab3c3bfec7d84ba"
   integrity sha512-pM/SU9d3YAggzi6MtR4h7ruuQlqKtad8e9S0fmxcMi+ueAK5Korys/aWcV9LIIHTVbj01NdzxcnXSN+O74ZIVA==
 
-zod@3.25.76, zod@^3.24.1, zod@^3.24.2, "zod@^3.25 || ^4.0", "zod@^3.25.76 || ^4", zod@^4.3.6:
-  version "3.25.76"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.76.tgz#26841c3f6fd22a6a2760e7ccb719179768471e34"
-  integrity sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==
+zod@4.3.6, zod@^3.24.1, zod@^3.24.2, "zod@^3.25 || ^4.0", "zod@^3.25.76 || ^4", zod@^4.3.6:
+  version "4.3.6"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-4.3.6.tgz#89c56e0aa7d2b05107d894412227087885ab112a"
+  integrity sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==
 
 zustand@^4.4.0:
   version "4.5.5"
