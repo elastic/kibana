@@ -101,8 +101,8 @@ describe('ResourceManager', () => {
     );
   });
 
-  describe('softFail', () => {
-    it('waitUntilReady resolves even when a soft-fail resource fails', async () => {
+  describe('optional', () => {
+    it('waitUntilReady resolves even when an optional resource fails', async () => {
       const manager = createManager();
 
       const initHard = createInitializer(async () => {});
@@ -111,7 +111,7 @@ describe('ResourceManager', () => {
       });
 
       manager.registerResource('hard', initHard);
-      manager.registerResource('soft', initSoft, { softFail: true });
+      manager.registerResource('soft', initSoft, { optional: true });
 
       manager.startInitialization();
       await expect(manager.waitUntilReady()).resolves.toBeUndefined();
@@ -120,7 +120,7 @@ describe('ResourceManager', () => {
       expect(manager.isReady('soft')).toBe(false);
     });
 
-    it('waitUntilReady rejects when a non-soft-fail resource fails alongside a soft-fail one', async () => {
+    it('waitUntilReady rejects when a required resource fails alongside an optional one', async () => {
       const manager = createManager();
 
       const initHard = createInitializer(async () => {
@@ -131,20 +131,20 @@ describe('ResourceManager', () => {
       });
 
       manager.registerResource('hard', initHard);
-      manager.registerResource('soft', initSoft, { softFail: true });
+      manager.registerResource('soft', initSoft, { optional: true });
 
       manager.startInitialization();
       await expect(manager.waitUntilReady()).rejects.toThrow('hard failure');
     });
 
-    it('ensureResourceReady still rejects for a failed soft-fail resource', async () => {
+    it('ensureResourceReady still rejects for a failed optional resource', async () => {
       const manager = createManager();
 
       const initSoft = createInitializer(async () => {
         throw new Error('view creation failed');
       });
 
-      manager.registerResource('soft', initSoft, { softFail: true });
+      manager.registerResource('soft', initSoft, { optional: true });
       manager.startInitialization();
 
       await manager.waitUntilReady();

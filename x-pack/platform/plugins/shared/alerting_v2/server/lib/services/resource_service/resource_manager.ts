@@ -21,7 +21,7 @@ interface ResourceState {
   initializationPromise?: Promise<void>;
   error?: Error;
   status: 'not_started' | 'pending' | 'ready' | 'failed';
-  softFail: boolean;
+  optional: boolean;
 }
 
 export interface RegisterResourceOptions {
@@ -30,7 +30,7 @@ export interface RegisterResourceOptions {
    * to reject. The resource is still tracked as `'failed'`, but it is treated as
    * non-blocking for startup readiness.
    */
-  softFail?: boolean;
+  optional?: boolean;
 }
 
 export interface ResourceManagerContract {
@@ -80,7 +80,7 @@ export class ResourceManager implements ResourceManagerContract {
     this.resources.set(key, {
       status: 'not_started',
       initializer,
-      softFail: options?.softFail ?? false,
+      optional: options?.optional ?? false,
     });
   }
 
@@ -122,12 +122,12 @@ export class ResourceManager implements ResourceManagerContract {
     } catch (err) {
       const state = this.resources.get(key);
 
-      if (!state?.softFail) {
+      if (!state?.optional) {
         throw err;
       }
 
       this.logger.debug({
-        message: `ResourceManager: soft-fail resource [${key}] failed to initialize, continuing`,
+        message: `ResourceManager: optional resource [${key}] failed to initialize, continuing`,
       });
     }
   }
