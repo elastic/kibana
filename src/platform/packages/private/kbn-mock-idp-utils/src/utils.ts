@@ -292,10 +292,20 @@ export function generateCosmosDBApiRequestHeaders(
   };
 }
 
+// Normalizes Kibana CLI project type aliases (e.g. 'oblt', 'es') to the canonical
+// ES project type names used in UIAM tokens and ES serverless configuration.
+const projectTypeAliases = new Map<string, string>([
+  ['oblt', 'observability'],
+  ['es', 'search'],
+]);
+
+const normalizeProjectType = (projectType: string): string =>
+  projectTypeAliases.get(projectType) ?? projectType;
+
 export async function createUiamSessionTokens({
   username,
   organizationId,
-  projectType,
+  projectType: rawProjectType,
   roles,
   fullName,
   email,
@@ -313,6 +323,7 @@ export async function createUiamSessionTokens({
   accessTokenLifetimeSec?: number;
   refreshTokenLifetimeSec?: number;
 }) {
+  const projectType = normalizeProjectType(rawProjectType);
   const iat = Math.floor(Date.now() / 1000);
 
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';
