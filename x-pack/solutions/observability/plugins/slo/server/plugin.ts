@@ -199,7 +199,10 @@ export class SLOPlugin
           );
 
           const soClient = coreStart.savedObjects.getScopedClient(request, {
-            includedHiddenTypes: [SO_SLO_TEMPLATE_TYPE],
+            includedHiddenTypes: [
+              SO_SLO_TEMPLATE_TYPE,
+              ...(isCompositeSloEnabled ? [SO_SLO_COMPOSITE_TYPE] : []),
+            ],
           });
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
@@ -245,7 +248,10 @@ export class SLOPlugin
         },
       },
       logger: this.logger,
-      repository: getSloServerRouteRepository({ isServerless: this.isServerless }),
+      repository: getSloServerRouteRepository({
+        isServerless: this.isServerless,
+        isCompositeSloEnabled,
+      }),
       isDev: this.isDev,
     });
 

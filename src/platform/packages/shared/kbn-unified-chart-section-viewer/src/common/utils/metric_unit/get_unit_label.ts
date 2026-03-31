@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { MetricUnit } from '../../../types';
+import type { MetricUnit, NullableMetricUnit } from '../../../types';
 
 const unitToLabel: Record<MetricUnit, string> = {
   ns: i18n.translate('metricsExperience.metricUnit.label.nanoseconds', {
@@ -43,9 +43,11 @@ const unitToLabel: Record<MetricUnit, string> = {
   }),
 };
 
-export function getUnitLabel({ unit }: { unit: MetricUnit | undefined }) {
+export function getUnitLabel({ unit }: { unit: NullableMetricUnit }) {
   if (!unit) {
-    return unitToLabel.count;
+    return i18n.translate('metricsExperience.metricUnit.label.null', {
+      defaultMessage: 'null',
+    });
   }
 
   return unitToLabel[unit] ?? unit;
