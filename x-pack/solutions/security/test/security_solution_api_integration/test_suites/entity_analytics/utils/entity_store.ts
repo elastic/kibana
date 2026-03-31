@@ -189,7 +189,7 @@ export const EntityStoreUtils = (
     opts: { size?: number; source?: string[] } = {}
   ) => {
     const supertest = getService('supertest');
-    let url = '/internal/security/entity_store/entities';
+    let url = '/api/security/entity_store/entities';
     if (namespace !== 'default') {
       url = `/s/${namespace}${url}`;
     }
@@ -197,7 +197,7 @@ export const EntityStoreUtils = (
       .get(url)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
-      .set('elastic-api-version', '2')
+      .set('elastic-api-version', '2023-10-31')
       .query({
         filter,
         ...(opts.size !== undefined ? { size: opts.size } : {}),
@@ -213,7 +213,7 @@ export const EntityStoreUtils = (
 
   const deleteEntityV2 = async (entityId: string) => {
     const supertest = getService('supertest');
-    let url = '/internal/security/entity_store/entities/';
+    let url = '/api/security/entity_store/entities/';
     if (namespace !== 'default') {
       url = `/s/${namespace}${url}`;
     }
@@ -221,7 +221,7 @@ export const EntityStoreUtils = (
       .delete(url)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
-      .set('elastic-api-version', '2')
+      .set('elastic-api-version', '2023-10-31')
       .send({ entityId });
     if (res.status !== 200) {
       log.error(`Failed to delete entity ${entityId}`);
@@ -245,7 +245,7 @@ export const EntityStoreUtils = (
       .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
       .expect(200);
 
-    let url = '/internal/security/entity_store/install?apiVersion=2';
+    let url = '/api/security/entity_store/install';
     if (namespace !== 'default') {
       url = `/s/${namespace}${url}`;
     }
@@ -253,6 +253,7 @@ export const EntityStoreUtils = (
       .post(url)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
       .send(body);
     if (res.status !== 201 && res.status !== 200) {
       log.error(`Failed to install entity store v2`);
@@ -268,7 +269,7 @@ export const EntityStoreUtils = (
 
     const res = await enableEntityStoreV2(body);
 
-    let maintainersUrl = '/internal/security/entity_store/entity_maintainers/init?apiVersion=2';
+    let maintainersUrl = '/internal/security/entity_store/entity_maintainers/init';
     if (namespace !== 'default') {
       maintainersUrl = `/s/${namespace}${maintainersUrl}`;
     }
@@ -277,6 +278,7 @@ export const EntityStoreUtils = (
       .post(maintainersUrl)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2')
       .send({})
       .expect(200);
     return res;
