@@ -55,7 +55,7 @@ describe('ModelDetailFlyout', () => {
     const endpoint = {
       ...createEndpoint(),
       metadata: { display: { name: 'Anthropic Claude Opus 4.5', model_creator: 'Anthropic' } },
-    } as InferenceAPIConfigResponse;
+    } as unknown as InferenceAPIConfigResponse;
     renderFlyout(MODEL_ID, [endpoint]);
 
     expect(screen.getByText('Anthropic Claude Opus 4.5')).toBeInTheDocument();
