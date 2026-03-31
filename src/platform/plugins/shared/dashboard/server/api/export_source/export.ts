@@ -9,7 +9,7 @@
 
 import Boom from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import type { DashboardState } from '../types';
+import type { DashboardState, Warnings } from '../types';
 import type { DashboardExportSourceResponseBody } from './types';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
@@ -20,6 +20,7 @@ export async function exportSource(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   dashboardState: DashboardState
 ): Promise<DashboardExportSourceResponseBody> {
+  const warnings: Warnings = [];
   try {
     /**
      * Temporary escape hatch for lens as code
@@ -29,14 +30,13 @@ export async function exportSource(
      * transformDashboardIn and transformDashboardOut calls.
      */
     const { attributes: storedDashboardState, references } = transformDashboardIn(dashboardState);
-    const transformedApiDashboardState = transformDashboardOut(
-      storedDashboardState ?? {},
-      references ?? []
-    );
+    const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
+      transformDashboardOut(storedDashboardState ?? {}, references ?? []);
 
-    const { data: scopedDashboardState, warnings } = stripUnmappedKeys(
+    const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
       transformedApiDashboardState as Partial<DashboardState>
     );
+    warnings.push(...dashboardStateWarnings, ...scopeWarnings);
     const sanitizedDashboardState = dashboardStateSchema.validate(scopedDashboardState);
     return {
       data: sanitizedDashboardState,

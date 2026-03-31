@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { warningsSchema } from '../warnings_schema';
 
 export function getExportSourceRequestBodySchema() {
   return getDashboardStateSchema(true);
@@ -17,7 +18,6 @@ export function getExportSourceRequestBodySchema() {
 export function getExportSourceResponseBodySchema() {
   return schema.object({
     data: getDashboardStateSchema(false),
-    // codeql[js/kibana/unbounded-array-in-schema] output schema — server controls the response size
-    warnings: schema.maybe(schema.arrayOf(schema.string())),
+    warnings: schema.maybe(warningsSchema),
   });
 }

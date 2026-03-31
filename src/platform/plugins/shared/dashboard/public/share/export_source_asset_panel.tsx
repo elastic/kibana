@@ -66,7 +66,8 @@ function useSanitizedExportSource({
     getSanitizedExportSource(dashboardState)
       .then(({ data, warnings }) => {
         if (!isMounted) return;
-        setLoadState({ status: 'success', data, warnings });
+        const warningMessages = warnings.map(({ message }) => message);
+        setLoadState({ status: 'success', data, warnings: warningMessages });
       })
       .catch((e) => {
         if (!isMounted) return;

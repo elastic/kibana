@@ -53,7 +53,9 @@ describe('ExportSourceAssetPanel', () => {
     const user = userEvent.setup();
     (getSanitizedExportSource as jest.Mock).mockResolvedValue({
       data: dashboardState,
-      warnings: ['Dropped panel panel1, panel schema not available for panel type: foo.'],
+      warnings: [
+        { message: 'Dropped panel panel1, panel schema not available for panel type: foo.' },
+      ],
     });
 
     render(<ExportSourceAssetPanel dashboardState={dashboardState} />);
