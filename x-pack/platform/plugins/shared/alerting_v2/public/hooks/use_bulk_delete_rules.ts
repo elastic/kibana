@@ -35,6 +35,7 @@ export const useBulkDeleteRules = () => {
         );
       }
       queryClient.invalidateQueries(ruleKeys.lists());
+      queryClient.invalidateQueries(ruleKeys.tags());
     },
     onError: () => {
       toasts.addDanger(

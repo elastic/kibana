@@ -66,6 +66,7 @@ export interface RulesSavedObjectServiceContract {
     saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes }>;
     total: number;
   }>;
+  findTags(): Promise<string[]>;
 }
 
 @injectable()
@@ -237,5 +238,27 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       sortOrder,
       ...(filter ? { filter } : {}),
     });
+  }
+
+  public async findTags(): Promise<string[]> {
+    const result = await this.client.find<RuleSavedObjectAttributes>({
+      type: RULE_SAVED_OBJECT_TYPE,
+      perPage: 0,
+      aggs: {
+        tags: {
+          terms: {
+            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.labels`,
+            size: 10000,
+            order: { _key: 'asc' },
+          },
+        },
+      },
+    });
+
+    const aggs = result.aggregations as
+      | { tags?: { buckets: Array<{ key: string }> } }
+      | undefined;
+
+    return aggs?.tags?.buckets.map((bucket) => bucket.key) ?? [];
   }
 }

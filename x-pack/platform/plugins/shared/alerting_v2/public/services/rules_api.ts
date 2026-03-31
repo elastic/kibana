@@ -50,6 +50,10 @@ export type BulkOperationParams =
 export class RulesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
+  public async listTags() {
+    return this.http.get<{ tags: string[] }>(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/_tags`);
+  }
+
   public async listRules(params: ListRulesParams) {
     return this.http.get<FindRulesResponse>(INTERNAL_ALERTING_V2_RULE_API_PATH, {
       query: {

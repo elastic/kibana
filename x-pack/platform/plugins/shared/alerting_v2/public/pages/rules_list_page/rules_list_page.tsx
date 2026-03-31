@@ -30,6 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import type { ListRulesSortField, RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
+import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
 import { RulesListTableContainer } from './rules_list_table_container';
@@ -394,6 +395,8 @@ export const RulesListPage = () => {
     sortOrder: sortDirection,
   });
 
+  const { data: allTags } = useFetchRuleTags();
+
   const onTableChange = ({ page: tablePage, sort }: Criteria<RuleApiResponse>) => {
     if (tablePage) {
       setPage(tablePage.index + 1);
@@ -413,15 +416,7 @@ export const RulesListPage = () => {
     }
   };
 
-  const availableTagOptions = useMemo(() => {
-    const tagSet = new Set<string>(tagsFilter);
-    for (const rule of data?.items ?? []) {
-      for (const tag of rule.metadata.labels ?? []) {
-        tagSet.add(tag);
-      }
-    }
-    return [...tagSet].sort();
-  }, [data?.items, tagsFilter]);
+  const availableTagOptions = allTags ?? [];
 
   const hasActiveFilters = Boolean(filter);
 
