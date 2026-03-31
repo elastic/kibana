@@ -989,7 +989,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should return unauthorized when patching exception list value', async () => {
           await createRule(supertest, log, getSimpleRule('rule-1'));
 
-          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedUser = { username: 'rules_read_exceptions_read', password: 'changeme' };
           const restrictedApis = detectionsApi.withUser(restrictedUser);
           await restrictedApis
             .patchRule({
@@ -1005,7 +1005,7 @@ export default ({ getService }: FtrProviderContext) => {
                 ],
               },
             })
-            .expect(401);
+            .expect(403);
         });
       });
 
@@ -1237,7 +1237,7 @@ export default ({ getService }: FtrProviderContext) => {
               body: {
                 rule_id: 'rule-1',
                 note: 'This is allowed',
-                // User doens't have exception list edit capabilities
+                // User doesn't have exception list edit capabilities
                 exceptions_list: [
                   {
                     id: '1',
