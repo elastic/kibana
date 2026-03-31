@@ -125,8 +125,16 @@ export async function cloneRule<Params extends RuleParams = never>(
     errorMessage: 'Error creating rule: could not create API key',
   });
 
+  const {
+    apiKey: _sourceApiKey,
+    apiKeyOwner: _sourceApiKeyOwner,
+    apiKeyCreatedByUser: _sourceApiKeyCreatedByUser,
+    uiamApiKey: _sourceUiamApiKey,
+    ...sourceAttributes
+  } = ruleSavedObject.attributes;
+
   const ruleAttributes: RawRule = {
-    ...ruleSavedObject.attributes,
+    ...sourceAttributes,
     name: ruleName,
     ...apiKeyAttributes,
     legacyId,
