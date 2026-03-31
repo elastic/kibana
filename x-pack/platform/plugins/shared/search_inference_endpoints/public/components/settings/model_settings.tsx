@@ -12,6 +12,7 @@ import {
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiPageTemplate,
+  EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
 } from '@elastic/eui';
@@ -91,6 +92,8 @@ export const ModelSettings: React.FC = () => {
     setResetParentKey(null);
   }, [resetParentKey, resetSection]);
 
+  const disallowOtherModels = defaultModelSettings.state.disallowOtherModels;
+
   return (
     <>
       <EuiPageTemplate.Header
@@ -121,39 +124,38 @@ export const ModelSettings: React.FC = () => {
         ]}
       />
       <EuiPageTemplate.Section data-test-subj="modelSettingsContent">
-        <EuiSplitPanel.Outer hasBorder grow={false}>
-          <EuiSplitPanel.Inner>
-            <DefaultModelSection defaultModelSettings={defaultModelSettings} />
-          </EuiSplitPanel.Inner>
-        </EuiSplitPanel.Outer>
+        <DefaultModelSection defaultModelSettings={defaultModelSettings} />
+        {disallowOtherModels ? null : (
+          <>
+            <EuiSpacer size="xl" />
 
-        <EuiSpacer size="xl" />
-
-        {isLoading ? (
-          <EuiLoadingSpinner size="l" />
-        ) : sections.length === 0 ? (
-          <EuiEmptyPrompt
-            iconType="gear"
-            title={<h2>{i18n.SETTINGS_NO_FEATURES_TITLE}</h2>}
-            body={<p>{i18n.SETTINGS_NO_FEATURES_DESCRIPTION}</p>}
-            data-test-subj="settings-no-features"
-          />
-        ) : (
-          sections.map((section) => (
-            <React.Fragment key={section.featureId}>
-              <FeatureSection
-                parentName={section.featureName}
-                parentDescription={section.featureDescription}
-                features={section.children.map((f) => ({
-                  endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
-                  feature: f,
-                }))}
-                onReset={() => setResetParentKey(section.featureId)}
-                onEndpointsChange={updateEndpoints}
+            {isLoading ? (
+              <EuiLoadingSpinner size="l" />
+            ) : sections.length === 0 ? (
+              <EuiEmptyPrompt
+                iconType="gear"
+                title={<h2>{i18n.SETTINGS_NO_FEATURES_TITLE}</h2>}
+                body={<p>{i18n.SETTINGS_NO_FEATURES_DESCRIPTION}</p>}
+                data-test-subj="settings-no-features"
               />
-              <EuiSpacer size="xl" />
-            </React.Fragment>
-          ))
+            ) : (
+              sections.map((section) => (
+                <React.Fragment key={section.featureId}>
+                  <FeatureSection
+                    parentName={section.featureName}
+                    parentDescription={section.featureDescription}
+                    features={section.children.map((f) => ({
+                      endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
+                      feature: f,
+                    }))}
+                    onReset={() => setResetParentKey(section.featureId)}
+                    onEndpointsChange={updateEndpoints}
+                  />
+                  <EuiSpacer size="xl" />
+                </React.Fragment>
+              ))
+            )}
+          </>
         )}
       </EuiPageTemplate.Section>
 

@@ -265,14 +265,21 @@ export const DEFAULT_MODEL_CUSTOM_GROUP = i18n.translate(
 export const DISALLOW_OTHER_MODELS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels',
   {
-    defaultMessage: 'Disallow all other models',
+    defaultMessage: 'Only allow the default model to be used.',
   }
 );
 
-export const DISALLOW_OTHER_MODELS_TOOLTIP = i18n.translate(
-  'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels.tooltip',
+export const DISALLOW_OTHER_MODELS_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels.description',
   {
-    defaultMessage: 'Only the chosen default model will be shown to users of this space.',
+    defaultMessage: 'Model selection is hidden and only the default model will be used.',
+  }
+);
+
+export const ALLOW_OTHER_MODELS_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.allowOtherModels.description',
+  {
+    defaultMessage: 'Features can allow users to select other models than the default.',
   }
 );
 

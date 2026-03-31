@@ -7,14 +7,14 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiCheckbox,
   EuiComboBox,
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
-  EuiIconTip,
+  EuiSplitPanel,
+  EuiSwitch,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -108,31 +108,28 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
   };
 
   return (
-    <EuiDescribedFormGroup
-      data-test-subj="defaultModelSection"
-      fullWidth
-      title={
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="sparkles" size="m" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h3 data-test-subj="defaultModelTitle">{i18n.DEFAULT_MODEL_TITLE}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      description={<p>{i18n.DEFAULT_MODEL_DESCRIPTION}</p>}
-    >
-      <EuiFormRow
-        fullWidth
-        label={i18n.DEFAULT_MODEL_LABEL}
-        isInvalid={validationErrors.length > 0}
-        error={validationErrors}
-      >
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem>
+    <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
+      <EuiSplitPanel.Inner paddingSize="l">
+        <EuiDescribedFormGroup
+          data-test-subj="defaultModelSection"
+          fullWidth
+          title={
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h3 data-test-subj="defaultModelTitle">{i18n.DEFAULT_MODEL_TITLE}</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          description={<p>{i18n.DEFAULT_MODEL_DESCRIPTION}</p>}
+        >
+          <EuiFormRow
+            fullWidth
+            label={i18n.DEFAULT_MODEL_LABEL}
+            isInvalid={validationErrors.length > 0}
+            error={validationErrors}
+          >
             <EuiComboBox
               data-test-subj="defaultModelComboBox"
               placeholder={i18n.DEFAULT_MODEL_PLACEHOLDER}
@@ -141,30 +138,29 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
               selectedOptions={selectedOptions}
               onChange={onChangeDefaultModel}
               isLoading={connectorsLoading}
-              isInvalid={
-                (selectedOptions.length === 0 && !connectorsLoading) ||
-                (state.disallowOtherModels && selectedOptions[0]?.value === NO_DEFAULT_MODEL)
-              }
+              isInvalid={validationErrors.length > 0}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner grow={false} color={state.disallowOtherModels ? 'danger' : 'subdued'} paddingSize="l">
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              id="disallowOtherModelsCheckbox"
+              data-test-subj="disallowOtherModelsCheckbox"
+              label={i18n.DISALLOW_OTHER_MODELS_LABEL}
+              checked={state.disallowOtherModels}
+              onChange={(e) => onChangeDisallow(e.target.checked)}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiCheckbox
-                  id="disallowOtherModelsCheckbox"
-                  data-test-subj="disallowOtherModelsCheckbox"
-                  label={i18n.DISALLOW_OTHER_MODELS_LABEL}
-                  checked={state.disallowOtherModels}
-                  onChange={(e) => onChangeDisallow(e.target.checked)}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIconTip content={i18n.DISALLOW_OTHER_MODELS_TOOLTIP} position="top" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {state.disallowOtherModels ? i18n.DISALLOW_OTHER_MODELS_DESCRIPTION : i18n.ALLOW_OTHER_MODELS_DESCRIPTION}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
 };
