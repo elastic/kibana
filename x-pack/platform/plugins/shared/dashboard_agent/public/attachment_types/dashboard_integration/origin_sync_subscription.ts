@@ -6,23 +6,16 @@
  */
 
 import type { Subscription } from 'rxjs';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 
 export const createOriginSyncSubscription = ({
   api,
-  conversationId,
-  attachmentId,
   attachmentOrigin,
-  agentBuilder,
-  onOriginUpdated,
+  onOriginChange,
 }: {
   api: DashboardApi;
-  conversationId: string;
-  attachmentId: string;
   attachmentOrigin: string | undefined;
-  agentBuilder: AgentBuilderPluginStart;
-  onOriginUpdated?: (origin: string) => void;
+  onOriginChange: (origin: string) => void;
 }): Subscription => {
   let previousSavedObjectId = api.savedObjectId$.value;
   let currentOrigin = attachmentOrigin;
@@ -40,8 +33,7 @@ export const createOriginSyncSubscription = ({
         currentSavedObjectId === currentOrigin);
 
     if (shouldUpdate) {
-      void agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, currentSavedObjectId);
-      onOriginUpdated?.(currentSavedObjectId);
+      onOriginChange(currentSavedObjectId);
       currentOrigin = currentSavedObjectId;
     }
     previousSavedObjectId = currentSavedObjectId;
