@@ -7,8 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { PolicyArtifactsPageLabels } from '../artifacts/translations';
 
-export const POLICY_ARTIFACT_TRUSTED_DEVICES_LABELS = Object.freeze({
+export const POLICY_ARTIFACT_TRUSTED_DEVICES_LABELS: Omit<
+  PolicyArtifactsPageLabels,
+  'layoutAboutMessage'
+> = Object.freeze({
   deleteModalTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.trustedDevices.list.removeDialog.title',
     {
@@ -126,6 +130,10 @@ export const POLICY_ARTIFACT_TRUSTED_DEVICES_LABELS = Object.freeze({
   emptyUnexistingPrimaryActionButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.trustedDevices.empty.unexisting.action',
     { defaultMessage: 'Add trusted devices' }
+  ),
+  emptyUnexistingImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.trustedDevices.empty.unexisting.importAction',
+    { defaultMessage: 'Import trusted device list' }
   ),
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate('xpack.securitySolution.endpoint.policy.trustedDevices.list.totalItemCount', {

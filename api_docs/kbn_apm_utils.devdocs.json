@@ -150,7 +150,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-        "lineNumber": 24,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -173,7 +173,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
@@ -206,7 +206,7 @@
           " | undefined) => Promise<T>"
         ],
         "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -229,7 +229,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -248,7 +248,7 @@
               " | undefined) => Promise<T>"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -266,7 +266,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -286,7 +286,7 @@
         "label": "SpanOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -299,7 +299,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 15,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -315,7 +315,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 16,
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -331,7 +331,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 17,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -347,7 +347,7 @@
               "Record<string, string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -363,7 +363,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/with_span.ts",
-            "lineNumber": 19,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

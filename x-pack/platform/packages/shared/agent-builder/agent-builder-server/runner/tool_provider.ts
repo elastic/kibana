@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z, ZodObject } from '@kbn/zod';
+import type { z, ZodObject } from '@kbn/zod/v4';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';

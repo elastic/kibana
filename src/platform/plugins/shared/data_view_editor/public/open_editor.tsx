@@ -96,6 +96,10 @@ export const getEditorOpener =
           hideCloseButton: true,
           size: 'l',
           'aria-labelledby': 'dataViewEditorFlyoutTitle',
+          onClose: () => {
+            closeEditor();
+            onCancel();
+          },
         }
       );
 

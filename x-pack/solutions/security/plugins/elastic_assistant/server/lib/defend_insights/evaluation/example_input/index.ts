@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { DefendInsight, Replacements } from '@kbn/elastic-assistant-common';
 
 const Document = z.object({

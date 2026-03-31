@@ -103,7 +103,9 @@ describe('export timelines', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest.mock.calls[0][0]).toEqual('file_name: Required');
+      expect(result.badRequest.mock.calls[0][0]).toEqual(
+        'file_name: Invalid input: expected string, received undefined'
+      );
     });
 
     test('return validation error for request params', async () => {
@@ -115,7 +117,9 @@ describe('export timelines', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest.mock.calls[0][0]).toEqual('ids: Expected array, received string');
+      expect(result.badRequest.mock.calls[0][0]).toEqual(
+        'ids: Invalid input: expected array, received string'
+      );
     });
   });
 });

@@ -9,8 +9,8 @@ import { useGetEndpointScript } from './use_get_script_by_id';
 import { useQuery as _useQuery } from '@kbn/react-query';
 import { scriptsLibraryHttpMocks } from '../../mocks/scripts_library_http_mocks';
 import {
-  createAppRootMockRenderer,
   type AppContextTestRender,
+  createAppRootMockRenderer,
   type ReactQueryHookRenderer,
 } from '../../../common/mock/endpoint';
 import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';

@@ -64,7 +64,9 @@ describe('Dashboard App', () => {
   });
 
   it('test the default behavior without an expandedPanel id passed as a prop to the DashboardApp', async () => {
-    render(<DashboardApp redirectTo={jest.fn()} history={mockHistory} />);
+    render(
+      <DashboardApp redirectTo={jest.fn()} history={mockHistory} setDashboardAppApi={jest.fn()} />
+    );
 
     await waitFor(() => {
       expect(expandPanelSpy).not.toHaveBeenCalled();
@@ -86,7 +88,14 @@ describe('Dashboard App', () => {
   });
 
   it('test that the expanded panel behavior subject and history is called when passed as a prop to the DashboardApp', async () => {
-    render(<DashboardApp redirectTo={jest.fn()} history={mockHistory} expandedPanelId="456" />);
+    render(
+      <DashboardApp
+        redirectTo={jest.fn()}
+        history={mockHistory}
+        expandedPanelId="456"
+        setDashboardAppApi={jest.fn()}
+      />
+    );
 
     await waitFor(() => {
       expect(expandPanelSpy).toHaveBeenCalledTimes(1);

@@ -337,7 +337,7 @@
           "\nGet the background color for a button associated when popover is open."
         ],
         "signature": [
-          "({ color, euiTheme, isFilled, }: { color: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"risk\" | \"neutral\"; euiTheme: ",
+          "({ color, euiTheme, isFilled, }: { color: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\"; euiTheme: ",
           "EuiThemeComputed",
           "<{}>; isFilled: boolean; }) => string | { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundNeutral: string; backgroundSuccess: string; backgroundWarning: string; backgroundRisk: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundPrimaryHover: string; backgroundAccentHover: string; backgroundAccentSecondaryHover: string; backgroundNeutralHover: string; backgroundSuccessHover: string; backgroundWarningHover: string; backgroundRiskHover: string; backgroundDangerHover: string; backgroundAssistanceHover: string; backgroundTextHover: string; backgroundPrimaryActive: string; backgroundAccentActive: string; backgroundAccentSecondaryActive: string; backgroundNeutralActive: string; backgroundSuccessActive: string; backgroundWarningActive: string; backgroundRiskActive: string; backgroundDangerActive: string; backgroundTextActive: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundFilledPrimaryHover: string; backgroundFilledAccentHover: string; backgroundFilledAccentSecondaryHover: string; backgroundFilledNeutralHover: string; backgroundFilledSuccessHover: string; backgroundFilledWarningHover: string; backgroundFilledRiskHover: string; backgroundFilledDangerHover: string; backgroundFilledAssistanceHover: string; backgroundFilledTextHover: string; backgroundFilledPrimaryActive: string; backgroundFilledAccentActive: string; backgroundFilledAccentSecondaryActive: string; backgroundFilledNeutralActive: string; backgroundFilledSuccessActive: string; backgroundFilledWarningActive: string; backgroundFilledRiskActive: string; backgroundFilledDangerActive: string; backgroundFilledTextActive: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptyNeutralHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyRiskHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; backgroundEmptyPrimaryActive: string; backgroundEmptyAccentActive: string; backgroundEmptyAccentSecondaryActive: string; backgroundEmptyNeutralActive: string; backgroundEmptySuccessActive: string; backgroundEmptyWarningActive: string; backgroundEmptyRiskActive: string; backgroundEmptyDangerActive: string; backgroundEmptyTextActive: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorNeutral: string; textColorSuccess: string; textColorWarning: string; textColorRisk: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledNeutral: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledRisk: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; }"
         ],
@@ -368,7 +368,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"risk\" | \"neutral\""
+                  "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\""
                 ],
                 "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx",
                 "lineNumber": 335,
@@ -1301,7 +1301,7 @@
         "tags": [],
         "label": "AppMenuConfig",
         "description": [
-          "\nConfiguration object for the AppMenu component."
+          "\nConfiguration object for the AppMenu component.\nThe maximum number of items that can be visible at once before overflowing into the \"More\"\npopover is determined by the APP_MENU_ITEM_LIMIT constant - currently 5 but it will\nbe reduced to 3 in a future release."
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
         "lineNumber": 270,
@@ -1323,7 +1323,7 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-            "lineNumber": 274,
+            "lineNumber": 277,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1342,7 +1342,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-            "lineNumber": 278,
+            "lineNumber": 282,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1351,20 +1351,42 @@
             "parentPluginId": "@kbn/core-chrome-app-menu-components",
             "id": "def-public.AppMenuConfig.secondaryActionItem",
             "type": "CompoundType",
-            "tags": [],
-            "label": "secondaryActionItem",
-            "description": [
-              "\nSecondary action button to display in the app menu."
+            "tags": [
+              "deprecated"
             ],
+            "label": "secondaryActionItem",
+            "description": [],
             "signature": [
               "AppMenuSecondaryActionItem",
               " | undefined"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-            "lineNumber": 282,
+            "lineNumber": 286,
             "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/components/app_menu.tsx"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/components/app_menu.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/use_top_nav_links.tsx"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/top_nav/use_dashboard_menu_items.tsx"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1430,17 +1452,39 @@
         "parentPluginId": "@kbn/core-chrome-app-menu-components",
         "id": "def-public.APP_MENU_ITEM_LIMIT",
         "type": "number",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "APP_MENU_ITEM_LIMIT",
-        "description": [],
+        "description": [
+          "\nThe maximum number of items that can be displayed in the app menu before overflowing into\n\"More\" popover.\nIf the number of items exceeds this limit, the extra items will be shown in an overflow\npopover.\nPrimary and secondary action items count towards this limit but always remain visible and are\nnot moved to the overflow popover.\nThe overflow button itself does not count towards this limit."
+        ],
         "signature": [
           "5"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/constants.ts",
-        "lineNumber": 10,
+        "lineNumber": 20,
         "columnNumber": 14,
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/index.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/index.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1454,7 +1498,7 @@
           "25"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1471,7 +1515,7 @@
           "2"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1596,7 +1640,7 @@
         "signature": [
           "Omit<",
           "AppMenuItemCommon",
-          ", \"order\"> & { color?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"risk\" | \"neutral\" | undefined; } & { isFilled?: boolean | undefined; minWidth?: false | ",
+          ", \"order\"> & { color?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; } & { isFilled?: boolean | undefined; minWidth?: false | ",
           "Property",
           ".MinWidth<string | number> | undefined; }"
         ],

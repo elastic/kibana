@@ -8,6 +8,8 @@
 import { useCallback } from 'react';
 
 import type { AlertAssignees } from '../../../../../../common/api/detection_engine';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { useSetUnifiedAlertsAssignees } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_assignees';
 
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
@@ -29,6 +31,9 @@ interface ApplyAttackAssigneesReturn {
 export const useApplyAttackAssignees = (): ApplyAttackAssigneesReturn => {
   const { mutateAsync: setUnifiedAlertsAssignees } = useSetUnifiedAlertsAssignees();
   const showModalIfNeeded = useUpdateAttacksModal();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
   const applyAssignees = useCallback(
     async ({
@@ -37,6 +42,7 @@ export const useApplyAttackAssignees = (): ApplyAttackAssigneesReturn => {
       relatedAlertIds,
       setIsLoading,
       onSuccess,
+      telemetrySource,
     }: ApplyAttackAssigneesProps) => {
       // Show modal (if needed) and wait for user decision
       const result = await showModalIfNeeded({
@@ -47,6 +53,14 @@ export const useApplyAttackAssignees = (): ApplyAttackAssigneesReturn => {
         // User cancelled, don't proceed with update
         return;
       }
+
+      if (telemetrySource) {
+        telemetry.reportEvent(AttacksEventTypes.ActionAssigneeUpdated, {
+          source: telemetrySource,
+          scope: result.updateAlerts ? 'attack_and_related_alerts' : 'attack_only',
+        });
+      }
+
       setIsLoading?.(true);
       try {
         // Combine IDs based on user choice
@@ -58,7 +72,7 @@ export const useApplyAttackAssignees = (): ApplyAttackAssigneesReturn => {
         setIsLoading?.(false);
       }
     },
-    [setUnifiedAlertsAssignees, showModalIfNeeded]
+    [setUnifiedAlertsAssignees, showModalIfNeeded, telemetry]
   );
 
   return { applyAssignees };

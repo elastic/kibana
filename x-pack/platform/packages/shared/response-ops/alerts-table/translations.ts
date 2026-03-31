@@ -328,6 +328,13 @@ export const UNACKNOWLEDGE = i18n.translate('xpack.responseOpsAlertsTable.action
   defaultMessage: 'Unacknowledge',
 });
 
+export const ALERT_FLYOUT_ALERT_DETAILS_BUTTON = i18n.translate(
+  'xpack.responseOpsAlertsTable.alertFlyout.alertDetailsButton',
+  {
+    defaultMessage: 'Alert details',
+  }
+);
+
 export const getAlertFlyoutAriaLabel = (alertDescription: string) =>
   i18n.translate('xpack.responseOpsAlertsTable.alertFlyout.ariaLabel', {
     defaultMessage: 'Details for alert "{alertDescription}"',

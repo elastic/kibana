@@ -9,20 +9,9 @@
 
 import { isDashboardSection } from '../../common';
 import { embeddableService } from '../kibana_services';
-import type {
-  DashboardPanel,
-  DashboardState,
-  DashboardPinnedPanel,
-  DashboardSection,
-} from './types';
+import type { DashboardPanel, DashboardState, DashboardPinnedPanel } from './types';
 
-function isPinnedPanel(
-  panel: DashboardPanel | DashboardPinnedPanel | DashboardSection
-): panel is DashboardPinnedPanel {
-  return !('grid' in panel);
-}
-
-export function stripUnmappedKeys(dashboardState: DashboardState) {
+export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
   const warnings: string[] = [];
   const { pinned_panels, panels, ...rest } = dashboardState;
 
@@ -66,10 +55,9 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
     };
   }
 
-  const mappedPanels = [...(panels ?? []), ...(pinned_panels ?? [])]
+  const mappedPanels = (panels ?? [])
     .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel))
     .map((panel) => {
-      if (isPinnedPanel(panel)) return panel;
       if (!isDashboardSection(panel)) return removeEnhancements(panel);
       const { panels: sectionPanels, ...restOfSection } = panel;
       return {
@@ -78,11 +66,14 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
       };
     });
 
+  const mappedPinnedPanels = (pinned_panels ?? []).filter(isMappedPanelType);
+
   return {
     data: {
       ...rest,
       panels: mappedPanels,
-    },
+      ...(pinned_panels && { pinned_panels: mappedPinnedPanels }),
+    } as DashboardState,
     warnings,
   };
 }

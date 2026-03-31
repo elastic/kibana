@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequiredOptional } from '@kbn/zod-helpers';
+import type { RequiredOptional } from '@kbn/zod-helpers/v4';
 import { assertUnreachable } from '../../../utility_types';
 import type {
   EqlRule,

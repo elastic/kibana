@@ -19,6 +19,7 @@ import type {
   DocumentMigrateOptions,
   IsDowngradeRequiredOptions,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
 import type { ActiveMigrations } from './types';
 import { maxVersion } from './pipelines/utils';
 import { buildActiveMigrations } from './build_active_migrations';
@@ -169,18 +170,36 @@ export class DocumentMigrator implements IDocumentMigrator {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
     const typeMigrations = this.migrations[doc.type];
-    if (downgradeRequired(doc, typeMigrations?.latestVersion ?? {}, targetTypeVersion)) {
-      const currentVersion = doc.typeMigrationVersion ?? doc.migrationVersion?.[doc.type];
+
+    // When the document has no typeMigrationVersion (e.g. created via the deprecated SO HTTP API),
+    // use the type's version guesser—if one was registered—to synthesize a starting version so
+    // that the appropriate migrations are applied rather than skipping all of them.
+    // The guesser may return either a model version number (converted to a virtual semver) or a
+    // semver string directly (required when the type has legacy migrations in its history).
+    const effectiveDoc = (() => {
+      if (doc.typeMigrationVersion != null || !typeMigrations?.typeVersionGuesser) {
+        return doc;
+      }
+      const guessed = typeMigrations.typeVersionGuesser(doc);
+      const typeMigrationVersion =
+        typeof guessed === 'number' ? modelVersionToVirtualVersion(guessed) : guessed;
+      return { ...doc, typeMigrationVersion };
+    })();
+
+    if (downgradeRequired(effectiveDoc, typeMigrations?.latestVersion ?? {}, targetTypeVersion)) {
+      const currentVersion =
+        effectiveDoc.typeMigrationVersion ?? effectiveDoc.migrationVersion?.[effectiveDoc.type];
       const latestVersion =
-        targetTypeVersion ?? this.migrations[doc.type].latestVersion[TransformType.Migrate];
+        targetTypeVersion ??
+        this.migrations[effectiveDoc.type].latestVersion[TransformType.Migrate];
       if (!allowDowngrade) {
         throw Boom.badData(
-          `Document "${doc.id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
+          `Document "${effectiveDoc.id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
         );
       }
-      return this.transformDown(doc, { targetTypeVersion: latestVersion! });
+      return this.transformDown(effectiveDoc, { targetTypeVersion: latestVersion! });
     } else {
-      return this.transformUp(doc, { convertNamespaceTypes, targetTypeVersion });
+      return this.transformUp(effectiveDoc, { convertNamespaceTypes, targetTypeVersion });
     }
   }
 

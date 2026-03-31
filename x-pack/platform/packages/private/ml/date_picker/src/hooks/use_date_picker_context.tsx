@@ -17,6 +17,7 @@ import type {
   NotificationsStart,
 } from '@kbn/core/public';
 import type { HttpStart } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public/types';
 
 /**
  * Date Picker Dependencies to be passed on via `DatePickerContextProvider`.
@@ -58,6 +59,10 @@ export interface DatePickerDependencies {
    * Optional flag to disable the frozen data tier choice.
    */
   showFrozenDataTierChoice?: boolean;
+  /**
+   * CPS plugin for project routing
+   */
+  cps?: CPSPluginStart;
 }
 
 /**

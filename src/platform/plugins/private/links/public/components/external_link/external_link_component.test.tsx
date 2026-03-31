@@ -20,7 +20,6 @@ import { DEFAULT_EXTERNAL_LINK_OPTIONS } from './constants';
 describe('external link component', () => {
   const defaultLinkInfo: ResolvedLink = {
     destination: 'https://example.com',
-    order: 1,
     id: 'foo',
     type: 'externalLink' as const,
     title: 'https://example.com',
@@ -37,33 +36,33 @@ describe('external link component', () => {
   test('by default opens in new tab and renders external icon', async () => {
     render(<ExternalLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
-    const link = await screen.findByTestId('externalLink--foo');
+    const link = await screen.findByTestId('externalLink--https://example.com');
     expect(link).toBeInTheDocument();
-    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeInTheDocument();
     await userEvent.click(link);
     expect(window.open).toHaveBeenCalledWith('https://example.com', '_blank');
   });
 
-  test('renders external icon even when `openInNewTab` setting is `false`', async () => {
+  test('renders external icon even when `open_in_new_tab` setting is `false`', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
-      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, openInNewTab: false },
+      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
-    const link = await screen.findByTestId('externalLink--foo');
-    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    const link = await screen.findByTestId('externalLink--https://example.com');
+    const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeInTheDocument();
   });
 
   test('modified click does not trigger event.preventDefault', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
-      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, openInNewTab: false },
+      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
-    const link = await screen.findByTestId('externalLink--foo');
+    const link = await screen.findByTestId('externalLink--https://example.com');
     expect(link).toHaveTextContent('https://example.com');
     const clickEvent = createEvent.click(link, { ctrlKey: true });
     const preventDefault = jest.spyOn(clickEvent, 'preventDefault');
@@ -71,14 +70,14 @@ describe('external link component', () => {
     expect(preventDefault).toHaveBeenCalledTimes(0);
   });
 
-  test('uses navigateToUrl when openInNewTab is false', async () => {
+  test('uses navigateToUrl when open_in_new_tab is false', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
-      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, openInNewTab: false },
+      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
-    const link = await screen.findByTestId('externalLink--foo');
+    const link = await screen.findByTestId('externalLink--https://example.com');
     await userEvent.click(link);
     expect(coreServices.application.navigateToUrl).toBeCalledTimes(1);
     expect(coreServices.application.navigateToUrl).toBeCalledWith('https://example.com');
@@ -92,7 +91,7 @@ describe('external link component', () => {
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
-    const link = screen.getByTestId('externalLink--foo--error');
+    const link = screen.getByTestId('externalLink--https://example.com--error');
     expect(link).toBeDisabled();
     /**
      * TODO: We should test the tooltip content, but the component is disabled

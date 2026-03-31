@@ -6,6 +6,7 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -14,7 +15,7 @@ import {
   PostAttackDiscoveryGenerationsDismissRequestParams,
   PostAttackDiscoveryGenerationsDismissResponse,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import { ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED } from '../../../../../common/constants';
 import { performChecks } from '../../../helpers';
@@ -31,7 +32,7 @@ export const postAttackDiscoveryGenerationsDismissRoute = (
       path: ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })

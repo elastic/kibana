@@ -13,6 +13,7 @@ import { ContentListProvider, useContentListConfig } from './provider';
 import type { ContentListProviderProps } from './provider';
 import type { FindItemsResult, FindItemsParams } from '../datasource';
 import type { ContentListItem } from '../item';
+import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 
 describe('ContentListProvider', () => {
   const mockFindItems = jest.fn(
@@ -176,6 +177,60 @@ describe('ContentListProvider', () => {
       });
 
       expect(result.current.supports.search).toBe(true);
+    });
+
+    describe('tags support', () => {
+      const mockTagsService: ContentManagementTagsServices = {
+        getTagList: () => [
+          { id: 'tag-1', name: 'Production', description: '', color: '#FF0000', managed: false },
+        ],
+      };
+
+      it('disables tags by default when no tags service is provided', () => {
+        const { result } = renderHook(() => useContentListConfig(), {
+          wrapper: createWrapper(),
+        });
+
+        expect(result.current.supports.tags).toBe(false);
+      });
+
+      it('enables tags when tags service is provided', () => {
+        const { result } = renderHook(() => useContentListConfig(), {
+          wrapper: createWrapper({ services: { tags: mockTagsService } }),
+        });
+
+        expect(result.current.supports.tags).toBe(true);
+      });
+
+      it('disables tags when `features.tags` is false even with tags service', () => {
+        const { result } = renderHook(() => useContentListConfig(), {
+          wrapper: createWrapper({
+            features: { tags: false },
+            services: { tags: mockTagsService },
+          }),
+        });
+
+        expect(result.current.supports.tags).toBe(false);
+      });
+
+      it('enables tags when `features.tags` is true and service is provided', () => {
+        const { result } = renderHook(() => useContentListConfig(), {
+          wrapper: createWrapper({
+            features: { tags: true },
+            services: { tags: mockTagsService },
+          }),
+        });
+
+        expect(result.current.supports.tags).toBe(true);
+      });
+
+      it('disables tags when `features.tags` is true but no service is provided', () => {
+        const { result } = renderHook(() => useContentListConfig(), {
+          wrapper: createWrapper({ features: { tags: true } }),
+        });
+
+        expect(result.current.supports.tags).toBe(false);
+      });
     });
   });
 

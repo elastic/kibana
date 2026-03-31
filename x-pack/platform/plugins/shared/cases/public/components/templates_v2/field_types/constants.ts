@@ -21,30 +21,67 @@ export const exampleTemplateDefinition = `
 name: Example template
 # description is optional
 description: A short description of the template
+# severity is optional (low, medium, high, critical)
+severity: low
+# category is optional
+category: General
 # tags are optional
 tags:
   - example
 fields:
-  - name: severity
-    control: SELECT_BASIC
-    label: Select label
+  - name: summary
+    control: INPUT_TEXT
+    label: Summary
     type: keyword
     metadata:
-      options:
-        - low
-        - moderate
-        - high
-        - critical
-  - name: name
-    control: INPUT_TEXT
-    label: Input text label
-    type: keyword
+      default: Default summary text
   - name: effort
     control: INPUT_NUMBER
-    label: Input number label
+    label: Effort estimate
     type: integer
+    metadata:
+      default: 1
   - name: details
     control: TEXTAREA
-    label: Textarea label
+    label: Details
     type: keyword
+    metadata:
+      default: Enter details here...
+  - name: priority
+    control: SELECT_BASIC
+    label: Priority
+    type: keyword
+    metadata:
+      default: medium
+      options:
+        - low
+        - medium
+        - high
+        - urgent
+  # display.show_when hides this field unless priority is urgent
+  - name: urgency_reason
+    control: TEXTAREA
+    label: Reason for urgency
+    type: keyword
+    display:
+      show_when:
+        field: priority
+        operator: eq
+        value: urgent
+    validation:
+      required_when:
+        field: priority
+        operator: eq
+        value: urgent
+      pattern:
+        regex: "^[A-Z]"
+        message: "Must start with a capital letter"
+  - name: score
+    control: INPUT_NUMBER
+    label: Score
+    type: integer
+    validation:
+      required: true
+      min: 0
+      max: 100
 `.trimStart();

@@ -38,7 +38,7 @@ interface LegacyStartDependencies {
   core: CoreStart;
   isCloud: boolean;
   cloudBaseUrl?: string;
-  hasEnterpriseLicense: boolean;
+  isAirGapped: boolean;
   pluginInitializerContext: PluginInitializerContext;
   externalConfig: Array<Array<string | number> | Array<string | boolean>>;
   appMountParameters: AppMountParameters;

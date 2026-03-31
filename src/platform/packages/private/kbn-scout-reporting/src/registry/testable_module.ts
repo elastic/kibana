@@ -42,6 +42,7 @@ export const testableModules = {
           category: config.category,
           type: config.type,
           manifest: config.manifest,
+          server: config.server,
         })),
       ],
     }));

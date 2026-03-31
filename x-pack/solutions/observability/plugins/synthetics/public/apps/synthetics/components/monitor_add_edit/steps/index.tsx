@@ -52,7 +52,11 @@ export const MonitorSteps = ({
       )}
       <AdvancedConfig readOnly={readOnly} />
       <MonitorTypePortal monitorType={type} />
-      <InspectMonitorPortal isValid={formState.isValid} monitorFields={format(watch())} />
+      <InspectMonitorPortal
+        isValid={formState.isValid}
+        monitorFields={format(watch())}
+        isEditFlow={isEditFlow}
+      />
     </>
   );
 };

@@ -149,13 +149,6 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                         ),
                       },
                       {
-                        value: 'exact_fuzzy',
-                        text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorExactFuzzy',
-                          { defaultMessage: 'exact fuzzy' }
-                        ),
-                      },
-                      {
                         value: 'fuzzy',
                         text: i18n.translate(
                           'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorFuzzy',
@@ -268,6 +261,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                   error={error?.values ? error.values.message : undefined}
                 >
                   <EuiComboBox
+                    isCaseSensitive
                     isInvalid={!!error?.values}
                     isDisabled={criteria.type === 'always'}
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorValues"
