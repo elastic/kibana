@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsContext } from '../../shared/context';
 import {
   ASSIGNEES_EMPTY_TEST_ID,
@@ -32,8 +33,19 @@ import {
   RISK_SCORE_TITLE_TEST_ID,
   RISK_SCORE_VALUE_TEST_ID,
 } from '../../../../flyout_v2/shared/components/test_ids';
+import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../flyout_v2/document/hooks/use_refetch_by_scope');
+jest.mock('../../../../flyout_v2/document/components/header_status', () => ({
+  HeaderStatus: ({ onAlertUpdated }: { onAlertUpdated?: () => void }) => (
+    <>
+      <div data-test-subj="securitySolutionFlyoutHeaderStatusTitle">{'Status'}</div>
+      <button data-test-subj="rule-status-badge" onClick={onAlertUpdated} type="button" />
+    </>
+  ),
+}));
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
@@ -69,9 +81,17 @@ const renderHeader = (contextValue: DocumentDetailsContext) =>
   );
 
 describe('<AlertHeaderTitle />', () => {
+  const closeFlyoutMock = jest.fn();
+  const refetchMock = jest.fn();
+
   beforeEach(() => {
+    jest.clearAllMocks();
     jest.mocked(useDateFormat).mockImplementation(() => dateFormat);
     jest.mocked(useTimeZone).mockImplementation(() => 'UTC');
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+      closeFlyout: closeFlyoutMock,
+    } as ReturnType<typeof useExpandableFlyoutApi>);
+    jest.mocked(useRefetchByScope).mockReturnValue({ refetch: refetchMock });
   });
 
   it('should render component', () => {
@@ -104,5 +124,19 @@ describe('<AlertHeaderTitle />', () => {
     expect(queryByTestId(STATUS_BUTTON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_EMPTY_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(ASSIGNEES_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('refetches the table and closes the flyout when the alert status changes', () => {
+    const refetchFlyoutData = jest.fn();
+    const { getByTestId } = renderHeader({
+      ...mockContextValue,
+      refetchFlyoutData,
+    });
+
+    getByTestId(STATUS_BUTTON_TEST_ID).click();
+
+    expect(refetchMock).toHaveBeenCalledTimes(1);
+    expect(closeFlyoutMock).toHaveBeenCalledTimes(1);
+    expect(refetchFlyoutData).not.toHaveBeenCalled();
   });
 });

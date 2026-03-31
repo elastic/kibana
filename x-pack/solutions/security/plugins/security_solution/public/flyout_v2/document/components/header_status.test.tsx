@@ -13,11 +13,21 @@ import { HeaderStatus } from './header_status';
 import { STATUS_TITLE_TEST_ID } from '../../shared/components/test_ids';
 
 jest.mock('./status_popover_button', () => ({
-  StatusPopoverButton: ({ eventId, contextId }: { eventId: string; contextId: string }) => (
-    <div
+  StatusPopoverButton: ({
+    eventId,
+    contextId,
+    onStatusUpdated,
+  }: {
+    eventId: string;
+    contextId: string;
+    onStatusUpdated?: () => void;
+  }) => (
+    <button
       data-test-subj="mockStatusPopoverButton"
       data-event-id={eventId}
       data-context-id={contextId}
+      onClick={onStatusUpdated}
+      type="button"
     />
   ),
 }));
@@ -74,6 +84,15 @@ describe('<HeaderStatus />', () => {
     );
     expect(getByTestId('wrappedCellActions')).toHaveAttribute('data-value', 'open');
     expect(getByTestId('wrappedCellActions')).toHaveAttribute('data-scope-id', 'alerts-page');
+  });
+
+  it('calls the alert update callback after a status change', () => {
+    const onAlertUpdated = jest.fn();
+    const { getByTestId } = renderComponent({ onAlertUpdated });
+
+    getByTestId('mockStatusPopoverButton').click();
+
+    expect(onAlertUpdated).toHaveBeenCalledTimes(1);
   });
 
   it('renders an empty value when the alert has no workflow status', () => {

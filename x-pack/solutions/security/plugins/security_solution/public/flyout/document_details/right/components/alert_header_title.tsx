@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { buildDataTableRecord, type EsHitRecord, getFieldValue } from '@kbn/discover-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { ALERT_RULE_UUID, ALERT_WORKFLOW_ASSIGNEE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
@@ -44,6 +45,7 @@ const urlParamOverride = { timeline: { isOpen: false } };
 export const AlertHeaderTitle = memo(() => {
   const { eventId, scopeId, isRulePreview, refetchFlyoutData, getFieldsData, searchHit } =
     useDocumentDetailsContext();
+  const { closeFlyout } = useExpandableFlyoutApi();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   const ruleId = useMemo(() => getFieldValue(hit, ALERT_RULE_UUID) as string, [hit]);
   const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null }, urlParamOverride);
@@ -54,6 +56,10 @@ export const AlertHeaderTitle = memo(() => {
     () => (getFieldsData(ALERT_WORKFLOW_ASSIGNEE_IDS) as string[]) ?? [],
     [getFieldsData]
   );
+  const onStatusUpdated = useCallback(() => {
+    refetch();
+    closeFlyout();
+  }, [closeFlyout, refetch]);
   const onAssigneesUpdated = useCallback(() => {
     refetch();
     refetchFlyoutData();
@@ -100,9 +106,14 @@ export const AlertHeaderTitle = memo(() => {
           {getEmptyTagValue()}
         </AlertHeaderBlock>
       ) : (
-        <HeaderStatus hit={hit} scopeId={scopeId} renderCellActions={renderStatusCellActions} />
+        <HeaderStatus
+          hit={hit}
+          scopeId={scopeId}
+          renderCellActions={renderStatusCellActions}
+          onAlertUpdated={onStatusUpdated}
+        />
       ),
-    [hit, isRulePreview, renderStatusCellActions, scopeId]
+    [hit, isRulePreview, onStatusUpdated, renderStatusCellActions, scopeId]
   );
 
   const assignees = useMemo(
