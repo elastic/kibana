@@ -20,19 +20,28 @@ export const PREBUILT_WATCHLISTS_VERSION = 1;
 
 const PREBUILT_WATCHLISTS = [
   {
-    id: PRIVILEGED_USER_WATCHLIST_ID,
-    name: 'Privileged Users',
+    name: PRIVILEGED_USER_WATCHLIST_ID,
     description: 'System-managed watchlist for tracking privileged users',
     managed: true,
     riskModifier: PRIVILEGED_USER_MODIFIER,
-    entitySource: {
-      type: 'entity_analytics_integration',
-      name: 'okta',
-      indexPattern: getStreamPatternFor('entityanalytics_okta', 'default'),
-      integrationName: 'entityanalytics_okta',
-      enabled: true,
-      matchers: getMatchersFor('entityanalytics_okta'),
-    },
+    entitySources: [
+      {
+        type: 'entity_analytics_integration',
+        name: 'okta',
+        indexPattern: getStreamPatternFor('entityanalytics_okta', 'default'),
+        integrationName: 'entityanalytics_okta',
+        enabled: true,
+        matchers: getMatchersFor('entityanalytics_okta'),
+      },
+      {
+        type: 'entity_analytics_integration',
+        name: 'ad',
+        indexPattern: getStreamPatternFor('entityanalytics_ad', 'default'),
+        integrationName: 'entityanalytics_ad',
+        enabled: true,
+        matchers: getMatchersFor('entityanalytics_ad'),
+      },
+    ],
   },
 ];
 
