@@ -31,7 +31,6 @@ interface MockDashboardApi {
     useMargins$: BehaviorSubject<boolean>;
   };
   setState: jest.Mock;
-  scrollToBottom: jest.Mock;
   getSerializedState: jest.Mock;
 }
 
@@ -69,7 +68,6 @@ const createMockDashboardApi = (): MockDashboardApi => ({
     useMargins$: new BehaviorSubject<boolean>(true),
   },
   setState: jest.fn(),
-  scrollToBottom: jest.fn(),
   getSerializedState: jest.fn().mockReturnValue({
     attributes: {
       title: 'Test Dashboard',

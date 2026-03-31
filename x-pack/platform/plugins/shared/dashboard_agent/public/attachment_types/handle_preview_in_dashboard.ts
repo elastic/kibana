@@ -31,7 +31,6 @@ export const handlePreviewInDashboard = async ({
     (!attachmentLinkedSavedObjectId && !currentSavedObjectId)
   ) {
     dashboardApi.setState(dashboardState);
-    dashboardApi.scrollToBottom();
     return;
   }
 
@@ -47,7 +46,6 @@ export const handlePreviewInDashboard = async ({
   // b) Viewing saved dashboard + attachment not linked -> navigate to new unsaved dashboard
   if (!attachmentLinkedSavedObjectId && !currentSavedObjectId) {
     dashboardApi.setState(dashboardState);
-    dashboardApi.scrollToBottom();
     return;
   }
 

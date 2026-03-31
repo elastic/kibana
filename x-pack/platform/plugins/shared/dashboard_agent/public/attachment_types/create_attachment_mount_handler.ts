@@ -110,7 +110,6 @@ export const onAttachmentMount = ({
         origin: updatedVersionedAttachment.origin,
       };
       api.setState(attachmentToDashboardState(attachment));
-      setTimeout(() => api!.scrollToBottom(), 0);
     });
 
     manualChangesSubscription = createManualChangesTracker({
