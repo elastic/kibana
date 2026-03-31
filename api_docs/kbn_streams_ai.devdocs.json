@@ -45,7 +45,7 @@
         "label": "featureToKnowledgeIndicatorFeature",
         "description": [],
         "signature": [
-          "(feature: z.infer<any>) => ",
+          "(feature: any) => ",
           {
             "pluginId": "@kbn/streams-ai",
             "scope": "server",
@@ -68,7 +68,7 @@
             "label": "feature",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/knowledge_indicators/mappers.ts",
             "lineNumber": 11,
@@ -93,7 +93,15 @@
         "signature": [
           "(options: ",
           "ComputedFeatureGeneratorOptions",
-          ") => Promise<z.infer<any>[]>"
+          ") => Promise<{ id: string; stream_name: string; type: string; description: string; properties: Record<string, unknown>; confidence: number; subtype?: string | undefined; title?: string | undefined; evidence?: string[] | undefined; evidence_doc_ids?: string[] | undefined; tags?: string[] | undefined; filter?: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          " | undefined; meta?: Record<string, unknown> | undefined; }[]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/computed/index.ts",
         "lineNumber": 81,
@@ -142,7 +150,7 @@
           },
           ".all.Definition; esClient: ",
           "ElasticsearchClient",
-          "; start: number; end: number; getFeatures(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined): Promise<z.infer<any>[]>; inferenceClient: ",
+          "; start: number; end: number; getFeatures(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined): Promise<any[]>; inferenceClient: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1264,7 +1272,7 @@
                 "label": "getFeatures",
                 "description": [],
                 "signature": [
-                  "(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined) => Promise<z.infer<any>[]>"
+                  "(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined) => Promise<any[]>"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
                 "lineNumber": 62,
@@ -2630,7 +2638,7 @@
         "label": "identifyFeatures",
         "description": [],
         "signature": [
-          "({\n  streamName,\n  sampleDocuments,\n  excludedFeatures,\n  systemPrompt,\n  inferenceClient,\n  logger,\n  signal,\n}: ",
+          "({\n  streamName,\n  sampleDocuments,\n  excludedFeatures,\n  systemPrompt,\n  inferenceClient,\n  signal,\n  previouslyIdentifiedFeatures = [],\n}: ",
           {
             "pluginId": "@kbn/streams-ai",
             "scope": "server",
@@ -2638,7 +2646,15 @@
             "section": "def-server.IdentifyFeaturesOptions",
             "text": "IdentifyFeaturesOptions"
           },
-          ") => Promise<{ features: z.infer<any>[]; ignoredFeatures: z.infer<any>[]; tokensUsed: ",
+          ") => Promise<{ features: { id: string; stream_name: string; type: string; description: string; properties: Record<string, unknown>; confidence: number; subtype?: string | undefined; title?: string | undefined; evidence?: string[] | undefined; evidence_doc_ids?: string[] | undefined; tags?: string[] | undefined; filter?: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          " | undefined; meta?: Record<string, unknown> | undefined; }[]; ignoredFeatures: { feature_id: string; feature_title: string; excluded_feature_id: string; reason: string; }[]; tokensUsed: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -2649,7 +2665,7 @@
           "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-        "lineNumber": 45,
+        "lineNumber": 54,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2659,7 +2675,7 @@
             "id": "def-server.identifyFeatures.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  streamName,\n  sampleDocuments,\n  excludedFeatures,\n  systemPrompt,\n  inferenceClient,\n  logger,\n  signal,\n}",
+            "label": "{\n  streamName,\n  sampleDocuments,\n  excludedFeatures,\n  systemPrompt,\n  inferenceClient,\n  signal,\n  previouslyIdentifiedFeatures = [],\n}",
             "description": [],
             "signature": [
               {
@@ -2671,7 +2687,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 45,
+            "lineNumber": 54,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -2715,7 +2731,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; start: number; end: number; maxSteps?: number | undefined; signal: AbortSignal; getFeatures(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined): Promise<z.infer<any>[]>; }) => Promise<",
+          "; start: number; end: number; maxSteps?: number | undefined; signal: AbortSignal; getFeatures(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined): Promise<any[]>; }) => Promise<",
           "PartitionStreamResponse",
           ">"
         ],
@@ -3875,7 +3891,7 @@
                 "label": "getFeatures",
                 "description": [],
                 "signature": [
-                  "(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined) => Promise<z.infer<any>[]>"
+                  "(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined) => Promise<any[]>"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
                 "lineNumber": 57,
@@ -4021,7 +4037,7 @@
         "label": "searchKnowledgeIndicators",
         "description": [],
         "signature": [
-          "({\n  getStreamNames,\n  getFeatures,\n  getQueries,\n  onFeatureFetchError,\n  params,\n}: { getStreamNames(): Promise<string[]>; getFeatures(streamName: string, options: { limit?: number | undefined; }): Promise<z.infer<any>[]>; getQueries(streamNames: string[], search_text?: string | undefined): Promise<",
+          "({\n  getStreamNames,\n  getFeatures,\n  getQueries,\n  onFeatureFetchError,\n  params,\n}: { getStreamNames(): Promise<string[]>; getFeatures(streamName: string, options: { limit?: number | undefined; }): Promise<any[]>; getQueries(streamNames: string[], search_text?: string | undefined): Promise<",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -4092,7 +4108,7 @@
                 "label": "getFeatures",
                 "description": [],
                 "signature": [
-                  "(streamName: string, options: { limit?: number | undefined; }) => Promise<z.infer<any>[]>"
+                  "(streamName: string, options: { limit?: number | undefined; }) => Promise<any[]>"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/knowledge_indicators/search.ts",
                 "lineNumber": 128,
@@ -5725,7 +5741,7 @@
         "label": "ExcludedFeatureSummary",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-        "lineNumber": 26,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5738,7 +5754,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 27,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5751,7 +5767,7 @@
             "label": "type",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 28,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5767,7 +5783,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 29,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5783,7 +5799,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 30,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5799,7 +5815,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 31,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5815,7 +5831,7 @@
               "{ [x: string]: unknown; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 32,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5831,7 +5847,7 @@
         "label": "IdentifyFeaturesOptions",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-        "lineNumber": 35,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5844,7 +5860,7 @@
             "label": "streamName",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 36,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5861,7 +5877,7 @@
               "<Record<string, unknown>>[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 37,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5884,7 +5900,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 38,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5906,7 +5922,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 39,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5919,7 +5935,7 @@
             "label": "systemPrompt",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 40,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5941,7 +5957,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 41,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5957,7 +5973,30 @@
               "AbortSignal"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "lineNumber": 42,
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.IdentifyFeaturesOptions.previouslyIdentifiedFeatures",
+            "type": "Array",
+            "tags": [],
+            "label": "previouslyIdentifiedFeatures",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-ai",
+                "scope": "server",
+                "docId": "kibKbnStreamsAiPluginApi",
+                "section": "def-server.PreviouslyIdentifiedFeature",
+                "text": "PreviouslyIdentifiedFeature"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6002,7 +6041,7 @@
             "label": "feature",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/knowledge_indicators/types.ts",
             "lineNumber": 44,
@@ -6089,6 +6128,112 @@
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/knowledge_indicators/types.ts",
             "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-ai",
+        "id": "def-server.PreviouslyIdentifiedFeature",
+        "type": "Interface",
+        "tags": [],
+        "label": "PreviouslyIdentifiedFeature",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.PreviouslyIdentifiedFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.PreviouslyIdentifiedFeature.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.PreviouslyIdentifiedFeature.subtype",
+            "type": "string",
+            "tags": [],
+            "label": "subtype",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.PreviouslyIdentifiedFeature.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.PreviouslyIdentifiedFeature.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.PreviouslyIdentifiedFeature.properties",
+            "type": "Object",
+            "tags": [],
+            "label": "properties",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6361,10 +6506,10 @@
         "label": "IgnoredFeature",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ feature_id: string; feature_title: string; excluded_feature_id: string; reason: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 68,
+        "lineNumber": 67,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

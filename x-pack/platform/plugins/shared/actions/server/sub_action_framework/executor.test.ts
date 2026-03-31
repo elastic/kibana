@@ -261,6 +261,48 @@ describe('Executor', () => {
     `);
   });
 
+  describe('includes Zod v4 error format in validation failure message', () => {
+    it.each([
+      ['a wrong key is provided', { wrongKey: 'value' }],
+      ['an empty object is provided', {}],
+      ['id is null', { id: null }],
+      ['id is undefined', { id: undefined }],
+      ['id is a number', { id: 123 }],
+      ['id is an array', { id: [] }],
+      ['id is a boolean', { id: true }],
+    ])('throws a Request validation failed error when %s', async (_, subActionParams) => {
+      await expect(
+        createExecutor(TestExecutor)({
+          actionId,
+          params: { subAction: 'echo', subActionParams },
+          config,
+          secrets,
+          services,
+          configurationUtilities: mockedActionsConfig,
+          logger,
+          connectorUsageCollector,
+        })
+      ).rejects.toThrow(/Request validation failed/);
+    });
+
+    it('includes Zod v4 format markers in the error message', async () => {
+      const error = await createExecutor(TestExecutor)({
+        actionId,
+        params: { subAction: 'echo', subActionParams: { wrongKey: 'value' } },
+        config,
+        secrets,
+        services,
+        configurationUtilities: mockedActionsConfig,
+        logger,
+        connectorUsageCollector,
+      }).catch((e) => e);
+
+      expect(error.message).toMatch(/Request validation failed/);
+      expect(error.message).toMatch(/✖|Invalid input|expected string|received/);
+      expect(error.message).toMatch(/→ at|id/);
+    });
+  });
+
   it('Passes connectorUsageCollector to the subAction method as a second param', async () => {
     let echoSpy;
 

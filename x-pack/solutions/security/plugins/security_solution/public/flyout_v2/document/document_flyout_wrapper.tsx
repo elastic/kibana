@@ -15,7 +15,7 @@ import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
-import { FlyoutMissingAlertsPrivilege } from '../../flyout/shared/components/flyout_missing_alerts_privilege';
+import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../data_view_manager/constants';
 import { EventKind } from './constants/event_kinds';

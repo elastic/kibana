@@ -59,8 +59,8 @@ function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisuali
     layerType: 'data',
     accessor: ACCESSOR,
     size: layer.metric.size,
-    titlePosition: layer.metric.alignments?.labels,
-    textAlign: layer.metric.alignments?.value,
+    titlePosition: layer.metric.labels?.alignment,
+    textAlign: layer.metric.values?.alignment,
     ...(layer.metric.apply_color_to && layer.metric.color
       ? {
           colorMode: layer.metric.apply_color_to === 'background' ? 'Background' : 'Labels',
@@ -101,10 +101,16 @@ function reverseBuildVisualizationState(
     }
 
     if (visualization.titlePosition || visualization.textAlign) {
-      props.metric.alignments = {
-        ...(visualization.titlePosition ? { labels: visualization.titlePosition } : {}),
-        ...(visualization.textAlign ? { value: visualization.textAlign } : {}),
-      };
+      if (visualization.titlePosition) {
+        props.metric.labels = {
+          alignment: visualization.titlePosition,
+        };
+      }
+      if (visualization.textAlign) {
+        props.metric.values = {
+          alignment: visualization.textAlign,
+        };
+      }
     }
 
     if (visualization.colorMode && visualization.colorMode !== 'None' && visualization.palette) {

@@ -129,7 +129,7 @@ export function AlertsSearchBar({
           } as EuiContextMenuPanelDescriptor);
           return {
             name: qf.title,
-            icon: qf.icon ?? 'filterInCircle',
+            icon: qf.icon ?? 'filter',
             panel: panelId,
             'data-test-subj': `quick-filters-item-${qf.title}`,
           };
@@ -137,7 +137,7 @@ export function AlertsSearchBar({
           const { filter, ...menuItem } = qf;
           return {
             ...menuItem,
-            icon: qf.icon ?? 'filterInCircle',
+            icon: qf.icon ?? 'filter',
             onClick: () => {
               if (!filters?.some((f) => compareFilters(f, filter))) {
                 onFiltersUpdated?.([...(filters ?? []), filter]);

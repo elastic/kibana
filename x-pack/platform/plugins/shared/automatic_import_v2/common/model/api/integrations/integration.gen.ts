@@ -35,7 +35,7 @@ export const ApproveIntegrationRequest = z
     /**
      * The categories of the integration
      */
-    categories: z.array(z.string()).max(50).optional(),
+    categories: z.array(NonEmptyString).min(1).max(50),
     /**
      * The LangSmith tracing options
      */
