@@ -107,7 +107,7 @@ export const AnomalyHeatmap: React.FC<AnomalyHeatmapProps> = ({
     <EuiFlexItem
       css={{
         marginTop: `${styling.heightOfTopLegend}px`,
-        height: `${styling.heightOfHeatmap(entityNames)}px`,
+        height: `${styling.heightOfHeatmap(entityNames.length)}px`,
       }}
     >
       {isLoading && (

@@ -34,7 +34,7 @@ export const UserNameList: React.FC<{ userNames: string[] }> = ({ userNames }) =
     <EuiFlexItem
       css={css`
         margin-top: ${anomalyChartStyling.heightOfTopLegend}px;
-        height: ${anomalyChartStyling.heightOfEntityNamesList(userNames)}px;
+        height: ${anomalyChartStyling.heightOfEntityNamesList(userNames.length)}px;
       `}
       grow={false}
     >

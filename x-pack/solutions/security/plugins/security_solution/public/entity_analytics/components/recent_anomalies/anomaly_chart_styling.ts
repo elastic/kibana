@@ -18,12 +18,10 @@ export const getAnomalyChartStyling = (compressed: boolean = false) => {
     heightOfXAxisLegend: HEIGHT_OF_X_AXIS_LEGEND,
     heightOfTopLegend: HEIGHT_OF_TOP_LEGEND,
     heightOfEachCell,
-    heightOfEntityNamesList: (entityNames: string[]) =>
-      entityNames.length > 0 ? entityNames.length * heightOfEachCell : HEIGHT_OF_NO_RESULTS,
-    heightOfHeatmap: (entityNames: string[]) =>
-      entityNames.length > 0
-        ? entityNames.length * heightOfEachCell + HEIGHT_OF_X_AXIS_LEGEND
-        : HEIGHT_OF_NO_RESULTS,
+    heightOfEntityNamesList: (count: number) =>
+      count > 0 ? count * heightOfEachCell : HEIGHT_OF_NO_RESULTS,
+    heightOfHeatmap: (count: number) =>
+      count > 0 ? count * heightOfEachCell + HEIGHT_OF_X_AXIS_LEGEND : HEIGHT_OF_NO_RESULTS,
   };
 };
 

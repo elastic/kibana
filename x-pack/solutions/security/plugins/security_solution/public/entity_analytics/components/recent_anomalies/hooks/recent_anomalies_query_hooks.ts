@@ -21,6 +21,12 @@ import {
   type ViewByMode,
 } from './recent_anomalies_esql_source_query_hooks';
 
+export interface EntityMetadata {
+  entityId: string;
+  entityName: string;
+  entityType: string;
+}
+
 const useRecentAnomaliesTopRowsQuery = (params: {
   anomalyBands: AnomalyBand[];
   viewBy: ViewByMode;
@@ -53,9 +59,23 @@ const useRecentAnomaliesTopRowsQuery = (params: {
     },
     { enabled: !!topRowsEsqlSource }
   );
+
+  const entityMetadata: EntityMetadata[] | undefined = useMemo(
+    () =>
+      params.viewBy === 'entity'
+        ? data?.map((record) => ({
+            entityId: record.entity_id,
+            entityName: record.entity_name,
+            entityType: record.entity_type,
+          }))
+        : undefined,
+    [data, params.viewBy]
+  );
+
   return {
     isLoading,
     rowLabels: data?.map((each) => each[rowField]),
+    entityMetadata,
     isError,
   };
 };
@@ -71,6 +91,7 @@ export const useRecentAnomaliesQuery = (params: {
 
   const {
     rowLabels,
+    entityMetadata,
     isError: isTopRowsError,
     isLoading: isTopRowsLoading,
   } = useRecentAnomaliesTopRowsQuery(params);
@@ -144,6 +165,7 @@ export const useRecentAnomaliesQuery = (params: {
 
   return {
     data,
+    entityMetadata,
     isLoading: isTopRowsLoading || isAnomaliesLoading,
     isError: isTopRowsError || isAnomaliesError,
     refetch,

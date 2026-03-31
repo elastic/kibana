@@ -34,7 +34,7 @@ const LabelList: React.FC<{ labels: string[]; compressed?: boolean }> = ({
     <EuiFlexItem
       css={css`
         margin-top: ${styling.heightOfTopLegend}px;
-        height: ${styling.heightOfEntityNamesList(labels)}px;
+        height: ${styling.heightOfEntityNamesList(labels.length)}px;
       `}
       grow={false}
     >
@@ -72,7 +72,7 @@ export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
 
   const { bands, toggleHiddenBand } = useAnomalyBands();
 
-  const { data, isLoading, isError, inspect, refetch } = useRecentAnomaliesQuery({
+  const { data, entityMetadata, isLoading, isError, inspect, refetch } = useRecentAnomaliesQuery({
     anomalyBands: bands,
     viewBy,
     watchlistName,
@@ -107,9 +107,9 @@ export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
         <AnomalySeverityFilter anomalyBands={bands} toggleHiddenBand={toggleHiddenBand} />
       </EuiFlexGroup>
       <EuiFlexGroup>
-        {viewBy === 'entity' ? (
+        {viewBy === 'entity' && entityMetadata ? (
           <EntityNameList
-            entityIds={rowLabels}
+            entities={entityMetadata}
             contextId={RECENT_ANOMALIES_CONTEXT_ID}
             compressed
           />

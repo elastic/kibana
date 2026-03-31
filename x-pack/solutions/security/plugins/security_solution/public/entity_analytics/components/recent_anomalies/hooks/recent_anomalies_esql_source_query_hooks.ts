@@ -17,10 +17,21 @@ export type ViewByMode = 'entity' | 'jobId';
 
 const ANOMALY_ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
+/** The entity name field (e.g. user.name) used as the display name for each entity type. */
+const ENTITY_NAME_FIELD: Record<(typeof ANOMALY_ENTITY_TYPES)[number], string> = {
+  user: 'user.name',
+  host: 'host.name',
+  service: 'service.name',
+};
+
 /**
  * EUID evaluation block for ES|QL queries on ML anomaly records.
  * Uses the entity store EUID helpers to compute typed EUIDs (e.g. "user:alice@okta", "host:server1")
  * that match the entity store's EUID format for accurate LOOKUP JOIN matching.
+ *
+ * Also computes:
+ * - entity_type: "user" | "host" | "service" (based on which EUID matched)
+ * - entity_name: the display name from the winning entity type's name field
  */
 const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
   const parts: string[] = [];
@@ -36,6 +47,16 @@ const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
   parts.push(
     `| EVAL entity_id = COALESCE(${ANOMALY_ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`
   );
+
+  const entityTypeCases = ANOMALY_ENTITY_TYPES.map((t) => `${t}_euid IS NOT NULL, "${t}"`).join(
+    ', '
+  );
+  parts.push(`| EVAL entity_type = CASE(${entityTypeCases}, NULL)`);
+
+  const entityNameCases = ANOMALY_ENTITY_TYPES.map(
+    (t) => `${t}_euid IS NOT NULL, ${ENTITY_NAME_FIELD[t]}`
+  ).join(', ');
+  parts.push(`| EVAL entity_name = CASE(${entityNameCases}, NULL)`);
 
   return `\n    ${parts.join('\n    ')}`;
 };
@@ -107,9 +128,10 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
     | WHERE entity_id IS NOT NULL
     ${needsWatchlistJoin ? getWatchlistJoinBlock(watchlistName, spaceId) : ''}
     ${getHiddenBandsFilters(anomalyBands)}
-    | STATS max_record_score = MAX(record_score) BY entity_id
+    | STATS max_record_score = MAX(record_score), entity_name = VALUES(entity_name), entity_type = VALUES(entity_type) BY entity_id
+    | EVAL entity_name = MV_FIRST(entity_name), entity_type = MV_FIRST(entity_type)
     | SORT max_record_score DESC
-    | KEEP entity_id
+    | KEEP entity_id, entity_name, entity_type
     | LIMIT ${rowsLimit}`;
 };
 
