@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLink, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
+import { EuiLink, EuiSwitch, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
@@ -20,7 +20,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import React from 'react';
+import React, { useState } from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type {
@@ -37,6 +37,7 @@ import { loadFromLibrary } from './markdown_client/load_from_library';
 import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check';
 import { markdownClient } from './markdown_client/markdown_client';
 import type { MarkdownAttributes } from '../server/markdown_saved_object';
+import { MarkdownSettingsState } from '../server/schemas';
 
 const flexCss = css({
   display: 'flex',
@@ -73,11 +74,20 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);
 
+    const settings$ = new BehaviorSubject<MarkdownSettingsState>(
+      (isByReference
+        ? initialLibraryState.settings
+        : (initialState as MarkdownByValueState).settings) ?? {
+        open_links_in_new_tab: true,
+      }
+    );
+
     const overrideHoverActions$ = new BehaviorSubject<boolean>(false);
 
     const serializeByValue = () => ({
       ...titleManager.getLatestState(),
       content: content$.getValue(),
+      settings: settings$.getValue(),
     });
 
     const serializeByReference = (refId: string) => {
@@ -184,23 +194,25 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     return {
       api,
       Component: function MarkdownEmbeddableComponent() {
-        const [content, isEditing, viewMode, title, hideTitle] = useBatchedPublishingSubjects(
-          content$,
-          isEditing$,
-          getViewModeSubject(api) ?? new BehaviorSubject('view'),
-          titleManager.api.title$,
-          titleManager.api.hideTitle$
-        );
-
-        const { processingPlugins: processingPluginList, uiPlugins } =
-          getDefaultEuiMarkdownPlugins();
-
-        // openLinksInNewTab functionality from src/platform/packages/shared/shared-ux/markdown/impl/markdown.tsx
-        if (processingPluginList[1]?.[1]?.components?.a) {
-          processingPluginList[1][1].components.a = (props) => (
-            <EuiLink {...props} target="_blank" />
+        const [content, settings, isEditing, viewMode, title, hideTitle] =
+          useBatchedPublishingSubjects(
+            content$,
+            settings$,
+            isEditing$,
+            getViewModeSubject(api) ?? new BehaviorSubject('view'),
+            titleManager.api.title$,
+            titleManager.api.hideTitle$
           );
-        }
+
+        const { processingPlugins: processingPluginList, uiPlugins } = getDefaultEuiMarkdownPlugins(
+          {
+            processingConfig: {
+              linkProps: {
+                target: settings?.open_links_in_new_tab ? '_blank' : '_self',
+              },
+            },
+          }
+        );
 
         const editorContent =
           viewMode === 'view' || !isEditing ? (
@@ -214,6 +226,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
               uiPlugins={uiPlugins}
               processingPluginList={processingPluginList}
               content={content}
+              settings$={settings$}
               onCancel={() => {
                 if (isNewPanel$.getValue() && apiIsPresentationContainer(parentApi)) {
                   parentApi.removePanel(api.uuid);
@@ -252,3 +265,4 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     };
   },
 };
+///
