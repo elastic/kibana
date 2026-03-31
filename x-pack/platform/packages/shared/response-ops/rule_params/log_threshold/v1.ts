@@ -83,7 +83,15 @@ const countRuleParamsSchema = schema.object(
     logView: persistedLogViewReferenceSchema, // Alerts are only compatible with persisted Log Views
     groupBy: schema.maybe(groupBySchema),
   },
-  { unknowns: 'ignore' }
+  {
+    unknowns: 'ignore',
+    meta: {
+      id: 'log-threshold-count-rule-params',
+      title: 'Log Threshold Rule Params',
+      description:
+        'The parameters for the log threshold rule. These parameters are appropriate when `rule_type_id` is `monitoring.log_threshold`.',
+    },
+  }
 );
 
 const ratioRuleParamsSchema = schema.object(
@@ -97,7 +105,15 @@ const ratioRuleParamsSchema = schema.object(
     logView: persistedLogViewReferenceSchema, // Alerts are only compatible with persisted Log Views
     groupBy: schema.maybe(groupBySchema),
   },
-  { unknowns: 'ignore' }
+  {
+    unknowns: 'ignore',
+    meta: {
+      id: 'log-threshold-ratio-rule-params',
+      title: 'Log Threshold Rule Params',
+      description:
+        'The parameters for the log threshold rule. These parameters are appropriate when `rule_type_id` is `monitoring.log_threshold`.',
+    },
+  }
 );
 
 export const logThresholdParamsSchema = schema.oneOf([

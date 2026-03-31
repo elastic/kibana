@@ -8,5 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const nodesChangedParamsSchema = stackMonitoringCommonSchema.extends({});
+export const nodesChangedParamsSchema = stackMonitoringCommonSchema.extends(
+  {},
+  {
+    meta: {
+      id: 'nodes-changed-rule-params',
+      title: 'Nodes Changed Rule Params',
+      description:
+        'The parameters for the nodes changed rule. These parameters are appropriate when `rule_type_id` is `monitoring.nodes_changed`.',
+    },
+  }
+);
 export type NodesChangedParams = TypeOf<typeof nodesChangedParamsSchema>;

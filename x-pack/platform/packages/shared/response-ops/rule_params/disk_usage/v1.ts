@@ -8,6 +8,16 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const diskUsageParamsSchema = stackMonitoringCommonSchema.extends({});
+export const diskUsageParamsSchema = stackMonitoringCommonSchema.extends(
+  {},
+  {
+    meta: {
+      id: 'disk-usage-rule-params',
+      title: 'Disk Usage Rule Params',
+      description:
+        'The parameters for the disk usage rule. These parameters are appropriate when `rule_type_id` is `monitoring.disk_usage`.',
+    },
+  }
+);
 
 export type DiskUsageParams = TypeOf<typeof diskUsageParamsSchema>;

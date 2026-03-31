@@ -8,5 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const missingMonitoringDataParamsSchema = stackMonitoringCommonSchema.extends({});
+export const missingMonitoringDataParamsSchema = stackMonitoringCommonSchema.extends(
+  {},
+  {
+    meta: {
+      id: 'missing-monitoring-data-rule-params',
+      title: 'Missing Monitoring Data Rule Params',
+      description:
+        'The parameters for the missing monitoring data rule. These parameters are appropriate when `rule_type_id` is `monitoring.missing_monitoring_data`.',
+    },
+  }
+);
 export type MissingMonitoringDataParams = TypeOf<typeof missingMonitoringDataParamsSchema>;

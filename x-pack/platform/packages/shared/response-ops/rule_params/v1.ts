@@ -6,7 +6,7 @@
  */
 import path from 'node:path';
 import type { Type, TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { ObjectType, schema } from '@kbn/config-schema';
 import { mlAnomalyDetectionAlertParamsSchemaV1 } from './anomaly_detection';
 import { anomalyDetectionJobsHealthRuleParamsSchemaV1 } from './anomaly_detection_jobs_health';
 import { anomalyParamsSchemaV1 } from './apm_anomaly';
@@ -44,6 +44,12 @@ import { uptimeMonitorStatusRuleParamsSchemaV1 } from './uptime_monitor_status';
 import { uptimeTLSRuleParamsSchemaV1 } from './uptime_tls';
 
 export const RULE_TYPE_ID = 'rule_type_id';
+
+const toSchemaId = (ruleTypeId: string) =>
+  ruleTypeId
+    .replace(/[^a-zA-Z0-9]/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-');
 
 export const ruleParamsSchemasWithRuleTypeId: Record<string, Type<any>> = {
   monitoring_ccr_read_exceptions: ccrReadExceptionsParamsSchemaV1,
@@ -83,53 +89,39 @@ export const ruleParamsSchemasWithRuleTypeId: Record<string, Type<any>> = {
   'slo.rules.burnRate': sloBurnRateParamsSchemaV1,
 };
 
-export const ruleParamsSchemaWithRuleTypeId = () => {
-  return schema.discriminatedUnion('rule_type_id', [
-    schema.object({ rule_type_id: schema.literal('.es-query'), params: EsQueryRuleParamsSchemaV1 }),
-    schema.object({
-      rule_type_id: schema.literal('.index-threshold'),
-      params: IndexThresholdRuleParamsSchemaV1,
-    }),
-  ]);
+export const ruleParamsSchemaDiscriminatedUnion = (key: string = RULE_TYPE_ID) => {
+  const variants = Object.entries(ruleParamsSchemasWithRuleTypeId).map(
+    ([ruleTypeId, paramsSchema]) => {
+      if (paramsSchema instanceof ObjectType) {
+        return paramsSchema.extends(
+          { [key]: schema.literal(ruleTypeId) },
+          { meta: { id: `${toSchemaId(ruleTypeId)}-rule-params-alerting` } }
+        );
+      }
+      return schema.object(
+        { [key]: schema.literal(ruleTypeId), params: paramsSchema },
+        { meta: { id: `${toSchemaId(ruleTypeId)}-rule-params-alerting` } }
+      );
+    }
+  );
+  return schema.discriminatedUnion(key, variants as unknown as [ReturnType<typeof schema.object>]);
 };
 
-export const ruleParamsSchemaWithRuleTypeIdForUpdate = schema.oneOf(
-  Object.values(ruleParamsSchemasWithRuleTypeId).map((schemaValue) => schemaValue) as [Type<any>],
-  {
-    meta: { description: 'The parameters for the rule.' },
-  }
-);
+const variantsWithoutRuleTypeId = Object.values(ruleParamsSchemasWithRuleTypeId) as unknown as [
+  Type<any>
+];
 
-export const ruleParamsSchemaWithRuleTypeIdAndDefaultValueForUpdate = schema.oneOf(
-  Object.values(ruleParamsSchemasWithRuleTypeId).map((schemaValue) => schemaValue) as [Type<any>],
-  {
-    defaultValue: {},
-    meta: { description: 'The parameters for the rule.' },
-  }
-);
-
-export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+export const ruleParamsSchema = schema.oneOf(variantsWithoutRuleTypeId, {
   meta: { description: 'The parameters for the rule.' },
 });
 
-export const ruleParamsSchemaWithDefaultValue = schema.recordOf(
-  schema.string(),
-  schema.maybe(schema.any()),
-  {
-    defaultValue: {},
-    meta: { description: 'The parameters for the rule.' },
-  }
-);
+const ruleParamsSchemaInstance = ruleParamsSchemaDiscriminatedUnion();
+
+export const ruleParamsSchemaWithRuleTypeId = () => ruleParamsSchemaInstance;
 
 export const createRuleParamsExamples = () =>
   path.join(__dirname, 'examples_create_rule_params.yaml');
 
-export type RuleParamsWithRuleTypeId = TypeOf<typeof ruleParamsSchemaWithRuleTypeId>;
-
-export type RuleParamsForUpdate = TypeOf<typeof ruleParamsSchemaWithRuleTypeIdForUpdate>;
-export type RuleParamsWithDefaultValueForUpdate = TypeOf<
-  typeof ruleParamsSchemaWithRuleTypeIdAndDefaultValueForUpdate
->;
+export type RuleParamsWithRuleTypeId = TypeOf<ReturnType<typeof ruleParamsSchemaWithRuleTypeId>>;
 
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
-export type RuleParamsWithDefaultValue = TypeOf<typeof ruleParamsSchemaWithDefaultValue>;

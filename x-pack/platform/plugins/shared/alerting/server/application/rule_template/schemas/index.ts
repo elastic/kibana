@@ -21,5 +21,5 @@ export const ruleTemplateSchema = schema.object({
   alertDelay: ruleSchema.getPropSchemas().alertDelay,
   artifacts: ruleSchema.getPropSchemas().artifacts,
   description: schema.maybe(schema.string()),
-  params: ruleParamsSchemaWithRuleTypeId('ruleTypeId'),
+  params: ruleParamsSchemaWithRuleTypeId(),
 });

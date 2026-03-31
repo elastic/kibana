@@ -8,7 +8,17 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { threadPoolRejectionsCommonSchema } from '../common';
 
-export const threadPoolSearchRejectionsParamsSchema = threadPoolRejectionsCommonSchema.extends({});
+export const threadPoolSearchRejectionsParamsSchema = threadPoolRejectionsCommonSchema.extends(
+  {},
+  {
+    meta: {
+      id: 'thread-pool-search-rejections-rule-params',
+      title: 'Thread Pool Search Rejections Rule Params',
+      description:
+        'The parameters for the thread pool search rejections rule. These parameters are appropriate when `rule_type_id` is `monitoring.thread_pool_search_rejections`.',
+    },
+  }
+);
 export type ThreadPoolSearchRejectionsParams = TypeOf<
   typeof threadPoolSearchRejectionsParamsSchema
 >;

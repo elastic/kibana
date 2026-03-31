@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-export { ParamsSchema } from './latest';
-export { ParamsSchema as ParamsSchemaV1 } from './latest';
+export { IndexThresholdRuleParamsSchema } from './latest';
+export { IndexThresholdRuleParamsSchema as IndexThresholdRuleParamsSchemaV1 } from './v1';
 
 export { type IndexThresholdRuleParams } from './latest';
-export { type IndexThresholdRuleParams as IndexThresholdRuleParamsV1 } from './latest';
+export { type IndexThresholdRuleParams as IndexThresholdRuleParamsV1 } from './v1';
 
 export type { CoreQueryParams } from './latest';
-export type { CoreQueryParams as CoreQueryParamsV1 } from './latest';
+export type { CoreQueryParams as CoreQueryParamsV1 } from './v1';
 
 export { CoreQueryParamsSchemaProperties } from './latest';
 export { validateCoreQueryBody } from './latest';

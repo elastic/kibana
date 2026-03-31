@@ -141,5 +141,13 @@ export const metricThresholdRuleParamsSchema = schema.object(
       })
     ),
   },
-  { unknowns: 'allow' }
+  {
+    unknowns: 'allow',
+    meta: {
+      id: 'metric-threshold-rule-params',
+      title: 'Metric Threshold Rule Params',
+      description:
+        'The parameters for the metric threshold rule. These parameters are appropriate when `rule_type_id` is `monitoring.metric_threshold`.',
+    },
+  }
 );
