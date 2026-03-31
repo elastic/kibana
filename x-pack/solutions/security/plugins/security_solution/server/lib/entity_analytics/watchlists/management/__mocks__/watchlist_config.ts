@@ -8,9 +8,11 @@
 export const mockWatchlistGet = jest.fn();
 export const mockWatchlistCreate = jest.fn();
 export const mockGetEntitySourceIds = jest.fn();
+export const mockWatchlistList = jest.fn();
 
 export class WatchlistConfigClient {
   public get = mockWatchlistGet;
   public create = mockWatchlistCreate;
   public getEntitySourceIds = mockGetEntitySourceIds;
+  public list = mockWatchlistList;
 }

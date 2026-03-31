@@ -101,15 +101,15 @@ export const getExecutionStatusColors = (
 };
 
 const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
-  [ExecutionStatus.COMPLETED]: 'checkInCircleFilled',
-  [ExecutionStatus.FAILED]: 'errorFilled',
-  [ExecutionStatus.TIMED_OUT]: 'errorFilled',
+  [ExecutionStatus.COMPLETED]: 'checkCircleFill',
+  [ExecutionStatus.FAILED]: 'errorFill',
+  [ExecutionStatus.TIMED_OUT]: 'errorFill',
   [ExecutionStatus.PENDING]: 'clock',
   [ExecutionStatus.RUNNING]: 'play',
   [ExecutionStatus.WAITING]: 'clock',
   [ExecutionStatus.WAITING_FOR_INPUT]: 'hourglass',
-  [ExecutionStatus.CANCELLED]: 'crossInCircle',
-  [ExecutionStatus.SKIPPED]: 'minusInCircleFilled',
+  [ExecutionStatus.CANCELLED]: 'crossCircle',
+  [ExecutionStatus.SKIPPED]: 'minusCircle',
 };
 
 export const getExecutionStatusIcon = (euiTheme: EuiThemeComputed, status: ExecutionStatus) => {
