@@ -117,7 +117,7 @@ export function SettingsPanel() {
             values={{
               advancedSettingsLink: (
                 <EuiLink href={prependBasePath(ADVANCED_SETTINGS_URL_LEGACY_PICKER)}>
-                  {settingsPanelTexts.advancedSettingsLink}!!
+                  {settingsPanelTexts.advancedSettingsLink}
                 </EuiLink>
               ),
             }}
