@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -182,6 +182,11 @@ const EditLensConfiguration: FC<
 }) => {
   const [currentAttributes, setCurrentAttributes] =
     useState<TypedLensSerializedState['attributes']>(attributes);
+  /**
+   * The query rerun already forces a parent rerender via `setCurrentAttributes`, so keeping the
+   * last editor height in a ref is enough to restore it on the next mount without adding resize-time rerenders.
+   */
+  const esqlEditorHeightRef = useRef<number>();
 
   /**
    * During inline editing of a by reference panel, the panel is converted to a by value one.
@@ -273,6 +278,7 @@ const EditLensConfiguration: FC<
     panelId,
     applyButtonLabel,
     hideTextBasedEditor,
+    esqlEditorHeightRef,
   };
 
   return (

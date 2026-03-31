@@ -6,6 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { MutableRefObject } from 'react';
 import type {
   TypedLensSerializedState,
   FramePublicAPI,
@@ -78,6 +79,8 @@ export interface EditConfigPanelProps {
   displayFlyoutHeader?: boolean;
   /** If true, hides the ES|QL editor in the flyout */
   hideTextBasedEditor?: boolean;
+  /** Persisted height for the inline ES|QL editor UI */
+  esqlEditorHeightRef?: MutableRefObject<number | undefined>;
   /** The flyout is used for adding a new panel by scratch */
   isNewPanel?: boolean;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
@@ -117,6 +120,7 @@ export interface LayerConfigurationProps {
   panelId?: string;
   closeFlyout?: () => void;
   editorContainer?: HTMLElement;
+  esqlEditorHeightRef?: MutableRefObject<number | undefined>;
   /** Callback to report text-based query state changes */
   onTextBasedQueryStateChange?: (state: TextBasedQueryState) => void;
 }

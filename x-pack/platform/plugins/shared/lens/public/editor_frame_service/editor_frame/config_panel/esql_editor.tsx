@@ -58,6 +58,7 @@ export type ESQLEditorProps = Simplify<
     | 'updateSuggestion'
     | 'dataLoading$'
     | 'parentApi'
+    | 'esqlEditorHeightRef'
     | 'onTextBasedQueryStateChange'
   >
 >;
@@ -86,6 +87,7 @@ export function ESQLEditor({
   setCurrentAttributes,
   updateSuggestion,
   onTextBasedQueryStateChange,
+  esqlEditorHeightRef,
 }: ESQLEditorProps) {
   const prevQuery = useRef<AggregateQuery | Query>(attributes?.state.query || { esql: '' });
   const [query, setQuery] = useState<AggregateQuery | Query>(
@@ -129,6 +131,20 @@ export function ESQLEditor({
   const esqlQueryStats = useESQLQueryStats(isTextBasedLanguage, lensAdapters?.requests);
 
   const dispatch = useLensDispatch();
+
+  const handleEditorInitialStateChange = useCallback(
+    (nextState: { editorHeight?: number }) => {
+      const { editorHeight } = nextState;
+      if (editorHeight === undefined) {
+        return;
+      }
+
+      if (esqlEditorHeightRef) {
+        esqlEditorHeightRef.current = editorHeight;
+      }
+    },
+    [esqlEditorHeightRef]
+  );
 
   useEffect(() => {
     const s = dataLoading$?.subscribe((isDataLoading) => {
@@ -237,6 +253,12 @@ export function ESQLEditor({
         panelId={panelId}
         attributes={attributes}
         parentApi={parentApi}
+        editorInitialState={
+          esqlEditorHeightRef?.current === undefined
+            ? undefined
+            : { editorHeight: esqlEditorHeightRef.current }
+        }
+        onEditorInitialStateChange={handleEditorInitialStateChange}
       />
       {dataGridAttrs ? (
         <ESQLDataGridAccordion
@@ -281,6 +303,8 @@ type InnerEditorProps = Simplify<
     adHocDataViews: DataViewSpec[];
     esqlVariables: ESQLControlVariable[] | undefined;
     queryStats?: ESQLQueryStats;
+    editorInitialState?: { editorHeight?: number };
+    onEditorInitialStateChange: (nextState: { editorHeight?: number }) => void;
   } & Pick<LayerPanelProps, 'attributes' | 'parentApi' | 'panelId' | 'closeFlyout'>
 >;
 
@@ -293,6 +317,8 @@ function InnerESQLEditor({
   parentApi,
   panelId,
   closeFlyout,
+  editorInitialState,
+  onEditorInitialStateChange,
   setQuery,
   isVisualizationLoading,
   setIsVisualizationLoading,
@@ -329,6 +355,8 @@ function InnerESQLEditor({
               : undefined
           }
           editorIsInline
+          initialState={editorInitialState}
+          onInitialStateChange={onEditorInitialStateChange}
           onTextLangQuerySubmit={async (q, a) => {
             // do not run the suggestions if the query is the same as the previous one
             if (q && !isEqual(q, prevQuery.current)) {

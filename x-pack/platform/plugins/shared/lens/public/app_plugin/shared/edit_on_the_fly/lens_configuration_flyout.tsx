@@ -77,6 +77,7 @@ export function LensEditConfigurationFlyout({
   parentApi,
   panelId,
   applyButtonLabel,
+  esqlEditorHeightRef,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
@@ -487,6 +488,7 @@ export function LensEditConfigurationFlyout({
             closeFlyout={closeFlyout}
             parentApi={parentApi}
             panelId={panelId}
+            esqlEditorHeightRef={esqlEditorHeightRef}
             onTextBasedQueryStateChange={onTextBasedQueryStateChange}
           />
         </FlyoutWrapper>
@@ -633,6 +635,7 @@ export function LensEditConfigurationFlyout({
                     parentApi={parentApi}
                     panelId={panelId}
                     editorContainer={editorContainer.current || undefined}
+                    esqlEditorHeightRef={esqlEditorHeightRef}
                     onTextBasedQueryStateChange={onTextBasedQueryStateChange}
                   />
                 </>

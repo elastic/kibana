@@ -33,6 +33,7 @@ export function LayerConfiguration({
   panelId,
   closeFlyout,
   editorContainer,
+  esqlEditorHeightRef,
   onTextBasedQueryStateChange,
 }: LayerConfigurationProps) {
   // Derive whether we're in text-based mode from the query type
@@ -76,6 +77,7 @@ export function LayerConfiguration({
     panelId,
     closeFlyout,
     editorContainer,
+    esqlEditorHeightRef,
     onTextBasedQueryStateChange,
   };
   return (

@@ -10,6 +10,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { MutableRefObject } from 'react';
 import type {
   TypedLensSerializedState,
   Visualization,
@@ -52,6 +53,7 @@ export interface LensConfigPanelBaseProps {
   panelId?: string;
   closeFlyout?: () => void;
   editorContainer?: HTMLElement;
+  esqlEditorHeightRef?: MutableRefObject<number | undefined>;
   /** Callback to report text-based query state changes */
   onTextBasedQueryStateChange?: (state: TextBasedQueryState) => void;
 }
