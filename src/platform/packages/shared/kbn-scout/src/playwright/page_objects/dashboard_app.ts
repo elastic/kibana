@@ -139,7 +139,10 @@ export class DashboardApp {
   /** Clicks "Create new dashboard" on the listing page and waits for the editor toolbar to load. */
   async openNewDashboard() {
     await this.page.waitForLoadingIndicatorHidden();
-    await this.page.testSubj.click('newItemButton', { timeout: 30_000, noWaitAfter: true });
+    const newItemButton = this.page.testSubj.locator('newItemButton');
+    await expect(newItemButton).toBeVisible({ timeout: 30_000 });
+    await expect(newItemButton).toBeEnabled({ timeout: 30_000 });
+    await newItemButton.click({ noWaitAfter: true });
     await expect(this.addTopNavButton).toBeVisible({ timeout: 30_000 });
   }
 
