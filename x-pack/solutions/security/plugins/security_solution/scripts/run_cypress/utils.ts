@@ -237,13 +237,22 @@ export const retrieveIntegrationsConfigAware = (
       reservedIdx += agentsNeeded;
 
       // Greedy bin-pack this group's specs across its reserved agents.
+      // Tie-break: lower totalWeight first, then fewer specs. This ensures
+      // balanced loads when specs have similar weights (e.g. 9 specs of ~10
+      // across 2 agents produces 4+5 with the lighter agent getting the extra).
       groupSpecs.sort((a, b) => b.weight - a.weight || a.path.localeCompare(b.path));
       for (const spec of groupSpecs) {
         let bestIdx = groupStart;
         let bestCost = Infinity;
         for (let i = groupStart; i < groupStart + agentsNeeded; i++) {
           const cost = getAgentCost(agents[i], spec.configKey);
-          if (cost < bestCost) {
+          const isBetter =
+            cost < bestCost ||
+            (cost === bestCost && agents[i].totalWeight < agents[bestIdx].totalWeight) ||
+            (cost === bestCost &&
+              agents[i].totalWeight === agents[bestIdx].totalWeight &&
+              agents[i].paths.length < agents[bestIdx].paths.length);
+          if (isBetter) {
             bestCost = cost;
             bestIdx = i;
           }
@@ -266,11 +275,13 @@ export const retrieveIntegrationsConfigAware = (
     for (const spec of defaultSpecs) {
       let bestIdx = 0;
       let bestCost = Infinity;
+      let bestWeight = Infinity;
 
       for (let i = 0; i < agents.length; i++) {
         const cost = getAgentCost(agents[i], spec.configKey);
-        if (cost < bestCost) {
+        if (cost < bestCost || (cost === bestCost && agents[i].totalWeight < bestWeight)) {
           bestCost = cost;
+          bestWeight = agents[i].totalWeight;
           bestIdx = i;
         }
       }
@@ -284,11 +295,13 @@ export const retrieveIntegrationsConfigAware = (
     for (const spec of specs) {
       let bestIdx = 0;
       let bestCost = Infinity;
+      let bestWeight = Infinity;
 
       for (let i = 0; i < agents.length; i++) {
         const cost = getAgentCost(agents[i], spec.configKey);
-        if (cost < bestCost) {
+        if (cost < bestCost || (cost === bestCost && agents[i].totalWeight < bestWeight)) {
           bestCost = cost;
+          bestWeight = agents[i].totalWeight;
           bestIdx = i;
         }
       }

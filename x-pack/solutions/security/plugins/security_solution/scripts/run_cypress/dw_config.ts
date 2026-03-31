@@ -65,6 +65,11 @@ const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
   { pattern: 'artifacts/host_isolation_exceptions.cy.ts', weight: 8 },
   { pattern: 'artifacts/endpoint_exceptions.cy.ts', weight: 8 },
   { pattern: 'artifacts/endpoint_exceptions.no_ff.cy.ts', weight: 5 },
+
+  // RBAC endpoint_exceptions split specs: getArtifactMockedDataTests with
+  // siemVersionFilter gives weight 5 from FILTERED_RUNNER_WEIGHTS, but actual
+  // runtime is ~3-4 min each. Bumping to 8 rebalances the experimental group.
+  { pattern: 'endpoint_exceptions_rbac_siem', weight: 8 },
   { pattern: 'artifacts/trusted_devices.cy.ts', weight: 7 },
   { pattern: 'artifacts/artifacts.cy.ts', weight: 8 },
 
