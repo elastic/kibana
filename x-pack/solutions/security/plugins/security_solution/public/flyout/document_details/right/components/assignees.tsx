@@ -43,7 +43,7 @@ const UpdateAssigneesButton: FC<{
     <EuiButtonIcon
       aria-label="Update assignees"
       data-test-subj={ASSIGNEES_ADD_BUTTON_TEST_ID}
-      iconType={'plusInCircle'}
+      iconType={'plusCircle'}
       onClick={togglePopover}
       isDisabled={isDisabled}
     />
