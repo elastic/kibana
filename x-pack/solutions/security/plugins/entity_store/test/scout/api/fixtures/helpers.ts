@@ -6,9 +6,28 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
+import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
-import { hashEuid } from '../../../../server/domain/crud/utils';
-import { ENTITY_STORE_ROUTES, LATEST_INDEX, UPDATES_INDEX } from './constants';
+
+import {
+  ENTITY_STORE_ROUTES,
+  HISTORY_INDEX_PATTERN,
+  LATEST_INDEX,
+  UPDATES_INDEX,
+} from './constants';
+
+/**
+ * Deletes all Entity Store data indices: latest, updates, and history snapshots.
+ * Call in afterAll / afterEach to prevent stale data from leaking between
+ * sequential test-target runs that share the same ES cluster.
+ */
+export const clearEntityStoreIndices = async (esClient: EsClient) => {
+  const resolved = await esClient.indices.resolveIndex({ name: HISTORY_INDEX_PATTERN });
+  const historyIndices = resolved.indices.map((i) => i.name);
+
+  const toDelete = [LATEST_INDEX, UPDATES_INDEX, ...historyIndices];
+  await esClient.indices.delete({ index: toDelete, ignore_unavailable: true }, { ignore: [404] });
+};
 
 /**
  * API client shape required by forceUserExtraction.

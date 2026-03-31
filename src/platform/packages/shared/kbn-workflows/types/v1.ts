@@ -12,6 +12,8 @@ import { z } from '@kbn/zod/v4';
 import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
+export type { WorkflowYaml } from '../spec/schema';
+
 export enum ExecutionStatus {
   // In progress
   PENDING = 'pending',

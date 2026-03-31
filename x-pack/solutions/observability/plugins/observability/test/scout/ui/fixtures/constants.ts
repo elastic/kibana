@@ -110,8 +110,8 @@ export const RULE_DETAILS_TEST_SUBJECTS = {
   RULE_DEFINITION: 'ruleSummaryRuleDefinition',
 
   // Actions
-  ACTIONS_BUTTON: 'actions',
-  EDIT_RULE_BUTTON: 'editRuleButton',
+  ACTIONS_BUTTON: 'ruleActionsButton',
+  EDIT_RULE_BUTTON: 'openEditRuleFlyoutButton',
   DELETE_RULE_BUTTON: 'deleteRuleButton',
 
   // Alert Summary Widget

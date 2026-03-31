@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import AdmZip from 'adm-zip';
-import YAML from 'yaml';
 import type { IRouter } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
@@ -254,15 +252,37 @@ describe('Workflow routes', () => {
       expect(routeHandlers[key]).toBeDefined();
     });
 
-    it('should call api.deleteWorkflows with a single id, space id, and request', async () => {
+    it('should call api.deleteWorkflows with a single id, space id, and request (soft delete)', async () => {
       mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 1, failures: [] });
-      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+      const request = httpServerMock.createKibanaRequest({
+        params: { id: 'wf-1' },
+        query: { force: false },
+      });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default-space', request);
+      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default-space', request, {
+        force: false,
+      });
+      expect(response.ok).toHaveBeenCalledWith();
+    });
+
+    it('should call api.deleteWorkflows with force=true (hard delete)', async () => {
+      mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 1, failures: [] });
+      const request = httpServerMock.createKibanaRequest({
+        params: { id: 'wf-1' },
+        query: { force: true },
+      });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default-space', request, {
+        force: true,
+      });
       expect(response.ok).toHaveBeenCalledWith();
     });
   });
@@ -328,16 +348,39 @@ describe('Workflow routes', () => {
       expect(routeHandlers[key]).toBeDefined();
     });
 
-    it('should call api.deleteWorkflows with ids, space id, and request', async () => {
+    it('should call api.deleteWorkflows with ids, space id, and request (soft delete)', async () => {
       const bodyResult = { total: 2, deleted: 2, failures: [] };
       mockApi.deleteWorkflows.mockResolvedValue(bodyResult);
-      const request = httpServerMock.createKibanaRequest({ body: { ids: ['a', 'b'] } });
+      const request = httpServerMock.createKibanaRequest({
+        body: { ids: ['a', 'b'] },
+        query: { force: false },
+      });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request);
+      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request, {
+        force: false,
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: bodyResult });
+    });
+
+    it('should call api.deleteWorkflows with force=true (hard delete)', async () => {
+      const bodyResult = { total: 2, deleted: 2, failures: [] };
+      mockApi.deleteWorkflows.mockResolvedValue(bodyResult);
+      const request = httpServerMock.createKibanaRequest({
+        body: { ids: ['a', 'b'] },
+        query: { force: true },
+      });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request, {
+        force: true,
+      });
       expect(response.ok).toHaveBeenCalledWith({ body: bodyResult });
     });
   });
@@ -474,7 +517,7 @@ describe('Workflow routes', () => {
       });
     });
 
-    it('should export workflows as a ZIP archive', async () => {
+    it('should export workflows as JSON with entries and manifest', async () => {
       mockApi.getWorkflowsByIds.mockResolvedValue([
         {
           id: 'w-1',
@@ -495,24 +538,15 @@ describe('Workflow routes', () => {
       const context = createLicensingContext() as any;
 
       await routeHandlers[key].handler(context, request, response);
-      const { body, headers } = (response.ok as jest.Mock).mock.calls[0][0];
+      const { body } = (response.ok as jest.Mock).mock.calls[0][0];
 
-      expect(headers['Content-Type']).toBe('application/zip');
-      expect(headers['Content-Disposition']).toContain('.zip');
-
-      const zip = new AdmZip(body);
-      const entryNames = zip.getEntries().map((e) => e.entryName);
-      expect(entryNames.some((n) => n.includes('w-1.yml'))).toBe(true);
-      expect(entryNames.some((n) => n.includes('w-2.yml'))).toBe(true);
-      expect(entryNames.some((n) => n.includes('manifest.yml'))).toBe(true);
-
-      const manifestEntry = zip.getEntries().find((e) => e.entryName === 'manifest.yml');
-      expect(manifestEntry).toBeDefined();
-
-      const manifest = YAML.parse(manifestEntry!.getData().toString('utf-8'));
-      expect(manifest.exportedCount).toBe(2);
-      expect(manifest.version).toBe('1');
-      expect(manifest.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(body.entries).toEqual([
+        { id: 'w-1', yaml: 'name: Workflow w-1\nsteps: []' },
+        { id: 'w-2', yaml: 'name: Workflow w-2\nsteps: []' },
+      ]);
+      expect(body.manifest.exportedCount).toBe(2);
+      expect(body.manifest.version).toBe('1');
+      expect(body.manifest.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     });
 
     it('should log a warning when some workflow IDs are missing', async () => {
