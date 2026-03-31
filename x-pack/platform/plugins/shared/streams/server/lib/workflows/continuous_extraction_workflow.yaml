@@ -1,7 +1,6 @@
 version: "1"
 name: ".streams-continuous-ki-extraction"
 description: "This workflow is used by the system and should not be modified."
-enabled: true
 settings:
   timeout: "9m"
   concurrency:

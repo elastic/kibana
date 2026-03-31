@@ -68,16 +68,27 @@ export const createContinuousExtractionWorkflowService = (
       if (existingWorkflowId) {
         const existing = await managementApi.getWorkflow(existingWorkflowId, spaceId);
         if (existing) {
-          if (existing.yaml === WORKFLOW_YAML && existing.enabled === enabled) {
+          const yamlChanged = existing.yaml !== WORKFLOW_YAML;
+          const enabledChanged = existing.enabled !== enabled;
+
+          if (!yamlChanged && !enabledChanged) {
             log.debug(`Continuous extraction workflow ${existingWorkflowId} is already up to date`);
             return;
           }
-          await managementApi.updateWorkflow(
-            existingWorkflowId,
-            { yaml: WORKFLOW_YAML, enabled },
-            spaceId,
-            request
-          );
+
+          if (yamlChanged) {
+            await managementApi.updateWorkflow(
+              existingWorkflowId,
+              { yaml: WORKFLOW_YAML },
+              spaceId,
+              request
+            );
+          }
+
+          if (enabledChanged) {
+            await managementApi.updateWorkflow(existingWorkflowId, { enabled }, spaceId, request);
+          }
+
           log.info(`Updated continuous extraction workflow ${existingWorkflowId}`);
           return;
         }
@@ -89,6 +100,8 @@ export const createContinuousExtractionWorkflowService = (
       }
 
       const created = await managementApi.createWorkflow({ yaml: WORKFLOW_YAML }, spaceId, request);
+
+      await managementApi.updateWorkflow(created.id, { enabled: true }, spaceId, request);
 
       await modelSettingsClient.updateSettings({
         continuousExtraction: { workflowId: created.id },
