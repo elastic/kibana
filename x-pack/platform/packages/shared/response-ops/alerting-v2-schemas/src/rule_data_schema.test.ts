@@ -711,7 +711,9 @@ describe('createRuleDataSchema', () => {
         expect(result.error.issues).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              message: expect.stringContaining(`Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`),
+              message: expect.stringContaining(
+                `Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`
+              ),
             }),
           ])
         );
@@ -932,7 +934,9 @@ describe('updateRuleDataSchema', () => {
         expect(result.error.issues).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              message: expect.stringContaining(`Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`),
+              message: expect.stringContaining(
+                `Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`
+              ),
             }),
           ])
         );
