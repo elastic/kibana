@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('New terms rule execution logic API', function () {
     loadTestFile(require.resolve('./new_terms'));
     loadTestFile(require.resolve('./new_terms_alert_suppression'));
+    loadTestFile(require.resolve('./new_terms_metrics'));
   });
 }

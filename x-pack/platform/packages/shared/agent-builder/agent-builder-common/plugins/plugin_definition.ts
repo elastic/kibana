@@ -19,7 +19,6 @@ export interface PluginManifestAuthor {
  * Each field contains the list of file paths found for that asset type.
  */
 export interface UnmanagedPluginAssets {
-  commands: string[];
   agents: string[];
   hooks: string[];
   mcp_servers: string[];

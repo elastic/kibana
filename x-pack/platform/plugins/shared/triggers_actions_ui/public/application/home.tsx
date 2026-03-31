@@ -22,6 +22,7 @@ import { CreateRuleButton } from './sections/rules_list/components/create_rule_b
 import type { Section } from './constants';
 import { routeToRules, routeToLogs } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
+import { useSetBreadcrumbs } from './hooks/use_set_breadcrumbs';
 import { getCurrentDocTitle } from './lib/doc_title';
 
 import { HealthCheck } from './components/health_check';
@@ -46,13 +47,13 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 }) => {
   const {
     chrome,
-    setBreadcrumbs,
     http,
     notifications: { toasts },
     ruleTypeRegistry,
     application: { navigateToApp },
     cps,
   } = useKibana().services;
+  const setBreadcrumbs = useSetBreadcrumbs();
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
