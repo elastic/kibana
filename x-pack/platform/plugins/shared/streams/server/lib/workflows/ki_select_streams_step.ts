@@ -64,6 +64,7 @@ export const registerKiSelectStreamsStep = ({
     description:
       'Selects streams that need knowledge indicator extraction and schedules identification tasks.',
     category: StepCategory.Kibana,
+    stability: 'tech_preview',
     inputSchema: kiSelectStreamsInputSchema,
     outputSchema,
     handler: async (context) => {

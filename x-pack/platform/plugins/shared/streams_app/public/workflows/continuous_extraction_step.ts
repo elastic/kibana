@@ -25,6 +25,7 @@ export const kiSelectStreamsPublicStepDefinition: PublicStepDefinition = {
   description:
     'Selects streams that need knowledge indicator extraction and schedules identification tasks.',
   category: StepCategory.Kibana,
+  stability: 'tech_preview',
   inputSchema: kiSelectStreamsInputSchema,
   outputSchema: z.object({
     connectorId: z.string(),
@@ -49,6 +50,7 @@ export const kiFeaturesExtractStreamPublicStepDefinition: PublicStepDefinition =
   description:
     'Polls a scheduled KI features identification task for a single stream until completion and reports results.',
   category: StepCategory.Kibana,
+  stability: 'tech_preview',
   inputSchema: kiFeaturesExtractStreamInputSchema,
   outputSchema: z.object({
     streamName: z.string(),

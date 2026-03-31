@@ -102,6 +102,7 @@ export const registerKiFeaturesExtractStreamStep = ({
     description:
       'Polls a scheduled KI features identification task for a single stream until completion and reports results.',
     category: StepCategory.Kibana,
+    stability: 'tech_preview',
     inputSchema: kiFeaturesExtractStreamInputSchema,
     outputSchema: z.object({
       streamName: z.string(),
