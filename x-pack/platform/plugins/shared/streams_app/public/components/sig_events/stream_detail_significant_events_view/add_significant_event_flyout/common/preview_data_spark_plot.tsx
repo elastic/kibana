@@ -75,7 +75,10 @@ export function PreviewDataSparkPlot({
     xFormatter,
   });
 
-  const noOccurrencesFound = sparkPlotData.timeseries.every((point) => point.y === 0);
+  const firingCount = previewFetch.value?.firing_count;
+  const isStatsPreview = firingCount !== undefined;
+  const hasTimeseriesData = sparkPlotData.timeseries.some((point) => point.y > 0);
+  const noOccurrencesFound = !hasTimeseriesData;
 
   const {
     dependencies: {
@@ -139,6 +142,46 @@ export function PreviewDataSparkPlot({
       );
     }
 
+    if (noOccurrencesFound && isStatsPreview && firingCount > 0) {
+      if (compressed) {
+        return (
+          <EuiBadge color="hollow">
+            {i18n.translate(
+              'xpack.streams.addSignificantEventFlyout.manualFlow.previewFiringCountCompressed',
+              {
+                defaultMessage:
+                  '{count, plural, one {# threshold breach} other {# threshold breaches}}',
+                values: { count: firingCount },
+              }
+            )}
+          </EuiBadge>
+        );
+      }
+
+      return (
+        <>
+          <EuiBadge color="hollow">
+            {i18n.translate(
+              'xpack.streams.addSignificantEventFlyout.manualFlow.previewFiringCountNoChart',
+              {
+                defaultMessage:
+                  '{count, plural, one {# bucket exceeded threshold} other {# buckets exceeded threshold}}',
+                values: { count: firingCount },
+              }
+            )}
+          </EuiBadge>
+          <EuiText color="subdued" size="s" textAlign="center">
+            {i18n.translate(
+              'xpack.streams.addSignificantEventFlyout.manualFlow.previewNoTemporalData',
+              {
+                defaultMessage: 'No temporal data available for chart',
+              }
+            )}
+          </EuiText>
+        </>
+      );
+    }
+
     if (noOccurrencesFound) {
       if (compressed) {
         return (
@@ -166,7 +209,25 @@ export function PreviewDataSparkPlot({
       { defaultMessage: 'Open in Discover' }
     );
 
-    const firingCount = previewFetch.value?.firing_count;
+    const titleLabel = isStatsPreview
+      ? i18n.translate(
+          'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartThresholdBreaches',
+          {
+            defaultMessage: 'Threshold breaches ({count})',
+            values: {
+              count: sparkPlotData.timeseries.reduce((acc, point) => acc + point.y, 0),
+            },
+          }
+        )
+      : i18n.translate(
+          'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
+          {
+            defaultMessage: 'Detected event occurrences ({count})',
+            values: {
+              count: sparkPlotData.timeseries.reduce((acc, point) => acc + point.y, 0),
+            },
+          }
+        );
 
     return (
       <>
@@ -176,18 +237,10 @@ export function PreviewDataSparkPlot({
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-                    {i18n.translate(
-                      'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
-                      {
-                        defaultMessage: 'Detected event occurrences ({count})',
-                        values: {
-                          count: sparkPlotData.timeseries.reduce((acc, point) => acc + point.y, 0),
-                        },
-                      }
-                    )}
+                    {titleLabel}
                   </EuiText>
                 </EuiFlexItem>
-                {firingCount !== undefined && firingCount > 0 && (
+                {isStatsPreview && firingCount > 0 && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="hollow">
                       {i18n.translate(

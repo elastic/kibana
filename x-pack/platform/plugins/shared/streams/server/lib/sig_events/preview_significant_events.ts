@@ -12,6 +12,8 @@ import type { ESQLCommand } from '@elastic/esql/types';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
 import { hasStatsCommand, extractBucketIntervalMs } from '@kbn/streams-schema';
 
+const PREVIEW_STATS_LIMIT = 10_000;
+
 const ESQL_UNITS: Record<string, string> = {
   s: 'seconds',
   m: 'minutes',
@@ -234,7 +236,7 @@ async function previewStatsQuery(
   const { scopedClusterClient } = deps;
 
   const response = await scopedClusterClient.asCurrentUser.esql.query({
-    query: esqlQuery,
+    query: `${esqlQuery} | LIMIT ${PREVIEW_STATS_LIMIT}`,
     filter,
     drop_null_columns: true,
   });
@@ -256,7 +258,14 @@ async function previewStatsQuery(
     const queryBucketMs = extractBucketIntervalMs(esqlQuery);
     const effectiveBucketSize = queryBucketMs ? msToEsqlBucketSize(queryBucketMs) : bucketSize;
 
-    const sparseOccurrences = firingDates.map((date) => ({ date, count: 1 }));
+    const aggregatedByBucket = new Map<string, number>();
+    for (const date of firingDates) {
+      aggregatedByBucket.set(date, (aggregatedByBucket.get(date) ?? 0) + 1);
+    }
+    const sparseOccurrences = [...aggregatedByBucket.entries()].map(([date, count]) => ({
+      date,
+      count,
+    }));
     const occurrences = fillBucketGaps(sparseOccurrences, from, to, effectiveBucketSize);
 
     return {

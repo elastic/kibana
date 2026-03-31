@@ -12,7 +12,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { PersistenceServices } from '@kbn/rule-registry-plugin/server';
-import { extractBucketIntervalMs } from '@kbn/streams-schema';
+import { deriveQueryType, extractBucketIntervalMs, extractStatsGroupColumns } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
@@ -35,8 +35,16 @@ type ExecutorOptions = RuleExecutorOptions<
 };
 
 export async function getRuleExecutor(options: ExecutorOptions) {
-  const queryType = options.params.type ?? 'match';
-  return queryType === 'stats' ? executeStatsPath(options) : executeMatchPath(options);
+  const derivedType = deriveQueryType(options.params.query);
+  const storedType = options.params.type ?? 'match';
+
+  if (derivedType !== storedType) {
+    options.logger.warn(
+      `Rule "${options.rule.id}" has stored type "${storedType}" but ES|QL content derives "${derivedType}". Routing by derived type.`
+    );
+  }
+
+  return derivedType === 'stats' ? executeStatsPath(options) : executeMatchPath(options);
 }
 
 async function executeMatchPath(options: ExecutorOptions) {
@@ -95,9 +103,15 @@ async function executeMatchPath(options: ExecutorOptions) {
     logger.debug(() => `Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
   }
 
-  const originalDocumentIds = createdAlerts.map(
-    (alert) => alertDocIdToDocumentIdMap.get(alert._id)!
-  );
+  const originalDocumentIds: string[] = [];
+  for (const alert of createdAlerts) {
+    const docId = alertDocIdToDocumentIdMap.get(alert._id);
+    if (docId) {
+      originalDocumentIds.push(docId);
+    } else {
+      logger.debug(`Alert "${alert._id}" has no mapped original document ID; skipping dedup entry`);
+    }
+  }
 
   return {
     state: {
@@ -126,6 +140,7 @@ async function executeStatsPath(options: ExecutorOptions) {
   const lookbackMs = (params.lookbackMinutes ?? DEFAULT_STATS_LOOKBACK_MINUTES) * 60_000;
 
   const bucketIntervalMs = extractBucketIntervalMs(params.query);
+  const groupColumnNames = extractStatsGroupColumns(params.query);
 
   let from: string;
   let to: string;
@@ -151,6 +166,7 @@ async function executeStatsPath(options: ExecutorOptions) {
     esClient: scopedClusterClient.asCurrentUser,
     esqlRequest,
     logger,
+    groupColumnNames,
   });
 
   if (results.length === 0) {
@@ -168,7 +184,7 @@ async function executeStatsPath(options: ExecutorOptions) {
     [];
 
   for (const row of results) {
-    const alertId = objectHash([row.bucket, ...row.groupValues, rule.id, spaceId]);
+    const alertId = objectHash([row.bucket, row.groupEntries, rule.id, spaceId]);
     allAlertIds.push(alertId);
 
     if (!previousFiringIds.has(alertId)) {

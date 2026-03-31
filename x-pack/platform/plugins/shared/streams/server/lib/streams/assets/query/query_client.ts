@@ -17,7 +17,6 @@ import {
   QUERY_TYPE_STATS,
   deriveQueryType,
   extractBucketIntervalMs,
-  queryTypeSchema,
 } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
@@ -174,8 +173,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
   };
 
   const esql = storageFields[QUERY_ESQL_QUERY];
-  const parsed = queryTypeSchema.safeParse(storageFields[QUERY_TYPE]);
-  const type: QueryType = parsed.success ? parsed.data : deriveQueryType(esql);
+  const type: QueryType = deriveQueryType(esql);
 
   return {
     ...storageFields,
@@ -681,14 +679,14 @@ export class QueryClient {
   public async promoteQueries(
     definition: Streams.all.Definition,
     queryIds: string[]
-  ): Promise<{ promoted: number; skipped: Array<{ id: string; reason: string }> }> {
+  ): Promise<{ promoted: number }> {
     const streamName = definition.name;
 
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
         `Skipping promoteQueries because significant events feature is disabled.`
       );
-      return { promoted: 0, skipped: [] };
+      return { promoted: 0 };
     }
 
     const unbacked = await this.getUnbackedQueries(streamName);
@@ -698,10 +696,9 @@ export class QueryClient {
     const toPromote = candidates.map((link) =>
       toQueryLinkFromQuery({ query: link.query, stream: streamName })
     );
-    const skipped: Array<{ id: string; reason: string }> = [];
 
     if (toPromote.length === 0) {
-      return { promoted: 0, skipped };
+      return { promoted: 0 };
     }
 
     await this.installQueries(toPromote, [], definition);
@@ -726,7 +723,7 @@ export class QueryClient {
       throwOnFail: true,
     });
 
-    return { promoted: toPromote.length, skipped };
+    return { promoted: toPromote.length };
   }
 
   private async installQueries(

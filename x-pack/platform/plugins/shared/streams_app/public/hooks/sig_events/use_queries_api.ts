@@ -12,7 +12,6 @@ import { useKibana } from '../use_kibana';
 
 interface PromoteResult {
   promoted: number;
-  skipped: Array<{ id: string; reason: string }>;
 }
 
 interface QueriesApi {

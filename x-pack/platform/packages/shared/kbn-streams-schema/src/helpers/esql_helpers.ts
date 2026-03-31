@@ -7,6 +7,7 @@
 
 import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ESQLCommand, ESQLSingleAstItem, ESQLSource } from '@elastic/esql/types';
+import type { QueryType } from '../queries';
 
 // ---------------------------------------------------------------------------
 // Internal helpers — shared parsing, type-guarding, and printing logic
@@ -162,7 +163,7 @@ export function hasStatsCommand(esql: string): boolean {
  * Derives the canonical {@link QueryType} from an ES|QL query string
  * by checking whether it contains a STATS command.
  */
-export function deriveQueryType(esql: string): import('../queries').QueryType {
+export function deriveQueryType(esql: string): QueryType {
   return hasStatsCommand(esql) ? 'stats' : 'match';
 }
 
@@ -210,9 +211,8 @@ export function getStatsQueryHints(esql: string): string[] {
       );
     }
 
-    // These commands are disallowed in *all* queries (match and stats alike).
-    // The check is placed here because match queries never reach this function,
-    // but the system prompt already blocks them for match queries.
+    // These commands are disallowed in STATS queries. The check is placed on the
+    // stats branch; the system prompt independently blocks them for match queries.
     const disallowed = ['sort', 'limit', 'keep'];
     const found = commands.filter((cmd) => disallowed.includes(cmd.name)).map((cmd) => cmd.name.toUpperCase());
     if (found.length > 0) {
@@ -222,6 +222,48 @@ export function getStatsQueryHints(esql: string): string[] {
     }
 
     return hints;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Extracts the output column names from the STATS command's BY clause.
+ * Used to identify group-by dimensions for alert identity hashing,
+ * avoiding the fragile numeric-type heuristic.
+ *
+ * Returns column names in sorted order for deterministic hashing.
+ * Returns an empty array when no STATS or BY clause is found, or on parse failure.
+ */
+export function extractStatsGroupColumns(esql: string): string[] {
+  try {
+    const { root } = Parser.parse(esql);
+    const statsCmd = root.commands.find(
+      (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'stats'
+    );
+    if (!statsCmd) return [];
+
+    const byOption = statsCmd.args.find(
+      (arg) => !Array.isArray(arg) && 'type' in arg && arg.type === 'option' && 'name' in arg && arg.name === 'by'
+    );
+    if (!byOption || Array.isArray(byOption) || !('args' in byOption)) return [];
+
+    const names: string[] = [];
+    for (const arg of (byOption as { args: ESQLCommand['args'] }).args) {
+      if (Array.isArray(arg)) continue;
+      if (!('type' in arg)) continue;
+
+      if (arg.type === 'column' && 'name' in arg) {
+        names.push(arg.name as string);
+      } else if (arg.type === 'function' && 'name' in arg && arg.name === '=') {
+        const lhs = (arg as { args: ESQLCommand['args'] }).args[0];
+        if (lhs && !Array.isArray(lhs) && 'type' in lhs && lhs.type === 'column' && 'name' in lhs) {
+          names.push(lhs.name as string);
+        }
+      }
+    }
+
+    return names.sort();
   } catch {
     return [];
   }

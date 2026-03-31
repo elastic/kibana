@@ -24,7 +24,7 @@ describe('executeStatsEsqlRequest', () => {
     jest.clearAllMocks();
   });
 
-  it('returns structured rows with bucket, columns, and groupValues', async () => {
+  it('returns structured rows with bucket, columns, and groupEntries', async () => {
     esClient.esql.query.mockResolvedValueOnce({
       columns: [
         { name: 'errors', type: 'long' },
@@ -47,10 +47,10 @@ describe('executeStatsEsqlRequest', () => {
         bucket: '2024-01-01T10:00:00.000Z',
         service: 'api-server',
       },
-      groupValues: ['api-server'],
+      groupEntries: { service: 'api-server' },
     });
     expect(results[1].bucket).toBe('2024-01-01T10:05:00.000Z');
-    expect(results[1].groupValues).toEqual(['web-frontend']);
+    expect(results[1].groupEntries).toEqual({ service: 'web-frontend' });
   });
 
   it('returns null bucket for non-bucketed STATS queries', async () => {
@@ -65,7 +65,7 @@ describe('executeStatsEsqlRequest', () => {
     const results = await executeStatsEsqlRequest({ esClient, esqlRequest, logger });
 
     expect(results[0].bucket).toBeNull();
-    expect(results[0].groupValues).toEqual(['api-server']);
+    expect(results[0].groupEntries).toEqual({ service: 'api-server' });
   });
 
   it('returns empty array when no rows are returned', async () => {
@@ -91,7 +91,7 @@ describe('executeStatsEsqlRequest', () => {
     expect(results).toEqual([]);
   });
 
-  it('classifies numeric columns as aggregate (not group) columns', async () => {
+  it('uses type heuristic for group detection when groupColumnNames is not provided', async () => {
     esClient.esql.query.mockResolvedValueOnce({
       columns: [
         { name: 'error_count', type: 'long' },
@@ -104,7 +104,49 @@ describe('executeStatsEsqlRequest', () => {
 
     const results = await executeStatsEsqlRequest({ esClient, esqlRequest, logger });
 
-    expect(results[0].groupValues).toEqual(['host-1']);
+    expect(results[0].groupEntries).toEqual({ host: 'host-1' });
+  });
+
+  it('uses explicit groupColumnNames to identify group columns including numeric ones', async () => {
+    esClient.esql.query.mockResolvedValueOnce({
+      columns: [
+        { name: 'error_count', type: 'long' },
+        { name: 'bucket', type: 'date' },
+        { name: 'status_code', type: 'long' },
+        { name: 'host', type: 'keyword' },
+      ],
+      values: [[100, '2024-01-01T10:00:00.000Z', 502, 'host-1']],
+    } as never);
+
+    const results = await executeStatsEsqlRequest({
+      esClient,
+      esqlRequest,
+      logger,
+      groupColumnNames: ['host', 'status_code'],
+    });
+
+    expect(results[0].groupEntries).toEqual({ host: 'host-1', status_code: 502 });
+  });
+
+  it('sorts groupEntries by column name for deterministic hashing', async () => {
+    esClient.esql.query.mockResolvedValueOnce({
+      columns: [
+        { name: 'count', type: 'long' },
+        { name: 'bucket', type: 'date' },
+        { name: 'zone', type: 'keyword' },
+        { name: 'app', type: 'keyword' },
+      ],
+      values: [[50, '2024-01-01T10:00:00.000Z', 'us-east', 'api']],
+    } as never);
+
+    const results = await executeStatsEsqlRequest({
+      esClient,
+      esqlRequest,
+      logger,
+      groupColumnNames: ['zone', 'app'],
+    });
+
+    expect(Object.keys(results[0].groupEntries)).toEqual(['app', 'zone']);
   });
 
   it('throws a user error when the ES|QL query fails', async () => {

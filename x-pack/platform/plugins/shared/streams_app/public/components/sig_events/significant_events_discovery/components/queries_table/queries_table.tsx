@@ -157,10 +157,7 @@ export function QueriesTable() {
     [queryClient]
   );
 
-  const promoteAllMutation = useMutation<
-    { promoted: number; skipped: Array<{ id: string; reason: string }> },
-    Error
-  >({
+  const promoteAllMutation = useMutation<{ promoted: number }, Error>({
     mutationFn: promoteAll,
     onSuccess: async ({ promoted }) => {
       toasts.addSuccess(getPromoteAllSuccessToast(promoted));

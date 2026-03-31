@@ -223,17 +223,22 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
   // --- Field-specific pattern: HTTP error rate ---
   const httpStatusField = findFieldInAnalysis(analysis, HTTP_STATUS_FIELD_PATTERNS);
   if (httpStatusField) {
+    const observedHttpPct =
+      extractErrorPercentage(analysis, httpStatusField) ?? DEFAULT_HTTP_ERROR_RATE;
+    const httpThreshold = roundThreshold(observedHttpPct * BASELINE_MULTIPLIER);
+
     fieldSpecificPatterns.push({
       id: 'http-error-rate',
       title: 'HTTP Error Rate',
       body: [
-        `  Observed: ${httpStatusField} present in data.`,
+        `  Observed: ${httpStatusField} present in data (~${observedHttpPct}% 5xx).`,
+        `  Suggested threshold: error_rate > ${httpThreshold}% (${BASELINE_MULTIPLIER}x baseline).`,
         `  Template:`,
         `    FROM <stream>`,
         `    | STATS errors = COUNT(*) WHERE ${httpStatusField} >= 500, total = COUNT(*)`,
         `      BY bucket = BUCKET(@timestamp, 5 minutes)`,
         `    | EVAL error_rate = errors * 100.0 / total`,
-        `    | WHERE total > ${MIN_SAMPLE_SIZE} AND error_rate > ${DEFAULT_HTTP_ERROR_RATE}`,
+        `    | WHERE total > ${MIN_SAMPLE_SIZE} AND error_rate > ${httpThreshold}`,
       ].join('\n'),
     });
   }

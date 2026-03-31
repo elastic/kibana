@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ensureMetadata, extractBucketIntervalMs, extractWhereExpression } from './esql_helpers';
+import { ensureMetadata, extractBucketIntervalMs, extractStatsGroupColumns, extractWhereExpression } from './esql_helpers';
 
 describe('extractWhereExpression', () => {
   it('returns the WHERE expression when present', () => {
@@ -52,6 +52,41 @@ describe('ensureMetadata', () => {
 
   it('returns the original string if there is no FROM command', () => {
     expect(ensureMetadata('SHOW INFO')).toBe('SHOW INFO');
+  });
+});
+
+describe('extractStatsGroupColumns', () => {
+  it('extracts aliased and plain group-by columns', () => {
+    const query =
+      'FROM logs | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes), service.name';
+    expect(extractStatsGroupColumns(query)).toEqual(['bucket', 'service.name']);
+  });
+
+  it('extracts numeric group-by columns from BY clause', () => {
+    const query =
+      'FROM logs | STATS error_count = COUNT(*) BY http.response.status_code, service.name | WHERE error_count > 10';
+    expect(extractStatsGroupColumns(query)).toEqual([
+      'http.response.status_code',
+      'service.name',
+    ]);
+  });
+
+  it('returns sorted column names', () => {
+    const query =
+      'FROM logs | STATS c = COUNT(*) BY zone, app, bucket = BUCKET(@timestamp, 5m)';
+    expect(extractStatsGroupColumns(query)).toEqual(['app', 'bucket', 'zone']);
+  });
+
+  it('returns empty array for match queries', () => {
+    expect(extractStatsGroupColumns('FROM logs | WHERE x > 1')).toEqual([]);
+  });
+
+  it('returns empty array for STATS without BY clause', () => {
+    expect(extractStatsGroupColumns('FROM logs | STATS total = COUNT(*)')).toEqual([]);
+  });
+
+  it('returns empty array on parse failure', () => {
+    expect(extractStatsGroupColumns('NOT VALID ESQL {{{')).toEqual([]);
   });
 });
 

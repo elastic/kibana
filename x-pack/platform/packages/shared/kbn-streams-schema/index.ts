@@ -63,6 +63,7 @@ export {
   deriveQueryType,
   ensureMetadata,
   extractBucketIntervalMs,
+  extractStatsGroupColumns,
   extractWhereExpression,
   getFromSources,
   getStatsQueryHints,

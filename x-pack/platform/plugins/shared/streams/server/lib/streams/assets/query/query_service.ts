@@ -93,9 +93,7 @@ export class QueryService {
           // Derive type first — all subsequent migration steps depend on this.
           const derivedType = deriveQueryType(esqlQuery);
 
-          if (!(QUERY_TYPE in migrated)) {
-            migrated = { ...migrated, [QUERY_TYPE]: derivedType };
-          }
+          migrated = { ...migrated, [QUERY_TYPE]: derivedType };
 
           if (derivedType !== QUERY_TYPE_STATS) {
             migrated = { ...migrated, [QUERY_ESQL_QUERY]: ensureMetadata(esqlQuery) };

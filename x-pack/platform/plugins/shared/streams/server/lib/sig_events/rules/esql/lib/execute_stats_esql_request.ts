@@ -13,17 +13,19 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 export interface StatsRow {
   bucket: string | null;
   columns: Record<string, unknown>;
-  groupValues: unknown[];
+  groupEntries: Record<string, unknown>;
 }
 
 export const executeStatsEsqlRequest = async ({
   esClient,
   esqlRequest,
   logger,
+  groupColumnNames,
 }: {
   esClient: ElasticsearchClient;
   esqlRequest: { query: string; filter: estypes.QueryDslQueryContainer };
   logger: Logger;
+  groupColumnNames?: string[];
 }): Promise<StatsRow[]> => {
   try {
     const response = (await esClient.esql.query({
@@ -42,25 +44,35 @@ export const executeStatsEsqlRequest = async ({
       (col) => col.name === 'bucket' && col.type === 'date'
     );
 
-    // Heuristic: numeric column types are treated as aggregate metrics (COUNT, AVG, etc.)
-    // while non-numeric columns are treated as group-by dimensions used for alert identity.
-    // This works reliably for our generated queries but would misclassify a numeric group-by
-    // field (e.g., `BY status_code`). If that becomes a use case, parse the STATS command's
-    // BY clause to identify explicit group columns instead.
-    const aggregateColumnTypes = new Set([
-      'long',
-      'integer',
-      'double',
-      'unsigned_long',
-      'counter_long',
-      'counter_integer',
-      'counter_double',
-    ]);
+    const groupColumnNameSet = groupColumnNames && groupColumnNames.length > 0
+      ? new Set(groupColumnNames)
+      : null;
 
-    const groupColumnIndices = columns
-      .map((col, idx) => ({ col, idx }))
-      .filter(({ col, idx }) => idx !== bucketIndex && !aggregateColumnTypes.has(col.type))
-      .map(({ idx }) => idx);
+    let groupColumnIndices: Array<{ idx: number; name: string }>;
+
+    if (groupColumnNameSet) {
+      groupColumnIndices = columns
+        .map((col, idx) => ({ col, idx, name: col.name }))
+        .filter(({ col, idx }) => idx !== bucketIndex && groupColumnNameSet.has(col.name))
+        .map(({ idx, name }) => ({ idx, name }));
+    } else {
+      const aggregateColumnTypes = new Set([
+        'long',
+        'integer',
+        'double',
+        'unsigned_long',
+        'counter_long',
+        'counter_integer',
+        'counter_double',
+      ]);
+
+      groupColumnIndices = columns
+        .map((col, idx) => ({ col, idx, name: col.name }))
+        .filter(({ col, idx }) => idx !== bucketIndex && !aggregateColumnTypes.has(col.type))
+        .map(({ idx, name }) => ({ idx, name }));
+    }
+
+    groupColumnIndices.sort((a, b) => a.name.localeCompare(b.name));
 
     return values.map((row) => {
       const allColumns: Record<string, unknown> = {};
@@ -68,10 +80,15 @@ export const executeStatsEsqlRequest = async ({
         allColumns[columns[i].name] = row[i];
       }
 
+      const groupEntries: Record<string, unknown> = {};
+      for (const { idx, name } of groupColumnIndices) {
+        groupEntries[name] = row[idx];
+      }
+
       return {
         bucket: bucketIndex !== -1 ? (row[bucketIndex] as string) : null,
         columns: allColumns,
-        groupValues: groupColumnIndices.map((idx) => row[idx]),
+        groupEntries,
       };
     });
   } catch (error) {
