@@ -70,23 +70,20 @@ apiTest.describe(
       }
     });
 
-    apiTest(
-      'returns empty tags in a space with no templates',
-      async ({ apiClient, kbnClient }) => {
-        const SPACE_ID = `scout-template-tags-empty-${Date.now()}`;
-        await kbnClient.spaces.create({ id: SPACE_ID, name: 'Scout Template Tags Empty Space' });
+    apiTest('returns empty tags in a space with no templates', async ({ apiClient, kbnClient }) => {
+      const SPACE_ID = `scout-template-tags-empty-${Date.now()}`;
+      await kbnClient.spaces.create({ id: SPACE_ID, name: 'Scout Template Tags Empty Space' });
 
-        try {
-          const response = await apiClient.get(
-            `s/${SPACE_ID}/api/observability/slo_templates/_tags`,
-            { headers, responseType: 'json' }
-          );
-          expect(response).toHaveStatusCode(200);
-          expect((response.body as { tags: string[] }).tags).toStrictEqual([]);
-        } finally {
-          await kbnClient.spaces.delete(SPACE_ID);
-        }
+      try {
+        const response = await apiClient.get(
+          `s/${SPACE_ID}/api/observability/slo_templates/_tags`,
+          { headers, responseType: 'json' }
+        );
+        expect(response).toHaveStatusCode(200);
+        expect((response.body as { tags: string[] }).tags).toStrictEqual([]);
+      } finally {
+        await kbnClient.spaces.delete(SPACE_ID);
       }
-    );
+    });
   }
 );
