@@ -40,7 +40,7 @@ import { formatInferenceProviderError } from '../../../../routes/utils/create_co
 import { resolveConnectorId } from '../../../../routes/utils/resolve_connector_id';
 import type { TaskContext } from '..';
 import type { TaskParams } from '../../types';
-import { PromptsConfigService } from '../../../saved_objects/significant_events/prompts_config_service';
+import { PromptsConfigService } from '../../../sig_events/saved_objects/prompts_config_service';
 import { cancellableTask } from '../../cancellable_task';
 import { MAX_FEATURE_AGE_MS } from '../../../streams/feature/feature_client';
 import { isDefinitionNotFoundError } from '../../../streams/errors/definition_not_found_error';
@@ -366,7 +366,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 request: runContext.fakeRequest,
               });
 
-              const taskLogger = taskContext.logger.get('features_identification');
+              const taskLogger = taskContext.logger.get('features_identification', streamName);
               const settings = await modelSettingsClient.getSettings();
               const connectorId = await resolveConnectorId({
                 connectorId: settings.connectorIdKnowledgeIndicatorExtraction,
@@ -388,7 +388,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   featureClient.getExcludedFeatures(streamName),
                   new PromptsConfigService({
                     soClient,
-                    logger: taskContext.logger,
+                    logger: taskLogger,
                   }).getPrompt(),
                 ]);
 
@@ -407,7 +407,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     existingFeatures,
                     excludedFeatures,
                     inferenceClient: boundInferenceClient,
-                    logger: taskContext.logger.get('features_identification'),
+                    logger: taskLogger,
                     signal: runContext.abortController.signal,
                     systemPrompt: featurePromptOverride,
                     onIterationComplete: async (it, changedFeatures) => {
@@ -446,7 +446,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     start,
                     end,
                     esClient,
-                    logger: taskContext.logger.get('computed_features'),
+                    logger: taskContext.logger.get('computed_features', streamName),
                   }),
                 ]);
 
@@ -471,7 +471,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 );
               } catch (error) {
                 if (isDefinitionNotFoundError(error)) {
-                  taskContext.logger.debug(
+                  taskLogger.debug(
                     () =>
                       `Stream ${streamName} was deleted before features identification task started, skipping`
                   );
@@ -489,17 +489,16 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  taskContext.logger.debug(
+                  taskLogger.debug(
                     () => `Task ${runContext.taskInstance.id} was canceled: ${errorMessage}`
                   );
                   trackEmptyTelemetry('canceled');
                   return getDeleteTaskRunResult();
                 }
 
-                taskContext.logger.error(
-                  `Task ${runContext.taskInstance.id} failed: ${errorMessage}`,
-                  { error } as LogMeta
-                );
+                taskLogger.error(`Task ${runContext.taskInstance.id} failed: ${errorMessage}`, {
+                  error,
+                } as LogMeta);
 
                 await taskClient.fail<FeaturesIdentificationTaskParams>(
                   _task,
