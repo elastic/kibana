@@ -27,12 +27,17 @@ export const dataViewSpecSchema = schema.object({
   }),
   version: schema.maybe(
     schema.string({
-      meta: { description: 'The version of the data view. Used for optimistic concurrency control.' },
+      meta: {
+        description: 'The version of the data view. Used for optimistic concurrency control.',
+      },
     })
   ),
   id: schema.maybe(
     schema.string({
-      meta: { description: 'A unique identifier for the data view. If not provided, an ID is generated automatically.' },
+      meta: {
+        description:
+          'A unique identifier for the data view. If not provided, an ID is generated automatically.',
+      },
     })
   ),
   type: schema.maybe(
@@ -51,7 +56,10 @@ export const dataViewSpecSchema = schema.object({
     schema.arrayOf(
       schema.object({
         value: schema.string({
-          meta: { description: 'The field name or pattern to filter from the source. Supports wildcards (`*`).' },
+          meta: {
+            description:
+              'The field name or pattern to filter from the source. Supports wildcards (`*`).',
+          },
         }),
         clientId: schema.maybe(
           schema.oneOf([schema.string(), schema.number()], {
@@ -73,10 +81,16 @@ export const dataViewSpecSchema = schema.object({
     })
   ),
   typeMeta: schema.maybe(
-    schema.object({}, {
-      unknowns: 'allow',
-      meta: { description: 'Type-specific metadata. For rollup data views, contains information about rollup jobs and their capabilities.' },
-    })
+    schema.object(
+      {},
+      {
+        unknowns: 'allow',
+        meta: {
+          description:
+            'Type-specific metadata. For rollup data views, contains information about rollup jobs and their capabilities.',
+        },
+      }
+    )
   ),
   fieldFormats: schema.maybe(
     schema.recordOf(schema.string(), serializedFieldFormatSchema, {
@@ -105,7 +119,10 @@ export const dataViewSpecSchema = schema.object({
         ),
       }),
       {
-        meta: { description: 'A map of field names to their custom attributes, such as custom labels, descriptions, and popularity counts.' },
+        meta: {
+          description:
+            'A map of field names to their custom attributes, such as custom labels, descriptions, and popularity counts.',
+        },
       }
     )
   ),

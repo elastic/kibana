@@ -66,9 +66,7 @@ export const swapReferencesRoute =
     const path = previewRoute
       ? `${DATA_VIEW_SWAP_REFERENCES_PATH}/_preview`
       : DATA_VIEW_SWAP_REFERENCES_PATH;
-    const summary = previewRoute
-      ? PREVIEW_SWAP_REFERENCES_SUMMARY
-      : SWAP_REFERENCES_SUMMARY;
+    const summary = previewRoute ? PREVIEW_SWAP_REFERENCES_SUMMARY : SWAP_REFERENCES_SUMMARY;
     const description = previewRoute
       ? PREVIEW_SWAP_REFERENCES_DESCRIPTION
       : SWAP_REFERENCES_DESCRIPTION;
@@ -94,7 +92,9 @@ export const swapReferencesRoute =
             request: {
               body: schema.object({
                 fromId: schema.string({
-                  meta: { description: 'The identifier of the saved object to swap references from.' },
+                  meta: {
+                    description: 'The identifier of the saved object to swap references from.',
+                  },
                 }),
                 fromType: schema.maybe(
                   schema.string({
@@ -105,7 +105,9 @@ export const swapReferencesRoute =
                   })
                 ),
                 toId: schema.string({
-                  meta: { description: 'The identifier of the saved object to swap references to.' },
+                  meta: {
+                    description: 'The identifier of the saved object to swap references to.',
+                  },
                 }),
                 forId: schema.maybe(
                   schema.oneOf([idSchema, schema.arrayOf(idSchema)], {
@@ -164,8 +166,7 @@ export const swapReferencesRoute =
                         }),
                         deletePerformed: schema.boolean({
                           meta: {
-                            description:
-                              'Whether the source saved object was deleted.',
+                            description: 'Whether the source saved object was deleted.',
                           },
                         }),
                       })

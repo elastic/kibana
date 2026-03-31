@@ -119,8 +119,7 @@ export const UPDATE_DATA_VIEW_SUMMARY = 'Update a data view';
 export const UPDATE_DATA_VIEW_FIELDS_SUMMARY = 'Update field metadata';
 export const UPDATE_RUNTIME_FIELD_SUMMARY = 'Update a runtime field';
 
-const DATA_VIEW_DOCS_URL =
-  'https://www.elastic.co/docs/manage-data/data-store/data-views';
+const DATA_VIEW_DOCS_URL = 'https://www.elastic.co/docs/manage-data/data-store/data-views';
 
 /**
  * Operation descriptions (expanded, used in OAS description)
@@ -145,8 +144,7 @@ export const GET_DATA_VIEW_DESCRIPTION =
 export const UPDATE_DATA_VIEW_DESCRIPTION =
   'Update an existing data view. Only the fields provided in the request body are updated.';
 
-export const DELETE_DATA_VIEW_DESCRIPTION =
-  'Delete a data view by its identifier.';
+export const DELETE_DATA_VIEW_DESCRIPTION = 'Delete a data view by its identifier.';
 
 export const GET_DEFAULT_DATA_VIEW_DESCRIPTION =
   'Retrieve the identifier of the default data view for the current Kibana space.';
@@ -173,8 +171,7 @@ export const GET_RUNTIME_FIELD_DESCRIPTION =
 export const UPDATE_RUNTIME_FIELD_DESCRIPTION =
   'Update an existing runtime field in a data view. Only the fields provided in the request body are updated.';
 
-export const DELETE_RUNTIME_FIELD_DESCRIPTION =
-  'Delete a runtime field from a data view.';
+export const DELETE_RUNTIME_FIELD_DESCRIPTION = 'Delete a runtime field from a data view.';
 
 export const SWAP_REFERENCES_DESCRIPTION =
   'Swap saved object references from one data view to another. ' +

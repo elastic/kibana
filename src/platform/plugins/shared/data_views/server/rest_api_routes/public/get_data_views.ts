@@ -58,15 +58,22 @@ const getDataViewsRouteFactory =
           }),
           namespaces: schema.maybe(
             schema.arrayOf(schema.string(), {
-              meta: { description: 'The Kibana namespaces (spaces) where this data view is available.' },
+              meta: {
+                description: 'The Kibana namespaces (spaces) where this data view is available.',
+              },
             })
           ),
           title: schema.string({
-            meta: { description: 'The comma-separated list of data streams, indices, and aliases that the data view matches.' },
+            meta: {
+              description:
+                'The comma-separated list of data streams, indices, and aliases that the data view matches.',
+            },
           }),
           type: schema.maybe(
             schema.string({
-              meta: { description: 'The type of data view. Set to `rollup` for rollup data views.' },
+              meta: {
+                description: 'The type of data view. Set to `rollup` for rollup data views.',
+              },
             })
           ),
           typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),

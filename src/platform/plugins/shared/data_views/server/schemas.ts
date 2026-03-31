@@ -18,12 +18,18 @@ import type { RuntimeType } from '../common';
 export const serializedFieldFormatSchema = schema.object({
   id: schema.maybe(
     schema.string({
-      meta: { description: 'The unique identifier for the field format, such as `number`, `bytes`, or `percent`.' },
+      meta: {
+        description:
+          'The unique identifier for the field format, such as `number`, `bytes`, or `percent`.',
+      },
     })
   ),
   params: schema.maybe(
     schema.any({
-      meta: { description: 'Configuration parameters for the field format. The available options depend on the format type.' },
+      meta: {
+        description:
+          'Configuration parameters for the field format. The available options depend on the format type.',
+      },
     })
   ),
 });
@@ -57,7 +63,10 @@ const primitiveRuntimeFieldSchemaShared = {
   popularity: schema.maybe(
     schema.number({
       min: 0,
-      meta: { description: 'A popularity score for the field, used to prioritize fields in the field list. Higher values indicate more popular fields.' },
+      meta: {
+        description:
+          'A popularity score for the field, used to prioritize fields in the field list. Higher values indicate more popular fields.',
+      },
     })
   ),
 };
@@ -76,7 +85,10 @@ const compositeRuntimeFieldSchemaShared = {
   script: schema.maybe(
     schema.object({
       source: schema.string({
-        meta: { description: 'The Painless script to execute at query time. A composite script emits multiple values accessed as sub-fields.' },
+        meta: {
+          description:
+            'The Painless script to execute at query time. A composite script emits multiple values accessed as sub-fields.',
+        },
       }),
     })
   ),
@@ -105,7 +117,10 @@ const compositeRuntimeFieldSchemaShared = {
         ),
       }),
       {
-        meta: { description: 'A map of sub-field names to their type and format definitions. Each sub-field maps to a value emitted by the composite script.' },
+        meta: {
+          description:
+            'A map of sub-field names to their type and format definitions. Each sub-field maps to a value emitted by the composite script.',
+        },
       }
     )
   ),
@@ -139,12 +154,18 @@ export const fieldSpecSchemaFields = {
   type: schema.string({
     defaultValue: 'string',
     maxLength: 1000,
-    meta: { description: 'The field type, such as `string`, `number`, `date`, `boolean`, `geo_point`, or `ip`.' },
+    meta: {
+      description:
+        'The field type, such as `string`, `number`, `date`, `boolean`, `geo_point`, or `ip`.',
+    },
   }),
   count: schema.maybe(
     schema.number({
       min: 0,
-      meta: { description: 'A popularity count for the field, used to prioritize fields in the field list.' },
+      meta: {
+        description:
+          'A popularity count for the field, used to prioritize fields in the field list.',
+      },
     })
   ),
   script: schema.maybe(
@@ -200,7 +221,10 @@ export const fieldSpecSchemaFields = {
   ),
   shortDotsEnable: schema.maybe(
     schema.boolean({
-      meta: { description: 'When `true`, shorten long field names using dot notation, for example `a.b.c.d` becomes `a.b...d`.' },
+      meta: {
+        description:
+          'When `true`, shorten long field names using dot notation, for example `a.b.c.d` becomes `a.b...d`.',
+      },
     })
   ),
   searchable: schema.maybe(
