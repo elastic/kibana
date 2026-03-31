@@ -44,11 +44,8 @@ export async function exec(
   let child: execa.ExecaChildProcess<string>;
 
   if (args.length === 2) {
-    // A single command string is passed, which may contain shell-specific syntax like `&&` or `||`.
-    // To ensure these are interpreted correctly, we must use a shell.
-    child = execa.command(args[0], { ...execaOpts, shell: true });
-
-    log.debug(`Running command with shell: ${args[0]} in ${cwd}`);
+    child = execa.command(args[0], { ...execaOpts });
+    log.debug(`Running command: ${args[0]} in ${cwd}`);
   } else {
     // A file and arguments array are passed, so we can execute it directly without a shell.
     child = execa(args[0], args[1], { ...execaOpts });
