@@ -167,7 +167,8 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
                 'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',
                 { defaultMessage: 'View this connector' }
               ),
-          enabled: (connector) => !!connector.index_name,
+          enabled: (connector) =>
+            !!connector.index_name && (!isCrawler || !!indexManagementLocator),
           icon: 'eye',
           isPrimary: false,
           name: (connector) =>

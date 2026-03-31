@@ -58,7 +58,8 @@ const SearchIndexManagementApp: React.FC<{
   );
 
   useEffect(() => {
-    let indexManagementUnmount: () => void | undefined;
+    let isMounted = true;
+    let indexManagementUnmount: (() => void) | undefined;
     indexManagement
       .renderIndexManagementApp({
         element: indexManagementRef.current,
@@ -66,10 +67,17 @@ const SearchIndexManagementApp: React.FC<{
         setBreadcrumbs,
       })
       .then((unmount) => {
-        indexManagementUnmount = unmount;
+        if (isMounted) {
+          indexManagementUnmount = unmount;
+        } else {
+          // Component already unmounted while the promise was in-flight;
+          // tear down immediately to avoid leaking the rendered app.
+          unmount();
+        }
       });
 
     return () => {
+      isMounted = false;
       indexManagementUnmount?.();
     };
   }, [indexManagement, indexManagementRef, setBreadcrumbs, history]);
