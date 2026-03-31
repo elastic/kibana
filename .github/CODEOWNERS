@@ -1002,7 +1002,8 @@ x-pack/platform/packages/shared/kbn-evals @elastic/obs-ai-team @elastic/security
 x-pack/platform/packages/shared/kbn-evals-common @elastic/obs-ai-team @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-evals-extensions @elastic/obs-ai-team @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-evals-phoenix-executor @elastic/obs-ai-team
-x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/obs-onboarding-team @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-evals-suite-significant-events @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-fs @elastic/kibana-security
@@ -1039,7 +1040,8 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
-x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerting-v2-constants @elastic/rna-project-team
+x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-schemas @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
@@ -2403,6 +2405,12 @@ x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 /x-pack/platform/test/fixtures/es_archives/alerting/8_2_0 @elastic/response-ops
 /x-pack/solutions/**/test/serverless/**/test_suites/rules/ @elastic/response-ops
 
+# EARS
+/x-pack/platform/plugins/shared/actions/server/lib/ears @elastic/workchat-eng
+x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.ts @elastic/workchat-eng @elastic/response-ops
+x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.test.ts @elastic/workchat-eng @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-specs/src/auth_types/ears.ts @elastic/workchat-eng
+
 # Connector Specs
 src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
 src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
@@ -2420,6 +2428,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/github/** @elastic/wo
 src/platform/packages/shared/kbn-connector-specs/src/specs/figma/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/firecrawl/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_calendar/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_storage/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
@@ -2437,6 +2446,10 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/w
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/zendesk/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_server/** @elastic/workchat-eng
+
+# Connector Workflow Tests
+src/platform/plugins/shared/workflows_management/test/connector_workflows @elastic/workchat-eng
 
 # Gap fill feature has shared responsibility between response-ops and security-detection-engine
 /x-pack/platform/plugins/shared/alerting/common/routes/gaps @elastic/response-ops @elastic/security-detection-engine
@@ -2446,6 +2459,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/work
 /x-pack/platform/test/alerting_api_integration/security_and_spaces/group8/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
 /x-pack/platform/test/alerting_api_integration/security_and_spaces/group9/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
 /x-pack/platform/test/alerting_api_integration/security_and_spaces/group10/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
+/x-pack/platform/test/alerting_api_integration/security_and_spaces/group17/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
 
 # Enterprise Search
 # search

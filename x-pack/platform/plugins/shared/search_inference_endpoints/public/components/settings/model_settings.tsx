@@ -124,6 +124,8 @@ export const ModelSettings: React.FC = () => {
                 }))}
                 onReset={() => setResetParentKey(section.featureId)}
                 onEndpointsChange={updateEndpoints}
+                isBeta={section.isBeta}
+                isTechPreview={section.isTechPreview}
               />
               <EuiSpacer size="xl" />
             </React.Fragment>

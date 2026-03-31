@@ -189,6 +189,13 @@ export interface DocViewerExtension {
    * @returns A React element to render above the tabs
    */
   renderHeader?: (props: DocViewRenderProps) => React.ReactElement;
+  /**
+   * Optional render function to display a custom footer section at the bottom of the flyout.
+   * The footer is always visible while scrolling through the flyout content.
+   * @param props The doc view render props
+   * @returns A React element to render at the bottom of the flyout
+   */
+  renderFooter?: (props: DocViewRenderProps) => React.ReactElement;
 }
 
 /**
