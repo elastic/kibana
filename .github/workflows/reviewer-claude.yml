@@ -1,13 +1,14 @@
 name: reviewer:claude
 
 on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
   pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
-
-permissions:
-  contents: read # needed to checkout repo
-  issues: read # needed to read PR description, conversation, comments, and labels
-  pull-requests: write # needed to post review comments and inline comments on the diff
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
@@ -21,6 +22,7 @@ jobs:
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
       contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
     runs-on: ubuntu-latest
+    permissions: {}
     outputs:
       api_key: ${{ steps.mint.outputs.api_key }}
     steps:
@@ -36,7 +38,13 @@ jobs:
 
   claude-review:
     needs: mint-token
+    if: >-
+      github.event_name == 'pull_request_target'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # needed to checkout repo
+      issues: read # needed to read PR description, conversation, comments, and labels
+      pull-requests: write # needed to post review comments and inline comments on the diff
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -52,3 +60,24 @@ jobs:
           # TODO: limit tools / internet access?
           ANTHROPIC_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
           ANTHROPIC_MODEL: 'llm-gateway/claude-opus-4-5'
+
+  claude-review-comment:
+    needs: mint-token
+    if: >-
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Claude PR Review Comment
+        uses: anthropics/claude-code-action@64c7a0ef71df67b14cb4471f4d9c8565c61042bf # v1.0.66
+        with:
+          anthropic_api_key: ${{ needs.mint-token.outputs.api_key }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
