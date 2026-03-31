@@ -26,7 +26,6 @@ import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_anal
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
 import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
 
-
 // ---- Management routes ----
 const EntityAnalyticsManagementWrapper = () => (
   <PluginTemplateWrapper>

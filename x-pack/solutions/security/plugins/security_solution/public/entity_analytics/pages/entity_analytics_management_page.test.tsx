@@ -117,9 +117,7 @@ jest.mock('../components/entity_store/components/engines_status', () => ({
 }));
 
 jest.mock('../components/watchlists/watchlists_tab', () => ({
-  WatchlistsTab: () => (
-    <span data-test-subj="mock-watchlists-tab">{'Mocked Watchlists Tab'}</span>
-  ),
+  WatchlistsTab: () => <span data-test-subj="mock-watchlists-tab">{'Mocked Watchlists Tab'}</span>,
 }));
 
 jest.mock('../components/entity_store/components/entity_store_missing_privileges_callout', () => ({
