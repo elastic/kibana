@@ -20,6 +20,7 @@ export const useSkillsService = () => {
   const { data, isLoading, error, isError } = useQuery({
     queryKey: queryKeys.skills.all,
     queryFn: () => skillsService.list(),
+    keepPreviousData: true,
   });
 
   return { skills: data ?? [], isLoading, error, isError };
