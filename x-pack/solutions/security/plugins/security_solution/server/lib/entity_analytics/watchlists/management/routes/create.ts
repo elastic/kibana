@@ -57,13 +57,13 @@ export const createWatchlistRoute = (
               esClient: core.elasticsearch.client.asCurrentUser,
             });
 
-            const { entitySource: entitySourceInput, ...watchlistInput } = request.body;
+            const { entitySources: entitySourceInputs, ...watchlistInput } = request.body;
 
             // Step 1: Create the watchlist
             const watchlist = await watchlistClient.create(watchlistInput);
 
-            // Step 2: If an entity source was provided, create and link it (with rollback)
-            if (entitySourceInput) {
+            // Step 2: If entity sources were provided, create and link them (with rollback)
+            if (entitySourceInputs?.length) {
               if (!watchlist.id) {
                 throw new Error('Watchlist creation succeeded but no ID was returned');
               }
@@ -73,10 +73,16 @@ export const createWatchlistRoute = (
                 namespace,
               });
 
+              const createdSources = [];
               try {
-                const entitySource = await sourceClient.create(entitySourceInput);
-                await watchlistClient.addEntitySourceReference(watchlist.id, entitySource.id);
-                return response.ok({ body: { ...watchlist, entitySource } });
+                for (const entitySourceInput of entitySourceInputs) {
+                  const entitySource = await sourceClient.create(entitySourceInput);
+                  await watchlistClient.addEntitySourceReference(watchlist.id, entitySource.id);
+                  createdSources.push(entitySource);
+                }
+                return response.ok({
+                  body: { ...watchlist, entitySources: createdSources },
+                });
               } catch (e) {
                 logger.error(
                   `Entity source creation failed, rolling back watchlist ${watchlist.id}`

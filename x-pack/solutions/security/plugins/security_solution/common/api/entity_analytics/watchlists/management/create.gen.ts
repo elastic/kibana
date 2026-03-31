@@ -43,30 +43,33 @@ export const CreateWatchlistRequestBody = z.object({
    */
   managed: z.boolean().optional(),
   /**
-   * Optional entity source to create and link to the watchlist
+   * Optional entity sources to create and link to the watchlist
    */
-  entitySource: z
-    .object({
-      type: EntitySourceType,
-      name: z.string(),
-      indexPattern: z.string().optional(),
-      /**
-       * Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
-       */
-      integrationName: z.string().optional(),
-      enabled: z.boolean().optional(),
-      /**
-       * Field used to query the entity store for index-type sources
-       */
-      identifierField: z.string().optional(),
-      /**
-       * KQL query used to filter data from the provided index patterns
-       */
-      queryRule: z.string().optional(),
-      matchers: z.array(Matcher).optional(),
-      filter: Filter.optional(),
-    })
-    .strict()
+  entitySources: z
+    .array(
+      z
+        .object({
+          type: EntitySourceType,
+          name: z.string(),
+          indexPattern: z.string().optional(),
+          /**
+           * Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+           */
+          integrationName: z.string().optional(),
+          enabled: z.boolean().optional(),
+          /**
+           * Field used to query the entity store for index-type sources
+           */
+          identifierField: z.string().optional(),
+          /**
+           * KQL query used to filter data from the provided index patterns
+           */
+          queryRule: z.string().optional(),
+          matchers: z.array(Matcher).optional(),
+          filter: Filter.optional(),
+        })
+        .strict()
+    )
     .optional(),
 });
 export type CreateWatchlistRequestBodyInput = z.input<typeof CreateWatchlistRequestBody>;
@@ -74,6 +77,6 @@ export type CreateWatchlistRequestBodyInput = z.input<typeof CreateWatchlistRequ
 export type CreateWatchlistResponse = z.infer<typeof CreateWatchlistResponse>;
 export const CreateWatchlistResponse = WatchlistObject.merge(
   z.object({
-    entitySource: MonitoringEntitySource.optional(),
+    entitySources: z.array(MonitoringEntitySource).optional(),
   })
 );

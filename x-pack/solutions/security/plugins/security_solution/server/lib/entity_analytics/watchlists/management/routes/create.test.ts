@@ -74,7 +74,7 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
       },
     });
 
-  describe('without entitySource', () => {
+  describe('without entitySources', () => {
     it('creates a watchlist and returns 200', async () => {
       const watchlistResult = {
         id: 'wl-1',
@@ -99,38 +99,83 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
     });
   });
 
-  describe('with entitySource', () => {
-    const entitySourceInput = {
+  describe('with entitySources', () => {
+    const entitySourceInputA = {
       type: 'index' as const,
-      name: 'my-source',
+      name: 'my-source-a',
       indexPattern: 'logs-*',
       enabled: true,
     };
 
-    it('creates the watchlist and entity source, then links them', async () => {
+    const entitySourceInputB = {
+      type: 'index' as const,
+      name: 'my-source-b',
+      indexPattern: 'metrics-*',
+      enabled: true,
+    };
+
+    it('creates the watchlist and entity sources, then links them', async () => {
       const watchlistResult = {
         id: 'wl-1',
         name: 'test-watchlist',
         description: 'A test watchlist',
         riskModifier: 10,
       };
-      const entitySourceResult = { id: 'es-1', ...entitySourceInput };
+      const entitySourceResultA = { id: 'es-1', ...entitySourceInputA };
+      const entitySourceResultB = { id: 'es-2', ...entitySourceInputB };
 
       mockWatchlistCreate.mockResolvedValue(watchlistResult);
-      mockCreateEntitySource.mockResolvedValue(entitySourceResult);
+      mockCreateEntitySource
+        .mockResolvedValueOnce(entitySourceResultA)
+        .mockResolvedValueOnce(entitySourceResultB);
       mockAddEntitySourceReference.mockResolvedValue(undefined);
 
-      const request = buildRequest({ entitySource: entitySourceInput });
+      const request = buildRequest({
+        entitySources: [entitySourceInputA, entitySourceInputB],
+      });
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
-      expect(response.body).toEqual({ ...watchlistResult, entitySource: entitySourceResult });
+      expect(response.body).toEqual({
+        ...watchlistResult,
+        entitySources: [entitySourceResultA, entitySourceResultB],
+      });
       expect(mockWatchlistCreate).toHaveBeenCalledWith({
         name: 'test-watchlist',
         description: 'A test watchlist',
         riskModifier: 10,
       });
-      expect(mockCreateEntitySource).toHaveBeenCalledWith(entitySourceInput);
+      expect(mockCreateEntitySource).toHaveBeenCalledTimes(2);
+      expect(mockCreateEntitySource).toHaveBeenCalledWith(entitySourceInputA);
+      expect(mockCreateEntitySource).toHaveBeenCalledWith(entitySourceInputB);
+      expect(mockAddEntitySourceReference).toHaveBeenCalledTimes(2);
+      expect(mockAddEntitySourceReference).toHaveBeenCalledWith('wl-1', 'es-1');
+      expect(mockAddEntitySourceReference).toHaveBeenCalledWith('wl-1', 'es-2');
+    });
+
+    it('creates the watchlist and a single entity source', async () => {
+      const watchlistResult = {
+        id: 'wl-1',
+        name: 'test-watchlist',
+        description: 'A test watchlist',
+        riskModifier: 10,
+      };
+      const entitySourceResult = { id: 'es-1', ...entitySourceInputA };
+
+      mockWatchlistCreate.mockResolvedValue(watchlistResult);
+      mockCreateEntitySource.mockResolvedValue(entitySourceResult);
+      mockAddEntitySourceReference.mockResolvedValue(undefined);
+
+      const request = buildRequest({ entitySources: [entitySourceInputA] });
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        ...watchlistResult,
+        entitySources: [entitySourceResult],
+      });
+      expect(mockCreateEntitySource).toHaveBeenCalledTimes(1);
+      expect(mockCreateEntitySource).toHaveBeenCalledWith(entitySourceInputA);
       expect(mockAddEntitySourceReference).toHaveBeenCalledWith('wl-1', 'es-1');
     });
 
@@ -146,7 +191,7 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
       mockCreateEntitySource.mockRejectedValue(new Error('source creation failed'));
       mockWatchlistDelete.mockResolvedValue(undefined);
 
-      const request = buildRequest({ entitySource: entitySourceInput });
+      const request = buildRequest({ entitySources: [entitySourceInputA] });
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(500);
@@ -163,14 +208,14 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
         description: 'A test watchlist',
         riskModifier: 10,
       };
-      const entitySourceResult = { id: 'es-1', ...entitySourceInput };
+      const entitySourceResult = { id: 'es-1', ...entitySourceInputA };
 
       mockWatchlistCreate.mockResolvedValue(watchlistResult);
       mockCreateEntitySource.mockResolvedValue(entitySourceResult);
       mockAddEntitySourceReference.mockRejectedValue(new Error('linking failed'));
       mockWatchlistDelete.mockResolvedValue(undefined);
 
-      const request = buildRequest({ entitySource: entitySourceInput });
+      const request = buildRequest({ entitySources: [entitySourceInputA] });
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(500);
@@ -186,7 +231,7 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
 
       mockWatchlistCreate.mockResolvedValue(watchlistResult);
 
-      const request = buildRequest({ entitySource: entitySourceInput });
+      const request = buildRequest({ entitySources: [entitySourceInputA] });
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(500);
