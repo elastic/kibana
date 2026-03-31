@@ -7,7 +7,6 @@
 
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { buildEpisodesQuery } from '../utils/build_episodes_esql_query';
 import { fetchAlertingEpisodes } from './fetch_alerting_episodes';
@@ -18,9 +17,6 @@ const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
 
 describe('fetchAlertingEpisodes', () => {
   const mockExpressions = {} as ExpressionsStart;
-  const mockDataView = {
-    getFieldByName: jest.fn(),
-  } as unknown as DataView;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -36,7 +32,6 @@ describe('fetchAlertingEpisodes', () => {
     fetchAlertingEpisodes({
       pageSize,
       services: { expressions: mockExpressions },
-      dataView: mockDataView,
     });
 
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
@@ -67,7 +62,6 @@ describe('fetchAlertingEpisodes', () => {
     fetchAlertingEpisodes({
       pageSize,
       services: { expressions: mockExpressions },
-      dataView: mockDataView,
     });
 
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
@@ -101,7 +95,6 @@ describe('fetchAlertingEpisodes', () => {
       pageSize,
       abortSignal,
       services: { expressions: mockExpressions },
-      dataView: mockDataView,
     });
 
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
@@ -134,7 +127,6 @@ describe('fetchAlertingEpisodes', () => {
       pageSize,
       sortState,
       services: { expressions: mockExpressions },
-      dataView: mockDataView,
     });
 
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);

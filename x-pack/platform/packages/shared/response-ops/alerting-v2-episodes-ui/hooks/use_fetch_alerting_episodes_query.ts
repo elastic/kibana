@@ -57,7 +57,6 @@ export const useFetchAlertingEpisodesQuery = ({
         filterState,
         sortState,
         timeRange,
-        dataView,
       });
     },
     keepPreviousData: true,
