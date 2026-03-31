@@ -389,10 +389,10 @@ describe('getAxiosInstance', () => {
 
     // Access the 401 response interceptor
     // @ts-expect-error accessing internal axios interceptor handlers
-    const rejectionHandler = result!.interceptors.response.handlers[0].rejected;
+    const rejectionHandler = result!.interceptors.response.handlers[0].rejected as Function;
 
-    const mockAxiosRequest = jest.fn().mockResolvedValue({ status: 200, data: 'ok' });
-    result!.request = mockAxiosRequest;
+    // Mock the retry request so it doesn't make a real HTTP call
+    jest.spyOn(result!, 'request').mockResolvedValue({ status: 200, data: 'ok' });
 
     const mock401Error = {
       response: { status: 401 },
