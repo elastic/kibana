@@ -6,6 +6,7 @@
       "jest",
       "node",
       "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
       "@testing-library/jest-dom"
     ]
   },
@@ -20,6 +21,7 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/test-jest-helpers",
-  ],
+    "@kbn/storybook",
+    "@kbn/test-jest-helpers"
+  ]
 }
