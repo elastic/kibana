@@ -99,25 +99,21 @@ export const otelDemoDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'payment-unreachable',
-        log_query_filter: {
-          bool: {
-            filter: [
-              { terms: { 'resource.attributes.app': ['frontend', 'checkout'] } },
-              {
-                bool: {
-                  should: [
-                    { match_phrase: { 'body.text': 'failed to charge card' } },
-                    { match_phrase: { 'body.text': 'transport: Error while dialing' } },
-                    { match_phrase: { 'body.text': 'dial tcp' } },
-                    { match_phrase: { 'body.text': 'i/o timeout' } },
-                    { match_phrase: { 'body.text': 'deadline exceeded' } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
+        log_query_filter: [
+          { terms: { 'resource.attributes.app': ['frontend', 'checkout'] } },
+          {
+            bool: {
+              should: [
+                { match_phrase: { 'body.text': 'failed to charge card' } },
+                { match_phrase: { 'body.text': 'transport: Error while dialing' } },
+                { match_phrase: { 'body.text': 'dial tcp' } },
+                { match_phrase: { 'body.text': 'i/o timeout' } },
+                { match_phrase: { 'body.text': 'deadline exceeded' } },
+              ],
+              minimum_should_match: 1,
+            },
           },
-        },
+        ],
       },
       output: {
         criteria: [
