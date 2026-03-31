@@ -744,6 +744,20 @@ export class TaskRunner<
         await withAlertingSpan('alerting:run', () => this.runRule(validatedRuleData))
       );
 
+        // DEBUG ONLY
+      const hangMs = parseInt(process.env.SIMULATE_TASK_HANG_MS ?? '0', 10);
+      const hasActiveAlerts =
+        isOk(runRuleResult) &&
+        Object.keys(runRuleResult.value.state?.alertInstances ?? {}).length > 0;
+
+      if (hangMs > 0 && hasActiveAlerts) {
+        this.logger.warn(
+          `[SIMULATE_TASK_HANG] Hanging for ${hangMs}ms after persistAlerts() to simulate task timeout. Alert docs are written; task state will NOT be saved. Task Manager will reclaim this task.`
+        );
+        process.env.SIMULATE_TASK_HANG_MS = '0';
+        await new Promise((resolve) => setTimeout(resolve, hangMs));
+      }
+
       schedule = asOk(validatedRuleData.rule.schedule);
     } catch (err) {
       if (isOutdatedTaskVersionError(err)) {
