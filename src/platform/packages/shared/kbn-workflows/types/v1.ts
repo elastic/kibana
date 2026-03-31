@@ -12,6 +12,8 @@ import { z } from '@kbn/zod/v4';
 import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
+export type { WorkflowYaml } from '../spec/schema';
+
 export enum ExecutionStatus {
   // In progress
   PENDING = 'pending',
@@ -221,6 +223,13 @@ export interface WorkflowExecutionListDto {
   total: number;
 }
 
+export interface WorkflowStepExecutionListDto {
+  results: EsWorkflowStepExecution[];
+  total: number;
+  page?: number;
+  size?: number;
+}
+
 // TODO: convert to actual elastic document spec
 
 export const EsWorkflowSchema = z.object({
@@ -254,6 +263,7 @@ export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
   id: z.string().max(255).regex(WORKFLOW_ID_PATTERN).optional(),
 });
+export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export const BulkCreateWorkflowsCommandSchema = z.object({
   workflows: z.array(CreateWorkflowCommandSchema).max(MAX_BULK_CREATE_WORKFLOWS),
@@ -290,6 +300,7 @@ export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
   workflowId: z.string().optional(), // Optional to allow for test step runs for unsaved workflows
   stepId: z.string(),
+  executionContext: z.record(z.string(), z.unknown()).optional(),
   contextOverride: z.record(z.string(), z.unknown()).optional(),
 });
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
@@ -309,8 +320,6 @@ export const TestWorkflowResponseSchema = z.object({
   workflowExecutionId: z.string(),
 });
 export type TestWorkflowResponseDto = z.infer<typeof TestWorkflowResponseSchema>;
-
-export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export interface UpdatedWorkflowResponseDto {
   id: string;
@@ -334,6 +343,11 @@ export interface WorkflowDetailDto {
   yaml: string;
   valid: boolean;
 }
+
+export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
+  id: string;
+}
+export type WorkflowMgetResponseDto = WorkflowPartialDetailDto[];
 
 export interface WorkflowListItemDto {
   id: string;
@@ -584,8 +598,8 @@ export type ConnectorContractUnion =
   | InternalConnectorContract;
 
 export interface WorkflowsSearchParams {
-  size: number;
-  page: number;
+  size?: number;
+  page?: number;
   query?: string;
   createdBy?: string[];
   enabled?: boolean[];
@@ -600,4 +614,32 @@ export interface RequestOptions {
   headers?: Record<string, string>;
   /** Bulk body for elasticsearch.bulk step */
   bulkBody?: Array<Record<string, unknown>>;
+}
+
+export type WorkflowDiagnosticSeverity = 'error' | 'warning' | 'info';
+
+export interface WorkflowDiagnostic {
+  severity: WorkflowDiagnosticSeverity;
+  message: string;
+  source: string;
+  path?: (string | number)[];
+}
+export interface ValidateWorkflowResponseDto {
+  valid: boolean;
+  diagnostics: WorkflowDiagnostic[];
+  parsedWorkflow?: WorkflowYaml;
+}
+
+export interface GetAvailableConnectorsResponse {
+  connectorTypes: Record<string, ConnectorTypeInfo>;
+  totalConnectors: number;
+}
+
+export interface ChildWorkflowExecutionItem {
+  parentStepExecutionId: string;
+  workflowId: string;
+  workflowName: string;
+  executionId: string;
+  status: ExecutionStatus;
+  stepExecutions: WorkflowStepExecutionDto[];
 }

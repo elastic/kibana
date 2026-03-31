@@ -40,13 +40,15 @@ import {
 } from '../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { CpsMlRuleCallout } from '../../components/cps_ml_rule_callout/callout';
 
 const RulesPageContent = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const [isRuleSettingsModalOpen, openRuleSettingsModal, closeRuleSettingsModal] = useBoolState();
   const kibanaServices = useKibana().services;
-  const { navigateToApp } = kibanaServices.application;
+  const { application } = kibanaServices;
+  const { navigateToApp } = application;
 
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
@@ -54,7 +56,6 @@ const RulesPageContent = () => {
   const {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,
-    canCreateIndex: canCreateListsIndex,
     needsConfiguration: needsListsConfiguration,
     needsIndex: needsListsIndex,
   } = useListsConfig();
@@ -80,18 +81,14 @@ const RulesPageContent = () => {
     return null;
   }
 
-  // - if lists data stream does not exist and user doesn't have enough privileges to create it,
-  // lists button should be disabled
-  // - if data stream exists and user doesn't have enough privileges to create it,
-  // user still can import value lists, so button should not be disabled if user has enough other privileges
-  const cantCreateNonExistentListIndex = needsListsIndex && !canCreateListsIndex;
   const isImportValueListDisabled =
-    cantCreateNonExistentListIndex || !canWriteListsIndex || !canEditRules || loading;
+    needsListsIndex || !canWriteListsIndex || !canEditRules || loading;
 
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingDetectionsPrivilegesCallOut />
+      <CpsMlRuleCallout />
       <MlJobCompatibilityCallout />
       <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
       <RuleImportModal
@@ -116,17 +113,10 @@ const RulesPageContent = () => {
                 <AddElasticRulesButton isDisabled={!canReadRules || loading} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={
-                    cantCreateNonExistentListIndex
-                      ? i18n.UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP
-                      : i18n.UPLOAD_VALUE_LISTS_TOOLTIP
-                  }
-                >
+                <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>
                   <EuiButtonEmpty
                     data-test-subj="open-value-lists-modal-button"
-                    iconType="importAction"
+                    iconType="download"
                     isDisabled={isImportValueListDisabled}
                     onClick={showValueListFlyout}
                   >
@@ -137,7 +127,7 @@ const RulesPageContent = () => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="rules-import-modal-button"
-                  iconType="importAction"
+                  iconType="download"
                   isDisabled={!canEditRules || loading}
                   onClick={showImportModal}
                 >
@@ -151,7 +141,7 @@ const RulesPageContent = () => {
                   <SecuritySolutionLinkButton
                     data-test-subj="create-new-rule"
                     fill
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     isDisabled={!canEditRules || loading}
                     deepLinkId={SecurityPageName.rulesCreate}
                   >

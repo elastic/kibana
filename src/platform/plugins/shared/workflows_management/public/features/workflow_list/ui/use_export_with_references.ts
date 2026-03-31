@@ -11,7 +11,7 @@ import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
-import { isNotNullable } from '../../../../common/lib/utils';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import {
   exportSingleWorkflow,
   exportWorkflows,
@@ -37,7 +37,8 @@ export const useExportWithReferences = ({
   allWorkflowsMap,
   onComplete,
 }: UseExportWithReferencesParams) => {
-  const { http, notifications } = useKibana().services;
+  const { notifications } = useKibana().services;
+  const api = useWorkflowsApi();
   const telemetry = useTelemetry();
   const [exportModalState, setExportModalState] = useState<ExportModalState | null>(null);
 
@@ -46,10 +47,9 @@ export const useExportWithReferences = ({
       workflowsToExport: WorkflowListItemDto[],
       referenceResolution: WorkflowExportReferenceResolution
     ) => {
-      if (!http) return;
       let exportError: Error | undefined;
       try {
-        const exportedCount = await exportWorkflows(workflowsToExport, http);
+        const exportedCount = await exportWorkflows(workflowsToExport, api);
         const skippedCount = workflowsToExport.length - exportedCount;
 
         if (skippedCount > 0) {
@@ -89,7 +89,7 @@ export const useExportWithReferences = ({
       });
       onComplete?.();
     },
-    [http, notifications, onComplete, telemetry]
+    [api, notifications, onComplete, telemetry]
   );
 
   const exportWithoutReferences = useCallback(
@@ -123,10 +123,13 @@ export const useExportWithReferences = ({
         exportWithoutReferences(workflowsToExport);
         return;
       }
-
-      const missingWorkflows = missingIds
-        .map((id) => allWorkflowsMap.get(id))
-        .filter(isNotNullable);
+      const missingWorkflows = missingIds.reduce<WorkflowListItemDto[]>((acc, id) => {
+        const workflow = allWorkflowsMap.get(id);
+        if (workflow) {
+          acc.push(workflow);
+        }
+        return acc;
+      }, []);
 
       if (missingWorkflows.length === 0) {
         exportWithoutReferences(workflowsToExport);

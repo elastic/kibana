@@ -114,7 +114,6 @@ export {
 } from './impl/assistant_context/constants';
 
 export type { AIConnector } from './impl/connectorland/connector_selector';
-export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
 
 export type {
   /** for rendering results in a code block */

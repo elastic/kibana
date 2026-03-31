@@ -32,6 +32,7 @@ export const parseTemplate = (template: Template): ParsedTemplate => {
     lastUsedAt: template.lastUsedAt,
     isDefault: template.isDefault,
     isLatest: template.isLatest ?? false,
+    isEnabled: template.isEnabled ?? true,
     latestVersion: 1,
   };
 };

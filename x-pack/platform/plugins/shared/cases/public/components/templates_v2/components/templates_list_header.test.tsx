@@ -19,12 +19,6 @@ describe('TemplatesListHeader', () => {
     expect(await screen.findByTestId('all-templates-header')).toBeInTheDocument();
   });
 
-  it('renders the templates title', async () => {
-    renderWithTestingProviders(<TemplatesListHeader />);
-
-    expect(await screen.findByText('Templates')).toBeInTheDocument();
-  });
-
   it('renders the import template button', async () => {
     renderWithTestingProviders(<TemplatesListHeader />);
 
@@ -36,7 +30,7 @@ describe('TemplatesListHeader', () => {
     renderWithTestingProviders(<TemplatesListHeader />);
 
     expect(await screen.findByTestId('create-template-button')).toBeInTheDocument();
-    expect(screen.getByText('Create template')).toBeInTheDocument();
+    expect(screen.getByText('Create')).toBeInTheDocument();
   });
 
   it('opens the import template flyout when clicking the import button', async () => {

@@ -49,10 +49,6 @@ jest.mock('../../../hooks/use_local_storage', () => ({
 }));
 
 // Mock child components
-jest.mock('../../shared/search_bar/search_bar', () => ({
-  SearchBar: () => <div data-test-subj="search-bar">SearchBar</div>,
-}));
-
 jest.mock('../../shared/environment_filter', () => ({
   ApmEnvironmentFilter: () => <div data-test-subj="environment-filter">Environment Filter</div>,
 }));
@@ -197,7 +193,6 @@ describe('StorageExplorer', () => {
     it('renders all main components when user has privileges', () => {
       render(<StorageExplorer />, renderOptions);
 
-      expect(screen.getByTestId('search-bar')).toBeInTheDocument();
       expect(screen.getByTestId('environment-filter')).toBeInTheDocument();
       expect(screen.getByTestId('lifecycle-phase-select')).toBeInTheDocument();
       expect(screen.getByTestId('summary-stats')).toBeInTheDocument();
@@ -257,7 +252,6 @@ describe('StorageExplorer', () => {
 
       render(<StorageExplorer />, renderOptions);
 
-      expect(screen.getByTestId('search-bar')).toBeInTheDocument();
       expect(screen.getByTestId('apmStorageExplorerLongLoadingTimeCallout')).toBeInTheDocument();
     });
 
@@ -280,7 +274,6 @@ describe('StorageExplorer', () => {
 
       render(<StorageExplorer />, renderOptions);
 
-      expect(screen.getByTestId('search-bar')).toBeInTheDocument();
       expect(
         screen.queryByTestId('apmStorageExplorerLongLoadingTimeCallout')
       ).not.toBeInTheDocument();
@@ -302,8 +295,6 @@ describe('StorageExplorer', () => {
 
       render(<StorageExplorer />, renderOptions);
 
-      // Component should still render main structure even with API errors
-      expect(screen.getByTestId('search-bar')).toBeInTheDocument();
       expect(screen.getByTestId('services-table')).toBeInTheDocument();
     });
   });
