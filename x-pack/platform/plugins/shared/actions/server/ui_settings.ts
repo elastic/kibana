@@ -22,6 +22,9 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       }),
       schema: schema.boolean(),
       value: false,
+      // only allow it to be set via kibana.yml
+      readonly: true,
+      readonlyMode: 'strict',
       technicalPreview: true,
       requiresPageReload: true,
       category: ['general'],
