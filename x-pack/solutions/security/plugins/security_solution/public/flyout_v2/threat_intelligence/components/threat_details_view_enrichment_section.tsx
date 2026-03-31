@@ -6,26 +6,26 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
-  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   THREAT_INTELLIGENCE_ENRICHMENTS_TITLE_TEST_ID,
   THREAT_INTELLIGENCE_LOADING_ENRICHMENTS_TEST_ID,
   THREAT_INTELLIGENCE_NO_ENRICHMENTS_FOUND_TEST_ID,
 } from './test_ids';
-import { isInvestigationTimeEnrichment } from '../../shared/utils/threat_intelligence';
-import type { CtiEnrichment } from '../../../../../common/search_strategy';
-import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
+import { isInvestigationTimeEnrichment } from '../utils/threat_intelligence';
+import type { CtiEnrichment } from '../../../../common/search_strategy';
+import { ENRICHMENT_TYPES } from '../../../../common/cti/constants';
 import { EnrichmentAccordionGroup } from './threat_details_view_enrichment_accordion_group';
 
 const INDICATOR_ENRICHMENT_TITLE = i18n.translate(
@@ -63,11 +63,6 @@ const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
     defaultMessage: 'This alert does not have threat intelligence.',
   }
 );
-
-const InlineBlock = styled.div`
-  display: inline-block;
-  line-height: 1.7em;
-`;
 
 export interface EnrichmentSectionProps {
   /**
@@ -110,7 +105,13 @@ export const EnrichmentSection = memo(
 
     const noEnrichmentDataMessage = useMemo(
       () => (
-        <InlineBlock data-test-subj={THREAT_INTELLIGENCE_NO_ENRICHMENTS_FOUND_TEST_ID}>
+        <div
+          css={css`
+            display: inline-block;
+            line-height: 1.7em;
+          `}
+          data-test-subj={THREAT_INTELLIGENCE_NO_ENRICHMENTS_FOUND_TEST_ID}
+        >
           {type === ENRICHMENT_TYPES.IndicatorMatchRule ? (
             NO_ENRICHMENTS_FOUND_DESCRIPTION
           ) : (
@@ -132,7 +133,7 @@ export const EnrichmentSection = memo(
               }}
             />
           )}
-        </InlineBlock>
+        </div>
       ),
       [type]
     );

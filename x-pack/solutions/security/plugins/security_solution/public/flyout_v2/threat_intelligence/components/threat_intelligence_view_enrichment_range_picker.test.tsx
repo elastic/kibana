@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import { EnrichmentRangePicker } from './threat_intelligence_view_enrichment_range_picker';
 import {
   THREAT_INTELLIGENCE_ENRICHMENTS_RANGE_PICKER_TEST_ID,

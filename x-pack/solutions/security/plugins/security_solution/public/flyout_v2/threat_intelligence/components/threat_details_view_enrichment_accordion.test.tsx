@@ -6,7 +6,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import React from 'react';
 import {
   ENRICHMENT_ACCORDION_LINK_TEST_ID,
@@ -15,8 +15,8 @@ import {
   THREAT_DETAILS_ROW_LINK_VALUE_TEST_ID,
   THREAT_DETAILS_ROW_STRING_VALUE_TEST_ID,
 } from './threat_details_view_enrichment_accordion';
-import { indicatorWithNestedObjects } from '../mocks/indicator_with_nested_objects';
-import type { CtiEnrichment } from '../../../../../common/search_strategy';
+import { indicatorWithNestedObjects } from '../../../flyout/document_details/left/mocks/indicator_with_nested_objects';
+import type { CtiEnrichment } from '../../../../common/search_strategy';
 
 describe('EnrichmentAccordion', () => {
   it('should render the top level accordion', () => {
