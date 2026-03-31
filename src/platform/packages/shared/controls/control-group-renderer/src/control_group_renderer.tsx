@@ -172,17 +172,13 @@ export const ControlGroupRenderer = ({
       getInput$: () => input$,
       getInput: () => input$.value,
       updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
-        /** Set the last saved state to the new input and then reset each child to this state */
-        const newState = lastSavedState$Ref.current.getValue();
+        const newState = { ...lastSavedState$Ref.current.getValue() };
         Object.entries(newInput.initialChildControlState ?? {}).forEach(([id, control]) => {
           newState[id] = {
             ...lastSavedState$Ref.current.value[id],
             ...control,
           };
         });
-        // TODO: we might be able to delete this
-        // after this is merged: https://github.com/elastic/kibana/pull/260082 - testing needed to confirm
-        lastSavedState$Ref.current.next(newState);
         asyncForEach(Object.entries(parentApi.children$.getValue()), async ([id, child]) => {
           if (apiHasSerializableState(child)) child.applySerializedState(newState[id]);
         });
