@@ -526,12 +526,15 @@
           {
             "parentPluginId": "@kbn/connector-specs",
             "id": "def-common.ActionDefinition.input",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "input",
             "description": [],
             "signature": [
-              "z.ZodSchema<TInput>"
+              "ZodType",
+              "<TInput, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<TInput, unknown>>"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "lineNumber": 185,
@@ -542,12 +545,15 @@
           {
             "parentPluginId": "@kbn/connector-specs",
             "id": "def-common.ActionDefinition.output",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "output",
             "description": [],
             "signature": [
-              "any"
+              "ZodType",
+              "<TOutput, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<TOutput, unknown>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "lineNumber": 186,
@@ -558,12 +564,15 @@
           {
             "parentPluginId": "@kbn/connector-specs",
             "id": "def-common.ActionDefinition.error",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "error",
             "description": [],
             "signature": [
-              "any"
+              "ZodType",
+              "<TError, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<TError, unknown>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "lineNumber": 187,
@@ -958,12 +967,19 @@
           {
             "parentPluginId": "@kbn/connector-specs",
             "id": "def-common.AuthTypeSpec.schema",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "schema",
             "description": [],
             "signature": [
-              "z.ZodObject<Record<string, z.ZodType>>"
+              "ZodObject",
+              "<Record<string, ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "lineNumber": 102,
@@ -979,7 +995,15 @@
             "label": "normalizeSchema",
             "description": [],
             "signature": [
-              "((defaults?: Record<string, unknown> | undefined) => z.ZodObject<Record<string, z.ZodType>>) | undefined"
+              "((defaults?: Record<string, unknown> | undefined) => ",
+              "ZodObject",
+              "<Record<string, ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "lineNumber": 103,
@@ -1451,12 +1475,17 @@
           {
             "parentPluginId": "@kbn/connector-specs",
             "id": "def-common.ConnectorSpec.schema",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "schema",
             "description": [],
             "signature": [
-              "any"
+              "ZodObject",
+              "<",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodLooseShape, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "lineNumber": 257,
@@ -2375,7 +2404,7 @@
             "label": "parser",
             "description": [],
             "signature": [
-              "\"text\" | \"ndjson\" | \"json\" | \"custom\" | undefined"
+              "\"text\" | \"custom\" | \"json\" | \"ndjson\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "lineNumber": 168,
@@ -2436,7 +2465,7 @@
             "label": "escaping",
             "description": [],
             "signature": [
-              "\"none\" | \"html\" | \"json\" | \"markdown\" | undefined"
+              "\"none\" | \"html\" | \"markdown\" | \"json\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "lineNumber": 209,
@@ -2713,7 +2742,8 @@
               "/**\n   * Secret/password field - automatically masked in UI\n   * USED BY: All connectors with API keys/tokens (Slack, OpenAI, Jira, etc.)\n   * @example secrets: { apiKey: UISchemas.secret().describe(\"API Key\") }\n   */"
             ],
             "signature": [
-              "(placeholder?: string | undefined) => any"
+              "(placeholder?: string | undefined) => ",
+              "ZodString"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
             "lineNumber": 94,
@@ -2751,7 +2781,8 @@
               "/**\n   * Multi-line text field\n   * USED BY: Webhook, Slack (message body), Teams (message text)\n   * @example message: UISchemas.textarea({ rows: 5 }).describe(\"Message body\")\n   */"
             ],
             "signature": [
-              "(options?: { rows?: number | undefined; } | undefined) => any"
+              "(options?: { rows?: number | undefined; } | undefined) => ",
+              "ZodString"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
             "lineNumber": 106,
@@ -2803,7 +2834,8 @@
               "/**\n   * JSON editor field with syntax highlighting\n   * USED BY: Webhook (body), OpenAI (functions), Slack (blocks)\n   * @example config: UISchemas.json().describe(\"Configuration object\")\n   */"
             ],
             "signature": [
-              "() => any"
+              "() => ",
+              "ZodString"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
             "lineNumber": 117,
@@ -2823,7 +2855,8 @@
               "/**\n   * Code editor field\n   * USED BY: Tines (custom scripts), TheHive (case templates)\n   * @example script: UISchemas.code(\"javascript\").describe(\"Custom script\")\n   */"
             ],
             "signature": [
-              "(language: \"python\" | \"javascript\" | \"typescript\") => any"
+              "(language: \"python\" | \"javascript\" | \"typescript\") => ",
+              "ZodString"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
             "lineNumber": 127,
@@ -2861,7 +2894,8 @@
               "/**\n   * URL field with validation\n   * USED BY: All webhook-based connectors (Webhook, Cases Webhook, Slack webhook)\n   * @example webhookUrl: UISchemas.url().describe(\"Webhook URL\")\n   */"
             ],
             "signature": [
-              "(placeholder?: string | undefined) => any"
+              "(placeholder?: string | undefined) => ",
+              "ZodURL"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
             "lineNumber": 138,

@@ -4403,6 +4403,10 @@
                 "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/migrate_data_streams/data_stream_routes.ts"
               },
               {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/cloud_stack_versions.ts"
+              },
+              {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/settings/register_load_route.ts"
               },
@@ -7185,6 +7189,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/sml.ts"
               },
               {
                 "plugin": "agentBuilder",
@@ -15092,14 +15100,15 @@
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-server.RouteValidatorConfig.params",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [
               "\nValidation logic for the URL params"
             ],
             "signature": [
-              "any"
+              "RouteValidationSpec",
+              "<P> | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route_validator.ts",
             "lineNumber": 93,
@@ -15110,14 +15119,15 @@
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-server.RouteValidatorConfig.query",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "query",
             "description": [
               "\nValidation logic for the Query params"
             ],
             "signature": [
-              "any"
+              "RouteValidationSpec",
+              "<Q> | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route_validator.ts",
             "lineNumber": 98,
@@ -15128,14 +15138,15 @@
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-server.RouteValidatorConfig.body",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "body",
             "description": [
               "\nValidation logic for the body payload"
             ],
             "signature": [
-              "any"
+              "RouteValidationSpec",
+              "<B> | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route_validator.ts",
             "lineNumber": 103,
@@ -19252,6 +19263,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upload_csv_v2.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/preview.ts"
               },
               {
@@ -19421,6 +19436,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/get_mitre_data_indices_docs_count.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/initialization/routes/initialize_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -21231,7 +21250,19 @@
           "\nA validation schema factory.\n"
         ],
         "signature": [
-          "() => any"
+          "() => ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<unknown> | ",
+          "ZodType",
+          "<unknown, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<unknown, unknown>>"
         ],
         "path": "src/core/packages/http/server/src/router/route_validator.ts",
         "lineNumber": 215,
@@ -22345,7 +22376,28 @@
           "\nAllowed property validation options: either @kbn/config-schema validations or custom validation functions\n\nSee {@link RouteValidationFunction} for custom validation.\n"
         ],
         "signature": [
-          "any"
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<any> | ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<T> | ",
+          "ZodType",
+          "<T, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<T, unknown>> | ",
+          "RouteValidationFunction",
+          "<T>"
         ],
         "path": "src/core/packages/http/server/src/router/route_validator.ts",
         "lineNumber": 77,
