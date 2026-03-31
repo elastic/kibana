@@ -103,7 +103,7 @@ export const saveDiscoverSession = async (
         columns: tab.columns,
         grid: tab.grid,
         hideChart: tab.hideChart,
-        hideTable: tab.hideTable,
+        hideTable: tab.hideTable ?? false,
         isTextBasedQuery: tab.isTextBasedQuery,
         usesAdHocDataView: tab.usesAdHocDataView,
         kibanaSavedObjectMeta: {
@@ -135,6 +135,7 @@ export const saveDiscoverSession = async (
     tabs,
     // TODO: Spreading the first tab attributes like this shouldn't be necessary soon
     ...firstTabAttributes,
+    hideTable: firstTabAttributes.hideTable ?? false,
     sort: firstTabAttributes.sort as SortOrder[],
     density: firstTabAttributes.density as DataGridDensity,
   };
