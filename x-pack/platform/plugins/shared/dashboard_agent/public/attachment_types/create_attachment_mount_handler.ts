@@ -67,7 +67,7 @@ export const onAttachmentMount = ({
       const shouldUpdate =
         currentSavedObjectId &&
         currentSavedObjectId !== currentAttachment.origin &&
-        (!currentAttachment.origin || previousSavedObjectId === currentAttachment.origin);
+        (!currentAttachment.origin || previousSavedObjectId === currentAttachment.origin || currentSavedObjectId === currentAttachment.origin);
       if (shouldUpdate) {
         await updateOrigin(currentSavedObjectId);
       }
