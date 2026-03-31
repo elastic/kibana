@@ -61,6 +61,12 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
         extractPanelsState({ panels: panel.panels });
       savedObjectReferences.push(...(sectionPanelReferences ?? []));
       panel.panels = sectionPanels;
+
+      // < 9.4 `id` is stored as `uid`
+      if (panel.panels.uid) {
+        panel.panels.id = panel.panels.uid;
+        delete panel.panels.uid;
+      }
     }
 
     // < 8.17 panels state stored panelConfig as embeddableConfig
@@ -102,6 +108,12 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
     if (panel.title && panel.config && typeof panel.config === 'object') {
       panel.config.title = panel.title;
       delete panel.title;
+    }
+
+    // < 9.4 `id` is stored as `uid`
+    if (panel.uid) {
+      panel.id = panel.uid;
+      delete panel.uid;
     }
 
     // < 9.2 dashboard managed saved object refs for panels

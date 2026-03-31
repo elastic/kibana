@@ -10,7 +10,7 @@
 import { extractDashboardState } from './extract_dashboard_state';
 
 describe('extractDashboardState', () => {
-  describe('>=9.4 state', () => {
+  describe('>9.4 state', () => {
     test('should extract controls', () => {
       const controlGroupInput94 = {
         controls: [
@@ -77,6 +77,48 @@ describe('extractDashboardState', () => {
       });
 
       expect(dashboardState.pinned_panels).toBeUndefined();
+    });
+  });
+
+  describe('9.4 state', () => {
+    test('should switch `uid` to `id`', () => {
+      const controlGroupInput94 = {
+        controls: [
+          {
+            config: {},
+            uid: 'control1',
+            grow: true,
+            type: 'optionsListControl',
+            width: 'small',
+          },
+          {
+            config: {},
+            uid: 'control2',
+            grow: false,
+            type: 'optionsListControl',
+            width: 'medium',
+          },
+        ],
+      };
+      const dashboardState = extractDashboardState({
+        controlGroupInput: controlGroupInput94,
+      });
+      expect(dashboardState.pinned_panels).toEqual([
+        {
+          config: {},
+          id: 'control1',
+          grow: true,
+          type: 'options_list_control',
+          width: 'small',
+        },
+        {
+          config: {},
+          id: 'control2',
+          grow: false,
+          type: 'options_list_control',
+          width: 'medium',
+        },
+      ]);
     });
   });
 

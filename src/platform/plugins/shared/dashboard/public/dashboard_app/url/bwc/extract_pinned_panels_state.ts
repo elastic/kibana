@@ -48,6 +48,11 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
         const { controlConfig, ...rest } = control;
         return { ...rest, config: controlConfig };
       }
+      // < 9.4 `id` is stored as `uid`
+      if (control.uid) {
+        const { uid, ...rest } = control;
+        return { id: uid, ...rest };
+      }
       return control; // otherwise, we are dealing with state >=9.4
     });
   } else if (controls !== null && typeof controls === 'object') {
