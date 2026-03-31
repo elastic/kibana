@@ -9,14 +9,14 @@
 
 import { useMemo } from 'react';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { Dimension, MetricUnit, NullableMetricUnit, ParsedMetricItem } from '../../../types';
+import type { Dimension, ParsedMetricItem } from '../../../types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
   getLensMetricFormat,
   firstNonNullable,
+  resolveMetricUnit,
 } from '../../../common/utils';
-import { normalizeUnit } from '../../../common/utils/metric_unit/normalize_unit';
 
 interface UseChartLayersParams {
   dimensions?: Dimension[];
@@ -25,22 +25,6 @@ interface UseChartLayersParams {
   seriesType?: LensSeriesLayer['seriesType'];
   customFunction?: string;
 }
-
-/**
- * Resolves the unit for a metric by normalizing and selecting the best option.
- * Normalizes raw units (e.g., 'byte' -> 'bytes') and handles multiple units.
- */
-const resolveMetricUnit = (
-  metricName: string,
-  units: NullableMetricUnit[]
-): MetricUnit | undefined => {
-  for (const unit of units) {
-    if (unit == null) continue;
-    const normalized = normalizeUnit({ fieldName: metricName, unit });
-    if (normalized != null) return normalized;
-  }
-  return undefined;
-};
 
 /**
  * A hook that computes the Lens series layer configuration for the metrics chart.
