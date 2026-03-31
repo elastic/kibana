@@ -20,6 +20,7 @@ export const generateSecretsSchema = (
   return {
     schema: generateSecretsSchemaFromSpec(authSpec, {
       isPfxEnabled,
+      isEarsEnabled: true,
     }),
   };
 };
