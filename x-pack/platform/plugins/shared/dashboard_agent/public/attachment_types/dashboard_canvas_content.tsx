@@ -14,7 +14,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { DEFAULT_TIME_RANGE, getStateFromAttachment } from './attachment_to_dashboard_state';
+import { DEFAULT_TIME_RANGE, attachmentToDashboardState } from '@kbn/dashboard-agent-common';
 import type { SavedObjectStatus } from './use_register_action_buttons';
 import { useRegisterActionButtons } from './use_register_action_buttons';
 
@@ -35,11 +35,16 @@ const dashboardCanvasContentStyles = {
     css({
       padding: euiTheme.size.m,
     }),
-  renderer: css({
-    flex: 1,
-    minHeight: 0,
-    display: 'flex',
-  }),
+  renderer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: 1,
+      minHeight: 0,
+      display: 'flex',
+      '.controlGroup': {
+        padding: `${euiTheme.size.s} !important`,
+        borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+      },
+    }),
   searchBar: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexShrink: 0,
@@ -107,7 +112,7 @@ export const DashboardCanvasContent = ({
     [attachmentOrigin, checkSavedDashboardExist]
   );
 
-  const dashboardState = useMemo(() => getStateFromAttachment(attachment), [attachment]);
+  const dashboardState = useMemo(() => attachmentToDashboardState(attachment), [attachment]);
 
   const [timeRange, setTimeRange] = useState<{ from: string; to: string }>(
     dashboardState.time_range ?? DEFAULT_TIME_RANGE

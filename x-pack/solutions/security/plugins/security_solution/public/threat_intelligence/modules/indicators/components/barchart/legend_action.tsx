@@ -89,7 +89,7 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
         <EuiToolTip content={BUTTON_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
             aria-label={BUTTON_LABEL}
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             iconSize="s"
             size="xs"
             onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}

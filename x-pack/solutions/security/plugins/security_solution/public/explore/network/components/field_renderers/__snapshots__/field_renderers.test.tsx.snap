@@ -76,7 +76,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
 </DocumentFragment>
 `;
 
-exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
+exports[`Field Renderers #HostIdRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
   <span
     class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
@@ -135,7 +135,7 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
 </DocumentFragment>
 `;
 
-exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
+exports[`Field Renderers #HostNameRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
   <div
     data-test-subj="cellActions-renderContent-host.name"
