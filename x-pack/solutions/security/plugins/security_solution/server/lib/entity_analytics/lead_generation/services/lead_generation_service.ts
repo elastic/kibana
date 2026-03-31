@@ -112,10 +112,36 @@ export const formatLeadForResponse = (lead: Lead, executionId: string) => ({
 
 export type FormattedLead = ReturnType<typeof formatLeadForResponse>;
 
+const toSnakeCaseDoc = (lead: FormattedLead, sourceType: LeadGenerationMode) => ({
+  id: lead.id,
+  title: lead.title,
+  byline: lead.byline,
+  description: lead.description,
+  entities: lead.entities,
+  tags: lead.tags,
+  priority: lead.priority,
+  chat_recommendations: lead.chatRecommendations,
+  timestamp: lead.timestamp,
+  staleness: lead.staleness,
+  status: 'active',
+  observations: lead.observations.map((obs) => ({
+    entity_id: obs.entityId,
+    module_id: obs.moduleId,
+    type: obs.type,
+    score: obs.score,
+    severity: obs.severity,
+    confidence: obs.confidence,
+    description: obs.description,
+    metadata: obs.metadata,
+  })),
+  execution_uuid: lead.executionId,
+  source_type: sourceType,
+});
+
 /**
  * Gap-free replace pattern:
  *   1. Bulk upsert new leads (visible immediately).
- *   2. Delete any docs whose executionId differs (stale from previous runs).
+ *   2. Delete any docs whose execution_uuid differs (stale from previous runs).
  */
 export const persistLeads = async (
   esClient: ElasticsearchClient,
@@ -131,7 +157,7 @@ export const persistLeads = async (
     if (leads.length > 0) {
       const bulkBody = leads.flatMap((lead) => [
         { index: { _index: indexName, _id: lead.id } },
-        lead,
+        toSnakeCaseDoc(lead, mode),
       ]);
       await esClient.bulk({ body: bulkBody, refresh: 'wait_for' });
       pLogger.debug(`[LeadGeneration] Persisted ${leads.length} leads to "${indexName}"`);
@@ -139,7 +165,7 @@ export const persistLeads = async (
 
     await esClient.deleteByQuery({
       index: indexName,
-      query: { bool: { must_not: [{ term: { executionId } }] } },
+      query: { bool: { must_not: [{ term: { 'execution_uuid.keyword': executionId } }] } },
       refresh: true,
       conflicts: 'proceed',
       ignore_unavailable: true,

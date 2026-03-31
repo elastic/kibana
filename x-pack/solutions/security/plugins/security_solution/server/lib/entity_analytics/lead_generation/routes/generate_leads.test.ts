@@ -138,7 +138,7 @@ describe('lead generation helpers', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: { bool: { must_not: [{ term: { executionId: 'exec-1' } }] } },
+          query: { bool: { must_not: [{ term: { 'execution_uuid.keyword': 'exec-1' } }] } },
           refresh: true,
           conflicts: 'proceed',
           ignore_unavailable: true,
