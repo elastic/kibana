@@ -23,7 +23,7 @@ import {
 import {
   DEFAULT_EVENT_ENRICHMENT_FROM,
   DEFAULT_EVENT_ENRICHMENT_TO,
-} from '../../../../../common/cti/constants';
+} from '../../../../common/cti/constants';
 
 const ENRICHMENT_LOOKBACK_START_DATE = i18n.translate(
   'xpack.securitySolution.flyout.threatIntelligence.enrichmentQueryStartDate',

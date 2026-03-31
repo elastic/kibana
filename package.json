@@ -215,6 +215,7 @@
     "@kbn/alerting-rule-utils": "link:x-pack/platform/packages/shared/alerting-rule-utils",
     "@kbn/alerting-state-types": "link:x-pack/platform/packages/private/kbn-alerting-state-types",
     "@kbn/alerting-types": "link:src/platform/packages/shared/kbn-alerting-types",
+    "@kbn/alerting-v2-constants": "link:x-pack/platform/packages/shared/response-ops/alerting-v2-constants",
     "@kbn/alerting-v2-episodes-ui": "link:x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui",
     "@kbn/alerting-v2-plugin": "link:x-pack/platform/plugins/shared/alerting_v2",
     "@kbn/alerting-v2-rule-form": "link:x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form",

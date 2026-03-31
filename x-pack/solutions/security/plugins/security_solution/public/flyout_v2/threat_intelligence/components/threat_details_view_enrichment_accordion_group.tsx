@@ -8,8 +8,8 @@ import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { EnrichmentAccordion } from './threat_details_view_enrichment_accordion';
-import type { CtiEnrichment } from '../../../../../common/search_strategy';
-import { getFirstSeen } from '../../shared/utils/threat_intelligence';
+import type { CtiEnrichment } from '../../../../common/search_strategy';
+import { getFirstSeen } from '../utils/threat_intelligence';
 
 export interface EnrichmentAccordionGroupProps {
   /**

@@ -8,13 +8,13 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EnrichmentSection } from './threat_details_view_enrichment_section';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import {
   THREAT_INTELLIGENCE_ENRICHMENTS_TITLE_TEST_ID,
   THREAT_INTELLIGENCE_LOADING_ENRICHMENTS_TEST_ID,
   THREAT_INTELLIGENCE_NO_ENRICHMENTS_FOUND_TEST_ID,
 } from './test_ids';
-import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
+import { ENRICHMENT_TYPES } from '../../../../common/cti/constants';
 
 describe('EnrichmentSection', () => {
   it('should render no data views for indicator match rule type', () => {

@@ -20,16 +20,16 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { THREAT_INTELLIGENCE_ENRICHMENTS_ACCORDION_TABLE_TEST_ID } from './test_ids';
-import type { CtiEnrichment } from '../../../../../common/search_strategy';
-import { QUERY_ID } from '../../../../flyout_v2/document/hooks/use_investigation_enrichment';
-import { InspectButton } from '../../../../common/components/inspect';
+import type { CtiEnrichment } from '../../../../common/search_strategy';
+import { QUERY_ID } from '../hooks/use_investigation_enrichment';
+import { InspectButton } from '../../../common/components/inspect';
 import {
   buildThreatDetailsItems,
   getEnrichmentIdentifiers,
   isInvestigationTimeEnrichment,
-} from '../../shared/utils/threat_intelligence';
+} from '../utils/threat_intelligence';
 import { EnrichmentButtonContent } from './threat_details_view_enrichment_button_content';
-import { REFERENCE } from '../../../../../common/cti/constants';
+import { REFERENCE } from '../../../../common/cti/constants';
 
 const StyledH5 = styled.h5`
   line-height: 1.7rem;

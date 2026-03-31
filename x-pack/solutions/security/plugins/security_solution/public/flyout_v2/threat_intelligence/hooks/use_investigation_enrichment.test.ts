@@ -11,9 +11,9 @@ import {
   DEFAULT_EVENT_ENRICHMENT_FROM,
   DEFAULT_EVENT_ENRICHMENT_TO,
 } from '../../../../common/cti/constants';
-import { useEventEnrichmentComplete } from '../services/threat_intelligence';
+import { useEventEnrichmentComplete } from '../../document/services/threat_intelligence';
 
-jest.mock('../services/threat_intelligence');
+jest.mock('../../document/services/threat_intelligence');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
   return {

@@ -8,9 +8,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EnrichmentAccordionGroup } from './threat_details_view_enrichment_accordion_group';
-import type { CtiEnrichment } from '../../../../../common/search_strategy';
-import { TestProviders } from '../../../../common/mock';
-import { indicatorWithNestedObjects } from '../mocks/indicator_with_nested_objects';
+import type { CtiEnrichment } from '../../../../common/search_strategy';
+import { TestProviders } from '../../../common/mock';
+import { indicatorWithNestedObjects } from '../../../flyout/document_details/left/mocks/indicator_with_nested_objects';
 import { THREAT_INTELLIGENCE_ENRICHMENTS_ACCORDION_TABLE_TEST_ID } from './test_ids';
 
 describe('EnrichmentAccordionGroup', () => {

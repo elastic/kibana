@@ -6,15 +6,23 @@
  */
 
 import { useMemo } from 'react';
-import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import type { CtiEnrichment, EventFields } from '../../../../common/search_strategy';
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
   parseExistingEnrichments,
-} from '../../../../flyout_v2/document/utils/threat_intelligence_helpers';
-import { useInvestigationTimeEnrichment } from '../../../../flyout_v2/document/hooks/use_investigation_enrichment';
-import { useDocumentDetailsContext } from '../../shared/context';
+} from '../utils/threat_intelligence_helpers';
+import { useInvestigationTimeEnrichment } from './use_investigation_enrichment';
+
+export interface ThreatIntelligenceDetailsProps {
+  /**
+   * The document hit to extract threat intelligence from
+   */
+  hit: DataTableRecord;
+}
 
 export interface ThreatIntelligenceDetailsResult {
   /**
@@ -52,10 +60,10 @@ export interface ThreatIntelligenceDetailsResult {
  * Reusing a bunch of hooks scattered across kibana, it makes it easier to mock the data layer
  * for component testing.
  */
-export const useThreatIntelligenceDetails = (): ThreatIntelligenceDetailsResult => {
-  const { searchHit } = useDocumentDetailsContext();
-  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
-  const alertRuleUuid = hit.flattened['kibana.alert.rule.uuid'];
+export const useThreatIntelligenceDetails = ({
+  hit,
+}: ThreatIntelligenceDetailsProps): ThreatIntelligenceDetailsResult => {
+  const alertRuleUuid = getFieldValue(hit, ALERT_RULE_UUID);
   const isAlert = Array.isArray(alertRuleUuid)
     ? alertRuleUuid.some((value) => value != null)
     : alertRuleUuid != null;

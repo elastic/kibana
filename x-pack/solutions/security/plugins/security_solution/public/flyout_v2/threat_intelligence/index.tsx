@@ -6,26 +6,34 @@
  */
 
 import React, { memo } from 'react';
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { groupBy, isEmpty } from 'lodash';
-import { EnrichmentSection } from './threat_details_view_enrichment_section';
-import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
-import { EnrichmentRangePicker } from './threat_intelligence_view_enrichment_range_picker';
-import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { EnrichmentSection } from './components/threat_details_view_enrichment_section';
+import { ENRICHMENT_TYPES } from '../../../common/cti/constants';
+import { EnrichmentRangePicker } from './components/threat_intelligence_view_enrichment_range_picker';
+import { useThreatIntelligenceDetails } from './hooks/use_threat_intelligence_details';
 import {
   THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID,
   THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID,
   THREAT_INTELLIGENCE_ENRICHMENTS_TEST_ID,
   THREAT_INTELLIGENCE_MATCHES_TEST_ID,
-} from './test_ids';
-import { FlyoutLoading } from '../../../shared/components/flyout_loading';
+} from './components/test_ids';
+import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
 
 export const THREAT_INTELLIGENCE_TAB_ID = 'threatIntelligence';
+
+export interface ThreatIntelligenceDetailsProps {
+  /**
+   * The document hit to display threat intelligence for
+   */
+  hit: DataTableRecord;
+}
 
 /**
  * Threat intelligence displayed in the document details expandable flyout left section under the Insights tab
  */
-export const ThreatIntelligenceDetails = memo(() => {
+export const ThreatIntelligenceDetails = memo(({ hit }: ThreatIntelligenceDetailsProps) => {
   const {
     enrichments,
     eventFields,
@@ -34,7 +42,7 @@ export const ThreatIntelligenceDetails = memo(() => {
     isLoading,
     range,
     setRange,
-  } = useThreatIntelligenceDetails();
+  } = useThreatIntelligenceDetails({ hit });
 
   const showInvestigationTimeEnrichments = !isEmpty(eventFields);
   const {
@@ -46,7 +54,7 @@ export const ThreatIntelligenceDetails = memo(() => {
   return isEventDataLoading ? (
     <FlyoutLoading data-test-subj={THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID} />
   ) : (
-    <>
+    <EuiPanel hasShadow={false} hasBorder={false}>
       <EnrichmentSection
         dataTestSubj={THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID}
         enrichments={indicatorMatches}
@@ -82,7 +90,7 @@ export const ThreatIntelligenceDetails = memo(() => {
           />
         </>
       ) : null}
-    </>
+    </EuiPanel>
   );
 });
 

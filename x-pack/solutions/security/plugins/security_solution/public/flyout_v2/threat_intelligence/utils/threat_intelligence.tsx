@@ -7,9 +7,9 @@
 
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { ThreatDetailsRow } from '../../left/components/threat_details_view_enrichment_accordion';
-import type { CtiEnrichment } from '../../../../../common/search_strategy';
-import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import type { ThreatDetailsRow } from '../components/threat_details_view_enrichment_accordion';
+import type { CtiEnrichment } from '../../../../common/search_strategy';
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
   FEED_NAME,
@@ -18,7 +18,7 @@ import {
   MATCHED_FIELD,
   MATCHED_ID,
   MATCHED_TYPE,
-} from '../../../../../common/cti/constants';
+} from '../../../../common/cti/constants';
 
 const NESTED_OBJECT_VALUES_NOT_RENDERED = i18n.translate(
   'xpack.securitySolution.flyout.threatIntelligence.investigationEnrichmentObjectValuesNotRendered',
