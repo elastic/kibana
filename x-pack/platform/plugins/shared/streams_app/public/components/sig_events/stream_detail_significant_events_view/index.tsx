@@ -39,6 +39,7 @@ import { KnowledgeIndicatorsStatusFilter } from './knowledge_indicators_status_f
 import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filter';
 import { RulesTable } from './rules_table';
 import { LoadingPanel } from '../../loading_panel';
+import { PromotionCallout } from './promotion_callout';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -173,6 +174,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
+        <PromotionCallout streamName={definition.stream.name} onReviewClick={() => {}} />
+
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={true}>
             <EuiFlexGroup
