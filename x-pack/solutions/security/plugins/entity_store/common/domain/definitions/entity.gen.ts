@@ -36,6 +36,8 @@ export const EntityField = z
     type: z.string().optional(),
     sub_type: z.string().optional(),
     source: z.array(z.string()).optional(),
+    schema_version: z.string().optional(),
+    url: z.string().optional(),
     EngineMetadata: EngineMetadata.optional(),
     attributes: z
       .object({
@@ -76,6 +78,8 @@ export const EntityField = z
         depends_on: z.array(z.string()).optional(),
         owns: z.array(z.string()).optional(),
         accesses_frequently: z.array(z.string()).optional(),
+        accesses_infrequently: z.array(z.string()).optional(),
+        owns_inferred: z.array(z.string()).optional(),
         supervises: z.array(z.string()).optional(),
         resolution: z
           .object({
@@ -153,6 +157,240 @@ export const Asset = z
     business_unit: z.string().optional(),
   })
   .strict();
+
+/**
+ * A summary of the entity's risk score containing only the calculated level and scores.
+ */
+export type EntityRiskSummary = z.infer<typeof EntityRiskSummary>;
+export const EntityRiskSummary = z
+  .object({
+    /**
+     * Lexical description of the entity's risk.
+     */
+    calculated_level: EntityRiskLevels.optional(),
+    /**
+     * The raw numeric value of the given entity's risk score.
+     */
+    calculated_score: z.number().optional(),
+    /**
+     * The normalized numeric value of the given entity's risk score.
+     */
+    calculated_score_norm: z.number().min(0).max(100).optional(),
+  })
+  .strict();
+
+export type UserEntity = z.infer<typeof UserEntity>;
+export const UserEntity = z
+  .object({
+    '@timestamp': z.string().datetime().optional(),
+    entity: EntityField.optional(),
+    user: z
+      .object({
+        full_name: z.array(z.string()).optional(),
+        domain: z.array(z.string()).optional(),
+        roles: z.array(z.string()).optional(),
+        name: z.string().optional(),
+        id: z.array(z.string()).optional(),
+        email: z.array(z.string()).optional(),
+        hash: z.array(z.string()).optional(),
+        risk: EntityRiskSummary.optional(),
+      })
+      .strict()
+      .optional(),
+    asset: Asset.optional(),
+    labels: z.object({}).catchall(z.unknown()).optional(),
+    tags: z.array(z.string()).optional(),
+    event: z
+      .object({
+        ingested: z.string().datetime().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+export type HostEntity = z.infer<typeof HostEntity>;
+export const HostEntity = z
+  .object({
+    '@timestamp': z.string().datetime().optional(),
+    entity: EntityField.optional(),
+    host: z
+      .object({
+        hostname: z.array(z.string()).optional(),
+        domain: z.array(z.string()).optional(),
+        ip: z.array(z.string()).optional(),
+        name: z.string().optional(),
+        id: z.array(z.string()).optional(),
+        type: z.array(z.string()).optional(),
+        mac: z.array(z.string()).optional(),
+        architecture: z.array(z.string()).optional(),
+        /**
+         * ECS host.os fields materialized on the entity latest index (v2).
+         */
+        os: z
+          .object({
+            name: z.union([z.string(), z.array(z.string())]).optional(),
+            type: z.union([z.string(), z.array(z.string())]).optional(),
+            family: z.string().optional(),
+            full: z.string().optional(),
+            kernel: z.string().optional(),
+            platform: z.string().optional(),
+            version: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        risk: EntityRiskSummary.optional(),
+      })
+      .strict()
+      .optional(),
+    asset: Asset.optional(),
+    labels: z.object({}).catchall(z.unknown()).optional(),
+    tags: z.array(z.string()).optional(),
+    event: z
+      .object({
+        ingested: z.string().datetime().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+export type ServiceEntity = z.infer<typeof ServiceEntity>;
+export const ServiceEntity = z
+  .object({
+    '@timestamp': z.string().datetime().optional(),
+    entity: EntityField.optional(),
+    service: z
+      .object({
+        name: z.string().optional(),
+        address: z.string().optional(),
+        environment: z.string().optional(),
+        ephemeral_id: z.string().optional(),
+        id: z.string().optional(),
+        node: z
+          .object({
+            name: z.string().optional(),
+            role: z.string().optional(),
+            roles: z.array(z.string()).optional(),
+          })
+          .strict()
+          .optional(),
+        state: z.string().optional(),
+        type: z.string().optional(),
+        version: z.string().optional(),
+        risk: EntityRiskSummary.optional(),
+      })
+      .strict()
+      .optional(),
+    asset: Asset.optional(),
+    labels: z.object({}).catchall(z.unknown()).optional(),
+    tags: z.array(z.string()).optional(),
+    event: z
+      .object({
+        ingested: z.string().datetime().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+export type GenericEntity = z.infer<typeof GenericEntity>;
+export const GenericEntity = z
+  .object({
+    '@timestamp': z.string().datetime().optional(),
+    entity: EntityField.optional(),
+    asset: Asset.optional(),
+    cloud: z
+      .object({
+        account: z
+          .object({
+            id: z.string().optional(),
+            name: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        availability_zone: z.string().optional(),
+        instance: z
+          .object({
+            id: z.string().optional(),
+            name: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        machine: z
+          .object({
+            type: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        project: z
+          .object({
+            id: z.string().optional(),
+            name: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        provider: z.string().optional(),
+        region: z.string().optional(),
+        service: z
+          .object({
+            name: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+      })
+      .strict()
+      .optional(),
+    orchestrator: z
+      .object({
+        api_version: z.string().optional(),
+        cluster: z
+          .object({
+            id: z.string().optional(),
+            name: z.string().optional(),
+            url: z.string().optional(),
+            version: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        namespace: z.string().optional(),
+        organization: z.string().optional(),
+        resource: z
+          .object({
+            annotation: z.string().optional(),
+            id: z.string().optional(),
+            ip: z.string().optional(),
+            label: z.string().optional(),
+            name: z.string().optional(),
+            parent: z
+              .object({
+                type: z.string().optional(),
+              })
+              .strict()
+              .optional(),
+            type: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        type: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+    labels: z.object({}).catchall(z.unknown()).optional(),
+    tags: z.array(z.string()).optional(),
+    event: z
+      .object({
+        ingested: z.string().datetime().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+export const EntityInternal = z.union([UserEntity, HostEntity, ServiceEntity, GenericEntity]);
+
+export type Entity = z.infer<typeof EntityInternal>;
+export const Entity = EntityInternal as z.ZodType<Entity>;
 
 /**
  * A generic representation of a document contributing to a Risk Score.
@@ -244,113 +482,3 @@ export const EntityRiskScoreRecord = z.object({
     )
     .optional(),
 });
-
-export type UserEntity = z.infer<typeof UserEntity>;
-export const UserEntity = z
-  .object({
-    '@timestamp': z.string().datetime().optional(),
-    entity: EntityField.optional(),
-    user: z
-      .object({
-        full_name: z.array(z.string()).optional(),
-        domain: z.array(z.string()).optional(),
-        roles: z.array(z.string()).optional(),
-        name: z.string().optional(),
-        id: z.array(z.string()).optional(),
-        email: z.array(z.string()).optional(),
-        hash: z.array(z.string()).optional(),
-        risk: EntityRiskScoreRecord.optional(),
-      })
-      .strict()
-      .optional(),
-    asset: Asset.optional(),
-    event: z
-      .object({
-        ingested: z.string().datetime().optional(),
-      })
-      .strict()
-      .optional(),
-  })
-  .strict();
-
-export type HostEntity = z.infer<typeof HostEntity>;
-export const HostEntity = z
-  .object({
-    '@timestamp': z.string().datetime().optional(),
-    entity: EntityField.optional(),
-    host: z
-      .object({
-        hostname: z.array(z.string()).optional(),
-        domain: z.array(z.string()).optional(),
-        ip: z.array(z.string()).optional(),
-        name: z.string().optional(),
-        id: z.array(z.string()).optional(),
-        type: z.array(z.string()).optional(),
-        mac: z.array(z.string()).optional(),
-        architecture: z.array(z.string()).optional(),
-        /**
-         * ECS host.os fields materialized on the entity latest index (v2).
-         */
-        os: z
-          .object({
-            name: z.union([z.string(), z.array(z.string())]).optional(),
-            type: z.union([z.string(), z.array(z.string())]).optional(),
-            family: z.string().optional(),
-            full: z.string().optional(),
-            kernel: z.string().optional(),
-            platform: z.string().optional(),
-            version: z.string().optional(),
-          })
-          .strict()
-          .optional(),
-        risk: EntityRiskScoreRecord.optional(),
-        entity: EntityField.optional(),
-      })
-      .strict()
-      .optional(),
-    asset: Asset.optional(),
-    event: z
-      .object({
-        ingested: z.string().datetime().optional(),
-      })
-      .strict()
-      .optional(),
-  })
-  .strict();
-
-export type ServiceEntity = z.infer<typeof ServiceEntity>;
-export const ServiceEntity = z
-  .object({
-    '@timestamp': z.string().datetime().optional(),
-    entity: EntityField.optional(),
-    service: z
-      .object({
-        name: z.string().optional(),
-        risk: EntityRiskScoreRecord.optional(),
-        entity: EntityField.optional(),
-      })
-      .strict()
-      .optional(),
-    asset: Asset.optional(),
-    event: z
-      .object({
-        ingested: z.string().datetime().optional(),
-      })
-      .strict()
-      .optional(),
-  })
-  .strict();
-
-export type GenericEntity = z.infer<typeof GenericEntity>;
-export const GenericEntity = z
-  .object({
-    '@timestamp': z.string().datetime().optional(),
-    entity: EntityField.optional(),
-    asset: Asset.optional(),
-  })
-  .strict();
-
-export const EntityInternal = z.union([UserEntity, HostEntity, ServiceEntity, GenericEntity]);
-
-export type Entity = z.infer<typeof EntityInternal>;
-export const Entity = EntityInternal as z.ZodType<Entity>;

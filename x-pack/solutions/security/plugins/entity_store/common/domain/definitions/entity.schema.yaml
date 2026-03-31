@@ -33,6 +33,10 @@ components:
           type: array
           items:
             type: string
+        schema_version:
+          type: string
+        url:
+          type: string
         EngineMetadata:
           $ref: '#/components/schemas/EngineMetadata'
         attributes:
@@ -94,6 +98,14 @@ components:
               items:
                 type: string
             accesses_frequently:
+              type: array
+              items:
+                type: string
+            accesses_infrequently:
+              type: array
+              items:
+                type: string
+            owns_inferred:
               type: array
               items:
                 type: string
@@ -207,11 +219,17 @@ components:
               items:
                 type: string
             risk:
-             $ref: '#/components/schemas/EntityRiskScoreRecord'
-             additionalProperties: false
+              $ref: '#/components/schemas/EntityRiskSummary'
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
+        labels:
+          type: object
+          additionalProperties: true
+        tags:
+          type: array
+          items:
+            type: string
         event:
           type: object
           additionalProperties: false
@@ -291,12 +309,17 @@ components:
                 version:
                   type: string
             risk:
-              $ref: '#/components/schemas/EntityRiskScoreRecord'
-            entity:
-              $ref: '#/components/schemas/EntityField'
+              $ref: '#/components/schemas/EntityRiskSummary'
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
+        labels:
+          type: object
+          additionalProperties: true
+        tags:
+          type: array
+          items:
+            type: string
         event:
           type: object
           additionalProperties: false
@@ -320,13 +343,44 @@ components:
           properties:
             name:
               type: string
+            address:
+              type: string
+            environment:
+              type: string
+            ephemeral_id:
+              type: string
+            id:
+              type: string
+            node:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                role:
+                  type: string
+                roles:
+                  type: array
+                  items:
+                    type: string
+            state:
+              type: string
+            type:
+              type: string
+            version:
+              type: string
             risk:
-              $ref: '#/components/schemas/EntityRiskScoreRecord'
-            entity:
-              $ref: '#/components/schemas/EntityField'
+              $ref: '#/components/schemas/EntityRiskSummary'
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
+        labels:
+          type: object
+          additionalProperties: true
+        tags:
+          type: array
+          items:
+            type: string
         event:
           type: object
           additionalProperties: false
@@ -335,12 +389,6 @@ components:
               type: string
               format: date-time
 
-    # The Generic Entity definition maps more than just entity.
-    # however I don't see a reason to duplicate the definition
-    # of all the fields just for the sake of doing.
-    # Thus the current mapping maps entity and asset only
-    # (used in code). If you end up needing the fields mapped
-    # in the schema just add it.
     GenericEntity:
       type: object
       additionalProperties: false
@@ -353,6 +401,112 @@ components:
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
+        cloud:
+          type: object
+          additionalProperties: false
+          properties:
+            account:
+              type: object
+              additionalProperties: false
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+            availability_zone:
+              type: string
+            instance:
+              type: object
+              additionalProperties: false
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+            machine:
+              type: object
+              additionalProperties: false
+              properties:
+                type:
+                  type: string
+            project:
+              type: object
+              additionalProperties: false
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+            provider:
+              type: string
+            region:
+              type: string
+            service:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+        orchestrator:
+          type: object
+          additionalProperties: false
+          properties:
+            api_version:
+              type: string
+            cluster:
+              type: object
+              additionalProperties: false
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                url:
+                  type: string
+                version:
+                  type: string
+            namespace:
+              type: string
+            organization:
+              type: string
+            resource:
+              type: object
+              additionalProperties: false
+              properties:
+                annotation:
+                  type: string
+                id:
+                  type: string
+                ip:
+                  type: string
+                label:
+                  type: string
+                name:
+                  type: string
+                parent:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    type:
+                      type: string
+                type:
+                  type: string
+            type:
+              type: string
+        labels:
+          type: object
+          additionalProperties: true
+        tags:
+          type: array
+          items:
+            type: string
+        event:
+          type: object
+          additionalProperties: false
+          properties:
+            ingested:
+              type: string
+              format: date-time
 
     # These entities represent the API of Entity Store
     # where entity is a root field, as it's in the final
@@ -375,6 +529,25 @@ components:
         - high_impact
         - extreme_impact
       description: The criticality level of the asset.
+
+    EntityRiskSummary:
+      type: object
+      additionalProperties: false
+      description: A summary of the entity's risk score containing only the calculated level and scores.
+      properties:
+        calculated_level:
+          $ref: '#/components/schemas/EntityRiskLevels'
+          description: Lexical description of the entity's risk.
+        calculated_score:
+          type: number
+          format: double
+          description: The raw numeric value of the given entity's risk score.
+        calculated_score_norm:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+          description: The normalized numeric value of the given entity's risk score.
 
     EntityRiskLevels:
       type: string
