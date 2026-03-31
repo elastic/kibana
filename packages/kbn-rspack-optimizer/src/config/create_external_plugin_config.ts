@@ -12,6 +12,7 @@ import Fs from 'fs';
 import { rspack, type Configuration } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import { DLL_MANIFEST } from './dll_manifest';
 import { getExternals } from './externals';
 import {
   getSharedResolveConfig,
@@ -20,32 +21,6 @@ import {
   getSharedIgnoreWarnings,
 } from './shared_config';
 import type { ThemeTag } from '../types';
-
-/**
- * Pre-built DLL manifest from @kbn/ui-shared-deps-npm (same as main build).
- * Prevents external plugins from re-bundling transitive deps already in the DLL.
- *
- * See the comment on DLL_MANIFEST in create_single_compile_config.ts for the
- * full explanation of the sanitisation strategy applied here.
- */
-const DLL_MANIFEST = (() => {
-  const raw = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
-  for (const entry of Object.values(raw.content) as Array<{
-    buildMeta?: { exportsType?: string; defaultObject?: string | boolean };
-  }>) {
-    if (entry.buildMeta) {
-      const { exportsType, defaultObject } = entry.buildMeta;
-      if (exportsType === 'namespace') {
-        entry.buildMeta = { exportsType };
-      } else if (defaultObject === 'redirect' || defaultObject === 'redirect-warn') {
-        entry.buildMeta = { exportsType: 'namespace' };
-      } else {
-        entry.buildMeta = undefined;
-      }
-    }
-  }
-  return raw;
-})();
 
 /**
  * Files that affect the external plugin RSPack build. Used as the single source

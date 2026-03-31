@@ -14,6 +14,7 @@ import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { discoverPlugins, createCoreEntry, getPackageMapPath, type PluginEntry } from '../utils/plugin_discovery';
+import { DLL_MANIFEST } from './dll_manifest';
 import { getExternals } from './externals';
 import {
   getSharedResolveConfig,
@@ -22,48 +23,6 @@ import {
   getSharedIgnoreWarnings,
 } from './shared_config';
 import type { ThemeTag } from '../types';
-
-/**
- * Pre-built DLL manifest from @kbn/ui-shared-deps-npm.
- * Contains ~4200 modules (npm deps + transitive deps) that are already bundled
- * into the DLL script (__kbnSharedDeps_npm__). DllReferencePlugin uses this to
- * avoid re-bundling those modules in plugin chunks.
- *
- * The manifest is built by webpack's DllPlugin and contains `buildMeta` per
- * module. Rspack's DllReferencePlugin has two compatibility gaps:
- *
- *  1. It panics (Rust crash) on `defaultObject` and `strictHarmonyModule`.
- *  2. It does not generate runtime CJS interop for delegated modules with
- *     `exportsType: "dynamic"` — named imports are statically replaced with
- *     `undefined` instead of being resolved to module.exports properties.
- *
- * Sanitisation strategy:
- *  - `exportsType: "namespace"` → keep (true ESM, named imports work directly).
- *  - `defaultObject: "redirect" | "redirect-warn"` → promote to "namespace".
- *    In webpack these modules redirect named imports to module.exports
- *    properties; "namespace" achieves the same in rspack by generating
- *    property access (e.g. `mod.format`) for each named import.
- *  - Everything else → strip buildMeta entirely (default-only CJS or modules
- *    without export metadata; no named imports expected).
- */
-const DLL_MANIFEST = (() => {
-  const raw = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
-  for (const entry of Object.values(raw.content) as Array<{
-    buildMeta?: { exportsType?: string; defaultObject?: string | boolean };
-  }>) {
-    if (entry.buildMeta) {
-      const { exportsType, defaultObject } = entry.buildMeta;
-      if (exportsType === 'namespace') {
-        entry.buildMeta = { exportsType };
-      } else if (defaultObject === 'redirect' || defaultObject === 'redirect-warn') {
-        entry.buildMeta = { exportsType: 'namespace' };
-      } else {
-        entry.buildMeta = undefined;
-      }
-    }
-  }
-  return raw;
-})();
 
 /**
  * Plugin to emit stats.json file for bundle analysis.
