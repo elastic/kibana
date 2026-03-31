@@ -1,6 +1,6 @@
 {
   "name": "@kbn/alerting-v2-constants",
-  "description": "Shared constants and limits for Alerting v2 artifact types.",
+  "description": "Shared constants for the Alerting v2 plugin and packages.",
   "private": true,
   "version": "1.0.0",
   "license": "Elastic License 2.0",

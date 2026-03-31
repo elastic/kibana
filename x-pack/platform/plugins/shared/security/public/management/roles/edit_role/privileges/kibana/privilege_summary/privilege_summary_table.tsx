@@ -130,7 +130,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
           onClick={() => toggleExpandedFeature(featureId)}
           data-test-subj={`expandPrivilegeSummaryRow`}
           aria-label={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
-          iconType={expandedFeatures.includes(featureId) ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedFeatures.includes(featureId) ? 'chevronSingleUp' : 'chevronSingleDown'}
         />
       );
     },

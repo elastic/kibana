@@ -13,4 +13,6 @@ export interface WatchlistBulkEntity {
   name?: string;
   sourceId: string;
   existingEntityId?: string;
+  /** Current watchlist names from the entity store, used for store sync */
+  currentWatchlists?: string[];
 }
