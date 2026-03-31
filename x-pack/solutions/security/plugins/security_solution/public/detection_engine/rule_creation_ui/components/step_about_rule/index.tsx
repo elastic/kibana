@@ -14,6 +14,7 @@ import type { DataViewBase } from '@kbn/es-query';
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { defaultRiskScoreBySeverity } from '../../../../../common/detection_engine/constants';
 import type { RuleSource } from '../../../../../common/api/detection_engine';
 import { isEsqlRule, isThreatMatchRule } from '../../../../../common/detection_engine/utils';
@@ -41,7 +42,6 @@ import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useAllEsqlRuleFields } from '../../hooks';
 import { MaxSignals } from '../max_signals';
 import { ThreatMatchIndicatorPathEdit } from '../../../rule_creation/components/threat_match_indicator_path_edit';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -109,9 +109,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPattern);
 
-  const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
-    'endpointExceptionsMovedUnderManagement'
-  );
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
 
   useEffect(() => {
     if (index != null && (dataViewId === '' || dataViewId == null)) {
@@ -350,7 +348,9 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiToolTip>
             <EuiSpacer size="l" />
-            {!endpointExceptionsMovedUnderManagement ? (
+            {endpointPerPolicyOptIn?.status === true ? (
+              <UseField path="isAssociatedToEndpointList" component={GhostFormField} />
+            ) : (
               <EuiFormRow label={I18n.GLOBAL_ENDPOINT_EXCEPTION_LIST} fullWidth>
                 <CommonUseField
                   path="isAssociatedToEndpointList"
@@ -363,8 +363,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   }}
                 />
               </EuiFormRow>
-            ) : (
-              <UseField path="isAssociatedToEndpointList" component={GhostFormField} />
             )}
             <EuiFormRow label={I18n.BUILDING_BLOCK} fullWidth>
               <CommonUseField
