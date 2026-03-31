@@ -211,3 +211,25 @@ export const SETTINGS_NO_FEATURES_DESCRIPTION = i18n.translate(
     defaultMessage: 'No features have been registered for inference settings in this project.',
   }
 );
+
+export const EXTERNAL_INFERENCE_EMPTY_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.externalInference.emptyTitle',
+  {
+    defaultMessage: 'Connect to external model providers',
+  }
+);
+
+export const EXTERNAL_INFERENCE_EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.externalInference.emptyDescription',
+  {
+    defaultMessage:
+      'Add model endpoints from your favorite model providers to use them for AI-powered search.',
+  }
+);
+
+export const VIEW_DOCUMENTATION_LINK = i18n.translate(
+  'xpack.searchInferenceEndpoints.providerInference.viewDocumentation',
+  {
+    defaultMessage: 'View documentation',
+  }
+);
