@@ -39,6 +39,7 @@ export const GmailConnector: ConnectorSpec = {
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
+
   auth: {
     types: [
       'bearer',
@@ -50,11 +51,19 @@ export const GmailConnector: ConnectorSpec = {
           scope: 'https://www.googleapis.com/auth/gmail.readonly',
         },
       },
+      {
+        type: 'ears',
+        defaults: {
+          provider: 'google',
+          scope: 'https://www.googleapis.com/auth/gmail.readonly',
+        },
+      },
     ],
     headers: {
       Accept: 'application/json',
     },
   },
+
   actions: {
     searchMessages: {
       isTool: true,
@@ -201,6 +210,7 @@ export const GmailConnector: ConnectorSpec = {
       },
     },
   },
+
   test: {
     description: 'Verifies Gmail connection by fetching user profile',
     handler: async (ctx) => {
@@ -227,6 +237,7 @@ export const GmailConnector: ConnectorSpec = {
       }
     },
   },
+
   agentBuilderWorkflows: [
     getAttachmentWorkflow,
     getMessageWorkflow,
