@@ -249,7 +249,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         footerRow,
       }) => (
         <CustomCascadeGridBodyMemoized
-          key={isCellInFullScreenMode ? `full-screen-${cellId}` : cellId}
+          key={cellId}
           Cell={Cell}
           data={cellData}
           visibleColumns={visibleColumns}
