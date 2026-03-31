@@ -8,6 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { FunctionComponent } from 'react';
 import type React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
@@ -120,9 +121,13 @@ export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
   render: (hit: DataTableRecord) => JSX.Element;
 }
 
+export interface SecuritySolutionAlertFlyoutHeaderRenderProps extends DocViewRenderProps {
+  onAlertUpdated?: () => void;
+}
+
 export interface SecuritySolutionAlertFlyoutHeaderTitleFeature {
   id: 'security-solution-alert-flyout-header-title';
-  renderHeader: (hit: DataTableRecord) => JSX.Element;
+  renderHeader: (props: SecuritySolutionAlertFlyoutHeaderRenderProps) => JSX.Element;
 }
 
 export type SecuritySolutionFeature =

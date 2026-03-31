@@ -148,6 +148,7 @@ export const ResolverWithoutProviders = React.memo(
                 <DocumentFlyoutWrapper
                   documentId={documentId}
                   indexName={indexName}
+                  scopeId={resolverComponentInstanceID}
                   renderCellActions={renderCellActions}
                 />
               ),
@@ -159,7 +160,7 @@ export const ResolverWithoutProviders = React.memo(
               size: 's',
             }
           ),
-      [history, overlays, renderCellActions, services, store]
+      [history, overlays, renderCellActions, resolverComponentInstanceID, services, store]
     );
 
     const onShowPanel = useCallback(() => {

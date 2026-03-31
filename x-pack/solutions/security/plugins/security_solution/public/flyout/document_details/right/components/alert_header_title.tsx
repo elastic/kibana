@@ -7,27 +7,29 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord, getFieldValue } from '@kbn/discover-utils';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { ALERT_RULE_UUID, ALERT_WORKFLOW_ASSIGNEE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
-import { DocumentStatus } from './status';
-import { useRefetchByScope } from '../hooks/use_refetch_by_scope';
+import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { Assignees } from './assignees';
-import { RiskScore } from '../../../../flyout_v2/document/components/risk_score';
-import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
-import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
-import { AlertHeaderBlock } from '../../../../flyout_v2/shared/components/alert_header_block';
 import {
   ALERT_SUMMARY_PANEL_TEST_ID,
   ASSIGNEES_TITLE_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
-} from '../../../../flyout_v2/shared/components/test_ids';
-import { getDocumentTitle } from '../../../../flyout_v2/document/utils/get_header_title';
-import { HEADER_TITLE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
+  STATUS_TITLE_TEST_ID,
+} from './test_ids';
+import { HeaderTitle } from '../../../../flyout_v2/document/components/header_title';
+import { HeaderStatus } from '../../../../flyout_v2/document/components/header_status';
+import { RiskScore } from '../../../../flyout_v2/document/components/risk_score';
+import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
+import type { CellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
+import { AlertHeaderBlock } from '../../../../flyout_v2/shared/components/alert_header_block';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { CellActions } from '../../shared/components/cell_actions';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
@@ -45,24 +47,7 @@ export const AlertHeaderTitle = memo(() => {
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   const ruleId = useMemo(() => getFieldValue(hit, ALERT_RULE_UUID) as string, [hit]);
   const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null }, urlParamOverride);
-  const title = useMemo(() => getDocumentTitle(hit), [hit]);
   const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
-  const ruleTitle = useMemo(
-    () =>
-      href ? (
-        <EuiLink href={href} target="_blank" external={false}>
-          <FlyoutTitle
-            title={title}
-            iconType={'warning'}
-            isLink
-            data-test-subj={HEADER_TITLE_TEST_ID}
-          />
-        </EuiLink>
-      ) : (
-        <FlyoutTitle title={title} iconType={'warning'} data-test-subj={HEADER_TITLE_TEST_ID} />
-      ),
-    [title, href]
-  );
 
   const { refetch } = useRefetchByScope({ scopeId });
   const alertAssignees = useMemo(
@@ -73,6 +58,14 @@ export const AlertHeaderTitle = memo(() => {
     refetch();
     refetchFlyoutData();
   }, [refetch, refetchFlyoutData]);
+  const renderStatusCellActions = useCallback<CellActionRenderer>(
+    ({ children, field, value }) => (
+      <CellActions field={field} value={value as string | string[] | null | undefined}>
+        {children}
+      </CellActions>
+    ),
+    []
+  );
 
   const riskScore = useMemo(
     () => (
@@ -90,6 +83,26 @@ export const AlertHeaderTitle = memo(() => {
       </AlertHeaderBlock>
     ),
     [hit]
+  );
+  const status = useMemo(
+    () =>
+      isRulePreview ? (
+        <AlertHeaderBlock
+          hasBorder
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.header.statusTitle"
+              defaultMessage="Status"
+            />
+          }
+          data-test-subj={STATUS_TITLE_TEST_ID}
+        >
+          {getEmptyTagValue()}
+        </AlertHeaderBlock>
+      ) : (
+        <HeaderStatus hit={hit} scopeId={scopeId} renderCellActions={renderStatusCellActions} />
+      ),
+    [hit, isRulePreview, renderStatusCellActions, scopeId]
   );
 
   const assignees = useMemo(
@@ -121,7 +134,7 @@ export const AlertHeaderTitle = memo(() => {
       <EuiSpacer size="m" />
       {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />
-      {ruleTitle}
+      <HeaderTitle hit={hit} titleHref={href ?? undefined} />
       <EuiSpacer size="m" />
       <EuiFlexGroup
         direction="row"
@@ -132,9 +145,7 @@ export const AlertHeaderTitle = memo(() => {
       >
         <EuiFlexItem css={blockStyles}>
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-            <EuiFlexItem>
-              <DocumentStatus />
-            </EuiFlexItem>
+            <EuiFlexItem>{status}</EuiFlexItem>
             <EuiFlexItem>{riskScore}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

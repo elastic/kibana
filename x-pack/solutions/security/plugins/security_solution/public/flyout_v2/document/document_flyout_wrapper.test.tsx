@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
@@ -37,13 +38,17 @@ const mockDataView = {
   getIndexPattern: () => 'logs-*',
 };
 
-const renderDocumentFlyoutWrapper = () =>
+const renderDocumentFlyoutWrapper = (
+  props: Partial<React.ComponentProps<typeof DocumentFlyoutWrapper>> = {}
+) =>
   render(
     <TestProviders>
       <DocumentFlyoutWrapper
         documentId="doc-id"
         indexName="my-index"
+        scopeId="alerts-page"
         renderCellActions={jest.fn()}
+        {...props}
       />
     </TestProviders>
   );
@@ -67,6 +72,22 @@ describe('DocumentFlyoutWrapper', () => {
       id: 'doc-id',
       index: 'my-index',
       dataView: mockDataView,
+      skip: false,
+    });
+  });
+
+  it('uses the provided data view instead of the default scoped one', () => {
+    const providedDataView = {
+      hasMatchedIndices: () => true,
+      getIndexPattern: () => 'timeline-*',
+    } as DataView;
+
+    renderDocumentFlyoutWrapper({ dataView: providedDataView });
+
+    expect(useEsDocSearch).toHaveBeenCalledWith({
+      id: 'doc-id',
+      index: 'my-index',
+      dataView: providedDataView,
       skip: false,
     });
   });
@@ -119,16 +140,32 @@ describe('DocumentFlyoutWrapper', () => {
 
   it('renders DocumentFlyout when document is found', () => {
     const hit = { id: '1', raw: {}, flattened: { 'event.kind': 'event' } } as DataTableRecord;
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, hit, jest.fn()]);
+    const refetchDocument = jest.fn();
+    const onAlertUpdated = jest.fn();
+    (useEsDocSearch as jest.Mock).mockReturnValue([
+      ElasticRequestState.Found,
+      hit,
+      refetchDocument,
+    ]);
 
-    const { getByTestId } = renderDocumentFlyoutWrapper();
+    const { getByTestId } = renderDocumentFlyoutWrapper({ onAlertUpdated });
 
     expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
     expect(mockDocumentFlyout).toHaveBeenCalledWith(
       expect.objectContaining({
         hit,
+        onAlertUpdated: expect.any(Function),
       })
     );
+
+    const latestProps = mockDocumentFlyout.mock.calls.at(-1)?.[0] as {
+      onAlertUpdated: () => void;
+    };
+
+    latestProps.onAlertUpdated();
+
+    expect(onAlertUpdated).toHaveBeenCalledTimes(1);
+    expect(refetchDocument).toHaveBeenCalledTimes(1);
   });
 
   it('renders not-found state when no document matches', () => {
@@ -145,6 +182,33 @@ describe('DocumentFlyoutWrapper', () => {
     const { getByTestId } = renderDocumentFlyoutWrapper();
 
     expect(getByTestId('document-overview-fetch-error')).toBeInTheDocument();
+  });
+
+  it('renders data view error when the data view has no matched indices', () => {
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'ready',
+      dataView: {
+        ...mockDataView,
+        hasMatchedIndices: () => false,
+      },
+    });
+
+    const { getByTestId } = renderDocumentFlyoutWrapper();
+
+    expect(getByTestId('document-overview-wrapper-data-view-error')).toBeInTheDocument();
+    expect(useEsDocSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skip: true,
+      })
+    );
+  });
+
+  it('renders fallback error state when the document request returns found without a hit', () => {
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, null, jest.fn()]);
+
+    const { getByTestId } = renderDocumentFlyoutWrapper();
+
+    expect(getByTestId('document-overview-something-went-wrong')).toBeInTheDocument();
   });
 
   it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {

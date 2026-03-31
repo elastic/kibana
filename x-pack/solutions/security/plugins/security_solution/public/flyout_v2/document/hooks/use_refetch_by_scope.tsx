@@ -7,13 +7,13 @@
 
 import { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import type { inputsModel, State } from '../../../../common/store';
-import { inputsSelectors } from '../../../../common/store';
-import { isActiveTimeline } from '../../../../helpers';
-import { TimelineId } from '../../../../../common/types/timeline';
-import { selectTimelineById } from '../../../../timelines/store/selectors';
-import { timelineDefaults } from '../../../../timelines/store/defaults';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import type { inputsModel, State } from '../../../common/store';
+import { inputsSelectors } from '../../../common/store';
+import { isActiveTimeline } from '../../../helpers';
+import { TimelineId } from '../../../../common/types/timeline';
+import { selectTimelineById } from '../../../timelines/store/selectors';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 export interface UseRefetchScopeQueryParams {
   /**
    * Scope ID

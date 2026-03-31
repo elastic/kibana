@@ -6,6 +6,12 @@
  */
 
 import { PREFIX } from '../../../shared/test_ids';
+export {
+  ALERT_SUMMARY_PANEL_TEST_ID,
+  RISK_SCORE_TITLE_TEST_ID,
+  RISK_SCORE_VALUE_TEST_ID,
+  ASSIGNEES_TITLE_TEST_ID,
+} from '../../../../flyout_v2/shared/components/test_ids';
 
 const HEADER_TEST_ID = 'Header';
 const CONTENT_TEST_ID = 'Content';

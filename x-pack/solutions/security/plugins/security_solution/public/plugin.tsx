@@ -401,14 +401,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
     const headerTitleFeature: SecuritySolutionAlertFlyoutHeaderTitleFeature = {
       id: 'security-solution-alert-flyout-header-title',
-      renderHeader: (hit) => {
+      renderHeader: (props) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
         return (
           <React.Suspense fallback={null}>
             <LazyAlertFlyoutHeader
-              hit={hit}
+              {...props}
               servicesPromise={servicesPromise}
               storePromise={storePromise}
             />

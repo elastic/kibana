@@ -13,7 +13,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
-import { DocumentFlyout } from '../../../../flyout_v2/document';
+import { DocumentFlyoutWrapper } from '../../../../flyout_v2/document/document_flyout_wrapper';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
@@ -119,7 +119,15 @@ const RowActionComponent = ({
           services,
           store,
           history,
-          children: <DocumentFlyout hit={hit} renderCellActions={cellActionRenderer} />,
+          children: (
+            <DocumentFlyoutWrapper
+              documentId={eventId}
+              indexName={indexName ?? undefined}
+              scopeId={tableId}
+              renderCellActions={cellActionRenderer}
+              onAlertUpdated={refetch}
+            />
+          ),
         }),
         {
           ownFocus: false,
@@ -156,6 +164,7 @@ const RowActionComponent = ({
     store,
     tableId,
     telemetry,
+    refetch,
   ]);
 
   const toggleShowNotes = useCallback(() => {
