@@ -24,7 +24,10 @@ const makeTxHit = (id: string, sort = [0, 0, id]) => ({
   _source: {},
 });
 
-const makeSearchResponse = (hits: ReturnType<typeof makeHit>[], total: number) => ({
+const makeSearchResponse = (
+  hits: Array<{ fields: Record<string, string[]>; sort: (string | number)[]; _source: {} }>,
+  total: number
+) => ({
   hits: {
     hits,
     total: { value: total, relation: 'eq' },
