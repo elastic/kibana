@@ -30,7 +30,7 @@ export interface EntityMetadata {
 const useRecentAnomaliesTopRowsQuery = (params: {
   anomalyBands: AnomalyBand[];
   viewBy: ViewByMode;
-  watchlistName?: string;
+  watchlistId?: string;
   spaceId?: string;
 }) => {
   const search = useKibana().services.data.search.search;
@@ -83,7 +83,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
 export const useRecentAnomaliesQuery = (params: {
   anomalyBands: AnomalyBand[];
   viewBy: ViewByMode;
-  watchlistName?: string;
+  watchlistId?: string;
   spaceId?: string;
 }) => {
   const search = useKibana().services.data.search.search;

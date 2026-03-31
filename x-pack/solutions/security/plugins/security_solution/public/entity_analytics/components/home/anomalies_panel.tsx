@@ -13,7 +13,6 @@ import { RecentAnomaliesChart } from '../recent_anomalies/recent_anomalies_chart
 import { useKibana } from '../../../common/lib/kibana';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { getWatchlistName } from '../../../../common/entity_analytics/watchlists/constants';
 
 const useRecentAnomaliesMlExplorerUrl = () => {
   const { from, to } = useGlobalTime();
@@ -37,8 +36,6 @@ export const EntityAnalyticsRecentAnomalies: React.FC<{ watchlistId?: string }> 
 }) => {
   const anomalyExplorerUrl = useRecentAnomaliesMlExplorerUrl();
   const spaceId = useSpaceId();
-  const watchlistName = watchlistId ? getWatchlistName(watchlistId) : undefined;
-
   return (
     <EuiFlexItem data-test-subj="recent-anomalies-panel">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -64,7 +61,7 @@ export const EntityAnalyticsRecentAnomalies: React.FC<{ watchlistId?: string }> 
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size={'m'} />
-      <RecentAnomaliesChart watchlistName={watchlistName} spaceId={spaceId} />
+      <RecentAnomaliesChart watchlistId={watchlistId} spaceId={spaceId} />
     </EuiFlexItem>
   );
 };

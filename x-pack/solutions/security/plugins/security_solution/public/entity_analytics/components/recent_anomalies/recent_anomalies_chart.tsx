@@ -59,12 +59,12 @@ const LabelList: React.FC<{ labels: string[]; compressed?: boolean }> = ({
 };
 
 interface RecentAnomaliesChartProps {
-  watchlistName?: string;
+  watchlistId?: string;
   spaceId?: string;
 }
 
 export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
-  watchlistName,
+  watchlistId,
   spaceId,
 }) => {
   const { deleteQuery, setQuery } = useGlobalTime();
@@ -75,7 +75,7 @@ export const RecentAnomaliesChart: React.FC<RecentAnomaliesChartProps> = ({
   const { data, entityMetadata, isLoading, isError, inspect, refetch } = useRecentAnomaliesQuery({
     anomalyBands: bands,
     viewBy,
-    watchlistName,
+    watchlistId,
     spaceId,
   });
 
