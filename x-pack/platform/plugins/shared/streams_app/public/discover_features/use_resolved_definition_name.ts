@@ -29,16 +29,16 @@ export function useResolvedDefinitionName({
           return undefined;
         }
         if (!cpsHasLinkedProjects) {
-          return fallbackStreamName;
+          return { name: fallbackStreamName, existsLocally: true };
         }
         try {
           await streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
             signal,
             params: { path: { name: fallbackStreamName } },
           });
-          return fallbackStreamName;
+          return { name: fallbackStreamName, existsLocally: true };
         } catch {
-          return undefined;
+          return { name: fallbackStreamName, existsLocally: false };
         }
       }
       const definition = await streamsRepositoryClient.fetch(
@@ -52,7 +52,7 @@ export function useResolvedDefinitionName({
           },
         }
       );
-      return definition?.stream?.name;
+      return { name: definition?.stream?.name, existsLocally: true };
     },
     [streamsRepositoryClient, index, fallbackStreamName, cpsHasLinkedProjects]
   );

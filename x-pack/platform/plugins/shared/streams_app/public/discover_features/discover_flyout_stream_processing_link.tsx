@@ -46,14 +46,16 @@ export function DiscoverFlyoutStreamProcessingLink({
 
   if (loading) return <EuiLoadingSpinner size="s" />;
 
-  if (!value || error) return null;
+  const { name, existsLocally } = value ?? {};
+
+  if (!name || !existsLocally || error) return null;
 
   const href = locator.getRedirectUrl({
-    name: value,
+    name,
     managementTab: 'processing',
     pageState: {
       v: 1,
-      dataSources: [getTargetDataSource(doc, value)],
+      dataSources: [getTargetDataSource(doc, name)],
     },
   } as StreamsAppLocatorParams);
 
