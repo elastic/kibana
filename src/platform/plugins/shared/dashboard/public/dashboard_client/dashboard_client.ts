@@ -70,7 +70,7 @@ export const dashboardClient = {
         throw new Error(message);
       });
 
-    if (result.meta.outcome !== 'aliasMatch') {
+    if (result.resolve.outcome !== 'aliasMatch') {
       /**
        * Only add the dashboard to the cache if it does not require a redirect - otherwise, the meta
        * alias info gets cached and prevents the dashboard contents from being updated

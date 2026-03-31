@@ -25,17 +25,17 @@ export const useDashboardOutcomeValidation = () => {
 
   const validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'] = useCallback(
     (result: DashboardReadResponseBody) => {
-      if (result.meta.outcome === 'aliasMatch' && result.meta.alias_target_id) {
-        const path = scopedHistory.location.hash.replace(result.id, result.meta.alias_target_id);
+      if (result.resolve.outcome === 'aliasMatch' && result.resolve.alias_target_id) {
+        const path = scopedHistory.location.hash.replace(result.id, result.resolve.alias_target_id);
         if (screenshotModeService.isScreenshotMode()) {
           scopedHistory.replace(path); // redirect without the toast when in screenshot mode.
         } else {
-          spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose: result.meta.alias_purpose });
+          spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose: result.resolve.alias_purpose });
         }
         return 'redirected'; // redirected. Stop loading dashboard.
       }
-      setAliasId(result.meta.alias_target_id);
-      setOutcome(result.meta.outcome);
+      setAliasId(result.resolve.alias_target_id);
+      setOutcome(result.resolve.outcome);
       setSavedObjectId(result.id);
       return 'valid';
     },

@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
+import { metaSchema } from '../meta_schemas';
 
 export const createRequestParamsSchema = schema.maybe(
   schema.object(
@@ -29,6 +29,6 @@ export function getCreateResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
     data: getDashboardStateSchema(isDashboardAppRequest),
-    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
+    meta: metaSchema,
   });
 }

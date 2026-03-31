@@ -9,38 +9,28 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const baseMetaSchema = schema.object({
-  managed: schema.maybe(schema.boolean()),
+export const metaSchema = schema.object({
+  created_at: schema.maybe(schema.string()),
+  created_by: schema.maybe(schema.string()),
   error: schema.maybe(
     schema.object({
       error: schema.string(),
       message: schema.string(),
       statusCode: schema.number(),
       metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    }, {
+      meta: {
+        id: 'kbn-dashboard-meta-error'
+      }
     })
   ),
+  managed: schema.maybe(schema.boolean()),
   owner: schema.maybe(schema.string()),
-  version: schema.maybe(schema.string()),
-});
-
-export const createdMetaSchema = schema.object({
-  created_at: schema.maybe(schema.string()),
-  created_by: schema.maybe(schema.string()),
-});
-
-export const updatedMetaSchema = schema.object({
   updated_at: schema.maybe(schema.string()),
   updated_by: schema.maybe(schema.string()),
-});
-
-export const resolveMetaSchema = schema.object({
-  outcome: schema.oneOf([
-    schema.literal('exactMatch'),
-    schema.literal('aliasMatch'),
-    schema.literal('conflict'),
-  ]),
-  alias_target_id: schema.maybe(schema.string()),
-  alias_purpose: schema.maybe(
-    schema.oneOf([schema.literal('savedObjectConversion'), schema.literal('savedObjectImport')])
-  ),
+  version: schema.maybe(schema.string()),
+}, {
+  meta: {
+    id: 'kbn-dashboard-meta'
+  }
 });

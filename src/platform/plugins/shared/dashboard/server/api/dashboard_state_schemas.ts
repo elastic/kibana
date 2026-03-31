@@ -50,6 +50,10 @@ export const panelGridSchema = schema.object({
     min: 1,
     meta: { description: 'The height of the panel in grid units' },
   }),
+}, {
+  meta: {
+    id: 'kbn-dashboard-panel-grid'
+  }
 });
 
 export function getPanelSchema(isDashboardAppRequest: boolean) {
@@ -95,7 +99,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
         },
         {
           meta: {
-            id: `kbn-dashboard-panel-${type}`,
+            id: `kbn-dashboard-panel-type-${type}`,
             title: type,
           },
         }
@@ -112,8 +116,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
         type: Type<string>;
         config: ObjectType<{}>;
       }>
-    ]
-  );
+    ]);
 }
 
 const sectionGridSchema = schema.object({
@@ -145,6 +148,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
     {
       meta: {
         description: 'Collapsable section',
+        id: 'kbn-dashboard-section',
         title: 'section',
       },
     }
@@ -186,6 +190,9 @@ export const optionsSchema = schema.object(
   },
   {
     defaultValue: DEFAULT_DASHBOARD_OPTIONS,
+    meta: {
+      id: 'kbn-dashboard-options'
+    }
   }
 );
 
@@ -199,7 +206,6 @@ export const accessControlSchema = schema.maybe(
 
 export function getDashboardStateSchema(
   isDashboardAppRequest: boolean,
-  { allowAccessControl = true }: { allowAccessControl?: boolean } = {}
 ) {
   return schema.object({
     pinned_panels: pinnedPanelsSchema,
@@ -229,6 +235,10 @@ export function getDashboardStateSchema(
     ),
     time_range: schema.maybe(timeRangeSchema),
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-    access_control: allowAccessControl ? accessControlSchema : schema.never(),
+    access_control: accessControlSchema,
+  }, {
+    meta: {
+      id: isDashboardAppRequest ? 'kbn-dashboard-app-data' : 'kbn-dashboard-data'
+    }
   });
 }

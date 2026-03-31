@@ -41,11 +41,10 @@ export async function read(
   );
   return {
     ...response,
-    meta: {
-      ...response.meta,
+    resolve: {
       alias_target_id,
       alias_purpose,
       outcome,
-    },
+    }
   };
 }
