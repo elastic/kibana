@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
@@ -19,6 +19,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { RULE_FORM_ID } from '../form/constants';
+import { HeaderActionPortalProvider } from './flyout_header_portal_context';
 
 const FLYOUT_TITLE_ID = 'ruleV2FormFlyoutTitle';
 
@@ -34,6 +35,9 @@ export interface RuleFormFlyoutProps {
  *
  * Use DynamicRuleFormFlyout or StandaloneRuleFormFlyout for pre-composed
  * flyouts that handle form submission and state management.
+ *
+ * Exposes a portal target in the header via FlyoutHeaderPortalContext so
+ * descendants can render actions (e.g. a GUI/YAML toggle) next to the title.
  */
 export const RuleFormFlyout = ({
   push = true,
@@ -41,6 +45,11 @@ export const RuleFormFlyout = ({
   isLoading = false,
   children,
 }: RuleFormFlyoutProps) => {
+  const [headerActionEl, setHeaderActionEl] = useState<HTMLDivElement | null>(null);
+  const headerActionCallbackRef = useCallback((node: HTMLDivElement | null) => {
+    setHeaderActionEl(node);
+  }, []);
+
   return (
     <EuiFlyout
       session="start"
@@ -55,16 +64,25 @@ export const RuleFormFlyout = ({
       maxWidth={600}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
-          <h2>
-            <FormattedMessage
-              id="xpack.alertingV2.ruleForm.flyoutTitle"
-              defaultMessage="Create Alert Rule"
-            />
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
+              <h2>
+                <FormattedMessage
+                  id="xpack.alertingV2.ruleForm.flyoutTitle"
+                  defaultMessage="Create Alert Rule"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <div ref={headerActionCallbackRef} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        <HeaderActionPortalProvider value={headerActionEl}>{children}</HeaderActionPortalProvider>
+      </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

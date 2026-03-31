@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useRef, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,6 +20,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FormValues } from './types';
 import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
+import { useHeaderActionPortal } from '../flyout/flyout_header_portal_context';
 import {
   RuleFormProvider,
   useRuleFormServices,
@@ -190,33 +192,20 @@ const RuleFormContent = ({
   );
 
   const isYamlMode = editMode === 'yaml';
+  const headerPortalEl = useHeaderActionPortal();
+
+  const editModeToggle = includeYaml ? (
+    <EditModeToggle
+      editMode={editMode}
+      onChange={handleModeChange}
+      disabled={isDisabled || isSubmitting}
+    />
+  ) : null;
 
   const formContent = (
     <>
-      {isYamlMode ? (
-        includeYaml && (
-          <EditModeToggle
-            editMode={editMode}
-            onChange={handleModeChange}
-            disabled={isDisabled || isSubmitting}
-          />
-        )
-      ) : (
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem>
-            <NameField />
-          </EuiFlexItem>
-          {includeYaml && (
-            <EuiFlexItem grow={false}>
-              <EditModeToggle
-                editMode={editMode}
-                onChange={handleModeChange}
-                disabled={isDisabled || isSubmitting}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      )}
+      {headerPortalEl && editModeToggle ? createPortal(editModeToggle, headerPortalEl) : null}
+      <NameField />
       <EuiSpacer size="m" />
 
       {isYamlMode && includeYaml ? (

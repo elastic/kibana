@@ -14,6 +14,8 @@ export interface CreateRuleFormFlyoutProps {
   query: string;
   onClose?: () => void;
   push?: boolean;
+  /** Whether to include YAML editor toggle (default: false) */
+  includeYaml?: boolean;
 }
 
 export const DynamicRuleFormFlyout = (props: CreateRuleFormFlyoutProps) => {

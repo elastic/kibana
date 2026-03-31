@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiCallOut,
   EuiLoadingSpinner,
@@ -21,7 +21,11 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
-import { StandaloneRuleForm, mapRuleResponseToFormValues } from '@kbn/alerting-v2-rule-form';
+import {
+  StandaloneRuleForm,
+  mapRuleResponseToFormValues,
+  HeaderActionPortalProvider,
+} from '@kbn/alerting-v2-rule-form';
 import type { FormValues } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -169,22 +173,29 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
     <FormattedMessage id="xpack.alertingV2.createRule.submitLabel" defaultMessage="Create rule" />
   );
 
+  const [headerActionEl, setHeaderActionEl] = useState<HTMLDivElement | null>(null);
+
   return (
     <>
-      <EuiPageHeader pageTitle={pageTitle} />
-      <EuiSpacer size="m" />
-      <StandaloneRuleForm
-        query={initialQuery ?? DEFAULT_QUERY}
-        services={ruleFormServices}
-        includeYaml
-        isDisabled={false}
-        includeSubmission
-        onSuccess={onSuccess}
-        onCancel={onCancel}
-        ruleId={ruleId}
-        initialValues={initialValues}
-        submitLabel={submitLabel}
+      <EuiPageHeader
+        pageTitle={pageTitle}
+        rightSideItems={[<div ref={setHeaderActionEl} key="header-action-portal" />]}
       />
+      <EuiSpacer size="m" />
+      <HeaderActionPortalProvider value={headerActionEl}>
+        <StandaloneRuleForm
+          query={initialQuery ?? DEFAULT_QUERY}
+          services={ruleFormServices}
+          includeYaml
+          isDisabled={false}
+          includeSubmission
+          onSuccess={onSuccess}
+          onCancel={onCancel}
+          ruleId={ruleId}
+          initialValues={initialValues}
+          submitLabel={submitLabel}
+        />
+      </HeaderActionPortalProvider>
     </>
   );
 };

@@ -27,6 +27,9 @@ export { RuleResultsPreview } from './form';
 // Context - for consumers who need custom integrations
 export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './form';
 
+// Portal — lets a parent header host the GUI/YAML toggle rendered by the form
+export { HeaderActionPortalProvider } from './flyout/flyout_header_portal_context';
+
 // Mappers
 export {
   mapFormValuesToRuleRequest,

@@ -59,7 +59,7 @@ export function CreateESQLRuleFlyout({
     };
   }, [history, core.application.currentAppId$]);
 
-  return <RuleFormFlyout query={query} onClose={onClose} />;
+  return <RuleFormFlyout query={query} onClose={onClose} includeYaml />;
 }
 
 export const getCreateRuleMenuItem = ({
