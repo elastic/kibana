@@ -26,6 +26,7 @@ import {
   SEARCH_PRODUCT_NAME,
   SEARCH_HOMEPAGE,
   SEARCH_APPS_TITLE,
+  SEARCH_INDEX_MANAGEMENT_APP_ID,
 } from '../common/constants';
 
 import { AS_TELEMETRY_NAME } from './collectors/app_search/telemetry';
@@ -96,6 +97,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       SEARCH_HOMEPAGE,
       SEARCH_GETTING_STARTED,
+      SEARCH_INDEX_MANAGEMENT_APP_ID,
     ];
 
     if (customIntegrations) {
