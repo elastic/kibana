@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-onechat'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workchat-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/evals-suite-onechat'
+  title: '@kbn/evals-suite-onechat'
   description: Moon project for @kbn/evals-suite-onechat
   channel: ''
   owner: '@elastic/workchat-eng'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat
+  sourceRoot: x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat
 dependsOn:
   - '@kbn/evals'
   - '@kbn/onechat-common'
@@ -36,14 +35,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

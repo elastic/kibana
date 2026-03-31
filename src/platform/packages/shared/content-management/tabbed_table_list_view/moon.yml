@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/content-management-tabbed-table-list-view'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/content-management-tabbed-table-list-view'
+  title: '@kbn/content-management-tabbed-table-list-view'
   description: Moon project for @kbn/content-management-tabbed-table-list-view
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/content-management/tabbed_table_list_view
+  sourceRoot: src/platform/packages/shared/content-management/tabbed_table_list_view
 dependsOn:
   - '@kbn/content-management-table-list-view'
   - '@kbn/shared-ux-page-kibana-template'
@@ -37,14 +36,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
