@@ -6,6 +6,7 @@
  */
 
 import type { ToolType } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { subj } from '@kbn/test-subj-selector';
 import { AGENT_BUILDER_APP_ID } from '../../agent_builder/common/constants';
 import type { LlmProxy } from '../../agent_builder_api_integration/utils/llm_proxy';
@@ -31,7 +32,7 @@ export class AgentBuilderPageObject extends FtrService {
   /**
    * Navigate to the AgentBuilder app
    */
-  async navigateToApp(path: string = 'conversations/new') {
+  async navigateToApp(path: string = `agents/${agentBuilderDefaultAgentId}/conversations/new`) {
     await this.common.navigateToApp(AGENT_BUILDER_APP_ID, { path });
   }
 
@@ -58,7 +59,7 @@ export class AgentBuilderPageObject extends FtrService {
   async getCurrentConversationIdFromUrl(): Promise<string> {
     return await this.retry.try(async () => {
       const url = await this.browser.getCurrentUrl();
-      // URL should be something like: /app/agent_builder/conversations/{conversationId}
+      // URL should be something like: /app/agent_builder/agents/{agentId}/conversations/{conversationId}
       const match = url.match(/\/conversations\/([^\/\?]+)/);
       if (!match) {
         throw new Error('Could not extract conversation ID from URL');
@@ -78,7 +79,7 @@ export class AgentBuilderPageObject extends FtrService {
     withToolCall: boolean = false
   ): Promise<string> {
     // Navigate to new conversation
-    await this.navigateToApp('conversations/new');
+    await this.navigateToApp();
 
     await (withToolCall
       ? setupAgentCallSearchToolWithNoIndexSelectedThenAnswer({
@@ -112,37 +113,15 @@ export class AgentBuilderPageObject extends FtrService {
     return await this.getCurrentConversationIdFromUrl();
   }
 
-  async openConversationsHistory() {
-    // Only open if not already open
-    if (await this.isConversationsHistoryOpen()) {
-      return;
-    }
-
-    const conversationsHistoryToggleBtn = await this.testSubjects.find(
-      'agentBuilderConversationsHistoryToggleBtn'
-    );
-    await conversationsHistoryToggleBtn.click();
-
-    // Wait for the conversations history popover to be visible and populated
-    await this.retry.try(async () => {
-      const conversationList = await this.testSubjects.find('agentBuilderConversationList');
-      // Verify the list is actually visible and has content
-      const isDisplayed = await conversationList.isDisplayed();
-      if (!isDisplayed) {
-        throw new Error('Conversation list is not displayed');
-      }
-    });
-  }
-
   /**
-   * Check if the conversations history popover is currently open
+   * Ensure the Chats accordion in the sidebar is expanded.
+   * It defaults to open but can be collapsed by the user or when agent settings routes are active.
    */
-  async isConversationsHistoryOpen(): Promise<boolean> {
-    try {
-      const conversationList = await this.testSubjects.find('agentBuilderConversationList');
-      return await conversationList.isDisplayed();
-    } catch {
-      return false;
+  private async ensureChatsAccordionOpen() {
+    const toggle = await this.testSubjects.find('agentBuilderSidebarChatsToggle');
+    const isExpanded = await toggle.getAttribute('aria-expanded');
+    if (isExpanded !== 'true') {
+      await toggle.click();
     }
   }
 
@@ -150,9 +129,10 @@ export class AgentBuilderPageObject extends FtrService {
    * Navigate to an existing conversation by clicking on it in the history sidebar
    */
   async navigateToConversationViaHistory(conversationId: string) {
-    await this.openConversationsHistory();
-
-    const conversationItem = await this.testSubjects.find(`conversationItem-${conversationId}`);
+    await this.ensureChatsAccordionOpen();
+    const conversationItem = await this.testSubjects.find(
+      `agentBuilderSidebarConversation-${conversationId}`
+    );
     await conversationItem.click();
   }
 
@@ -160,7 +140,9 @@ export class AgentBuilderPageObject extends FtrService {
    * Navigate to an existing conversation using the conversation ID in the URL
    */
   async navigateToConversationById(conversationId: string) {
-    await this.navigateToApp(`conversations/${conversationId}`);
+    await this.navigateToApp(
+      `agents/${agentBuilderDefaultAgentId}/conversations/${conversationId}`
+    );
   }
 
   /**
@@ -187,18 +169,20 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   /**
-   * Delete a conversation by clicking the more actions button and then the delete button
+   * Delete a conversation by clicking the title button popover and then the delete button
    */
   async deleteConversation(conversationId: string) {
-    await this.openConversationsHistory();
+    await this.ensureChatsAccordionOpen();
 
     // Click on conversation to open it
-    const conversationItem = await this.testSubjects.find(`conversationItem-${conversationId}`);
+    const conversationItem = await this.testSubjects.find(
+      `agentBuilderSidebarConversation-${conversationId}`
+    );
     await conversationItem.click();
 
-    // Click on the more actions button
-    const moreActionsButton = await this.testSubjects.find('agentBuilderMoreActionsButton');
-    await moreActionsButton.click();
+    // Click the title button to open the popover with rename/delete actions
+    const titleButton = await this.testSubjects.find('agentBuilderConversationTitleButton');
+    await titleButton.click();
 
     // Click on the delete button from the popover
     const deleteButton = await this.testSubjects.find('agentBuilderConversationDeleteButton');
@@ -207,9 +191,9 @@ export class AgentBuilderPageObject extends FtrService {
     const confirmButton = await this.testSubjects.find('confirmModalConfirmButton');
     await confirmButton.click();
 
-    // Wait for the conversation to be removed
+    // Wait for the conversation to be removed from the sidebar
     await this.retry.try(async () => {
-      await this.testSubjects.missingOrFail(`conversationItem-${conversationId}`);
+      await this.testSubjects.missingOrFail(`agentBuilderSidebarConversation-${conversationId}`);
     });
   }
 
@@ -217,10 +201,10 @@ export class AgentBuilderPageObject extends FtrService {
    * Check if a conversation exists in the history by conversation ID
    */
   async isConversationInHistory(conversationId: string): Promise<boolean> {
-    await this.openConversationsHistory();
+    await this.ensureChatsAccordionOpen();
 
     try {
-      await this.testSubjects.find(`conversationItem-${conversationId}`);
+      await this.testSubjects.find(`agentBuilderSidebarConversation-${conversationId}`);
       return true;
     } catch (error) {
       return false;
@@ -239,28 +223,34 @@ export class AgentBuilderPageObject extends FtrService {
    * Click the new conversation button
    */
   async clickNewConversationButton() {
-    const newButton = await this.testSubjects.find('agentBuilderNewConversationButton');
+    const newButton = await this.testSubjects.find('agentBuilderSidebarNewConversationButton');
     await newButton.click();
   }
 
   /**
-   * Get the current conversation title text
+   * Get the current conversation title text.
+   * For persisted conversations the title is inside a button (popover trigger);
+   * for unsaved ones it is a plain h4.
    */
   async getConversationTitle(): Promise<string> {
-    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
+    const isPersisted = await this.testSubjects.exists('agentBuilderConversationTitleButton');
+    const selector = isPersisted
+      ? 'agentBuilderConversationTitleButton'
+      : 'agentBuilderConversationTitle';
+    const titleElement = await this.testSubjects.find(selector);
     return await titleElement.getVisibleText();
   }
 
   /**
-   * Rename a conversation by hovering over the title, clicking the pencil icon,
-   * entering the new name, and submitting
+   * Rename a conversation by clicking the title button to open the popover,
+   * then selecting rename, entering the new name, and submitting.
    */
   async renameConversation(newTitle: string): Promise<string> {
-    // Hover over the conversation title to reveal the pencil icon
-    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
-    await titleElement.moveMouseTo();
+    // Click the title button to open the popover
+    const titleButton = await this.testSubjects.find('agentBuilderConversationTitleButton');
+    await titleButton.click();
 
-    // Click the pencil icon to enter edit mode
+    // Click the rename button from the popover
     const renameButton = await this.testSubjects.find('agentBuilderConversationRenameButton');
     await renameButton.click();
 
@@ -313,15 +303,15 @@ export class AgentBuilderPageObject extends FtrService {
    * ==========================
    */
   async navigateToToolsLanding() {
-    await this.navigateToApp('tools');
+    await this.navigateToApp('manage/tools');
   }
 
   async navigateToNewTool() {
-    await this.navigateToApp('tools/new');
+    await this.navigateToApp('manage/tools/new');
   }
 
   async navigateToTool(toolId: string) {
-    await this.navigateToApp(`tools/${toolId}`);
+    await this.navigateToApp(`manage/tools/${toolId}`);
   }
 
   /*
@@ -390,7 +380,7 @@ export class AgentBuilderPageObject extends FtrService {
    * ==========================
    */
   async navigateToBulkImportMcp() {
-    await this.navigateToApp('tools/bulk_import_mcp');
+    await this.navigateToApp('manage/tools/bulk_import_mcp');
   }
 
   async openManageMcpMenu() {
@@ -540,7 +530,7 @@ export class AgentBuilderPageObject extends FtrService {
    * ==========================
    */
   async createAgentViaUI({ id, name, labels }: { id: string; name: string; labels: string[] }) {
-    await this.navigateToApp('agents/new');
+    await this.navigateToApp('manage/agents/new');
     const selectors = {
       inputs: {
         id: 'agentSettingsIdInput',
