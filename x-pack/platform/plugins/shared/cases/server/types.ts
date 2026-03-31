@@ -117,9 +117,8 @@ export interface CasesServerSetup {
   attachmentFramework: AttachmentFramework;
   config: ConfigType;
   /**
-   * Registers a validator for non-default close reasons for a specific case owner.
-   * Cases with the given owner will be allowed to use any close reason accepted by the validator,
-   * in addition to the built-in default reasons.
+   * Registers a validator for close reasons for a specific case owner.
+   * Cases with the given owner will be allowed to use any close reason accepted by the validator.
    */
   registerCloseReasonValidator: (owner: string, validator: CloseReasonValidator) => void;
 }
