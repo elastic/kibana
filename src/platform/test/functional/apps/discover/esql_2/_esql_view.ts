@@ -410,7 +410,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await testSubjects.click('querySubmitButton');
             await discover.waitUntilTabIsLoaded();
           }
-          await inspector.open();
+          await discover.openInspectorFromTabMenu();
           retries = retries + 1;
           const requestNames = await inspector.getRequestNames();
           expect(requestNames).to.contain('Table');
@@ -446,7 +446,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             window.ELASTIC_ESQL_DELAY_SECONDS = undefined;
           });
 
-          await inspector.open();
+          await discover.openInspectorFromTabMenu();
           const requestNames = (await inspector.getRequestNames()).split(',');
           const requestTotalTime = await inspector.getRequestTotalTime();
           expect(requestTotalTime).to.be.greaterThan(5000);
