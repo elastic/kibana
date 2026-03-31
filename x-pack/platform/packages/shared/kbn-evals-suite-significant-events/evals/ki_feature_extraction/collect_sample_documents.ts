@@ -10,7 +10,10 @@ import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getSampleDocuments } from '@kbn/ai-tools';
-import { MANAGED_STREAM_SEARCH_PATTERN, type KIFeatureExtractionScenario, } from '../../src/datasets';
+import {
+  MANAGED_STREAM_SEARCH_PATTERN,
+  type KIFeatureExtractionScenario,
+} from '../../src/datasets';
 
 const SAMPLE_DOCS_MAX = 50;
 
