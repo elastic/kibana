@@ -6,10 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { MonitoringEntitySourceDescriptorClient } from '../../../privilege_monitoring/saved_objects';
-import type { EntityStoreEntityIdsByType } from '../../entities/service';
+import type { WatchlistEntitySourceClient } from '../infra';
 import { createSourcesSyncService } from './sources_sync';
+import type { SyncSourceEntry } from './sources_sync';
 import { createUpdateDetectionService } from './update_detection/update_detection';
+import { createDeletionDetectionService } from './deletion_detection/deletion_detection';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
@@ -22,7 +23,7 @@ export const createIndexSyncService = ({
   esClient: ElasticsearchClient;
   logger: Logger;
   targetIndex: string;
-  descriptorClient: MonitoringEntitySourceDescriptorClient;
+  descriptorClient: WatchlistEntitySourceClient;
 }) => {
   const updateDetectionService = createUpdateDetectionService({
     esClient,
@@ -30,19 +31,26 @@ export const createIndexSyncService = ({
     targetIndex,
     descriptorClient,
   });
+  const deletionDetectionService = createDeletionDetectionService({
+    esClient,
+    logger,
+    targetIndex,
+    descriptorClient,
+  });
   const sourcesSyncService = createSourcesSyncService({ logger });
 
-  const plainIndexSync = async (
-    sources: {
-      sourceId: string;
-      entityStoreEntityIdsByType: EntityStoreEntityIdsByType;
-    }[]
-  ) => {
+  const plainIndexSync = async (sources: SyncSourceEntry[]) => {
     await sourcesSyncService.syncBySourceIds({
       descriptorClient,
       sources,
-      process: async (source, entityStoreEntityIdsByType) => {
-        await updateDetectionService.updateDetection(source, entityStoreEntityIdsByType);
+      process: async (source, entityStoreEntityIdsByType, correlationMap) => {
+        const entities = await updateDetectionService.updateDetection(
+          source,
+          entityStoreEntityIdsByType,
+          correlationMap
+        );
+        const currentEuids = entities.map((e) => e.euid);
+        await deletionDetectionService.deletionDetection(source, currentEuids);
       },
     });
   };

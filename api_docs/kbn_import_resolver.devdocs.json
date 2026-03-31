@@ -358,7 +358,7 @@
               " | null"
             ],
             "path": "src/platform/packages/private/kbn-import-resolver/src/import_resolver.ts",
-            "lineNumber": 327,
+            "lineNumber": 323,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -374,7 +374,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-import-resolver/src/import_resolver.ts",
-                "lineNumber": 330,
+                "lineNumber": 326,
                 "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -391,7 +391,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-import-resolver/src/import_resolver.ts",
-                "lineNumber": 330,
+                "lineNumber": 326,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,

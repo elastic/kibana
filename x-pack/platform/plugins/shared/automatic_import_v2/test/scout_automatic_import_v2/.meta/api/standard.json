@@ -1,5 +1,5 @@
 {
-  "sha1": "27bfab50fdf2cd334270c3d9aac63b3291ba9950",
+  "sha1": "aed8ee7c100c5ee6392bf1f5573e0dd4097e2fbc",
   "tests": [
     {
       "id": "73056018881f2b5-088156b965b4a55",
@@ -378,6 +378,46 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import_v2/test/scout_automatic_import_v2/api/tests/input_validation_api_manager.spec.ts",
         "line": 275,
+        "column": 12
+      }
+    },
+    {
+      "id": "9713a32dc1781f4-7cd6b5cb03ba975",
+      "title": "automatic_import_v2 input validation & abuse sketches (manager) POST .../approve: rejects body without categories (strict / required)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import_v2/test/scout_automatic_import_v2/api/tests/input_validation_api_manager.spec.ts",
+        "line": 292,
+        "column": 12
+      }
+    },
+    {
+      "id": "9713a32dc1781f4-37ee1012d6bfb71",
+      "title": "automatic_import_v2 input validation & abuse sketches (manager) POST .../approve: rejects empty categories array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import_v2/test/scout_automatic_import_v2/api/tests/input_validation_api_manager.spec.ts",
+        "line": 308,
         "column": 12
       }
     },
