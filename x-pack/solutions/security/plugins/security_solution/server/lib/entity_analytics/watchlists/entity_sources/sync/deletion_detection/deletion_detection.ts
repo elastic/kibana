@@ -6,7 +6,9 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { WatchlistsByEuid } from '../../../entities/service';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { WatchlistEntityDoc } from '../../../entities/types';
 import type { WatchlistEntitySourceClient } from '../../infra';
@@ -18,14 +20,16 @@ export type DeletionDetectionService = ReturnType<typeof createDeletionDetection
 
 export const createDeletionDetectionService = ({
   esClient,
+  crudClient,
   logger,
-  targetIndex,
   descriptorClient,
+  watchlist,
 }: {
   esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
   logger: Logger;
-  targetIndex: string;
   descriptorClient: WatchlistEntitySourceClient;
+  watchlist: { name: string; id: string; index: string };
 }) => {
   const syncMarkersService = createWatchlistSyncMarkersService(descriptorClient, esClient);
 
@@ -35,7 +39,10 @@ export const createDeletionDetectionService = ({
   ): Promise<StaleEntity[]> => {
     const query: Record<string, unknown> = {
       bool: {
-        must: [{ term: { 'labels.source_ids': sourceId } }],
+        must: [
+          { term: { 'labels.source_ids': sourceId } },
+          { term: { 'watchlist.id': watchlist.id } },
+        ],
         ...(currentEuids.length > 0
           ? { must_not: [{ terms: { 'entity.id': currentEuids } }] }
           : {}),
@@ -48,7 +55,7 @@ export const createDeletionDetectionService = ({
 
     while (true) {
       const response = await esClient.search<WatchlistEntityDoc>({
-        index: targetIndex,
+        index: watchlist.index,
         size: pageSize,
         query,
         _source: false,
@@ -72,7 +79,8 @@ export const createDeletionDetectionService = ({
 
   const deletionDetection = async (
     source: MonitoringEntitySource,
-    currentEuids: string[]
+    currentEuids: string[],
+    watchlistsByEuid: WatchlistsByEuid
   ): Promise<void> => {
     if (source.type === 'entity_analytics_integration') {
       const hasNewFullSync = await syncMarkersService.detectNewFullSync(source);
@@ -97,10 +105,12 @@ export const createDeletionDetectionService = ({
 
     await applyBulkRemoveSource({
       esClient,
+      crudClient,
       logger,
       staleEntities,
       sourceType: source.type ?? 'index',
-      targetIndex,
+      watchlist,
+      watchlistsByEuid,
     });
   };
 

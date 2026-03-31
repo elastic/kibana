@@ -16,7 +16,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 const updateNotificationPolicyParamsSchema = z.object({
@@ -26,13 +26,19 @@ const updateNotificationPolicyParamsSchema = z.object({
 @injectable()
 export class UpdateNotificationPolicyRoute {
   static method = 'put' as const;
-  static path = `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id}`;
+  static path = `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'public',
+    summary: 'Update a notification policy',
+    description: 'Update an existing notification policy by identifier.',
+    tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
+  } as const;
   static validate = {
     request: {
       body: buildRouteValidationWithZod(updateNotificationPolicyBodySchema),
