@@ -6,6 +6,8 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { isMissingApiKey, isRevokedApiKey } from '@kbn/core-security-server';
+
 import type { ApiKeyIdAndSOId, UiamApiKeyAndSOId } from './get_api_key_ids_to_invalidate';
 import { invalidateAPIKeys, invalidateUiamAPIKeys } from './invalidate_api_keys';
 import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
@@ -60,14 +62,26 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
       );
 
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-        logger.error(`Failed to invalidate UIAM APIKey id`);
-      } else {
-        try {
-          await savedObjectsClient.delete(savedObjectType, id);
-          totalInvalidated++;
-        } catch (err) {
-          logger.error(`Failed to delete invalidated UIAM API key. Error: ${err.message}`);
+        if (isMissingApiKey(response.result) || isRevokedApiKey(response.result)) {
+          logger.warn(
+            `UIAM APIKey is already invalidated or missing, removing pending invalidation. ` +
+              `Error: ${response.result.error_details?.map((d) => d.reason).join('; ')}`
+          );
+        } else {
+          logger.error(
+            `Failed to invalidate UIAM APIKey: ${response.result.error_details
+              ?.map((d) => d.reason)
+              .join('; ')}`
+          );
+          continue;
         }
+      }
+
+      try {
+        await savedObjectsClient.delete(savedObjectType, id);
+        totalInvalidated++;
+      } catch (err) {
+        logger.error(`Failed to delete invalidated UIAM API key. Error: ${err.message}`);
       }
     }
   }
