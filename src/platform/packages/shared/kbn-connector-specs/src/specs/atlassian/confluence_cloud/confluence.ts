@@ -61,6 +61,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       defaultMessage: 'Connect to Confluence Cloud to search and retrieve pages and spaces.',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
