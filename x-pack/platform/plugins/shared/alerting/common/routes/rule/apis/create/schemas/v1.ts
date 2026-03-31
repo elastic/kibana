@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  ruleParamsSchemaWithDefaultValueV1,
+  ruleParamsSchemaWithRuleTypeIdV1,
   createRuleParamsExamplesV1,
 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
@@ -171,7 +171,7 @@ export const createBodySchema = schema.object({
       })
     )
   ),
-  params: ruleParamsSchemaWithDefaultValueV1,
+  params: ruleParamsSchemaWithRuleTypeIdV1(),
   schedule: schema.object(
     {
       interval: schema.string({
