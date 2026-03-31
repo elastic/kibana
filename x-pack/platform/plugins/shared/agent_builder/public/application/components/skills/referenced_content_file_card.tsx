@@ -27,9 +27,13 @@ export interface ReferencedContentFileCardProps {
   onFileNameChange: (value: string) => void;
   onRelativePathChange: (value: string) => void;
   onContentChange: (value: string) => void;
+  onFileNameBlur?: () => void;
+  onRelativePathBlur?: () => void;
+  onContentBlur?: () => void;
   fileNameError?: string;
   relativePathError?: string;
   contentError?: string;
+  readOnly?: boolean;
 }
 
 export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps> = ({
@@ -40,9 +44,13 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
   onFileNameChange,
   onRelativePathChange,
   onContentChange,
+  onFileNameBlur,
+  onRelativePathBlur,
+  onContentBlur,
   fileNameError,
   relativePathError,
   contentError,
+  readOnly = false,
 }) => {
   const debouncedContent = useDebouncedValue(content, 300);
   const tokenCount = useMemo(() => estimateTokens(debouncedContent), [debouncedContent]);
@@ -67,8 +75,10 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
         <EuiFieldText
           value={fileName}
           onChange={(e) => onFileNameChange(e.target.value)}
+          onBlur={onFileNameBlur}
           fullWidth
           isInvalid={Boolean(fileNameError)}
+          disabled={readOnly}
           data-test-subj="agentBuilderSkillReferencedContentFileName"
         />
       </EuiFormRow>
@@ -85,8 +95,10 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
         <EuiFieldText
           value={relativePath}
           onChange={(e) => onRelativePathChange(e.target.value)}
+          onBlur={onRelativePathBlur}
           fullWidth
           isInvalid={Boolean(relativePathError)}
+          disabled={readOnly}
           data-test-subj="agentBuilderSkillReferencedContentRelativePath"
         />
       </EuiFormRow>
@@ -112,6 +124,8 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
         <EuiMarkdownEditor
           value={content}
           onChange={onContentChange}
+          onBlur={onContentBlur}
+          readOnly={readOnly}
           aria-label={labels.skills.referencedFileCard.contentAriaLabel}
           data-test-subj="agentBuilderSkillReferencedContentMarkdown"
         />
