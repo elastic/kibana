@@ -8,6 +8,7 @@
  */
 
 import type { Locator } from '@playwright/test';
+import { expect } from '@playwright/test';
 import type { ScoutPage } from '..';
 import { expect } from '../../../ui';
 
