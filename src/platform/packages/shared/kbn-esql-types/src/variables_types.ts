@@ -8,6 +8,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 
 type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
 
@@ -33,6 +34,20 @@ export enum EsqlControlType {
   STATIC_VALUES = 'STATIC_VALUES',
   VALUES_FROM_QUERY = 'VALUES_FROM_QUERY',
 }
+
+export type StaticESQLControl = Extract<
+  OptionsListESQLControlState,
+  { control_type: 'STATIC_VALUES' }
+>;
+export type QueryESQLControl = Extract<
+  OptionsListESQLControlState,
+  { control_type: 'VALUES_FROM_QUERY' }
+>;
+export const isStaticESQLControl = (
+  control: OptionsListESQLControlState
+): control is StaticESQLControl => {
+  return control.control_type === EsqlControlType.STATIC_VALUES;
+};
 
 export interface ESQLControlVariable {
   key: string;

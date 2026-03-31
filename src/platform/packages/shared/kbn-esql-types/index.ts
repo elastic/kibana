@@ -14,9 +14,12 @@ export {
   type ESQLControlVariable,
   type PublishesESQLVariable,
   type PublishesESQLVariables,
+  type StaticESQLControl,
+  type QueryESQLControl,
   apiPublishesESQLVariable,
   apiPublishesESQLVariables,
   controlHasVariableName,
+  isStaticESQLControl,
 } from './src/variables_types';
 
 export {

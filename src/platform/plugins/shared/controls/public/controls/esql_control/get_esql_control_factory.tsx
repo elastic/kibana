@@ -14,7 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import { apiPublishesESQLVariables, isStaticESQLControl } from '@kbn/esql-types';
 import {
   apiHasPinnedPanels,
   initializeUnsavedChanges,
@@ -34,7 +34,6 @@ import type {
   QueryESQLControl,
   StaticESQLControl,
 } from './types';
-import { isStaticESQLControl } from './utils/esql_type_utils';
 
 export const getESQLControlFactory = <
   State extends OptionsListESQLControlState

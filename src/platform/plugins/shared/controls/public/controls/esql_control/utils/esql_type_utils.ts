@@ -8,8 +8,6 @@
  */
 
 import { isNumericType } from '@kbn/esql-language';
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { StaticESQLControl } from '../types';
 
 /**
  * Casts a string value based on its ES|QL column type.
@@ -22,10 +20,4 @@ export const castESQLValue = (val: string, columnType?: string): string | number
     return isNumericType(columnType) ? Number(val) : val;
   }
   return isNaN(Number(val)) ? val : Number(val);
-};
-
-export const isStaticESQLControl = (
-  control: OptionsListESQLControlState
-): control is StaticESQLControl => {
-  return control.control_type === 'STATIC_VALUES';
 };

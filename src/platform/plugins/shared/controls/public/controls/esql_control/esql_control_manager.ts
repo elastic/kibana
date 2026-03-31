@@ -28,7 +28,7 @@ import type {
 } from '@kbn/controls-schemas';
 import type { TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType, isStaticESQLControl } from '@kbn/esql-types';
 import { getESQLQueryVariables, hasStartEndParams } from '@kbn/esql-utils';
 import {
   apiHasSections,
@@ -41,7 +41,7 @@ import type { OptionsListSuggestions } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
 import type { ESQLOptionsListRuntimeState, QueryESQLControl } from './types';
-import { castESQLValue, isStaticESQLControl } from './utils/esql_type_utils';
+import { castESQLValue } from './utils/esql_type_utils';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {

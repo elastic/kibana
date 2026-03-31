@@ -28,12 +28,24 @@ import type {
 import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_schema';
 import type { timeSliderControlSchema } from './time_slider_schema';
 
+/**
+  Converts { key: value | undefined } to { key?: value } 
+ */
+type OptionalIfUndefined<T> = {
+  [K in keyof T as undefined extends T[K] ? K : never]?: T[K];
+} & {
+  [K in keyof T as undefined extends T[K] ? never : K]: T[K];
+};
+
 export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
 export type PinnedControlState = ControlsGroupState[number];
-export type PinnedControlLayoutState = typeof pinnedControlSchema & {
+export type PinnedControlLayoutState = OptionalIfUndefined<{
+  [K in keyof typeof pinnedControlSchema]: TypeOf<(typeof pinnedControlSchema)[K]>;
+}> & {
   order: number;
   type: string;
 };
+
 export type ControlWidth = TypeOf<typeof controlWidthSchema>;
 const controlStateSchema = schema.object(controlTitleSchema);
 export type ControlState = TypeOf<typeof controlStateSchema>;
