@@ -680,16 +680,16 @@ paths:
                   managed: false
                   name: High Risk Vendors
                   riskModifier: 1.5
-              CreateWatchlistWithSourceRequest:
-                summary: Create watchlist with entity source
+              CreateWatchlistWithSourcesRequest:
+                summary: Create watchlist with entity sources
                 value:
                   description: High risk vendor watchlist
-                  entitySource:
-                    enabled: true
-                    identifierField: user.name
-                    indexPattern: my-sync-index
-                    name: My User Index Source
-                    type: index
+                  entitySources:
+                    - enabled: true
+                      identifierField: user.name
+                      indexPattern: my-sync-index
+                      name: My User Index Source
+                      type: index
                   managed: false
                   name: High Risk Vendors
                   riskModifier: 1.5
@@ -699,43 +699,45 @@ paths:
                 description:
                   description: Description of the watchlist
                   type: string
-                entitySource:
-                  additionalProperties: false
-                  description: Optional entity source to create and link to the watchlist
-                  type: object
-                  properties:
-                    enabled:
-                      type: boolean
-                    filter:
-                      $ref: '#/components/schemas/Filter'
-                    identifierField:
-                      description: >-
-                        Field used to query the entity store for index-type
-                        sources
-                      type: string
-                    indexPattern:
-                      type: string
-                    integrationName:
-                      description: >-
-                        Required when type is entity_analytics_integration. One
-                        of entityanalytics_okta, entityanalytics_ad.
-                      type: string
-                    matchers:
-                      items:
-                        $ref: '#/components/schemas/Matcher'
-                      type: array
-                    name:
-                      type: string
-                    queryRule:
-                      description: >-
-                        KQL query used to filter data from the provided index
-                        patterns
-                      type: string
-                    type:
-                      $ref: '#/components/schemas/EntitySourceType'
-                  required:
-                    - type
-                    - name
+                entitySources:
+                  description: Optional entity sources to create and link to the watchlist
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      filter:
+                        $ref: '#/components/schemas/Filter'
+                      identifierField:
+                        description: >-
+                          Field used to query the entity store for index-type
+                          sources
+                        type: string
+                      indexPattern:
+                        type: string
+                      integrationName:
+                        description: >-
+                          Required when type is entity_analytics_integration.
+                          One of entityanalytics_okta, entityanalytics_ad.
+                        type: string
+                      matchers:
+                        items:
+                          $ref: '#/components/schemas/Matcher'
+                        type: array
+                      name:
+                        type: string
+                      queryRule:
+                        description: >-
+                          KQL query used to filter data from the provided index
+                          patterns
+                        type: string
+                      type:
+                        $ref: '#/components/schemas/EntitySourceType'
+                    required:
+                      - type
+                      - name
+                  type: array
                 managed:
                   description: Indicates if the watchlist is managed by the system
                   type: boolean
@@ -771,8 +773,10 @@ paths:
                   - $ref: '#/components/schemas/WatchlistObject'
                   - type: object
                     properties:
-                      entitySource:
-                        $ref: '#/components/schemas/MonitoringEntitySource'
+                      entitySources:
+                        items:
+                          $ref: '#/components/schemas/MonitoringEntitySource'
+                        type: array
           description: Watchlist created successfully
       summary: Create a new watchlist
       tags:
