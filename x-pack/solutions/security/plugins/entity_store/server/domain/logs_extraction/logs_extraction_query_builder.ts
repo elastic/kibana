@@ -8,6 +8,7 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToESQL } from '@kbn/streamlang';
+import { HASH_ALG } from '../../../common/domain/euid';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
 import {
@@ -16,7 +17,7 @@ import {
   type EntityType,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEuidEsqlEvaluation } from '../../../common/domain/euid/esql';
-import { HASH_ALG } from '../constants';
+
 import {
   buildExtractionSourceClause,
   buildFieldEvaluations,
