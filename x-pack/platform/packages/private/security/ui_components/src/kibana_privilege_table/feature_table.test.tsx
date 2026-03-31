@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { EuiThemeProvider } from '@elastic/eui';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import React from 'react';
 
 import type { KibanaFeature, SubFeatureConfig } from '@kbn/features-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { Role } from '@kbn/security-plugin-types-common';
 import {
   createFeature,
   createKibanaPrivileges,
   kibanaFeatures,
 } from '@kbn/security-role-management-model/src/__fixtures__';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
 import { FeatureTable } from './feature_table';
@@ -47,22 +46,18 @@ const setup = (config: TestConfig) => {
 
   const onChange = jest.fn();
   const onChangeAll = jest.fn();
-  const { container } = render(
-    <I18nProvider>
-      <EuiThemeProvider>
-        <FeatureTable
-          role={config.role}
-          privilegeCalculator={calculator}
-          kibanaPrivileges={kibanaPrivileges}
-          onChange={onChange}
-          onChangeAll={onChangeAll}
-          showAdditionalPermissionsMessage={true}
-          canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
-          privilegeIndex={config.privilegeIndex}
-          allSpacesSelected={true}
-        />
-      </EuiThemeProvider>
-    </I18nProvider>
+  const { container } = renderWithKibanaRenderContext(
+    <FeatureTable
+      role={config.role}
+      privilegeCalculator={calculator}
+      kibanaPrivileges={kibanaPrivileges}
+      onChange={onChange}
+      onChangeAll={onChangeAll}
+      showAdditionalPermissionsMessage={true}
+      canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
+      privilegeIndex={config.privilegeIndex}
+      allSpacesSelected={true}
+    />
   );
 
   const displayedPrivileges = config.calculateDisplayedPrivileges
@@ -1085,9 +1080,6 @@ describe('FeatureTable', () => {
 
     const fooCategory = screen.getByTestId('featureCategory_foo');
     const barCategory = screen.getByTestId('featureCategory_bar');
-
-    expect(fooCategory).not.toBeNull();
-    expect(barCategory).not.toBeNull();
 
     expect(within(fooCategory).getByTestId('categoryLabel').textContent).toMatchInlineSnapshot(
       `"1 / 2 features granted"`
