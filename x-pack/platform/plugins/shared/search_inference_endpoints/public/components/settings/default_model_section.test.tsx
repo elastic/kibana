@@ -131,4 +131,75 @@ describe('DefaultModelSection', () => {
 
     expect(screen.getByTestId('defaultModelComboBox')).toBeInTheDocument();
   });
+
+  it('does not show connector-not-exist error while connector existence is loading', () => {
+    mockUseConnectorExists.mockReturnValue({ exists: false, loading: true });
+
+    const settings = createMockSettings({
+      state: { defaultModelId: 'some-connector', disallowOtherModels: false },
+    });
+
+    render(
+      <Wrapper>
+        <DefaultModelSection defaultModelSettings={settings} />
+      </Wrapper>
+    );
+
+    expect(
+      screen.queryByText(/The model previously selected is not available/)
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows disallow description text when disallowOtherModels is true', () => {
+    const settings = createMockSettings({
+      state: { defaultModelId: 'pre-1', disallowOtherModels: true },
+    });
+
+    render(
+      <Wrapper>
+        <DefaultModelSection defaultModelSettings={settings} />
+      </Wrapper>
+    );
+
+    expect(
+      screen.getByText('Model selection is hidden and only the default model will be used.')
+    ).toBeInTheDocument();
+  });
+
+  it('shows allow description text when disallowOtherModels is false', () => {
+    const settings = createMockSettings({
+      state: { defaultModelId: 'pre-1', disallowOtherModels: false },
+    });
+
+    render(
+      <Wrapper>
+        <DefaultModelSection defaultModelSettings={settings} />
+      </Wrapper>
+    );
+
+    expect(
+      screen.getByText('Features can allow users to select other models than the default.')
+    ).toBeInTheDocument();
+  });
+
+  it('does not show validation errors when connector exists and no disallow conflict', () => {
+    mockUseConnectorExists.mockReturnValue({ exists: true, loading: false });
+
+    const settings = createMockSettings({
+      state: { defaultModelId: 'pre-1', disallowOtherModels: true },
+    });
+
+    render(
+      <Wrapper>
+        <DefaultModelSection defaultModelSettings={settings} />
+      </Wrapper>
+    );
+
+    expect(
+      screen.queryByText(/The model previously selected is not available/)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/When disallowing all other models, a default model must be selected/)
+    ).not.toBeInTheDocument();
+  });
 });
