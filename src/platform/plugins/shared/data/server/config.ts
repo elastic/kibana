@@ -56,7 +56,7 @@ export const searchConfigSchema = schema.object({
     /**
      *  Block and wait until the search is completed up to the timeout (see es async_search's `wait_for_completion_timeout`)
      */
-    waitForCompletion: schema.duration({ defaultValue: '1000ms' }),
+    waitForCompletion: schema.duration({ defaultValue: '200ms' }),
     /**
      *  How long the async search needs to be available after each search poll. Ongoing async searches and any saved search results are deleted after this period.
      *  (see es async_search's `keep_alive`)
