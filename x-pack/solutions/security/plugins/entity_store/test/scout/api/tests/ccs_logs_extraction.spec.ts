@@ -11,6 +11,7 @@ import type { EsClient } from '@kbn/scout-security';
 import { get } from 'lodash';
 import {
   COMMON_HEADERS,
+  INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
@@ -100,12 +101,17 @@ apiTest.describe(
   { tag: ENTITY_STORE_TAGS },
   () => {
     let defaultHeaders: Record<string, string>;
+    let internalHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient }) => {
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = {
         ...credentials.cookieHeader,
         ...COMMON_HEADERS,
+      };
+      internalHeaders = {
+        ...credentials.cookieHeader,
+        ...INTERNAL_HEADERS,
       };
 
       await kbnClient.uiSettings.update({
@@ -171,7 +177,7 @@ apiTest.describe(
         const extractResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES('host'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               indexPatterns: [CCS_TEST_LOGS_INDEX],
@@ -187,7 +193,7 @@ apiTest.describe(
         const logExtractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               fromDateISO: TO_DATE,
@@ -310,7 +316,7 @@ apiTest.describe(
         const extractResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES('user'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               indexPatterns: [CCS_TEST_LOGS_INDEX],
@@ -326,7 +332,7 @@ apiTest.describe(
         const logExtractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               fromDateISO: TO_DATE,
@@ -422,7 +428,7 @@ apiTest.describe(
         const extractResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES('service'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               indexPatterns: [CCS_TEST_LOGS_INDEX],
@@ -438,7 +444,7 @@ apiTest.describe(
         const logExtractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('service'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               fromDateISO: TO_DATE,
@@ -497,7 +503,7 @@ apiTest.describe(
         const extractResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES('generic'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               indexPatterns: [CCS_TEST_LOGS_INDEX],
@@ -513,7 +519,7 @@ apiTest.describe(
         const logExtractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('generic'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               fromDateISO: TO_DATE,

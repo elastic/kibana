@@ -16,7 +16,12 @@ import {
 } from '../../../../server/domain/constants';
 import { getLatestEntitiesIndexName } from '../../../../common/domain/entity_index';
 import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
-import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import {
+  COMMON_HEADERS,
+  INTERNAL_HEADERS,
+  ENTITY_STORE_ROUTES,
+  ENTITY_STORE_TAGS,
+} from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
 
@@ -68,12 +73,17 @@ const getRoleWithoutSavedObjectCreate = () => buildRoleDescriptor({ withSavedObj
 
 apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
       ...COMMON_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
     };
   });
 
@@ -100,7 +110,7 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
       );
 
       const response = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
-        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+        headers: { ...INTERNAL_HEADERS, ...apiKeyHeader },
         responseType: 'json',
         body: {},
       });
@@ -128,7 +138,7 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
       );
 
       const response = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
-        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+        headers: { ...INTERNAL_HEADERS, ...apiKeyHeader },
         responseType: 'json',
         body: {},
       });
@@ -148,7 +158,7 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
     });
 
     const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
-      headers: defaultHeaders,
+      headers: internalHeaders,
       responseType: 'json',
       body: {},
     });

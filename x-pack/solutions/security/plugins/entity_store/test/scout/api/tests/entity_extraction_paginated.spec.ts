@@ -7,7 +7,12 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import {
+  COMMON_HEADERS,
+  INTERNAL_HEADERS,
+  ENTITY_STORE_ROUTES,
+  ENTITY_STORE_TAGS,
+} from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { expectedHostEntities } from '../fixtures/entity_extraction_expected';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
@@ -17,12 +22,17 @@ apiTest.describe(
   { tag: ENTITY_STORE_TAGS },
   () => {
     let defaultHeaders: Record<string, string>;
+    let internalHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = {
         ...credentials.cookieHeader,
         ...COMMON_HEADERS,
+      };
+      internalHeaders = {
+        ...credentials.cookieHeader,
+        ...INTERNAL_HEADERS,
       };
 
       // enable feature flag
@@ -66,7 +76,7 @@ apiTest.describe(
         const extractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               fromDateISO: '2026-01-20T11:00:00Z',

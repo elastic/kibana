@@ -9,6 +9,7 @@ import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   COMMON_HEADERS,
+  INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
@@ -25,12 +26,17 @@ import {
 
 apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
       ...COMMON_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
     };
 
     await kbnClient.uiSettings.update({
@@ -50,7 +56,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
     expect([200, 201]).toContain(installResponse.statusCode);
 
     const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
-      headers: defaultHeaders,
+      headers: internalHeaders,
       responseType: 'json',
       body: {},
     });
@@ -87,7 +93,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
       await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, entraEntity, oktaEntity);
 
       const groupResponse = await apiClient.get(
@@ -119,7 +125,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
       await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, oktaEntity, adEntity);
       await waitForResolution(esClient, entraEntity, adEntity);
 
@@ -147,7 +153,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: entityB, namespace: 'github', email });
       await seedUserEntity(esClient, { entityId: entityA, namespace: 'slack', email });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, entityB, entityA);
 
       const groupResponse = await apiClient.get(
@@ -183,7 +189,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       // Seed 3rd entity with the same email
       await seedUserEntity(esClient, { entityId: newEntity, namespace: 'entra_id', email });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, newEntity, targetEntity);
 
       const groupResponse = await apiClient.get(
@@ -219,7 +225,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
         email: emailA,
       });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, entityA2, entityA1);
 
       // Second batch — email B (naturally gets a later timestamp since time has passed)
@@ -230,7 +236,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
         email: emailB,
       });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
       await waitForResolution(esClient, entityB2, entityB1);
 
       // Verify both groups exist independently
@@ -278,7 +284,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
         email: sharedEmail,
       });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
 
       // B+A should be resolved (AD wins as target)
       await waitForResolution(esClient, singleA, singleB);
@@ -329,7 +335,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       });
       expect(link2.statusCode).toBe(200);
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
 
       // E3 should stay unresolved because the bucket is ambiguous (2 existing targets)
       await assertNotResolved(esClient, e3);
@@ -358,7 +364,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       // Seed C (unresolved, same email)
       await seedUserEntity(esClient, { entityId: entityC, namespace: 'entra_id', email });
 
-      await triggerMaintainerRun(apiClient, defaultHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders);
 
       // C should resolve to B (existing target in the group)
       await waitForResolution(esClient, entityC, entityB);

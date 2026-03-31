@@ -9,6 +9,7 @@ import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   COMMON_HEADERS,
+  INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
@@ -18,12 +19,17 @@ import { clearEntityStoreIndices, forceLogExtraction } from '../fixtures/helpers
 
 apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
       ...COMMON_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
     };
 
     await kbnClient.uiSettings.update({
@@ -57,14 +63,14 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
     async ({ apiClient, esClient }) => {
       await forceLogExtraction(
         apiClient,
-        defaultHeaders,
+        internalHeaders,
         'host',
         '2026-01-20T11:00:00Z',
         '2026-01-20T13:00:00Z'
       );
 
       const snapshotResponse = await apiClient.post(ENTITY_STORE_ROUTES.FORCE_HISTORY_SNAPSHOT, {
-        headers: defaultHeaders,
+        headers: internalHeaders,
         responseType: 'json',
         body: {},
       });
