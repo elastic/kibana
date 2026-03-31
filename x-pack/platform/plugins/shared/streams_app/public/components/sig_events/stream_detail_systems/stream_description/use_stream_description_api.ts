@@ -118,20 +118,21 @@ export const useStreamDescriptionApi = ({
     setIsEditing(true);
   }, [setIsEditing]);
 
-  const getDescriptionGenerationStatus = useCallback(async (): Promise<DescriptionGenerationTaskResult> => {
-    if (!enableGeneration) {
-      return { status: TaskStatus.NotStarted };
-    }
-    return await streams.streamsRepositoryClient.fetch(
-      'GET /internal/streams/{name}/_description_generation/_status',
-      {
-        signal,
-        params: {
-          path: { name: definition.stream.name },
-        },
+  const getDescriptionGenerationStatus =
+    useCallback(async (): Promise<DescriptionGenerationTaskResult> => {
+      if (!enableGeneration) {
+        return { status: TaskStatus.NotStarted };
       }
-    );
-  }, [definition.stream.name, enableGeneration, signal, streams.streamsRepositoryClient]);
+      return await streams.streamsRepositoryClient.fetch(
+        'GET /internal/streams/{name}/_description_generation/_status',
+        {
+          signal,
+          params: {
+            path: { name: definition.stream.name },
+          },
+        }
+      );
+    }, [definition.stream.name, enableGeneration, signal, streams.streamsRepositoryClient]);
 
   const scheduleDescriptionGenerationTask = useCallback(
     async (connectorId: string) => {
