@@ -74,7 +74,6 @@ const clusterPerformanceTitle = i18n.translate('management.sections.clusterPerfo
   defaultMessage: 'Cluster performance',
 });
 
-
 export const IngestSection = {
   id: ManagementSectionId.Ingest,
   title: ingestTitle,
