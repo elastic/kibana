@@ -161,6 +161,7 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
+import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import {
   initializeEndpointExceptionsPerPolicyOptInStatus,
@@ -323,6 +324,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         auditLogger: plugins.security?.audit.withoutRequest,
         productFeaturesService,
       });
+      if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+        registerWatchlistMaintainer({
+          entityStore: plugins.entityStore,
+          getStartServices: core.getStartServices,
+          logger: this.logger,
+        });
+      }
     } else {
       registerRiskScoringTask({
         getStartServices: core.getStartServices,
@@ -722,6 +730,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (plugins.taskManager) {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
+        isServerless: this.isServerless,
       });
 
       this.trialCompanionMilestoneService.setup({

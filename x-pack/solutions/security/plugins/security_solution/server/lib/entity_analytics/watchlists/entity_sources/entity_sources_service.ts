@@ -40,25 +40,40 @@ export const createEntitySourcesService = ({
     const targetIndex = getIndexForWatchlist(watchlist.name, namespace);
 
     const { sources } = await descriptorClient.list({});
-    const idp = (source: (typeof sources)[number]): IdentityProvider => {
-      if (source.type === 'index') {
-        return {
-          type: 'index' as const,
-          field: source.identifierField || '',
-        };
-      }
-
-      return {
-        type: 'integration' as const,
-        name: source.integrationName as IntegrationType,
-      };
-    };
     const entitiesBySource = await Promise.all(
       sources
         .filter((s) => sourceIds.includes(s.id))
         .map(async (source) => {
+          if (source.type === 'index') {
+            const identity: IdentityProvider = {
+              type: 'index',
+              field: source.identifierField || '',
+            };
+            const { correlationMap, entityIdsByType } =
+              await watchlistEntitiesService.listEntityStoreEntities(identity);
+            return {
+              sourceId: source.id,
+              entityStoreEntityIdsByType: entityIdsByType,
+              correlationMap,
+            };
+          }
+
+          if (source.type === 'store') {
+            const identity: IdentityProvider = {
+              type: 'store',
+              queryRule: source.queryRule || '',
+            };
+            const entityStoreEntityIdsByType =
+              await watchlistEntitiesService.listEntityStoreEntities(identity);
+            return { sourceId: source.id, entityStoreEntityIdsByType };
+          }
+
+          const identity: IdentityProvider = {
+            type: 'integration',
+            name: source.integrationName as IntegrationType,
+          };
           const entityStoreEntityIdsByType = await watchlistEntitiesService.listEntityStoreEntities(
-            idp(source)
+            identity
           );
           return { sourceId: source.id, entityStoreEntityIdsByType };
         })
@@ -76,5 +91,36 @@ export const createEntitySourcesService = ({
     logger.info(`[WatchlistSync] Completed sync for watchlist ${watchlistId} (${watchlist.name})`);
   };
 
-  return { syncWatchlist };
+  const syncAllWatchlists = async () => {
+    const allWatchlists = await watchlistClient.list();
+    // The id field is always present on persisted watchlists (set from saved object id);
+    // it is only optional in the shared OpenAPI schema because create requests omit it.
+    const watchlists = allWatchlists.filter((w): w is typeof w & { id: string } => w.id != null);
+
+    if (watchlists.length === 0) {
+      logger.debug(`No watchlists found for namespace "${namespace}". Skipping sync.`);
+      return;
+    }
+
+    logger.debug(`Found ${watchlists.length} watchlist(s) to sync in namespace "${namespace}"`);
+
+    for (const watchlist of watchlists) {
+      try {
+        logger.debug(`Syncing watchlist "${watchlist.name}" (${watchlist.id})`);
+        await syncWatchlist(watchlist.id);
+      } catch (err) {
+        logger.error(
+          `Failed to sync watchlist "${watchlist.name}" (${watchlist.id}): ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    }
+
+    logger.info(
+      `[WatchlistSync] Completed sync of ${watchlists.length} watchlist(s) for namespace "${namespace}"`
+    );
+  };
+
+  return { syncWatchlist, syncAllWatchlists };
 };
