@@ -31,6 +31,24 @@ export const registerSearchRoute = ({ router, logger }: RouteOptions) => {
     async (context, _request, response) => {
       try {
         const coreContext = await context.core;
+
+        // In ESS, verify the user has the ES monitor cluster privilege before proceeding.
+        // In Serverless, security?.hasPrivileges is absent so the check is silently skipped —
+        // GET /_cat/tasks is an internal-only API that requires operator-level access there,
+        // and Kibana RBAC (requiredPrivileges above) is the authorization gate.
+        const esPrivileges =
+          await coreContext.elasticsearch.client.asCurrentUser.security?.hasPrivileges?.({
+            cluster: ['monitor'],
+          });
+        if (esPrivileges && !esPrivileges.cluster?.monitor) {
+          return response.forbidden({
+            body: { message: 'Insufficient privileges to view queries' },
+          });
+        }
+
+        // asInternalUser is intentional: in Serverless, GET /_cat/tasks is an internal-only API
+        // that requires operator-level access. Kibana RBAC (requiredPrivileges above) is the
+        // authorization gate; the pre-flight hasPrivileges check above enforces ES privileges in ESS.
         const esClient = coreContext.elasticsearch.client.asInternalUser;
         const minRunningTimeMs = await coreContext.uiSettings.client.get<number>(
           QUERY_ACTIVITY_MIN_RUNNING_TIME_SETTING

@@ -11,20 +11,20 @@ import { PLUGIN_NAME } from '../../../common/constants';
 import { useQueryActivityAppContext } from '../app_context';
 
 export const useBreadcrumbs = () => {
-  const { chrome } = useQueryActivityAppContext();
+  const { chrome, http } = useQueryActivityAppContext();
 
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
         text: i18n.translate('xpack.queryActivity.breadcrumb.management', {
-          defaultMessage: 'Management',
+          defaultMessage: 'Stack Management',
         }),
-        href: '/',
+        href: http.basePath.prepend('/app/management'),
       },
       {
         text: PLUGIN_NAME,
       },
     ]);
     chrome.docTitle.change(PLUGIN_NAME);
-  }, [chrome]);
+  }, [chrome, http]);
 };

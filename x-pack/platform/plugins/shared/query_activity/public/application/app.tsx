@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -32,7 +31,6 @@ const QueryActivityAppWithData: React.FC = () => {
   const { apiService, notifications } = useQueryActivityAppContext();
   const { data, isLoading, error, resendRequest } = apiService.useLoadQueryActivity();
 
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
   const [secondsAgo, setSecondsAgo] = useState(0);
   // Tracks task IDs for which a cancel request has been sent but the task hasn't
@@ -84,9 +82,7 @@ const QueryActivityAppWithData: React.FC = () => {
   }, [pendingCancellations.size, apiService, resendRequest]);
 
   const handleRefresh = useCallback(() => {
-    setIsRefreshing(true);
     resendRequest();
-    setIsRefreshing(false);
     setLastRefreshTime(Date.now());
   }, [resendRequest]);
 
@@ -164,19 +160,6 @@ const QueryActivityAppWithData: React.FC = () => {
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="popout"
-                iconSide="right"
-                href="https://elastic.co"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {i18n.translate('xpack.queryActivity.queryHistoryButton', {
-                  defaultMessage: 'Query history',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
               <EuiFlexGroup
                 direction="column"
                 alignItems="center"
@@ -184,7 +167,7 @@ const QueryActivityAppWithData: React.FC = () => {
                 responsive={false}
               >
                 <EuiFlexItem grow={false}>
-                  <EuiButton iconType="refresh" isLoading={isRefreshing} onClick={handleRefresh}>
+                  <EuiButton iconType="refresh" isLoading={isLoading} onClick={handleRefresh}>
                     {i18n.translate('xpack.queryActivity.refreshButton', {
                       defaultMessage: 'Refresh',
                     })}

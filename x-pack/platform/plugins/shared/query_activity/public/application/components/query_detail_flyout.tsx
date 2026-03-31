@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import moment from 'moment';
+import { escapeQuotes } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -70,7 +71,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
     }
     const discoverParams: DiscoverAppLocatorParams = {
       timeRange: { from: rangeFrom, to: rangeTo },
-      query: { language: 'kuery', query: `trace.id:"${query.traceId}"` },
+      query: { language: 'kuery', query: `trace.id:"${escapeQuotes(query.traceId)}"` },
       filters: [],
     };
     const discoverHref = discoverLocator?.getRedirectUrl(discoverParams);

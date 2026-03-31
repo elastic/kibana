@@ -52,7 +52,7 @@ export const registerPrivilegesRoute = ({ router, logger }: RouteOptions) => {
 
         return response.ok({ body: { canCancelTasks, canViewTasks, missingClusterPrivileges } });
       } catch (error) {
-        logger.debug(`Failed to check query activity privileges: ${error}`);
+        logger.warn(`Failed to check query activity privileges: ${error}`);
         return response.ok({
           body: { canCancelTasks: false, canViewTasks: false, missingClusterPrivileges: [] },
         });

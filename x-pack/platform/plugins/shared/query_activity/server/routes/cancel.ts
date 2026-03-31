@@ -32,6 +32,24 @@ export const registerCancelRoute = ({ router, logger }: RouteOptions) => {
 
       try {
         const coreContext = await context.core;
+
+        // In ESS, verify the user has the ES manage cluster privilege before proceeding.
+        // In Serverless, security?.hasPrivileges is absent so the check is silently skipped —
+        // POST /_tasks/_cancel is an internal-only API that requires operator-level access there,
+        // and Kibana RBAC (requiredPrivileges above) is the authorization gate.
+        const esPrivileges =
+          await coreContext.elasticsearch.client.asCurrentUser.security?.hasPrivileges?.({
+            cluster: ['manage'],
+          });
+        if (esPrivileges && !esPrivileges.cluster?.manage) {
+          return response.forbidden({
+            body: { message: 'Insufficient privileges to cancel query' },
+          });
+        }
+
+        // asInternalUser is intentional: in Serverless, POST /_tasks/_cancel is an internal-only
+        // API that requires operator-level access. Kibana RBAC (requiredPrivileges above) is the
+        // authorization gate; the pre-flight hasPrivileges check above enforces ES privileges in ESS.
         const esClient = coreContext.elasticsearch.client.asInternalUser;
 
         const result = await esClient.tasks.cancel({
@@ -50,19 +68,9 @@ export const registerCancelRoute = ({ router, logger }: RouteOptions) => {
           return response.ok({ body: { acknowledged: true } });
         }
 
-        if (statusCode === 403) {
-          return response.forbidden({
-            body: { message: 'Insufficient privileges to cancel query' },
-          });
-        }
-
         logger.error(`Failed to cancel query activity task "${taskId}": ${error}`);
         return response.customError({
-          statusCode:
-            statusCode ??
-            (error as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode ??
-            (error as { statusCode?: number; meta?: { statusCode?: number } })?.meta?.statusCode ??
-            500,
+          statusCode: statusCode ?? 500,
           body: { message: 'Failed to cancel query' },
         });
       }

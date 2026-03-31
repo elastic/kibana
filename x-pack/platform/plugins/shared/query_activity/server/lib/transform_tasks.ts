@@ -150,6 +150,10 @@ export function transformTasks(tasks: TasksTaskInfo[], thresholdNanos: number): 
       continue;
     }
 
+    if (task.start_time_in_millis == null) {
+      continue;
+    }
+
     const action = task.action ?? '';
     const queryType = getQueryType(action);
     const description = task.description ?? '';
@@ -177,7 +181,7 @@ export function transformTasks(tasks: TasksTaskInfo[], thresholdNanos: number): 
       taskId: `${task.node}:${task.id}`,
       queryType,
       source,
-      startTime: task.start_time_in_millis as number,
+      startTime: task.start_time_in_millis,
       runningTimeMs: Math.round((task.running_time_in_nanos ?? 0) / 1_000_000),
       indices,
       query,
