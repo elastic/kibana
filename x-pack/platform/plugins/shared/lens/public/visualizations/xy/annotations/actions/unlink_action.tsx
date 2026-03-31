@@ -11,7 +11,7 @@ import type { LayerAction, StateSetter } from '@kbn/lens-common';
 import type {
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from '../../types';
 import { getAnnotationLayerTitle } from '../../visualization_helpers';
 
@@ -21,9 +21,9 @@ export const getUnlinkLayerAction = ({
   setState,
   toasts,
 }: {
-  state: XYState;
+  state: XYVisualizationState;
   layer: XYByReferenceAnnotationLayerConfig;
-  setState: StateSetter<XYState, unknown>;
+  setState: StateSetter<XYVisualizationState, unknown>;
   toasts: ToastsStart;
 }): LayerAction => {
   return {

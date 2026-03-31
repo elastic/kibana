@@ -41,7 +41,7 @@ apiTest.describe(
           `${INTEGRATION_API_BASE_PATH}/${SHARED_INTEGRATION_ID}/approve`,
           {
             headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-            body: { version: '0.1.0' },
+            body: { version: '0.1.0', categories: ['security'] },
             responseType: 'json',
           }
         );
@@ -57,7 +57,7 @@ apiTest.describe(
           `${INTEGRATION_API_BASE_PATH}/${NON_EXISTENT_INTEGRATION_ID}/approve`,
           {
             headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-            body: { version: '0.1.0' },
+            body: { version: '0.1.0', categories: ['security'] },
             responseType: 'json',
           }
         );

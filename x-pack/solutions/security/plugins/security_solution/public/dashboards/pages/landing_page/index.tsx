@@ -65,7 +65,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
             isDisabled={isLoading}
             color="primary"
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             href={url}
             onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
               ev.preventDefault();

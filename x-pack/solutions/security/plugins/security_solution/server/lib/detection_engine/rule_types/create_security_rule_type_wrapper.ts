@@ -289,6 +289,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             remainingGap,
             warningStatusMessage: rangeTuplesWarningMessage,
             gap,
+            gapReason: detectedGapReason,
             originalFrom,
             originalTo,
           } = await getRuleRangeTuples({
@@ -300,12 +301,17 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
             ruleExecutionLogger,
             alerting,
+            lastEnabledAt: rule.lastEnabledAt,
           });
           if (rangeTuplesWarningMessage != null) {
             ruleExecutionLogger.warn(rangeTuplesWarningMessage);
           }
 
           agent.setCustomContext({ [SECURITY_NUM_RANGE_TUPLES]: tuples.length });
+
+          const gapReason = experimentalFeatures.gapReasonDetectionEnabled
+            ? detectedGapReason
+            : undefined;
 
           if (remainingGap.asMilliseconds() > 0) {
             const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
@@ -318,6 +324,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 originalFrom,
                 originalTo,
                 ruleParams: params,
+                gapReasonType: gapReason?.type,
               });
             }
             ruleExecutionLogger.error(gapErrorMessage);
@@ -420,6 +427,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   enrichmentTimes: result.enrichmentTimes.concat(runResult.enrichmentTimes),
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
+                  alertsCandidateCount: runResult.alertsCandidateCount,
                   suppressedAlertsCount: runResult.suppressedAlertsCount,
                   totalEventsFound:
                     (result.totalEventsFound ?? 0) + (runResult.totalEventsFound ?? 0),
@@ -469,10 +477,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   ? Math.round(sum(result.enrichmentTimes.map(Number)))
                   : undefined,
               frozen_indices_queried_count: frozenIndicesQueriedCount,
+              alerts_candidate_count: result.alertsCandidateCount,
               alerts_suppressed_count: suppressedAlertsCount,
               gap_duration_s:
                 gap && remainingGap ? Math.round(remainingGap.asSeconds()) : undefined,
               gap_range: gap,
+              gap_reason: gapReason,
             });
 
             const createdSignalsCount = result.createdSignals.length;

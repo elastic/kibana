@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/saved-search-plugin'
   - '@kbn/content-management-utils'
   - '@kbn/control-group-renderer'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod

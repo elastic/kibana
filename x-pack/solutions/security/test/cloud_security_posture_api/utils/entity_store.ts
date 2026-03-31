@@ -8,15 +8,14 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
-import type SuperTest from 'supertest';
-import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
+import type { Agent } from 'supertest';
 import { CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 
 export interface EntityStoreHelpersDeps {
   es: Client;
   logger: ToolingLog;
   retry: RetryService;
-  supertest: SuperTest.Agent;
+  supertest: Pick<Agent, 'get' | 'post' | 'delete'>;
 }
 
 /**
@@ -89,75 +88,6 @@ export const enableAssetInventory = async ({
     .send({})
     .expect(200);
   logger.debug(`Asset inventory enabled for space: ${spaceId || 'default'}`);
-};
-
-/**
- * Helper to wait for enrich policy to be created
- */
-export const waitForEnrichPolicyCreated = async ({
-  es,
-  retry,
-  logger,
-  spaceId,
-}: Pick<EntityStoreHelpersDeps, 'es' | 'retry' | 'logger'> & { spaceId?: string }) => {
-  const policyId = getEnrichPolicyId(spaceId);
-  logger.debug(`Waiting for enrich policy to be created: ${policyId}`);
-  await retry.waitForWithTimeout('enrich policy to be created', 200000, async () => {
-    try {
-      const res = await es.enrich.getPolicy({ name: policyId });
-      const policy = res.policies?.[0];
-      if (policy) {
-        logger.debug(`Enrich policy found: ${JSON.stringify(res)}`);
-        return true;
-      } else {
-        logger.debug(`Enrich policy not found in response: ${JSON.stringify(res)}`);
-        return false;
-      }
-    } catch (e) {
-      logger.debug(`Error getting enrich policy: ${e.message || JSON.stringify(e)}`);
-      return false;
-    }
-  });
-};
-
-/**
- * Helper to execute enrich policy with retry logic
- */
-export const executeEnrichPolicy = async ({
-  es,
-  retry,
-  logger,
-  spaceId,
-}: Pick<EntityStoreHelpersDeps, 'es' | 'retry' | 'logger'> & { spaceId?: string }) => {
-  const spaceIdentifier = spaceId || 'default';
-  const policyId = getEnrichPolicyId(spaceId);
-  const enrichIndexName = `.enrich-${policyId}`;
-  logger.debug(`Executing enrich policy: ${policyId} for space: ${spaceIdentifier}`);
-  await retry.waitForWithTimeout(
-    `enrich policy to be executed for ${spaceIdentifier} space`,
-    20000,
-    async () => {
-      logger.debug(`Attempting to execute enrich policy: ${policyId}`);
-      try {
-        const data = await es.enrich.executePolicy({
-          name: policyId,
-          wait_for_completion: true,
-        });
-        logger.debug(`Enrich policy executed: ${JSON.stringify(data)}`);
-
-        // Check if the enrich index has documents
-        const countResponse = await es.count({
-          index: enrichIndexName,
-        });
-        logger.debug(`Enrich index [${enrichIndexName}] document count: ${countResponse.count}`);
-
-        return countResponse.count > 0;
-      } catch (e) {
-        logger.debug(`Error executing enrich policy: ${e.message || JSON.stringify(e)}`);
-        return false;
-      }
-    }
-  );
 };
 
 /**
