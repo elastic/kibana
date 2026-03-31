@@ -55,21 +55,22 @@ export const createSmlAttachTool = ({
     const smlService = getSmlService();
     const { spaceId, savedObjectsClient, request, attachments, esClient, logger } = context;
 
+    const uniqueChunkIds = [...new Set(chunkIds)];
     const accessMap = await smlService.checkItemsAccess({
-      ids: chunkIds,
+      ids: uniqueChunkIds,
       spaceId,
       esClient: esClient.asCurrentUser,
       request,
     });
 
     const smlDocs = await smlService.getDocuments({
-      ids: chunkIds.filter((chunkId) => accessMap.get(chunkId)),
+      ids: uniqueChunkIds.filter((chunkId) => accessMap.get(chunkId)),
       spaceId,
       esClient: esClient.asCurrentUser,
     });
 
     const results = await Promise.all(
-      chunkIds.map(async (chunkId) => {
+      uniqueChunkIds.map(async (chunkId) => {
         if (!accessMap.get(chunkId)) {
           return createErrorResult({
             message: `Access denied: you do not have the required permissions to access SML item '${chunkId}'`,
