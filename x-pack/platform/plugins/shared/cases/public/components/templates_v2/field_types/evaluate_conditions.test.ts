@@ -124,6 +124,40 @@ describe('evaluateCondition', () => {
         )
       ).toBe(false);
     });
+
+    // CHECKBOX_GROUP fields store selections as a JSON array string, e.g. '["api","database"]'.
+    // To match an exact element, the rule value must include JSON quotes: '"database"'.
+    it('returns true when a JSON-array string contains the JSON-quoted element', () => {
+      expect(
+        evaluateCondition(
+          { field: 'notes', operator: 'contains', value: '"database"' },
+          { notes: '["api","database"]' },
+          typeMap
+        )
+      ).toBe(true);
+    });
+
+    it('returns false when a JSON-array string does not contain the JSON-quoted element', () => {
+      expect(
+        evaluateCondition(
+          { field: 'notes', operator: 'contains', value: '"auth"' },
+          { notes: '["api","database"]' },
+          typeMap
+        )
+      ).toBe(false);
+    });
+
+    it('matches a substring without JSON quotes (unquoted value matches partial text)', () => {
+      // Without JSON quotes the operator does a raw substring check, so "database" still matches.
+      // Use JSON-quoted values ('"database"') for exact element matching in CHECKBOX_GROUP rules.
+      expect(
+        evaluateCondition(
+          { field: 'notes', operator: 'contains', value: 'database' },
+          { notes: '["api","database"]' },
+          typeMap
+        )
+      ).toBe(true);
+    });
   });
 
   describe('empty operator', () => {

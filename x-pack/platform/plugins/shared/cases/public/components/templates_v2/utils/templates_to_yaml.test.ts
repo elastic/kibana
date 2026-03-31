@@ -291,6 +291,108 @@ describe('templatesToYaml', () => {
   });
 });
 
+describe('CHECKBOX_GROUP field serialization', () => {
+  const baseTemplate: ParsedTemplate = {
+    templateId: 'tpl-1',
+    name: 'Checkbox template',
+    owner: 'securitySolution',
+    tags: [],
+    usageCount: 0,
+    fieldCount: 1,
+    templateVersion: 1,
+    latestVersion: 1,
+    isLatest: true,
+    deletedAt: null,
+    definition: { name: 'Checkbox template', fields: [] },
+  };
+
+  it('serializes options and defaults as YAML sequences', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Checkbox template',
+        fields: [
+          {
+            name: 'affected_systems',
+            control: 'CHECKBOX_GROUP',
+            type: 'keyword',
+            metadata: {
+              options: ['api', 'ui', 'database'],
+              default: ['api', 'database'],
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      control: "CHECKBOX_GROUP"');
+    expect(yaml).toContain('        options:');
+    expect(yaml).toContain('          - "api"');
+    expect(yaml).toContain('          - "ui"');
+    expect(yaml).toContain('          - "database"');
+    expect(yaml).toContain('        default:');
+    // default items are a subset of options
+    const lines = yaml.split('\n');
+    const defaultIdx = lines.findIndex((l) => l.trim() === 'default:');
+    expect(defaultIdx).toBeGreaterThan(-1);
+    const defaultBlock = lines.slice(defaultIdx + 1, defaultIdx + 3).join('\n');
+    expect(defaultBlock).toContain('"api"');
+    expect(defaultBlock).toContain('"database"');
+    expect(defaultBlock).not.toContain('"ui"');
+  });
+
+  it('omits the default block when no defaults are provided', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Checkbox template',
+        fields: [
+          {
+            name: 'tags',
+            control: 'CHECKBOX_GROUP',
+            type: 'keyword',
+            metadata: {
+              options: ['a', 'b', 'c'],
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('        options:');
+    expect(yaml).not.toContain('        default:');
+  });
+
+  it('omits the default block when defaults array is empty', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Checkbox template',
+        fields: [
+          {
+            name: 'tags',
+            control: 'CHECKBOX_GROUP',
+            type: 'keyword',
+            metadata: {
+              options: ['a', 'b'],
+              default: [],
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('        options:');
+    expect(yaml).not.toContain('        default:');
+  });
+});
+
 describe('templateToYaml', () => {
   it('serializes a single template with a template header', () => {
     const template: ParsedTemplate = {
