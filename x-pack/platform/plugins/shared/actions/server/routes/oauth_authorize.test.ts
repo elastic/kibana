@@ -223,6 +223,7 @@ describe('oauthAuthorizeRoute', () => {
 
   it('returns bad request for cross-origin returnUrl', async () => {
     mockOAuthServiceInstance.getOAuthConfig.mockResolvedValue({
+      authTypeId: 'oauth_authorization_code',
       authorizationUrl: 'https://provider.example.com/authorize',
       tokenUrl: 'https://provider.example.com/token',
       clientId: 'client-id',
@@ -247,6 +248,7 @@ describe('oauthAuthorizeRoute', () => {
 
   it('returns error when authorizationUrl host is not in allowedHosts', async () => {
     mockOAuthServiceInstance.getOAuthConfig.mockResolvedValue({
+      authTypeId: 'oauth_authorization_code',
       authorizationUrl: 'https://not-allowed.example.com/authorize',
       tokenUrl: 'https://provider.example.com/token',
       clientId: 'client-id',
@@ -280,6 +282,7 @@ describe('oauthAuthorizeRoute', () => {
 
   it('returns error when tokenUrl host is not in allowedHosts', async () => {
     mockOAuthServiceInstance.getOAuthConfig.mockResolvedValue({
+      authTypeId: 'oauth_authorization_code',
       authorizationUrl: 'https://provider.example.com/authorize',
       tokenUrl: 'https://not-allowed.example.com/token',
       clientId: 'client-id',
@@ -320,6 +323,7 @@ describe('oauthAuthorizeRoute', () => {
 
   it('returns authorization URL on success', async () => {
     mockOAuthServiceInstance.getOAuthConfig.mockResolvedValue({
+      authTypeId: 'oauth_authorization_code',
       authorizationUrl: 'https://provider.example.com/authorize',
       tokenUrl: 'https://provider.example.com/token',
       clientId: 'client-id',
@@ -377,6 +381,7 @@ describe('oauthAuthorizeRoute', () => {
 
   it('omits return URL when not provided', async () => {
     mockOAuthServiceInstance.getOAuthConfig.mockResolvedValue({
+      authTypeId: 'oauth_authorization_code',
       authorizationUrl: 'https://provider.example.com/authorize',
       tokenUrl: 'https://provider.example.com/token',
       clientId: 'client-id',

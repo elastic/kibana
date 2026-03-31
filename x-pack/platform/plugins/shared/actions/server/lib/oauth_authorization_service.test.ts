@@ -49,6 +49,7 @@ describe('OAuthAuthorizationService', () => {
       const result = await service.getOAuthConfig('connector-1', undefined);
 
       expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://provider.example.com/authorize',
         tokenUrl: 'https://provider.example.com/token',
         clientId: 'secret-client-id',
@@ -90,41 +91,13 @@ describe('OAuthAuthorizationService', () => {
       const result = await service.getOAuthConfig('connector-1', undefined);
 
       expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://config-provider.example.com/authorize',
         tokenUrl: 'https://config-provider.example.com/token',
         clientId: 'config-client-id',
         scope: 'profile',
       });
     });
-
-    it('supports auth.type for OAuth validation', async () => {
-      const service = createService();
-      const getResult = createMockConnector({
-        id: 'connector-1',
-        config: { auth: { type: 'oauth_authorization_code' } },
-      });
-      mockActionsClient.get.mockResolvedValue(getResult);
-      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        attributes: {
-          secrets: {
-            authorizationUrl: 'https://provider.example.com/authorize',
-            tokenUrl: 'https://provider.example.com/token',
-            clientId: 'client-id',
-          },
-          config: {},
-        },
-      });
-
-      const result = await service.getOAuthConfig('connector-1', undefined);
-
-      expect(result).toEqual({
-        authorizationUrl: 'https://provider.example.com/authorize',
-        tokenUrl: 'https://provider.example.com/token',
-        clientId: 'client-id',
-        scope: undefined,
-      });
-    });
-
     it('passes namespace when provided', async () => {
       const service = createService();
       const getResult = createMockConnector({
@@ -174,6 +147,34 @@ describe('OAuthAuthorizationService', () => {
       const result = await service.getOAuthConfig('connector-1', undefined);
 
       expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
+        authorizationUrl: 'https://provider.example.com/authorize',
+        tokenUrl: 'https://provider.example.com/token',
+        clientId: 'client-id',
+        scope: undefined,
+      });
+    });
+
+    it('resolves authType from secrets when config has none', async () => {
+      const service = createService();
+      const getResult = createMockConnector({ id: 'connector-1', config: {} });
+      mockActionsClient.get.mockResolvedValue(getResult);
+      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        attributes: {
+          secrets: {
+            authType: 'oauth_authorization_code',
+            authorizationUrl: 'https://provider.example.com/authorize',
+            tokenUrl: 'https://provider.example.com/token',
+            clientId: 'client-id',
+          },
+          config: {},
+        },
+      });
+
+      const result = await service.getOAuthConfig('connector-1', undefined);
+
+      expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://provider.example.com/authorize',
         tokenUrl: 'https://provider.example.com/token',
         clientId: 'client-id',
@@ -188,9 +189,12 @@ describe('OAuthAuthorizationService', () => {
         config: { authType: 'basic' },
       });
       mockActionsClient.get.mockResolvedValue(getResult);
+      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        attributes: { secrets: {}, config: {} },
+      });
 
       await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
-        'Connector does not use OAuth Authorization Code flow'
+        'Connector does not use OAuth Authorization Code or EARS flow'
       );
     });
 
@@ -202,9 +206,12 @@ describe('OAuthAuthorizationService', () => {
         authMode: 'shared',
       });
       mockActionsClient.get.mockResolvedValue(getResult);
+      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        attributes: { secrets: {}, config: {} },
+      });
 
       await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
-        'Connector does not use OAuth Authorization Code flow'
+        'Connector does not use OAuth Authorization Code or EARS flow'
       );
     });
 
