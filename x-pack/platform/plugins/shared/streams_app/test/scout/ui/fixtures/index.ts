@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures} from '@kbn/scout';
+import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { mergeTests, test as scoutTest } from '@kbn/scout';
 import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
 import { synthtraceFixture } from '@kbn/scout-synthtrace';
 import { StreamsPageObjects, extendPageObjects } from './page_objects';
-
 
 const baseTest = mergeTests(scoutTest, synthtraceFixture);
 
