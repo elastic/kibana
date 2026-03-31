@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import * as i18n from './translations';
 
 export const FieldType = {
   INPUT_TEXT: 'INPUT_TEXT',
@@ -141,11 +142,11 @@ export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
     .object({
       options: z
         .array(z.string())
-        .max(30, { message: 'Options must not exceed 30 items.' })
-        .refine(uniqueStrings, { message: 'Options must be unique.' }),
+        .max(30, { message: i18n.FIELD_OPTIONS_MAX_ITEMS(30) })
+        .refine(uniqueStrings, { message: i18n.FIELD_OPTIONS_MUST_BE_UNIQUE }),
       default: z
         .array(z.string())
-        .refine(uniqueStrings, { message: 'Default values must be unique.' })
+        .refine(uniqueStrings, { message: i18n.FIELD_DEFAULT_VALUES_MUST_BE_UNIQUE })
         .optional(),
     })
     .catchall(z.unknown()),
@@ -157,12 +158,15 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
     .object({
       options: z
         .array(z.string())
-        .min(2, { message: 'Options must have at least 2 items.' })
-        .max(20, { message: 'Options must not exceed 20 items.' })
-        .refine(uniqueStrings, { message: 'Options must be unique.' }),
+        .min(2, { message: i18n.FIELD_OPTIONS_MIN_ITEMS(2) })
+        .max(20, { message: i18n.FIELD_OPTIONS_MAX_ITEMS(20) })
+        .refine(uniqueStrings, { message: i18n.FIELD_OPTIONS_MUST_BE_UNIQUE }),
       default: z.string().optional(),
     })
-    .catchall(z.unknown()),
+    .catchall(z.unknown())
+    .refine((meta) => meta.default === undefined || meta.options.includes(meta.default), {
+      message: i18n.FIELD_DEFAULT_NOT_IN_OPTIONS,
+    }),
 });
 
 /**

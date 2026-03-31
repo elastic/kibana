@@ -390,4 +390,25 @@ fields:
     const updatedYaml = onYamlChange.mock.calls[0][0] as string;
     expect(updatedYaml).toContain('default: my default text');
   });
+
+  it('passes the string value unchanged for RADIO_GROUP control', () => {
+    setupWithYaml(`name: Test
+fields:
+  - name: env
+    control: RADIO_GROUP
+    type: keyword
+    metadata:
+      options:
+        - staging
+        - production
+`);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('env', 'production', 'RADIO_GROUP');
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).toContain('default: production');
+  });
 });

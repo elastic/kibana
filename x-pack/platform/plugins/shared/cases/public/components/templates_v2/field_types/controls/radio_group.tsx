@@ -17,7 +17,7 @@ import type {
   RadioGroupFieldSchema,
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
-import { FIELD_REQUIRED } from '../../translations';
+import * as i18n from '../../translations';
 
 type RadioGroupProps = z.infer<typeof RadioGroupFieldSchema> & ConditionRenderProps;
 
@@ -33,7 +33,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
         {
           validator: ({ value }: { value: unknown }) => {
             if (!value) {
-              return { message: FIELD_REQUIRED };
+              return { message: i18n.FIELD_REQUIRED };
             }
           },
         },
@@ -53,7 +53,11 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
             <EuiRadioGroup
               name={name}
               options={metadata.options.map((option) => ({ id: option, label: option }))}
-              idSelected={typeof field.value === 'string' ? field.value : ''}
+              idSelected={
+                typeof field.value === 'string' && field.value !== ''
+                  ? field.value
+                  : metadata.options[0]
+              }
               onChange={(id) => field.setValue(id)}
             />
           </EuiFormRow>

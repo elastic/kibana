@@ -86,6 +86,13 @@ describe('RadioGroup', () => {
       render(<FormWrapper initialValue="high" onSubmitResult={jest.fn()} />);
       expect(screen.getByLabelText('high')).toBeChecked();
     });
+
+    it('shows the first option selected when form value is empty string (yaml sync with no default)', () => {
+      // useYamlFormSync calls form.setFieldValue(path, '') when metadata.default is absent.
+      // The component must fall back to options[0] rather than rendering with nothing selected.
+      render(<FormWrapper initialValue="" onSubmitResult={jest.fn()} />);
+      expect(screen.getByLabelText('low')).toBeChecked();
+    });
   });
 
   describe('interaction', () => {
