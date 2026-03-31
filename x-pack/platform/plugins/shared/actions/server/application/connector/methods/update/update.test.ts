@@ -577,6 +577,7 @@ describe('update()', () => {
         isDeprecated: false,
         isConnectorTypeDeprecated: false,
         authMode: 'shared',
+        userAuthStatus: 'not_applicable',
       });
     });
 

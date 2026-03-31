@@ -49,6 +49,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           },
           is_connector_type_deprecated: false,
           auth_mode: 'shared',
+          user_auth_status: 'not_applicable',
         });
     });
 
@@ -90,6 +91,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           name: 'Slack#xyz',
           is_connector_type_deprecated: false,
           auth_mode: 'shared',
+          user_auth_status: 'not_applicable',
         });
     });
 
@@ -115,6 +117,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           name: 'ServiceNow#xyz',
           is_connector_type_deprecated: false,
           auth_mode: 'shared',
+          user_auth_status: 'not_applicable',
         });
 
       await supertest
@@ -130,6 +133,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           name: 'ServiceNow#xyz',
           is_connector_type_deprecated: false,
           auth_mode: 'shared',
+          user_auth_status: 'not_applicable',
         });
     });
   });
