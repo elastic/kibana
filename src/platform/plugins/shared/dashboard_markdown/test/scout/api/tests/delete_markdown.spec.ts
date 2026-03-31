@@ -75,23 +75,20 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(204);
   });
 
-  apiTest(
-    'should return 204 when deleted in a specific space',
-    async ({ apiClient }) => {
-      const response = await apiClient.delete(
-        `s/${spaceId}/${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID_IN_SPACE}`,
-        {
-          headers: {
-            ...COMMON_HEADERS,
-            ...editorCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-        }
-      );
+  apiTest('should return 204 when deleted in a specific space', async ({ apiClient }) => {
+    const response = await apiClient.delete(
+      `s/${spaceId}/${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID_IN_SPACE}`,
+      {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      }
+    );
 
-      expect(response).toHaveStatusCode(204);
-    }
-  );
+    expect(response).toHaveStatusCode(204);
+  });
 
   apiTest(
     'authorization - returns error when user does not have permission to delete library item',
