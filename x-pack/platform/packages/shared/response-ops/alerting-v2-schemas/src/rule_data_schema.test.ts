@@ -670,6 +670,15 @@ describe('createRuleDataSchema', () => {
         ],
       });
       expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: `Artifact value must be at most ${ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
+            }),
+          ])
+        );
+      }
     });
 
     it('accepts a non-runbook artifact at the default maximum length', () => {
@@ -698,6 +707,15 @@ describe('createRuleDataSchema', () => {
         ],
       });
       expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: expect.stringContaining(`Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`),
+            }),
+          ])
+        );
+      }
     });
   });
 
@@ -875,6 +893,15 @@ describe('updateRuleDataSchema', () => {
         ],
       });
       expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: `Artifact value must be at most ${ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
+            }),
+          ])
+        );
+      }
     });
 
     it('accepts a non-runbook artifact at the default maximum length', () => {
@@ -901,6 +928,15 @@ describe('updateRuleDataSchema', () => {
         ],
       });
       expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: expect.stringContaining(`Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`),
+            }),
+          ])
+        );
+      }
     });
   });
 
