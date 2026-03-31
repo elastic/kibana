@@ -17,6 +17,7 @@ import type { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
 import { embeddableService, logger } from '../kibana_services';
 import { getReferencesForElement } from './get_references_for_element';
 import { ensureLibraryReference } from './ensure_library_reference';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const embeddableFunctions = ['embeddable', 'savedLens', 'savedVisualization', 'savedMap'];
 
@@ -128,7 +129,7 @@ export function transformWorkpadOut(
         // Temporary escape hatch for lens as code
         // TODO remove when lens as code transforms are ready for production
         const transforms = embeddableService.getTransforms(
-          embeddableType === 'vis' ? 'lens-dashboard-app' : embeddableType
+          embeddableType === LENS_EMBEDDABLE_TYPE ? 'lens-dashboard-app' : embeddableType
         );
 
         try {

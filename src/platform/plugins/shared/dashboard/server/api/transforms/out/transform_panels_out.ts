@@ -16,6 +16,7 @@ import { embeddableService } from '../../../kibana_services';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
 import type { Warnings } from '../../types';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 export function transformPanelsOut(
   panelsJSON: string = '[]',
@@ -101,7 +102,7 @@ function transformPanel(
 
   // Temporary escape hatch for lens as code
   // TODO remove when lens as code transforms are ready for production
-  const transformType = type === 'vis' && isDashboardAppRequest ? 'lens-dashboard-app' : type;
+  const transformType = type === LENS_EMBEDDABLE_TYPE && isDashboardAppRequest ? 'lens-dashboard-app' : type;
   const transforms = embeddableService?.getTransforms(transformType);
 
   const transformedPanelConfig =

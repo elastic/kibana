@@ -10,6 +10,7 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { encode, decode } from '../../common/lib/embeddable_dataurl';
 import type { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
 import { embeddableService, logger } from '../kibana_services';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 export const transformWorkpadIn = (
   workpad: WorkpadAttributes
@@ -30,7 +31,7 @@ export const transformWorkpadIn = (
           const embeddableType = fn.arguments.type[0] as string;
           // Temporary escape hatch for lens as code
           // TODO remove when lens as code transforms are ready for production
-          const transformType = embeddableType === 'vis' ? 'lens-dashboard-app' : embeddableType;
+          const transformType = embeddableType === LENS_EMBEDDABLE_TYPE ? 'lens-dashboard-app' : embeddableType;
           const transforms = embeddableService.getTransforms(transformType);
 
           try {

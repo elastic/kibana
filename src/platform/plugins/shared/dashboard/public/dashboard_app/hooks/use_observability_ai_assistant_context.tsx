@@ -27,6 +27,7 @@ import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { useEffect } from 'react';
 import type { DashboardApi } from '../../dashboard_api/types';
 import { dataService, observabilityAssistantService } from '../../services/kibana_services';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const chartTypes = [
   'xy',
@@ -357,7 +358,7 @@ export function useObservabilityAIAssistantContext({
 
                 return dashboardApi
                   .addNewPanel({
-                    panelType: 'vis',
+                    panelType: LENS_EMBEDDABLE_TYPE,
                     serializedState: {
                       embeddableInput,
                     },

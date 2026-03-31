@@ -18,9 +18,7 @@ import type {
   DashboardAttachment,
 } from '../types';
 import { isSection } from '../types';
-
-// TODO: update this when LENS_EMBEDDABLE_TYPE is moved to @kbn/lens-common
-const LENS_EMBEDDABLE_TYPE = 'lens';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 /**
  * Converts an AttachmentPanel to a DashboardPanel.

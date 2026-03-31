@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 import type { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +24,7 @@ import { setState, initExisting, initEmpty } from '..';
 import { type InitialAppState, disableAutoApply, getPreloadedState } from '../lens_slice';
 import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
 import { initializeSources } from '../../editor_frame_service/editor_frame';
-import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
+import { getEditPath, getFullPath } from '../../../common/constants';
 
 interface PersistedDoc {
   doc: LensDocument;

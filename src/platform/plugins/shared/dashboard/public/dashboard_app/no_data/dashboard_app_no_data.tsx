@@ -31,6 +31,7 @@ import {
 } from '../../services/kibana_services';
 import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import { dashboardClient } from '../../dashboard_client';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
@@ -103,7 +104,7 @@ export const DashboardAppNoDataPage = ({
             .navigateToWithEmbeddablePackages<LensSerializedState>('dashboards', {
               state: [
                 {
-                  type: 'vis',
+                  type: LENS_EMBEDDABLE_TYPE,
                   serializedState: {
                     attributes: getLensAttributesFromSuggestion({
                       filters: [],

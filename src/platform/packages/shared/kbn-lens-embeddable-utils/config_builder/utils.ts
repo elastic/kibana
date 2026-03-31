@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
@@ -349,9 +349,6 @@ function isESQLDataset(dataset: LensDataset): dataset is LensESQLDataset {
 export function isDataViewDataset(dataset: LensDataset): dataset is LensDataviewDataset {
   return 'index' in dataset;
 }
-
-// TODO consolidate with LENS_EMBEDDABLE_TYPE from x-pack/platform/plugins/shared/lens/common/constants.ts
-const LENS_EMBEDDABLE_TYPE = 'vis';
 
 export function isLensAPIFormat(config: unknown): config is LensApiState {
   // We need to check the type is not lens because embeddable logic sometimes add it for some reason.

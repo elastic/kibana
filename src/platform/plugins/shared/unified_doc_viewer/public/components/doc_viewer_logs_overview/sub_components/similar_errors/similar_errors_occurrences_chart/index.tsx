@@ -23,6 +23,7 @@ import { fieldConstants } from '@kbn/discover-utils';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const chartTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.occurrences.title',
@@ -197,9 +198,7 @@ export function SimilarErrorsOccurrencesChart({
 
     return (
       <div style={{ height: '120px', width: '100%' }}>
-        {/* TODO update the string with LENS_EMBEDDABLE_TYPE once is moved to @kbn/lens-common
-        https://github.com/elastic/kibana/issues/245192 */}
-        <EmbeddableRenderer type={'lens'} getParentApi={getParentApi} hidePanelChrome />
+        <EmbeddableRenderer type={LENS_EMBEDDABLE_TYPE} getParentApi={getParentApi} hidePanelChrome />
       </div>
     );
   }, [getParentApi, lensAttributes]);

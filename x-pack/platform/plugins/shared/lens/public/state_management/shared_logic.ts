@@ -11,17 +11,18 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type {
-  VisualizationState,
-  DatasourceStates,
-  DatasourceMap,
-  VisualizationMap,
-  Datasource,
-  LensDocument,
-  Visualization,
+import {
+  type VisualizationState,
+  type DatasourceStates,
+  type DatasourceMap,
+  type VisualizationMap,
+  type Datasource,
+  type LensDocument,
+  type Visualization,
+  LENS_EMBEDDABLE_TYPE,
 } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
-import { LENS_EMBEDDABLE_TYPE, INDEX_PATTERN_TYPE } from '../../common/constants';
+import { INDEX_PATTERN_TYPE } from '../../common/constants';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(

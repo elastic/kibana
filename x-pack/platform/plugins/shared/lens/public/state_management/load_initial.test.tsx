@@ -19,7 +19,7 @@ import type { InitialAppState } from './lens_slice';
 import { loadInitial } from './lens_slice';
 import type { Filter } from '@kbn/es-query';
 import { faker } from '@faker-js/faker';
-import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const history = {
   location: {

@@ -17,6 +17,7 @@ import {
 } from '@kbn/lens-embeddable-utils/config_builder';
 import type { AttachmentPanel, DashboardSection as DashboardAttachmentSection } from '../types';
 import type { DashboardAttachmentData } from '../types';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 /**
  * Type guard to check if attributes are in LensAttributes format (internal).
@@ -33,8 +34,7 @@ export const isLensAttributes = (
  * For Lens panels with internal attributes format, converts to API format.
  */
 export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
-  // TODO: update this when LENS_EMBEDDABLE_TYPE is moved to @kbn/lens-common
-  if (panel.type === 'lens') {
+  if (panel.type === LENS_EMBEDDABLE_TYPE) {
     const panelConfig = panel.config as
       | { attributes?: LensApiSchemaType | LensAttributes }
       | undefined;

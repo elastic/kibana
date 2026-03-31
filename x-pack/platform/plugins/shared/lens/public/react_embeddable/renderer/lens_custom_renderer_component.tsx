@@ -11,10 +11,9 @@ import { BehaviorSubject } from 'rxjs';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import type { LensRendererProps, LensSerializedState } from '@kbn/lens-common';
+import { LENS_EMBEDDABLE_TYPE, type LensRendererProps, type LensSerializedState } from '@kbn/lens-common';
 import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
-import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { createEmptyLensState, transformToApiConfig } from '../helper';
 import type { LensParentApi } from './types';
 
