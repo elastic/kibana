@@ -85,13 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         ...entity.doc,
       },
     ]);
-    const bulkResult = await es.bulk({ operations, refresh: true });
-    if (bulkResult.errors) {
-      const failures = bulkResult.items.filter((item) => item.index?.error);
-      log.error(`[DIAG] Bulk indexing had errors: ${JSON.stringify(failures)}`);
-    } else {
-      log.warning(`[DIAG] Bulk indexed ${testEntities.length} entities successfully`);
-    }
+    await es.bulk({ operations, refresh: true });
   };
 
   const waitForEntities = async () => {
@@ -104,77 +98,6 @@ export default ({ getService }: FtrProviderContext) => {
       log.debug(`Waiting for ${testEntities.length} entities, found ${count}`);
       return count >= testEntities.length;
     });
-  };
-
-  /**
-   * Diagnostic: verify entities are searchable using the exact same query
-   * the CSV upload will use (term filters on identity fields + type).
-   */
-  const diagVerifySearchability = async (label: string) => {
-    const index = getLatestEntitiesIndexName('default');
-
-    // 1. Count by entity.id prefix (what waitForEntities checks)
-    const countResult = await es.count({
-      index,
-      query: { prefix: { 'entity.id': TEST_PREFIX } },
-    });
-    log.warning(`[DIAG:${label}] entity.id prefix count: ${countResult.count}`);
-
-    // 2. Search by user.email term (what the CSV upload uses for matching)
-    const emailSearch = await es.search({
-      index,
-      query: {
-        bool: {
-          filter: [
-            { term: { 'entity.EngineMetadata.Type': 'user' } },
-            { term: { 'user.email': 'shared@test.com' } },
-          ],
-        },
-      },
-      _source: ['entity.id', 'entity.EngineMetadata.Type', 'user.email'],
-      size: 10,
-    });
-    const emailHits = emailSearch.hits.hits.map((h) => h._source);
-    log.warning(
-      `[DIAG:${label}] user.email=shared@test.com search: ${emailSearch.hits.hits.length} hits: ${JSON.stringify(emailHits)}`
-    );
-
-    // 3. Search for the target entity by entity.id term
-    const targetSearch = await es.search({
-      index,
-      query: {
-        bool: {
-          filter: [{ term: { 'entity.id': `${TEST_PREFIX}golden` } }],
-        },
-      },
-      _source: ['entity.id', 'entity.relationships.resolution.resolved_to'],
-      size: 1,
-    });
-    log.warning(
-      `[DIAG:${label}] target entity search: ${targetSearch.hits.hits.length} hits: ${JSON.stringify(targetSearch.hits.hits.map((h) => h._source))}`
-    );
-
-    // 4. Check index mapping for user.email field
-    const mapping = await es.indices.getMapping({ index });
-    const indexMapping = Object.values(mapping)[0]?.mappings?.properties;
-    const userMapping = (indexMapping as Record<string, unknown>)?.user;
-    log.warning(`[DIAG:${label}] user field mapping: ${JSON.stringify(userMapping)}`);
-
-    // 5. Dump all test entities to see actual stored documents
-    const allDocs = await es.search({
-      index,
-      query: { prefix: { 'entity.id': TEST_PREFIX } },
-      _source: true,
-      size: 10,
-    });
-    log.warning(
-      `[DIAG:${label}] all test entities (${allDocs.hits.hits.length}): ${JSON.stringify(
-        allDocs.hits.hits.map((h) => ({
-          _id: h._id,
-          _source: h._source,
-        }))
-      )}`
-    );
   };
 
   const cleanEntities = async () => {
@@ -193,11 +116,14 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @skipInServerlessMKI Entity Resolution CSV Upload', () => {
     before(async () => {
-      await entityStoreUtils.installEntityStoreV2();
+      // Use enableEntityStoreV2 (without maintainer init) to prevent the
+      // automated resolution maintainer from racing with CSV upload tests.
+      // The maintainer would link entities sharing the same user.email,
+      // interfering with the test's own resolution assertions.
+      await entityStoreUtils.enableEntityStoreV2();
       await cleanEntities();
       await seedEntities();
       await waitForEntities();
-      await diagVerifySearchability('before');
     });
 
     afterEach(async () => {
@@ -205,7 +131,6 @@ export default ({ getService }: FtrProviderContext) => {
       await cleanEntities();
       await seedEntities();
       await waitForEntities();
-      await diagVerifySearchability('afterEach');
     });
 
     after(async () => {
@@ -213,15 +138,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should link matching entities to a target', async () => {
-      await diagVerifySearchability('link-test-pre-upload');
-
       const csv = ['type,user.email,resolved_to', `user,shared@test.com,${TEST_PREFIX}golden`].join(
         '\n'
       );
 
       const { body, status } = await uploadCsv(csv);
-
-      log.warning(`[DIAG:link-test] CSV upload response: ${JSON.stringify(body)}`);
 
       expect(status).toBe(200);
       expect(body.total).toBe(1);
@@ -229,32 +150,23 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.items[0].matchedEntities).toBe(2);
       expect(body.items[0].linkedEntities).toBe(2);
 
-      await diagVerifySearchability('link-test-post-upload');
-
       const group = await getResolutionGroup(`${TEST_PREFIX}golden`);
-      log.warning(`[DIAG:link-test] Resolution group: ${JSON.stringify(group)}`);
       expect(group.group_size).toBe(3);
     });
 
     it('should be idempotent on re-upload', async () => {
-      await diagVerifySearchability('idempotent-test-pre-upload');
-
       const csv = ['type,user.email,resolved_to', `user,shared@test.com,${TEST_PREFIX}golden`].join(
         '\n'
       );
 
       // First upload — links entities
-      const firstUpload = await uploadCsv(csv);
-      log.warning(`[DIAG:idempotent-test] First upload response: ${JSON.stringify(firstUpload.body)}`);
+      await uploadCsv(csv);
 
       // Ensure the resolved_to updates from linkEntities are visible
       await es.indices.refresh({ index: getLatestEntitiesIndexName('default') });
 
-      await diagVerifySearchability('idempotent-test-post-first-upload');
-
       // Second upload — same CSV, entities should be skipped
       const { body } = await uploadCsv(csv);
-      log.warning(`[DIAG:idempotent-test] Second upload response: ${JSON.stringify(body)}`);
 
       expect(body.successful).toBe(1);
       expect(body.items[0].linkedEntities).toBe(0);
