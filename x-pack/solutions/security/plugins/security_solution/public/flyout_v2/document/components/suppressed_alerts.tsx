@@ -74,7 +74,7 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
           <EuiBetaBadge
             label={SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW}
             size="s"
-            iconType="beaker"
+            iconType="flask"
             tooltipContent={
               <FormattedMessage
                 id="xpack.securitySolution.flyout.document.insights.entities.suppressedAlertTechnicalPreviewTooltip"

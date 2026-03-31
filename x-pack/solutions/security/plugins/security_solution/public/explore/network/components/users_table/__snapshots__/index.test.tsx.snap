@@ -100,7 +100,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
                         aria-hidden="true"
                         class="euiButtonIcon__icon"
                         color="inherit"
-                        data-euiicon-type="arrowDown"
+                        data-euiicon-type="chevronSingleDown"
                       />
                     </button>
                   </div>
