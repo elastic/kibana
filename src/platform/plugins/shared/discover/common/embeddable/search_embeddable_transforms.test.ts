@@ -101,6 +101,7 @@ describe('searchEmbeddableTransforms', () => {
         attributes: expectedAttributes,
       });
     });
+
     it('transforms drilldowns during transformOut', () => {
       const state: StoredSearchEmbeddableState = {
         title: 'Test Title',
@@ -117,7 +118,23 @@ describe('searchEmbeddableTransforms', () => {
         ...state,
       });
     });
+
+    it('transforms by-referencce state', () => {
+      const state: StoredSearchEmbeddableState = {
+        title: 'Test Title',
+        description: 'Test Description',
+      };
+      const result = getSearchEmbeddableTransforms(mockDrilldownTransforms).transformOut?.(state, [
+        {
+          id: '2f360f30-ea74-11eb-b4c6-3d2afc1cb389',
+          name: 'savedObjectRef',
+          type: 'search',
+        },
+      ]);
+      expect(result).toEqual({ ...state, savedObjectId: '2f360f30-ea74-11eb-b4c6-3d2afc1cb389' });
+    });
   });
+
   describe('transformIn', () => {
     describe('by-reference state', () => {
       it('transforms by-reference state', () => {
