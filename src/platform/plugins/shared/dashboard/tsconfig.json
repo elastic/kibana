@@ -116,6 +116,8 @@
     "@kbn/scout",
     "@kbn/cps-utils",
     "@kbn/as-code-shared-schemas",
+    "@kbn/core-http-common",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }
