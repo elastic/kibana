@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import moment from 'moment-timezone';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getYamlDefaultAsString } from '../../utils';
@@ -70,14 +71,20 @@ export const useYamlFormSync = (
         return;
       }
 
-      const extendedFields = (data.internal as Record<string, Record<string, string>>)?.[
+      const extendedFields = (data.internal as Record<string, Record<string, unknown>>)?.[
         CASE_EXTENDED_FIELDS
       ];
       if (!extendedFields) return;
 
       for (const field of parsedFields) {
         const fieldKey = `${field.name}_as_${field.type}`;
-        const currentFormValue = String(extendedFields[fieldKey] ?? '');
+        const rawValue = extendedFields[fieldKey];
+        const currentFormValue =
+          rawValue instanceof Date
+            ? rawValue.toISOString()
+            : moment.isMoment(rawValue)
+            ? rawValue.utc().toISOString()
+            : String(rawValue ?? '');
         const currentYamlValue = yamlDefaultsRef.current[field.name] ?? '';
 
         if (currentFormValue !== currentYamlValue) {

@@ -11,6 +11,7 @@ import type { IStorageClient } from '@kbn/storage-adapter';
 import type { BaseFeature, Feature } from '@kbn/streams-schema';
 import { isDuplicateFeature, isComputedFeature } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
+import { isConditionComplete } from '@kbn/streamlang';
 import {
   STREAM_NAME,
   FEATURE_ID,
@@ -68,6 +69,12 @@ export class FeatureClient {
   }
 
   async bulk(stream: string, operations: FeatureBulkOperation[]) {
+    validateFeatures(
+      operations
+        .filter((operation) => 'index' in operation)
+        .map((operation) => operation.index.feature)
+    );
+
     const resolvedOperations = await this.filterValidOperations(stream, operations);
 
     return await this.clients.storageClient.bulk({
@@ -348,4 +355,12 @@ function fromStorage(feature: StoredFeature): Feature {
     title: feature[FEATURE_TITLE],
     filter: feature[FEATURE_FILTER],
   };
+}
+
+function validateFeatures(features: Feature[]) {
+  for (const feature of features) {
+    if (feature.filter && !isConditionComplete(feature.filter)) {
+      throw new StatusError(`Invalid feature ${feature.id}: filter is incomplete`, 400);
+    }
+  }
 }

@@ -58,7 +58,7 @@ export const ConnectLLMButton: React.FC = () => {
       {hasConnectors ? (
         <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="successConnectLLMText">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
+            <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {hasElasticConnector ? (
