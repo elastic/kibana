@@ -24,7 +24,7 @@ jobs:
     outputs:
       api_key: ${{ steps.mint.outputs.api_key }}
     steps:
-      - name: Checkout Actions
+      - name: Mint LiteLLM token
         id: mint
         uses: elastic/github-actions/litellm-token@v3 # TODO: update to SHA after release
         with:
