@@ -11,11 +11,15 @@ import {
   RULES_UI_READ_PRIVILEGE,
   SECURITY_UI_SHOW_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
+import { LinkCategoryType } from '@kbn/security-solution-navigation';
 import { ONBOARDING_PATH, SecurityPageName } from '../../common/constants';
-import { GETTING_STARTED } from '../app/translations';
+import { GETTING_STARTED, LAUNCHPAD } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
+import { siemReadinessLinks } from '../siem_readiness/links';
+import { links as siemMigrationsLinks } from '../siem_migrations/links';
+import { aiValueLinks } from '../reports/links';
 
-export const onboardingLinks: LinkItem = {
+const getStartedLink: LinkItem = {
   id: SecurityPageName.landing,
   title: GETTING_STARTED,
   path: ONBOARDING_PATH,
@@ -25,8 +29,46 @@ export const onboardingLinks: LinkItem = {
       defaultMessage: 'Getting started',
     }),
   ],
+  hideTimeline: true,
+  skipUrlState: true,
+};
+
+export const onboardingLinks: LinkItem = {
+  id: SecurityPageName.launchpad,
+  title: LAUNCHPAD,
+  path: ONBOARDING_PATH,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.launchpad', {
+      defaultMessage: 'Launchpad',
+    }),
+  ],
+  categories: [
+    {
+      type: LinkCategoryType.separator,
+      linkIds: [SecurityPageName.landing, SecurityPageName.aiValue],
+    },
+    {
+      label: i18n.translate('xpack.securitySolution.appLinks.category.migrations', {
+        defaultMessage: 'Migrations',
+      }),
+      linkIds: [SecurityPageName.siemMigrationsLanding, SecurityPageName.siemMigrationsDashboards],
+    },
+  ],
+  links: [getStartedLink, aiValueLinks, siemMigrationsLinks, siemReadinessLinks],
   sideNavIcon: 'launch',
   sideNavFooter: true,
   skipUrlState: true,
   hideTimeline: true,
+  visibleIn: ['globalSearch', 'sideNav'],
 };
+
+/**
+ * Ordered entries: Get started, Value reports, Translated rules, Translated dashboards (titles come from link config).
+ */
+export const CLASSIC_LAUNCHPAD_PANEL_LINK_ENTRIES = Object.freeze([
+  { id: SecurityPageName.landing },
+  { id: SecurityPageName.siemReadiness },
+  { id: SecurityPageName.aiValue },
+  { id: SecurityPageName.siemMigrationsRules },
+  { id: SecurityPageName.siemMigrationsDashboards },
+]);

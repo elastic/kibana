@@ -54,7 +54,7 @@ const getLeadingBreadcrumbs = (
 ): ChromeBreadcrumb[] => {
   const landingBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
-    href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.landing }),
+    href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.launchpad }),
   };
 
   const breadcrumbs: ChromeBreadcrumb[] = parentLinks.map(({ title, id }) => ({

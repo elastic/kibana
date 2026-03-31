@@ -252,6 +252,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Uses entity store v2 for entity analytics skill
    */
   entityAnalyticsEntityStoreV2: false,
+
+  /**
+   * Classic chrome only: refreshed Security side nav (Launchpad, Dev Tools, Management footer; unified row + panel behavior).
+   */
+  securityClassicNavUpdate: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
