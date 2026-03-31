@@ -210,6 +210,10 @@ export {
   skillIdRegexp,
   skillNameRegexp,
   maxToolsPerSkill,
+  maxReferencedContentItems,
+  normalizeRelativePathSegments,
+  isRootRelativePath,
+  canComputeReferencedContentUniquenessKey,
 } from './skills';
 export * from './telemetry';
 export {

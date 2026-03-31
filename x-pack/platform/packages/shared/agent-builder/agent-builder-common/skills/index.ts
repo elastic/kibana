@@ -22,3 +22,9 @@ export {
   skillNameRegexp,
   maxToolsPerSkill,
 } from './validation';
+export {
+  maxReferencedContentItems,
+  normalizeRelativePathSegments,
+  isRootRelativePath,
+  canComputeReferencedContentUniquenessKey,
+} from './referenced_content_shared';

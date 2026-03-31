@@ -13,11 +13,11 @@ import {
   skillIdRegexp,
   skillNameRegexp,
   maxToolsPerSkill,
+  maxReferencedContentItems,
+  normalizeRelativePathSegments,
+  isRootRelativePath,
+  canComputeReferencedContentUniquenessKey,
 } from '@kbn/agent-builder-common';
-
-import { normalizeRelativePathSegments } from './referenced_content_path_utils';
-
-export const MAX_REFERENCED_CONTENT_ITEMS = 100;
 
 const validationMessages = {
   id: {
@@ -69,7 +69,7 @@ const validationMessages = {
   referencedContent: {
     maxItems: i18n.translate('xpack.agentBuilder.skills.validation.referencedContent.maxItems', {
       defaultMessage: 'A maximum of {max} additional files can be associated with a skill.',
-      values: { max: MAX_REFERENCED_CONTENT_ITEMS },
+      values: { max: maxReferencedContentItems },
     }),
     pathProtocol: i18n.translate(
       'xpack.agentBuilder.skills.validation.referencedContent.pathProtocol',
@@ -108,18 +108,15 @@ export interface ReferencedContentItem {
 }
 
 const referencedContentItemSchema: z.ZodType<ReferencedContentItem> = z.object({
-  name: z.string().trim(),
+  name: z
+    .string()
+    .trim()
+    .min(1, { message: validationMessages.name.required })
+    .max(skillNameMaxLength, { message: validationMessages.name.tooLong })
+    .regex(skillNameRegexp, { message: validationMessages.name.format }),
   relativePath: z.string().trim(),
   content: z.string(),
 });
-
-const isRootRelativePath = (relativePath: string): boolean =>
-  normalizeRelativePathSegments(relativePath) === './';
-
-const canComputeReferencedContentUniquenessKey = (relativePath: string): boolean => {
-  const trimmed = relativePath.trim();
-  return trimmed.startsWith('./') && !trimmed.includes('../');
-};
 
 const skillFormObjectSchema = z.object({
   id: z
@@ -140,7 +137,7 @@ const skillFormObjectSchema = z.object({
   tool_ids: z.array(z.string()).max(maxToolsPerSkill, { message: validationMessages.toolIds.max }),
   referenced_content: z
     .array(referencedContentItemSchema)
-    .max(MAX_REFERENCED_CONTENT_ITEMS, { message: validationMessages.referencedContent.maxItems }),
+    .max(maxReferencedContentItems, { message: validationMessages.referencedContent.maxItems }),
 });
 
 export const skillFormValidationSchema = skillFormObjectSchema.superRefine((data, ctx) => {

@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-/**
- * Collapses redundant slashes in a relative folder path (aligned with validation and full-path preview).
- */
-export const normalizeRelativePathSegments = (relativePath: string): string => {
-  const trimmed = relativePath.trim();
-  if (trimmed === '.' || trimmed === './') {
-    return './';
-  }
-  const rest = trimmed.startsWith('./') ? trimmed.slice(2) : trimmed;
-  const segments = rest.split('/').filter((segment) => segment.length > 0);
-  return segments.length === 0 ? './' : `./${segments.join('/')}`;
-};
+import { normalizeRelativePathSegments } from '@kbn/agent-builder-common';
+
+export { normalizeRelativePathSegments };
 
 /**
  * Builds the display path: `{skillFolder}/{normalizedRelativePath}/{fileName}.md`,

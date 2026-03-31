@@ -15,12 +15,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useController, useFieldArray, useWatch, type Control } from 'react-hook-form';
+import { maxReferencedContentItems } from '@kbn/agent-builder-common';
 import { labels } from '../../utils/i18n';
-import {
-  MAX_REFERENCED_CONTENT_ITEMS,
-  type ReferencedContentItem,
-  type SkillFormData,
-} from './skill_form_validation';
+import type { ReferencedContentItem, SkillFormData } from './skill_form_validation';
 import { ReferencedContentFileCard } from './referenced_content_file_card';
 import { SkillReferencedContentReadOnly } from './skill_referenced_content_read_only';
 
@@ -80,42 +77,36 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
   );
 };
 
-export interface SkillReferencedContentFieldArrayProps {
-  control: Control<SkillFormData>;
-  readOnly?: boolean;
-}
-
-export const SkillReferencedContentFieldArray: React.FC<SkillReferencedContentFieldArrayProps> = ({
+const SkillReferencedContentReadOnlySection: React.FC<{ control: Control<SkillFormData> }> = ({
   control,
-  readOnly = false,
 }) => {
   const skillName = useWatch({ control, name: 'name' }) ?? '';
-  const watchedReferencedContent: ReferencedContentItem[] =
-    useWatch({ control, name: 'referenced_content' }) ?? [];
+  const items: ReferencedContentItem[] = useWatch({ control, name: 'referenced_content' }) ?? [];
+
+  return (
+    <div data-test-subj="agentBuilderSkillReferencedContentSection">
+      <SkillReferencedContentReadOnly skillName={skillName} items={items} />
+    </div>
+  );
+};
+
+const SkillReferencedContentFieldArrayEdit: React.FC<{ control: Control<SkillFormData> }> = ({
+  control,
+}) => {
+  const skillName = useWatch({ control, name: 'name' }) ?? '';
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'referenced_content',
   });
 
-  const atLimit = fields.length >= MAX_REFERENCED_CONTENT_ITEMS;
+  const atLimit = fields.length >= maxReferencedContentItems;
 
   const filesAddedLabel = useMemo(
     () =>
-      labels.skills.referencedFileSection.filesAddedCount(
-        fields.length,
-        MAX_REFERENCED_CONTENT_ITEMS
-      ),
+      labels.skills.referencedFileSection.filesAddedCount(fields.length, maxReferencedContentItems),
     [fields.length]
   );
-
-  if (readOnly) {
-    return (
-      <div data-test-subj="agentBuilderSkillReferencedContentSection">
-        <SkillReferencedContentReadOnly skillName={skillName} items={watchedReferencedContent} />
-      </div>
-    );
-  }
 
   return (
     <div data-test-subj="agentBuilderSkillReferencedContentSection">
@@ -128,7 +119,7 @@ export const SkillReferencedContentFieldArray: React.FC<SkillReferencedContentFi
             title={
               atLimit
                 ? labels.skills.referencedFileSection.addFileButtonDisabledTooltip(
-                    MAX_REFERENCED_CONTENT_ITEMS
+                    maxReferencedContentItems
                   )
                 : undefined
             }
@@ -163,4 +154,19 @@ export const SkillReferencedContentFieldArray: React.FC<SkillReferencedContentFi
       </EuiFlexGroup>
     </div>
   );
+};
+
+export interface SkillReferencedContentFieldArrayProps {
+  control: Control<SkillFormData>;
+  readOnly?: boolean;
+}
+
+export const SkillReferencedContentFieldArray: React.FC<SkillReferencedContentFieldArrayProps> = ({
+  control,
+  readOnly = false,
+}) => {
+  if (readOnly) {
+    return <SkillReferencedContentReadOnlySection control={control} />;
+  }
+  return <SkillReferencedContentFieldArrayEdit control={control} />;
 };
