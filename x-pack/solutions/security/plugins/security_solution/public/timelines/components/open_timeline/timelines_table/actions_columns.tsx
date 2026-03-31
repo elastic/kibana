@@ -63,7 +63,7 @@ export const getActionsColumns = ({
 
   const createTemplateFromTimeline = {
     name: i18n.CREATE_TEMPLATE_FROM_TIMELINE,
-    icon: 'visText' as (typeof ICON_TYPES)[number],
+    icon: 'text' as (typeof ICON_TYPES)[number],
     onClick: ({ savedObjectId }: OpenTimelineResult) => {
       onOpenTimeline({
         duplicate: true,
@@ -117,7 +117,7 @@ export const getActionsColumns = ({
 
   const exportTimelineAction = {
     name: i18n.EXPORT_SELECTED,
-    icon: 'exportAction' as (typeof ICON_TYPES)[number],
+    icon: 'upload' as (typeof ICON_TYPES)[number],
     type: 'icon',
     onClick: (selectedTimeline: OpenTimelineResult) => {
       if (enableExportTimelineDownloader != null) enableExportTimelineDownloader(selectedTimeline);

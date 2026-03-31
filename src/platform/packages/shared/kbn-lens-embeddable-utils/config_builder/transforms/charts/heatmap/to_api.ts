@@ -15,11 +15,13 @@ import {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 
+import type { XScaleSchemaType } from '../../../schema/charts/shared';
 import { DEFAULT_LAYER_ID } from '../../../constants';
 import {
   getDatasourceLayers,
   getLegendTruncateAfterLines,
   getSharedChartLensStateToAPI,
+  getScaleTypeFromColumnType,
   stripUndefined,
 } from '../utils';
 import type { HeatmapState } from '../../../schema';
@@ -35,6 +37,8 @@ import {
 import type { HeatmapStateESQL, HeatmapStateNoESQL } from '../../../schema/charts/heatmap';
 import { getValueApiColumn } from '../../columns/esql_column';
 import type { LensApiAllMetricOperations } from '../../../schema/metric_ops';
+import { legendSizeCompat } from '../legend_sizes';
+import { axisLabelOrientationCompat } from '../common';
 
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapState['legend'] {
   return {
@@ -42,36 +46,35 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapSta
     position: legend.position,
     ...stripUndefined<HeatmapState['legend']>({
       truncate_after_lines: getLegendTruncateAfterLines(legend),
-      size: legend.legendSize,
+      size: legendSizeCompat.toAPI(legend.legendSize),
     }),
   };
 }
 
-function getOrientationFromRotation(rotation: number): 'angled' | 'vertical' | 'horizontal' {
-  return rotation === -45 ? 'angled' : rotation === -90 ? 'vertical' : 'horizontal';
-}
-
 function getGridConfigProps(
-  gridConfig: HeatmapVisualizationState['gridConfig']
-): HeatmapState['axis'] {
+  gridConfig: HeatmapVisualizationState['gridConfig'],
+  xAxisScale?: XScaleSchemaType
+): HeatmapState['axes'] {
   return {
     x: {
       labels: {
         visible: gridConfig.isXAxisLabelVisible,
         ...(gridConfig.xAxisLabelRotation !== undefined && {
-          orientation: getOrientationFromRotation(gridConfig.xAxisLabelRotation),
+          orientation:
+            axisLabelOrientationCompat.toAPI(gridConfig.xAxisLabelRotation) ?? 'horizontal',
         }),
       },
       title: {
-        value: gridConfig.xTitle,
+        text: gridConfig.xTitle,
         visible: gridConfig.isXAxisTitleVisible,
       },
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
+      ...(xAxisScale ? { scale: xAxisScale } : {}),
     },
     y: {
       labels: { visible: gridConfig.isYAxisLabelVisible },
       title: {
-        value: gridConfig.yTitle,
+        text: gridConfig.yTitle,
         visible: gridConfig.isYAxisTitleVisible,
       },
       ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
@@ -92,11 +95,17 @@ function reverseBuildVisualizationState(
     throw new Error('Value accessor is missing in the visualization state');
   }
 
+  let xAxisScale: XScaleSchemaType | undefined;
+  if (isTextBasedLayer(layer) && visualization.xAccessor) {
+    const xColumn = layer.columns.find((c) => c.columnId === visualization.xAccessor);
+    xAxisScale = getScaleTypeFromColumnType(xColumn?.meta?.type);
+  }
+
   const sharedProps = {
     ...generateApiLayer(layer),
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
-    axis: getGridConfigProps(visualization.gridConfig),
+    axes: getGridConfigProps(visualization.gridConfig, xAxisScale),
     cells: {
       labels: { visible: visualization.gridConfig.isCellLabelVisible },
     },

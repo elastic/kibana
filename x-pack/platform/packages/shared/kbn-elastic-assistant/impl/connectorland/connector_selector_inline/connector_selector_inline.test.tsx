@@ -146,6 +146,22 @@ describe('ConnectorSelectorInline', () => {
       },
     });
   });
+  it('passes loadConnectorFeatureId to ConnectorSelector when defined', () => {
+    render(
+      <TestProviders>
+        <ConnectorSelectorInline
+          isDisabled={false}
+          selectedConnectorId={mockConnectors[0].id}
+          selectedConversation={defaultConvo}
+          onConnectorSelected={jest.fn()}
+          loadConnectorFeatureId="test-feature-id"
+        />
+      </TestProviders>
+    );
+    expect(useLoadConnectors).toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: 'test-feature-id' })
+    );
+  });
   it('On connector change to add new connector, onchange event does nothing', () => {
     const { getByTestId } = render(
       <TestProviders>
