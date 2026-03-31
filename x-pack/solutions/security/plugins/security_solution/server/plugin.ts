@@ -58,7 +58,7 @@ import {
   APP_UI_ID,
   CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
   DEFAULT_ALERTS_INDEX,
-  DEFAULT_ALERT_CLOSE_REASONS_KEY,
+  DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
@@ -492,7 +492,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       const soClient = coreStart.savedObjects.getScopedClient(request);
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
       const customReasons =
-        (await uiSettingsClient.get<string[]>(DEFAULT_ALERT_CLOSE_REASONS_KEY)) ?? [];
+        (await uiSettingsClient.get<string[]>(DEFAULT_DETECTIONS_CLOSE_REASONS_KEY)) ?? [];
       const allowedReasons = new Set([...DefaultClosingReasonSchema.options, ...customReasons]);
       return allowedReasons.has(closeReason);
     });
