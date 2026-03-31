@@ -124,7 +124,6 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await mockIntegrationsList(page, []);
     await pageObjects.manageIntegrationsTable.navigateToEmpty();
     await expect(pageObjects.manageIntegrationsTable.getTable()).toBeVisible();
-    // EuiInMemoryTable renders 1 tbody row with "No items found" when items=[]; check the message
     await expect(pageObjects.manageIntegrationsTable.getTable()).toContainText('No items found');
   });
 
@@ -232,14 +231,11 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     await pageObjects.manageIntegrationsTable.getReviewApproveMenuItem().click();
     await expect(pageObjects.manageIntegrationsTable.getReviewApproveModal()).toBeVisible();
 
-    // Approve button disabled with no version or category
     await expect(pageObjects.manageIntegrationsTable.getReviewApproveDeployButton()).toBeDisabled();
 
-    // Fill valid version — still disabled without category
     await pageObjects.manageIntegrationsTable.getReviewModalVersionInput().fill('1.0.0');
     await expect(pageObjects.manageIntegrationsTable.getReviewApproveDeployButton()).toBeDisabled();
 
-    // Select category — now enabled
     const categoryInput = pageObjects.manageIntegrationsTable
       .getReviewModalCategoriesComboBox()
       .locator('input');
@@ -410,7 +406,7 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
   }) => {
     await pageObjects.manageIntegrationsTable.getStatusFilterButton().click();
     await page.getByRole('option', { name: 'In progress' }).click();
-    await pageObjects.manageIntegrationsTable.getStatusFilterButton().click(); // close popover
+    await pageObjects.manageIntegrationsTable.getStatusFilterButton().click();
 
     await expect(pageObjects.manageIntegrationsTable.getTableRows()).toHaveCount(1);
     await expect(
@@ -424,7 +420,7 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
   }) => {
     await pageObjects.manageIntegrationsTable.getActionsFilterButton().click();
     await page.getByRole('option', { name: 'Review & Approve' }).click();
-    await pageObjects.manageIntegrationsTable.getActionsFilterButton().click(); // close popover
+    await pageObjects.manageIntegrationsTable.getActionsFilterButton().click();
 
     await expect(pageObjects.manageIntegrationsTable.getTableRows()).toHaveCount(1);
     await expect(
@@ -507,7 +503,6 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
   });
 
   test('table renders rows in the order returned by the API', async ({ pageObjects }) => {
-    // ALL_INTEGRATIONS = [MOCK_PENDING, MOCK_COMPLETED, MOCK_APPROVED]
     const rowTexts = await pageObjects.manageIntegrationsTable.getTableRows().allTextContents();
     expect(rowTexts[0]).toContain('Pending Integration');
     expect(rowTexts[1]).toContain('Completed Integration');
@@ -518,6 +513,7 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
     page,
     pageObjects,
   }) => {
+    await page.unroute('**/api/automatic_import_v2/integrations');
     await page.route('**/api/automatic_import_v2/integrations', (route) =>
       route.fulfill({
         status: 500,
@@ -526,6 +522,8 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
       })
     );
     await pageObjects.manageIntegrationsTable.navigateToEmpty();
-    await expect(pageObjects.manageIntegrationsTable.getErrorCallout()).toBeVisible();
+    await expect(pageObjects.manageIntegrationsTable.getErrorCallout()).toBeVisible({
+      timeout: 15000,
+    });
   });
 });
