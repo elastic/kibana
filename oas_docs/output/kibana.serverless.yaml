@@ -2835,7 +2835,7 @@ paths:
                     properties:
                       data:
                         additionalProperties: {}
-                        description: Payload of the attachment.
+                        description: Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).
                         type: object
                       hidden:
                         description: When true, the attachment will not be displayed in the UI.
@@ -2843,12 +2843,14 @@ paths:
                       id:
                         description: Optional id for the attachment.
                         type: string
+                      origin:
+                        description: Origin string (for example, saved object ID) for by-reference attachments. When provided without `data`, the content is resolved once using the attachment type’s `resolve` hook.
+                        type: string
                       type:
                         description: Type of the attachment.
                         type: string
                     required:
                       - type
-                      - data
                   type: array
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
@@ -3202,7 +3204,7 @@ paths:
                     properties:
                       data:
                         additionalProperties: {}
-                        description: Payload of the attachment.
+                        description: Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).
                         type: object
                       hidden:
                         description: When true, the attachment will not be displayed in the UI.
@@ -3210,12 +3212,14 @@ paths:
                       id:
                         description: Optional id for the attachment.
                         type: string
+                      origin:
+                        description: Origin string (for example, saved object ID) for by-reference attachments. When provided without `data`, the content is resolved once using the attachment type’s `resolve` hook.
+                        type: string
                       type:
                         description: Type of the attachment.
                         type: string
                     required:
                       - type
-                      - data
                   type: array
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
@@ -3502,6 +3506,13 @@ paths:
           required: true
           schema:
             type: string
+        - description: If true, removes the plugin skills from agents that use them and then deletes the plugin. If false and any agent uses the plugin skills, the request returns 409 Conflict with the list of agents.
+          in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -19967,12 +19978,58 @@ paths:
                   managed: false
                   name: High Risk Vendors
                   riskModifier: 1.5
+              CreateWatchlistWithSourcesRequest:
+                summary: Create watchlist with entity sources
+                value:
+                  description: High risk vendor watchlist
+                  entitySources:
+                    - enabled: true
+                      identifierField: user.name
+                      indexPattern: my-sync-index
+                      name: My User Index Source
+                      type: index
+                  managed: false
+                  name: High Risk Vendors
+                  riskModifier: 1.5
             schema:
               type: object
               properties:
                 description:
                   description: Description of the watchlist
                   type: string
+                entitySources:
+                  description: Optional entity sources to create and link to the watchlist
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      filter:
+                        $ref: '#/components/schemas/Security_Entity_Analytics_API_Filter'
+                      identifierField:
+                        description: Field used to query the entity store for index-type sources
+                        type: string
+                      indexPattern:
+                        type: string
+                      integrationName:
+                        description: Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+                        type: string
+                      matchers:
+                        items:
+                          $ref: '#/components/schemas/Security_Entity_Analytics_API_Matcher'
+                        type: array
+                      name:
+                        type: string
+                      queryRule:
+                        description: KQL query used to filter data from the provided index patterns
+                        type: string
+                      type:
+                        $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitySourceType'
+                    required:
+                      - type
+                      - name
+                  type: array
                 managed:
                   description: Indicates if the watchlist is managed by the system
                   type: boolean
@@ -20004,7 +20061,14 @@ paths:
                     riskModifier: 1.5
                     updatedAt: '2026-01-28T12:00:00.000Z'
               schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_WatchlistObject'
+                allOf:
+                  - $ref: '#/components/schemas/Security_Entity_Analytics_API_WatchlistObject'
+                  - type: object
+                    properties:
+                      entitySources:
+                        items:
+                          $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEntitySource'
+                        type: array
           description: Watchlist created successfully
       summary: Create a new watchlist
       tags:
@@ -39445,6 +39509,1507 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/epm/packages/{pkgName}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: delete-fleet-epm-packages-pkgname
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: force
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      anyOf:
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            deferred:
+                              type: boolean
+                            id:
+                              type: string
+                            originId:
+                              type: string
+                            type:
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
+                          required:
+                            - id
+                            - type
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            deferred:
+                              type: boolean
+                            id:
+                              type: string
+                            type:
+                              enum:
+                                - index
+                                - index_template
+                                - component_template
+                                - ingest_pipeline
+                                - ilm_policy
+                                - data_stream_ilm_policy
+                                - transform
+                                - ml_model
+                                - knowledge_base
+                                - esql_view
+                              type: string
+                            version:
+                              type: string
+                          required:
+                            - id
+                            - type
+                    maxItems: 10000
+                    type: array
+                required:
+                  - items
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Delete a package
+      tags:
+        - Elastic Package Manager (EPM)
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      operationId: get-fleet-epm-packages-pkgname
+      parameters:
+        - in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: ignoreUnverified
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: prerelease
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: full
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: withMetadata
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: true
+                    type: object
+                    properties:
+                      agent:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          privileges:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              root:
+                                type: boolean
+                      asset_tags:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            asset_ids:
+                              items:
+                                type: string
+                              maxItems: 100
+                              type: array
+                            asset_types:
+                              items:
+                                type: string
+                              maxItems: 10
+                              type: array
+                            text:
+                              type: string
+                          required:
+                            - text
+                        maxItems: 1000
+                        type: array
+                      assets:
+                        additionalProperties: {}
+                        type: object
+                      categories:
+                        items:
+                          type: string
+                        maxItems: 10
+                        type: array
+                      conditions:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          deprecated:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              replaced_by:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              since:
+                                type: string
+                            required:
+                              - description
+                          elastic:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              capabilities:
+                                items:
+                                  type: string
+                                maxItems: 10
+                                type: array
+                              subscription:
+                                type: string
+                          kibana:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              version:
+                                type: string
+                      data_streams:
+                        items:
+                          additionalProperties: {}
+                          type: object
+                        maxItems: 1000
+                        type: array
+                      deprecated:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          description:
+                            type: string
+                          replaced_by:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          since:
+                            type: string
+                        required:
+                          - description
+                      description:
+                        type: string
+                      discovery:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          datasets:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            maxItems: 10
+                            type: array
+                          fields:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            maxItems: 10
+                            type: array
+                      download:
+                        type: string
+                      elasticsearch:
+                        additionalProperties: {}
+                        type: object
+                      format_version:
+                        type: string
+                      icons:
+                        items:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            dark_mode:
+                              type: boolean
+                            path:
+                              type: string
+                            size:
+                              type: string
+                            src:
+                              type: string
+                            title:
+                              type: string
+                            type:
+                              type: string
+                          required:
+                            - src
+                        maxItems: 10
+                        type: array
+                      installationInfo:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          additional_spaces_installed_kibana:
+                            additionalProperties:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  deferred:
+                                    type: boolean
+                                  id:
+                                    type: string
+                                  originId:
+                                    type: string
+                                  type:
+                                    anyOf:
+                                      - enum:
+                                          - dashboard
+                                          - lens
+                                          - visualization
+                                          - search
+                                          - index-pattern
+                                          - map
+                                          - ml-module
+                                          - security-rule
+                                          - csp-rule-template
+                                          - osquery-pack-asset
+                                          - osquery-saved-query
+                                          - tag
+                                        type: string
+                                      - type: string
+                                required:
+                                  - id
+                                  - type
+                              maxItems: 100
+                              type: array
+                            type: object
+                          created_at:
+                            type: string
+                          experimental_data_stream_features:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                data_stream:
+                                  type: string
+                                features:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    doc_value_only_numeric:
+                                      type: boolean
+                                    doc_value_only_other:
+                                      type: boolean
+                                    synthetic_source:
+                                      type: boolean
+                                    tsdb:
+                                      type: boolean
+                              required:
+                                - data_stream
+                                - features
+                            maxItems: 100
+                            type: array
+                          install_format_schema_version:
+                            type: string
+                          install_source:
+                            enum:
+                              - registry
+                              - upload
+                              - bundled
+                              - custom
+                            type: string
+                          install_status:
+                            enum:
+                              - installed
+                              - installing
+                              - install_failed
+                            type: string
+                          installed_es:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                deferred:
+                                  type: boolean
+                                id:
+                                  type: string
+                                type:
+                                  enum:
+                                    - index
+                                    - index_template
+                                    - component_template
+                                    - ingest_pipeline
+                                    - ilm_policy
+                                    - data_stream_ilm_policy
+                                    - transform
+                                    - ml_model
+                                    - knowledge_base
+                                    - esql_view
+                                  type: string
+                                version:
+                                  type: string
+                              required:
+                                - id
+                                - type
+                            maxItems: 10000
+                            type: array
+                          installed_kibana:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                deferred:
+                                  type: boolean
+                                id:
+                                  type: string
+                                originId:
+                                  type: string
+                                type:
+                                  anyOf:
+                                    - enum:
+                                        - dashboard
+                                        - lens
+                                        - visualization
+                                        - search
+                                        - index-pattern
+                                        - map
+                                        - ml-module
+                                        - security-rule
+                                        - csp-rule-template
+                                        - osquery-pack-asset
+                                        - osquery-saved-query
+                                        - tag
+                                      type: string
+                                    - type: string
+                              required:
+                                - id
+                                - type
+                            maxItems: 10000
+                            type: array
+                          installed_kibana_space_id:
+                            type: string
+                          is_rollback_ttl_expired:
+                            type: boolean
+                          latest_executed_state:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              error:
+                                type: string
+                              name:
+                                type: string
+                              started_at:
+                                type: string
+                          latest_install_failed_attempts:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                created_at:
+                                  type: string
+                                error:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    message:
+                                      type: string
+                                    name:
+                                      type: string
+                                    stack:
+                                      type: string
+                                  required:
+                                    - name
+                                    - message
+                                target_version:
+                                  type: string
+                              required:
+                                - created_at
+                                - target_version
+                                - error
+                            maxItems: 10
+                            type: array
+                          name:
+                            type: string
+                          namespaces:
+                            items:
+                              type: string
+                            maxItems: 100
+                            type: array
+                          previous_version:
+                            nullable: true
+                            type: string
+                          rolled_back:
+                            type: boolean
+                          type:
+                            type: string
+                          updated_at:
+                            type: string
+                          verification_key_id:
+                            nullable: true
+                            type: string
+                          verification_status:
+                            enum:
+                              - unverified
+                              - verified
+                              - unknown
+                            type: string
+                          version:
+                            type: string
+                        required:
+                          - type
+                          - installed_kibana
+                          - installed_es
+                          - name
+                          - version
+                          - install_status
+                          - install_source
+                          - verification_status
+                      internal:
+                        type: boolean
+                      keepPoliciesUpToDate:
+                        type: boolean
+                      latestVersion:
+                        type: string
+                      license:
+                        type: string
+                      licensePath:
+                        type: string
+                      name:
+                        type: string
+                      notice:
+                        type: string
+                      owner:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          github:
+                            type: string
+                          type:
+                            enum:
+                              - elastic
+                              - partner
+                              - community
+                            type: string
+                      path:
+                        type: string
+                      policy_templates:
+                        items:
+                          additionalProperties: {}
+                          type: object
+                        maxItems: 100
+                        type: array
+                      readme:
+                        type: string
+                      release:
+                        enum:
+                          - ga
+                          - beta
+                          - experimental
+                        type: string
+                      screenshots:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            dark_mode:
+                              type: boolean
+                            path:
+                              type: string
+                            size:
+                              type: string
+                            src:
+                              type: string
+                            title:
+                              type: string
+                            type:
+                              type: string
+                          required:
+                            - src
+                        maxItems: 10
+                        type: array
+                      signature_path:
+                        type: string
+                      source:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          license:
+                            type: string
+                        required:
+                          - license
+                      status:
+                        type: string
+                      title:
+                        type: string
+                      type:
+                        anyOf:
+                          - enum:
+                              - integration
+                            type: string
+                          - enum:
+                              - input
+                            type: string
+                          - enum:
+                              - content
+                            type: string
+                          - type: string
+                      var_groups:
+                        items:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            description:
+                              type: string
+                            name:
+                              type: string
+                            options:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  description:
+                                    type: string
+                                  hide_in_deployment_modes:
+                                    items:
+                                      enum:
+                                        - default
+                                        - agentless
+                                      type: string
+                                    maxItems: 2
+                                    type: array
+                                  name:
+                                    type: string
+                                  title:
+                                    type: string
+                                  vars:
+                                    items:
+                                      type: string
+                                    maxItems: 100
+                                    type: array
+                                required:
+                                  - name
+                                  - title
+                                  - vars
+                              maxItems: 20
+                              type: array
+                            selector_title:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - selector_title
+                            - options
+                        maxItems: 20
+                        type: array
+                      vars:
+                        items:
+                          additionalProperties: {}
+                          type: object
+                        maxItems: 1000
+                        type: array
+                      version:
+                        type: string
+                    required:
+                      - name
+                      - version
+                      - title
+                      - assets
+                  metadata:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      has_policies:
+                        type: boolean
+                    required:
+                      - has_policies
+                required:
+                  - item
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Get a package
+      tags:
+        - Elastic Package Manager (EPM)
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: post-fleet-epm-packages-pkgname
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: prerelease
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: ignoreMappingUpdateErrors
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - in: query
+          name: skipDataStreamRollover
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: Skip dependency validation when installing a package with dependencies
+          in: query
+          name: skipDependencyCheck
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              nullable: true
+              type: object
+              properties:
+                force:
+                  default: false
+                  type: boolean
+                ignore_constraints:
+                  default: false
+                  type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  _meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      install_source:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                      - install_source
+                      - name
+                  items:
+                    items:
+                      anyOf:
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            deferred:
+                              type: boolean
+                            id:
+                              type: string
+                            originId:
+                              type: string
+                            type:
+                              anyOf:
+                                - enum:
+                                    - dashboard
+                                    - lens
+                                    - visualization
+                                    - search
+                                    - index-pattern
+                                    - map
+                                    - ml-module
+                                    - security-rule
+                                    - csp-rule-template
+                                    - osquery-pack-asset
+                                    - osquery-saved-query
+                                    - tag
+                                  type: string
+                                - type: string
+                          required:
+                            - id
+                            - type
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            deferred:
+                              type: boolean
+                            id:
+                              type: string
+                            type:
+                              enum:
+                                - index
+                                - index_template
+                                - component_template
+                                - ingest_pipeline
+                                - ilm_policy
+                                - data_stream_ilm_policy
+                                - transform
+                                - ml_model
+                                - knowledge_base
+                                - esql_view
+                              type: string
+                            version:
+                              type: string
+                          required:
+                            - id
+                            - type
+                    maxItems: 10000
+                    type: array
+                required:
+                  - items
+                  - _meta
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Install a package from the registry
+      tags:
+        - Elastic Package Manager (EPM)
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: put-fleet-epm-packages-pkgname
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                keepPoliciesUpToDate:
+                  type: boolean
+              required:
+                - keepPoliciesUpToDate
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: true
+                    type: object
+                    properties:
+                      agent:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          privileges:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              root:
+                                type: boolean
+                      asset_tags:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            asset_ids:
+                              items:
+                                type: string
+                              maxItems: 100
+                              type: array
+                            asset_types:
+                              items:
+                                type: string
+                              maxItems: 10
+                              type: array
+                            text:
+                              type: string
+                          required:
+                            - text
+                        maxItems: 1000
+                        type: array
+                      assets:
+                        additionalProperties: {}
+                        type: object
+                      categories:
+                        items:
+                          type: string
+                        maxItems: 10
+                        type: array
+                      conditions:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          deprecated:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              replaced_by:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              since:
+                                type: string
+                            required:
+                              - description
+                          elastic:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              capabilities:
+                                items:
+                                  type: string
+                                maxItems: 10
+                                type: array
+                              subscription:
+                                type: string
+                          kibana:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              version:
+                                type: string
+                      data_streams:
+                        items:
+                          additionalProperties: {}
+                          type: object
+                        maxItems: 1000
+                        type: array
+                      deprecated:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          description:
+                            type: string
+                          replaced_by:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          since:
+                            type: string
+                        required:
+                          - description
+                      description:
+                        type: string
+                      discovery:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          datasets:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            maxItems: 10
+                            type: array
+                          fields:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            maxItems: 10
+                            type: array
+                      download:
+                        type: string
+                      elasticsearch:
+                        additionalProperties: {}
+                        type: object
+                      format_version:
+                        type: string
+                      icons:
+                        items:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            dark_mode:
+                              type: boolean
+                            path:
+                              type: string
+                            size:
+                              type: string
+                            src:
+                              type: string
+                            title:
+                              type: string
+                            type:
+                              type: string
+                          required:
+                            - src
+                        maxItems: 10
+                        type: array
+                      installationInfo:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          additional_spaces_installed_kibana:
+                            additionalProperties:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  deferred:
+                                    type: boolean
+                                  id:
+                                    type: string
+                                  originId:
+                                    type: string
+                                  type:
+                                    anyOf:
+                                      - enum:
+                                          - dashboard
+                                          - lens
+                                          - visualization
+                                          - search
+                                          - index-pattern
+                                          - map
+                                          - ml-module
+                                          - security-rule
+                                          - csp-rule-template
+                                          - osquery-pack-asset
+                                          - osquery-saved-query
+                                          - tag
+                                        type: string
+                                      - type: string
+                                required:
+                                  - id
+                                  - type
+                              maxItems: 100
+                              type: array
+                            type: object
+                          created_at:
+                            type: string
+                          experimental_data_stream_features:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                data_stream:
+                                  type: string
+                                features:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    doc_value_only_numeric:
+                                      type: boolean
+                                    doc_value_only_other:
+                                      type: boolean
+                                    synthetic_source:
+                                      type: boolean
+                                    tsdb:
+                                      type: boolean
+                              required:
+                                - data_stream
+                                - features
+                            maxItems: 100
+                            type: array
+                          install_format_schema_version:
+                            type: string
+                          install_source:
+                            enum:
+                              - registry
+                              - upload
+                              - bundled
+                              - custom
+                            type: string
+                          install_status:
+                            enum:
+                              - installed
+                              - installing
+                              - install_failed
+                            type: string
+                          installed_es:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                deferred:
+                                  type: boolean
+                                id:
+                                  type: string
+                                type:
+                                  enum:
+                                    - index
+                                    - index_template
+                                    - component_template
+                                    - ingest_pipeline
+                                    - ilm_policy
+                                    - data_stream_ilm_policy
+                                    - transform
+                                    - ml_model
+                                    - knowledge_base
+                                    - esql_view
+                                  type: string
+                                version:
+                                  type: string
+                              required:
+                                - id
+                                - type
+                            maxItems: 10000
+                            type: array
+                          installed_kibana:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                deferred:
+                                  type: boolean
+                                id:
+                                  type: string
+                                originId:
+                                  type: string
+                                type:
+                                  anyOf:
+                                    - enum:
+                                        - dashboard
+                                        - lens
+                                        - visualization
+                                        - search
+                                        - index-pattern
+                                        - map
+                                        - ml-module
+                                        - security-rule
+                                        - csp-rule-template
+                                        - osquery-pack-asset
+                                        - osquery-saved-query
+                                        - tag
+                                      type: string
+                                    - type: string
+                              required:
+                                - id
+                                - type
+                            maxItems: 10000
+                            type: array
+                          installed_kibana_space_id:
+                            type: string
+                          is_rollback_ttl_expired:
+                            type: boolean
+                          latest_executed_state:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              error:
+                                type: string
+                              name:
+                                type: string
+                              started_at:
+                                type: string
+                          latest_install_failed_attempts:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                created_at:
+                                  type: string
+                                error:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    message:
+                                      type: string
+                                    name:
+                                      type: string
+                                    stack:
+                                      type: string
+                                  required:
+                                    - name
+                                    - message
+                                target_version:
+                                  type: string
+                              required:
+                                - created_at
+                                - target_version
+                                - error
+                            maxItems: 10
+                            type: array
+                          name:
+                            type: string
+                          namespaces:
+                            items:
+                              type: string
+                            maxItems: 100
+                            type: array
+                          previous_version:
+                            nullable: true
+                            type: string
+                          rolled_back:
+                            type: boolean
+                          type:
+                            type: string
+                          updated_at:
+                            type: string
+                          verification_key_id:
+                            nullable: true
+                            type: string
+                          verification_status:
+                            enum:
+                              - unverified
+                              - verified
+                              - unknown
+                            type: string
+                          version:
+                            type: string
+                        required:
+                          - type
+                          - installed_kibana
+                          - installed_es
+                          - name
+                          - version
+                          - install_status
+                          - install_source
+                          - verification_status
+                      internal:
+                        type: boolean
+                      keepPoliciesUpToDate:
+                        type: boolean
+                      latestVersion:
+                        type: string
+                      license:
+                        type: string
+                      licensePath:
+                        type: string
+                      name:
+                        type: string
+                      notice:
+                        type: string
+                      owner:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          github:
+                            type: string
+                          type:
+                            enum:
+                              - elastic
+                              - partner
+                              - community
+                            type: string
+                      path:
+                        type: string
+                      policy_templates:
+                        items:
+                          additionalProperties: {}
+                          type: object
+                        maxItems: 100
+                        type: array
+                      readme:
+                        type: string
+                      release:
+                        enum:
+                          - ga
+                          - beta
+                          - experimental
+                        type: string
+                      screenshots:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            dark_mode:
+                              type: boolean
+                            path:
+                              type: string
+                            size:
+                              type: string
+                            src:
+                              type: string
+                            title:
+                              type: string
+                            type:
+                              type: string
+                          required:
+                            - src
+                        maxItems: 10
+                        type: array
+                      signature_path:
+                        type: string
+                      source:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          license:
+                            type: string
+                        required:
+                          - license
+                      status:
+                        type: string
+                      title:
+                        type: string
+                      type:
+                        anyOf:
+                          - enum:
+                              - integration
+                            type: string
+                          - enum:
+                              - input
+                            type: string
+                          - enum:
+                              - content
+                            type: string
+                          - type: string
+                      var_groups:
+                        items:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            description:
+                              type: string
+                            name:
+                              type: string
+                            options:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  description:
+                                    type: string
+                                  hide_in_deployment_modes:
+                                    items:
+                                      enum:
+                                        - default
+                                        - agentless
+                                      type: string
+                                    maxItems: 2
+                                    type: array
+                                  name:
+                                    type: string
+                                  title:
+                                    type: string
+                                  vars:
+                                    items:
+                                      type: string
+                                    maxItems: 100
+                                    type: array
+                                required:
+                                  - name
+                                  - title
+                                  - vars
+                              maxItems: 20
+                              type: array
+                            selector_title:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - selector_title
+                            - options
+                        maxItems: 20
+                        type: array
+                      vars:
+                        items:
+                          additionalProperties: {}
+                          type: object
+                        maxItems: 1000
+                        type: array
+                      version:
+                        type: string
+                    required:
+                      - name
+                      - version
+                      - title
+                      - assets
+                required:
+                  - item
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Update package settings
+      tags:
+        - Elastic Package Manager (EPM)
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}:
     delete:
       description: |-
@@ -39471,7 +41036,7 @@ paths:
             type: string
         - in: path
           name: pkgVersion
-          required: false
+          required: true
           schema:
             type: string
         - in: query
@@ -39586,7 +41151,7 @@ paths:
             type: string
         - in: path
           name: pkgVersion
-          required: false
+          required: true
           schema:
             type: string
         - in: query
@@ -40213,7 +41778,7 @@ paths:
             type: string
         - in: path
           name: pkgVersion
-          required: false
+          required: true
           schema:
             type: string
         - in: query
@@ -40388,7 +41953,7 @@ paths:
             type: string
         - in: path
           name: pkgVersion
-          required: false
+          required: true
           schema:
             type: string
       requestBody:
@@ -41804,8 +43369,8 @@ paths:
                         - type: string
                         - type: number
                         - type: boolean
-                        - enum: []
-                          nullable: true
+                        - enum:
+                            - null
                         - {}
                     maxItems: 2
                     type: array
@@ -61018,6 +62583,13 @@ paths:
           schema:
             example: 'true'
             type: string
+        - description: When true, permanently deletes the workflows (hard delete) instead of soft-deleting them. The workflow IDs become available for reuse.
+          in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -61057,10 +62629,22 @@ paths:
       tags:
         - workflows
       x-codeSamples:
-        - lang: curl
+        - label: Soft delete (default)
+          lang: curl
           source: |
             curl \
               -X DELETE "${KIBANA_URL}/api/workflows" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "ids": ["workflow-c3d4e5f6-a7b8-9012-cdef-234567890123", "workflow-d4e5f6a7-b8c9-0123-defa-345678901234"]
+              }'
+        - label: Hard delete (permanent)
+          lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/workflows?force=true" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -62630,6 +64214,13 @@ paths:
           required: true
           schema:
             type: string
+        - description: When true, permanently deletes the workflow (hard delete) instead of soft-deleting it. The workflow ID becomes available for reuse.
+          in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           description: Indicates a successful response
@@ -62637,10 +64228,18 @@ paths:
       tags:
         - workflows
       x-codeSamples:
-        - lang: curl
+        - label: Soft delete (default)
+          lang: curl
           source: |
             curl \
               -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - label: Hard delete (permanent)
+          lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}?force=true" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true"
         - lang: Console
@@ -82938,6 +84537,12 @@ components:
         - category_1_count
         - inputs
         - notes
+    Security_Entity_Analytics_API_EntitySourceType:
+      enum:
+        - index
+        - entity_analytics_integration
+        - store
+      type: string
     Security_Entity_Analytics_API_EntityType:
       enum:
         - user
@@ -82945,6 +84550,13 @@ components:
         - service
         - generic
       type: string
+    Security_Entity_Analytics_API_Filter:
+      type: object
+      properties:
+        kuery:
+          oneOf:
+            - type: string
+            - type: object
     Security_Entity_Analytics_API_GenericEntity:
       additionalProperties: false
       type: object
@@ -83070,11 +84682,49 @@ components:
       required:
         - dsl
         - response
+    Security_Entity_Analytics_API_Integrations:
+      type: object
+      properties:
+        syncData:
+          description: integrations latest full sync and update syncData
+          type: object
+          properties:
+            lastFullSync:
+              description: Timestamp of the last full sync from integrations
+              format: date-time
+              type: string
+            lastUpdateProcessed:
+              description: Timestamp of the last update processed from integrations
+              format: date-time
+              type: string
+        syncMarkerIndex:
+          description: Index to read latest sync markers from
+          type: string
     Security_Entity_Analytics_API_Interval:
       description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour. Must be less than or equal to half the duration of the lookback period,
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
+    Security_Entity_Analytics_API_Matcher:
+      type: object
+      properties:
+        fields:
+          items:
+            type: string
+          type: array
+        values:
+          description: |
+            Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
+          oneOf:
+            - items:
+                type: string
+              type: array
+            - items:
+                type: boolean
+              type: array
+      required:
+        - fields
+        - values
     Security_Entity_Analytics_API_Metadata:
       $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
     Security_Entity_Analytics_API_MonitoredUserDoc:
@@ -83162,6 +84812,27 @@ components:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
       required:
         - status
+    Security_Entity_Analytics_API_MonitoringEntitySource:
+      allOf:
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEntitySourceProperties'
+        - type: object
+          properties:
+            id:
+              type: string
+          required:
+            - type
+            - name
+            - id
+            - managed
+    Security_Entity_Analytics_API_MonitoringEntitySourceProperties:
+      allOf:
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_UpdateableMonitoringEntitySourceProperties'
+        - type: object
+          properties:
+            managed:
+              type: boolean
+            type:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitySourceType'
     Security_Entity_Analytics_API_MonitoringLabel:
       type: object
       properties:
@@ -83373,6 +85044,31 @@ components:
         - exponential_avg_checkpoint_duration_ms
         - exponential_avg_documents_indexed
         - exponential_avg_documents_processed
+    Security_Entity_Analytics_API_UpdateableMonitoringEntitySourceProperties:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        filter:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Filter'
+        identifierField:
+          description: Field used to query the entity store for index-type sources
+          type: string
+        indexPattern:
+          type: string
+        integrationName:
+          type: string
+        integrations:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Integrations'
+        matchers:
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_Matcher'
+          type: array
+        name:
+          type: string
+        queryRule:
+          description: KQL query used to filter data from the provided index patterns
+          type: string
     Security_Entity_Analytics_API_UserEntity:
       additionalProperties: false
       type: object
