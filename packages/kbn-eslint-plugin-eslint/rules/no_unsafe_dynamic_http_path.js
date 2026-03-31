@@ -136,7 +136,8 @@ const isPathExpressionStartingWithSlash = (node) => {
   }
 
   if (node.type === esTypes.TemplateLiteral) {
-    return node.quasis[0].value.cooked.startsWith('/');
+    const cooked = node.quasis[0].value.cooked;
+    return typeof cooked === 'string' && cooked.startsWith('/');
   }
 
   if (node.type === esTypes.BinaryExpression && node.operator === '+') {
