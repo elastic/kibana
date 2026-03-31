@@ -109,6 +109,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod

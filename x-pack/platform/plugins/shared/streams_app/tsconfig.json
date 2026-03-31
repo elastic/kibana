@@ -110,5 +110,6 @@
     "@kbn/std",
     "@kbn/workflows-extensions",
     "@kbn/workflows",
+    "@kbn/cps",
   ]
 }

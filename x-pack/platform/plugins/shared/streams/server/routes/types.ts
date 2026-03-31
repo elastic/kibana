@@ -50,6 +50,7 @@ export interface RouteHandlerScopedClients {
   fieldsMetadataClient: IFieldsMetadataClient;
   taskClient: TaskClient<StreamsTaskType>;
   modelSettingsClient: ModelSettingsConfigClient;
+  isSecurityEnabled: boolean;
 }
 
 export interface RouteDependencies {
