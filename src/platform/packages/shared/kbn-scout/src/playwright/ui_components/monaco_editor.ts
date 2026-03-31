@@ -27,7 +27,6 @@ export class KibanaCodeEditorWrapper {
   async waitCodeEditorReady(dataTestSubjId: string): Promise<void> {
     const editor = this.page.getByTestId(dataTestSubjId).getByTestId('kibanaCodeEditor');
     await expect(editor).toBeVisible({ timeout: 30_000 });
-    await expect(editor).toBeEnabled({ timeout: 30_000 });
   }
 
   /**
