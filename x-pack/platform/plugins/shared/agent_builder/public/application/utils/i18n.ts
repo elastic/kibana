@@ -1660,6 +1660,154 @@ export const labels = {
       'xpack.agentBuilder.overview.customizations.preExecutionWorkflowTitle',
       { defaultMessage: 'Pre-execution workflows' }
     ),
+    editDetails: {
+      successToast: i18n.translate('xpack.agentBuilder.overview.editDetails.successToast', {
+        defaultMessage: 'Agent details updated',
+      }),
+      errorToast: i18n.translate('xpack.agentBuilder.overview.editDetails.errorToast', {
+        defaultMessage: 'Unable to update agent details',
+      }),
+      title: i18n.translate('xpack.agentBuilder.overview.editDetails.title', {
+        defaultMessage: 'Edit agent settings',
+      }),
+      sharedWarningPrefix: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.sharedWarningPrefix',
+        { defaultMessage: "You're editing a " }
+      ),
+      sharedWarningBadge: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.sharedWarningBadge',
+        { defaultMessage: 'Shared agent' }
+      ),
+      sharedWarningSuffix: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.sharedWarningSuffix',
+        { defaultMessage: '. Changes will affect all users.' }
+      ),
+      identificationTitle: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.identificationTitle',
+        { defaultMessage: 'Identification' }
+      ),
+      identificationDescription: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.identificationDescription',
+        { defaultMessage: 'Define how this agent is named and described.' }
+      ),
+      nameLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.nameLabel', {
+        defaultMessage: 'Agent name',
+      }),
+      nameRequired: i18n.translate('xpack.agentBuilder.overview.editDetails.nameRequired', {
+        defaultMessage: 'Agent name is required.',
+      }),
+      descriptionLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.descriptionLabel', {
+        defaultMessage: 'Description',
+      }),
+      descriptionRequired: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.descriptionRequired',
+        { defaultMessage: 'Description is required.' }
+      ),
+      avatarSymbolLabel: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.avatarSymbolLabel',
+        { defaultMessage: 'Avatar symbol' }
+      ),
+      avatarSymbolPlaceholder: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.avatarSymbolPlaceholder',
+        { defaultMessage: 'Paste an emoji or use a two letter abbreviation' }
+      ),
+      avatarColorLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.avatarColorLabel', {
+        defaultMessage: 'Avatar color',
+      }),
+      avatarColorInvalid: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.avatarColorInvalid',
+        { defaultMessage: 'Enter a color hex code' }
+      ),
+      avatarColorPlaceholder: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.avatarColorPlaceholder',
+        { defaultMessage: 'Enter a color hex code' }
+      ),
+      accessTitle: i18n.translate('xpack.agentBuilder.overview.editDetails.accessTitle', {
+        defaultMessage: 'Access',
+      }),
+      accessDescription: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessDescription',
+        { defaultMessage: 'Control who can view and edit this agent.' }
+      ),
+      visibilityLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.visibilityLabel', {
+        defaultMessage: 'Visibility',
+      }),
+      visibilityDisabledReason: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.visibilityDisabledReason',
+        { defaultMessage: 'Only the owner or an administrator can change visibility.' }
+      ),
+      visibilityAriaLabel: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.visibilityAriaLabel',
+        { defaultMessage: 'Agent visibility' }
+      ),
+      customizationTitle: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.customizationTitle',
+        { defaultMessage: 'Customization' }
+      ),
+      customizationDescription: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.customizationDescription',
+        { defaultMessage: 'Control how your agent behaves.' }
+      ),
+      autoIncludeTitle: i18n.translate('xpack.agentBuilder.overview.editDetails.autoIncludeTitle', {
+        defaultMessage: 'Include built-in capabilities automatically',
+      }),
+      autoIncludeDescription: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.autoIncludeDescription',
+        {
+          defaultMessage:
+            'Automatically include all current and future Elastic-built skills, plugins, and tools. Turn off to manage them manually.',
+        }
+      ),
+      autoIncludeLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.autoIncludeLabel', {
+        defaultMessage: 'Include built-in capabilities automatically',
+      }),
+      workflowTitle: i18n.translate('xpack.agentBuilder.overview.editDetails.workflowTitle', {
+        defaultMessage: 'Pre-execution workflow',
+      }),
+      workflowDescription: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.workflowDescription',
+        {
+          defaultMessage:
+            'Workflows that run automatically when the agent starts, preparing context before it responds.',
+        }
+      ),
+      workflowLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.workflowLabel', {
+        defaultMessage: 'Workflows',
+      }),
+      instructionsTitle: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.instructionsTitle',
+        { defaultMessage: 'Custom Instructions' }
+      ),
+      instructionsDescription: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.instructionsDescription',
+        {
+          defaultMessage:
+            'Define how the agent should behave, what it should prioritize, and any rules it should follow when responding.',
+        }
+      ),
+      instructionsPlaceholder: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.instructionsPlaceholder',
+        {
+          defaultMessage:
+            'e.g., Prioritize concise answers. Focus on logs and metrics for payment services. Include ES|QL queries when helpful and end with clear next steps.',
+        }
+      ),
+      tagsTitle: i18n.translate('xpack.agentBuilder.overview.editDetails.tagsTitle', {
+        defaultMessage: 'Tags',
+      }),
+      tagsDescription: i18n.translate('xpack.agentBuilder.overview.editDetails.tagsDescription', {
+        defaultMessage: 'Add labels to organize and quickly find this agent.',
+      }),
+      tagsLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.tagsLabel', {
+        defaultMessage: 'Enter a tag',
+      }),
+      cancelButton: i18n.translate('xpack.agentBuilder.overview.editDetails.cancelButton', {
+        defaultMessage: 'Cancel',
+      }),
+      saveButton: i18n.translate('xpack.agentBuilder.overview.editDetails.saveButton', {
+        defaultMessage: 'Save',
+      }),
+    },
   },
   navigationAbort: {
     title: i18n.translate('xpack.agentBuilder.navigationAbort.title', {
