@@ -37,11 +37,10 @@ export interface GridSectionHeaderProps {
 
 export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderProps) => {
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
-  const isGhostMouseDown = useRef<boolean>(false);
-  const hasBeenDragged = useRef<boolean>(false);
 
   const { gridLayoutStateManager } = useGridLayoutContext();
   const startDrag = useGridLayoutSectionEvents({ sectionId });
+  const hasBeenDragged = useRef<boolean>(false);
 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
@@ -142,13 +141,11 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     const sectionInteractionSubscription = dragState$.subscribe(({ type, event }) => {
       const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
       if (!headerRef) return;
-      const isTouch = event?.sensorType === 'touch';
-      const isKeyboard = event?.sensorType === 'keyboard';
 
       const handleFirstDrag = () => {
-        collapseSectionOnDrag();
-        setIsActive(true);
         hasBeenDragged.current = true;
+        setIsActive(true);
+        collapseSectionOnDrag();
 
         const width = headerRef.getBoundingClientRect().width;
         headerRef.style.width = `${width}px`;
@@ -167,17 +164,8 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
       switch (type) {
         case 'init':
-          isGhostMouseDown.current = false;
-          if (isTouch) {
-            isGhostMouseDown.current = true; // sets flag to detect the next mouse down event fired automatically by the browser after the touchend event on touch devices
-          }
           hasBeenDragged.current = false;
-          if (isKeyboard) {
-            // we want active drag styles to be applied on keyboard drag from the start, whereas for mouse/touch we only want to apply drag styles if there is actual movement (i.e., distinguish between click and drag)
-            handleFirstDrag();
-          }
           break;
-
         case 'update':
           if (!hasBeenDragged.current) {
             handleFirstDrag();
@@ -186,19 +174,12 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
             event!.translate.top
           }px)`;
           break;
-
         case 'finish':
           setIsActive(false);
-          // Touch interactions are followed by a compatibility/emulated `mousedown`,
-          // meaning the browser fires a mouse down event after touchend.
-          // We detect this "ghost mouse down" to prevent duplicated toggling of the section collapse state on touch devices.
-          // while still executing the rest of the sectionInteractionSubscription logic
-          // so that active header styles (e.g., hover icons like delete and drag) remain visible.
-          if (!hasBeenDragged.current && !isGhostMouseDown.current) {
+          if (!hasBeenDragged.current) {
+            // if no drag occurred, then this is a click event
             toggleIsCollapsed();
           }
-
-          isGhostMouseDown.current = false;
           hasBeenDragged.current = false;
           resetHeaderStyles();
           break;
@@ -272,8 +253,14 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           gridLayoutStateManager.headerRefs.current[sectionId] = element;
         }}
         onMouseDown={readOnly ? toggleIsCollapsed : handleSectionDragStart}
-        // using `onTouchStart` in `readOnly` mode will cause `toggleIsCollapsed` to be called twice
-        onTouchStart={readOnly ? undefined : handleSectionDragStart}
+        onTouchStart={readOnly ? toggleIsCollapsed : handleSectionDragStart}
+        onTouchEnd={(e) => {
+          // prevents both `onMouseDown` and `onTouchStart` from firing during touch events
+          if (!shouldIgnoreHeaderClick(e.target)) {
+            if (e.cancelable) e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
       >
         <GridSectionTitle
           sectionId={sectionId}
@@ -331,9 +318,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                     className="kbnGridSection--dragHandle"
                     role="button"
                     tabIndex={0}
-                    onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) =>
-                      handleSectionDragStart(e as unknown as UserInteractionEvent)
-                    }
+                    onKeyDown={handleSectionDragStart}
                     aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
                       defaultMessage: 'Move section',
                     })}
@@ -374,15 +359,15 @@ const styles = {
       gridRowStart: `span 1`,
       gridRowEnd: `start-${sectionId}`,
       height: `${euiTheme.size.xl}`,
-      touchAction: 'none', // prevents default drag behaviour on mobile
+      touchAction: 'none', // prevents default scroll on drag behaviour on mobile
       ...(readOnly
         ? {
             cursor: 'pointer',
           }
         : {
+            cursor: 'move',
             userSelect: 'none',
-            '&:hover': {
-              cursor: 'move',
+            '&:hover:not(.kbnGridSectionHeader--active)': {
               backgroundColor: `${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)}`,
             },
           }),
@@ -393,12 +378,7 @@ const styles = {
         textWrapMode: 'nowrap', // prevent panel count from wrapping
       },
       '.kbnGridSection--dragHandle': {
-        cursor: 'move',
         padding: euiTheme.size.xs,
-        '&:active, &:hover, &:focus': {
-          transform: 'none !important', // prevent "bump up" that EUI adds on hover
-          backgroundColor: 'transparent',
-        },
       },
 
       // these styles hide the delete + move actions by default and only show them on hover
@@ -419,9 +399,9 @@ const styles = {
       // these styles ensure that dragged sections are rendered **above** everything else + the move icon stays visible
       '&.kbnGridSectionHeader--active': {
         zIndex: euiTheme.levels.modal,
-        backgroundColor: euiTheme.colors.backgroundBasePlain, // needed to prevent the bug with transparent background while dragging
+        pointerEvents: 'auto', // allow pointer events through so that cursor can change
+        cursor: 'move',
         '.kbnGridSection--dragHandle': {
-          cursor: 'move',
           opacity: 1,
         },
       },
