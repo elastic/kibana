@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-42;
-
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { WatchlistEntitySourceClient } from './infra';
 import type { IntegrationType } from './infra';
