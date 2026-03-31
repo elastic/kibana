@@ -10,6 +10,7 @@ import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
+import { LegendLayout } from '@kbn/chart-expressions-common';
 import { FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Parser } from '@elastic/esql';
 
@@ -24,6 +25,7 @@ import { getColorMappingDefaults } from '../../utils';
 import type { XYVisualizationState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import { visualizationSubtypes, defaultSeriesType } from './types';
 import { flipSeriesType, getIconForSeries } from './state_helpers';
+import { getDefaultPalette } from './default_palette';
 import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
 
 const COLUMN_SORT_ORDER = {
@@ -601,7 +603,7 @@ function buildSuggestion({
         : undefined,
     layerType: LayerTypes.DATA,
     colorMapping: !mainPalette
-      ? getColorMappingDefaults()
+      ? getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(seriesType) })
       : mainPalette?.type === 'colorMapping'
       ? mainPalette.value
       : undefined,
@@ -632,7 +634,9 @@ function buildSuggestion({
     : [];
 
   const state: XYVisualizationState = {
-    legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
+    legend: currentState
+      ? currentState.legend
+      : { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
