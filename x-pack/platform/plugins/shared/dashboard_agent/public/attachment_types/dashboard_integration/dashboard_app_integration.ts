@@ -15,7 +15,7 @@ import {
   dashboardStateToAttachment,
   attachmentToDashboardState,
 } from '@kbn/dashboard-agent-common';
-import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import type { DashboardAttachment, DashboardAttachmentData } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { createManualChanges$ } from './manual_changes_tracker';
@@ -26,7 +26,7 @@ const getCurrentDashboardAttachment = ({
 }: {
   api: DashboardApi;
   attachmentId: string;
-}): AttachmentInput | undefined => {
+}): AttachmentInput<typeof DASHBOARD_ATTACHMENT_TYPE, DashboardAttachmentData> | undefined => {
   const currentDashboardState = api.getSerializedState().attributes;
 
   if (!currentDashboardState) {
@@ -273,7 +273,7 @@ export const registerDashboardAppIntegration = ({
         api,
         attachmentId: pendingDashboardAttachmentId,
       });
-      if (!attachment) {
+      if (!attachment || !attachment.data) {
         return;
       }
 
@@ -282,7 +282,7 @@ export const registerDashboardAppIntegration = ({
 
       // Set current attachment for manual changes tracking
       currentAttachment = {
-        id: attachment.id,
+        id: pendingDashboardAttachmentId,
         type: DASHBOARD_ATTACHMENT_TYPE,
         data: attachment.data,
         origin: attachment.origin,

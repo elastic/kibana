@@ -18,23 +18,13 @@ export type SavedObjectStatus =
   | { status: 'loading' }
   | { status: 'resolved'; exists: boolean };
 
-// TODO: this feels very iffy, but it fixes the following flow as in edit in Dashboard, maybe we should rethink the flow?
-// 1. Open a canvas dshboard view and save the dashboard
-// 2. Go to Dashboard listing page and remove the dashboard you’ve created
-// 3. Open the Canvas again -> Edit in Dashboards
-// 4. You’re taken to the new dashboard page, but the origin is still set on the id of the removed dashboard - that’s ok, you can still edit
-// 5. Click on save in dashboard app — it will not work because we check on save if origin === previousId to not override other dashboard - this fixes it
 const getValidAttachmentOrigin = async (
   origin: string | undefined,
-  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>,
-  updateOrigin: (origin: string) => Promise<unknown>
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>
 ) => {
   if (!origin) return undefined;
   const exists = await checkSavedDashboardExist(origin);
-  if (!exists) {
-    await updateOrigin('');
-    return undefined;
-  }
+  if (!exists) return undefined;
   return origin;
 };
 
@@ -86,8 +76,7 @@ export const useRegisterCanvasActionButtons = ({
         handler: async () => {
           const existingAttachmentOrigin = await getValidAttachmentOrigin(
             attachmentOriginRef.current,
-            checkSavedDashboardExist,
-            updateOrigin
+            checkSavedDashboardExist
           );
           await locator.navigate({
             ...dashboardStateRef.current,
@@ -111,8 +100,7 @@ export const useRegisterCanvasActionButtons = ({
       handler: async () => {
         const existingAttachmentOrigin = await getValidAttachmentOrigin(
           attachmentOriginRef.current,
-          checkSavedDashboardExist,
-          updateOrigin
+          checkSavedDashboardExist
         );
         if (existingAttachmentOrigin) {
           await dashboardApi.runQuickSave();

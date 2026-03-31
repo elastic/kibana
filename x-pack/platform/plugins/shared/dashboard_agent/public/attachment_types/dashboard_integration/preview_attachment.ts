@@ -38,7 +38,6 @@ export const previewAttachmentInDashboard = async ({
 
   // b) Attachment's linked dashboard has been deleted -> clear origin and apply state
   if (attachment.origin && !linkedDashboardExists) {
-    await updateOrigin('');
     dashboardApi.setState(dashboardState);
     return;
   }

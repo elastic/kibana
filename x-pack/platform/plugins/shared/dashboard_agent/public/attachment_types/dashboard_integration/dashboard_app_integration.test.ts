@@ -63,7 +63,7 @@ interface MockChildApi {
   applySerializedState: jest.Mock;
 }
 
-interface MockDashboardApi extends Pick<DashboardApi, 'getSerializedState'> {
+interface MockDashboardApi {
   savedObjectId$: BehaviorSubject<string | undefined>;
   layout$: BehaviorSubject<unknown>;
   children$: BehaviorSubject<Record<string, MockChildApi>>;
@@ -83,6 +83,7 @@ interface MockDashboardApi extends Pick<DashboardApi, 'getSerializedState'> {
     useMargins$: BehaviorSubject<boolean>;
   };
   setState: jest.Mock;
+  getSerializedState: jest.Mock;
 }
 
 const createMockDashboardApi = (savedObjectId?: string): MockDashboardApi => {
@@ -122,6 +123,17 @@ const createMockDashboardApi = (savedObjectId?: string): MockDashboardApi => {
       },
     }),
   };
+};
+
+const getPendingAttachmentId = (
+  agentBuilder: jest.Mocked<AgentBuilderPluginStart>,
+  callIndex = 0
+): string => {
+  const attachment = agentBuilder.addAttachment.mock.calls[callIndex][0];
+  if (!attachment.id) {
+    throw new Error('Expected attachment to have an id');
+  }
+  return attachment.id;
 };
 
 describe('registerDashboardAppIntegration', () => {
@@ -686,7 +698,7 @@ describe('registerDashboardAppIntegration', () => {
           {
             id: 'existing-dashboard-attachment',
             type: DASHBOARD_ATTACHMENT_TYPE,
-            versions: [{ version: 1, data: { title: 'Test' }, content_hash: 'hash' }],
+            versions: [{ version: 1, data: { title: 'Test' }, content_hash: 'hash', created_at: new Date().toISOString() }],
             current_version: 1,
             origin: 'attachment-dashboard-id',
           },
@@ -717,7 +729,7 @@ describe('registerDashboardAppIntegration', () => {
           {
             id: 'existing-dashboard-attachment',
             type: DASHBOARD_ATTACHMENT_TYPE,
-            versions: [{ version: 1, data: { title: 'Test' }, content_hash: 'hash' }],
+            versions: [{ version: 1, data: { title: 'Test' }, content_hash: 'hash', created_at: new Date().toISOString() }],
             current_version: 1,
             origin: 'same-dashboard-id',
           },
@@ -800,7 +812,7 @@ describe('registerDashboardAppIntegration', () => {
       const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
-      const pendingAttachment = agentBuilder.addAttachment.mock.calls[0][0];
+      const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
       agentBuilder.addAttachment.mockClear();
 
       dashboardApi.getSerializedState.mockReturnValue({
@@ -815,7 +827,7 @@ describe('registerDashboardAppIntegration', () => {
       jest.advanceTimersByTime(200);
 
       expect(agentBuilder.addAttachment).toHaveBeenCalledWith({
-        id: pendingAttachment.id,
+        id: pendingAttachmentId,
         type: DASHBOARD_ATTACHMENT_TYPE,
         data: expect.any(Object),
         origin: undefined,
@@ -833,13 +845,13 @@ describe('registerDashboardAppIntegration', () => {
       const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
-      const pendingAttachment = agentBuilder.addAttachment.mock.calls[0][0];
+      const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
 
-      const versionedAttachment = createMockVersionedAttachment(pendingAttachment.id);
+      const versionedAttachment = createMockVersionedAttachment(pendingAttachmentId);
       chat$.next(
         createMockRoundCompleteEvent(
           [versionedAttachment],
-          [{ attachment_id: pendingAttachment.id, operation: ATTACHMENT_REF_OPERATION.updated }]
+          [{ attachment_id: pendingAttachmentId, operation: ATTACHMENT_REF_OPERATION.updated }]
         )
       );
 
@@ -857,13 +869,13 @@ describe('registerDashboardAppIntegration', () => {
       const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
-      const pendingAttachment = agentBuilder.addAttachment.mock.calls[0][0];
+      const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
 
-      const versionedAttachment = createMockVersionedAttachment(pendingAttachment.id);
+      const versionedAttachment = createMockVersionedAttachment(pendingAttachmentId);
       chat$.next(
         createMockRoundCompleteEvent(
           [versionedAttachment],
-          [{ attachment_id: pendingAttachment.id, operation: ATTACHMENT_REF_OPERATION.created }]
+          [{ attachment_id: pendingAttachmentId, operation: ATTACHMENT_REF_OPERATION.created }]
         )
       );
 
@@ -879,12 +891,12 @@ describe('registerDashboardAppIntegration', () => {
       const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
-      const pendingAttachment = agentBuilder.addAttachment.mock.calls[0][0];
+      const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
 
       chat$.next(
         createMockRoundCompleteEvent(
-          [createMockVersionedAttachment(pendingAttachment.id)],
-          [{ attachment_id: pendingAttachment.id, operation: ATTACHMENT_REF_OPERATION.read }]
+          [createMockVersionedAttachment(pendingAttachmentId)],
+          [{ attachment_id: pendingAttachmentId, operation: ATTACHMENT_REF_OPERATION.read }]
         )
       );
       expect(dashboardApi.setState).not.toHaveBeenCalled();
@@ -899,12 +911,12 @@ describe('registerDashboardAppIntegration', () => {
       const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
-      const pendingAttachment = agentBuilder.addAttachment.mock.calls[0][0];
+      const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
 
       chat$.next(
         createMockRoundCompleteEvent(
           [],
-          [{ attachment_id: pendingAttachment.id, operation: ATTACHMENT_REF_OPERATION.updated }]
+          [{ attachment_id: pendingAttachmentId, operation: ATTACHMENT_REF_OPERATION.updated }]
         )
       );
       expect(dashboardApi.setState).not.toHaveBeenCalled();
@@ -919,12 +931,12 @@ describe('registerDashboardAppIntegration', () => {
       const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
-      const pendingAttachment = agentBuilder.addAttachment.mock.calls[0][0];
+      const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
 
       chat$.next(
         createMockRoundCompleteEvent(
-          [createMockVersionedAttachment(pendingAttachment.id, undefined, false)],
-          [{ attachment_id: pendingAttachment.id, operation: ATTACHMENT_REF_OPERATION.updated }]
+          [createMockVersionedAttachment(pendingAttachmentId, undefined, false)],
+          [{ attachment_id: pendingAttachmentId, operation: ATTACHMENT_REF_OPERATION.updated }]
         )
       );
       expect(dashboardApi.setState).not.toHaveBeenCalled();
@@ -947,7 +959,7 @@ describe('registerDashboardAppIntegration', () => {
           {
             id: 'existing-dashboard-attachment',
             type: DASHBOARD_ATTACHMENT_TYPE,
-            versions: [{ version: 1, data: { title: 'Test' }, content_hash: 'hash' }],
+            versions: [{ version: 1, data: { title: 'Test' }, content_hash: 'hash', created_at: new Date().toISOString() }],
             current_version: 1,
             origin: 'original-dashboard-id',
           },
@@ -986,7 +998,7 @@ describe('registerDashboardAppIntegration', () => {
           {
             id: 'existing-dashboard-attachment',
             type: DASHBOARD_ATTACHMENT_TYPE,
-            versions: [{ version: 1, data: { title: 'Test' }, content_hash: 'hash' }],
+            versions: [{ version: 1, data: { title: 'Test' }, content_hash: 'hash', created_at: new Date().toISOString() }],
             current_version: 1,
             origin: 'same-dashboard-id',
           },
@@ -1017,14 +1029,14 @@ describe('registerDashboardAppIntegration', () => {
       const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
-      const pendingAttachment = agentBuilder.addAttachment.mock.calls[0][0];
+      const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
 
       cleanup();
 
       chat$.next(
         createMockRoundCompleteEvent(
-          [createMockVersionedAttachment(pendingAttachment.id)],
-          [{ attachment_id: pendingAttachment.id, operation: ATTACHMENT_REF_OPERATION.updated }]
+          [createMockVersionedAttachment(pendingAttachmentId)],
+          [{ attachment_id: pendingAttachmentId, operation: ATTACHMENT_REF_OPERATION.updated }]
         )
       );
 

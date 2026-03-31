@@ -8,7 +8,6 @@
 import React from 'react';
 import { EMPTY, switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
