@@ -1,0 +1,88 @@
+version: '1'
+name: 'sources.sharepoint-server.list'
+description: 'Browse SharePoint Server resources. REQUIRED: always provide list_action — calling without it will fail. list_action options: "getWeb" — site metadata, no other inputs needed; "getLists" — all lists and document libraries, no other inputs needed; "getListItems" — items in a named list, requires list_title (exact Title from getLists); "getFolderContents" — files and subfolders at a path, requires path (ServerRelativeUrl from getLists or a previous getFolderContents result, starts with /).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: list_action
+    type: choice
+    options:
+      - "getWeb"
+      - "getLists"
+      - "getListItems"
+      - "getFolderContents"
+    required: true
+    description: "Required. Which action to perform. Choose one: getWeb, getLists, getListItems, getFolderContents."
+  - name: list_title
+    type: string
+    required: false
+    description: "Required when list_action is 'getListItems'. Exact display name of the list (the Title field from getLists). Example: 'Documents', 'Tasks'."
+  - name: path
+    type: string
+    required: false
+    description: "Server-relative URL of the folder (required for getFolderContents). Get this from getLists (RootFolder.ServerRelativeUrl) or a previous getFolderContents result. Starts with '/'."
+steps:
+  - name: get-web
+    type: sharepoint-server.getWeb
+    if: "${{ inputs.list_action == 'getWeb' }}"
+    connector-id: <%= sharepoint-server-stack-connector-id %>
+    with: {}
+  - name: get-lists
+    type: sharepoint-server.getLists
+    if: "${{ inputs.list_action == 'getLists' }}"
+    connector-id: <%= sharepoint-server-stack-connector-id %>
+    with: {}
+  - name: get-list-items
+    type: sharepoint-server.getListItems
+    if: "${{ inputs.list_action == 'getListItems' and inputs.list_title }}"
+    connector-id: <%= sharepoint-server-stack-connector-id %>
+    with:
+      listTitle: "${{ inputs.list_title }}"
+  - name: get-folder-contents
+    type: sharepoint-server.getFolderContents
+    if: "${{ inputs.list_action == 'getFolderContents' and inputs.path }}"
+    connector-id: <%= sharepoint-server-stack-connector-id %>
+    with:
+      path: "${{ inputs.path }}"
+  - name: set-list-result
+    type: if
+    condition: "${{ inputs.list_action == 'getWeb' }}"
+    steps:
+      - name: set-get-web-output
+        type: data.set
+        with:
+          result: "${{ steps.get-web.output }}"
+    else:
+      - name: set-other-result
+        type: if
+        condition: "${{ inputs.list_action == 'getLists' }}"
+        steps:
+          - name: set-get-lists-output
+            type: data.set
+            with:
+              result: "${{ steps.get-lists.output }}"
+        else:
+          - name: set-items-or-folder-result
+            type: if
+            condition: "${{ inputs.list_action == 'getListItems' and inputs.list_title }}"
+            steps:
+              - name: set-get-list-items-output
+                type: data.set
+                with:
+                  result: "${{ steps.get-list-items.output }}"
+            else:
+              - name: set-folder-result
+                type: if
+                condition: "${{ inputs.list_action == 'getFolderContents' and inputs.path }}"
+                steps:
+                  - name: set-get-folder-contents-output
+                    type: data.set
+                    with:
+                      result: "${{ steps.get-folder-contents.output }}"
+                else:
+                  - name: set-missing-param-error
+                    type: data.set
+                    with:
+                      error: "Missing required parameter: list_title is required for getListItems, path is required for getFolderContents"
