@@ -27,8 +27,8 @@ import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
-import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { ENABLED_TRIGGER_TABS } from './constants';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
 import type { WorkflowTriggerTab } from './types';
@@ -107,9 +107,13 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     // Extract inputs from yamlString if definition.inputs is undefined
     const normalizedInputs = useMemo(() => {
-      let triggers = definition?.triggers;
+      let triggers: WorkflowYaml['triggers'] | undefined;
 
-      if (!triggers && yamlString) {
+      // YAML is a source of truth
+      // This is because definition might be 500ms behind the latest workflow definition
+      // due to computation debounce time.
+      // Handles the case when user edits the workflow, then immediately clicks "Run workflow" before the latest definition is re-computed.
+      if (yamlString) {
         try {
           const yamlDoc = parseDocument(yamlString);
           const yamlJson = yamlDoc.toJSON();
@@ -119,6 +123,9 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         } catch (e) {
           // ignore errors when extracting from YAML
         }
+      } else if (definition?.triggers) {
+        // if no YAML, fallback to definition triggers (handles case where YAML is not available, such as when executing from a list of workflows)
+        triggers = definition?.triggers;
       }
 
       if (!triggers) {

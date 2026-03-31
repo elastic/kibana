@@ -25,11 +25,10 @@ enabled: true
 description: Validates health of a given service and returns diagnostic output
 triggers:
   - type: manual
-
-inputs:
-  - name: service_name
-    type: string
-    default: "api-gateway"
+    inputs:
+      - name: service_name
+        type: string
+        default: "api-gateway"
 
 steps:
   - name: health_check
@@ -44,11 +43,10 @@ enabled: true
 description: Dispatches health checks asynchronously without waiting for results
 triggers:
   - type: manual
-
-inputs:
-  - name: service_name
-    type: string
-    default: "api-gateway"
+    inputs:
+      - name: service_name
+        type: string
+        default: "api-gateway"
 
 steps:
   - name: log_start
@@ -75,11 +73,10 @@ enabled: true
 description: Runs health check synchronously and waits for the result
 triggers:
   - type: manual
-
-inputs:
-  - name: service_name
-    type: string
-    default: "api-gateway"
+    inputs:
+      - name: service_name
+        type: string
+        default: "api-gateway"
 
 steps:
   - name: log_start

@@ -41,11 +41,10 @@ enabled: false
 description: This is a new workflow
 triggers:
   - type: manual
-
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 
 steps:
   - name: hello_world_step
@@ -64,14 +63,12 @@ enabled: false
 description: This is a new workflow
 triggers:
   - type: manual
-
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 consts:
   loop_items: [{"@timestamp": "now"}, {"@timestamp": "yesterday"}, {"@timestamp": "tomorrow"}, {"@timestamp": "next week"}]
-
-  inputs:
-  - name: message
-    type: string
-    default: "hello world"
 
 steps:
   - name: first_step
@@ -99,11 +96,10 @@ enabled: false
 description: This is a new workflow
 triggers:
   - type: manual
-
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 
 steps:
   - name: first_step
@@ -155,12 +151,13 @@ export const getDummyWorkflowYaml = (name: string) => `
 name: ${name}
 description: Dummy workflow description
 enabled: true
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
+
 triggers:
   - type: manual
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 steps:
   - name: hello_world_step
     type: console
@@ -237,17 +234,16 @@ enabled: false
 description: Multi-step workflow for scroll testing
 triggers:
   - type: manual
-
-inputs:
-  - name: param_a
-    type: string
-    default: "value_a"
-  - name: param_b
-    type: string
-    default: "value_b"
-  - name: param_c
-    type: string
-    default: "value_c"
+    inputs:
+      - name: param_a
+        type: string
+        default: "value_a"
+      - name: param_b
+        type: string
+        default: "value_b"
+      - name: param_c
+        type: string
+        default: "value_c"
 
 steps:
   - name: step_alpha
@@ -303,13 +299,35 @@ enabled: true
 # This comment references {{ steps.foo.output }}
 triggers:
   - type: manual
-inputs:
-  - name: message
-    type: string
-    default: "hello"
+    inputs:
+      - name: message
+        type: string
+        default: "hello"
 steps:
   # {{ some_old_variable | json }}
   - name: hello_world_step
     type: console  # previously used {{ steps.old.output }}
     with:
       message: "{{ inputs.message }}"`;
+
+export const getWorkflowWithEventInputYaml = (name: string) => `
+name: ${name}
+description: Workflow with event and inputs logging
+enabled: true
+triggers:
+  - type: manual
+    inputs:
+      - name: message
+        type: string
+        default: "hello"
+steps:
+  - name: log_event
+    type: console
+    with:
+      message: "{{event | json}}"
+
+  - name: log_inputs
+    type: console
+    with:
+      message: "{{inputs | json}}"
+`;
