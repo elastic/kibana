@@ -2054,6 +2054,7 @@ steps:
         total: 1,
         deleted: 1,
         failures: [],
+        successfulIds: ['test-workflow-id'],
       });
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
@@ -2215,6 +2216,7 @@ steps:
         total: 2,
         deleted: 1,
         failures: [{ id: 'wf-2', error: 'ES delete failed' }],
+        successfulIds: ['wf-1'],
       });
     });
 
@@ -2246,6 +2248,7 @@ steps:
         total: 1,
         deleted: 1,
         failures: [],
+        successfulIds: ['test-workflow-id'],
       });
       expect(mockLogger.warn).toHaveBeenCalled();
     });
