@@ -45,8 +45,9 @@ const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
   // Tamper protection: real Fleet agent ops (~4.7 min avg despite only 3 tests)
   { pattern: 'tamper_protection/', weight: 15 },
 
-  // Response actions: real Endpoint operations (~5-7 min)
-  { pattern: 'endpoint_operations.cy.ts', weight: 22 },
+  // Response actions: real Endpoint operations (~5-7 min each, split from endpoint_operations.cy.ts)
+  { pattern: 'endpoint_operations_document_signing.cy.ts', weight: 14 },
+  { pattern: 'endpoint_operations_responder.cy.ts', weight: 10 },
   { pattern: 'alerts_response_console.cy.ts', weight: 18 },
   { pattern: 'response_console/execute_and_file_operations.cy.ts', weight: 15 },
   { pattern: 'response_console/process_operations.cy.ts', weight: 10 },
@@ -97,12 +98,13 @@ const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
 
 /**
  * Stack setup cost expressed in weight units. Each distinct ftrConfig requires a
- * full ES + Kibana + Fleet stack setup (~4 min). With stack sharing enabled,
+ * full ES + Kibana + Fleet stack setup (~4-5 min). With stack sharing enabled,
  * specs sharing a config reuse the same stack, so the penalty only applies once
- * per unique config on an agent. Value of 20 provides optimal balance between
- * config consolidation and even weight distribution across agents.
+ * per unique config on an agent. Value of 30 aggressively penalizes multi-config
+ * assignments so the LB avoids stacking heavy specs on agents that already pay
+ * a double-boot cost.
  */
-const SETUP_COST_WEIGHT = 25;
+const SETUP_COST_WEIGHT = 30;
 
 /**
  * Per-spec overhead in weight units. Each additional spec on an agent adds Cypress
