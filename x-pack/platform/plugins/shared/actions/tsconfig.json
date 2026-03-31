@@ -59,6 +59,8 @@
     "@kbn/actions-utils",
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/usage-api-plugin",
+    "@kbn/core-ui-settings-server",
+    "@kbn/management-settings-ids",
   ],
   "exclude": [
     "target/**/*",
