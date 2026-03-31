@@ -15,8 +15,8 @@ import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { DEFAULT_TIME_RANGE, attachmentToDashboardState } from '@kbn/dashboard-agent-common';
-import type { SavedObjectStatus } from './use_register_action_buttons';
-import { useRegisterActionButtons } from './use_register_action_buttons';
+import type { SavedObjectStatus } from './use_register_canvas_action_buttons';
+import { useRegisterCanvasActionButtons } from './use_register_canvas_action_buttons';
 
 const dashboardCanvasContentStyles = {
   root: css({
@@ -126,7 +126,7 @@ export const DashboardCanvasContent = ({
     [dashboardState]
   );
 
-  useRegisterActionButtons({
+  useRegisterCanvasActionButtons({
     dashboardApi,
     registerActionButtons,
     updateOrigin,
