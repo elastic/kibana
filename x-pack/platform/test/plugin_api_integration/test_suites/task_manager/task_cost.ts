@@ -121,5 +121,22 @@ export default function ({ getService }: FtrProviderContext) {
         expect(docs.length).to.be.greaterThan(0);
       });
     });
+
+    it('ensure TaskCost Large is supported', async () => {
+      const task = await scheduleTask(supertest, {
+        taskType: 'sampleTask',
+        schedule: { interval: '1d' },
+        params: {},
+        cost: InstanceTaskCost.Large,
+      });
+
+      expect(task.cost).to.eql(InstanceTaskCost.Large);
+
+      // check that the task ran
+      await retry.try(async () => {
+        const docs: RawDoc[] = await historyDocs({ es, index: testHistoryIndex, taskId: task.id });
+        expect(docs.length).to.be.greaterThan(0);
+      });
+    });
   });
 }
