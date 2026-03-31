@@ -251,7 +251,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                         parentId={step.customIdentifier}
                         branch="else"
                         mode="inline"
-                        nestingDisabled={level >= 1}
+                        nestingDisabled={level >= 2}
                       />
                     </EuiFlexItem>
                   )}
