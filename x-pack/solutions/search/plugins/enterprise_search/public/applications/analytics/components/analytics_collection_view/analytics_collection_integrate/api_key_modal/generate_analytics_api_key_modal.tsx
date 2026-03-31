@@ -108,7 +108,7 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
                           data-telemetry-id="entSearchContent-analyticss-api-generateAnalyticsApiKeyModal-generateApiKeyButton"
                           data-test-subj="generateApiKeyButton"
                           iconSide="left"
-                          iconType="plusInCircle"
+                          iconType="plusCircle"
                           fill
                           onClick={() => {
                             makeRequest({

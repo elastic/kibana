@@ -105,7 +105,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ selectedAgentId, o
     <EuiButtonEmpty
       iconSide="right"
       flush="both"
-      iconType={isLoading ? undefined : 'arrowDown'}
+      iconType={isLoading ? undefined : 'chevronSingleDown'}
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       aria-haspopup="menu"
       aria-labelledby={AGENT_SELECT_ID}

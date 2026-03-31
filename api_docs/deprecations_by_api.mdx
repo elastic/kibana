@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2026-03-30
+date: 2026-03-31
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -71,6 +71,13 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnReactQueryPluginApi" section="def-common.QueryObserverOptions.onSuccess" text="onSuccess"/> | @kbn/alerts-ui-shared, triggersActionsUi, cases, @kbn/anonymization-ui, osquery, @kbn/securitysolution-list-hooks, slo, infra, securitySolution | - |
 | <DocLink id="kibKbnReactQueryPluginApi" section="def-common.QueryObserverOptions.onError" text="onError"/> | @kbn/alerts-ui-shared, @kbn/response-ops-rules-apis, triggersActionsUi, @kbn/response-ops-alerts-apis, @kbn/response-ops-alerts-table, @kbn/inference-connectors, @kbn/elastic-assistant, cases, @kbn/inference-endpoint-ui-common, alertingVTwo, dataSources, maintenanceWindows, osquery, stackConnectors, streamsApp, @kbn/securitysolution-list-hooks, observability, slo, infra, searchPlayground, @kbn/cloud-security-posture-graph, @kbn/cloud-security-posture, cloudSecurityPosture, securitySolution | - |
 | <DocLink id="kibKbnSecurityPluginTypesPublicPluginApi" section="def-public.SecurityPluginStart.authc" text="authc"/> | security, cloudLinks, securitySolution, cases | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.nativeEnum" text="nativeEnum"/> | securitySolution, streams, dashboardAgent, agentBuilderPlatform, @kbn/agent-builder-genai-utils, workflowsManagement, @kbn/entities-schema | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.uuid" text="uuid"/> | @kbn/connector-specs, @kbn/elastic-assistant-common, automaticImportVTwo, @kbn/openapi-common, securitySolution | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.datetime" text="datetime"/> | @kbn/streams-schema, @kbn/elastic-assistant-common, cases, @kbn/anonymization-common, @kbn/alerting-v2-schemas, agentBuilder, @kbn/logs-overview, alertingVTwo, @kbn/securitysolution-exceptions-common, securitySolution, entityStore, @kbn/securitysolution-lists-common | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodObject.passthrough" text="passthrough"/> | actions, @kbn/workflows, @kbn/connector-schemas, @kbn/sample-log-parser, workflowsManagement, stackConnectors, timelines, lists, securitySolution | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodObject.merge" text="merge"/> | @kbn/streams-schema, @kbn/elastic-assistant-common, @kbn/workflows, @kbn/entities-schema, osquery, @kbn/securitysolution-exceptions-common, securitySolution, entityStore, workflowsManagement | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodDefault.removeDefault" text="removeDefault"/> | securitySolution | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodError.flatten" text="flatten"/> | securitySolution | - |
 | <DocLink id="kibDashboardPluginApi" section="def-server.DashboardPluginStart.scanDashboards" text="scanDashboards"/> | observability | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.ApiActions.get" text="get"/> | @kbn/security-plugin-types-server, alerting, reporting, telemetry, fleet, profiling, @kbn/security-authorization-core, security | - |
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.TaskManagerSetupContract.index" text="index"/> | actions, alerting | - |
@@ -140,12 +147,14 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.shallowWithIntl" text="shallowWithIntl"/> | uptime, telemetry | - |
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.mountWithIntl" text="mountWithIntl"/> | uptime | - |
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.renderWithI18nProvider" text="renderWithI18nProvider"/> | uptime | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType._def" text="_def"/> | @kbn/workflows, workflowsManagement | - |
 | <DocLink id="kibKbnScoutPluginApi" section="def-common.Locator.isVisible.$1.timeout" text="timeout"/> | apm, synthetics, @kbn/scout | - |
 | <DocLink id="kibExpressionGaugePluginApi" section="def-common.GaugeState.percentageMode" text="percentageMode"/> | visTypeGauge | - |
 | <DocLink id="kibExpressionPartitionVisPluginApi" section="def-common.LabelsParams.truncate" text="truncate"/> | visTypePie | - |
 | <DocLink id="kibExpressionPartitionVisPluginApi" section="def-common.LabelsParams.last_level" text="last_level"/> | visTypePie | - |
 | <DocLink id="kibKbnSecurityPluginTypesPublicPluginApi" section="def-public.SecurityPluginSetup.authc" text="authc"/> | security | - |
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.findTestSubject" text="findTestSubject"/> | indexManagement, @kbn/security-ui-components, security, dataViewFieldEditor | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodIssueCode" text="ZodIssueCode"/> | agentBuilder, entityStore, cases, @kbn/alerting-v2-schemas, @kbn/entities-schema, @kbn/connector-schemas, @kbn/zod-helpers | - |
 | <DocLink id="kibInferencePluginApi" section="def-server.EsqlDocumentBase.getSystemMessage" text="getSystemMessage"/> | @kbn/ai-tools | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.wrapWithTheme" text="wrapWithTheme"/> | aiAssistantManagementSelection, observabilityAiAssistantManagement | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-common.KibanaStyledComponentsThemeProviderDecorator" text="KibanaStyledComponentsThemeProviderDecorator"/> | @kbn/react-kibana-context-styled, kibanaReact | - |
@@ -169,6 +178,9 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnPresentationPublishingPluginApi" section="def-common.useBatchedOptionalPublishingSubjects" text="useBatchedOptionalPublishingSubjects"/> | presentationPanel | - |
 | <DocLink id="kibKbnReportingExportTypesPdfCommonPluginApi" section="def-common.JobParamsPDFDeprecated" text="JobParamsPDFDeprecated"/> | @kbn/reporting-export-types-pdf | - |
 | <DocLink id="kibKbnScoutObltPluginApi" section="def-common.Locator.type" text="type"/> | @kbn/scout | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType.isOptional" text="isOptional"/> | @kbn/workflows | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common._ZodNumber.finite" text="finite"/> | @kbn/workflows, @kbn/connector-schemas | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.url" text="url"/> | @kbn/connector-specs, @kbn/connector-schemas, @kbn/router-to-openapispec | - |
 | <DocLink id="kibLicensingPluginApi" section="def-public.LicensingPluginSetup.license$" text="license$"/> | security, licenseManagement, ml, crossClusterReplication, grokdebugger, logstash, painlessLab, watcher, searchprofiler, slo, securitySolution | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-server.LicensingPluginSetup.license$" text="license$"/> | spaces, security, actions, maintenanceWindows, alerting, remoteClusters, graph, grokdebugger, indexLifecycleManagement, painlessLab, rollup, snapshotRestore, transform, upgradeAssistant, aiops, ml, osquery, searchprofiler, apm, securitySolution | 8.8.0 |
 | <DocLink id="kibKbnLicensingTypesPluginApi" section="def-common.PublicLicense.mode" text="mode"/> | licensing, fleet, security, apm, securitySolution | 8.8.0 |
@@ -321,6 +333,57 @@ Safe to remove.
 | <DocLink id="kibKbnUiThemePluginApi" section="def-common.darkMode" text="darkMode"/> | @kbn/ui-theme | 
 | <DocLink id="kibKbnUiThemePluginApi" section="def-common.tag" text="tag"/> | @kbn/ui-theme | 
 | <DocLink id="kibKbnUiThemePluginApi" section="def-common.version" text="version"/> | @kbn/ui-theme | 
-| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodObject.nonstrict" text="nonstrict"/> | @kbn/zod | 
-| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodObject.augment" text="augment"/> | @kbn/zod | 
-| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodObject.deepPartial" text="deepPartial"/> | @kbn/zod |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType._output" text="_output"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType._input" text="_input"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType.isNullable" text="isNullable"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.email" text="email"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.jwt" text="jwt"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.emoji" text="emoji"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.guid" text="guid"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.uuidv4" text="uuidv4"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.uuidv6" text="uuidv6"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.uuidv7" text="uuidv7"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.nanoid" text="nanoid"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.guid" text="guid"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.cuid" text="cuid"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.cuid2" text="cuid2"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.ulid" text="ulid"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.base64" text="base64"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.base64url" text="base64url"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.xid" text="xid"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.ksuid" text="ksuid"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.ipv4" text="ipv4"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.ipv6" text="ipv6"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.cidrv4" text="cidrv4"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.cidrv6" text="cidrv6"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.e164" text="e164"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.date" text="date"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.time" text="time"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.duration" text="duration"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common._ZodNumber.safe" text="safe"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common._ZodNumber.step" text="step"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common._ZodNumber.isInt" text="isInt"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common._ZodNumber.isFinite" text="isFinite"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common._ZodDate.minDate" text="minDate"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common._ZodDate.maxDate" text="maxDate"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodCatch.removeCatch" text="removeCatch"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodIssue" text="ZodIssue"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodError.format" text="format"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodError.addIssue" text="addIssue"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodError.addIssues" text="addIssues"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodError.isEmpty" text="isEmpty"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.IssueData" text="IssueData"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.setErrorMap" text="setErrorMap"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.getErrorMap" text="getErrorMap"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.inferFlattenedErrors" text="inferFlattenedErrors"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.inferFormattedError" text="inferFormattedError"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType._output" text="_output"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType._input" text="_input"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType.isNullable" text="isNullable"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType._output" text="_output"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType._input" text="_input"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType.isNullable" text="isNullable"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType._output" text="_output"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType._input" text="_input"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType.isNullable" text="isNullable"/> | @kbn/zod | 
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodFirstPartyTypeKind" text="ZodFirstPartyTypeKind"/> | @kbn/zod |

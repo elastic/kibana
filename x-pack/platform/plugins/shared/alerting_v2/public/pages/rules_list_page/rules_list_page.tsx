@@ -432,6 +432,7 @@ export const RulesListPage = () => {
         rightSideItems={[
           <EuiButton
             key="create-rule"
+            fill
             href={basePath.prepend(paths.ruleCreate)}
             data-test-subj="createRuleButton"
           >
