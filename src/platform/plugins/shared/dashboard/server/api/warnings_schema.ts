@@ -10,21 +10,24 @@
 import { schema } from '@kbn/config-schema';
 import { referenceSchema } from '@kbn/content-management-utils';
 
-const droppedPanelWarningSchema = schema.object({
-  type: schema.literal('dropped_panel'),
-  message: schema.string(),
-  panel_type: schema.string(),
-  panel_config: schema.object(
-    {},
-    {
-      unknowns: 'allow',
-    }
-  ),
-  panel_references: schema.maybe(schema.arrayOf(referenceSchema)),
-}, {
-  meta: {
-    id: 'kbn-dashboard-dropped-panel-warning'
+const droppedPanelWarningSchema = schema.object(
+  {
+    type: schema.literal('dropped_panel'),
+    message: schema.string(),
+    panel_type: schema.string(),
+    panel_config: schema.object(
+      {},
+      {
+        unknowns: 'allow',
+      }
+    ),
+    panel_references: schema.maybe(schema.arrayOf(referenceSchema)),
+  },
+  {
+    meta: {
+      id: 'kbn-dashboard-dropped-panel-warning',
+    },
   }
-});
+);
 
 export const warningsSchema = schema.arrayOf(droppedPanelWarningSchema);
