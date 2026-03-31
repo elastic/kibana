@@ -16,6 +16,7 @@ import {
   EuiTextBlockTruncate,
   EuiSkeletonText,
   useEuiTheme,
+  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -69,29 +70,7 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
 const EcsFieldDescriptionFallback: React.FC<
   FieldDescriptionProps & { fieldsMetadataService: FieldsMetadataPublicStart; streamName?: string }
 > = ({ fieldsMetadataService, streamNames, ...props }) => {
-  console.log('### caue ~ EcsFieldDescriptionFallback ~ streamName:', streamNames);
   const fieldName = removeKeywordSuffix(props.field.name);
-
-  // Loop through streamNames and get the fields metadata for each stream
-  const streamMetadata = streamNames?.map((streamName) => {
-    return fieldsMetadataService.useFieldsMetadata({
-      attributes: ['description', 'type'],
-      fieldNames: [fieldName],
-      streamName,
-    });
-  });
-
-  // const { fieldsMetadata: streamMetadata, loading: streamLoading } =
-  //   fieldsMetadataService.useFieldsMetadata(
-  //     streamNames && streamNames.length > 0
-  //       ? {
-  //           attributes: ['description', 'type'],
-  //           fieldNames: [fieldName],
-  //           streamNames,
-  //         }
-  //       : { attributes: [], fieldNames: [] }
-  //   );
-  console.log('### caue ~ EcsFieldDescriptionFallback ~ streamMetadata:', streamMetadata);
 
   const { fieldsMetadata, loading } = fieldsMetadataService.useFieldsMetadata({
     attributes: ['description', 'type'],
@@ -111,7 +90,49 @@ const EcsFieldDescriptionFallback: React.FC<
             : undefined
         }
       />
+      {streamNames?.map((streamName) => (
+        <StreamDescriptionItem
+          key={streamName}
+          fieldName={fieldName}
+          streamName={streamName}
+          fieldsMetadataService={fieldsMetadataService}
+        />
+      ))}
     </EuiSkeletonText>
+  );
+};
+
+/**
+ * Renders the stream-specific description for a single stream.
+ * Extracted as its own component so each stream can call useFieldsMetadata independently.
+ */
+const StreamDescriptionItem: React.FC<{
+  fieldName: string;
+  streamName: string;
+  fieldsMetadataService: FieldsMetadataPublicStart;
+}> = ({ fieldName, streamName, fieldsMetadataService }) => {
+  const { fieldsMetadata: streamMetadata } = fieldsMetadataService.useFieldsMetadata({
+    attributes: ['description'],
+    fieldNames: [fieldName],
+    streamName,
+  });
+
+  const description = streamMetadata?.[fieldName]?.description;
+  if (!description) return null;
+
+  return (
+    <>
+      <EuiSpacer size="xs" />
+      <EuiText color="subdued" size="xs" className="eui-textBreakWord eui-textLeft">
+        <strong>
+          {i18n.translate('fieldUtils.fieldDescription.streamDescriptionLabel', {
+            defaultMessage: '{streamName}:',
+            values: { streamName },
+          })}
+        </strong>{' '}
+        <Markdown readOnly>{description}</Markdown>
+      </EuiText>
+    </>
   );
 };
 
