@@ -9,7 +9,8 @@
     "../../../../../typings/**/*",
     "public/**/*.json",
     "server/**/*",
-    "e2e/**/*"
+    "e2e/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -46,7 +47,10 @@
     "@kbn/ebt-tools",
     "@kbn/apm-plugin",
     "@kbn/react-kibana-mount",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/scout-oblt",
+    "@kbn/scout-synthtrace",
+    "@kbn/synthtrace-client"
   ],
   "exclude": [
     "target/**/*"
