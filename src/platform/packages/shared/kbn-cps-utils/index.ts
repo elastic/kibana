@@ -22,5 +22,7 @@ export { ProjectPicker } from './components/project_picker';
 export { ProjectPickerContent } from './components/project_picker_content';
 export { ProjectPickerContainer } from './components/project_picker_container';
 export { useFetchProjects } from './components/use_fetch_projects';
+export { useCpsPickerAccess } from './components/use_cps_picker_access';
+export { useRouteBasedCpsPickerAccess } from './components/use_route_based_cps_picker_access';
 export { PROJECT_ROUTING } from '@kbn/cps-common';
 export { ProjectRoutingAccess } from './types';

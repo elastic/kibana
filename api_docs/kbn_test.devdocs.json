@@ -573,9 +573,9 @@
                     "signature": [
                       "[name: string]:  ",
                       {
-                        "pluginId": "@kbn/test",
+                        "pluginId": "@kbn/test-docker-servers",
                         "scope": "common",
-                        "docId": "kibKbnTestPluginApi",
+                        "docId": "kibKbnTestDockerServersPluginApi",
                         "section": "def-common.DockerServerSpec",
                         "text": "DockerServerSpec"
                       }
@@ -736,9 +736,9 @@
             "signature": [
               "(name: string) => { name: string; url: string; enabled: boolean; portInContainer: number; port: number; image: string; preferCached?: boolean | undefined; waitForLogLine?: string | RegExp | undefined; waitForLogLineTimeoutMs?: number | undefined; waitFor?: ((server: ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-docker-servers",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestDockerServersPluginApi",
                 "section": "def-common.DockerServer",
                 "text": "DockerServer"
               },
@@ -3371,23 +3371,23 @@
         "signature": [
           "(config: {} | { [name: string]: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-docker-servers",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestDockerServersPluginApi",
             "section": "def-common.DockerServerSpec",
             "text": "DockerServerSpec"
           },
           "; }) => {} | { [name: string]: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-docker-servers",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestDockerServersPluginApi",
             "section": "def-common.DockerServerSpec",
             "text": "DockerServerSpec"
           },
           "; }"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
         "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
@@ -3403,15 +3403,15 @@
             "signature": [
               "{} | { [name: string]: ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-docker-servers",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestDockerServersPluginApi",
                 "section": "def-common.DockerServerSpec",
                 "text": "DockerServerSpec"
               },
               "; }"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 35,
             "columnNumber": 43,
             "deprecated": false,
@@ -3469,7 +3469,7 @@
         "signature": [
           "(dirs: string | string[]) => string[]"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/find_test_plugin_paths.ts",
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/find_test_plugin_paths.ts",
         "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
@@ -3485,7 +3485,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/find_test_plugin_paths.ts",
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/find_test_plugin_paths.ts",
             "lineNumber": 13,
             "columnNumber": 37,
             "deprecated": false,
@@ -3874,6 +3874,223 @@
             "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/logs_dir.ts",
             "lineNumber": 15,
             "columnNumber": 52,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.isActualError",
+        "type": "Function",
+        "tags": [],
+        "label": "isActualError",
+        "description": [
+          "\nCheck if a log line from stderr is actually an error or just info/debug written to stderr"
+        ],
+        "signature": [
+          "(line: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_logs.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.isActualError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "line",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_logs.ts",
+            "lineNumber": 48,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.observeContainerLogs",
+        "type": "Function",
+        "tags": [],
+        "label": "observeContainerLogs",
+        "description": [
+          "\nObserve the logs for a container, reflecting the log lines\nto the ToolingLog and the returned Observable"
+        ],
+        "signature": [
+          "(name: string, containerId: string, log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => ",
+          "Observable",
+          "<string>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_logs.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.observeContainerLogs.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_logs.ts",
+            "lineNumber": 20,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.observeContainerLogs.$2",
+            "type": "string",
+            "tags": [],
+            "label": "containerId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_logs.ts",
+            "lineNumber": 20,
+            "columnNumber": 52,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.observeContainerLogs.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_logs.ts",
+            "lineNumber": 20,
+            "columnNumber": 73,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.observeContainerRunning",
+        "type": "Function",
+        "tags": [],
+        "label": "observeContainerRunning",
+        "description": [
+          "\nCreate an observable that errors if a docker\ncontainer exits before being unsubscribed"
+        ],
+        "signature": [
+          "(name: string, containerId: string, log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => ",
+          "Observable",
+          "<unknown>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_running.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.observeContainerRunning.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_running.ts",
+            "lineNumber": 18,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.observeContainerRunning.$2",
+            "type": "string",
+            "tags": [],
+            "label": "containerId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_running.ts",
+            "lineNumber": 18,
+            "columnNumber": 55,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.observeContainerRunning.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/container_running.ts",
+            "lineNumber": 18,
+            "columnNumber": 76,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5159,22 +5376,22 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-docker-servers",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestDockerServersPluginApi",
             "section": "def-common.DockerServer",
             "text": "DockerServer"
           },
           " extends ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-docker-servers",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestDockerServersPluginApi",
             "section": "def-common.DockerServerSpec",
             "text": "DockerServerSpec"
           }
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
         "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
@@ -5187,7 +5404,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
@@ -5200,7 +5417,7 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
@@ -5216,7 +5433,7 @@
         "tags": [],
         "label": "DockerServerSpec",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
         "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
@@ -5229,7 +5446,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
@@ -5242,7 +5459,7 @@
             "tags": [],
             "label": "portInContainer",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
@@ -5255,7 +5472,7 @@
             "tags": [],
             "label": "port",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
@@ -5268,7 +5485,7 @@
             "tags": [],
             "label": "image",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
@@ -5284,7 +5501,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
@@ -5300,7 +5517,7 @@
             "signature": [
               "string | RegExp | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
@@ -5316,7 +5533,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
@@ -5334,9 +5551,9 @@
             "signature": [
               "((server: ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/test-docker-servers",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnTestDockerServersPluginApi",
                 "section": "def-common.DockerServer",
                 "text": "DockerServer"
               },
@@ -5346,7 +5563,7 @@
               "Observable",
               "<unknown>) | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
@@ -5361,14 +5578,14 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-docker-servers",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestDockerServersPluginApi",
                     "section": "def-common.DockerServer",
                     "text": "DockerServer"
                   }
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+                "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
                 "lineNumber": 21,
                 "columnNumber": 14,
                 "deprecated": false,
@@ -5386,7 +5603,7 @@
                   "Observable",
                   "<string>"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+                "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
                 "lineNumber": 21,
                 "columnNumber": 36,
                 "deprecated": false,
@@ -5406,7 +5623,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/define_docker_servers_config.ts",
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
@@ -7769,7 +7986,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
         "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
@@ -7816,7 +8033,7 @@
         "tags": [],
         "label": "fleetPackageRegistryDockerImage",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
         "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
@@ -8145,7 +8362,7 @@
         "tags": [],
         "label": "packageRegistryDocker",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+        "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
         "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
@@ -8158,7 +8375,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
@@ -8171,7 +8388,7 @@
             "tags": [],
             "label": "image",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
@@ -8184,7 +8401,7 @@
             "tags": [],
             "label": "portInContainer",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
@@ -8200,7 +8417,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
@@ -8216,7 +8433,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
@@ -8229,7 +8446,7 @@
             "tags": [],
             "label": "waitForLogLine",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
@@ -8242,7 +8459,7 @@
             "tags": [],
             "label": "waitForLogLineTimeoutMs",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
@@ -8255,7 +8472,7 @@
             "tags": [],
             "label": "preferCached",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/package_registry/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-docker-servers/src/package_registry/index.ts",
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
