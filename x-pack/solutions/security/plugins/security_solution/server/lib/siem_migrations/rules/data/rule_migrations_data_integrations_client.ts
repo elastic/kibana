@@ -11,7 +11,8 @@ import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 
 const INTEGRATION_WEIGHTS = [
-  { ids: ['endpoint'], weight: 1.5 }, // Elastic Defend should be boosted
+  { ids: ['endpoint'], weight: 10 }, // Elastic Defend should be boosted
+  { ids: ['network_traffic'], weight: 10 }, // Elastic Defend should be boosted
 ];
 
 /**
@@ -54,8 +55,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       }
     } catch (error) {
       this.logger.warn(
-        `Failed to fetch fields metadata for package ${pkg.name}: ${
-          error instanceof Error ? error.message : String(error)
+        `Failed to fetch fields metadata for package ${pkg.name}: ${error instanceof Error ? error.message : String(error)
         }`
       );
     }
@@ -130,7 +130,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       function_score: {
         query: {
           bool: {
-            must: { semantic: { query: semanticQuery, field: 'elser_embedding' } },
+            must: [{ semantic: { query: semanticQuery, field: 'elser_embedding' } }],
             must_not: { ids: { values: EXCLUDED_INTEGRATIONS } },
             filter: { exists: { field: 'data_streams' } },
           },

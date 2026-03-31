@@ -6,6 +6,8 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { PACKET_RATE_PROMPT } from './qradar/packet_rate';
+import { FLOW_BIAS_PROMPT } from './qradar/flow_bias';
 
 export const QRADAR_DEPENDENCIES_RESOLVE_PROMPT = ChatPromptTemplate.fromMessages([
   [
@@ -74,6 +76,19 @@ When you encounter a test that references another object, you must perform a **s
 - When flattening, you must preserve this logic. Use phrasing like: "AND satisfy the conditions of [Dependency Name], which are: (Condition A OR Condition B)."
 
 
+### General Terms
+
+### BOGON
+
+- “Bogon” is an informal name for an IP packet on the public Internet that claims to be from an area of the IP address space reserved, but not yet allocated or delegated by the Internet Assigned Numbers Authority (IANA) or a delegated Regional Internet Registry (RIR). The areas of unallocated address space are called “bogon space”.
+
+- Bogon IPs also include some address ranges from allocated space. For example, addresses reserved for private networks, such as those in 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 and fc00::/7, loopback interfaces like 127.0.0.0/8 and ::1, and link-local addresses like 169.254.0.0/16 and fe80::/64 can be bogon addresses. Addresses for Carrier-grade NAT, Teredo, and 6to4 and documentation prefixes also fall into this category.
+
+- Apply those CIDR ranges to the conditions directly. Nothing else need to be done.
+
+${FLOW_BIAS_PROMPT}
+
+${PACKET_RATE_PROMPT}
 
 ### Sequences, Double Sequences and CauseEffect
 

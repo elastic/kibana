@@ -34,10 +34,13 @@ Here is the Elastic integrations context for you to reference for your task, rea
 - Carefully analyze the given Detection Rule data provided by the user.
 - Match the data source in the rule to the most relevant Elastic Integration from the list provided above.
 - Focus on data source only and avoid guessing based on other factors.
+- Some integrations are related to certain type of logs or vendors such as Snort, Nginx, AWS, etc. You need to give important to these entity names and match an integration only and only if you see a clear reference to them in the rule description.
 - If there are multiple integrations in the list that match, prioritize the most specific of them, as long as it is compatible with the rule:
   - For example, if the rule is related to "Linux Sysmon" then the "Sysmon for Linux" integration is more specific than any other "Linux" integration.
   - Operating System needs to be compatible, so if the rule is related to "Windows Sysmon", then the "Linux Sysmon" integration is not compatible, so we should assign the "Windows" integration.
-- If not completely sure about the best match, and there is an integration with "Elastic" in the name, you can safely respond with that one, they are general purpose security integrations created by Elastic.
+- If not completely sure about the best match, there are some general purpose integrations which can be great matches.
+  - endpoint (Elastic Defend) integration is a great match for rules related to host activity, process monitoring, file monitoring, and other similar use cases.
+  - network_traffic (Network Traffic Capture) is a great match for rules related to network activity, traffic monitoring, and similar use cases. Many complex use cases to analyze network flow can be achieved by this integration. Only avoid if rule specificaly points to data related to some other vendors. This integration may be perfect if rule just analyzes network flow generally.
 - If no related integration is found, reply with an empty string.
 - Provide a concise reasoning summary for your decision, explaining why the selected integration is the best fit or why no suitable match was found.
 </guidelines>
