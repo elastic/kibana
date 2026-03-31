@@ -118,7 +118,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
           <EuiCard
             hasBorder
             layout="horizontal"
-            icon={<EuiIcon size="l" type="importAction" />}
+            icon={<EuiIcon size="l" type="download" />}
             titleSize="xs"
             data-test-subj="privilegedUserMonitoringImportCSVCard"
             title={
