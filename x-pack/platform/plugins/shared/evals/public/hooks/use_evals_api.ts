@@ -14,6 +14,8 @@ import {
   EVALS_RUN_DATASET_EXAMPLES_URL,
   EVALS_EXAMPLE_SCORES_URL,
   EVALS_TRACE_URL,
+  EVALS_TRACING_PROJECTS_URL,
+  EVALS_TRACING_PROJECT_TRACES_URL,
   EVALS_DATASETS_URL,
   EVALS_DATASET_URL,
   EVALS_DATASET_EXAMPLES_URL,
@@ -37,6 +39,8 @@ import {
   type GetEvaluationRunDatasetExamplesResponse,
   type GetExampleScoresResponse,
   type GetTraceResponse,
+  type GetTracingProjectsResponse,
+  type GetProjectTracesResponse,
 } from '@kbn/evals-common';
 import { queryKeys } from '../query_keys';
 
@@ -349,5 +353,89 @@ export const useTrace = (traceId: string | null) => {
       });
     },
     enabled: traceId != null,
+  });
+};
+
+interface TracingProjectsFilters {
+  from?: string;
+  to?: string;
+  page?: number;
+  perPage?: number;
+}
+
+interface TracingProjectsOptions {
+  refetchInterval?: number | false;
+}
+
+export const useTracingProjects = (
+  filters: TracingProjectsFilters = {},
+  options: TracingProjectsOptions = {}
+) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.tracing.projects(filters),
+    queryFn: async (): Promise<GetTracingProjectsResponse> => {
+      const query: Record<string, string | number> = {};
+      if (filters.from) query.from = filters.from;
+      if (filters.to) query.to = filters.to;
+      if (filters.page) query.page = filters.page;
+      if (filters.perPage) query.per_page = filters.perPage;
+
+      return services.http!.get<GetTracingProjectsResponse>(EVALS_TRACING_PROJECTS_URL, {
+        query,
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    keepPreviousData: true,
+    refetchInterval: options.refetchInterval,
+  });
+};
+
+interface ProjectTracesFilters {
+  from?: string;
+  to?: string;
+  name?: string;
+  sortField?: string;
+  sortOrder?: string;
+  page?: number;
+  perPage?: number;
+}
+
+interface ProjectTracesOptions {
+  refetchInterval?: number | false;
+}
+
+export const useProjectTraces = (
+  projectName: string,
+  filters: ProjectTracesFilters = {},
+  options: ProjectTracesOptions = {}
+) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.tracing.projectTraces(projectName, filters),
+    queryFn: async (): Promise<GetProjectTracesResponse> => {
+      const url = EVALS_TRACING_PROJECT_TRACES_URL.replace(
+        '{projectName}',
+        encodeURIComponent(projectName)
+      );
+      const query: Record<string, string | number> = {};
+      if (filters.from) query.from = filters.from;
+      if (filters.to) query.to = filters.to;
+      if (filters.name) query.name = filters.name;
+      if (filters.sortField) query.sort_field = filters.sortField;
+      if (filters.sortOrder) query.sort_order = filters.sortOrder;
+      if (filters.page) query.page = filters.page;
+      if (filters.perPage) query.per_page = filters.perPage;
+
+      return services.http!.get<GetProjectTracesResponse>(url, {
+        query,
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    enabled: projectName.length > 0,
+    keepPreviousData: true,
+    refetchInterval: options.refetchInterval,
   });
 };
