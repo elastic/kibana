@@ -25,10 +25,11 @@ interface CreateTestConfigOptions<T> {
   indexRefreshInterval?: string | false;
 }
 
-// include settings from elasticsearch controller
+// These args replicate the MKI setup from the elasticsearch controller:
 // https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
 //
-// ⚠️  Do not add server args here to make tests pass as they won't be set on MKI.
+// ⚠️  Tests targeting these configs run against MKI. Adding a server arg here may allow
+//     tests to pass on Kibana CI but will cause failures on MKI if it is not yet supported there.
 //     If your test needs a feature flag, create a config under feature_flag_configs/ using
 //     createServerlessFeatureFlagTestConfig from feature_flag.serverless.config.base.ts.
 const esServerArgsFromController = {
@@ -38,10 +39,11 @@ const esServerArgsFromController = {
   workplaceai: [],
 };
 
-// include settings from kibana controller
+// These args replicate the MKI setup from the kibana controller:
 // https://github.com/elastic/kibana-controller/blob/main/internal/controllers/kibana/config/config_settings.go
 //
-// ⚠️  Do not add server args here to make tests pass as they won't be set on MKI.
+// ⚠️  Tests targeting these configs run against MKI. Adding a server arg here may allow
+//     tests to pass on Kibana CI but will cause failures on MKI if it is not yet supported there.
 //     If your test needs a feature flag, create a config under feature_flag_configs/ using
 //     createServerlessFeatureFlagTestConfig from feature_flag.serverless.config.base.ts.
 const kbnServerArgsFromController = {
