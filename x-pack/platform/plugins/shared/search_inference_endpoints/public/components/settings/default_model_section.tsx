@@ -143,8 +143,17 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
           </EuiFormRow>
         </EuiDescribedFormGroup>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner grow={false} color={state.disallowOtherModels ? 'danger' : 'subdued'} paddingSize="l">
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} justifyContent="spaceBetween">
+      <EuiSplitPanel.Inner
+        grow={false}
+        color={state.disallowOtherModels ? 'danger' : 'subdued'}
+        paddingSize="l"
+      >
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          justifyContent="spaceBetween"
+        >
           <EuiFlexItem grow={false}>
             <EuiSwitch
               id="disallowOtherModelsCheckbox"
@@ -156,7 +165,9 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              {state.disallowOtherModels ? i18n.DISALLOW_OTHER_MODELS_DESCRIPTION : i18n.ALLOW_OTHER_MODELS_DESCRIPTION}
+              {state.disallowOtherModels
+                ? i18n.DISALLOW_OTHER_MODELS_DESCRIPTION
+                : i18n.ALLOW_OTHER_MODELS_DESCRIPTION}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

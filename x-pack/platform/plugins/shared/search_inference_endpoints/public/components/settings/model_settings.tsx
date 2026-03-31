@@ -12,9 +12,7 @@ import {
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiPageTemplate,
-  EuiPanel,
   EuiSpacer,
-  EuiSplitPanel,
 } from '@elastic/eui';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
