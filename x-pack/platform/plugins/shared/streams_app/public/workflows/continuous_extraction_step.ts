@@ -15,6 +15,8 @@ import {
   tokenCountSchema,
   iterationResultSchema,
   streamCandidateSchema,
+  kiSelectStreamsInputSchema,
+  kiFeaturesExtractStreamInputSchema,
 } from '@kbn/streams-plugin/common';
 
 export const kiSelectStreamsPublicStepDefinition: PublicStepDefinition = {
@@ -23,7 +25,7 @@ export const kiSelectStreamsPublicStepDefinition: PublicStepDefinition = {
   description:
     'Selects streams that need knowledge indicator extraction and schedules identification tasks.',
   category: StepCategory.Kibana,
-  inputSchema: z.object({}),
+  inputSchema: kiSelectStreamsInputSchema,
   outputSchema: z.object({
     connectorId: z.string(),
     scheduled: z.array(streamCandidateSchema),
@@ -47,9 +49,7 @@ export const kiFeaturesExtractStreamPublicStepDefinition: PublicStepDefinition =
   description:
     'Polls a scheduled KI features identification task for a single stream until completion and reports results.',
   category: StepCategory.Kibana,
-  inputSchema: z.object({
-    streamName: z.string(),
-  }),
+  inputSchema: kiFeaturesExtractStreamInputSchema,
   outputSchema: z.object({
     streamName: z.string(),
     status: z.string(),

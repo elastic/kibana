@@ -58,7 +58,7 @@ export const FAILURE_STORE_SELECTOR = '::failures';
 
 export const DEFAULT_EXTRACTION_INTERVAL_HOURS = 12;
 export const MIN_EXTRACTION_INTERVAL_HOURS = 1;
-export const MAX_CONCURRENT_TASKS = 5;
+export const MAX_SCHEDULED_STREAMS = 5;
 
 export const COORDINATOR_INTERVAL_MINUTES = 10;
 

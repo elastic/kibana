@@ -1,6 +1,7 @@
 version: "1"
 name: ".streams-continuous-ki-extraction"
 description: "This workflow is used by the system and should not be modified."
+enabled: true
 settings:
   timeout: "9m"
   concurrency:
@@ -11,10 +12,15 @@ triggers:
   - type: scheduled
     with:
       every: "10m"
+inputs:
+  - name: maxScheduledStreams
+    type: number
+    default: 5
 steps:
   - name: select_streams
     type: streams.ki_select_streams
-    with: {}
+    with:
+      maxScheduledStreams: "{{ inputs.maxScheduledStreams }}"
   - name: has_scheduled_streams
     type: if
     condition: "steps.select_streams.output.scheduled[0].streamName:*"

@@ -24,6 +24,7 @@ import {
   featureSummarySchema,
   tokenCountSchema,
   iterationResultSchema,
+  kiFeaturesExtractStreamInputSchema,
 } from '../../../common/continuous_extraction_schemas';
 
 const toFeatureSummary = ({ id, title }: { id: string; title?: string }) => ({ id, title });
@@ -41,10 +42,6 @@ const formatIterationsSummary = (
   const tokensLine = totalTokensUsed ? ` | total tokens: ${totalTokensUsed.total}` : '';
   return `\nCompleted iterations (${iterations.length})${tokensLine}:\n${lines.join('\n')}`;
 };
-
-const inputSchema = z.object({
-  streamName: z.string(),
-});
 
 const ZERO_TOKENS = { prompt: 0, completion: 0, total: 0, cached: 0 };
 
@@ -105,7 +102,7 @@ export const registerKiFeaturesExtractStreamStep = ({
     description:
       'Polls a scheduled KI features identification task for a single stream until completion and reports results.',
     category: StepCategory.Kibana,
-    inputSchema,
+    inputSchema: kiFeaturesExtractStreamInputSchema,
     outputSchema: z.object({
       streamName: z.string(),
       status: z.string(),
@@ -120,7 +117,7 @@ export const registerKiFeaturesExtractStreamStep = ({
       iterations: z.array(iterationResultSchema),
     }),
     handler: async (context) => {
-      const { streamName } = inputSchema.parse(context.input);
+      const { streamName } = kiFeaturesExtractStreamInputSchema.parse(context.input);
       const taskId = getFeaturesIdentificationTaskId(streamName);
 
       const request = context.contextManager.getFakeRequest();

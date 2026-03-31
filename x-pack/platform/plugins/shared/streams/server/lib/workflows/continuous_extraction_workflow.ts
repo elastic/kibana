@@ -15,6 +15,7 @@ import {
   KI_SELECT_STREAMS_STEP_TYPE,
   KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
   COORDINATOR_INTERVAL_MINUTES,
+  MAX_SCHEDULED_STREAMS,
 } from '../../../common/constants';
 
 const WORKFLOW_YAML = readFileSync(
@@ -33,7 +34,16 @@ const assertYamlInSync = (yaml: string, expected: string, label: string) => {
 assertYamlInSync(WORKFLOW_YAML, KI_SELECT_STREAMS_STEP_TYPE, 'step type');
 assertYamlInSync(WORKFLOW_YAML, KI_FEATURES_EXTRACT_STREAM_STEP_TYPE, 'step type');
 assertYamlInSync(WORKFLOW_YAML, `timeout: "${COORDINATOR_INTERVAL_MINUTES - 1}m"`, 'timeout');
-assertYamlInSync(WORKFLOW_YAML, `every: "${COORDINATOR_INTERVAL_MINUTES}m"`, 'coordinator interval');
+assertYamlInSync(
+  WORKFLOW_YAML,
+  `every: "${COORDINATOR_INTERVAL_MINUTES}m"`,
+  'coordinator interval'
+);
+assertYamlInSync(
+  WORKFLOW_YAML,
+  `name: maxScheduledStreams\n    type: number\n    default: ${MAX_SCHEDULED_STREAMS}`,
+  'maxScheduledStreams input'
+);
 
 export interface ContinuousExtractionWorkflowService {
   ensureWorkflow(params: {

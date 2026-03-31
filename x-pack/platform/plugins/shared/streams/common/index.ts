@@ -30,6 +30,8 @@ export {
   tokenCountSchema,
   iterationResultSchema,
   streamCandidateSchema,
+  kiSelectStreamsInputSchema,
+  kiFeaturesExtractStreamInputSchema,
 } from './continuous_extraction_schemas';
 
 export type { StreamDocsStat } from './doc_counts';

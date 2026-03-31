@@ -22,9 +22,12 @@ import { resolveConnectorId } from '../../routes/utils/resolve_connector_id';
 import {
   KI_SELECT_STREAMS_STEP_TYPE,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
-  MAX_CONCURRENT_TASKS,
+  MAX_SCHEDULED_STREAMS,
 } from '../../../common/constants';
-import { streamCandidateSchema } from '../../../common/continuous_extraction_schemas';
+import {
+  streamCandidateSchema,
+  kiSelectStreamsInputSchema,
+} from '../../../common/continuous_extraction_schemas';
 
 // Fixed look-back window for each extraction run; independent of the configurable
 // scheduling interval, which controls *how often* we run, not *how far back* we look.
@@ -61,9 +64,12 @@ export const registerKiSelectStreamsStep = ({
     description:
       'Selects streams that need knowledge indicator extraction and schedules identification tasks.',
     category: StepCategory.Kibana,
-    inputSchema: z.object({}),
+    inputSchema: kiSelectStreamsInputSchema,
     outputSchema,
     handler: async (context) => {
+      const { maxScheduledStreams = MAX_SCHEDULED_STREAMS } = kiSelectStreamsInputSchema.parse(
+        context.input ?? {}
+      );
       const request = context.contextManager.getFakeRequest();
       const { streamsClient, taskClient, modelSettingsClient, uiSettingsClient } =
         await getScopedClients({ request });
@@ -143,7 +149,7 @@ export const registerKiSelectStreamsStep = ({
         ...candidates,
       ];
 
-      const availableSlots = Math.max(0, MAX_CONCURRENT_TASKS - alreadyRunning.length);
+      const availableSlots = Math.max(0, maxScheduledStreams - alreadyRunning.length);
       const toSchedule = allCandidates.slice(0, availableSlots);
       const skipped = allCandidates.slice(availableSlots);
 

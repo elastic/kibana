@@ -33,3 +33,11 @@ export const streamCandidateSchema = z.object({
   streamName: z.string(),
   lastCompletedAt: z.string().nullable(),
 });
+
+export const kiSelectStreamsInputSchema = z.object({
+  maxScheduledStreams: z.coerce.number().optional(),
+});
+
+export const kiFeaturesExtractStreamInputSchema = z.object({
+  streamName: z.string(),
+});
