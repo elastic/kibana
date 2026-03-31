@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import type { OpeningAndClosingTags } from 'mustache';
+import Mustache from 'mustache';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -16,48 +20,27 @@ import {
   COORDINATOR_INTERVAL_MINUTES,
 } from '../../../common/constants';
 
-const COORDINATOR_INTERVAL = `${COORDINATOR_INTERVAL_MINUTES}m`;
-const WORKFLOW_TIMEOUT = `${COORDINATOR_INTERVAL_MINUTES - 1}m`;
+const TEMPLATE_DELIMITERS: OpeningAndClosingTags = ['<%=', '%>'];
 
-const WORKFLOW_DESCRIPTION = i18n.translate(
-  'xpack.streams.continuousExtraction.workflowDescription',
-  {
-    defaultMessage: 'This workflow is used by the system and should not be modified.',
-  }
+const WORKFLOW_TEMPLATE = readFileSync(
+  resolve(__dirname, 'continuous_extraction_workflow.yaml'),
+  'utf-8'
 );
 
-const WORKFLOW_YAML = [
-  `name: ".streams-continuous-ki-extraction"`,
-  `description: '${WORKFLOW_DESCRIPTION}'`,
-  `settings:`,
-  `  timeout: "${WORKFLOW_TIMEOUT}"`,
-  `  concurrency:`,
-  `    key: streams-continuous-ki-extraction`,
-  `    strategy: drop`,
-  `    max: 1`,
-  `triggers:`,
-  `  - type: scheduled`,
-  `    with:`,
-  `      every: "${COORDINATOR_INTERVAL}"`,
-  `steps:`,
-  `  - name: select_streams`,
-  `    type: ${KI_SELECT_STREAMS_STEP_TYPE}`,
-  `    with: {}`,
-  `  - name: has_scheduled_streams`,
-  `    type: if`,
-  `    condition: "steps.select_streams.output.scheduled[0].streamName:*"`,
-  `    steps:`,
-  `      - name: extract_ki_features`,
-  `        type: foreach`,
-  `        foreach: "{{ steps.select_streams.output.scheduled }}"`,
-  `        iteration-on-failure:`,
-  `          continue: true`,
-  `        steps:`,
-  `          - name: poll_ki_features_extraction`,
-  `            type: ${KI_FEATURES_EXTRACT_STREAM_STEP_TYPE}`,
-  `            with:`,
-  `              streamName: "{{ foreach.item.streamName }}"`,
-].join('\n');
+const WORKFLOW_YAML = Mustache.render(
+  WORKFLOW_TEMPLATE,
+  {
+    description: i18n.translate('xpack.streams.continuousExtraction.workflowDescription', {
+      defaultMessage: 'This workflow is used by the system and should not be modified.',
+    }),
+    timeout: `${COORDINATOR_INTERVAL_MINUTES - 1}m`,
+    coordinatorInterval: `${COORDINATOR_INTERVAL_MINUTES}m`,
+    kiSelectStreamsStepType: KI_SELECT_STREAMS_STEP_TYPE,
+    kiFeaturesExtractStreamStepType: KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
+  },
+  {},
+  TEMPLATE_DELIMITERS
+);
 
 export interface ContinuousExtractionWorkflowService {
   ensureWorkflow(params: {

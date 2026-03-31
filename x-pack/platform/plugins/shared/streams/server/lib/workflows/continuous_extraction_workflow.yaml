@@ -1,0 +1,31 @@
+version: "1"
+name: ".streams-continuous-ki-extraction"
+description: "<%= description %>"
+settings:
+  timeout: "<%= timeout %>"
+  concurrency:
+    key: streams-continuous-ki-extraction
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "<%= coordinatorInterval %>"
+steps:
+  - name: select_streams
+    type: <%= kiSelectStreamsStepType %>
+    with: {}
+  - name: has_scheduled_streams
+    type: if
+    condition: "steps.select_streams.output.scheduled[0].streamName:*"
+    steps:
+      - name: extract_ki_features
+        type: foreach
+        foreach: "{{ steps.select_streams.output.scheduled }}"
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: poll_ki_features_extraction
+            type: <%= kiFeaturesExtractStreamStepType %>
+            with:
+              streamName: "{{ foreach.item.streamName }}"
