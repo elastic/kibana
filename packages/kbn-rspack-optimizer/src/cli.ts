@@ -118,6 +118,8 @@ export function runRspackCli(options: CliOptions = {}): void {
       } else {
         throw new Error(`RSPack build failed after ${duration}s`);
       }
+
+      await result.done;
     },
     {
       usage: 'node scripts/build_rspack_bundles.js [options]',

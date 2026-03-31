@@ -47,6 +47,8 @@ export interface BuildResult {
   totalSize?: number;
   /** Function to close the watcher (only set in watch mode) */
   close?: () => Promise<void>;
+  /** Resolves when the watcher closes (watch mode only) */
+  done?: Promise<void>;
   /** True if build was interrupted by SIGINT/SIGTERM */
   interrupted?: boolean;
 }
@@ -201,6 +203,10 @@ async function runWatchBuild(
     let isShuttingDown = false;
     const previousAssetSizes = new Map<string, number>();
     let previousBuildHash: string | undefined;
+    let resolveDone: () => void;
+    const done = new Promise<void>((r) => {
+      resolveDone = r;
+    });
 
     const cleanupStaleHotUpdates = (newHash: string) => {
       const keepHash = previousBuildHash;
@@ -228,8 +234,9 @@ async function runWatchBuild(
 
       watching.close(() => {
         log?.info('RSPack watch mode stopped.');
+        resolveDone();
       });
-      
+
       return Promise.resolve();
     };
 
@@ -267,6 +274,7 @@ async function runWatchBuild(
               errors: [err.message],
               duration,
               close: closeWatcher,
+              done,
             });
           }
           return;
@@ -281,6 +289,7 @@ async function runWatchBuild(
               errors: ['No stats returned from compilation'],
               duration,
               close: closeWatcher,
+              done,
             });
           }
           return;
@@ -307,6 +316,7 @@ async function runWatchBuild(
           resolve({
             ...result,
             close: closeWatcher,
+            done,
           });
           return;
         }
@@ -316,7 +326,14 @@ async function runWatchBuild(
         const hasErrors = stats.hasErrors();
 
         if (hasErrors) {
-          const timings = stats.toJson({ timings: true, assets: false, errors: false, warnings: false, modules: false, chunks: false });
+          const timings = stats.toJson({
+            timings: true,
+            assets: false,
+            errors: false,
+            warnings: false,
+            modules: false,
+            chunks: false,
+          });
           const rebuildTime = timings.time ? (timings.time / 1000).toFixed(1) : '?';
           const result = processStats(stats, log, { quiet: true });
           if (hmrServer && result.errors?.length) {
@@ -324,7 +341,14 @@ async function runWatchBuild(
           }
           log?.error(`Rebuild failed in ${rebuildTime}s — waiting for changes to fix errors...`);
         } else {
-          const timings = stats.toJson({ timings: true, assets: false, errors: false, warnings: false, modules: false, chunks: false });
+          const timings = stats.toJson({
+            timings: true,
+            assets: false,
+            errors: false,
+            warnings: false,
+            modules: false,
+            chunks: false,
+          });
           const rebuildTime = timings.time ? (timings.time / 1000).toFixed(1) : '?';
 
           log?.debug('Bundles ready at target/public/bundles/');
@@ -341,9 +365,15 @@ async function runWatchBuild(
             cleanupStaleHotUpdates(stats.hash);
           }
 
-          const isVerbose = typeof log?.getWriters === 'function' && log.getWriters().some(
-            (w) => 'level' in w && (w as { level?: { flags?: { debug?: boolean } } }).level?.flags?.debug
-          );
+          const isVerbose =
+            typeof log?.getWriters === 'function' &&
+            log
+              .getWriters()
+              .some(
+                (w) =>
+                  'level' in w &&
+                  (w as { level?: { flags?: { debug?: boolean } } }).level?.flags?.debug
+              );
 
           if (isVerbose) {
             const result = processStats(stats, log, { quiet: true });
@@ -361,7 +391,9 @@ async function runWatchBuild(
               previousAssetSizes.set(asset.name, asset.size);
             }
             log?.debug(
-              `Rebuilt in ${rebuildTime}s (${changedCount} chunks updated, ${formatSize(changedSize)} changed)`
+              `Rebuilt in ${rebuildTime}s (${changedCount} chunks updated, ${formatSize(
+                changedSize
+              )} changed)`
             );
           } else {
             log?.success(`Rebuilt in ${rebuildTime}s`);
@@ -408,7 +440,13 @@ function processStats(
       log?.error(filteredOutput);
     }
 
-    const errorInfo = stats.toJson({ errors: true, warnings: false, assets: false, modules: false, chunks: false });
+    const errorInfo = stats.toJson({
+      errors: true,
+      warnings: false,
+      assets: false,
+      modules: false,
+      chunks: false,
+    });
     const errorMessages = errorInfo.errors?.map((e) => e.message) ?? [];
 
     return {
