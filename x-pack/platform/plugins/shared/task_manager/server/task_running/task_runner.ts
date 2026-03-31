@@ -64,7 +64,7 @@ import type {
   TaskDefinition,
   TaskEventLogger,
 } from '../task';
-import { isFailedRunResult, TaskStatus } from '../task';
+import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
@@ -88,6 +88,8 @@ export interface TaskRunner {
   expiration: Date;
   startedAt: Date | null;
   definition: TaskDefinition | undefined;
+  /** Effective cost for this task (instance override, then definition, then Normal). */
+  cost: number;
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
@@ -285,6 +287,14 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public get definition(): TaskDefinition | undefined {
     return this.definitions.get(this.taskType);
+  }
+
+  /**
+   *  Effective cost for this task (instance override, then definition, then Normal).
+   */
+  public get cost(): number {
+    const instanceCost = getTaskCostFromInstance(this.instance.task.cost);
+    return instanceCost ?? this.definition?.cost ?? TaskCost.Normal;
   }
 
   /**
