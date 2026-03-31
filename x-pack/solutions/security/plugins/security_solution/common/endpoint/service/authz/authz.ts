@@ -116,9 +116,9 @@ export const calculateEndpointAuthz = (
   const canReadScriptsLibrary = hasAuth('readScriptsManagement');
   const canWriteScriptsLibrary = hasAuth('writeScriptsManagement');
 
-  // These are currently tied to the superuser role
-  const canReadAdminData = hasSuperuserRole;
-  const canWriteAdminData = hasSuperuserRole;
+  // These are currently tied to the superuser role on ESS and the admin role on Serverless
+  const canReadAdminData = hasSuperuserPrivileges;
+  const canWriteAdminData = hasSuperuserPrivileges;
 
   const authz: EndpointAuthz = {
     canWriteSecuritySolution,
