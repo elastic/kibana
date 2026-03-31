@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
       const failures = bulkResult.items.filter((item) => item.index?.error);
       log.error(`[DIAG] Bulk indexing had errors: ${JSON.stringify(failures)}`);
     } else {
-      log.info(`[DIAG] Bulk indexed ${testEntities.length} entities successfully`);
+      log.warning(`[DIAG] Bulk indexed ${testEntities.length} entities successfully`);
     }
   };
 
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
       index,
       query: { prefix: { 'entity.id': TEST_PREFIX } },
     });
-    log.info(`[DIAG:${label}] entity.id prefix count: ${countResult.count}`);
+    log.warning(`[DIAG:${label}] entity.id prefix count: ${countResult.count}`);
 
     // 2. Search by user.email term (what the CSV upload uses for matching)
     const emailSearch = await es.search({
@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
       size: 10,
     });
     const emailHits = emailSearch.hits.hits.map((h) => h._source);
-    log.info(
+    log.warning(
       `[DIAG:${label}] user.email=shared@test.com search: ${emailSearch.hits.hits.length} hits: ${JSON.stringify(emailHits)}`
     );
 
@@ -150,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
       _source: ['entity.id', 'entity.relationships.resolution.resolved_to'],
       size: 1,
     });
-    log.info(
+    log.warning(
       `[DIAG:${label}] target entity search: ${targetSearch.hits.hits.length} hits: ${JSON.stringify(targetSearch.hits.hits.map((h) => h._source))}`
     );
 
@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
     const mapping = await es.indices.getMapping({ index });
     const indexMapping = Object.values(mapping)[0]?.mappings?.properties;
     const userMapping = (indexMapping as Record<string, unknown>)?.user;
-    log.info(`[DIAG:${label}] user field mapping: ${JSON.stringify(userMapping)}`);
+    log.warning(`[DIAG:${label}] user field mapping: ${JSON.stringify(userMapping)}`);
 
     // 5. Dump all test entities to see actual stored documents
     const allDocs = await es.search({
@@ -167,7 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
       _source: true,
       size: 10,
     });
-    log.info(
+    log.warning(
       `[DIAG:${label}] all test entities (${allDocs.hits.hits.length}): ${JSON.stringify(
         allDocs.hits.hits.map((h) => ({
           _id: h._id,
@@ -221,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { body, status } = await uploadCsv(csv);
 
-      log.info(`[DIAG:link-test] CSV upload response: ${JSON.stringify(body)}`);
+      log.warning(`[DIAG:link-test] CSV upload response: ${JSON.stringify(body)}`);
 
       expect(status).toBe(200);
       expect(body.total).toBe(1);
@@ -229,7 +229,10 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.items[0].matchedEntities).toBe(2);
       expect(body.items[0].linkedEntities).toBe(2);
 
+      await diagVerifySearchability('link-test-post-upload');
+
       const group = await getResolutionGroup(`${TEST_PREFIX}golden`);
+      log.warning(`[DIAG:link-test] Resolution group: ${JSON.stringify(group)}`);
       expect(group.group_size).toBe(3);
     });
 
@@ -242,7 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // First upload — links entities
       const firstUpload = await uploadCsv(csv);
-      log.info(`[DIAG:idempotent-test] First upload response: ${JSON.stringify(firstUpload.body)}`);
+      log.warning(`[DIAG:idempotent-test] First upload response: ${JSON.stringify(firstUpload.body)}`);
 
       // Ensure the resolved_to updates from linkEntities are visible
       await es.indices.refresh({ index: getLatestEntitiesIndexName('default') });
@@ -251,7 +254,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // Second upload — same CSV, entities should be skipped
       const { body } = await uploadCsv(csv);
-      log.info(`[DIAG:idempotent-test] Second upload response: ${JSON.stringify(body)}`);
+      log.warning(`[DIAG:idempotent-test] Second upload response: ${JSON.stringify(body)}`);
 
       expect(body.successful).toBe(1);
       expect(body.items[0].linkedEntities).toBe(0);
