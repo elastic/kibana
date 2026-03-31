@@ -272,9 +272,8 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           gridLayoutStateManager.headerRefs.current[sectionId] = element;
         }}
         onMouseDown={readOnly ? toggleIsCollapsed : handleSectionDragStart}
+        // using `onTouchStart` in `readOnly` mode will cause `toggleIsCollapsed` to be called twice
         onTouchStart={readOnly ? undefined : handleSectionDragStart}
-        // using onTouchStart in readOnly mode will cause the problem with duplicated toggle on touch devices
-        // see more in the description for `isGhostMouseDown`
       >
         <GridSectionTitle
           sectionId={sectionId}
