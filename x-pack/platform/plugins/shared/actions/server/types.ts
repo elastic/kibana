@@ -128,11 +128,12 @@ export type ExecutorType<
 type Validator<T> = Pick<z4.ZodType, 'parse'>;
 export interface ValidatorType<T> {
   schema: Validator<T>;
-  customValidator?: (value: T, validatorServices: ValidatorServices) => void;
+  customValidator?: (value: T, validatorServices: ValidatorServices) => void | Promise<void>;
 }
 
 export interface ValidatorServices {
   configurationUtilities: ActionsConfigurationUtilities;
+  getIsEarsEnabled?: () => Promise<boolean>;
 }
 
 export interface ActionValidationService {
