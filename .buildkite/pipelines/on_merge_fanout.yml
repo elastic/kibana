@@ -239,7 +239,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 150
+      diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
@@ -259,8 +259,8 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
-      diskSizeGb: 105
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
