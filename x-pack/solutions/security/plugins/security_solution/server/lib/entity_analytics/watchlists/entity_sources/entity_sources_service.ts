@@ -48,7 +48,7 @@ export const createEntitySourcesService = ({
     const sourceIds = await watchlistClient.getEntitySourceIds(watchlistId);
     const targetIndex = getIndexForWatchlist(watchlist.name, namespace);
 
-    const { sources } = await descriptorClient.list({});
+    const { sources } = await descriptorClient.list({}); // default to 10 sources, each watchlist has 1/2 sources so this is ok for now but not ideal.
     const entitiesBySource = await Promise.all(
       sources
         .filter((s) => sourceIds.includes(s.id))
@@ -62,6 +62,11 @@ export const createEntitySourcesService = ({
             watchlistsByEuid,
             ...rest,
           };
+
+          const entityStoreEntityIdsByType = await watchlistEntitiesService.listEntityStoreEntities(
+            identity
+          );
+          return { sourceId: source.id, entityStoreEntityIdsByType };
         })
     );
 
