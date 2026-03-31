@@ -170,6 +170,9 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
             'copy_from',
             'field',
             'keep',
+            'input_output',
+            'target_field',
+            'field_map',
           ];
 
           // If the processor type is changed while editing, we need to ignore unkownOptions as they
