@@ -152,6 +152,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
         description: skill.description,
         content: skill.content,
         tool_ids: skill.tool_ids ?? [],
+        referenced_content: skill.referenced_content ?? [],
       });
     }
   }, [skill, reset]);

@@ -15,6 +15,8 @@ import {
   maxToolsPerSkill,
 } from '@kbn/agent-builder-common';
 
+export const MAX_REFERENCED_CONTENT_ITEMS = 100;
+
 const validationMessages = {
   id: {
     required: i18n.translate('xpack.agentBuilder.skills.validation.id.required', {
@@ -62,9 +64,73 @@ const validationMessages = {
       values: { max: maxToolsPerSkill },
     }),
   },
+  referencedContent: {
+    maxItems: i18n.translate('xpack.agentBuilder.skills.validation.referencedContent.maxItems', {
+      defaultMessage: 'A maximum of {max} additional files can be associated with a skill.',
+      values: { max: MAX_REFERENCED_CONTENT_ITEMS },
+    }),
+    pathProtocol: i18n.translate(
+      'xpack.agentBuilder.skills.validation.referencedContent.pathProtocol',
+      {
+        defaultMessage: 'Folder path must start with ./',
+      }
+    ),
+    pathTraversal: i18n.translate(
+      'xpack.agentBuilder.skills.validation.referencedContent.pathTraversal',
+      {
+        defaultMessage: 'Folder path must not contain "../".',
+      }
+    ),
+    duplicatePath: i18n.translate(
+      'xpack.agentBuilder.skills.validation.referencedContent.duplicatePath',
+      {
+        defaultMessage: 'This file path is already used by another additional file.',
+      }
+    ),
+    reservedSkillName: i18n.translate(
+      'xpack.agentBuilder.skills.validation.referencedContent.reservedSkillName',
+      {
+        defaultMessage: 'This name is reserved for the main instructions file.',
+      }
+    ),
+  },
 };
 
-export const skillFormValidationSchema = z.object({
+/**
+ * One additional markdown file attached to a skill (same shape as API `referenced_content` items).
+ */
+export interface ReferencedContentItem {
+  name: string;
+  relativePath: string;
+  content: string;
+}
+
+const referencedContentItemSchema: z.ZodType<ReferencedContentItem> = z.object({
+  name: z.string(),
+  relativePath: z.string(),
+  content: z.string(),
+});
+
+/** Collapses redundant slashes for root detection and duplicate path keys (aligned with full-path preview). */
+const normalizeRelativePathSegments = (relativePath: string): string => {
+  const trimmed = relativePath.trim();
+  if (trimmed === '.' || trimmed === './') {
+    return './';
+  }
+  const rest = trimmed.startsWith('./') ? trimmed.slice(2) : trimmed;
+  const segments = rest.split('/').filter((segment) => segment.length > 0);
+  return segments.length === 0 ? './' : `./${segments.join('/')}`;
+};
+
+const isRootRelativePath = (relativePath: string): boolean =>
+  normalizeRelativePathSegments(relativePath) === './';
+
+const canComputeReferencedContentUniquenessKey = (relativePath: string): boolean => {
+  const trimmed = relativePath.trim();
+  return trimmed.startsWith('./') && !trimmed.includes('../');
+};
+
+const skillFormObjectSchema = z.object({
   id: z
     .string()
     .min(1, { message: validationMessages.id.required })
@@ -81,6 +147,64 @@ export const skillFormValidationSchema = z.object({
     .max(1024, { message: validationMessages.description.tooLong }),
   content: z.string().min(1, { message: validationMessages.content.required }),
   tool_ids: z.array(z.string()).max(maxToolsPerSkill, { message: validationMessages.toolIds.max }),
+  referenced_content: z
+    .array(referencedContentItemSchema)
+    .max(MAX_REFERENCED_CONTENT_ITEMS, { message: validationMessages.referencedContent.maxItems }),
 });
 
-export type SkillFormData = z.infer<typeof skillFormValidationSchema>;
+export const skillFormValidationSchema = skillFormObjectSchema.superRefine((data, ctx) => {
+  data.referenced_content.forEach((item, index) => {
+    const trimmedPath = item.relativePath.trim();
+
+    const hasValidPathPrefix = trimmedPath.startsWith('./');
+    if (!hasValidPathPrefix) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: validationMessages.referencedContent.pathProtocol,
+        path: ['referenced_content', index, 'relativePath'],
+      });
+    }
+
+    if (trimmedPath.includes('../')) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: validationMessages.referencedContent.pathTraversal,
+        path: ['referenced_content', index, 'relativePath'],
+      });
+    }
+
+    if (item.name.trim().toLowerCase() === 'skill' && isRootRelativePath(item.relativePath)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: validationMessages.referencedContent.reservedSkillName,
+        path: ['referenced_content', index, 'name'],
+      });
+    }
+  });
+
+  const keyToIndices = new Map<string, number[]>();
+  data.referenced_content.forEach((item, index) => {
+    if (!canComputeReferencedContentUniquenessKey(item.relativePath)) {
+      return;
+    }
+    const key = `${normalizeRelativePathSegments(item.relativePath)}/${item.name.trim()}`;
+    const indices = keyToIndices.get(key) ?? [];
+    indices.push(index);
+    keyToIndices.set(key, indices);
+  });
+
+  for (const indices of keyToIndices.values()) {
+    if (indices.length < 2) {
+      continue;
+    }
+    for (const index of indices) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: validationMessages.referencedContent.duplicatePath,
+        path: ['referenced_content', index, 'name'],
+      });
+    }
+  }
+});
+
+export type SkillFormData = z.infer<typeof skillFormObjectSchema>;
