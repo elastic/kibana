@@ -16,11 +16,8 @@ const DEFAULT_SPACE_NPRE = 'kibana_space_default_default';
 const DEFAULT_EXPRESSION = '_alias:*';
 
 /**
- * Ensures that the default space NPRE exists and routes to all projects.
- *
- * This makes `project_routing: "@kibana_space_default_default"` behave as flat-world in local Scout CPS setups.
- *
- * In managed environments, writes to `/_project_routing/*` may be restricted; in that case we log and continue.
+ * Ensures the default space NPRE routes to all projects in local Scout CPS setups.
+ * Throws on failure to prevent tests from running in a misconfigured environment.
  */
 export async function ensureDefaultSpaceNPRE(config: Config, log: ToolingLog): Promise<void> {
   const scoutConfig = config.getScoutTestConfig();
@@ -31,17 +28,17 @@ export async function ensureDefaultSpaceNPRE(config: Config, log: ToolingLog): P
 
   const es = getEsClient(scoutConfig, new ScoutLogger('ensure-default-space-npre', 'info'));
 
-  try {
-    await es.transport.request({
+  await es.transport
+    .request({
       method: 'PUT',
       path: `/_project_routing/${DEFAULT_SPACE_NPRE}`,
       body: { expression: DEFAULT_EXPRESSION },
+    })
+    .catch((e) => {
+      const message = e instanceof Error ? e.message : String(e);
+      throw new Error(
+        `Failed to ensure default space NPRE routing — CPS environment may not be properly configured: ${message}`
+      );
     });
-    log.debug(`Ensured ${DEFAULT_SPACE_NPRE} => ${DEFAULT_EXPRESSION}`);
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    log.warning(
-      `Failed to ensure ${DEFAULT_SPACE_NPRE} routing expression (this can be restricted outside local Scout): ${message}`
-    );
-  }
+  log.debug(`Ensured ${DEFAULT_SPACE_NPRE} => ${DEFAULT_EXPRESSION}`);
 }
