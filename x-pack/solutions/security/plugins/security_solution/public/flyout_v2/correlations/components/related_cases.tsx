@@ -40,7 +40,7 @@ const getColumns: (data: RelatedCase[]) => Array<EuiBasicTableColumn<RelatedCase
         <CaseDetailsLink detailName={caseData.id} title={caseData.title} openInNewTab={true}>
           {caseData.title}
           <EuiIcon
-            type={'popout'}
+            type="external"
             size="m"
             color="primary"
             css={css`

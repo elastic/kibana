@@ -267,7 +267,7 @@ class TableClass extends Component<
                     });
                     this.stopEditingFilter();
                   }}
-                  iconType="checkInCircleFilled"
+                  iconType="checkCircleFill"
                   aria-label={saveAria}
                   data-test-subj={`save_filter-${filter.value}`}
                 />
