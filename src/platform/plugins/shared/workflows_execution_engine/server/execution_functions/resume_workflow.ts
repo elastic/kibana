@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { isTerminalStatus } from '@kbn/workflows';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { WorkflowsMeteringService } from '../metering';
@@ -55,6 +56,14 @@ export async function resumeWorkflow({
     fakeRequest,
     workflowsExecutionEngine
   );
+
+  const loadedExecution = workflowExecutionState.getWorkflowExecution();
+  if (isTerminalStatus(loadedExecution.status)) {
+    logger.info(
+      `Resume skipped for ${workflowRunId}: already in terminal status ${loadedExecution.status}`
+    );
+    return;
+  }
 
   await workflowRuntime.resume();
 

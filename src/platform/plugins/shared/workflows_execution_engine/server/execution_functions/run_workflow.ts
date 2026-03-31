@@ -11,11 +11,14 @@ import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus, isEventDrivenWorkflowTriggerSource } from '@kbn/workflows';
 import { setupDependencies } from './setup_dependencies';
+import { tryWakeParentResumeTaskAfterSyncChildCompletion } from './try_wake_parent_resume_task_after_sync_child';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { WorkflowsMeteringService } from '../metering';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export async function runWorkflow({
   workflowRunId,
@@ -143,21 +146,60 @@ export async function runWorkflow({
     loopSpan?.end();
   }
 
-  // Report metering after execution completes and state is flushed.
-  // This is fire-and-forget: the metering service handles retries and
-  // will no-op for non-terminal states (e.g., WAITING for resume).
-  if (meteringService) {
-    try {
-      const finalExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-        workflowRunId,
-        spaceId
+  await handlePostLoop({
+    workflowRunId,
+    spaceId,
+    logger,
+    workflowExecutionRepository,
+    workflowTaskManager,
+    meteringService,
+    cloudSetup: dependencies.cloudSetup,
+  });
+}
+
+async function handlePostLoop({
+  workflowRunId,
+  spaceId,
+  logger,
+  workflowExecutionRepository,
+  workflowTaskManager,
+  meteringService,
+  cloudSetup,
+}: {
+  workflowRunId: string;
+  spaceId: string;
+  logger: Logger;
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  workflowTaskManager: WorkflowTaskManager;
+  meteringService?: WorkflowsMeteringService;
+  cloudSetup: ContextDependencies['cloudSetup'];
+}): Promise<void> {
+  const finalExecution = await workflowExecutionRepository
+    .getWorkflowExecutionById(workflowRunId, spaceId)
+    .catch((err) => {
+      logger.warn(
+        `Failed to fetch execution after loop (execution=${workflowRunId}): ${
+          err instanceof Error ? err.message : String(err)
+        }`
       );
-      if (finalExecution) {
-        void meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
-      }
+      return null;
+    });
+
+  await tryWakeParentResumeTaskAfterSyncChildCompletion({
+    childWorkflowRunId: workflowRunId,
+    finalExecution,
+    spaceId,
+    workflowExecutionRepository,
+    workflowTaskManager,
+    logger,
+  });
+
+  if (meteringService && finalExecution) {
+    try {
+      void meteringService.reportWorkflowExecution(finalExecution, cloudSetup);
     } catch (err) {
       logger.warn(
-        `Failed to fetch execution for metering (execution=${workflowRunId}): ${
+        `Failed to report metering (execution=${workflowRunId}): ${
           err instanceof Error ? err.message : String(err)
         }`
       );

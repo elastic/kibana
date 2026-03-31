@@ -230,8 +230,9 @@ export class WorkflowExecuteSyncStrategy {
       // Still running - enter wait state again with exponential backoff
       const nextPollCount = state.pollCount + 1;
       const nextInterval = getNextPollInterval(nextPollCount);
+      const { resumeAt: _prevResumeAt, ...stateWithoutResumeAt } = state;
       this.stepExecutionRuntime.setCurrentStepState({
-        ...state,
+        ...stateWithoutResumeAt,
         pollCount: nextPollCount,
       });
 

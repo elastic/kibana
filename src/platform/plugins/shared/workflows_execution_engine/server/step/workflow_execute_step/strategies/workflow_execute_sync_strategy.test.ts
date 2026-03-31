@@ -231,6 +231,46 @@ describe('WorkflowExecuteSyncStrategy', () => {
       expect(mockStepRuntime.tryEnterDelay).toHaveBeenCalledWith('2s');
     });
 
+    it('does not persist stale resumeAt when advancing poll (avoids double tryEnterDelay per cycle)', async () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue({
+        ...waitState,
+        resumeAt: '2099-01-01T00:00:00.000Z',
+      } as any);
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.RUNNING,
+      } as any);
+
+      await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      const persisted = mockStepRuntime.setCurrentStepState.mock.calls[0][0] as Record<
+        string,
+        unknown
+      >;
+      expect(persisted).not.toHaveProperty('resumeAt');
+      expect(persisted.pollCount).toBe(1);
+      expect(persisted.executionId).toBe('child-exec-1');
+    });
+
+    it('should return failed when child execution not found (deleted / wrong space)', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue(null);
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result.status).toBe('failed');
+      expect(result.error!.message).toContain('not found');
+      expect(result.error!.message).toContain('child-exec-1');
+    });
+
+    it('should return failed when getWorkflowExecutionById throws', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockRejectedValue(new Error('ES unavailable'));
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result.status).toBe('failed');
+      expect(result.error!.message).toBe('ES unavailable');
+    });
+
     it('should use exponential backoff for poll intervals', async () => {
       mockStepRuntime.getCurrentStepState.mockReturnValue({ ...waitState, pollCount: 3 });
       mockExecRepo.getWorkflowExecutionById.mockResolvedValue({

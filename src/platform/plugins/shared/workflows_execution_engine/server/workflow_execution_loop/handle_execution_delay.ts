@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isExecuteSyncStepType } from '@kbn/workflows';
 import type { WorkflowExecutionLoopParams } from './types';
 import { abortableTimeout, TimeoutAbortedError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -47,7 +47,12 @@ export async function handleExecutionDelay(
   params.workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.WAITING,
   });
-  if (diff < SHORT_DURATION_THRESHOLD) {
+
+  // Sync nested workflow.execute waits always schedule a workflow:resume task so a completing
+  // child can runSoon that task; short in-process sleep would leave no task to wake.
+  const isSyncSubWorkflowPollWait = isExecuteSyncStepType(stepExecutionRuntime.node.stepType);
+
+  if (!isSyncSubWorkflowPollWait && diff < SHORT_DURATION_THRESHOLD) {
     const timeout = diff > 0 ? diff : 0;
 
     try {
@@ -69,10 +74,13 @@ export async function handleExecutionDelay(
       status: ExecutionStatus.RUNNING,
     });
   } else {
-    await params.workflowTaskManager.scheduleResumeTask({
+    const { taskId } = await params.workflowTaskManager.scheduleResumeTask({
       workflowExecution,
       resumeAt,
       fakeRequest: params.fakeRequest,
+    });
+    params.workflowExecutionState.updateWorkflowExecution({
+      pendingResumeTaskId: taskId,
     });
   }
 }
