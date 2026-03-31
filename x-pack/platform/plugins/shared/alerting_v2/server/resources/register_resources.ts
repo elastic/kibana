@@ -7,13 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { ResourceInitializer } from '../lib/services/resource_service/resource_initializer';
 import type { ResourceManagerContract } from '../lib/services/resource_service/resource_manager';
-import { getAlertActionsResourceDefinition } from './alert_actions';
-import { getAlertEventsResourceDefinition } from './alert_events';
-import type { ResourceDefinition } from './types';
+import { registerDatastreams } from './datastreams/register';
+import { registerEsqlViews } from './esql_views/register';
 
-export interface RegisterResourcesOptions {
+export interface InitializeResourcesOptions {
   resourceManager: ResourceManagerContract;
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -23,16 +21,9 @@ export function initializeResources({
   resourceManager,
   esClient,
   logger,
-}: RegisterResourcesOptions): void {
-  for (const resourceDefinition of getDataStreamResourceDefinitions()) {
-    const initializer = new ResourceInitializer(logger, esClient, resourceDefinition);
-
-    resourceManager.registerResource(resourceDefinition.key, initializer);
-  }
+}: InitializeResourcesOptions): void {
+  registerDatastreams({ resourceManager, esClient, logger });
+  registerEsqlViews({ resourceManager, esClient, logger });
 
   resourceManager.startInitialization();
-}
-
-function getDataStreamResourceDefinitions(): ResourceDefinition[] {
-  return [getAlertEventsResourceDefinition(), getAlertActionsResourceDefinition()];
 }
