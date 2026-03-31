@@ -7,18 +7,19 @@
 
 import { useMemo } from 'react';
 import { useOnboardingContext } from '../../onboarding_context';
-import { useTopicId } from '../../hooks/use_topic_id';
+import type { OnboardingTopicId } from '../../../constants';
 import type { OnboardingGroupConfig } from '../../../types';
 
 /**
  * Hook that returns the body config for the selected topic
  */
-export const useBodyConfig = (): OnboardingGroupConfig[] => {
-  const topicId = useTopicId();
+export const useBodyConfig = (topicId: OnboardingTopicId): OnboardingGroupConfig[] => {
+  console.log('useBodyConfig', topicId);
   const { config } = useOnboardingContext();
   const topicBodyConfig = useMemo(() => {
     let bodyConfig: OnboardingGroupConfig[] = [];
     const topicConfig = config.get(topicId);
+    console.log('topicConfig', topicConfig);
     // The selected topic should always exist in the config, but we check just in case
     if (topicConfig) {
       bodyConfig = topicConfig.body;

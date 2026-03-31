@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import { OnboardingTopicId } from '../../constants';
 import { OnboardingBody } from './onboarding_body';
 import { useBodyConfig } from './hooks/use_body_config';
 import { useExpandedCard } from './hooks/use_expanded_card';
@@ -59,14 +60,14 @@ describe('OnboardingBody Component', () => {
   });
 
   it('should render the OnboardingBody component with the correct content', () => {
-    render(<OnboardingBody />, { wrapper: TestProviders });
+    render(<OnboardingBody topicId={OnboardingTopicId.default} />, { wrapper: TestProviders });
     expect(screen.getByText('Group 1')).toBeInTheDocument();
     expect(screen.getByText('Card 1')).toBeInTheDocument();
   });
 
   describe('when the card is expanded', () => {
     beforeEach(() => {
-      render(<OnboardingBody />, { wrapper: TestProviders });
+      render(<OnboardingBody topicId={OnboardingTopicId.default} />, { wrapper: TestProviders });
       fireEvent.click(screen.getByText('Card 1'));
     });
 
@@ -86,7 +87,7 @@ describe('OnboardingBody Component', () => {
         setExpandedCardId: mockSetExpandedCardId,
       });
 
-      render(<OnboardingBody />, { wrapper: TestProviders });
+      render(<OnboardingBody topicId={OnboardingTopicId.default} />, { wrapper: TestProviders });
 
       fireEvent.click(screen.getByText('Card 1'));
     });
@@ -113,7 +114,7 @@ describe('OnboardingBody Component', () => {
         setExpandedCardId: mockSetExpandedCardId,
       });
 
-      render(<OnboardingBody />, { wrapper: TestProviders });
+      render(<OnboardingBody topicId={OnboardingTopicId.default} />, { wrapper: TestProviders });
       act(() => {
         fireEvent.click(screen.getByText('Card 1'));
       });
@@ -137,7 +138,7 @@ describe('OnboardingBody Component', () => {
         setExpandedCardId: mockSetExpandedCardId,
       });
 
-      render(<OnboardingBody />, { wrapper: TestProviders });
+      render(<OnboardingBody topicId={OnboardingTopicId.default} />, { wrapper: TestProviders });
       act(() => {
         fireEvent.click(screen.getByText('Card 1'));
       });
