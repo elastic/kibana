@@ -45,7 +45,7 @@ export const createDashboardAttachmentMountSync$ = ({
       const shouldUpdate =
         currentSavedObjectId &&
         currentSavedObjectId !== currentAttachment.origin &&
-        (!currentAttachment.origin || previousSavedObjectId === currentAttachment.origin);
+        (!currentAttachment.origin || previousSavedObjectId === currentAttachment.origin || currentSavedObjectId === currentAttachment.origin);
       if (shouldUpdate) {
         void updateOrigin(currentSavedObjectId);
       }
