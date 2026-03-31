@@ -44,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
     'taskToDisable',
+    'extraLargeCostTask',
     'sampleLongRunningRecurringTask',
     'sampleRecurringTaskTimingOutWithError',
   ];
