@@ -12,7 +12,6 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { initializeResources } from '../resources/register_resources';
-import { initializeESQLViews } from '../esql_views/register_views';
 import { scheduleApiKeyInvalidationTask } from '../lib/tasks/invalidate_pending_api_keys/schedule_task';
 import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
@@ -31,14 +30,9 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       .get<PluginConfig>();
 
     initializeResources({
-      logger,
       resourceManager,
       esClient,
-    });
-
-    initializeESQLViews({
       logger,
-      esClient,
     });
 
     scheduleDispatcherTask({ taskManager, resourceManager }).catch((error) => {
