@@ -48,6 +48,7 @@ const TITLE_CASE_GLOSSARY = [
   'TLS certificates',
   'Cloud Connect',
   'SIEM Readiness',
+  'V2 Alerting Preview',
 ] as const;
 
 const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLowerCase(), entry]));
