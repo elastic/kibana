@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await timePicker.setDefaultAbsoluteRange();
         await searchSessions.save({ withRefresh: true });
-        await inspector.open();
+        await discover.openInspectorFromTabMenu();
 
         const savedSessionId = await (
           await testSubjects.find('inspectorRequestSearchSessionId')

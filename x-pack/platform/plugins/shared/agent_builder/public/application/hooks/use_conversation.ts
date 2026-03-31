@@ -101,25 +101,22 @@ const useGetNewConversationAgentId = () => {
 export const useAgentId = () => {
   const { conversation } = useConversation();
   const context = useConversationContext();
-  const agentId = conversation?.agent_id;
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
   const getNewConversationAgentId = useGetNewConversationAgentId();
 
-  if (agentId) {
-    return agentId;
-  }
-
-  if (context.agentId) {
-    return context.agentId;
-  }
-
-  // For new conversations, agent id must be defined
+  // For new conversations, URL (context.agentId) is the source of truth
   if (isNewConversation) {
-    return getNewConversationAgentId();
+    return context.agentId ?? getNewConversationAgentId();
   }
 
-  return undefined;
+  // For existing conversations, use the conversation's stored agent_id
+  if (conversation?.agent_id) {
+    return conversation.agent_id;
+  }
+
+  // Fallback to context (URL) for edge cases
+  return context.agentId;
 };
 
 export const useConversationTitle = () => {
