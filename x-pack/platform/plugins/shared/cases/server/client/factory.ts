@@ -14,7 +14,6 @@ import type {
   IBasePath,
   SecurityServiceStart,
 } from '@kbn/core/server';
-import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
@@ -81,7 +80,11 @@ interface CasesClientFactoryArgs {
   filesPluginStart: FilesStart;
   usageCounter?: IUsageCounter;
   config: ConfigType;
-  uiSettings: UiSettingsServiceStart;
+  closeReasonValidator?: (
+    closeReason: string,
+    owner: string,
+    request: KibanaRequest
+  ) => Promise<boolean>;
 }
 
 /**
@@ -160,6 +163,10 @@ export class CasesClientFactory {
     const userInfo = await this.getUserInfo(request);
 
     const fileService = this.options.filesPluginStart.fileServiceFactory.asScoped(request);
+    const { closeReasonValidator } = this.options;
+    const boundCloseReasonValidator = closeReasonValidator
+      ? (closeReason: string, owner: string) => closeReasonValidator(closeReason, owner, request)
+      : undefined;
 
     return createCasesClient({
       services,
@@ -180,7 +187,7 @@ export class CasesClientFactory {
       fileService,
       usageCounter: this.options.usageCounter,
       config: this.options.config,
-      uiSettingsClient: this.options.uiSettings.asScopedToClient(unsecuredSavedObjectsClient),
+      closeReasonValidator: boundCloseReasonValidator,
     });
   }
 

@@ -69,8 +69,6 @@ import { AttachmentType, CaseStatuses } from '../../../common/types/domain';
 import { validateCustomFields } from './validators';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
 
-const CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY = 'securitySolution:alertCloseReasons';
-
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -232,13 +230,11 @@ async function updateAlerts({
   casesWithStatusChangedAndSynced,
   caseService,
   alertsService,
-  customCloseReasons,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   alertsService: AlertService;
-  customCloseReasons: ReadonlySet<string>;
 }): Promise<Map<string, number>> {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -250,7 +246,7 @@ async function updateAlerts({
   const casesToSyncToStatus = casesToSync.reduce((acc, { updateReq, originalCase }) => {
     const closeReason =
       updateReq.status === CaseStatuses.closed
-        ? getCloseReasonIfValid(updateReq.closeReason, customCloseReasons)
+        ? getCloseReasonIfValid(updateReq.closeReason)
         : undefined;
 
     acc.set(updateReq.id, [
@@ -426,13 +422,8 @@ export const bulkUpdate = async (
     user,
     logger,
     authorization,
-    uiSettingsClient,
+    closeReasonValidator,
   } = clientArgs;
-  const customCloseReasonsSetting =
-    (await uiSettingsClient?.get<string[]>(CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY)) ?? [];
-  const customCloseReasons = new Set(
-    Array.isArray(customCloseReasonsSetting) ? customCloseReasonsSetting : []
-  );
 
   try {
     const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
@@ -496,7 +487,7 @@ export const bulkUpdate = async (
         }
 
         const fieldsToUpdate = getCaseToUpdate(originalCase.attributes, updateCase);
-        const closeReason = getCloseReasonIfValid(updateCase.closeReason, customCloseReasons);
+        const closeReason = getCloseReasonIfValid(updateCase.closeReason);
         // Explicitly add the closing reason if it exists in the request
         const fieldsToUpdateIncludingCloseReason =
           fieldsToUpdate.status === CaseStatuses.closed && closeReason != null
@@ -522,6 +513,26 @@ export const bulkUpdate = async (
 
     throwIfUpdateOwner(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
+
+    // Validate close reasons
+    await Promise.all(
+      casesToUpdate
+        .filter(({ updateReq }) => updateReq.closeReason != null)
+        .map(async ({ updateReq, originalCase }) => {
+          const { closeReason } = updateReq;
+          if (closeReason == null) {
+            return Promise.resolve();
+          }
+          // The validator currently only exists for securitySolution cases
+          // For cases with any other owner that tries to update with a non-empty close reason will throw an error
+          const isValid =
+            closeReasonValidator != null &&
+            (await closeReasonValidator(closeReason, originalCase.attributes.owner));
+          if (!isValid) {
+            throw Boom.badRequest(`Invalid close reason: "${closeReason}"`);
+          }
+        })
+    );
 
     await validateCustomFieldsInRequest({ casesToUpdate, customFieldsConfigurationMap });
 
@@ -568,7 +579,6 @@ export const bulkUpdate = async (
       casesWithSyncSettingChangedToOn,
       caseService,
       alertsService,
-      customCloseReasons,
     });
 
     userActionsDict = userActionService.creator.addSyncedAlertsCountToUserActions({

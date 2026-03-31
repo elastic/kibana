@@ -58,10 +58,12 @@ import {
   APP_UI_ID,
   CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
   DEFAULT_ALERTS_INDEX,
+  DEFAULT_ALERT_CLOSE_REASONS_KEY,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
+import { DefaultClosingReasonSchema } from '../common/types';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -469,6 +471,16 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.usageCollection = plugins.usageCollection;
     plugins.cases.attachmentFramework.registerExternalReference({
       id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+    });
+
+    plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
+      const [coreStart] = await core.getStartServices();
+      const soClient = coreStart.savedObjects.getScopedClient(request);
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+      const customReasons =
+        (await uiSettingsClient.get<string[]>(DEFAULT_ALERT_CLOSE_REASONS_KEY)) ?? [];
+      const allowedReasons = new Set([...DefaultClosingReasonSchema.options, ...customReasons]);
+      return allowedReasons.has(closeReason);
     });
 
     const { ruleDataService } = plugins.ruleRegistry;

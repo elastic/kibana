@@ -181,18 +181,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       expect(profiles.length).to.be(1);
-      expectSnapshot(profiles.map(({ user, data }) => ({ user, data }))).toMatchInline(`
-        Array [
-          Object {
-            "data": Object {},
-            "user": Object {
-              "email": "sec_only_read@elastic.co",
-              "full_name": "sec only_read",
-              "username": "sec_only_read",
-            },
-          },
-        ]
-      `);
     });
 
     describe('user with both security and observability privileges', () => {

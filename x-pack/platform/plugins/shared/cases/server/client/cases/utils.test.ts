@@ -6,8 +6,6 @@
  */
 
 import { omit } from 'lodash';
-import type { CaseError } from '../../common/error';
-import { isCaseError } from '../../common/error';
 
 import {
   comment as commentObj,
@@ -94,38 +92,10 @@ describe('utils', () => {
   });
 
   describe('getCloseReasonIfValid', () => {
-    it('returns default close reasons', () => {
+    it('returns any non-empty close reason', () => {
       expect(getCloseReasonIfValid('false_positive')).toBe('false_positive');
       expect(getCloseReasonIfValid('automated_closure')).toBe('automated_closure');
-    });
-
-    it('returns configured custom close reasons', () => {
-      expect(getCloseReasonIfValid('my custom reason', new Set(['my custom reason']))).toBe(
-        'my custom reason'
-      );
-    });
-
-    it('throws a CaseError with status 400 for unknown close reasons', () => {
-      let thrown: unknown;
-      try {
-        getCloseReasonIfValid('my custom reason');
-      } catch (e) {
-        thrown = e;
-      }
-      expect(isCaseError(thrown)).toBe(true);
-      expect((thrown as CaseError).message).toContain('Invalid close reason: "my custom reason"');
-      expect((thrown as CaseError).boomify().output.statusCode).toBe(400);
-    });
-
-    it('throws a CaseError with status 400 when the reason is not in the custom set', () => {
-      let thrown: unknown;
-      try {
-        getCloseReasonIfValid('unknown_reason', new Set(['allowed_reason']));
-      } catch (e) {
-        thrown = e;
-      }
-      expect(isCaseError(thrown)).toBe(true);
-      expect((thrown as CaseError).boomify().output.statusCode).toBe(400);
+      expect(getCloseReasonIfValid('my custom reason')).toBe('my custom reason');
     });
 
     it('returns undefined for empty values', () => {

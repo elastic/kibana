@@ -41,7 +41,6 @@ describe('update', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      clientArgs.uiSettingsClient.get.mockResolvedValue([]);
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
         saved_objects: [],
@@ -1933,7 +1932,6 @@ describe('update', () => {
 
       beforeEach(() => {
         jest.clearAllMocks();
-        clientArgs.uiSettingsClient.get.mockResolvedValue([]);
         clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
         clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
           saved_objects: [],
@@ -2045,7 +2043,7 @@ describe('update', () => {
         ]);
       });
 
-      it('propagates configured custom closeReason values to alerts', async () => {
+      it('propagates custom closeReason values to alerts', async () => {
         const closeReason = 'my custom reason';
         const alertComment = {
           ...mockCaseComments[3],
@@ -2058,7 +2056,6 @@ describe('update', () => {
           ],
         };
 
-        clientArgs.uiSettingsClient.get.mockResolvedValue([closeReason]);
         clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
           saved_objects: [alertComment],
           total: 1,
@@ -2090,27 +2087,6 @@ describe('update', () => {
             closingReason: closeReason,
           },
         ]);
-      });
-
-      it('does not propagate unconfigured custom closeReason values to alerts', async () => {
-        await expect(
-          bulkUpdate(
-            {
-              cases: [
-                {
-                  id: mockCases[0].id,
-                  version: mockCases[0].version ?? '',
-                  status: CaseStatuses.closed,
-                  closeReason: 'my custom reason',
-                },
-              ],
-            },
-            clientArgs,
-            casesClientMock
-          )
-        ).rejects.toThrow('Invalid close reason: "my custom reason"');
-
-        expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
       });
 
       it('returns synced alert count when only one of two alerts is updated', async () => {
@@ -2353,7 +2329,6 @@ describe('update', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      clientArgs.uiSettingsClient.get.mockResolvedValue([]);
       clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
         saved_objects: [],

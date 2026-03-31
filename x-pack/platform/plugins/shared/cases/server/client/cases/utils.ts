@@ -6,13 +6,11 @@
  */
 
 import { isEmpty, uniqBy } from 'lodash';
-import Boom from '@hapi/boom';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { v4 } from 'uuid';
-import { createCaseError } from '../../common/error';
 import type {
   ActionConnector,
   AttachmentV2,
@@ -28,12 +26,7 @@ import type {
   Observable,
   User,
 } from '../../../common/types/domain';
-import {
-  DefaultCloseReasonRt,
-  AttachmentType,
-  CaseStatuses,
-  UserActionTypes,
-} from '../../../common/types/domain';
+import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CaseRequestCustomFields,
@@ -69,28 +62,8 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
   return uniqBy(assignees, 'uid');
 };
 
-export const getCloseReasonIfValid = (
-  closeReason?: string,
-  customCloseReasons: ReadonlySet<string> = new Set()
-): string | undefined => {
-  if (closeReason == null) {
-    return undefined;
-  }
-
-  if (closeReason.trim().length <= 0) {
-    return undefined;
-  }
-
-  const isDefaultCaseCloseReason = DefaultCloseReasonRt.is(closeReason);
-  const isCustomCaseCloseReason = customCloseReasons.has(closeReason);
-
-  if (!isDefaultCaseCloseReason && !isCustomCaseCloseReason) {
-    const message = i18n.INVALID_CLOSE_REASON(closeReason);
-    throw createCaseError({ message, error: Boom.badRequest(message) });
-  }
-
-  return closeReason;
-};
+export const getCloseReasonIfValid = (closeReason?: string): string | undefined =>
+  closeReason != null && closeReason.trim().length > 0 ? closeReason : undefined;
 
 type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
 

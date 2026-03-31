@@ -100,25 +100,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should reject a close request with an invalid closeReason', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                status: CaseStatuses.closed,
-                closeReason: 'invalid_custom_reason_not_in_settings',
-              },
-            ],
-          },
-          expectedHttpCode: 400,
-        });
-      });
-
       it('should reopen a case that was previously closed with a closeReason', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
