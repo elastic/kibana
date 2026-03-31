@@ -61,14 +61,13 @@ export async function create(
   );
   savedObjectTimer?.end();
 
-  const transformOutTimer = serverTiming?.start('transform-dashboard-out');
   const response = getDashboardCRUResponseBody(
     savedObject,
     'create',
     dashboardStateSchema,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    serverTiming
   );
-  transformOutTimer?.end();
 
   return response;
 }

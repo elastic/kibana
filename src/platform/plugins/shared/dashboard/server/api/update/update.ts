@@ -52,14 +52,13 @@ export async function update(
   );
   savedObjectTimer?.end();
 
-  const transformOutTimer = serverTiming?.start('transform-dashboard-out');
   const response = getDashboardCRUResponseBody(
     savedObject,
     'update',
     dashboardStateSchema,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    serverTiming
   );
-  transformOutTimer?.end();
 
   return response;
 }

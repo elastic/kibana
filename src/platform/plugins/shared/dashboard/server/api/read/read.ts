@@ -40,16 +40,13 @@ export async function read(
 
   savedObjectTimer?.end();
 
-  const transformTimer = serverTiming?.start('transform-dashboard-out');
-
   const response = getDashboardCRUResponseBody(
     savedObject,
     'read',
     dashboardStateSchema,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    serverTiming
   );
-
-  transformTimer?.end();
 
   return {
     ...response,
