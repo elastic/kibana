@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/unified-field-list-examples-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/unified-field-list-examples-plugin'
+  title: '@kbn/unified-field-list-examples-plugin'
   description: Moon project for @kbn/unified-field-list-examples-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: examples/unified_field_list_examples
+  sourceRoot: examples/unified_field_list_examples
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'

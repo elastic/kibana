@@ -107,7 +107,8 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
       rm -rf /var/lib/apt/lists/*
 {{/ubuntu}}
 {{#wolfi}}
-RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
+# TODO: Remove pinned shadow version once Wolfi image is updated. Newer releases of shadow require glibc 2.43 which is not available in the current image SHA.
+RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow=4.19.3-r0 ca-certificates
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.

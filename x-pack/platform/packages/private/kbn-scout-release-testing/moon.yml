@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/scout-release-testing'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-qa'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/scout-release-testing'
+  title: '@kbn/scout-release-testing'
   description: Moon project for @kbn/scout-release-testing
   channel: ''
   owner: '@elastic/appex-qa'
-  metadata:
-    sourceRoot: x-pack/platform/packages/private/kbn-scout-release-testing
+  sourceRoot: x-pack/platform/packages/private/kbn-scout-release-testing
 dependsOn:
   - '@kbn/scout'
 tags:
