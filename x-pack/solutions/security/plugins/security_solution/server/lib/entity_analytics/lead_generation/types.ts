@@ -111,9 +111,18 @@ export interface LeadGenerationEngineConfig {
   readonly minObservations: number;
   /** Maximum number of leads to return */
   readonly maxLeads: number;
+  /** Bonus multiplier applied when multiple observations come from the same module (0.0–1.0) */
+  readonly corroborationBonus: number;
+  /** Bonus multiplier applied when observations come from multiple modules (0.0–1.0) */
+  readonly diversityBonus: number;
+  /** Raw score ceiling used when normalizing to the 1–10 priority scale */
+  readonly normalizationCeiling: number;
 }
 
 export const DEFAULT_ENGINE_CONFIG: LeadGenerationEngineConfig = {
   minObservations: 1,
   maxLeads: 10,
+  corroborationBonus: 0.15,
+  diversityBonus: 0.1,
+  normalizationCeiling: 100,
 };

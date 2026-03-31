@@ -57,7 +57,8 @@ const mockConnectors: InferenceConnector[] = [
     config: { inferenceId: 'inf-1' },
     capabilities: {},
     isInferenceEndpoint: true,
-    isPreconfigured: true,
+    isPreconfigured: false,
+    isEis: true,
   },
 ];
 

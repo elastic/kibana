@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import { getFlattenedObject } from '@kbn/std';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { getEuidSourceFields } from '../../../common/domain/euid';
@@ -16,24 +15,38 @@ import type {
   EntityField,
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
-import { HASH_ALG } from '../constants';
 import { BadCRUDRequestError } from '../errors';
 
 type CrudOperation = 'create' | 'update';
-const GENERIC_TYPE = 'generic' as EntityType;
+const USER_ENTITY_TYPE = 'user' as EntityType;
 
-export function hashEuid(id: string): string {
-  return createHash(HASH_ALG).update(id).digest('hex');
+export interface ValidateDocIdentificationOptions {
+  readonly force?: boolean;
+  readonly operation?: CrudOperation;
+  readonly entityType?: EntityType;
 }
 
 // validateDocIdentification checks provided and generated EUIDs. It
 // picks validId, preferring generated over supplied ID.
-export function validateDocIdentification(doc: Entity, generatedId: string | undefined): string {
+// For forced user updates only: trust canonical store entity.id when the body cannot re-derive
+// the same EUID (e.g. local-namespace users need host.id; sanitized API payloads may omit it).
+export function validateDocIdentification(
+  doc: Entity,
+  generatedId: string | undefined,
+  options?: ValidateDocIdentificationOptions
+): string {
   if (!doc.entity?.id && generatedId === undefined) {
     throw new BadCRUDRequestError(`Could not derive EUID from document or find it in entity.id`);
   }
 
   if (doc.entity?.id && generatedId !== undefined && doc.entity.id !== generatedId) {
+    if (
+      options?.force === true &&
+      options.operation === 'update' &&
+      options.entityType === USER_ENTITY_TYPE
+    ) {
+      return doc.entity.id;
+    }
     throw new BadCRUDRequestError(
       `Supplied ID ${doc.entity.id} does not match generated EUID ${generatedId}`
     );
@@ -54,7 +67,7 @@ export function validateAndTransformDoc(
   generatedId: string | undefined,
   force: boolean
 ): ValidatedDoc {
-  const id = validateDocIdentification(doc, generatedId);
+  const id = validateDocIdentification(doc, generatedId, { force, operation, entityType });
 
   if (!doc.entity) {
     doc.entity = { id };
@@ -69,7 +82,16 @@ export function validateAndTransformDoc(
     assertOnlyNonForcedAttributesInReq(fieldDescriptions);
   }
 
-  return { id, doc: transformDoc(operation, entityType, doc) };
+  if (operation === 'create' && !doc.entity.name) {
+    doc.entity.name = id;
+  }
+
+  const transformedDoc: Record<string, unknown> = {
+    ...doc,
+    '@timestamp': new Date().toISOString(),
+  };
+
+  return { id, doc: transformedDoc };
 }
 
 function getFieldDescriptions(
@@ -128,35 +150,4 @@ function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>)
         `updated without forcing it (?force=true): ${notAllowedPropsString}`
     );
   }
-}
-
-function transformDoc(
-  operation: CrudOperation,
-  type: EntityType,
-  data: Entity
-): Record<string, unknown> {
-  const doc: Record<string, unknown> = {
-    ...data,
-    '@timestamp': new Date().toISOString(),
-  };
-
-  if (type === GENERIC_TYPE) {
-    return doc;
-  }
-
-  const typeKey = type as keyof typeof doc;
-  if (!doc[typeKey] || typeof doc[typeKey] !== 'object') {
-    doc[typeKey] = {};
-  }
-  const typeDoc = doc[typeKey] as Record<string, unknown>;
-
-  if (operation === 'create' && !typeDoc.name) {
-    typeDoc.name = data.entity?.id;
-  }
-  typeDoc.entity = data.entity;
-
-  // Remove entity from root
-  delete doc.entity;
-
-  return doc;
 }
