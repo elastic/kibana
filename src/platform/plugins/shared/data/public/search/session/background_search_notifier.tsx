@@ -57,8 +57,8 @@ export class BackgroundSearchNotifier {
                 loadedStatuses: {
                   statuses: Object.fromEntries(
                     existingIds.map((id) => [id, { status: SearchSessionStatus.IN_PROGRESS }])
-                  ) as Record<string, SearchSessionStatusResponse>,
-                  sessions: {} as SearchSessionStatusesResponse['sessions'],
+                  ) satisfies Record<string, SearchSessionStatusResponse>,
+                  sessions: {} satisfies SearchSessionStatusesResponse['sessions'],
                 },
                 existingIds,
               })
