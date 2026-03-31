@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
@@ -14,19 +14,21 @@ import { getMatchersFor } from '../../privilege_monitoring/data_sources/matchers
 import { getStreamPatternFor } from '../../privilege_monitoring/data_sources/constants';
 import type { WatchlistConfigClient } from '../management/watchlist_config';
 import { WatchlistConfigClient as WatchlistConfigClientClass } from '../management/watchlist_config';
+import { WatchlistEntitySourceClient } from '../entity_sources/infra';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
 export const PREBUILT_WATCHLISTS_VERSION = 1;
 
 const PREBUILT_WATCHLISTS = [
   {
+    id: PRIVILEGED_USER_WATCHLIST_ID,
     name: PRIVILEGED_USER_WATCHLIST_ID,
     description: 'System-managed watchlist for tracking privileged users',
     managed: true,
     riskModifier: PRIVILEGED_USER_MODIFIER,
     entitySources: [
       {
-        type: 'entity_analytics_integration',
+        type: 'entity_analytics_integration' as const,
         name: 'okta',
         indexPattern: getStreamPatternFor('entityanalytics_okta', 'default'),
         integrationName: 'entityanalytics_okta',
@@ -34,7 +36,7 @@ const PREBUILT_WATCHLISTS = [
         matchers: getMatchersFor('entityanalytics_okta'),
       },
       {
-        type: 'entity_analytics_integration',
+        type: 'entity_analytics_integration' as const,
         name: 'ad',
         indexPattern: getStreamPatternFor('entityanalytics_ad', 'default'),
         integrationName: 'entityanalytics_ad',
@@ -51,9 +53,13 @@ const PREBUILT_WATCHLISTS = [
  */
 export const ensurePrebuiltWatchlists = async ({
   watchlistClient,
+  soClient,
+  namespace,
   logger,
 }: {
   watchlistClient: WatchlistConfigClient;
+  soClient: SavedObjectsClientContract;
+  namespace: string;
   logger: Logger;
 }) => {
   for (const watchlist of PREBUILT_WATCHLISTS) {
@@ -63,8 +69,21 @@ export const ensurePrebuiltWatchlists = async ({
       const errorMessage = e instanceof Error ? e.message : String(e);
       if (errorMessage.includes('not found')) {
         logger.info(`Prebuilt watchlist '${watchlist.name}' not found, initializing...`);
-        const { id, ...attrs } = watchlist;
-        await watchlistClient.create(attrs, { id });
+        const { id, entitySources, ...attrs } = watchlist;
+        const created = await watchlistClient.create(attrs, { id });
+
+        if (!created.id) {
+          throw new Error('Prebuilt watchlist creation succeeded but no ID was returned');
+        }
+
+        if (entitySources?.length) {
+          const sourceClient = new WatchlistEntitySourceClient({ soClient, namespace });
+          for (const entitySourceInput of entitySources) {
+            const entitySource = await sourceClient.create(entitySourceInput);
+            await watchlistClient.addEntitySourceReference(created.id, entitySource.id);
+          }
+        }
+
         logger.info(`Prebuilt watchlist '${watchlist.name}' initialized.`);
       } else {
         logger.error(`Error checking prebuilt watchlist '${watchlist.name}': ${errorMessage}`);
@@ -105,6 +124,6 @@ export const installPrebuiltWatchlists = async ({
       logger,
     });
 
-    await ensurePrebuiltWatchlists({ watchlistClient, logger });
+    await ensurePrebuiltWatchlists({ watchlistClient, soClient, namespace, logger });
   }
 };

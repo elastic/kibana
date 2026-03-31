@@ -80,12 +80,12 @@ export class WatchlistConfigClient {
 
   async create(
     attrs: SetOptional<WatchlistSavedObjectAttributes, 'managed'>,
-    options: { id: string } // optional id to override the default id generation
+    options?: { id?: string }
   ): Promise<WatchlistObject> {
     const so = await this.deps.soClient.create<WatchlistSavedObjectAttributes>(
       watchlistConfigTypeName,
       { ...attrs, managed: attrs.managed ?? false },
-      { id: options.id, refresh: 'wait_for' }
+      { id: options?.id, refresh: 'wait_for' }
     );
 
     await createOrUpdateIndex({

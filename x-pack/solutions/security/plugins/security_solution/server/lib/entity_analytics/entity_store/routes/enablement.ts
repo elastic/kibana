@@ -57,13 +57,15 @@ export const enableEntityStoreRoute = (
         await checkAndInitPrivilegeMonitoringResources(context, logger);
 
         const core = await context.core;
+        const namespace = secSol.getSpaceId();
+        const soClient = getRequestSavedObjectClient(core);
         const watchlistClient = new WatchlistConfigClient({
-          namespace: secSol.getSpaceId(),
-          soClient: getRequestSavedObjectClient(core),
+          namespace,
+          soClient,
           esClient: core.elasticsearch.client.asCurrentUser,
           logger,
         });
-        await ensurePrebuiltWatchlists({ watchlistClient, logger });
+        await ensurePrebuiltWatchlists({ watchlistClient, soClient, namespace, logger });
 
         try {
           const body: InitEntityStoreResponse = await secSol
