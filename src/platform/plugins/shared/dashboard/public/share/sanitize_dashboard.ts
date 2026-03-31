@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardExportSourceResponseBody, DashboardState } from '../../server';
+import type { DashboardSanitizeResponseBody, DashboardState } from '../../server';
 import { DASHBOARD_INTERNAL_API_PATH } from '../../common/constants';
 import { coreServices } from '../services/kibana_services';
 
-export async function getSanitizedExportSource(dashboardState: DashboardState) {
-  const result = await coreServices.http.post<DashboardExportSourceResponseBody>(
-    `${DASHBOARD_INTERNAL_API_PATH}/_export_source`,
+export async function sanitizeDashboard(dashboardState: DashboardState) {
+  const result = await coreServices.http.post<DashboardSanitizeResponseBody>(
+    `${DASHBOARD_INTERNAL_API_PATH}/_sanitize`,
     {
       version: '1',
       body: JSON.stringify(dashboardState),

@@ -12,15 +12,15 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import '@kbn/code-editor-mock/jest_helper';
 import type { DashboardState } from '../../server';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
-import { ExportSourceAssetPanel } from './export_source_asset_panel';
-import { getSanitizedExportSource } from './dashboard_export_source_client';
+import { ExportJsonPanel } from './export_json_panel';
+import { sanitizeDashboard } from './sanitize_dashboard';
 import { userEvent } from '@testing-library/user-event';
 
-jest.mock('./dashboard_export_source_client', () => ({
-  getSanitizedExportSource: jest.fn(),
+jest.mock('./sanitize_dashboard', () => ({
+  sanitizeDashboard: jest.fn(),
 }));
 
-describe('ExportSourceAssetPanel', () => {
+describe('ExportJsonPanel', () => {
   const dashboardState: DashboardState = {
     title: 'my dashboard',
     panels: [],
@@ -33,12 +33,12 @@ describe('ExportSourceAssetPanel', () => {
   });
 
   it('shows a loading indicator then renders sanitized JSON', async () => {
-    (getSanitizedExportSource as jest.Mock).mockResolvedValue({
+    (sanitizeDashboard as jest.Mock).mockResolvedValue({
       data: { ...dashboardState, title: 'my dashboard (sanitized)' },
       warnings: [],
     });
 
-    render(<ExportSourceAssetPanel dashboardState={dashboardState} />);
+    render(<ExportJsonPanel dashboardState={dashboardState} />);
 
     expect(screen.getByTestId('dashboardExportSourceLoading')).toBeInTheDocument();
 
@@ -51,14 +51,14 @@ describe('ExportSourceAssetPanel', () => {
 
   it('renders warnings when the server reports unsupported panels', async () => {
     const user = userEvent.setup();
-    (getSanitizedExportSource as jest.Mock).mockResolvedValue({
+    (sanitizeDashboard as jest.Mock).mockResolvedValue({
       data: dashboardState,
       warnings: [
         { message: 'Dropped panel panel1, panel schema not available for panel type: foo.' },
       ],
     });
 
-    render(<ExportSourceAssetPanel dashboardState={dashboardState} />);
+    render(<ExportJsonPanel dashboardState={dashboardState} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('dashboardExportSourceWarnings')).toBeInTheDocument();
@@ -76,9 +76,9 @@ describe('ExportSourceAssetPanel', () => {
   });
 
   it('renders an error callout when sanitization fails and hides sanitized JSON', async () => {
-    (getSanitizedExportSource as jest.Mock).mockRejectedValue(new Error('boom'));
+    (sanitizeDashboard as jest.Mock).mockRejectedValue(new Error('boom'));
 
-    render(<ExportSourceAssetPanel dashboardState={dashboardState} />);
+    render(<ExportJsonPanel dashboardState={dashboardState} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('dashboardExportSourceSanitizeErrorPrompt')).toBeInTheDocument();
@@ -92,14 +92,14 @@ describe('ExportSourceAssetPanel', () => {
 
   it('retries sanitization when the user clicks Retry', async () => {
     const user = userEvent.setup();
-    (getSanitizedExportSource as jest.Mock)
+    (sanitizeDashboard as jest.Mock)
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce({
         data: { ...dashboardState, title: 'my dashboard (sanitized)' },
         warnings: [],
       });
 
-    render(<ExportSourceAssetPanel dashboardState={dashboardState} />);
+    render(<ExportJsonPanel dashboardState={dashboardState} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('dashboardExportSourceSanitizeErrorPrompt')).toBeInTheDocument();
@@ -107,7 +107,7 @@ describe('ExportSourceAssetPanel', () => {
 
     await user.click(screen.getByTestId('dashboardExportSourceRetryButton'));
     await waitFor(() => {
-      expect(getSanitizedExportSource).toHaveBeenCalledTimes(2);
+      expect(sanitizeDashboard).toHaveBeenCalledTimes(2);
     });
 
     await waitFor(() => {

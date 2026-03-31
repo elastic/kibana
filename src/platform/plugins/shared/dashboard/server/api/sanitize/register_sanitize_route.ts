@@ -11,19 +11,19 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { once } from 'lodash';
 import { DASHBOARD_INTERNAL_API_PATH } from '../../../common/constants';
-import { getExportSourceRequestBodySchema, getExportSourceResponseBodySchema } from './schemas';
+import { getSanitizeRequestBodySchema, getSanitizeResponseBodySchema } from './schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { exportSource } from './export';
+import { sanitize } from './sanitize';
 
 /**
- * Register the export source route.
+ * Register the sanitize dashboard route.
  * This route uses an internal API path because it is not intended for public use.
- * It is only used by the dashboard app to sanitize the export source for the export share integration.
+ * It is currently used by the dashboard app to sanitize a dashboard for the export share integration.
  */
-export function registerExportSourceRoute(router: VersionedRouter<RequestHandlerContext>) {
-  const exportSourceRoute = router.post({
-    path: `${DASHBOARD_INTERNAL_API_PATH}/_export_source`,
-    summary: 'Sanitize a dashboard export source',
+export function registerSanitizeRoute(router: VersionedRouter<RequestHandlerContext>) {
+  const sanitizeRoute = router.post({
+    path: `${DASHBOARD_INTERNAL_API_PATH}/_sanitize`,
+    summary: 'Sanitize a dashboard',
     security: {
       authz: {
         enabled: false,
@@ -40,23 +40,23 @@ export function registerExportSourceRoute(router: VersionedRouter<RequestHandler
     return getDashboardStateSchema(false);
   });
 
-  exportSourceRoute.addVersion(
+  sanitizeRoute.addVersion(
     {
       version: '1',
       validate: () => ({
         request: {
-          body: getExportSourceRequestBodySchema(),
+          body: getSanitizeRequestBodySchema(),
         },
         response: {
           200: {
-            body: () => getExportSourceResponseBodySchema(),
+            body: () => getSanitizeResponseBodySchema(),
           },
         },
       }),
     },
     async (_ctx, req, res) => {
       try {
-        const result = await exportSource(_ctx, getCachedDashboardStateSchema(), req.body);
+        const result = await sanitize(_ctx, getCachedDashboardStateSchema(), req.body);
         return res.ok({ body: result });
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Unknown error';

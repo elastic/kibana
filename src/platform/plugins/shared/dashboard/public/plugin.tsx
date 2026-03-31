@@ -190,9 +190,9 @@ export class DashboardPlugin
       share.registerShareIntegration<ExportShareDerivatives>('dashboard', {
         id: 'exportJson',
         groupId: 'exportDerivatives',
-        getShareIntegrationConfig: async (...args) => {
+        getShareIntegrationConfig: async () => {
           const { exportJsonConfig } = await import('./dashboard_renderer/dashboard_module');
-          return exportJsonConfig(...args);
+          return exportJsonConfig;
         },
       });
     }

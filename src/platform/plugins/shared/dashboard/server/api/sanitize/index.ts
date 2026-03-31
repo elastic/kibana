@@ -7,10 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { getExportSourceResponseBodySchema } from './schemas';
-
-/** The response body type for sanitizing a dashboard export source. */
-export type DashboardExportSourceResponseBody = TypeOf<
-  ReturnType<typeof getExportSourceResponseBodySchema>
->;
+export type { DashboardSanitizeResponseBody } from './types';
+export { registerSanitizeRoute } from './register_sanitize_route';

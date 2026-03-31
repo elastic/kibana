@@ -11,31 +11,27 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ExportShareDerivatives } from '@kbn/share-plugin/public';
-import type { ShareContext } from '@kbn/share-plugin/public/types';
+import { ExportJsonFlyout } from './export_json_flyout';
 
-import { ExportSourceFlyout } from './export_source_flyout';
-
-export const exportJsonConfig = (
-  _ctx: ShareContext
-): ReturnType<ExportShareDerivatives['config']> extends Promise<infer R> ? R : never => {
-  return {
-    label: ({ openFlyout }) => (
-      <EuiButtonEmpty
-        size="s"
-        iconType="code"
-        onClick={openFlyout}
-        data-test-subj="exportMenuItem-JSON"
-      >
-        {i18n.translate('dashboard.exportSource.label', {
-          defaultMessage: 'JSON',
-        })}
-      </EuiButtonEmpty>
-    ),
-    shouldRender: () => true,
-    flyoutSizing: {
-      size: 'm',
-      maxWidth: 1000,
-    },
-    flyoutContent: ({ closeFlyout }) => <ExportSourceFlyout closeFlyout={closeFlyout} />,
-  };
+export const exportJsonConfig: ReturnType<ExportShareDerivatives['config']> extends Promise<infer R>
+  ? R
+  : never = {
+  label: ({ openFlyout }) => (
+    <EuiButtonEmpty
+      size="s"
+      iconType="code"
+      onClick={openFlyout}
+      data-test-subj="exportMenuItem-JSON"
+    >
+      {i18n.translate('dashboard.exportJson.label', {
+        defaultMessage: 'JSON',
+      })}
+    </EuiButtonEmpty>
+  ),
+  shouldRender: () => true,
+  flyoutSizing: {
+    size: 'm',
+    maxWidth: 1000,
+  },
+  flyoutContent: ({ closeFlyout }) => <ExportJsonFlyout closeFlyout={closeFlyout} />,
 };

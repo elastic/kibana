@@ -30,16 +30,16 @@ import { XJsonLang } from '@kbn/monaco';
 import { compressToEncodedURIComponent } from 'lz-string';
 import { CodeEditor } from '@kbn/code-editor';
 import type { DashboardState } from '../../server';
-import { getSanitizedExportSource } from './dashboard_export_source_client';
-import { buildCreateDashboardRequestForConsole } from './export_source_share_utils';
+import { sanitizeDashboard } from './sanitize_dashboard';
+import { buildCreateDashboardRequestForConsole } from './export_json_share_utils';
 import { coreServices, shareService } from '../services/kibana_services';
 
-export interface ExportSourceAssetPanelProps {
+export interface ExportJsonPanelProps {
   dashboardState: DashboardState;
-  onLoadStateChange?: (loadState: ExportSourceLoadState) => void;
+  onLoadStateChange?: (loadState: ExportJsonLoadState) => void;
 }
 
-export type ExportSourceLoadState =
+export type ExportJsonLoadState =
   | { status: 'loading' }
   | { status: 'success'; data: DashboardState; warnings: string[] }
   | { status: 'error'; errorMessage: string };
@@ -50,8 +50,8 @@ function useSanitizedExportSource({
 }: {
   dashboardState: DashboardState;
   onLoadStart?: () => void;
-}): { loadState: ExportSourceLoadState; retry: () => void } {
-  const [loadState, setLoadState] = useState<ExportSourceLoadState>({ status: 'loading' });
+}): { loadState: ExportJsonLoadState; retry: () => void } {
+  const [loadState, setLoadState] = useState<ExportJsonLoadState>({ status: 'loading' });
   const [requestNonce, setRequestNonce] = useState(0);
 
   const retry = useCallback(() => {
@@ -63,7 +63,7 @@ function useSanitizedExportSource({
     setLoadState({ status: 'loading' });
     onLoadStart?.();
 
-    getSanitizedExportSource(dashboardState)
+    sanitizeDashboard(dashboardState)
       .then(({ data, warnings }) => {
         if (!isMounted) return;
         const warningMessages = warnings.map(({ message }) => message);
@@ -120,7 +120,7 @@ function WarningsCallout({
       <EuiCallOut
         color="warning"
         iconType="alert"
-        title={i18n.translate('dashboard.exportSource.warningsTitle', {
+        title={i18n.translate('dashboard.exportJson.warningsTitle', {
           defaultMessage: 'Unsupported properties were removed',
         })}
         size="s"
@@ -128,7 +128,7 @@ function WarningsCallout({
         onDismiss={onDismiss}
       >
         <EuiText size="s" color="subdued">
-          {i18n.translate('dashboard.exportSource.warningsSummary', {
+          {i18n.translate('dashboard.exportJson.warningsSummary', {
             defaultMessage:
               '{count} item{count, plural, one {} other {s}} removed from the JSON source.',
             values: { count: warnings.length },
@@ -142,10 +142,10 @@ function WarningsCallout({
           paddingSize="s"
           buttonContent={
             isExpanded
-              ? i18n.translate('dashboard.exportSource.warningsAccordionHide', {
+              ? i18n.translate('dashboard.exportJson.warningsAccordionHide', {
                   defaultMessage: 'Hide details',
                 })
-              : i18n.translate('dashboard.exportSource.warningsAccordionShow', {
+              : i18n.translate('dashboard.exportJson.warningsAccordionShow', {
                   defaultMessage: 'Show details',
                 })
           }
@@ -182,14 +182,14 @@ function LoadingState() {
         <EuiLoadingSpinner
           size="xl"
           data-test-subj="dashboardExportSourceLoading"
-          aria-label={i18n.translate('dashboard.exportSource.loadingLabel', {
+          aria-label={i18n.translate('dashboard.exportJson.loadingLabel', {
             defaultMessage: 'Loading JSON source',
           })}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
-          {i18n.translate('dashboard.exportSource.loadingText', {
+          {i18n.translate('dashboard.exportJson.loadingText', {
             defaultMessage: 'Loading JSON source...',
           })}
         </EuiText>
@@ -247,12 +247,12 @@ function SuccessState({
                     flush="right"
                     iconType="copyClipboard"
                     onClick={copy}
-                    aria-label={i18n.translate('dashboard.exportSource.copyAriaLabel', {
+                    aria-label={i18n.translate('dashboard.exportJson.copyAriaLabel', {
                       defaultMessage: 'Copy JSON source',
                     })}
                     data-test-subj="dashboardExportSourceCopyButton"
                   >
-                    {i18n.translate('dashboard.exportSource.copyButtonLabel', {
+                    {i18n.translate('dashboard.exportJson.copyButtonLabel', {
                       defaultMessage: 'Copy to clipboard',
                     })}
                   </EuiButtonEmpty>
@@ -272,7 +272,7 @@ function SuccessState({
                   rel="noopener noreferrer"
                   data-test-subj="dashboardExportSourceOpenInConsoleButton"
                 >
-                  {i18n.translate('dashboard.exportSource.openInConsoleButtonLabel', {
+                  {i18n.translate('dashboard.exportJson.openInConsoleButtonLabel', {
                     defaultMessage: 'Open in Console',
                   })}
                 </EuiButtonEmpty>
@@ -285,7 +285,7 @@ function SuccessState({
         <CodeEditor
           languageId={XJsonLang.ID}
           value={jsonValue}
-          aria-label={i18n.translate('dashboard.exportSource.codeBlockAriaLabel', {
+          aria-label={i18n.translate('dashboard.exportJson.codeBlockAriaLabel', {
             defaultMessage: 'Export JSON source',
           })}
           options={{
@@ -325,7 +325,7 @@ function ErrorState({ errorMessage, onRetry }: { errorMessage: string; onRetry: 
           data-test-subj="dashboardExportSourceSanitizeErrorPrompt"
           title={
             <h3>
-              {i18n.translate('dashboard.exportSource.sanitizeErrorTitle', {
+              {i18n.translate('dashboard.exportJson.sanitizeErrorTitle', {
                 defaultMessage: 'Unable to export',
               })}
             </h3>
@@ -333,12 +333,12 @@ function ErrorState({ errorMessage, onRetry }: { errorMessage: string; onRetry: 
           body={
             <EuiText size="s">
               <p>
-                {i18n.translate('dashboard.exportSource.sanitizeErrorBody', {
+                {i18n.translate('dashboard.exportJson.sanitizeErrorBody', {
                   defaultMessage: 'Sorry, there was an error loading the JSON source.',
                 })}
               </p>
               <p>
-                {i18n.translate('dashboard.exportSource.sanitizeErrorDetails', {
+                {i18n.translate('dashboard.exportJson.sanitizeErrorDetails', {
                   defaultMessage: 'Error: {errorMessage}',
                   values: { errorMessage },
                 })}
@@ -352,7 +352,7 @@ function ErrorState({ errorMessage, onRetry }: { errorMessage: string; onRetry: 
               onClick={onRetry}
               data-test-subj="dashboardExportSourceRetryButton"
             >
-              {i18n.translate('dashboard.exportSource.retryButtonLabel', {
+              {i18n.translate('dashboard.exportJson.retryButtonLabel', {
                 defaultMessage: 'Retry',
               })}
             </EuiButton>
@@ -363,10 +363,7 @@ function ErrorState({ errorMessage, onRetry }: { errorMessage: string; onRetry: 
   );
 }
 
-export const ExportSourceAssetPanel = ({
-  dashboardState,
-  onLoadStateChange,
-}: ExportSourceAssetPanelProps) => {
+export const ExportJsonPanel = ({ dashboardState, onLoadStateChange }: ExportJsonPanelProps) => {
   const warningsAccordionId = useGeneratedHtmlId({ prefix: 'dashboardExportSourceWarnings' });
   const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
   const [showWarningsCallout, setShowWarningsCallout] = useState(true);

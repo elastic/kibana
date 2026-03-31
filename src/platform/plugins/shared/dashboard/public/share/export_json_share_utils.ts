@@ -32,7 +32,7 @@ function sanitizeFilenameBase(input: string): string {
   );
 }
 
-export function buildExportSourceFilename(filenameBase: string, fileExtension: string): string {
+export function buildExportJsonFilename(filenameBase: string, fileExtension: string): string {
   return `${sanitizeFilenameBase(filenameBase)}${normalizeExtension(fileExtension)}`;
 }
 

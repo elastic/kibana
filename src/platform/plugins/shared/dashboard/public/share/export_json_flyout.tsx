@@ -26,9 +26,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { downloadFileAs, useShareTypeContext } from '@kbn/share-plugin/public';
 
-import type { ExportSourceLoadState } from './export_source_asset_panel';
-import { ExportSourceAssetPanel } from './export_source_asset_panel';
-import { buildExportSourceFilename } from './export_source_share_utils';
+import type { ExportJsonLoadState } from './export_json_panel';
+import { ExportJsonPanel } from './export_json_panel';
+import { buildExportJsonFilename } from './export_json_share_utils';
 import type { buildExportSharingData } from '../dashboard_app/top_nav/share/share_options_utils';
 
 const flyoutBodyCss = css`
@@ -44,7 +44,7 @@ const flyoutBodyCss = css`
   }
 `;
 
-export const ExportSourceFlyout = ({ closeFlyout }: { closeFlyout: () => void }) => {
+export const ExportJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void }) => {
   const { objectType, objectTypeAlias, sharingData } = useShareTypeContext(
     'integration',
     'exportDerivatives'
@@ -52,13 +52,13 @@ export const ExportSourceFlyout = ({ closeFlyout }: { closeFlyout: () => void })
 
   const typedSharingData = sharingData as unknown as ReturnType<typeof buildExportSharingData>;
 
-  const [dashboardState] = useState(() => typedSharingData.exportSource());
-  const [loadState, setLoadState] = useState<ExportSourceLoadState>({ status: 'loading' });
+  const [dashboardState] = useState(() => typedSharingData.exportJson());
+  const [loadState, setLoadState] = useState<ExportJsonLoadState>({ status: 'loading' });
 
   const onDownload = useCallback(async () => {
     if (loadState.status !== 'success') return;
 
-    const filename = buildExportSourceFilename(typedSharingData.title, '.json');
+    const filename = buildExportJsonFilename(typedSharingData.title, '.json');
     const content = JSON.stringify(loadState.data, null, 2);
     await downloadFileAs(filename, { content, type: 'application/json' });
     closeFlyout();
@@ -70,11 +70,11 @@ export const ExportSourceFlyout = ({ closeFlyout }: { closeFlyout: () => void })
         <EuiTitle>
           <h2>
             <FormattedMessage
-              id="dashboard.exportSource.flyoutTitle"
+              id="dashboard.exportJson.flyoutTitle"
               defaultMessage="Export {objectType} as {type}"
               values={{
                 objectType: objectTypeAlias ?? objectType.toLocaleLowerCase(),
-                type: i18n.translate('dashboard.exportSource.label', { defaultMessage: 'JSON' }),
+                type: i18n.translate('dashboard.exportJson.label', { defaultMessage: 'JSON' }),
               }}
             />
           </h2>
@@ -82,10 +82,10 @@ export const ExportSourceFlyout = ({ closeFlyout }: { closeFlyout: () => void })
         <React.Fragment>
           <EuiSpacer size="s" />
           <EuiBetaBadge
-            label={i18n.translate('dashboard.exportSource.technicalPreviewBadgeLabel', {
+            label={i18n.translate('dashboard.exportJson.technicalPreviewBadgeLabel', {
               defaultMessage: 'TECHNICAL PREVIEW',
             })}
-            tooltipContent={i18n.translate('dashboard.exportSource.technicalPreviewBadgeTooltip', {
+            tooltipContent={i18n.translate('dashboard.exportJson.technicalPreviewBadgeTooltip', {
               defaultMessage:
                 'This functionality is experimental and not supported. It may change or be removed at any time.',
             })}
@@ -97,10 +97,7 @@ export const ExportSourceFlyout = ({ closeFlyout }: { closeFlyout: () => void })
 
       <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody" css={flyoutBodyCss}>
         <EuiFlexGroup css={{ height: '100%' }} direction="column">
-          <ExportSourceAssetPanel
-            dashboardState={dashboardState}
-            onLoadStateChange={setLoadState}
-          />
+          <ExportJsonPanel dashboardState={dashboardState} onLoadStateChange={setLoadState} />
         </EuiFlexGroup>
       </EuiFlyoutBody>
 
@@ -109,7 +106,7 @@ export const ExportSourceFlyout = ({ closeFlyout }: { closeFlyout: () => void })
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="exportFlyoutCloseButton" onClick={closeFlyout}>
               <FormattedMessage
-                id="dashboard.exportSource.closeFlyoutButtonLabel"
+                id="dashboard.exportJson.closeFlyoutButtonLabel"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -121,7 +118,7 @@ export const ExportSourceFlyout = ({ closeFlyout }: { closeFlyout: () => void })
               data-test-subj="generateReportButton"
               disabled={loadState.status !== 'success'}
             >
-              {i18n.translate('dashboard.exportSource.downloadButtonLabel', {
+              {i18n.translate('dashboard.exportJson.downloadButtonLabel', {
                 defaultMessage: 'Download JSON',
               })}
             </EuiButton>

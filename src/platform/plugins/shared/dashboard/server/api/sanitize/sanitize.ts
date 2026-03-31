@@ -10,16 +10,16 @@
 import Boom from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardState, Warnings } from '../types';
-import type { DashboardExportSourceResponseBody } from './types';
+import type { DashboardSanitizeResponseBody } from './types';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
 import { stripUnmappedKeys } from '../scope_tooling';
 
-export async function exportSource(
+export async function sanitize(
   requestCtx: RequestHandlerContext,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   dashboardState: DashboardState
-): Promise<DashboardExportSourceResponseBody> {
+): Promise<DashboardSanitizeResponseBody> {
   const warnings: Warnings = [];
   try {
     /**
@@ -42,7 +42,7 @@ export async function exportSource(
       data: sanitizedDashboardState,
       ...(warnings.length ? { warnings } : {}),
     };
-  } catch (exportSourceError) {
-    throw Boom.badRequest(`Invalid response. ${exportSourceError.message}`);
+  } catch (sanitizeError) {
+    throw Boom.badRequest(`Invalid response. ${sanitizeError.message}`);
   }
 }
