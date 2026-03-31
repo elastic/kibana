@@ -44,10 +44,6 @@ export function getSharedResolveConfig(repoRoot: string): Configuration['resolve
 export function getSharedResolveFallback(): Record<string, false> {
   return {
     // Core Node.js modules that should be empty in browser
-    child_process: false,
-    net: false,
-    tls: false,
-    dns: false,
     'node:child_process': false,
     'node:net': false,
     'node:tls': false,
