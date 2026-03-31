@@ -834,7 +834,7 @@ export class ActionsPlugin
   private instantiateAuthorization = (request: KibanaRequest) => {
     return new ActionsAuthorization({
       request,
-      authorization: this.security?.authc.getCurrentUserauthz,
+      authorization: this.security?.authz,
     });
   };
 
