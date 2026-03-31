@@ -43,11 +43,7 @@ export { runBuild, type BuildOptions, type BuildResult } from './run_build';
 export { runRspackCli, type CliOptions } from './cli';
 
 // Dev mode optimizer
-export {
-  RspackOptimizer,
-  type RspackOptimizerOptions,
-  type OptimizerPhase,
-} from './rspack_optimizer';
+export { RspackOptimizer, type RspackOptimizerOptions, type OptimizerPhase } from './optimizer';
 
 // Plugin discovery
 export { discoverPlugins, type PluginEntry } from './utils/plugin_discovery';

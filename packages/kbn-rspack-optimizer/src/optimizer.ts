@@ -75,7 +75,7 @@ export class RspackOptimizer {
       // Spawn worker process
       // Use require.resolve to find the worker file
       const workerPath = require.resolve('./worker');
-      
+
       // Use @kbn/babel-register to enable TypeScript support in the worker
       // This is exactly how @kbn/optimizer does it (see observe_worker.ts)
       this.worker = fork(workerPath, [], {
