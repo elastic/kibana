@@ -1,8 +1,17 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
   "include": ["src/**/*"],
-  "exclude": ["target/**/*"]
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/repo-info",
+    "@kbn/tooling-log",
+    "@kbn/node-libs-browser-webpack-plugin",
+    "@kbn/ui-shared-deps-src",
+    "@kbn/transpiler-config",
+    "@kbn/core-ui-settings-common",
+    "@kbn/repo-packages",
+  ]
 }
