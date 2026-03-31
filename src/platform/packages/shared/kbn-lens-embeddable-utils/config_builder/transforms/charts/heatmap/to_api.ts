@@ -37,6 +37,8 @@ import {
 import type { HeatmapStateESQL, HeatmapStateNoESQL } from '../../../schema/charts/heatmap';
 import { getValueApiColumn } from '../../columns/esql_column';
 import type { LensApiAllMetricOperations } from '../../../schema/metric_ops';
+import { legendSizeCompat } from '../legend_sizes';
+import { axisLabelOrientationCompat } from '../common';
 
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapState['legend'] {
   return {
@@ -44,13 +46,9 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapSta
     position: legend.position,
     ...stripUndefined<HeatmapState['legend']>({
       truncate_after_lines: getLegendTruncateAfterLines(legend),
-      size: legend.legendSize,
+      size: legendSizeCompat.toAPI(legend.legendSize),
     }),
   };
-}
-
-function getOrientationFromRotation(rotation: number): 'angled' | 'vertical' | 'horizontal' {
-  return rotation === -45 ? 'angled' : rotation === -90 ? 'vertical' : 'horizontal';
 }
 
 function getGridConfigProps(
@@ -62,7 +60,8 @@ function getGridConfigProps(
       labels: {
         visible: gridConfig.isXAxisLabelVisible,
         ...(gridConfig.xAxisLabelRotation !== undefined && {
-          orientation: getOrientationFromRotation(gridConfig.xAxisLabelRotation),
+          orientation:
+            axisLabelOrientationCompat.toAPI(gridConfig.xAxisLabelRotation) ?? 'horizontal',
         }),
       },
       title: {
