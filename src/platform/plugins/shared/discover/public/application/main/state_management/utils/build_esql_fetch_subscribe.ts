@@ -9,14 +9,12 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { isEqual } from 'lodash';
 import type { DataDocumentsMsg, SavedSearchData } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import type { InternalStateStore, TabActionInjector, TabState } from '../redux';
 import { internalStateActions } from '../redux';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
-import { isChartAvailableForDataView } from './is_chart_available';
 
 const ESQL_MAX_NUM_OF_COLUMNS = 50;
 const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 5;
@@ -30,13 +28,11 @@ export const buildEsqlFetchSubscribe = ({
   dataSubjects,
   getCurrentTab,
   injectCurrentTab,
-  getCurrentDataView,
 }: {
   internalState: InternalStateStore;
   dataSubjects: SavedSearchData;
   getCurrentTab: () => TabState;
   injectCurrentTab: TabActionInjector;
-  getCurrentDataView: () => DataView | undefined;
 }) => {
   let prevEsqlData: {
     initialFetch: boolean;
@@ -154,10 +150,7 @@ export const buildEsqlFetchSubscribe = ({
     const changeDefaultColumns =
       indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
 
-    const { viewMode, hideTable } = getCurrentTab().appState;
-    const currentDataView = getCurrentDataView();
-    const isChartAvailable = isChartAvailableForDataView(currentDataView);
-    const changeHideTable = !isChartAvailable && hideTable === true;
+    const { viewMode } = getCurrentTab().appState;
     const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
     // If the index pattern hasn't changed, but the available columns have changed
@@ -172,16 +165,15 @@ export const buildEsqlFetchSubscribe = ({
 
     prevEsqlData.allColumns = nextAllColumns;
 
-    if (indexPatternChanged || changeDefaultColumns || changeViewMode || changeHideTable) {
+    if (indexPatternChanged || changeDefaultColumns || changeViewMode) {
       prevEsqlData.query = nextQuery.esql;
       prevEsqlData.defaultColumns = nextDefaultColumns;
 
       // just change URL state if necessary
-      if (changeDefaultColumns || changeViewMode || changeHideTable) {
+      if (changeDefaultColumns || changeViewMode) {
         const nextState = {
           ...(changeDefaultColumns && { columns: nextDefaultColumns }),
           ...(changeViewMode && { viewMode: undefined }),
-          ...(changeHideTable && { hideTable: false }),
         };
 
         await internalState.dispatch(
