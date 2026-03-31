@@ -201,7 +201,8 @@ const CreateRulePageComponent: React.FC<{
   );
 
   const [openSteps, setOpenSteps] = useState({
-    [RuleStep.defineRule]: false,
+    // Matches define-rule EuiAccordion initialIsOpen={true}
+    [RuleStep.defineRule]: true,
     [RuleStep.aboutRule]: false,
     [RuleStep.scheduleRule]: false,
     [RuleStep.ruleActions]: false,
@@ -228,6 +229,8 @@ const CreateRulePageComponent: React.FC<{
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
+  const onAiCreatedRuleAppliedRef = useRef<(() => void) | undefined>(undefined);
+
   const { isAiRuleUpdateRef } = useAgentBuilderRuleCreation({
     defineStepForm,
     aboutStepForm,
@@ -238,6 +241,7 @@ const CreateRulePageComponent: React.FC<{
     scheduleStepData,
     actionsStepData,
     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+    onAiCreatedRuleAppliedRef,
   });
 
   useEffect(() => {
@@ -325,6 +329,27 @@ const CreateRulePageComponent: React.FC<{
     } else if (step === RuleStep.ruleActions) {
       ruleActionsRef.current?.onToggle();
     }
+  };
+
+  const openStepsRef = useRef(openSteps);
+  openStepsRef.current = openSteps;
+  const goToStepRef = useRef(goToStep);
+  goToStepRef.current = goToStep;
+  const toggleStepAccordionRef = useRef(toggleStepAccordion);
+  toggleStepAccordionRef.current = toggleStepAccordion;
+
+  onAiCreatedRuleAppliedRef.current = () => {
+    const o = openStepsRef.current;
+    if (o[RuleStep.defineRule]) {
+      toggleStepAccordionRef.current(RuleStep.defineRule);
+    }
+    if (o[RuleStep.aboutRule]) {
+      toggleStepAccordionRef.current(RuleStep.aboutRule);
+    }
+    if (o[RuleStep.scheduleRule]) {
+      toggleStepAccordionRef.current(RuleStep.scheduleRule);
+    }
+    goToStepRef.current(RuleStep.ruleActions);
   };
 
   const validateStep = useCallback(

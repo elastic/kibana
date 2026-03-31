@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MutableRefObject } from 'react';
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -41,6 +42,12 @@ interface UseAgentBuilderRuleCreationParams {
   scheduleStepData?: ScheduleStepRule;
   actionsStepData?: ActionsStepRule;
   actionTypeRegistry?: ActionTypeRegistryContract;
+  /**
+   * Assign `current` to a no-arg function that focuses the desired step after the form is filled
+   * from agent chat (e.g. `() => goToStep(RuleStep.ruleActions)`). Uses a ref so the parent can
+   * wire this after `goToStep` is defined.
+   */
+  onAiCreatedRuleAppliedRef?: MutableRefObject<(() => void) | undefined>;
 }
 
 interface UseAgentBuilderRuleCreationResult {
@@ -57,6 +64,7 @@ export const useAgentBuilderRuleCreation = ({
   scheduleStepData,
   actionsStepData,
   actionTypeRegistry,
+  onAiCreatedRuleAppliedRef,
 }: UseAgentBuilderRuleCreationParams): UseAgentBuilderRuleCreationResult => {
   const { services } = useKibana();
   const { agentBuilder, aiRuleCreation } = services;
@@ -109,8 +117,18 @@ export const useAgentBuilderRuleCreation = ({
           { defaultMessage: 'The form has been updated with the AI-generated rule.' }
         ),
       });
+
+      onAiCreatedRuleAppliedRef?.current?.();
     },
-    [defineStepForm, aboutStepForm, scheduleStepForm, actionsStepForm, addSuccess, aiRuleCreation]
+    [
+      defineStepForm,
+      aboutStepForm,
+      scheduleStepForm,
+      actionsStepForm,
+      addSuccess,
+      aiRuleCreation,
+      onAiCreatedRuleAppliedRef,
+    ]
   );
 
   const updateFormFromChatRef = useRef(updateFormFromChat);

@@ -209,7 +209,7 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
         <>
           <SectionHeading>{getQueryHeading(rule)}</SectionHeading>
           <EuiSpacer size="xs" />
-          <EuiCodeBlock fontSize="s" paddingSize="s" overflowHeight={150}>
+          <EuiCodeBlock language="esql" fontSize="s" paddingSize="s" overflowHeight={150}>
             {query}
           </EuiCodeBlock>
           <EuiSpacer size="s" />
