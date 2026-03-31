@@ -32,13 +32,13 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           201: {
             body: () => createResponseBodySchema,
-            description: 'Indicates that a markdown library item is created successfully.',
+            description: 'created',
           },
           400: {
-            description: 'Indicates an invalid schema or parameters.',
+            description: 'invalid request',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
+            description: 'forbidden',
           },
         },
       },

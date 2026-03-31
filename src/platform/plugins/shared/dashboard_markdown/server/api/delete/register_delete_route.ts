@@ -36,13 +36,13 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
         },
         response: {
           204: {
-            description: 'Indicates that the markdown library item is deleted successfully.',
+            description: 'deleted',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
+            description: 'forbidden',
           },
           404: {
-            description: 'Indicates that the markdown library item with the given ID is not found.',
+            description: 'not found',
           },
         },
       },

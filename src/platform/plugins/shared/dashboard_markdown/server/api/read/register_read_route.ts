@@ -38,10 +38,10 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         response: {
           200: {
             body: () => readResponseBodySchema,
-            description: 'Indicates that the markdown library item is retrieved successfully.',
+            description: 'success',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
+            description: 'forbidden',
           },
         },
       },

@@ -48,10 +48,14 @@ export function registerUpdateRoute(
         response: {
           200: {
             body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
-            description: 'Indicates the dashboard is upserted successfully',
+            description: 'updated',
+          },
+          201: {
+            body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
+            description: 'created',
           },
           403: {
-            description: 'Indicates that upsert is forbidden.',
+            description: 'forbidden',
           },
         },
       }),
@@ -65,7 +69,9 @@ export function registerUpdateRoute(
           req.body,
           isDashboardAppRequest
         );
-        return res.ok({ body: result });
+        return result.meta.updated_at === result.meta.created_at
+          ? res.created({ body: result })
+          : res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden({ body: { message: e.message } });

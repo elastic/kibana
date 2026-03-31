@@ -43,13 +43,13 @@ export function registerCreateRoute(
         response: {
           201: {
             body: () => getCreateResponseBodySchema(isDashboardAppRequest),
-            description: 'Indicates the dashboard is created successfully',
+            description: 'created',
           },
           400: {
-            description: 'Indicates an invalid schema or parameters.',
+            description: 'invalid request',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
+            description: 'forbidden',
           },
         },
       }),

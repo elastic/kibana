@@ -36,13 +36,17 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           200: {
             body: () => updateResponseBodySchema,
-            description: 'Indicates the markdown library item is upserted successfully',
+            description: 'updated',
+          },
+          201: {
+            body: () => updateResponseBodySchema,
+            description: 'created',
           },
           400: {
-            description: 'Indicates an invalid schema or parameters.',
+            description: 'invalid request',
           },
           403: {
-            description: 'Indicates that upsert is forbidden.',
+            description: 'forbidden',
           },
         },
       },
@@ -50,7 +54,9 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
     async (ctx, req, res) => {
       try {
         const result = await update(ctx, req.params.id, req.body);
-        return res.ok({ body: result });
+        return result.meta.created_at === result.meta.updated_at
+          ? res.created({ body: result })
+          : res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden({ body: { message: e.message } });
