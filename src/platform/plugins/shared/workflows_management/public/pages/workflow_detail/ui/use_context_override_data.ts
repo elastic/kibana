@@ -15,9 +15,7 @@ import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trig
 import {
   selectWorkflowDefinition,
   selectWorkflowGraph,
-  selectYamlDocument,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { getWorkflowContextSchema } from '../../../features/workflow_context/lib/get_workflow_context_schema';
 import { useSpaceId } from '../../../hooks/use_space_id';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { buildContextOverride } from '../../../shared/utils/build_step_context_override/build_step_context_override';
@@ -31,7 +29,6 @@ export function useContextOverrideData() {
   // Redux selectors, use only current workflow data, not execution data
   const workflowGraph = useSelector(selectWorkflowGraph);
   const workflowDefinition = useSelector(selectWorkflowDefinition);
-  const yamlDocument = useSelector(selectYamlDocument);
 
   const getContextOverrideData = useCallback(
     (stepId: string): ContextOverrideData | null => {
@@ -43,7 +40,6 @@ export function useContextOverrideData() {
         isManualTrigger(trigger)
       ) as ManualTrigger | undefined;
 
-      const executionContextSchema = getWorkflowContextSchema(workflowDefinition, yamlDocument);
       const stepSubGraph = workflowGraph.getStepGraph(stepId);
 
       return buildContextOverride(stepSubGraph, {
@@ -55,10 +51,9 @@ export function useContextOverrideData() {
           spaceId,
         },
         inputsDefinition: manualTrigger?.inputs,
-        executionContextSchema,
       });
     },
-    [workflowGraph, workflowDefinition, spaceId, yamlDocument]
+    [workflowGraph, workflowDefinition, spaceId]
   );
 
   return getContextOverrideData;

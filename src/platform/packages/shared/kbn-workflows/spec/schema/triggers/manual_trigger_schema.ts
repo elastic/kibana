@@ -65,6 +65,7 @@ export const WorkflowInputSchema = z.union([
   // Legacy array format (for backward compatibility)
   z.array(FlatInputSchema),
 ]);
+export type WorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
 export const ManualTriggerSchema = z.object({
   type: z.literal('manual'),

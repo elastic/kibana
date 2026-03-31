@@ -43,7 +43,9 @@ describe('loadWorkflowsThunk', () => {
         {
           id: 'wf-1',
           name: 'Workflow One',
-          definition: { inputs: [{ name: 'input1', type: 'string' }] },
+          definition: {
+            triggers: [{ type: 'manual', inputs: [{ name: 'input1', type: 'string' }] }],
+          },
         },
         {
           id: 'wf-2',

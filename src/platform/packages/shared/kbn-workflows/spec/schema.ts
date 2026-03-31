@@ -9,10 +9,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
+import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { TriggerSchema } from './schema/triggers';
 import { WorkflowInputSchema } from './schema/triggers/manual_trigger_schema';
-import { BaseEventSchema } from './schema/common/base_event';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 

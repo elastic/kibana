@@ -100,7 +100,12 @@ describe('useContextOverrideData', () => {
       name: 'test-workflow',
       enabled: true,
       consts: { key: 'value' },
-      inputs: { type: 'object' },
+      triggers: [
+        {
+          type: 'manual',
+          inputs: { type: 'object' },
+        },
+      ],
     };
 
     mockSelectWorkflowGraph.mockReturnValue(mockGraph);
@@ -152,9 +157,7 @@ describe('useContextOverrideData', () => {
     expect(mockBuildContextOverride).toHaveBeenCalledWith(
       mockStepSubGraph,
       expect.objectContaining({
-        inputsDefinition: expect.objectContaining({
-          type: 'object',
-        }),
+        inputsDefinition: undefined,
       })
     );
   });

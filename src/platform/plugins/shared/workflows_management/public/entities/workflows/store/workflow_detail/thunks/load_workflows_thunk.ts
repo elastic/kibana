@@ -38,7 +38,7 @@ export const loadWorkflowsThunk = createAsyncThunk<
 
     const workflowsMap: WorkflowsResponse['workflows'] = {};
     response.results.forEach((workflow) => {
-      const manualTrigger = workflow.definition?.triggers.find((trigger) =>
+      const manualTrigger = workflow.definition?.triggers?.find((trigger) =>
         isManualTrigger(trigger)
       ) as ManualTrigger | undefined;
       const inputsSchema = manualTrigger?.inputs

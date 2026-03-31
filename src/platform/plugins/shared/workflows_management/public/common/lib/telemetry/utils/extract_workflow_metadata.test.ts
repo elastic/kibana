@@ -8,6 +8,7 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import type { WorkflowInput } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import {
   extractStepInfoFromWorkflowYaml,
   extractWorkflowMetadata,
@@ -42,8 +43,8 @@ function asRuntimeTriggers(triggers: unknown): WorkflowYaml['triggers'] {
 }
 
 /** Legacy inputs array form is not fully expressed on `WorkflowYaml['inputs']` union typing. */
-function asRuntimeInputs(inputs: unknown): WorkflowYaml['inputs'] {
-  return inputs as WorkflowYaml['inputs'];
+function asRuntimeInputs(inputs: unknown): WorkflowInput {
+  return inputs as WorkflowInput;
 }
 
 const minimalConsoleStep = { name: 's1', type: 'console', with: {} };
@@ -291,10 +292,15 @@ describe('extractWorkflowMetadata', () => {
       expect(
         metadata(
           baseWorkflow({
-            inputs: asRuntimeInputs([
-              { name: 'a', type: 'string' },
-              { name: 'b', type: 'number' },
-            ]),
+            triggers: [
+              {
+                type: 'manual',
+                inputs: asRuntimeInputs([
+                  { name: 'a', type: 'string' },
+                  { name: 'b', type: 'number' },
+                ]),
+              },
+            ],
           })
         ).inputCount
       ).toBe(2);
@@ -399,9 +405,14 @@ describe('extractWorkflowMetadata', () => {
   describe('inputs', () => {
     it('counts inputs from array', () => {
       const result = metadata({
-        inputs: [
-          { name: 'input-1', type: 'string' },
-          { name: 'input-2', type: 'number' },
+        triggers: [
+          {
+            type: 'manual',
+            inputs: [
+              { name: 'input-1', type: 'string' },
+              { name: 'input-2', type: 'number' },
+            ],
+          },
         ],
       });
       expect(result.inputCount).toBe(2);
@@ -534,11 +545,17 @@ describe('extractWorkflowMetadata', () => {
         enabled: true,
         description: 'A complex workflow',
         tags: ['prod', 'alerts'],
-        triggers: [{ type: 'scheduled' }, { type: 'alert' }],
-        inputs: [
-          { name: 'input-1', type: 'string' },
-          { name: 'input-2', type: 'number' },
-          { name: 'input-3', type: 'boolean' },
+        triggers: [
+          { type: 'scheduled' },
+          { type: 'alert' },
+          {
+            type: 'manual',
+            inputs: [
+              { name: 'input-1', type: 'string' },
+              { name: 'input-2', type: 'number' },
+              { name: 'input-3', type: 'boolean' },
+            ],
+          },
         ],
         consts: { API_KEY: 'abc', TIMEOUT: 30 },
         settings: {
@@ -575,8 +592,8 @@ describe('extractWorkflowMetadata', () => {
       expect(result.enabled).toBe(true);
       expect(result.hasDescription).toBe(true);
       expect(result.tagCount).toBe(2);
-      expect(result.triggerCount).toBe(2);
-      expect(result.triggerTypes).toEqual(expect.arrayContaining(['scheduled', 'alert']));
+      expect(result.triggerCount).toBe(3);
+      expect(result.triggerTypes).toEqual(expect.arrayContaining(['scheduled', 'alert', 'manual']));
       expect(result.inputCount).toBe(3);
       expect(result.constCount).toBe(2);
       expect(result.concurrencyMax).toBe(3);
