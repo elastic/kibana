@@ -364,7 +364,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
             </span>
             <span
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="chevronSingleDown"
             />
           </span>
         </button>
