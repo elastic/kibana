@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
@@ -15,6 +15,7 @@ import { useAlertsPrivileges } from '../../detections/containers/detection_engin
 import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
 import { EventKind } from './constants/event_kinds';
+import { Footer } from './footer';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 
@@ -57,6 +58,9 @@ export const DocumentFlyout = memo(({ hit, renderCellActions }: DocumentFlyoutPr
       <EuiFlyoutBody>
         <OverviewTab hit={hit} renderCellActions={renderCellActions} />
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <Footer hit={hit} />
+      </EuiFlyoutFooter>
     </>
   );
 });
