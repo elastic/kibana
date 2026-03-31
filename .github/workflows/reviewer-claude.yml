@@ -14,44 +14,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  mint-litellm-token:
+  mint-token:
     if: >-
       github.event.pull_request.user.type != 'Bot' &&
       contains(fromJSON('["MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association) &&
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
       contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
     runs-on: ubuntu-latest
-    environment: litellm-admin # contains LITELLM_MASTER_KEY
     outputs:
       api_key: ${{ steps.mint.outputs.api_key }}
-      key_alias: ${{ steps.mint.outputs.key_alias }}
-      token_id: ${{ steps.mint.outputs.token_id }}
     steps:
       - name: Checkout Actions
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          repository: 'elastic/kibana-github-actions'
-          ref: main
-          path: ./actions
-          persist-credentials: false
-
-      - name: Install Actions
-        run: npm ci --omit=dev --prefix ./actions
-
-      - name: Mint LiteLLM token
         id: mint
-        uses: ./actions/litellm-token
+        uses: elastic/github-actions/litellm-token@v3 # TODO: update to SHA after release
         with:
-          operation: mint
           base-url: ${{ secrets.LITELLM_BASE_URL }}
-          master-key: ${{ secrets.LITELLM_MASTER_KEY }}
-          models: 'llm-gateway/claude-opus-4-5'
-          duration: '30m'
-          metadata: >-
-            {"purpose":"claude-review"}
+          master-key: ${{ secrets.LITELLM_API_KEY }}
+          models: llm-gateway/claude-opus-4-5
+          key-ttl: 15m
+          max-budget: '5'
 
   claude-review:
-    needs: mint-litellm-token
+    needs: mint-token
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -60,39 +44,11 @@ jobs:
       - name: Run Claude PR Review
         uses: anthropics/claude-code-action@64c7a0ef71df67b14cb4471f4d9c8565c61042bf # v1.0.66
         with:
-          anthropic_api_key: ${{ needs.mint-litellm-token.outputs.api_key }}
+          anthropic_api_key: ${{ needs.mint-token.outputs.api_key }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: '/review'
           claude_args: '--max-turns 5'
-
-          # TODO: limit tools / internet access?
         env:
+          # TODO: limit tools / internet access?
           ANTHROPIC_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
           ANTHROPIC_MODEL: 'llm-gateway/claude-opus-4-5'
-
-  revoke-litellm-token:
-    if: ${{ always() && needs.mint-litellm-token.result == 'success' }}
-    needs: [mint-litellm-token, claude-review]
-    runs-on: ubuntu-latest
-    environment: litellm-admin # contains LITELLM_MASTER_KEY
-    steps:
-      - name: Checkout Actions
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          repository: 'elastic/kibana-github-actions'
-          ref: main
-          path: ./actions
-          persist-credentials: false
-
-      - name: Install Actions
-        run: npm ci --omit=dev --prefix ./actions
-
-      - name: Revoke LiteLLM token
-        uses: ./actions/litellm-token
-        with:
-          operation: revoke
-          base-url: ${{ secrets.LITELLM_BASE_URL }}
-          master-key: ${{ secrets.LITELLM_MASTER_KEY }}
-          key-alias: ${{ needs.mint-litellm-token.outputs.key_alias }}
-          token-id: ${{ needs.mint-litellm-token.outputs.token_id }}
-          api-key: ${{ needs.mint-litellm-token.outputs.api_key }}
