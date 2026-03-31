@@ -9,6 +9,7 @@ import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { CircuitBreakingQueryExecutorImpl } from '../health_diagnostic_receiver';
 import { QueryType, Action } from '../health_diagnostic_service.types';
+import type { TelemetryConfigProvider } from '../../../../../common/telemetry_config/telemetry_config_provider';
 
 export const createMockLogger = (): jest.Mocked<Logger> =>
   ({
@@ -27,6 +28,16 @@ export const createMockTaskManager = (): jest.Mocked<TaskManagerStartContract> =
 export const createMockAnalytics = (): jest.Mocked<AnalyticsServiceStart> =>
   ({
     reportEvent: jest.fn(),
+  } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+export const createMockTelemetryConfigProvider = (
+  isOptedIn = true
+): jest.Mocked<TelemetryConfigProvider> =>
+  ({
+    getIsOptedIn: jest.fn().mockReturnValue(isOptedIn),
+    start: jest.fn(),
+    stop: jest.fn(),
+    getObservable: jest.fn(),
   } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export const createMockQueryExecutor = (): jest.Mocked<CircuitBreakingQueryExecutorImpl> =>
@@ -126,10 +137,11 @@ enabled: ${config.enabled}`;
 
 // Helper functions for common test patterns
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createMockSearchResponse = (hits: any[] = [], aggregations?: any) => ({
+export const createMockSearchResponse = (hits: any[] = [], aggregations?: any, pitId?: string) => ({
   hits: {
     hits: hits.map((hit) => ({ _source: hit, sort: ['sort1'] })),
   },
+  ...(pitId && { pit_id: pitId }),
   ...(aggregations && { aggregations }),
 });
 

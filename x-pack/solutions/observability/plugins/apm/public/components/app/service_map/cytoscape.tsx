@@ -18,6 +18,26 @@ cytoscape.use(dagre);
 
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(undefined);
 
+/**
+ * Filters out edges whose source or target node is not present in the
+ * elements list.  This prevents Cytoscape from throwing when the graph
+ * data contains inconsistencies (e.g. an edge referencing a node that
+ * was removed by server-side grouping).
+ */
+export const filterValidElements = (
+  elements: cytoscape.ElementDefinition[]
+): cytoscape.ElementDefinition[] => {
+  const nodeIds = new Set(
+    elements.filter((el) => !el.data.source && !el.data.target).map((el) => el.data.id)
+  );
+  return elements.filter((el) => {
+    if (el.data.source || el.data.target) {
+      return nodeIds.has(el.data.source) && nodeIds.has(el.data.target);
+    }
+    return true;
+  });
+};
+
 export interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
@@ -64,16 +84,18 @@ function CytoscapeComponent({ children, elements, height, serviceName, style }: 
       // We do a fit if we're going from 0 to >0 elements
       const fit = cy.elements().length === 0;
 
-      cy.add(elements);
+      const validElements = filterValidElements(elements);
+
+      cy.add(validElements);
       // Remove any old elements that don't exist in the new set of elements.
-      const elementIds = elements.map((element) => element.data.id);
+      const elementIds = validElements.map((element) => element.data.id);
       cy.elements().forEach((element) => {
         if (!elementIds.includes(element.data('id'))) {
           cy.remove(element);
         } else {
           // Doing an "add" with an element with the same id will keep the original
           // element. Set the data with the new element data.
-          const newElement = elements.find((el) => el.data.id === element.id());
+          const newElement = validElements.find((el) => el.data.id === element.id());
           element.data(newElement?.data ?? element.data());
         }
       });

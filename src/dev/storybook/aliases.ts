@@ -45,6 +45,7 @@ export const storybookAliases = {
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',
   logs_explorer: 'x-pack/solutions/observability/plugins/logs_explorer/.storybook',
   management: 'src/platform/packages/shared/kbn-management/storybook/config',
+  metrics_data_access: 'x-pack/solutions/observability/plugins/metrics_data_access/.storybook',
   observability_ai_assistant_app:
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_ai_assistant:

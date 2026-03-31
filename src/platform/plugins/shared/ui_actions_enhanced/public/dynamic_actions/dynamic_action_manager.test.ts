@@ -314,6 +314,7 @@ describe('DynamicActionManager', () => {
 
         await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
 
+        // @ts-expect-error upgrade typescript v5.9.3
         const createdAction = await actions.values().next().value();
 
         expect(createdAction.grouping).toBe(dynamicActionGrouping);
@@ -477,8 +478,10 @@ describe('DynamicActionManager', () => {
 
         expect(actions.size).toBe(1);
 
+        // @ts-expect-error upgrade typescript v5.9.3
         const registeredAction1 = await actions.values().next().value();
 
+        // @ts-expect-error upgrade typescript v5.9.3
         expect(registeredAction1.getDisplayName()).toBe('Action 3');
 
         const action: SerializedAction = {
@@ -491,8 +494,10 @@ describe('DynamicActionManager', () => {
 
         expect(actions.size).toBe(1);
 
+        // @ts-expect-error upgrade typescript v5.9.3
         const registeredAction2 = await actions.values().next().value();
 
+        // @ts-expect-error upgrade typescript v5.9.3
         expect(registeredAction2.getDisplayName()).toBe('foo');
       });
 
@@ -600,8 +605,10 @@ describe('DynamicActionManager', () => {
 
         expect(actions.size).toBe(1);
 
+        // @ts-expect-error upgrade typescript v5.9.3
         const registeredAction1 = await actions.values().next().value();
 
+        // @ts-expect-error upgrade typescript v5.9.3
         expect(registeredAction1.getDisplayName()).toBe('Action 3');
 
         const action: SerializedAction = {
@@ -614,8 +621,10 @@ describe('DynamicActionManager', () => {
 
         expect(actions.size).toBe(1);
 
+        // @ts-expect-error upgrade typescript v5.9.3
         const registeredAction2 = await actions.values().next().value();
 
+        // @ts-expect-error upgrade typescript v5.9.3
         expect(registeredAction2.getDisplayName()).toBe('Action 3');
       });
 

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MutableRefObject } from 'react';
 import React, { useContext } from 'react';
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { ToastsStart } from '@kbn/core/public';
@@ -22,13 +23,15 @@ function onFilterCell(
   rowIndex: EuiDataGridColumnCellActionProps['rowIndex'],
   columnId: EuiDataGridColumnCellActionProps['columnId'],
   mode: '+' | '-',
-  field: DataViewField
+  field: DataViewField,
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>
 ) {
   const row = context.getRowByIndex(rowIndex);
 
   if (row && field && context.onFilter) {
     const value = row.flattened[columnId];
     context.onFilter(field, value, mode);
+    dataGridRef?.current?.closeCellPopover();
   }
 }
 
@@ -43,10 +46,12 @@ export const FilterInBtn = ({
   cellActionProps: { Component, rowIndex, columnId },
   field,
   isPlainRecord,
+  dataGridRef,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
   field: DataViewField;
   isPlainRecord: boolean | undefined;
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
 }) => {
   const context = useContext(UnifiedDataTableContext);
   const filteringDisabled =
@@ -59,7 +64,7 @@ export const FilterInBtn = ({
   return (
     <Component
       onClick={() => {
-        onFilterCell(context, rowIndex, columnId, '+', field);
+        onFilterCell(context, rowIndex, columnId, '+', field, dataGridRef);
       }}
       iconType="plusInCircle"
       aria-label={buttonTitle}
@@ -78,10 +83,12 @@ export const FilterOutBtn = ({
   cellActionProps: { Component, rowIndex, columnId },
   field,
   isPlainRecord,
+  dataGridRef,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
   field: DataViewField;
   isPlainRecord: boolean | undefined;
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
 }) => {
   const context = useContext(UnifiedDataTableContext);
   const filteringDisabled =
@@ -94,7 +101,7 @@ export const FilterOutBtn = ({
   return (
     <Component
       onClick={() => {
-        onFilterCell(context, rowIndex, columnId, '-', field);
+        onFilterCell(context, rowIndex, columnId, '-', field, dataGridRef);
       }}
       iconType="minusInCircle"
       aria-label={buttonTitle}
@@ -146,7 +153,8 @@ export function buildCellActions(
   isPlainRecord: boolean | undefined,
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
-  onFilter?: DocViewFilterFn
+  onFilter?: DocViewFilterFn,
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>
 ) {
   return [
     ...(onFilter && field.filterable
@@ -156,12 +164,14 @@ export function buildCellActions(
               cellActionProps,
               field,
               isPlainRecord,
+              dataGridRef,
             }),
           (cellActionProps: EuiDataGridColumnCellActionProps) =>
             FilterOutBtn({
               cellActionProps,
               field,
               isPlainRecord,
+              dataGridRef,
             }),
         ]
       : []),

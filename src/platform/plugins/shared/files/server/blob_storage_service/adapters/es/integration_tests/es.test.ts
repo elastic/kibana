@@ -17,7 +17,8 @@ import {
 
 import { ElasticsearchBlobStorageClient, BLOB_STORAGE_SYSTEM_INDEX_NAME } from '../es';
 
-describe('Elasticsearch blob storage', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/222640
+describe.skip('Elasticsearch blob storage', () => {
   let manageES: TestElasticsearchUtils;
   let manageKbn: TestKibanaUtils;
   let esBlobStorage: ElasticsearchBlobStorageClient;

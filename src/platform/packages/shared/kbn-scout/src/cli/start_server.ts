@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Command } from '@kbn/dev-cli-runner';
-import { initLogsDir } from '@kbn/test';
-import { FlagsReader } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Command } from '@kbn/dev-cli-runner';
+import type { FlagsReader } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
 
+import { initLogsDir } from './init_logs_dir';
 import { startServers, parseServerFlags, SERVER_FLAG_OPTIONS } from '../servers';
 
 export const runStartServer = async (flagsReader: FlagsReader, log: ToolingLog) => {

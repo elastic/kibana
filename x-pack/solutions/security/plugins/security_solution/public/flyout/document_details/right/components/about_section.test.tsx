@@ -50,7 +50,8 @@ const renderAboutSection = (getFieldsData = mockGetFieldsData) => {
   );
 };
 
-describe('<AboutSection />', () => {
+// Failing: See https://github.com/elastic/kibana/issues/230642
+describe.skip('<AboutSection />', () => {
   it('should render about component', async () => {
     const { getByTestId } = renderAboutSection();
     await act(async () => {

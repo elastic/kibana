@@ -197,6 +197,10 @@ export interface ChatCompleteResponse<
    */
   content: string;
   /**
+   * Optional refusal reason returned by the model when content is filtered.
+   */
+  refusal?: string;
+  /**
    * The eventual tool calls performed by the LLM.
    */
   toolCalls: ToolCallsOf<TOptions>['toolCalls'];

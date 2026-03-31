@@ -493,7 +493,7 @@ paths:
           description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -507,7 +507,7 @@ paths:
             create a draft Timeline.
         '409':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -558,7 +558,7 @@ paths:
             Timeline is cleared and returned.
         '403':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -571,7 +571,7 @@ paths:
             create a draft Timeline.
         '409':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -681,7 +681,7 @@ paths:
           description: Indicates the favorite status was successfully updated.
         '403':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -814,7 +814,7 @@ paths:
           description: Indicates the installation of prepackaged Timelines was successful.
         '500':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -963,7 +963,7 @@ paths:
           description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:

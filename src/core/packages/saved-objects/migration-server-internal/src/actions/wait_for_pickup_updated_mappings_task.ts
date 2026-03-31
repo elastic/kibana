@@ -36,7 +36,8 @@ export const waitForPickupUpdatedMappingsTask = flow(
             JSON.stringify(res.failures.value)
         );
       } else if (Option.isSome(res.error)) {
-        if (res.error.value.type === 'search_phase_execution_exception') {
+        const error = res.error.value;
+        if (error.type === 'search_phase_execution_exception') {
           // This error is normally fixed in the next try, so let's retry
           // the update mappings task instead of throwing
           return TaskEither.left({

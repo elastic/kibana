@@ -205,21 +205,42 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              ip:
+                value:
+                  description: This list describes bad internet ips
+                  id: ip_list
+                  name: Simple list with ips
+                  type: ip
+              ip_range:
+                value:
+                  description: This list has ip ranges
+                  id: ip_range_list
+                  name: Simple list with ip ranges
+                  type: ip_range
+              keyword:
+                value:
+                  description: This list describes bad host names
+                  id: keyword_list
+                  name: Simple list with a keyword
+                  type: keyword
+              keyword_custom_format:
+                value:
+                  description: This parses the first found ipv4 only
+                  id: keyword_custom_format_list
+                  name: Simple list with a keyword using a custom format
+                  type: keyword
             schema:
               type: object
               properties:
                 description:
                   $ref: '#/components/schemas/ListDescription'
-                deserializer:
-                  type: string
                 id:
                   $ref: '#/components/schemas/ListId'
                 meta:
                   $ref: '#/components/schemas/ListMetadata'
                 name:
                   $ref: '#/components/schemas/ListName'
-                serializer:
-                  type: string
                 type:
                   $ref: '#/components/schemas/ListType'
                 version:
@@ -236,6 +257,67 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                ip:
+                  value:
+                    _version: WzAsMV0=
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    created_at: 2025-01-08T04:47:34.273Z
+                    created_by: elastic
+                    description: This list describes bad internet ips
+                    id: ip_list
+                    immutable: false
+                    name: Simple list with ips
+                    tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                    type: ip
+                    updated_at: 2025-01-08T04:47:34.273Z
+                    updated_by: elastic
+                    version: 1
+                ip_range:
+                  value:
+                    _version: WzAsMV0=
+                    '@timestamp': 2025-01-09T18:23:52.241Z
+                    created_at: 2025-01-09T18:23:52.241Z
+                    created_by: elastic
+                    description: This list has ip ranges
+                    id: ip_range_list
+                    immutable: false
+                    name: Simple list with ip ranges
+                    tie_breaker_id: 74aebdaf-601f-4940-b351-155728ff7003
+                    type: ip_range
+                    updated_at: 2025-01-09T18:23:52.241Z
+                    updated_by: elastic
+                    version: 1
+                keyword:
+                  value:
+                    _version: WzEsMV0=
+                    '@timestamp': 2025-01-09T18:24:55.786Z
+                    created_at: 2025-01-09T18:24:55.786Z
+                    created_by: elastic
+                    description: This list describes bad host names
+                    id: keyword_list
+                    immutable: false
+                    name: Simple list with a keyword
+                    tie_breaker_id: f7e7dbaa-daf7-4c9a-a3dc-56643923ef68
+                    type: keyword
+                    updated_at: 2025-01-09T18:24:55.786Z
+                    updated_by: elastic
+                    version: 1
+                keyword_custom_format:
+                  value:
+                    _version: WzIsMV0=
+                    '@timestamp': 2025-01-09T18:25:39.604Z
+                    created_at: 2025-01-09T18:25:39.604Z
+                    created_by: elastic
+                    description: This parses the first found ipv4 only
+                    id: keyword_custom_format_list
+                    immutable: false
+                    name: Simple list with a keyword using a custom format
+                    tie_breaker_id: 8247ae63-b780-47b8-9a89-948b643e9ec2
+                    type: keyword
+                    updated_at: 2025-01-09T18:25:39.604Z
+                    updated_by: elastic
+                    version: 1
               schema:
                 $ref: '#/components/schemas/List'
           description: Successful response
@@ -1194,21 +1276,14 @@ paths:
 
             Required when importing a new list that is `list_id` is not
             specified.
+          examples:
+            ip:
+              value: ip
           in: query
           name: type
           required: false
           schema:
             $ref: '#/components/schemas/ListType'
-        - in: query
-          name: serializer
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: deserializer
-          required: false
-          schema:
-            type: string
         - description: >-
             Determines when changes made by the request are made visible to
             search
@@ -1351,8 +1426,6 @@ components:
           type: string
         description:
           $ref: '#/components/schemas/ListDescription'
-        deserializer:
-          type: string
         id:
           $ref: '#/components/schemas/ListId'
         immutable:
@@ -1361,8 +1434,6 @@ components:
           $ref: '#/components/schemas/ListMetadata'
         name:
           $ref: '#/components/schemas/ListName'
-        serializer:
-          type: string
         tie_breaker_id:
           type: string
         type:
@@ -1404,16 +1475,12 @@ components:
           type: string
         created_by:
           type: string
-        deserializer:
-          type: string
         id:
           $ref: '#/components/schemas/ListItemId'
         list_id:
           $ref: '#/components/schemas/ListId'
         meta:
           $ref: '#/components/schemas/ListItemMetadata'
-        serializer:
-          type: string
         tie_breaker_id:
           type: string
         type:

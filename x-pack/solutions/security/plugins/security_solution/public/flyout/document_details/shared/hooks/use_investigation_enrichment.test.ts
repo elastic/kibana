@@ -26,6 +26,8 @@ jest.mock('../../../../common/hooks/use_app_toasts', () => ({
     addError: jest.fn(),
   }),
 }));
+
+const mockStorageGet = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
   return {
@@ -41,6 +43,7 @@ jest.mock('../../../../common/lib/kibana', () => {
             }),
           },
         },
+        storage: { get: () => mockStorageGet() },
         uiSettings: {
           get: jest.fn().mockReturnValue(''),
         },
@@ -50,6 +53,10 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 describe('useInvestigationTimeEnrichment', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should return default range', () => {
     (useEventEnrichmentComplete as jest.Mock).mockReturnValue({});
 
@@ -64,6 +71,22 @@ describe('useInvestigationTimeEnrichment', () => {
       to: DEFAULT_EVENT_ENRICHMENT_TO,
     });
     expect(typeof result.current.setRange).toBe('function');
+  });
+
+  it('should return range saved in local storage', () => {
+    mockStorageGet.mockReturnValue({ start: 'now-7d', end: 'now-3d' });
+    (useEventEnrichmentComplete as jest.Mock).mockReturnValue({});
+
+    const { result } = renderHook(() =>
+      useInvestigationTimeEnrichment({
+        eventFields: {},
+      })
+    );
+
+    expect(result.current.range).toEqual({
+      from: 'now-7d',
+      to: 'now-3d',
+    });
   });
 
   it('should return loading', () => {

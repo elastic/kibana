@@ -31,7 +31,6 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
   private async claimJob(task: ReportTaskParams): Promise<SavedReport> {
     const store = await this.opts.reporting.getStore();
     const report = await store.findReportFromTask(task); // receives seq_no and primary_term
-    const logger = this.logger.get(report._id);
 
     if (report.status === 'completed') {
       throw new Error(`Can not claim the report job: it is already completed!`);
@@ -51,7 +50,7 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
         err.stack = error.stack;
       } else {
         if (report.error && report.error instanceof Error) {
-          errorLogger(logger, 'Error executing report', report.error);
+          errorLogger(this.logger, 'Error executing report', report.error);
         }
         err = new QueueTimeoutError(
           `Max attempts reached (${maxAttempts}). Queue timeout reached.`
@@ -76,13 +75,14 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
 
     const claimedReport = new SavedReport({ ...report, ...doc });
 
-    logger.info(
+    this.logger.info(
       `Claiming ${claimedReport.jobtype} ${report._id} ` +
         `[_index: ${report._index}] ` +
         `[_seq_no: ${report._seq_no}] ` +
         `[_primary_term: ${report._primary_term}] ` +
         `[attempts: ${report.attempts}] ` +
-        `[process_expiration: ${expirationTime}]`
+        `[process_expiration: ${expirationTime}]`,
+      { tags: [report._id] }
     );
 
     // event tracking of claimed job

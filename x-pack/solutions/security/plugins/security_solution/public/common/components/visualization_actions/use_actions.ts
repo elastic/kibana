@@ -104,6 +104,7 @@ export const useActions = ({
   const { services } = useKibana();
   const {
     lens: { navigateToPrefilledEditor, canUseEditor },
+    topValuesPopover,
   } = services;
 
   const onOpenInLens = useCallback(() => {
@@ -152,6 +153,7 @@ export const useActions = ({
           ...ACTION_DEFINITION[VisualizationContextMenuActions.addToNewCase],
           execute: async () => {
             onAddToNewCaseClicked();
+            topValuesPopover.closePopover();
           },
           disabled: isAddToNewCaseDisabled,
           isCompatible: async () =>
@@ -206,6 +208,7 @@ export const useActions = ({
       onOpenInLens,
       openSaveVisualizationFlyout,
       withActions,
+      topValuesPopover,
     ]
   );
 

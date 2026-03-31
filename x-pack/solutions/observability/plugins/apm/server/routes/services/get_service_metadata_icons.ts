@@ -8,7 +8,7 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
+import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
 import { getAgentName } from '@kbn/elastic-agent-utils';
 import { maybe } from '../../../common/utils/maybe';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';

@@ -23,7 +23,6 @@ import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_uti
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { getMutedAlertsInstancesByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
 import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import { afterAll } from '@elastic/synthetics';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
@@ -328,6 +327,7 @@ describe('AlertsTable', () => {
   let onToggleColumn: AlertsDataGridProps['onToggleColumn'];
   let onResetColumns: AlertsDataGridProps['onResetColumns'];
   let refresh: RenderContext<AdditionalContext>['refresh'];
+  let refreshSpy: jest.SpyInstance<void, []>;
 
   mockAlertsDataGrid.mockImplementation((props) => {
     const { AlertsDataGrid: ActualAlertsDataGrid } = jest.requireActual('./alerts_data_grid');
@@ -335,6 +335,7 @@ describe('AlertsTable', () => {
     onToggleColumn = props.onToggleColumn;
     onResetColumns = props.onResetColumns;
     refresh = props.renderContext.refresh;
+    refreshSpy = jest.spyOn(props.renderContext, 'refresh');
     return <ActualAlertsDataGrid {...props} />;
   });
 
@@ -1054,6 +1055,18 @@ describe('AlertsTable', () => {
         refresh();
       });
       expect(mockSearchAlerts).toHaveBeenLastCalledWith(expect.objectContaining({ pageIndex: 0 }));
+    });
+
+    it("doesn't call `refresh` when paginating and using `lastReloadRequestTime`", async () => {
+      render(<AlertsTable {...tableProps} lastReloadRequestTime={Date.now()} />);
+
+      await waitFor(() => expect(onChangePageIndex).not.toBeUndefined());
+
+      act(() => {
+        onChangePageIndex(1);
+      });
+
+      expect(refreshSpy).not.toHaveBeenCalled();
     });
   });
 });

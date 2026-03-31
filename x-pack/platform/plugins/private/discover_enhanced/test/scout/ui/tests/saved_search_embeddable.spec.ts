@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ScoutWorkerFixtures, expect, tags } from '@kbn/scout';
+import { ScoutWorkerFixtures, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
 const createSavedSearch = async (
@@ -37,7 +38,7 @@ const createSavedSearch = async (
     ],
   });
 
-test.describe('Discover app - saved search embeddable', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAgnostic }, () => {
   const SAVED_SEARCH_TITLE = 'TempSearch';
   const SAVED_SEARCH_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
 

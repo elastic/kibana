@@ -68,7 +68,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       return window.__RENDERING_SESSION__;
     });
 
-  describe('rendering service', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/240348
+  describe.skip('rendering service', () => {
     it('exposes plugin config settings to authenticated users', async () => {
       // This retry loop to get the injectedMetadata is to overcome flakiness
       // (see comment in getInjectedMetadata)

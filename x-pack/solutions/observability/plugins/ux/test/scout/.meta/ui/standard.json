@@ -1,0 +1,131 @@
+{
+  "sha1": "dc0c8e1c5ad5fd9648c343109cdb68f48300c0d4",
+  "tests": [
+    {
+      "id": "b0e8cd0f58f4ceb-df9624e0ada8207",
+      "title": "Ingest UX test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/ux/test/scout/ui/tests/global.setup.ts",
+        "line": 12,
+        "column": 16
+      }
+    },
+    {
+      "id": "b6f8c1042794196-1f5d5658cbb50b0",
+      "title": "Core Web Vitals displays core web vitals metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/ux/test/scout/ui/tests/core_web_vitals.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    },
+    {
+      "id": "f5d36336992c805-b6d850a5a8ae90d",
+      "title": "INP displays Interaction to Next Paint values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/ux/test/scout/ui/tests/inp.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    },
+    {
+      "id": "b32cb908bb051e2-d068a474ee25a97",
+      "title": "Page Views Chart displays page views with browser breakdown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/ux/test/scout/ui/tests/page_views.spec.ts",
+        "line": 14,
+        "column": 7
+      }
+    },
+    {
+      "id": "9fde28eabdb6a7b-e5096310a5be7e3",
+      "title": "UX Client Metrics displays client metrics values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/ux/test/scout/ui/tests/ux_client_metrics.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    },
+    {
+      "id": "857e23675439c3a-9d5460321804dbf",
+      "title": "UX JS Errors displays JS error count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/ux/test/scout/ui/tests/ux_js_errors.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    },
+    {
+      "id": "04ca0d2444644ee-08c53333a07fbe8",
+      "title": "UX Long Task Metrics displays long task metrics values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/ux/test/scout/ui/tests/ux_long_task_metrics.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    },
+    {
+      "id": "73fdafae712b1b6-60ea532b82d48a8",
+      "title": "UX URL Query confirms query params are applied",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/ux/test/scout/ui/tests/ux_url_query.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    },
+    {
+      "id": "1eec594267cf895-d9660a0103eeb6a",
+      "title": "UX Visitor Breakdown displays visitor breakdown charts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/ux/test/scout/ui/tests/ux_visitor_breakdown.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    }
+  ]
+}

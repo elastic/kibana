@@ -143,12 +143,21 @@ export const TSVBMetricModelVariableRT = rt.type({
   name: rt.string,
 });
 
-export const TSVBMetricModelBucketScriptRT = rt.type({
-  id: rt.string,
-  script: rt.string,
-  type: rt.literal('calculation'),
-  variables: rt.array(TSVBMetricModelVariableRT),
-});
+export const TSVBMetricModelBucketScriptRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    script: rt.string,
+    type: rt.literal('calculation'),
+    variables: rt.array(TSVBMetricModelVariableRT),
+  }),
+  rt.partial({
+    gap_policy: rt.union([
+      rt.literal('skip'),
+      rt.literal('insert_zeros'),
+      rt.literal('keep_values'),
+    ]),
+  }),
+]);
 
 export const TSVBMetricModelDerivativeRT = rt.type({
   id: rt.string,

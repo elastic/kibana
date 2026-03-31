@@ -383,6 +383,47 @@ export default function genAiTest({ getService }: FtrProviderContext) {
         expect(body.status).to.equal('ok');
         expect(body.connector_id).to.equal(createdAction.id);
       });
+
+      it('should return 200 when creating an Azure connector with defaultModel', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config: {
+              apiProvider: 'Azure OpenAI',
+              apiUrl: config.apiUrl,
+              defaultModel: 'gpt-4o',
+            },
+            secrets,
+          })
+          .expect(200);
+
+        expect(createdAction).to.have.property('id');
+        expect(createdAction.config.apiProvider).to.equal('Azure OpenAI');
+        expect(createdAction.config.defaultModel).to.equal('gpt-4o');
+      });
+
+      it('should return 200 when creating an Azure connector without defaultModel', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config: {
+              apiProvider: 'Azure OpenAI',
+              apiUrl: config.apiUrl,
+            },
+            secrets,
+          })
+          .expect(200);
+
+        expect(createdAction).to.have.property('id');
+        expect(createdAction.config.apiProvider).to.equal('Azure OpenAI');
+        expect(createdAction.config).to.not.have.property('defaultModel');
+      });
     });
 
     describe('executor', () => {

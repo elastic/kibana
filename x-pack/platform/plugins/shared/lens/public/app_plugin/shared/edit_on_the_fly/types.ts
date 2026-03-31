@@ -53,7 +53,7 @@ export interface EditConfigPanelProps {
   /** Contains the active data, necessary for some panel configuration such as coloring */
   lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   /** Optional callback called when updating the by reference embeddable */
-  updateByRefInput?: (soId: string) => void;
+  updateByRefInput?: (soId: string, attrs: TypedLensSerializedState['attributes']) => void;
   /** Callback for closing the edit flyout */
   closeFlyout?: () => void;
   /** Boolean used for adding a flyout wrapper */

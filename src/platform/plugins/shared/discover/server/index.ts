@@ -15,6 +15,7 @@ import type {
   TitleFromLocatorFn,
   QueryFromLocatorFn,
   FiltersFromLocatorFn,
+  TimeFieldNameFromLocatorFn,
 } from './locator';
 
 export interface DiscoverServerPluginStartDeps {
@@ -27,6 +28,7 @@ export interface LocatorServiceScopedClient {
   titleFromLocator: TitleFromLocatorFn;
   queryFromLocator: QueryFromLocatorFn;
   filtersFromLocator: FiltersFromLocatorFn;
+  timeFieldNameFromLocator: TimeFieldNameFromLocatorFn;
 }
 
 export interface DiscoverServerPluginLocatorService {

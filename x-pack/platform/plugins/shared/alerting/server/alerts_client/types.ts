@@ -38,6 +38,18 @@ import type { RulesSettingsFlappingProperties } from '../../common/rules_setting
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
 
+export interface TrackedAADAlerts<AlertData extends RuleAlertData> {
+  indices: Record<string, string>;
+  active: Record<string, Alert & AlertData>;
+  recovered: Record<string, Alert & AlertData>;
+  delayed: Record<string, Alert & AlertData>;
+  all: Record<string, Alert & AlertData>;
+  seqNo: Record<string, number | undefined>;
+  primaryTerm: Record<string, number | undefined>;
+  get: (uuid: string) => Alert & AlertData;
+  getById: (id: string) => (Alert & AlertData) | undefined;
+}
+
 export interface AlertRuleData {
   consumer: string;
   executionId: string;
@@ -106,7 +118,6 @@ export interface IAlertsClient<
   > | null;
   determineFlappingAlerts(): void;
   determineDelayedAlerts(opts: DetermineDelayedAlertsOpts): void;
-  getTrackedExecutions(): Set<string>;
 }
 
 export interface ProcessAndLogAlertsOpts {
@@ -135,7 +146,6 @@ export interface InitializeExecutionOpts {
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
-  trackedExecutions?: string[];
 }
 
 export interface TrackedAlerts<

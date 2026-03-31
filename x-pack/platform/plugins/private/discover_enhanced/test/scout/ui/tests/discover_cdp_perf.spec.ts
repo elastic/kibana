@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { test, tags, expect, CDPSession } from '@kbn/scout';
+import { test, tags, CDPSession } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { testData } from '../fixtures';
 
 test.describe(
   'Discover App - Performance Metrics & Bundle Analysis',
-  { tag: [...tags.DEPLOYMENT_AGNOSTIC, ...tags.PERFORMANCE] },
+  { tag: [...tags.deploymentAgnostic, ...tags.performance] },
   () => {
     let cdp: CDPSession;
 

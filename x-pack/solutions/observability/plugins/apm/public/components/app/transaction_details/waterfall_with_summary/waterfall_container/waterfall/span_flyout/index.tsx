@@ -130,18 +130,21 @@ export function SpanFlyout({
 
   const isLoading = isPending(status);
 
+  const spanDetailsTitle = i18n.translate(
+    'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
+    {
+      defaultMessage: 'Span details',
+    }
+  );
+
   return (
     <EuiPortal>
-      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
+      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true} aria-label={spanDetailsTitle}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h2>
-                  {i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle', {
-                    defaultMessage: 'Span details',
-                  })}
-                </h2>
+                <h2>{spanDetailsTitle}</h2>
               </EuiTitle>
             </EuiFlexItem>
             {span && (
@@ -204,7 +207,7 @@ function SpanFlyoutBody({
 }) {
   const stackframes = span.span.stacktrace;
   const plaintextStacktrace = span.code?.stacktrace;
-  const codeLanguage = parentTransaction?.service.language?.name;
+  const codeLanguage = parentTransaction?.service?.language?.name;
   const spanDb = span.span.db;
   const spanTypes = getSpanTypes(span);
   const spanHttpStatusCode =
@@ -316,7 +319,7 @@ function SpanFlyoutBody({
 
             <FailureBadge outcome={span.event?.outcome} />
 
-            <SyncBadge sync={span.span.sync} agentName={span.agent.name} />
+            <SyncBadge sync={span.span.sync} agentName={span.agent?.name} />
           </ContainerWithMarginRight>,
         ]}
       />

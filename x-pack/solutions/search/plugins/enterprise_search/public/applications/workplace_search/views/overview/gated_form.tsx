@@ -691,6 +691,7 @@ export const WorkplaceSearchGate: React.FC = () => {
         <EuiSpacer />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
+            {/* @ts-expect-error upgrade typescript v5.9.3 */}
             <EuiButton isDisabled={!feature ?? false} type="submit" fill>
               {i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.submit', {
                 defaultMessage: 'Submit',

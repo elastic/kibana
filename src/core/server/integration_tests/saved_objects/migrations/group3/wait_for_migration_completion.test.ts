@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import JSON5 from 'json5';
+import { parse } from 'hjson';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 import {
@@ -68,7 +68,7 @@ describe('migration with waitForCompletion=true', () => {
         const records = logFileContent
           .split('\n')
           .filter(Boolean)
-          .map((str) => JSON5.parse(str)) as any[];
+          .map((str) => parse(str)) as any[];
 
         expect(
           records.find((rec) =>
@@ -105,7 +105,7 @@ describe('migration with waitForCompletion=true', () => {
         const records = logFileContent
           .split('\n')
           .filter(Boolean)
-          .map((str) => JSON5.parse(str)) as any[];
+          .map((str) => parse(str)) as any[];
 
         expect(
           records.find((rec) =>

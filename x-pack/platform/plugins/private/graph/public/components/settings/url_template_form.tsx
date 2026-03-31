@@ -213,7 +213,8 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             urlPlaceholderMissing
               ? [
                   i18n.translate('xpack.graph.settings.drillDowns.invalidUrlWarningText', {
-                    defaultMessage: 'The URL must contain a {placeholder} string.',
+                    defaultMessage:
+                      'The URL is invalid and/or must contain a {placeholder} string.',
                     values: { placeholder: '{{gquery}}' },
                   }),
                 ]

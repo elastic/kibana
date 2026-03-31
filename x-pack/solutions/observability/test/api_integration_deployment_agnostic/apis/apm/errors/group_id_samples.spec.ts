@@ -81,22 +81,24 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let errorsSamplesResponse: ErrorGroupSamples;
       const { bananaTransaction } = config;
 
-      describe('error group id', () => {
-        before(async () => {
-          await generateData({ serviceName, start, end, apmSynthtraceEsClient });
-          const response = await callErrorGroupSamplesApi({
-            groupId: '0000000000000000000000000Error 1',
+      [{ withoutErrorId: true }, { withoutErrorId: false }].forEach(({ withoutErrorId }) => {
+        describe(`error sample (${withoutErrorId ? 'without error id' : 'with error id'})`, () => {
+          before(async () => {
+            await generateData({ serviceName, start, end, apmSynthtraceEsClient, withoutErrorId });
+            const response = await callErrorGroupSamplesApi({
+              groupId: '0000000000000000000000000Error 1',
+            });
+            errorsSamplesResponse = response.body;
           });
-          errorsSamplesResponse = response.body;
-        });
 
-        after(() => apmSynthtraceEsClient.clean());
+          after(() => apmSynthtraceEsClient.clean());
 
-        it('displays correct number of occurrences', () => {
-          const numberOfBuckets = 15;
-          expect(errorsSamplesResponse.occurrencesCount).to.equal(
-            bananaTransaction.failureRate * numberOfBuckets
-          );
+          it('displays correct number of occurrences', () => {
+            const numberOfBuckets = 15;
+            expect(errorsSamplesResponse.occurrencesCount).to.equal(
+              bananaTransaction.failureRate * numberOfBuckets
+            );
+          });
         });
       });
     });

@@ -11,9 +11,9 @@ import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-
 import type { ListArray, NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { waitFor } from '@kbn/detections-response-ftr-services';
 import { createExceptionList } from './create_exception_list';
 import { createExceptionListItem } from '../item/create_exception_list_item';
-import { waitFor } from '../../../../../config/services/detections_response';
 
 /**
  * Convenience testing function where you can pass in just the endpoint entries and you will
@@ -32,7 +32,6 @@ export const createContainerWithEntries = async (
     return [];
   }
   // Create the rule exception list container
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
     description: 'some description',
     list_id: 'some-list-id',

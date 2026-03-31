@@ -18,9 +18,6 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
   job_id: {
     type: 'wildcard',
   },
-  message: {
-    type: 'text',
-  },
   build: {
     type: 'object',
     properties: {
@@ -153,6 +150,23 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
   },
   duration: {
     type: 'long',
+  },
+  tests: {
+    type: 'object',
+    properties: {
+      passes: {
+        type: 'long',
+      },
+      failures: {
+        type: 'long',
+      },
+      pending: {
+        type: 'long',
+      },
+      total: {
+        type: 'long',
+      },
+    },
   },
   config: {
     type: 'object',

@@ -87,7 +87,7 @@ const metricsApiRequest: MetricsAPIRequest = {
               source: 'params.with_limit > 0.0 ? params.with_limit : params.without_limit',
               lang: 'painless',
             },
-            gap_policy: 'skip',
+            gap_policy: 'insert_zeros',
           },
         },
       },

@@ -164,12 +164,9 @@ export class ListClient {
   /**
    * Creates a list, if given at least the "name", "description", "type", and "version"
    * See {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}
-   * for more information around formats of the deserializer and serializer
    * @param options
    * @param options.id The id of the list to create or "undefined" if you want an "id" to be auto-created for you
-   * @param options.deserializer A custom deserializer for the list. Optionally, you an define this as handle bars. See online docs for more information.
    * @param options.immutable Set this to true if this is a list that is "immutable"/"pre-packaged".
-   * @param options.serializer Determines how uploaded list item values are parsed. By default, list items are parsed using named regex groups. See online docs for more information.
    * @param options.name The name of the list
    * @param options.description The description of the list
    * @param options.type The type of list such as "boolean", "double", "text", "keyword", etc...
@@ -179,9 +176,7 @@ export class ListClient {
    */
   public createList = async ({
     id,
-    deserializer,
     immutable,
-    serializer,
     name,
     description,
     type,
@@ -192,14 +187,12 @@ export class ListClient {
     const listName = this.getListName();
     return createList({
       description,
-      deserializer,
       esClient,
       id,
       immutable,
       listIndex: listName,
       meta,
       name,
-      serializer,
       type,
       user,
       version,
@@ -209,14 +202,11 @@ export class ListClient {
   /**
    * Creates a list, if given at least the "name", "description", "type", and "version"
    * See {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}
-   * for more information around formats of the deserializer and serializer.
    * This will create the list if it does not exist. If the list exists, this will ignore creating
    * anything and just return the existing list.
    * @param options
    * @param options.id The id of the list to create or "undefined" if you want an "id" to be auto-created for you
-   * @param options.deserializer A custom deserializer for the list. Optionally, you an define this as handle bars. See online docs for more information.
    * @param options.immutable Set this to true if this is a list that is "immutable"/"pre-packaged".
-   * @param options.serializer Determines how uploaded list item values are parsed. By default, list items are parsed using named regex groups. See online docs for more information.
    * @param options.name The name of the list
    * @param options.description The description of the list
    * @param options.type The type of list such as "boolean", "double", "text", "keyword", etc...
@@ -226,8 +216,6 @@ export class ListClient {
    */
   public createListIfItDoesNotExist = async ({
     id,
-    deserializer,
-    serializer,
     name,
     description,
     immutable,
@@ -239,14 +227,12 @@ export class ListClient {
     const listName = this.getListName();
     return createListIfItDoesNotExist({
       description,
-      deserializer,
       esClient,
       id,
       immutable,
       listIndex: listName,
       meta,
       name,
-      serializer,
       type,
       user,
       version,
@@ -756,10 +742,7 @@ export class ListClient {
    * Imports list items to a stream. If the list already exists, this will append the list items to the existing list.
    * If the list does not exist, this will auto-create the list and then add the items to that list.
    * See {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}
-   * for more information around formats of the deserializer and serializer.
    * @param options
-   * @param options.deserializer A custom deserializer for the list. Optionally, you an define this as handle bars. See online docs for more information.
-   * @param options.serializer Determines how uploaded list item values are parsed. By default, list items are parsed using named regex groups. See online docs for more information.
    * @param options.type The type of list such as "boolean", "double", "text", "keyword", etc...
    * @param options.stream The stream to pull the import from
    * @param options.meta Additional meta data to associate with the list items as an object of "key/value" pairs. You can set this to "undefined" for no meta values.
@@ -767,8 +750,6 @@ export class ListClient {
    * @param options.refresh If true, then refresh the index after importing the list items.
    */
   public importListItemsToStream = async ({
-    deserializer,
-    serializer,
     type,
     listId,
     stream,
@@ -781,14 +762,12 @@ export class ListClient {
     const listName = this.getListName();
     return importListItemsToStream({
       config,
-      deserializer,
       esClient,
       listId,
       listIndex: listName,
       listItemIndex: listItemName,
       meta,
       refresh,
-      serializer,
       stream,
       type,
       user,
@@ -824,11 +803,8 @@ export class ListClient {
    * Creates a list item given at least "value", "type", and a "listId" where "listId" is the parent container that this list
    * item belongs to.
    * See {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}
-   * for more information around formats of the deserializer and serializer.
    * @param options
    * @param options.id Optional Elasticsearch id, if none is given an autogenerated one will be used.
-   * @param options.deserializer A custom deserializer for the list. Optionally, you an define this as handle bars. See online docs for more information.
-   * @param options.serializer Determines how uploaded list item values are parsed. By default, list items are parsed using named regex groups. See online docs for more information.
    * @param options.listId The "list_id" this list item belongs to.
    * @param options.value The value of the list item.
    * @param options.type The type of list such as "boolean", "double", "text", "keyword", etc...
@@ -836,8 +812,6 @@ export class ListClient {
    */
   public createListItem = async ({
     id,
-    deserializer,
-    serializer,
     listId,
     value,
     type,
@@ -847,14 +821,12 @@ export class ListClient {
     const { esClient, user } = this;
     const listItemName = this.getListItemName();
     return createListItem({
-      deserializer,
       esClient,
       id,
       listId,
       listItemIndex: listItemName,
       meta,
       refresh,
-      serializer,
       type,
       user,
       value,

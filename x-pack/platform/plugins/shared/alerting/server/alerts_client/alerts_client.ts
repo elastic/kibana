@@ -8,15 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import {
-  ALERT_INSTANCE_ID,
-  ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
-  ALERT_RULE_EXECUTION_UUID,
-  ALERT_START,
 } from '@kbn/rule-data-utils';
 import { flatMap, get, isEmpty, keys } from 'lodash';
 import type {
@@ -68,6 +64,7 @@ import {
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
+import { getTrackedAlerts, createEmptyTrackedAlerts } from './lib/get_tracked_alerts';
 import {
   filterMaintenanceWindows,
   filterMaintenanceWindowsIds,
@@ -117,7 +114,6 @@ export class AlertsClient<
     getById: (id: string) => (Alert & AlertData) | undefined;
   };
 
-  private trackedExecutions: Set<string>;
   private startedAtString: string | null = null;
   private runTimestampString: string | undefined;
   private rule: AlertRule;
@@ -151,23 +147,7 @@ export class AlertsClient<
         ? this.options.namespace
         : DEFAULT_NAMESPACE_STRING,
     });
-    this.trackedAlerts = {
-      indices: {},
-      active: {},
-      recovered: {},
-      seqNo: {},
-      primaryTerm: {},
-      get(uuid: string) {
-        return this.active[uuid] ?? this.recovered[uuid];
-      },
-      getById(id: string) {
-        return (
-          Object.values(this.active).find((alert) => get(alert, ALERT_INSTANCE_ID) === id) ??
-          Object.values(this.recovered).find((alert) => get(alert, ALERT_INSTANCE_ID) === id)
-        );
-      },
-    };
-    this.trackedExecutions = new Set([]);
+    this.trackedAlerts = createEmptyTrackedAlerts<AlertData>();
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
     this.ruleType = options.ruleType;
     this._isUsingDataStreams = this.options.dataStreamAdapter.isUsingDataStreams();
@@ -179,88 +159,27 @@ export class AlertsClient<
   public async initializeExecution(opts: InitializeExecutionOpts) {
     this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
 
-    const { runTimestamp, trackedExecutions } = opts;
+    const { runTimestamp } = opts;
 
     if (runTimestamp) {
       this.runTimestampString = runTimestamp.toISOString();
     }
     await this.legacyAlertsClient.initializeExecution(opts);
 
-    this.trackedExecutions = new Set(trackedExecutions ?? []);
-
     // No need to fetch the tracked alerts for the non-lifecycle rules
     if (this.ruleType.autoRecoverAlerts) {
-      const getTrackedAlertsByExecutionUuids = async (executionUuids: string[]) => {
-        const result = await this.search({
-          size: (opts.maxAlerts || DEFAULT_MAX_ALERTS) * 2,
-          seq_no_primary_term: true,
-          query: {
-            bool: {
-              must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
-              filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: executionUuids } }],
-            },
-          },
-        });
-        return result.hits;
-      };
-
-      const getTrackedAlertsByAlertUuids = async () => {
-        const { activeAlertsFromState = {}, recoveredAlertsFromState = {} } = opts;
-        const uuidsToFetch: string[] = [];
-        Object.values(activeAlertsFromState).forEach((activeAlert) =>
-          uuidsToFetch.push(activeAlert.meta?.uuid!)
-        );
-        Object.values(recoveredAlertsFromState).forEach((recoveredAlert) =>
-          uuidsToFetch.push(recoveredAlert.meta?.uuid!)
-        );
-
-        if (uuidsToFetch.length <= 0) {
-          return [];
-        }
-
-        const result = await this.search({
-          size: uuidsToFetch.length,
-          seq_no_primary_term: true,
-          sort: { [ALERT_START]: 'desc' },
-          query: {
-            bool: {
-              filter: [
-                { term: { [ALERT_RULE_UUID]: this.options.rule.id } },
-                { terms: { [ALERT_UUID]: uuidsToFetch } },
-              ],
-            },
-          },
-        });
-        return result.hits;
-      };
-
       try {
-        const results = trackedExecutions
-          ? await getTrackedAlertsByExecutionUuids(Array.from(this.trackedExecutions))
-          : await getTrackedAlertsByAlertUuids();
-
-        for (const hit of results.flat()) {
-          const alertHit = hit._source as Alert & AlertData;
-          const alertUuid = get(alertHit, ALERT_UUID);
-
-          if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
-            this.trackedAlerts.active[alertUuid] = alertHit;
-          }
-          if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_RECOVERED) {
-            this.trackedAlerts.recovered[alertUuid] = alertHit;
-          }
-          this.trackedAlerts.indices[alertUuid] = hit._index;
-          this.trackedAlerts.seqNo[alertUuid] = hit._seq_no;
-          this.trackedAlerts.primaryTerm[alertUuid] = hit._primary_term;
-
-          // only when the alerts are fetched by alert uuids
-          if (!trackedExecutions) {
-            const executionUuid = get(alertHit, ALERT_RULE_EXECUTION_UUID);
-            if (executionUuid) {
-              this.trackedExecutions.add(executionUuid);
-            }
-          }
-        }
+        this.trackedAlerts = await getTrackedAlerts<AlertData>({
+          ruleId: this.options.rule.id,
+          lookBackWindow: opts.flappingSettings.lookBackWindow,
+          maxAlertLimit: opts.maxAlerts || DEFAULT_MAX_ALERTS,
+          activeAlertsFromState: opts.activeAlertsFromState,
+          recoveredAlertsFromState: opts.recoveredAlertsFromState,
+          search: (queryBody) => this.search(queryBody),
+          logger: this.options.logger,
+          ruleInfoMessage: this.ruleInfoMessage,
+          logTags: this.logTags,
+        });
       } catch (err) {
         this.options.logger.error(
           `Error searching for tracked alerts by UUID ${this.ruleInfoMessage} - ${err.message}`,
@@ -916,10 +835,6 @@ export class AlertsClient<
 
   public isUsingDataStreams(): boolean {
     return this._isUsingDataStreams;
-  }
-
-  public getTrackedExecutions() {
-    return this.trackedExecutions;
   }
 
   private throwIfHasClusterBlockException(response: BulkResponse) {

@@ -43,6 +43,12 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     latencyAggregationType = LatencyAggregationType.avg,
     comparisonEnabled,
     offset,
+    logsColumns,
+    logsSort,
+    logsGrid,
+    logsRowHeight,
+    logsRowsPerPage,
+    logsDensity,
   } = query;
 
   return removeUndefinedProps({
@@ -75,5 +81,13 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
     comparisonEnabled: comparisonEnabled ? toBoolean(comparisonEnabled) : undefined,
     offset,
+
+    // Logs tab state
+    logsColumns: toString(logsColumns),
+    logsSort: toString(logsSort),
+    logsGrid: toString(logsGrid),
+    logsRowHeight: logsRowHeight ? toNumber(logsRowHeight) : undefined,
+    logsRowsPerPage: logsRowsPerPage ? toNumber(logsRowsPerPage) : undefined,
+    logsDensity: toString(logsDensity),
   });
 }

@@ -76,8 +76,6 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { ConfigSchema } from '.';
-import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
-import { registerEmbeddables } from './embeddable/register_embeddables';
 import {
   getApmEnrollmentFlyoutData,
   LazyApmCustomAssetsExtension,
@@ -85,8 +83,8 @@ import {
 import { getLazyApmAgentsTabExtension } from './components/fleet_integration/lazy_apm_agents_tab_extension';
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
 
@@ -420,13 +418,19 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    registerApmRuleTypes(observabilityRuleTypeRegistry);
-    registerEmbeddables({
-      coreSetup: core,
-      pluginsSetup: plugins,
-      config,
-      kibanaEnvironment,
-      observabilityRuleTypeRegistry,
+    import('./components/alerting/rule_types/register_apm_rule_types').then(
+      ({ registerApmRuleTypes }) => {
+        registerApmRuleTypes(observabilityRuleTypeRegistry);
+      }
+    );
+    import('./embeddable/register_embeddables').then(({ registerEmbeddables }) => {
+      registerEmbeddables({
+        coreSetup: core,
+        pluginsSetup: plugins,
+        config,
+        kibanaEnvironment,
+        observabilityRuleTypeRegistry,
+      });
     });
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));

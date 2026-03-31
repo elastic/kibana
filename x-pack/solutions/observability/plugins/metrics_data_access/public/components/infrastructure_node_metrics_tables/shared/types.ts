@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { CoreProvidersProps } from '../../../apps/common_providers';
 import type { MetricsDataClient } from '../../../lib/metrics_client';
 
@@ -13,6 +13,7 @@ export interface UseNodeMetricsTableOptions {
   timerange: { from: string; to: string };
   filterClauseDsl?: QueryDslQueryContainer;
   metricsClient: MetricsDataClient;
+  isOtel?: boolean;
 }
 
 export interface SourceProviderProps {

@@ -20,6 +20,18 @@ describe('transformRRuleToCustomSchedule', () => {
     ).toEqual({ duration: '2h', start: '2021-05-10T00:00:00.000Z', timezone: 'UTC' });
   });
 
+  it('transforms duration to ms correctly', () => {
+    expect(
+      transformRRuleToCustomSchedule({
+        duration: 7200325,
+        rRule: {
+          dtstart: '2021-05-10T00:00:00.000Z',
+          tzid: 'UTC',
+        },
+      })
+    ).toEqual({ duration: '7200325ms', start: '2021-05-10T00:00:00.000Z', timezone: 'UTC' });
+  });
+
   it('transforms to start date and timezone correctly', () => {
     expect(
       transformRRuleToCustomSchedule({

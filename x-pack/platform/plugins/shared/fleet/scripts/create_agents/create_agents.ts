@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import yargs from 'yargs';
 import { omit } from 'lodash';
 
-import type { AgentStatus } from '../../common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, type AgentStatus } from '../../common';
 import type { Agent } from '../../common';
 const printUsage = () =>
   logger.info(`
@@ -29,6 +29,7 @@ const printUsage = () =>
     [--batches]: run the script in batches, defaults to 1 e.g if count is 50 and batches is 10, 500 agents will be created and 10 agent policies
     [--concurrentBatches]: how many batches to run concurrently, defaults to 10
     [--outdated]: agents will show as outdated (their revision is below the policies), defaults to false
+    [--revisions]: includes the number of revisions to create per policy, defaults to 0
 `);
 
 const DEFAULT_KIBANA_URL = 'http://localhost:5601';
@@ -57,6 +58,7 @@ const {
   batches: batchesArg = 1,
   outdated: outdatedArg = false,
   concurrentBatches: concurrentBatchesArg = 10,
+  revisions: revisionsArg = 0,
   // ignore yargs positional args, we only care about named args
   _,
   $0,
@@ -67,9 +69,10 @@ const statusesArg = (statusArg as string).split(',') as AgentStatus[];
 const inactivityTimeout = inactivityTimeoutArg
   ? Number(inactivityTimeoutArg).valueOf()
   : DEFAULT_UNENROLL_TIMEOUT;
-const batches = inactivityTimeoutArg ? Number(batchesArg).valueOf() : 1;
+const batches = batchesArg ? Number(batchesArg).valueOf() : 1;
 const concurrentBatches = concurrentBatchesArg ? Number(concurrentBatchesArg).valueOf() : 10;
 const count = countArg ? Number(countArg).valueOf() : DEFAULT_AGENT_COUNT;
+const revisionsCount = revisionsArg ? Number(revisionsArg).valueOf() : 0;
 const kbnAuth = 'Basic ' + Buffer.from(kbnUsername + ':' + kbnPassword).toString('base64');
 
 const logger = new ToolingLog({
@@ -138,11 +141,13 @@ function createAgentWithStatus({
   status,
   version,
   hostname,
+  revisionIdx = 1,
 }: {
   policyId: string;
   status: AgentStatus;
   version: string;
   hostname: string;
+  revisionIdx?: number;
 }) {
   const baseAgent = {
     agent: {
@@ -153,8 +158,8 @@ function createAgentWithStatus({
     active: true,
     policy_id: policyId,
     type: 'PERMANENT',
-    policy_revision_idx: 1,
-    policy_revision: 1,
+    policy_revision_idx: revisionIdx,
+    policy_revision: revisionIdx,
     local_metadata: {
       elastic: {
         agent: {
@@ -178,7 +183,8 @@ function createAgentsWithStatuses(
   statusMap: Partial<{ [status in AgentStatus]: number }>,
   policyId: string,
   version: string,
-  namePrefix?: string
+  namePrefix?: string,
+  latestRevision?: number
 ) {
   // loop over statuses and create agents with that status
   const agents = [];
@@ -189,7 +195,13 @@ function createAgentsWithStatuses(
     for (let i = 0; i < statusCount; i++) {
       const hostname = `${namePrefix ? namePrefix + '-' : ''}${currentAgentStatus}-${i}`;
       agents.push(
-        createAgentWithStatus({ policyId, status: currentAgentStatus, version, hostname })
+        createAgentWithStatus({
+          policyId,
+          status: currentAgentStatus,
+          version,
+          hostname,
+          revisionIdx: latestRevision,
+        })
       );
     }
   }
@@ -268,7 +280,7 @@ async function createSuperUser() {
     body: JSON.stringify({
       indices: [
         {
-          names: ['.fleet*'],
+          names: ['.fleet*', '.kibana*'],
           privileges: ['all'],
           allow_restricted_indices: true,
         },
@@ -335,6 +347,104 @@ async function createAgentPolicy(id: string, name: string) {
   return data;
 }
 
+async function createPolicyRevisions(policyId: string, latestRevisionIdx: number) {
+  const nextLatestRevisionIdx = latestRevisionIdx + revisionsCount;
+  await revisePolicySoRevisionIdx(policyId, nextLatestRevisionIdx);
+  await backfillPolicyRevisions(policyId, nextLatestRevisionIdx);
+
+  return nextLatestRevisionIdx;
+}
+
+async function getLatestFleetPolicyRevision(policyId: string) {
+  const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
+  const res = await fetch(`${ES_URL}/.fleet-policies/_search`, {
+    method: 'post',
+    body: JSON.stringify({
+      size: 1,
+      sort: { revision_idx: 'desc' },
+      query: {
+        match: {
+          policy_id: policyId,
+        },
+      },
+    }),
+    headers: {
+      Authorization: auth,
+      'Content-Type': 'application/x-ndjson',
+    },
+  });
+
+  const data = await res.json();
+  const latestPolicyRevision = data.hits.hits[0];
+
+  if (!latestPolicyRevision) {
+    logger.error('Error retrieving latest fleet policy revision: ' + JSON.stringify(data));
+    process.exit(1);
+  }
+  return latestPolicyRevision;
+}
+
+async function backfillPolicyRevisions(policyId: string, maxRevisionIdx: number) {
+  const latestPolicyRevision = await getLatestFleetPolicyRevision(policyId);
+
+  const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
+  const body = Array(maxRevisionIdx)
+    .fill(0)
+    .flatMap((_rev, idx) => [
+      INDEX_BULK_OP.replace(/{{id}}/, `${policyId}:${idx}`),
+      JSON.stringify({
+        ...latestPolicyRevision._source,
+        revision_idx: idx + 1,
+        '@timestamp': new Date().toISOString(),
+      }) + '\n',
+    ])
+    .join('');
+
+  const res = await fetch(`${ES_URL}/.fleet-policies/_bulk`, {
+    method: 'post',
+    body,
+    headers: {
+      Authorization: auth,
+      'Content-Type': 'application/x-ndjson',
+    },
+  });
+  const data = await res.json();
+
+  if (!data.items) {
+    logger.error('Error creating bulk policy revisions: ' + JSON.stringify(data));
+    process.exit(1);
+  }
+}
+
+async function revisePolicySoRevisionIdx(policyId: string, revisionIdx: number) {
+  const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
+  const body = JSON.stringify({
+    doc: {
+      [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
+        revision: revisionIdx,
+      },
+    },
+  });
+  const res = await fetch(
+    `${ES_URL}/.kibana_ingest/_update/${AGENT_POLICY_SAVED_OBJECT_TYPE}:${policyId}`,
+    {
+      method: 'post',
+      body,
+      headers: {
+        Authorization: auth,
+        'Content-Type': 'application/x-ndjson',
+      },
+    }
+  );
+  const data = await res.json();
+
+  if (!data.result) {
+    logger.error('Error updating agent policy SO revision idx: ' + JSON.stringify(data));
+    process.exit(1);
+  }
+  return data;
+}
+
 async function bumpAgentPolicyRevision(id: string, policy: any) {
   const res = await fetch(`${kibanaUrl}/api/fleet/agent_policies/${id}`, {
     method: 'put',
@@ -348,6 +458,9 @@ async function bumpAgentPolicyRevision(id: string, policy: any) {
         'schema_version',
         'package_policies',
         'agents',
+        'version',
+        'unprivileged_agents',
+        'fips_agents',
       ]),
       monitoring_enabled: ['logs'], // change monitoring to add  a revision
     }),
@@ -428,13 +541,19 @@ export async function run() {
           agentPolicyId = agentPolicy.item.id;
           logger.info(`Created agent policy ${agentPolicy.item.id}`);
 
+          let latestRevision: number = agentPolicy.item.revision ?? 1;
+          if (revisionsCount > 0) {
+            logger.info(`Creating ${revisionsCount} revisions for agent policy ${agentPolicyId}`);
+            latestRevision = await createPolicyRevisions(agentPolicyId, latestRevision);
+          }
           const statusMap = statusesArg.reduce((acc, status) => ({ ...acc, [status]: count }), {});
           logStatusMap(statusMap);
           const agents = createAgentsWithStatuses(
             statusMap,
             agentPolicyId,
             agentVersion,
-            i > 0 ? `batch-${i}` : undefined
+            i > 0 ? `batch-${i}` : undefined,
+            latestRevision
           );
           const createRes = await createAgentDocsBulk(agents);
           if (outdatedArg) {

@@ -27,8 +27,6 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
-        // define custom es server here
-        // API Keys is enabled at the top level
         'xpack.security.enabled=true',
       ],
     },
@@ -36,11 +34,12 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
     kbnTestServer: {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
-        ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        ...xpackFunctionalTestsConfig
+          .get('kbnTestServer.serverArgs')
+          .filter((arg: string) => !arg.includes('--xpack.fleet.registryUrl')),
         '--home.disableWelcomeScreen=true',
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
-        // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--config=${kibanaYamlFilePath}`,
       ],

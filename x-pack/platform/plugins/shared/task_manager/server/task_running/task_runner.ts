@@ -39,6 +39,7 @@ import {
   promiseResult,
   unwrap,
 } from '../lib/result_type';
+import { getExecutionContextRunner } from '../lib/execution_context';
 import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
   asTaskMarkRunningEvent,
@@ -397,14 +398,13 @@ export class TaskManagerRunner implements TaskRunner {
       );
       this.task = definition.createTaskRunner({ taskInstance: sanitizedTaskInstance, fakeRequest });
 
-      const ctx = {
-        type: 'task manager',
+      const runner = getExecutionContextRunner(this.executionContext, {
         name: `run ${this.instance.task.taskType}`,
         id: this.instance.task.id,
         description: 'run task',
-      };
+      });
 
-      const result = await this.executionContext.withContext(ctx, () =>
+      const result = await runner.run(() =>
         withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
       );
 

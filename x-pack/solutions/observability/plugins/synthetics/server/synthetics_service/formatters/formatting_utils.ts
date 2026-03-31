@@ -11,6 +11,14 @@ import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maint
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { ParsedVars, replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
+import { hasNoParams } from './param_utils';
+
+export {
+  hasNoParams,
+  extractParamReferences,
+  valueContainsParams,
+  monitorUsesGlobalParams,
+} from './param_utils';
 
 export type FormatterFn = (
   fields: Partial<MonitorFields>,
@@ -67,12 +75,6 @@ const allParamsAreMissing = (parsedVars: ParsedVars, params: Record<string, stri
     .filter((parsedVar) => parsedVar.type === 'var')
     .map((v) => (typeof v.content === 'string' ? v.content : v.content.name));
   return varKeys.every((v) => !params[v]);
-};
-
-const SHELL_PARAMS_REGEX = /\$\{[a-zA-Z_][a-zA-Z0-9\._\-?:]*\}/g;
-
-export const hasNoParams = (strVal: string) => {
-  return strVal.match(SHELL_PARAMS_REGEX) === null;
 };
 
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {

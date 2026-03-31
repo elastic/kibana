@@ -32,7 +32,6 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
         <EuiTitle size="l" className="secAuthenticationStatePage__title">
           <h1>{props.title}</h1>
         </EuiTitle>
-        <EuiSpacer size="xl" />
       </div>
     </header>
     <div className="secAuthenticationStatePage__content eui-textCenter">{props.children}</div>

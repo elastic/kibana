@@ -6,13 +6,17 @@
  */
 
 import { DEFAULT_DOWNLOAD_SOURCE_URI } from '../../../../common/constants';
-import type { DownloadSource, FleetProxy } from '../../../types';
+import type { DownloadSource, ProxyConfig } from '../../../types';
 
-function getfleetServerHostsEnrollArgs(
-  apiKey: string,
-  fleetServerHost: string,
-  fleetProxy?: FleetProxy
-) {
+function getFleetServerHostsEnrollArgs({
+  apiKey,
+  fleetServerHost,
+  fleetProxy,
+}: {
+  apiKey: string;
+  fleetServerHost: string;
+  fleetProxy?: ProxyConfig;
+}) {
   const proxyHeadersArgs = fleetProxy?.proxy_headers
     ? Object.entries(fleetProxy.proxy_headers).reduce((acc, [proxyKey, proyVal]) => {
         acc += ` --proxy-header "${proxyKey}=${proyVal}"`;
@@ -29,7 +33,7 @@ export const getDownloadBaseUrl = (downloadSource?: DownloadSource) => {
   return source.endsWith('/') ? source.substring(0, source.length - 1) : source;
 };
 
-export const getDownloadSourceProxyArgs = (downloadSourceProxy?: FleetProxy) => {
+export const getDownloadSourceProxyArgs = (downloadSourceProxy?: ProxyConfig) => {
   const windows = `${downloadSourceProxy?.url ? `-Proxy "${downloadSourceProxy.url}"` : ''} ${
     downloadSourceProxy?.proxy_headers
       ? `-Headers @{${Object.entries(downloadSourceProxy.proxy_headers)
@@ -70,15 +74,15 @@ export const ManualInstructions = ({
 }: {
   apiKey: string;
   fleetServerHost: string;
-  fleetProxy?: FleetProxy;
+  fleetProxy?: ProxyConfig;
   downloadSource?: DownloadSource;
-  downloadSourceProxy?: FleetProxy;
+  downloadSourceProxy?: ProxyConfig;
   agentVersion: string;
   gcpProjectId?: string;
   gcpOrganizationId?: string;
   gcpAccountType?: string;
 }) => {
-  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHost, fleetProxy);
+  const enrollArgs = getFleetServerHostsEnrollArgs({ apiKey, fleetServerHost, fleetProxy });
 
   const downloadBaseUrl = getDownloadBaseUrl(downloadSource);
 

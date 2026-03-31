@@ -90,6 +90,11 @@ export interface FleetConfigType {
   integrationsHomeOverride?: string;
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;
+  fleetPolicyRevisionsCleanup?: {
+    maxRevisions: number;
+    interval: string;
+    maxPoliciesPerRun: number;
+  };
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

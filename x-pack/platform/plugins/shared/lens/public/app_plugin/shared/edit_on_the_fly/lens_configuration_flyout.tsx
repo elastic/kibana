@@ -92,7 +92,10 @@ export function LensEditConfigurationFlyout({
             previousAttrs.state.datasourceStates[datasourceId],
             previousAttrs.references,
             datasourceStates[datasourceId].state,
-            attributes.references
+            // Extract references from the current state as they contain resolved data view IDs
+            // We cannot use attributes.references because they may contain stale data view IDs from when the panel was initially loaded
+            datasourceMap[datasourceId].getPersistableState(datasourceStates[datasourceId].state)
+              .savedObjectReferences
           )
         : false;
 
@@ -143,7 +146,7 @@ export function LensEditConfigurationFlyout({
         updateSuggestion?.(previousAttrs);
       }
       if (savedObjectId) {
-        updateByRefInput?.(savedObjectId);
+        updateByRefInput?.(savedObjectId, previousAttrs);
       }
     }
     onCancelCallback?.();
@@ -176,7 +179,7 @@ export function LensEditConfigurationFlyout({
     }
     if (savedObjectId) {
       saveByRef?.(currentAttributes);
-      updateByRefInput?.(savedObjectId);
+      updateByRefInput?.(savedObjectId, currentAttributes);
     }
 
     // check if visualization type changed, if it did, don't pass the previous visualization state

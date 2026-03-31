@@ -55,7 +55,7 @@ describe('chatFunctionClient', () => {
           connectorId: 'foo',
           simulateFunctionCalling: false,
         });
-      }).rejects.toThrowError(`Function arguments are invalid`);
+      }).rejects.toThrowError('Tool call arguments for myFunction were invalid');
 
       expect(respondFn).not.toHaveBeenCalled();
     });

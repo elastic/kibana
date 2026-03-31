@@ -9,8 +9,26 @@
 
 import { ScoutPage, expect } from '..';
 
+export enum DateUnitSelector {
+  Seconds = 's',
+  Minutes = 'm',
+  Hours = 'h',
+}
+
 export class DatePicker {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly quickMenuButton;
+  private readonly toggleRefreshButton;
+  private readonly refreshIntervalInput;
+  private readonly refreshIntervalUnitSelect;
+
+  constructor(private readonly page: ScoutPage) {
+    this.quickMenuButton = this.page.testSubj.locator('superDatePickerToggleQuickMenuButton');
+    this.toggleRefreshButton = this.page.testSubj.locator('superDatePickerToggleRefreshButton');
+    this.refreshIntervalInput = this.page.testSubj.locator('superDatePickerRefreshIntervalInput');
+    this.refreshIntervalUnitSelect = this.page.testSubj.locator(
+      'superDatePickerRefreshIntervalUnitsSelect'
+    );
+  }
 
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
@@ -38,6 +56,13 @@ export class DatePicker {
     if (isStartDatePopoverBtnVisible) {
       await this.page.testSubj.click('superDatePickerstartDatePopoverButton');
     }
+  }
+
+  async setCommonlyUsedTime(option: string) {
+    await this.quickMenuButton.click();
+    const commonlyUsedOption = this.page.testSubj.locator(`superDatePickerCommonlyUsed_${option}`);
+    await expect(commonlyUsedOption).toBeVisible();
+    await commonlyUsedOption.click();
   }
 
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
@@ -68,5 +93,28 @@ export class DatePicker {
       `Date picker 'end date' should be set correctly`
     ).toHaveText(to);
     await this.page.testSubj.click('querySubmitButton');
+  }
+
+  async getTimeConfig(): Promise<{ start: string; end: string }> {
+    await this.showStartEndTimes();
+    const start = await this.page.testSubj.innerText('superDatePickerstartDatePopoverButton');
+    const end = await this.page.testSubj.innerText('superDatePickerendDatePopoverButton');
+    return { start, end };
+  }
+
+  async startAutoRefresh(interval: number, dateUnit: DateUnitSelector = DateUnitSelector.Seconds) {
+    await this.quickMenuButton.click();
+    // Check if refresh is already running
+    const isPaused = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'false';
+    if (isPaused) {
+      await this.toggleRefreshButton.click();
+    }
+    // Set interval
+    await this.refreshIntervalInput.clear();
+    await this.refreshIntervalInput.fill(interval.toString());
+    await this.refreshIntervalUnitSelect.selectOption({ value: dateUnit });
+    await this.refreshIntervalInput.press('Enter');
+
+    await this.quickMenuButton.click();
   }
 }

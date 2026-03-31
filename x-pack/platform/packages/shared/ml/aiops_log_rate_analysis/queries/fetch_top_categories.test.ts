@@ -48,7 +48,7 @@ describe('fetchTopCategories', () => {
                     top_hits: { _source: 'message', size: 4, sort: ['the-time-field-name'] },
                   },
                 },
-                categorize_text: { field: 'message', size: 100 },
+                categorize_text: { field: 'message', size: 1000 },
               },
             },
             query: {

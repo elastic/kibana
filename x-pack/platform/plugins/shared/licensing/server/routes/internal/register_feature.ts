@@ -34,7 +34,8 @@ export function registerRegisterFeatureRoute(
                 }
               },
             }),
-          })
+          }),
+          { maxSize: 1000 }
         ),
       },
     },
