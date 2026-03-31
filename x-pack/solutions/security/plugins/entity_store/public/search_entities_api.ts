@@ -27,14 +27,14 @@ export interface SearchEntitiesFromEntityStoreResponse {
 
 /**
  * List/search Entity Store v2 unified latest index via the internal list-entities route
- * (`ENTITY_STORE_ROUTES.CRUD_GET`, page mode). Requires Entity Store v2 feature flag.
+ * (`ENTITY_STORE_ROUTES.public.CRUD_GET`, page mode). Requires Entity Store v2 feature flag.
  */
 export async function searchEntitiesFromEntityStore(
   http: HttpStart,
   params: SearchEntitiesFromEntityStoreParams,
   options?: { signal?: AbortSignal }
 ): Promise<SearchEntitiesFromEntityStoreResponse> {
-  return http.fetch<SearchEntitiesFromEntityStoreResponse>(ENTITY_STORE_ROUTES.CRUD_GET, {
+  return http.fetch<SearchEntitiesFromEntityStoreResponse>(ENTITY_STORE_ROUTES.public.CRUD_GET, {
     version: API_VERSIONS.public.v1,
     method: 'GET',
     query: {

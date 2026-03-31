@@ -14,7 +14,7 @@ import { checkAndFormatPrivileges } from './utils/check_and_format_privileges';
 export function registerCheckPrivileges(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: ENTITY_STORE_ROUTES.CHECK_PRIVILEGES,
+      path: ENTITY_STORE_ROUTES.public.CHECK_PRIVILEGES,
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

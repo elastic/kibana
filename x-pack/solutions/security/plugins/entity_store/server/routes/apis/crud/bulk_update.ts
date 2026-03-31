@@ -32,7 +32,7 @@ const querySchema = z.object({
 export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: ENTITY_STORE_ROUTES.CRUD_BULK_UPDATE,
+      path: ENTITY_STORE_ROUTES.public.CRUD_BULK_UPDATE,
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

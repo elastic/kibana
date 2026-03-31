@@ -18,7 +18,7 @@ import type { AssetManagerClient } from '../../../domain/asset_manager';
 export function registerInitMaintainers(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT,
+      path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

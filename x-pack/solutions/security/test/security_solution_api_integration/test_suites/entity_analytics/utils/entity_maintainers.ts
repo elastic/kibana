@@ -35,7 +35,7 @@ export const entityMaintainerRouteHelpersFactory = (
 ) => {
   const getMaintainers = async (expectStatusCode: number = 200) => {
     const response = await withHeaders(
-      supertest.get(routeWithNamespace(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_GET, namespace))
+      supertest.get(routeWithNamespace(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET, namespace))
     ).expect(expectStatusCode);
     return response as SuperTest.Response & {
       body: { maintainers: EntityMaintainerResponse[] };
@@ -47,7 +47,7 @@ export const entityMaintainerRouteHelpersFactory = (
 
     initMaintainers: async (expectStatusCode: number = 200) => {
       const response = await withHeaders(
-        supertest.post(routeWithNamespace(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, namespace))
+        supertest.post(routeWithNamespace(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, namespace))
       )
         .send()
         .expect((res) => {
@@ -61,7 +61,7 @@ export const entityMaintainerRouteHelpersFactory = (
     },
 
     runMaintainer: async (id: string, expectStatusCode: number = 200) => {
-      const route = ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_RUN.replace('{id}', id);
+      const route = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN.replace('{id}', id);
       const response = await withHeaders(supertest.post(routeWithNamespace(route, namespace)))
         .send()
         .expect(expectStatusCode);
@@ -69,7 +69,7 @@ export const entityMaintainerRouteHelpersFactory = (
     },
 
     startMaintainer: async (id: string, expectStatusCode: number = 200) => {
-      const route = ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_START.replace('{id}', id);
+      const route = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START.replace('{id}', id);
       const response = await withHeaders(supertest.put(routeWithNamespace(route, namespace)))
         .send()
         .expect(expectStatusCode);
@@ -77,7 +77,7 @@ export const entityMaintainerRouteHelpersFactory = (
     },
 
     stopMaintainer: async (id: string, expectStatusCode: number = 200) => {
-      const route = ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_STOP.replace('{id}', id);
+      const route = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP.replace('{id}', id);
       const response = await withHeaders(supertest.put(routeWithNamespace(route, namespace)))
         .send()
         .expect(expectStatusCode);

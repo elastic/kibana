@@ -21,7 +21,7 @@ const bodySchema = z.object({
 export function registerCRUDDelete(router: EntityStorePluginRouter) {
   router.versioned
     .delete({
-      path: ENTITY_STORE_ROUTES.CRUD_DELETE,
+      path: ENTITY_STORE_ROUTES.public.CRUD_DELETE,
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

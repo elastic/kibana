@@ -25,7 +25,7 @@ const paramsSchema = z
 export function registerCRUDCreate(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.CRUD_CREATE,
+      path: ENTITY_STORE_ROUTES.public.CRUD_CREATE,
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

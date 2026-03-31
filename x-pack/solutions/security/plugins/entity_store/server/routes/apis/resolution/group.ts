@@ -21,7 +21,7 @@ const querySchema = z.object({
 export function registerResolutionGroup(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: ENTITY_STORE_ROUTES.RESOLUTION_GROUP,
+      path: ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP,
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

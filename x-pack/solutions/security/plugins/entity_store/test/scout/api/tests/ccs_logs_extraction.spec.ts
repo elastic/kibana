@@ -118,7 +118,7 @@ apiTest.describe(
         [FF_ENABLE_ENTITY_STORE_V2]: true,
       });
 
-      await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {
@@ -132,7 +132,7 @@ apiTest.describe(
     apiTest.afterAll(async ({ apiClient, esClient }) => {
       await esClient.indices.delete({ index: CCS_TEST_LOGS_INDEX }, { ignore: [404] });
 
-      await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {
@@ -175,7 +175,7 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES('host'),
+          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('host'),
           {
             headers: internalHeaders,
             responseType: 'json',
@@ -191,7 +191,7 @@ apiTest.describe(
         expect(extractResponse.body).toMatchObject({ count: 4, pages: 2 });
 
         const logExtractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
           {
             headers: internalHeaders,
             responseType: 'json',
@@ -314,7 +314,7 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES('user'),
+          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('user'),
           {
             headers: internalHeaders,
             responseType: 'json',
@@ -330,7 +330,7 @@ apiTest.describe(
         expect(extractResponse.body).toMatchObject({ count: 5, pages: 3 });
 
         const logExtractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
           {
             headers: internalHeaders,
             responseType: 'json',
@@ -426,7 +426,7 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES('service'),
+          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('service'),
           {
             headers: internalHeaders,
             responseType: 'json',
@@ -442,7 +442,7 @@ apiTest.describe(
         expect(extractResponse.body).toMatchObject({ count: 2, pages: 1 });
 
         const logExtractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('service'),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('service'),
           {
             headers: internalHeaders,
             responseType: 'json',
@@ -501,7 +501,7 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES('generic'),
+          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('generic'),
           {
             headers: internalHeaders,
             responseType: 'json',
@@ -517,7 +517,7 @@ apiTest.describe(
         expect(extractResponse.body).toMatchObject({ count: 2, pages: 1 });
 
         const logExtractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('generic'),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('generic'),
           {
             headers: internalHeaders,
             responseType: 'json',

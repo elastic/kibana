@@ -21,7 +21,7 @@ const bodySchema = z.object({
 export function registerUpdate(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: ENTITY_STORE_ROUTES.UPDATE,
+      path: ENTITY_STORE_ROUTES.public.UPDATE,
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

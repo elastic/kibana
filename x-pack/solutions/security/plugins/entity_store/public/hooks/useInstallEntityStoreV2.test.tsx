@@ -86,7 +86,7 @@ describe('useInstallEntityStoreV2', () => {
       path: '/api/entity_store/status',
     });
     expect(mockServices.http.get).toHaveBeenNthCalledWith(2, {
-      path: ENTITY_STORE_ROUTES.STATUS,
+      path: ENTITY_STORE_ROUTES.public.STATUS,
       query: { include_components: false },
     });
   });
@@ -105,16 +105,16 @@ describe('useInstallEntityStoreV2', () => {
     });
 
     expect(mockServices.http.get).toHaveBeenCalledWith({
-      path: ENTITY_STORE_ROUTES.STATUS,
+      path: ENTITY_STORE_ROUTES.public.STATUS,
       query: { include_components: false },
     });
     expect(mockServices.http.post).toHaveBeenCalledWith({
-      path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT,
+      path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
       body: JSON.stringify({}),
       query: { apiVersion: '2' },
     });
     expect(mockServices.http.post).not.toHaveBeenCalledWith({
-      path: ENTITY_STORE_ROUTES.INSTALL,
+      path: ENTITY_STORE_ROUTES.public.INSTALL,
       body: JSON.stringify({}),
     });
   });
@@ -133,15 +133,15 @@ describe('useInstallEntityStoreV2', () => {
     });
 
     expect(mockServices.http.get).toHaveBeenCalledWith({
-      path: ENTITY_STORE_ROUTES.STATUS,
+      path: ENTITY_STORE_ROUTES.public.STATUS,
       query: { include_components: false },
     });
     expect(mockServices.http.post).toHaveBeenNthCalledWith(1, {
-      path: ENTITY_STORE_ROUTES.INSTALL,
+      path: ENTITY_STORE_ROUTES.public.INSTALL,
       body: JSON.stringify({}),
     });
     expect(mockServices.http.post).toHaveBeenNthCalledWith(2, {
-      path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT,
+      path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
       body: JSON.stringify({}),
       query: { apiVersion: '2' },
     });

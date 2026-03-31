@@ -22,7 +22,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
   apiTest('Should return full privileges for admin user', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
-    const response = await apiClient.get(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
+    const response = await apiClient.get(ENTITY_STORE_ROUTES.public.CHECK_PRIVILEGES, {
       headers: { ...cookieHeader, ...PUBLIC_HEADERS },
       responseType: 'json',
     });
@@ -43,7 +43,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         kibana: [{ base: [], feature: { discover: ['all'] }, spaces: ['*'] }],
       });
 
-      const response = await apiClient.get(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
+      const response = await apiClient.get(ENTITY_STORE_ROUTES.public.CHECK_PRIVILEGES, {
         headers: { ...cookieHeader, ...PUBLIC_HEADERS },
         responseType: 'json',
       });
@@ -66,7 +66,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         ],
       });
 
-      const response = await apiClient.get(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
+      const response = await apiClient.get(ENTITY_STORE_ROUTES.public.CHECK_PRIVILEGES, {
         headers: { ...cookieHeader, ...PUBLIC_HEADERS },
         responseType: 'json',
       });
@@ -97,7 +97,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         ],
       });
 
-      const response = await apiClient.get(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
+      const response = await apiClient.get(ENTITY_STORE_ROUTES.public.CHECK_PRIVILEGES, {
         headers: { ...cookieHeader, ...PUBLIC_HEADERS },
         responseType: 'json',
       });

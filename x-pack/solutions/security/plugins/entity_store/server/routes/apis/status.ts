@@ -77,7 +77,7 @@ function toPublicEngine(
 export function registerStatus(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: ENTITY_STORE_ROUTES.STATUS,
+      path: ENTITY_STORE_ROUTES.public.STATUS,
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

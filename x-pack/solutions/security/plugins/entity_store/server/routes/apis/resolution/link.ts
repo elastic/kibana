@@ -29,7 +29,7 @@ const bodySchema = z.object({
 export function registerResolutionLink(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.RESOLUTION_LINK,
+      path: ENTITY_STORE_ROUTES.public.RESOLUTION_LINK,
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

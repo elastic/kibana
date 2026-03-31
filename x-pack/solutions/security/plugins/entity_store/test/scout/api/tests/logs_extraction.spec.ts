@@ -52,7 +52,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     // Install the entity store
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -65,7 +65,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -78,7 +78,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     const expectedResultCount = 20;
 
     const extractionResponse = await apiClient.post(
-      ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
+      ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
       {
         headers: internalHeaders,
         responseType: 'json',
@@ -115,7 +115,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     const expectedResultCount = 25;
 
     const extractionResponse = await apiClient.post(
-      ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
+      ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
       {
         headers: internalHeaders,
         responseType: 'json',
@@ -158,7 +158,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
   apiTest('Should extract properly extract service', async ({ apiClient, esClient }) => {
     const extractionResponse = await apiClient.post(
-      ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('service'),
+      ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('service'),
       {
         headers: internalHeaders,
         responseType: 'json',
@@ -194,7 +194,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
   apiTest('Should extract properly extract generic', async ({ apiClient, esClient }) => {
     const extractionResponse = await apiClient.post(
-      ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('generic'),
+      ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('generic'),
       {
         headers: internalHeaders,
         responseType: 'json',
@@ -753,7 +753,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       });
 
       const extractionResponse = await apiClient.post(
-        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
+        ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
         {
           headers: internalHeaders,
           responseType: 'json',
@@ -830,7 +830,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       });
 
       const extractionResponse = await apiClient.post(
-        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
+        ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
         {
           headers: internalHeaders,
           responseType: 'json',
@@ -919,7 +919,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       for (const entityType of ['host', 'user', 'service', 'generic'] as const) {
         const extractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION(entityType),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType),
           {
             headers: internalHeaders,
             responseType: 'json',
@@ -1051,7 +1051,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     'Should store _source as nested objects after ingest pipeline',
     async ({ apiClient, esClient }) => {
       const extractionResponse = await apiClient.post(
-        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
+        ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
         {
           headers: internalHeaders,
           responseType: 'json',

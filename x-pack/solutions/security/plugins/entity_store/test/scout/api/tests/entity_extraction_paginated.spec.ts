@@ -41,7 +41,7 @@ apiTest.describe(
       });
 
       // Install the entity store
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {
@@ -58,7 +58,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
@@ -74,7 +74,7 @@ apiTest.describe(
         const expectedPageCount = 4;
 
         const extractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
           {
             headers: internalHeaders,
             responseType: 'json',

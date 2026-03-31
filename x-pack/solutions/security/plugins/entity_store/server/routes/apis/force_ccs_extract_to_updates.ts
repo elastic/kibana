@@ -31,7 +31,7 @@ const bodySchema = z.object({
 export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES,
+      path: ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

@@ -29,7 +29,7 @@ const querySchema = z.object({
 export function registerCRUDUpdate(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: ENTITY_STORE_ROUTES.CRUD_UPDATE,
+      path: ENTITY_STORE_ROUTES.public.CRUD_UPDATE,
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

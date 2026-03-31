@@ -48,14 +48,14 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       ignore_unavailable: true,
     });
 
-    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect([200, 201]).toContain(installResponse.statusCode);
 
-    const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
+    const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
       headers: internalHeaders,
       responseType: 'json',
       body: {},
@@ -74,7 +74,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -97,7 +97,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await waitForResolution(esClient, entraEntity, oktaEntity);
 
       const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${oktaEntity}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${oktaEntity}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
 
@@ -130,7 +130,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await waitForResolution(esClient, entraEntity, adEntity);
 
       const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
 
@@ -157,7 +157,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await waitForResolution(esClient, entityB, entityA);
 
       const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${entityA}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityA}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
 
@@ -179,7 +179,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: aliasEntity, namespace: 'entra_id', email });
 
       // Manually link first
-      const linkResponse = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+      const linkResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { target_id: targetEntity, entity_ids: [aliasEntity] },
@@ -193,7 +193,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await waitForResolution(esClient, newEntity, targetEntity);
 
       const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${targetEntity}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${targetEntity}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
 
@@ -241,7 +241,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
 
       // Verify both groups exist independently
       const groupA = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${entityA1}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityA1}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
       expect(groupA.statusCode).toBe(200);
@@ -249,7 +249,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       expect(groupA.body.target.entity.id).toBe(entityA1);
 
       const groupB = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${entityB1}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityB1}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
       expect(groupB.statusCode).toBe(200);
@@ -294,7 +294,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
 
       // Verify group: only singleA and singleB, not multi-value entity
       const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${singleB}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${singleB}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
       expect(groupResponse.statusCode).toBe(200);
@@ -321,14 +321,14 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: e3, namespace: 'slack', email });
 
       // Pre-link into two separate targets (creating ambiguity)
-      const link1 = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+      const link1 = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { target_id: t1, entity_ids: [e1] },
       });
       expect(link1.statusCode).toBe(200);
 
-      const link2 = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+      const link2 = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { target_id: t2, entity_ids: [e2] },
@@ -354,7 +354,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: entityB, namespace: 'okta', email });
 
       // Manually link A → B (B is target)
-      const linkResponse = await apiClient.post(ENTITY_STORE_ROUTES.RESOLUTION_LINK, {
+      const linkResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { target_id: entityB, entity_ids: [entityA] },
@@ -373,7 +373,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await waitForResolution(esClient, entityA, entityB);
 
       const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.RESOLUTION_GROUP}?entity_id=${entityB}&apiVersion=2`,
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityB}&apiVersion=2`,
         { headers: defaultHeaders, responseType: 'json' }
       );
 

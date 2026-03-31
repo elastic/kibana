@@ -21,7 +21,7 @@ const bodySchema = z.object({
 export function registerResolutionUnlink(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.RESOLUTION_UNLINK,
+      path: ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK,
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

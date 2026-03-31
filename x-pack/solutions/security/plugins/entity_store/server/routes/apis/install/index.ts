@@ -17,7 +17,7 @@ import { getMissingPrivileges } from '../utils/get_missing_privileges';
 export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.INSTALL,
+      path: ENTITY_STORE_ROUTES.public.INSTALL,
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

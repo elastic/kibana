@@ -83,7 +83,7 @@ const isPageModeQuery = (q: z.infer<typeof querySchema>): boolean =>
 export function registerCRUDGet(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: ENTITY_STORE_ROUTES.CRUD_GET,
+      path: ENTITY_STORE_ROUTES.public.CRUD_GET,
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

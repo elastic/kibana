@@ -78,7 +78,7 @@ apiTest.describe('Entity Store install - privilege checks', { tag: ENTITY_STORE_
   apiTest.afterEach(async ({ esClient, apiClient, samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     await Promise.allSettled([
-      apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: { ...credentials.cookieHeader, ...PUBLIC_HEADERS },
         body: {},
       }),
@@ -100,7 +100,7 @@ apiTest.describe('Entity Store install - privilege checks', { tag: ENTITY_STORE_
 
       const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(getRoleWithAllPrivileges());
 
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: { ...PUBLIC_HEADERS, ...apiKeyHeader },
         responseType: 'json',
         body: { logExtraction: { additionalIndexPatterns: [restrictedIndex] } },
@@ -123,7 +123,7 @@ apiTest.describe('Entity Store install - privilege checks', { tag: ENTITY_STORE_
         getRoleWithoutTargetIndexPrivileges()
       );
 
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: { ...PUBLIC_HEADERS, ...apiKeyHeader },
         responseType: 'json',
         body: {},
@@ -151,7 +151,7 @@ apiTest.describe('Entity Store install - privilege checks', { tag: ENTITY_STORE_
         getRoleWithoutSavedObjectCreate()
       );
 
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: { ...PUBLIC_HEADERS, ...apiKeyHeader },
         responseType: 'json',
         body: {},

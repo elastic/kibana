@@ -94,7 +94,7 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
   });
 
   apiTest.afterEach(async ({ apiClient, esClient }) => {
-    await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -109,7 +109,7 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
         getRoleWithoutTargetIndexPrivileges()
       );
 
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
         headers: { ...INTERNAL_HEADERS, ...apiKeyHeader },
         responseType: 'json',
         body: {},
@@ -137,7 +137,7 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
         getRoleWithoutSavedObjectCreate()
       );
 
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
         headers: { ...INTERNAL_HEADERS, ...apiKeyHeader },
         responseType: 'json',
         body: {},
@@ -151,13 +151,13 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
   );
 
   apiTest('Should return 400 when entity store is not installed', async ({ apiClient }) => {
-    await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
 
-    const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
+    const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
       headers: internalHeaders,
       responseType: 'json',
       body: {},

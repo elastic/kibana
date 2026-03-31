@@ -36,7 +36,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
 
-    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { historySnapshot: { frequency: '24h' } },
@@ -49,7 +49,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -69,7 +69,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         '2026-01-20T13:00:00Z'
       );
 
-      const snapshotResponse = await apiClient.post(ENTITY_STORE_ROUTES.FORCE_HISTORY_SNAPSHOT, {
+      const snapshotResponse = await apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT, {
         headers: internalHeaders,
         responseType: 'json',
         body: {},
