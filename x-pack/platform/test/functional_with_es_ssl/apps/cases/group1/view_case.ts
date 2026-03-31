@@ -30,7 +30,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
 
   const hasFocus = async (testSubject: string) => {
     const targetElement = await testSubjects.find(testSubject);
