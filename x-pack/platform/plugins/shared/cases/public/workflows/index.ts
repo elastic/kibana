@@ -16,7 +16,7 @@ export function registerCasesSteps(
   }
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./get_case').then((m) => m.getCaseStepDefinition)
+    import('./simple_steps').then((m) => m.getCaseStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
@@ -24,11 +24,80 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./update_case').then((m) => m.updateCaseStepDefinition)
+    import('./simple_steps').then((m) => m.updateCaseStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./add_comment').then((m) => m.addCommentStepDefinition)
+    import('./simple_steps').then((m) => m.addCommentStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.updateCasesStepDefinition)
+  );
+
+  // TODO: enable once https://github.com/elastic/security-team/issues/15982 has been resolved
+  // workflowsExtensions.registerStepDefinition(() =>
+  //   import('./set_custom_field').then((m) => m.setCustomFieldStepDefinition)
+  // );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.findCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.setSeverityStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.setStatusStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.closeCaseStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.deleteCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.assignCaseStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.unassignCaseStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.addAlertsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.addEventsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.findSimilarCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.setDescriptionStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.setTitleStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.addObservablesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.addTagsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.setCategoryStepDefinition)
   );
 
   // Leaving this in for now. We need to get support for reflective value lookup first.
