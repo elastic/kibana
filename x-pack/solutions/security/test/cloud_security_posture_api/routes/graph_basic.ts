@@ -15,7 +15,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 
 // eslint-disable-next-line import/no-default-export
-export default function graphBasicTests({ getService }: FtrProviderContext) {
+export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const logger = getService('log');
 
@@ -41,4 +41,4 @@ export default function graphBasicTests({ getService }: FtrProviderContext) {
       }).expect(result(403, logger));
     });
   });
-}
+};
