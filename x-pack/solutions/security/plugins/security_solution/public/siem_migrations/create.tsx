@@ -16,7 +16,7 @@ import { CenteredLoadingSpinner } from '../common/components/centered_loading_sp
 import { OnboardingContextProvider } from '../onboarding/components/onboarding_context';
 
 const SIEM_MIGRATIONS_PAGE_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.landing.pageTitle',
+  'xpack.securitySolution.siemMigrations.create.pageTitle',
   {
     defaultMessage: 'Automatic Migrations',
   }
