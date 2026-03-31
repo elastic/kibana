@@ -75,7 +75,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
         <EuiButtonEmpty
           iconSide="left"
           onClick={collapseDetails}
-          iconType="arrowEnd"
+          iconType="chevronLimitRight"
           size="s"
           data-test-subj={COLLAPSE_DETAILS_BUTTON_TEST_ID}
           aria-label={i18n.translate(
@@ -99,7 +99,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
         <EuiButtonEmpty
           iconSide="left"
           onClick={expandDetails}
-          iconType="arrowStart"
+          iconType="chevronLimitLeft"
           size="s"
           data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}
           aria-label={i18n.translate(

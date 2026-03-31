@@ -36,6 +36,7 @@ import { SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPES } from '../constants';
 interface AssetCriticalityFilePickerStepProps {
   onFileChange: (fileList: FileList | null) => void;
   isLoading: boolean;
+  isEntityStoreV2Enabled: boolean;
   errorMessage?: string;
 }
 
@@ -47,8 +48,14 @@ const entityCSVMap: Record<SupportedEntityType, string> = {
   service: `service,service-001,extreme_impact`,
 };
 
+const entityCSVV2Map: Record<SupportedEntityType, string> = {
+  user: `user,user001@company.com,user-001,User One,,,,low_impact\nuser,user002@abc.biz,user-002,,,,,medium_impact`,
+  host: `host,,,,host-001,xyz.com,,extreme_impact`,
+  service: `service,,,,,,service-001,extreme_impact`,
+};
+
 export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePickerStepProps> =
-  React.memo(({ onFileChange, errorMessage, isLoading }) => {
+  React.memo(({ onFileChange, errorMessage, isLoading, isEntityStoreV2Enabled }) => {
     const { formatListToParts } = useI18n();
 
     const formatBytes = useFormatBytes();
@@ -67,6 +74,13 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
       .filter((entity): entity is SupportedEntityType => entity in entityCSVMap)
       .map((entity) => entityCSVMap[entity])
       .join('\n');
+
+    const sampleCSVContentV2 = [
+      'type,user.email,user.name,user.full_name,host.name,host.domain,service.name,criticality_level',
+      ...entityTypes
+        .filter((entity): entity is SupportedEntityType => entity in entityCSVMap)
+        .map((entity) => entityCSVV2Map[entity]),
+    ].join('\n');
 
     const i18nOrList = (items: string[]) =>
       formatListToParts(items, {
@@ -119,17 +133,40 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <EuiSpacer size="s" />
 
           <ul className={listStyle}>
+            {isEntityStoreV2Enabled && (
+              <li>
+                <FormattedMessage
+                  defaultMessage={`Header row: The first row of the file must contain a header. This specifies the columns in the file. "type" and "criticality_level" must be columns in the file.`}
+                  id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.headerDescription"
+                />
+              </li>
+            )}
             <li>
-              <FormattedMessage
-                defaultMessage="Entity type: Indicate whether the entity is a {entityTypes}"
-                id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
-                values={{
-                  entityTypes: i18nOrList(entityTypes),
-                }}
-              />
+              {isEntityStoreV2Enabled ? (
+                <FormattedMessage
+                  defaultMessage={`Entity type: Indicate whether the entity is a {entityTypes}. The header for this column must be "type".`}
+                  id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescriptionV2"
+                  values={{
+                    entityTypes: i18nOrList(entityTypes),
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  defaultMessage="Entity type: Indicate whether the entity is a {entityTypes}."
+                  id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
+                  values={{
+                    entityTypes: i18nOrList(entityTypes),
+                  }}
+                />
+              )}
             </li>
             <li>
-              {
+              {isEntityStoreV2Enabled ? (
+                <FormattedMessage
+                  defaultMessage={`Identifier fields: Specify fields that identify the entity. Examples include "user.name", "user.email", "user.username", "event.module", "host.name", "host.hostname". Entities that match ALL of the identifiers specified in a row will be updated.`}
+                  id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescriptionV2"
+                />
+              ) : (
                 <FormattedMessage
                   defaultMessage="Identifier: Specify the entity's {fieldsName}"
                   id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescription"
@@ -139,16 +176,26 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
                     ),
                   }}
                 />
-              }
+              )}
             </li>
             <li>
-              <FormattedMessage
-                defaultMessage="Criticality level: Specify any one of {labels}"
-                id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetCriticalityLabels"
-                values={{
-                  labels: <EuiCode>{ValidCriticalityLevels.join(', ')}</EuiCode>,
-                }}
-              />
+              {isEntityStoreV2Enabled ? (
+                <FormattedMessage
+                  defaultMessage={`Criticality level: Specify any one of {labels}. The header for this column must be "criticality_level".`}
+                  id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetCriticalityLabelsV2"
+                  values={{
+                    labels: <EuiCode>{ValidCriticalityLevels.join(', ')}</EuiCode>,
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  defaultMessage="Criticality level: Specify any one of {labels}"
+                  id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetCriticalityLabels"
+                  values={{
+                    labels: <EuiCode>{ValidCriticalityLevels.join(', ')}</EuiCode>,
+                  }}
+                />
+              )}
             </li>
           </ul>
 
@@ -170,7 +217,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
             lineNumbers
             isCopyable
           >
-            {sampleCSVContent}
+            {isEntityStoreV2Enabled ? sampleCSVContentV2 : sampleCSVContent}
           </EuiCodeBlock>
         </EuiPanel>
 
