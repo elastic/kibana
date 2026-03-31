@@ -198,7 +198,7 @@ export function registerCollector(
         ({ jobs = [] } = await esClient.ml.getJobs());
         customRulesData = aggregateCustomRulesUsageFromJobs(jobs);
       } catch {
-        // ML API may be unavailable; keep zeroes so alertRules data is still returned
+        // ML API may be unavailable; keep zeroes so other data is still returned
       }
 
       try {
