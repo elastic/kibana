@@ -58,6 +58,11 @@ describe('getFieldValue', () => {
     it('returns undefined when path is missing', () => {
       expect(getFieldValue({ user: {} }, 'user.id')).toBeUndefined();
     });
+
+    it('returns undefined when path is an empty array (e.g. Elasticsearch multi-field)', () => {
+      expect(getFieldValue({ user: { id: [] } }, 'user.id')).toBeUndefined();
+      expect(getFieldValue({ 'user.id': [] }, 'user.id')).toBeUndefined();
+    });
   });
 });
 

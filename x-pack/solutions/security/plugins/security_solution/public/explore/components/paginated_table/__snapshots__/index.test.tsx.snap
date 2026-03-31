@@ -418,7 +418,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                 </span>
                 <span
                   color="inherit"
-                  data-euiicon-type="arrowDown"
+                  data-euiicon-type="chevronSingleDown"
                 />
               </span>
             </button>

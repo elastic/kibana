@@ -591,6 +591,7 @@ describe('useActions', () => {
         settings: false,
         createComment: false,
         assign: false,
+        manageTemplates: false,
       };
 
       const { result } = renderHook(() => useActions({ disableActions: false }), {
@@ -629,6 +630,7 @@ describe('useActions', () => {
         settings: false,
         createComment: false,
         assign: false,
+        manageTemplates: false,
       };
 
       const { result } = renderHook(() => useActions({ disableActions: false }), {
@@ -667,6 +669,7 @@ describe('useActions', () => {
         settings: false,
         createComment: false,
         assign: false,
+        manageTemplates: false,
       };
 
       const { result } = renderHook(() => useActions({ disableActions: false }), {
