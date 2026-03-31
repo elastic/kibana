@@ -734,7 +734,7 @@
         "label": "SupportedPytorchTasksType",
         "description": [],
         "signature": [
-          "\"text_expansion\" | \"ner\" | \"text_embedding\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"fill_mask\""
+          "\"text_expansion\" | \"text_embedding\" | \"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"fill_mask\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
         "lineNumber": 49,

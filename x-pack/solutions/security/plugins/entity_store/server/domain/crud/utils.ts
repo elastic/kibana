@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import { getFlattenedObject } from '@kbn/std';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { getEuidSourceFields } from '../../../common/domain/euid';
@@ -16,7 +15,6 @@ import type {
   EntityField,
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
-import { HASH_ALG } from '../constants';
 import { BadCRUDRequestError } from '../errors';
 
 type CrudOperation = 'create' | 'update';
@@ -26,10 +24,6 @@ export interface ValidateDocIdentificationOptions {
   readonly force?: boolean;
   readonly operation?: CrudOperation;
   readonly entityType?: EntityType;
-}
-
-export function hashEuid(id: string): string {
-  return createHash(HASH_ALG).update(id).digest('hex');
 }
 
 // validateDocIdentification checks provided and generated EUIDs. It
