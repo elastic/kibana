@@ -63,8 +63,8 @@ const TEST_CONFIGS: Record<string, IntegrationTestConfig> = {
     dataStreamName: 'logs-system.auth-default',
     templateName: 'scout-system-auth-events',
     entityNamespace: 'system',
-    expectedFrequentHost: 'test-linux-a',
-    expectedInfrequentHost: 'test-linux-b',
+    expectedFrequentHost: 'test-linux-host-id-a',
+    expectedInfrequentHost: 'test-linux-host-id-b',
   },
   system_security: {
     archivePath: `${ARCHIVES_BASE}/system_security/events`,
@@ -280,6 +280,24 @@ for (const integration of INTEGRATION_CONFIGS) {
         refresh: true,
       });
 
+      // Force log extraction to populate the latest entity index BEFORE
+      // running the maintainer so entities exist and can be updated.
+      const extractionResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            fromDateISO: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+            toDateISO: new Date().toISOString(),
+          },
+        }
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect((extractionResponse.body as Record<string, unknown>).success).toBe(true);
+
+      await esClient.indices.refresh({ index: LATEST_INDEX });
+
       // Run the maintainer and wait for it to complete
       const entryBeforeRun = await getMaintainerEntry(apiClient, defaultHeaders, MAINTAINER_ID);
       const runsBefore = entryBeforeRun?.runs ?? 0;
@@ -294,21 +312,6 @@ for (const integration of INTEGRATION_CONFIGS) {
       );
 
       expect(maintainerEntry.customState).toBeDefined();
-
-      // Force log extraction to populate the latest entity index
-      const extractionResponse = await apiClient.post(
-        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
-        {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: {
-            fromDateISO: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-            toDateISO: new Date().toISOString(),
-          },
-        }
-      );
-      expect(extractionResponse.statusCode).toBe(200);
-      expect((extractionResponse.body as Record<string, unknown>).success).toBe(true);
 
       await esClient.indices.refresh({ index: LATEST_INDEX });
     });

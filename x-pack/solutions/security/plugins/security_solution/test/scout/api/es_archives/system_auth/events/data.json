@@ -29,6 +29,7 @@
         ]
       },
       "host": {
+        "id": "test-linux-host-id-a",
         "hostname": "test-linux-a",
         "name": "test-linux-a"
       },
@@ -86,6 +87,7 @@
         ]
       },
       "host": {
+        "id": "test-linux-host-id-a",
         "hostname": "test-linux-a",
         "name": "test-linux-a"
       },
@@ -143,6 +145,7 @@
         ]
       },
       "host": {
+        "id": "test-linux-host-id-a",
         "hostname": "test-linux-a",
         "name": "test-linux-a"
       },
@@ -200,6 +203,7 @@
         ]
       },
       "host": {
+        "id": "test-linux-host-id-a",
         "hostname": "test-linux-a",
         "name": "test-linux-a"
       },
@@ -257,6 +261,7 @@
         ]
       },
       "host": {
+        "id": "test-linux-host-id-a",
         "hostname": "test-linux-a",
         "name": "test-linux-a"
       },
@@ -314,6 +319,7 @@
         ]
       },
       "host": {
+        "id": "test-linux-host-id-b",
         "hostname": "test-linux-b",
         "name": "test-linux-b"
       },
