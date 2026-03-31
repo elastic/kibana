@@ -3,6 +3,15 @@ get:
   operationId: getRuntimeFieldDefault
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X GET "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field/${FIELD_NAME}" \
+          -H "Authorization: ApiKey ${API_KEY}"
+    - lang: Console
+      source: |
+        GET kbn://api/data_views/data_view/{viewId}/runtime_field/{fieldName}
   parameters:
     - $ref: '../components/parameters/field_name.yaml'
     - $ref: '../components/parameters/view_id.yaml'
@@ -35,6 +44,16 @@ delete:
   operationId: deleteRuntimeFieldDefault
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X DELETE "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field/${FIELD_NAME}" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true"
+    - lang: Console
+      source: |
+        DELETE kbn://api/data_views/data_view/{viewId}/runtime_field/{fieldName}
   parameters:
     - $ref: '../components/parameters/field_name.yaml'
     - $ref: '../components/parameters/view_id.yaml'
@@ -53,6 +72,19 @@ post:
   operationId: updateRuntimeFieldDefault
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X POST "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field/${FIELD_NAME}" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{"runtimeField":{"type":"long","script":{"source":"emit(doc['"'"'timestamp'"'"'].value.getHour())"}}}'
+    - lang: Console
+      source: |
+        POST kbn://api/data_views/data_view/{viewId}/runtime_field/{fieldName}
+        {"runtimeField":{"type":"long","script":{"source":"emit(doc['timestamp'].value.getHour())"}}}
   parameters:
     - $ref: '../components/parameters/field_name.yaml'
     - $ref: '../components/parameters/view_id.yaml'
