@@ -246,61 +246,6 @@ export const useDashboardMenuItems = ({
   const menuItems = useMemo(() => {
     return {
       // Regular menu items
-      add: {
-        label: topNavStrings.add.label,
-        id: 'add',
-        iconType: 'plus',
-        testId: 'dashboardAddTopNavButton',
-        htmlId: 'dashboardAddTopNavButton',
-        disableButton: disableTopNav,
-        popoverWidth: 200,
-        items: addMenuItems,
-        order: 2,
-      } as AppMenuItemType,
-      fullScreen: {
-        order: 6,
-        label: topNavStrings.fullScreen.label,
-        id: 'full-screen',
-        testId: 'dashboardFullScreenMode',
-        iconType: 'fullScreen',
-        run: () => dashboardApi.setFullScreenMode(true),
-        disableButton: disableTopNav,
-      } as AppMenuItemType,
-
-      duplicate: {
-        order: 3,
-        disableButton: disableTopNav,
-        id: 'interactive-save',
-        testId: 'dashboardInteractiveSaveMenuItem',
-        iconType: 'copy',
-        run: dashboardInteractiveSave,
-        label: topNavStrings.viewModeInteractiveSave.label,
-      } as AppMenuItemType,
-
-      switchToViewMode: {
-        order: 1,
-        iconType: 'exit', // use 'logOut' when added to EUI
-        label: topNavStrings.switchToViewMode.label,
-        id: 'cancel',
-        disableButton: disableTopNav || !lastSavedId || isResetting,
-        isLoading: isResetting,
-        testId: 'dashboardViewOnlyMode',
-        run: () => resetChanges(true),
-      } as AppMenuItemType,
-
-      backgroundSearch: {
-        order: viewMode === 'edit' ? 6 : 5,
-        label: topNavStrings.backgroundSearch.label,
-        id: 'backgroundSearch',
-        iconType: 'backgroundTask',
-        testId: 'openBackgroundSearchFlyoutButton',
-        run: () =>
-          dataService.search.showSearchSessionsFlyout({
-            appId: appId!,
-            trackingProps: { openedFrom: 'background search button' },
-          }),
-      } as AppMenuItemType,
-
       share: {
         order: viewMode === 'edit' ? 3 : 1,
         label: topNavStrings.share.label,
@@ -323,6 +268,62 @@ export const useDashboardMenuItems = ({
         items: exportItems,
         popoverWidth: 160,
         popoverTestId: 'exportPopoverPanel',
+      } as AppMenuItemType,
+
+      duplicate: {
+        order: 3,
+        disableButton: disableTopNav,
+        id: 'interactive-save',
+        testId: 'dashboardInteractiveSaveMenuItem',
+        iconType: 'copy',
+        run: dashboardInteractiveSave,
+        label: topNavStrings.viewModeInteractiveSave.label,
+      } as AppMenuItemType,
+
+      backgroundSearch: {
+        order: viewMode === 'edit' ? 6 : 5,
+        label: topNavStrings.backgroundSearch.label,
+        id: 'backgroundSearch',
+        iconType: 'backgroundTask',
+        testId: 'openBackgroundSearchFlyoutButton',
+        run: () =>
+          dataService.search.showSearchSessionsFlyout({
+            appId: appId!,
+            trackingProps: { openedFrom: 'background search button' },
+          }),
+      } as AppMenuItemType,
+
+      fullScreen: {
+        order: 6,
+        label: topNavStrings.fullScreen.label,
+        id: 'full-screen',
+        testId: 'dashboardFullScreenMode',
+        iconType: 'fullScreen',
+        run: () => dashboardApi.setFullScreenMode(true),
+        disableButton: disableTopNav,
+      } as AppMenuItemType,
+
+      switchToViewMode: {
+        order: 1,
+        iconType: 'exit', // use 'logOut' when added to EUI
+        label: topNavStrings.switchToViewMode.label,
+        id: 'cancel',
+        disableButton: disableTopNav || !lastSavedId || isResetting,
+        isLoading: isResetting,
+        testId: 'dashboardViewOnlyMode',
+        run: () => resetChanges(true),
+      } as AppMenuItemType,
+
+      add: {
+        label: topNavStrings.add.label,
+        id: 'add',
+        iconType: 'plus',
+        testId: 'dashboardAddTopNavButton',
+        htmlId: 'dashboardAddTopNavButton',
+        disableButton: disableTopNav,
+        popoverWidth: 200,
+        items: addMenuItems,
+        order: 2,
       } as AppMenuItemType,
 
       settings: {
