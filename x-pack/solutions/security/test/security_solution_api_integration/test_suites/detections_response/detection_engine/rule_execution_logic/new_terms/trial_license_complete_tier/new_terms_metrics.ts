@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const { indexListOfDocuments } = dataGeneratorFactory({
     es,
-    index: 'logs-test-1',
+    index: 'test-data-1',
     log,
   });
 
@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
 
       await es.indices.delete({
-        index: 'logs-test-1,logs-test-2',
+        index: 'test-data-1,test-data-2',
         ignore_unavailable: true,
       });
 
@@ -51,11 +51,11 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
       await es.indices.create({
-        index: 'logs-test-1',
+        index: 'test-data-1',
         mappings,
       });
       await es.indices.create({
-        index: 'logs-test-2',
+        index: 'test-data-2',
         mappings,
       });
     });
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
             supertest,
             log,
             getNewTermsRuleParams({
-              index: ['logs-test-1'],
+              index: ['test-data-1'],
               query: '*:*',
               new_terms_fields: ['host.name'],
               history_window_start: 'now-1h',
@@ -119,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
             supertest,
             log,
             getNewTermsRuleParams({
-              index: ['logs-test-*'],
+              index: ['test-data-*'],
               query: '*:*',
               new_terms_fields: ['host.name'],
               history_window_start: 'now-1h',
@@ -157,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
             supertest,
             log,
             getNewTermsRuleParams({
-              index: ['logs-te*', 'logs-test-1', 'logs-test-2'],
+              index: ['test-da*', 'test-data-1', 'test-data-2'],
               query: '*:*',
               new_terms_fields: ['host.name'],
               history_window_start: 'now-1h',
@@ -197,7 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
             supertest,
             log,
             getNewTermsRuleParams({
-              index: ['logs-test-1'],
+              index: ['test-data-1'],
               query: '*:*',
               new_terms_fields: ['host.name'],
               history_window_start: 'now-1h',
@@ -240,7 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
             supertest,
             log,
             getNewTermsRuleParams({
-              index: ['logs-test-1'],
+              index: ['test-data-1'],
               query: '*:*',
               new_terms_fields: ['host.name'],
               history_window_start: 'now-1h',

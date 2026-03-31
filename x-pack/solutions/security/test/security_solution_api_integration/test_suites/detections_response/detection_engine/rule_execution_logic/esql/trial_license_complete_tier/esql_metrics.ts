@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const { indexListOfDocuments: indexListOfSourceDocuments } = dataGeneratorFactory({
     es,
-    index: 'logs-test-1',
+    index: 'test-data-1',
     log,
   });
 
@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
 
       await es.indices.delete({
-        index: 'logs-test-1,logs-test-2',
+        index: 'test-data-1,test-data-2',
         ignore_unavailable: true,
       });
 
@@ -51,11 +51,11 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
       await es.indices.create({
-        index: 'logs-test-1',
+        index: 'test-data-1',
         mappings,
       });
       await es.indices.create({
-        index: 'logs-test-2',
+        index: 'test-data-2',
         mappings,
       });
     });
@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
             host: { name: 'test-1' },
           };
           const rule = getEsqlRuleParams({
-            query: 'from logs-test-1 metadata _id, _index, _version',
+            query: 'from test-data-1 metadata _id, _index, _version',
             from: 'now-35m',
             interval: '30m',
             enabled: true,
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
             host: { name: 'test-1' },
           };
           const rule = getEsqlRuleParams({
-            query: 'from logs-test-* metadata _id, _index, _version',
+            query: 'from test-data-* metadata _id, _index, _version',
             from: 'now-35m',
             interval: '30m',
             enabled: true,
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
             host: { name: 'test-1' },
           };
           const rule = getEsqlRuleParams({
-            query: 'from logs-te*, logs-test-1, logs-test-2 metadata _id, _index, _version',
+            query: 'from test-da*, test-data-1, test-data-2 metadata _id, _index, _version',
             from: 'now-35m',
             interval: '30m',
             enabled: true,
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
             host: { name: 'test-1' },
           };
           const rule = getEsqlRuleParams({
-            query: 'from logs-test-1 metadata _id, _index, _version',
+            query: 'from test-data-1 metadata _id, _index, _version',
             from: 'now-35m',
             interval: '30m',
             enabled: true,
@@ -172,7 +172,7 @@ export default ({ getService }: FtrProviderContext) => {
             host: { name: 'test-1' },
           };
           const rule = getEsqlRuleParams({
-            query: 'from logs-test-1 metadata _id, _index, _version',
+            query: 'from test-data-1 metadata _id, _index, _version',
             alert_suppression: {
               group_by: ['host.name'],
               duration: {
