@@ -236,9 +236,9 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
               reason: error instanceof ValidationError ? error.result : undefined,
             };
             if (error instanceof PermissionError) {
-              this.logger.info('Permission error running query.', withErrorMessage(error));
+              this.logger.debug('Permission error running query.', withErrorMessage(error));
             } else {
-              this.logger.error('Error running query', withErrorMessage(error));
+              this.logger.warn('Error running query', withErrorMessage(error));
             }
             resolve({
               ...queryStats,
