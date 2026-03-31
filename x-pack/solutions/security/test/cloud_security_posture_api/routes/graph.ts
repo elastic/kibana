@@ -28,8 +28,6 @@ import {
   result,
   loadAlertArchive,
   dataViewRouteHelpersFactory,
-  waitForEnrichPolicyCreated,
-  executeEnrichPolicy,
   installCloudAssetInventoryPackage,
   initEntityEnginesWithRetry,
   waitForEntityDataIndexed,
@@ -304,12 +302,12 @@ export default function (providerContext: FtrProviderContext) {
           isAlert: false,
         }));
         const groupedActorIds = [
-          'group-actor-1@example.com',
-          'group-actor-2@example.com',
-          'group-actor-3@example.com',
-          'group-actor-4@example.com',
-          'group-actor-5@example.com',
-          'group-actor-6@example.com',
+          'user:group-actor-1@example.com@gcp',
+          'user:group-actor-2@example.com@gcp',
+          'user:group-actor-3@example.com@gcp',
+          'user:group-actor-4@example.com@gcp',
+          'user:group-actor-5@example.com@gcp',
+          'user:group-actor-6@example.com@gcp',
         ];
         const groupedTargetIds = [
           'group-target-1',
@@ -318,7 +316,7 @@ export default function (providerContext: FtrProviderContext) {
           'group-target-4',
           'group-target-5',
         ];
-        const soloActorId = 'solo-actor@example.com';
+        const soloActorId = 'user:solo-actor@example.com@gcp';
         const soloTargetId = 'solo-target';
         const groupActionQuery = {
           bool: {
@@ -407,12 +405,10 @@ export default function (providerContext: FtrProviderContext) {
           }).expect(result(200));
 
           const entityNodes = response.body.nodes.filter(isEntityNode) as EntityNodeDataModel[];
-          const actorNodes = entityNodes.filter(
-            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'user'
-          );
-          const targetNodes = entityNodes.filter(
-            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'entity'
-          );
+          const isActorNode = (node: EntityNodeDataModel) =>
+            node.documentsData?.some((doc) => doc.id.startsWith('user:'));
+          const actorNodes = entityNodes.filter(isActorNode);
+          const targetNodes = entityNodes.filter((node) => !isActorNode(node));
 
           expect(actorNodes).to.have.length(2);
           expect(targetNodes).to.have.length(2);
@@ -479,8 +475,8 @@ export default function (providerContext: FtrProviderContext) {
           const response = await postGraph(supertest, {
             query: {
               pinnedIds: [
-                'group-actor-1@example.com',
-                'group-actor-2@example.com',
+                'user:group-actor-1@example.com@gcp',
+                'user:group-actor-2@example.com@gcp',
                 'group-target-3',
               ],
               indexPatterns: ['logs-*'],
@@ -492,12 +488,10 @@ export default function (providerContext: FtrProviderContext) {
           }).expect(result(200));
 
           const entityNodes = response.body.nodes.filter(isEntityNode) as EntityNodeDataModel[];
-          const actorNodes = entityNodes.filter(
-            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'user'
-          );
-          const targetNodes = entityNodes.filter(
-            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'entity'
-          );
+          const isActorNode = (node: EntityNodeDataModel) =>
+            node.documentsData?.some((doc) => doc.id.startsWith('user:'));
+          const actorNodes = entityNodes.filter(isActorNode);
+          const targetNodes = entityNodes.filter((node) => !isActorNode(node));
 
           expect(actorNodes).to.have.length(4);
           expect(targetNodes).to.have.length(4);
@@ -508,9 +502,9 @@ export default function (providerContext: FtrProviderContext) {
           const actorGroupIds = (actorGroupNode.documentsData ?? []).map((doc) => doc.id).sort();
           expect(actorGroupIds).to.eql(
             [
-              'group-actor-4@example.com',
-              'group-actor-5@example.com',
-              'group-actor-6@example.com',
+              'user:group-actor-4@example.com@gcp',
+              'user:group-actor-5@example.com@gcp',
+              'user:group-actor-6@example.com@gcp',
             ].sort()
           );
 
@@ -531,9 +525,9 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(actorSingleIds).to.eql(
             [
-              'group-actor-1@example.com',
-              'group-actor-2@example.com',
-              'group-actor-3@example.com',
+              'user:group-actor-1@example.com@gcp',
+              'user:group-actor-2@example.com@gcp',
+              'user:group-actor-3@example.com@gcp',
             ].sort()
           );
           expect(targetSingleIds).to.eql(
@@ -558,7 +552,7 @@ export default function (providerContext: FtrProviderContext) {
           // Render: solo actor + pinned actor + grouped actors (5); solo target + pinned target + grouped targets (4).
           const response = await postGraph(supertest, {
             query: {
-              pinnedIds: ['solo-actor@example.com', 'group-actor-1@example.com'],
+              pinnedIds: ['user:solo-actor@example.com@gcp', 'user:group-actor-1@example.com@gcp'],
               indexPatterns: ['logs-*'],
               originEventIds: [],
               start: '2024-09-01T00:00:00Z',
@@ -568,12 +562,10 @@ export default function (providerContext: FtrProviderContext) {
           }).expect(result(200));
 
           const entityNodes = response.body.nodes.filter(isEntityNode) as EntityNodeDataModel[];
-          const actorNodes = entityNodes.filter(
-            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'user'
-          );
-          const targetNodes = entityNodes.filter(
-            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'entity'
-          );
+          const isActorNode = (node: EntityNodeDataModel) =>
+            node.documentsData?.some((doc) => doc.id.startsWith('user:'));
+          const actorNodes = entityNodes.filter(isActorNode);
+          const targetNodes = entityNodes.filter((node) => !isActorNode(node));
 
           expect(actorNodes).to.have.length(3);
           expect(targetNodes).to.have.length(3);
@@ -584,11 +576,11 @@ export default function (providerContext: FtrProviderContext) {
           const actorGroupIds = (actorGroupNode.documentsData ?? []).map((doc) => doc.id).sort();
           expect(actorGroupIds).to.eql(
             [
-              'group-actor-2@example.com',
-              'group-actor-3@example.com',
-              'group-actor-4@example.com',
-              'group-actor-5@example.com',
-              'group-actor-6@example.com',
+              'user:group-actor-2@example.com@gcp',
+              'user:group-actor-3@example.com@gcp',
+              'user:group-actor-4@example.com@gcp',
+              'user:group-actor-5@example.com@gcp',
+              'user:group-actor-6@example.com@gcp',
             ].sort()
           );
 
@@ -609,7 +601,7 @@ export default function (providerContext: FtrProviderContext) {
             .map((node) => node.documentsData?.[0]?.id)
             .sort();
 
-          expect(actorSingleIds).to.eql([soloActorId, 'group-actor-1@example.com'].sort());
+          expect(actorSingleIds).to.eql([soloActorId, 'user:group-actor-1@example.com@gcp'].sort());
           expect(targetSingleIds).to.eql([soloTargetId, 'group-target-1'].sort());
         });
 
@@ -627,12 +619,10 @@ export default function (providerContext: FtrProviderContext) {
           }).expect(result(200));
 
           const entityNodes = response.body.nodes.filter(isEntityNode) as EntityNodeDataModel[];
-          const actorNodes = entityNodes.filter(
-            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'user'
-          );
-          const targetNodes = entityNodes.filter(
-            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'entity'
-          );
+          const isActorNode = (node: EntityNodeDataModel) =>
+            node.documentsData?.some((doc) => doc.id.startsWith('user:'));
+          const actorNodes = entityNodes.filter(isActorNode);
+          const targetNodes = entityNodes.filter((node) => !isActorNode(node));
 
           expect(actorNodes).to.have.length(2);
           expect(targetNodes).to.have.length(2);
@@ -646,7 +636,7 @@ export default function (providerContext: FtrProviderContext) {
             .map((node) => node.documentsData?.[0]?.id)
             .sort();
 
-          expect(actorSingleIds).to.eql(['group-actor-1@example.com']);
+          expect(actorSingleIds).to.eql(['user:group-actor-1@example.com@gcp']);
           expect(targetSingleIds).to.eql(['group-target-1']);
 
           const actorGroupNode = actorNodes.find(
@@ -683,12 +673,10 @@ export default function (providerContext: FtrProviderContext) {
           }).expect(result(200));
 
           const entityNodes = response.body.nodes.filter(isEntityNode) as EntityNodeDataModel[];
-          const actorNodes = entityNodes.filter(
-            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'user'
-          );
-          const targetNodes = entityNodes.filter(
-            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'entity'
-          );
+          const isActorNode = (node: EntityNodeDataModel) =>
+            node.documentsData?.some((doc) => doc.id.startsWith('user:'));
+          const actorNodes = entityNodes.filter(isActorNode);
+          const targetNodes = entityNodes.filter((node) => !isActorNode(node));
 
           expect(actorNodes).to.have.length(1);
           expect(targetNodes).to.have.length(1);
@@ -713,7 +701,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'user.entity.id': 'admin@example.com',
+                      'user.id': 'admin@example.com',
                     },
                   },
                 ],
@@ -748,18 +736,20 @@ export default function (providerContext: FtrProviderContext) {
             expect(hasEvent).to.be(true);
           }
 
-          if (node.id === 'admin@example.com') {
+          if (node.id === 'user:admin@example.com@gcp') {
             expect(node).to.not.be(undefined);
             expect(node!.documentsData).to.not.be(undefined);
             expect(node!.documentsData!.length).to.equal(1);
 
             expectExpect(node!.documentsData).toContainEqual(
               expectExpect.objectContaining({
-                id: 'admin@example.com',
+                id: 'user:admin@example.com@gcp',
                 type: 'entity',
                 entity: expectExpect.objectContaining({
-                  ecsParentField: 'user',
                   availableInEntityStore: false,
+                  sourceFields: expectExpect.objectContaining({
+                    'user.id': 'admin@example.com',
+                  }),
                 }),
               })
             );
@@ -775,8 +765,10 @@ export default function (providerContext: FtrProviderContext) {
                 id: 'projects/your-project-id/roles/customRole',
                 type: 'entity',
                 entity: expectExpect.objectContaining({
-                  ecsParentField: 'entity',
                   availableInEntityStore: false,
+                  sourceFields: expectExpect.objectContaining({
+                    'entity.target.id': 'projects/your-project-id/roles/customRole',
+                  }),
                 }),
               })
             );
@@ -929,7 +921,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'user.entity.id': 'admin2@example.com',
+                      'user.id': 'admin2@example.com',
                     },
                   },
                 ],
@@ -979,7 +971,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'user.entity.id': 'admin@example.com',
+                      'user.id': 'admin@example.com',
                     },
                   },
                 ],
@@ -1078,42 +1070,81 @@ export default function (providerContext: FtrProviderContext) {
         expect(actorNode).to.have.property('shape', 'rectangle');
         expect(actorNode).to.have.property('color', 'primary');
         expect(actorNode).to.have.property('tag', 'Entities');
-        expect(actorNode).to.have.property('icon', 'magnifyWithExclamation');
+        expect(actorNode).to.have.property('icon', 'magnifyExclamation');
+        // entity.id is multi-value ["actor-mv-1", "actor-mv-2"]. These are generic entities
+        // (no typed EUID source fields present), so entity.id is used as-is via COALESCE fallback.
+        // Each entity gets its own correct sourceFields value from the EUID column post MV_EXPAND.
         expect(actorNode.documentsData).to.have.length(2);
-        expectExpect(actorNode.documentsData).toContainEqual({
-          id: 'actor-mv-1',
-          type: 'entity',
-          entity: { ecsParentField: 'entity', availableInEntityStore: false },
-        });
-        expectExpect(actorNode.documentsData).toContainEqual({
-          id: 'actor-mv-2',
-          type: 'entity',
-          entity: { ecsParentField: 'entity', availableInEntityStore: false },
-        });
+        expectExpect(actorNode.documentsData).toContainEqual(
+          expectExpect.objectContaining({
+            id: 'actor-mv-1',
+            type: 'entity',
+            entity: expectExpect.objectContaining({
+              availableInEntityStore: false,
+              sourceFields: expectExpect.objectContaining({
+                'entity.id': 'actor-mv-1',
+              }),
+            }),
+          })
+        );
+        expectExpect(actorNode.documentsData).toContainEqual(
+          expectExpect.objectContaining({
+            id: 'actor-mv-2',
+            type: 'entity',
+            entity: expectExpect.objectContaining({
+              availableInEntityStore: false,
+              sourceFields: expectExpect.objectContaining({
+                'entity.id': 'actor-mv-2',
+              }),
+            }),
+          })
+        );
 
-        // Find target node (should have count: 3 for 3 target IDs)
+        // Find target node (should have count: 3 for 3 multi-value target IDs)
+        // Same as actors: generic entities, EUID column used directly for sourceFields.
         const targetNode = entityNodes.find((node: EntityNodeDataModel) => node.count === 3);
         expect(targetNode).to.not.be(undefined);
         expect(targetNode).to.have.property('shape', 'rectangle');
         expect(targetNode).to.have.property('color', 'primary');
         expect(targetNode).to.have.property('tag', 'Entities');
-        expect(targetNode).to.have.property('icon', 'magnifyWithExclamation');
+        expect(targetNode).to.have.property('icon', 'magnifyExclamation');
         expect(targetNode.documentsData).to.have.length(3);
-        expectExpect(targetNode.documentsData).toContainEqual({
-          id: 'target-mv-1',
-          type: 'entity',
-          entity: { ecsParentField: 'entity', availableInEntityStore: false },
-        });
-        expectExpect(targetNode.documentsData).toContainEqual({
-          id: 'target-mv-2',
-          type: 'entity',
-          entity: { ecsParentField: 'entity', availableInEntityStore: false },
-        });
-        expectExpect(targetNode.documentsData).toContainEqual({
-          id: 'target-mv-3',
-          type: 'entity',
-          entity: { ecsParentField: 'entity', availableInEntityStore: false },
-        });
+        expectExpect(targetNode.documentsData).toContainEqual(
+          expectExpect.objectContaining({
+            id: 'target-mv-1',
+            type: 'entity',
+            entity: expectExpect.objectContaining({
+              availableInEntityStore: false,
+              sourceFields: expectExpect.objectContaining({
+                'entity.target.id': 'target-mv-1',
+              }),
+            }),
+          })
+        );
+        expectExpect(targetNode.documentsData).toContainEqual(
+          expectExpect.objectContaining({
+            id: 'target-mv-2',
+            type: 'entity',
+            entity: expectExpect.objectContaining({
+              availableInEntityStore: false,
+              sourceFields: expectExpect.objectContaining({
+                'entity.target.id': 'target-mv-2',
+              }),
+            }),
+          })
+        );
+        expectExpect(targetNode.documentsData).toContainEqual(
+          expectExpect.objectContaining({
+            id: 'target-mv-3',
+            type: 'entity',
+            entity: expectExpect.objectContaining({
+              availableInEntityStore: false,
+              sourceFields: expectExpect.objectContaining({
+                'entity.target.id': 'target-mv-3',
+              }),
+            }),
+          })
+        );
 
         // Verify label node exists for the action with count of 6 (2 actors × 3 targets)
         const labelNodes = response.body.nodes.filter(
@@ -1214,7 +1245,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'user.entity.id': 'admin2@example.com',
+                      'user.id': 'admin2@example.com',
                     },
                   },
                 ],
@@ -1270,7 +1301,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'user.entity.id': 'admin5@example.com',
+                      'user.id': 'admin5@example.com',
                     },
                   },
                 ],
@@ -1297,7 +1328,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'user.entity.id': 'admin5@example.com',
+                      'user.id': 'admin5@example.com',
                     },
                   },
                 ],
@@ -1324,7 +1355,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     exists: {
-                      field: 'user.entity.id',
+                      field: 'user.id',
                     },
                   },
                 ],
@@ -1463,8 +1494,8 @@ export default function (providerContext: FtrProviderContext) {
             '@timestamp': '2024-09-01T12:00:00.000Z',
             'event.action': 'test_action_null_event_id',
             // Deliberately omit event.id to test null handling
-            'user.entity.id': 'test-user-null-event-id',
-            'host.target.entity.id': 'test-target-null-event-id',
+            'user.id': 'test-user-null-event-id',
+            'entity.target.id': 'test-target-null-event-id',
           },
           refresh: 'wait_for',
         });
@@ -1517,7 +1548,7 @@ export default function (providerContext: FtrProviderContext) {
                   filter: [
                     {
                       match_phrase: {
-                        'user.entity.id': 'test-user-null-event-id',
+                        'user.id': 'test-user-null-event-id',
                       },
                     },
                   ],
@@ -1603,7 +1634,7 @@ export default function (providerContext: FtrProviderContext) {
                   filter: [
                     {
                       match_phrase: {
-                        'user.entity.id': 'admin@example.com',
+                        'user.id': 'admin@example.com',
                       },
                     },
                   ],
@@ -1658,9 +1689,9 @@ export default function (providerContext: FtrProviderContext) {
             // Index some entity data directly (without lookup mode, enrichment won't work)
             await es.index({
               index: getEntitiesLatestIndexName(),
-              id: 'admin@example.com',
+              id: 'user:admin@example.com@gcp',
               document: {
-                'entity.id': 'admin@example.com',
+                'entity.id': 'user:admin@example.com@gcp',
                 'entity.name': 'AdminExample',
                 'entity.type': 'Identity',
                 'entity.sub_type': 'GCP IAM User',
@@ -1694,7 +1725,7 @@ export default function (providerContext: FtrProviderContext) {
                     filter: [
                       {
                         match_phrase: {
-                          'user.entity.id': 'admin@example.com',
+                          'user.id': 'admin@example.com',
                         },
                       },
                     ],
@@ -1715,25 +1746,26 @@ export default function (providerContext: FtrProviderContext) {
             expect(response.body).not.to.have.property('messages');
 
             // Find the actor node - it should NOT be enriched since v2 is not in lookup mode
-            // and v1 enrich policy doesn't exist
             const actorNode = response.body.nodes.find(
-              (node: EntityNodeDataModel) => node.id === 'admin@example.com'
+              (node: EntityNodeDataModel) => node.id === 'user:admin@example.com@gcp'
             ) as EntityNodeDataModel;
 
             expect(actorNode).not.to.be(undefined);
             // Without enrichment, the label should be the entity ID (not the enriched name)
-            expect(actorNode.label).to.equal('admin@example.com');
+            expect(actorNode.label).to.equal('user:admin@example.com@gcp');
             // Without enrichment, should have default icon/shape for unknown entity
-            expect(actorNode.icon).to.equal('magnifyWithExclamation');
+            expect(actorNode.icon).to.equal('magnifyExclamation');
             // Entity should indicate it's NOT available in entity store
             expect(actorNode.documentsData).to.have.length(1);
             expectExpect(actorNode.documentsData).toContainEqual(
               expectExpect.objectContaining({
-                id: 'admin@example.com',
+                id: 'user:admin@example.com@gcp',
                 type: 'entity',
                 entity: expectExpect.objectContaining({
                   availableInEntityStore: false,
-                  ecsParentField: 'user',
+                  sourceFields: expectExpect.objectContaining({
+                    'user.id': 'admin@example.com',
+                  }),
                 }),
               })
             );
@@ -1743,15 +1775,17 @@ export default function (providerContext: FtrProviderContext) {
             ) as EntityNodeDataModel;
             expect(targetNode).not.to.be(undefined);
             expect(targetNode.label).to.equal('projects/your-project-id/roles/customRole');
-            expect(targetNode.icon).to.equal('magnifyWithExclamation');
+            expect(targetNode.icon).to.equal('magnifyExclamation');
             expect(targetNode.documentsData).to.have.length(1);
             expectExpect(targetNode.documentsData).toContainEqual(
               expectExpect.objectContaining({
                 id: 'projects/your-project-id/roles/customRole',
                 type: 'entity',
                 entity: expectExpect.objectContaining({
-                  ecsParentField: 'entity',
                   availableInEntityStore: false,
+                  sourceFields: expectExpect.objectContaining({
+                    'entity.target.id': 'projects/your-project-id/roles/customRole',
+                  }),
                 }),
               })
             );
@@ -1760,18 +1794,15 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('Enrich graph with entity metadata', () => {
-        // Entity store is initialized once at the parent level to avoid race conditions
-        // Tests run sequentially: first v1 (ENRICH), then v2 (LOOKUP JOIN)
         // All enrichment tests run in a dedicated space called 'entities-space'
-        const enrichPolicyCreationTimeout = 15000;
+        const enrichmentRetryTimeout = 15000;
         const entitiesSpaceId = 'entities-space';
         let entitiesSpaceDataView: ReturnType<typeof dataViewRouteHelpersFactory>;
 
-        // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
         // All tests run in the dedicated entities-space
         const runEnrichmentTests = () => {
           it('should contain entity data when asset inventory is enabled', async () => {
-            await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
               const response = await postGraph(
                 supertest,
                 {
@@ -1784,7 +1815,7 @@ export default function (providerContext: FtrProviderContext) {
                         filter: [
                           {
                             match_phrase: {
-                              'user.entity.id': 'admin@example.com',
+                              'user.id': 'admin@example.com',
                             },
                           },
                         ],
@@ -1808,7 +1839,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(response.body).not.to.have.property('messages');
               // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
               const actorNode = response.body.nodes.find(
-                (node: EntityNodeDataModel) => node.id === 'admin@example.com'
+                (node: EntityNodeDataModel) => node.id === 'user:admin@example.com@gcp'
               ) as EntityNodeDataModel;
 
               // Verify entity enrichment
@@ -1859,7 +1890,7 @@ export default function (providerContext: FtrProviderContext) {
           });
 
           it('should return enriched data when asset inventory is enabled - multi target', async () => {
-            await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
               const response = await postGraph(
                 supertest,
                 {
@@ -1879,8 +1910,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(response.body).to.have.property('edges').length(2);
 
               const actorNode = response.body.nodes.find(
-                (node: NodeDataModel) =>
-                  node.id === 'service-account-123@project.iam.gserviceaccount.com'
+                (node: NodeDataModel) => node.id === 'service:ServiceAccount123'
               ) as EntityNodeDataModel;
 
               // Verify entity enrichment for service actor (single entity)
@@ -1893,21 +1923,23 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode.documentsData).to.have.length(1);
               expectExpect(actorNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'service-account-123@project.iam.gserviceaccount.com',
+                  id: 'service:ServiceAccount123',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'ServiceAccount123',
                     type: 'Service',
                     sub_type: 'GCP Service Account',
-                    ecsParentField: 'service',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'service.name': 'ServiceAccount123',
+                    }),
                   }),
                 })
               );
 
               // Find grouped target node by checking for count property
               const targetNode = response.body.nodes.find(
-                (node: EntityNodeDataModel) => node.id === '599353ee39e688c8a37d9d2818d77898'
+                (node: EntityNodeDataModel) => node.id === '9da97a47da11862817d60dcc1cfbaaef'
               ) as EntityNodeDataModel;
 
               // Verify entity enrichment for grouped targets (2 hosts of same type/subtype)
@@ -1920,27 +1952,31 @@ export default function (providerContext: FtrProviderContext) {
               expect(targetNode.documentsData).to.have.length(2);
               expectExpect(targetNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'host-instance-1',
+                  id: 'host:host-instance-1',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'HostInstance1',
                     type: 'Container',
                     sub_type: 'GCP Compute Instance',
-                    ecsParentField: 'host',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'host.target.id': 'host-instance-1',
+                    }),
                   }),
                 })
               );
               expectExpect(targetNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'host-instance-2',
+                  id: 'host:host-instance-2',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'HostInstance2',
                     type: 'Container',
                     sub_type: 'GCP Compute Instance',
-                    ecsParentField: 'host',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'host.target.id': 'host-instance-2',
+                    }),
                   }),
                 })
               );
@@ -1948,7 +1984,7 @@ export default function (providerContext: FtrProviderContext) {
           });
 
           it('should enrich graph with entity metadata for actor acting on single target', async () => {
-            await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
               const response = await postGraph(
                 supertest,
                 {
@@ -1968,25 +2004,26 @@ export default function (providerContext: FtrProviderContext) {
               expect(response.body).not.to.have.property('messages');
 
               const actorNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'entity-user@example.com'
+                (node: NodeDataModel) => node.id === 'user:entity-user@example.com@gcp'
               ) as EntityNodeDataModel;
               expect(actorNode).not.to.be(undefined);
               expect(actorNode.label).to.equal('EntityTestUser');
               expect(actorNode.icon).to.equal('user');
               expect(actorNode.shape).to.equal('ellipse');
               expect(actorNode.tag).to.equal('Identity');
-              // ecsParentField assertion
               expect(actorNode!.documentsData!.length).to.equal(1);
               expectExpect(actorNode!.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'entity-user@example.com',
+                  id: 'user:entity-user@example.com@gcp',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'EntityTestUser',
                     type: 'Identity',
                     sub_type: 'GCP IAM User',
-                    ecsParentField: 'user',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'user.id': 'entity-user@example.com',
+                    }),
                   }),
                 })
               );
@@ -2008,8 +2045,10 @@ export default function (providerContext: FtrProviderContext) {
                     name: 'ComputeServiceTarget',
                     type: 'Compute',
                     sub_type: 'GCP Compute Instance',
-                    ecsParentField: 'service',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'entity.target.id': 'entity-service-target-1',
+                    }),
                   }),
                 })
               );
@@ -2043,7 +2082,7 @@ export default function (providerContext: FtrProviderContext) {
           });
 
           it('should enrich graph with multiple targets from different fields with mixed grouping', async () => {
-            await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
               const response = await postGraph(
                 supertest,
                 {
@@ -2070,7 +2109,7 @@ export default function (providerContext: FtrProviderContext) {
 
               // Verify actor node (single enriched user)
               const actorNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'multi-target-user@example.com'
+                (node: NodeDataModel) => node.id === 'user:multi-target-user@example.com@gcp'
               ) as EntityNodeDataModel;
               expect(actorNode).not.to.be(undefined);
               expect(actorNode.label).to.equal('MultiTargetUser');
@@ -2081,14 +2120,16 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode.documentsData).to.have.length(1);
               expectExpect(actorNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'multi-target-user@example.com',
+                  id: 'user:multi-target-user@example.com@gcp',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'MultiTargetUser',
                     type: 'Identity',
                     sub_type: 'GCP IAM User',
-                    ecsParentField: 'user',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'user.id': 'multi-target-user@example.com',
+                    }),
                   }),
                 })
               );
@@ -2103,6 +2144,8 @@ export default function (providerContext: FtrProviderContext) {
               expect(storageGroupNode.tag).to.equal('Storage');
               expect(storageGroupNode.count).to.equal(3);
               expect(storageGroupNode.documentsData).to.have.length(3);
+              // Generic entities use the EUID column value directly for sourceFields,
+              // so each entity gets its own correct entity.target.id value.
               expectExpect(storageGroupNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
                   id: 'projects/multi-target-project-id/buckets/target-bucket-a',
@@ -2111,8 +2154,11 @@ export default function (providerContext: FtrProviderContext) {
                     name: 'TargetBucketA',
                     type: 'Storage',
                     sub_type: 'GCP Storage Bucket',
-                    ecsParentField: 'entity',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'entity.target.id':
+                        'projects/multi-target-project-id/buckets/target-bucket-a',
+                    }),
                   }),
                 })
               );
@@ -2124,8 +2170,11 @@ export default function (providerContext: FtrProviderContext) {
                     name: 'TargetBucketB',
                     type: 'Storage',
                     sub_type: 'GCP Storage Bucket',
-                    ecsParentField: 'entity',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'entity.target.id':
+                        'projects/multi-target-project-id/buckets/target-bucket-b',
+                    }),
                   }),
                 })
               );
@@ -2137,17 +2186,18 @@ export default function (providerContext: FtrProviderContext) {
                     name: 'TargetBucketC',
                     type: 'Storage',
                     sub_type: 'GCP Storage Bucket',
-                    ecsParentField: 'service',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'entity.target.id':
+                        'projects/multi-target-project-id/buckets/target-bucket-c',
+                    }),
                   }),
                 })
               );
 
-              // Find single Service target node (target-sa-different)
+              // Find single Service target node (TargetServiceDifferent)
               const serviceNode = response.body.nodes.find(
-                (node: EntityNodeDataModel) =>
-                  node.id ===
-                  'projects/multi-target-project-id/serviceAccounts/target-sa-different@multi-target-project-id.iam.gserviceaccount.com'
+                (node: EntityNodeDataModel) => node.id === 'service:TargetServiceDifferent'
               ) as EntityNodeDataModel;
               expect(serviceNode).not.to.be(undefined);
               expect(serviceNode.label).to.equal('TargetServiceDifferent');
@@ -2158,14 +2208,16 @@ export default function (providerContext: FtrProviderContext) {
               expect(serviceNode.documentsData).to.have.length(1);
               expectExpect(serviceNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'projects/multi-target-project-id/serviceAccounts/target-sa-different@multi-target-project-id.iam.gserviceaccount.com',
+                  id: 'service:TargetServiceDifferent',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'TargetServiceDifferent',
                     type: 'Service',
                     sub_type: 'GCP Service Account',
-                    ecsParentField: 'service',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'service.target.name': 'TargetServiceDifferent',
+                    }),
                   }),
                 })
               );
@@ -2198,7 +2250,7 @@ export default function (providerContext: FtrProviderContext) {
           });
 
           it('should handle entities with partial data (name only or type/subtype only)', async () => {
-            await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
               const response = await postGraph(
                 supertest,
                 {
@@ -2219,23 +2271,25 @@ export default function (providerContext: FtrProviderContext) {
 
               // Verify actor node - entity with only name (no type/sub_type)
               const actorNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'partial-user@example.com'
+                (node: NodeDataModel) => node.id === 'user:partial-user@example.com@gcp'
               ) as EntityNodeDataModel;
               expect(actorNode).not.to.be(undefined);
               // Label should be the entity name since it exists
-              expect(actorNode.label).to.equal('partial-user@example.com');
+              expect(actorNode.label).to.equal('user:partial-user@example.com@gcp');
               // Icon and shape should be defaults since type is missing
-              expect(actorNode.icon).to.equal('magnifyWithExclamation');
+              expect(actorNode.icon).to.equal('magnifyExclamation');
               expect(actorNode.shape).to.equal('rectangle');
               expect(actorNode.documentsData).to.have.length(1);
               expectExpect(actorNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'partial-user@example.com',
+                  id: 'user:partial-user@example.com@gcp',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'PartialUserNameOnly',
-                    ecsParentField: 'user',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'user.id': 'partial-user@example.com',
+                    }),
                   }),
                 })
               );
@@ -2245,7 +2299,7 @@ export default function (providerContext: FtrProviderContext) {
 
               // Verify target node - entity with only type/sub_type (no name)
               const targetNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'partial-host-instance-1'
+                (node: NodeDataModel) => node.id === 'host:partial-host-instance-1'
               ) as EntityNodeDataModel;
               expect(targetNode).not.to.be(undefined);
               // Icon and shape should be based on type since it exists
@@ -2255,13 +2309,15 @@ export default function (providerContext: FtrProviderContext) {
               expect(targetNode.documentsData).to.have.length(1);
               expectExpect(targetNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'partial-host-instance-1',
+                  id: 'host:partial-host-instance-1',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     type: 'Container',
                     sub_type: 'GCP Compute Instance',
-                    ecsParentField: 'host',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'host.target.id': 'partial-host-instance-1',
+                    }),
                   }),
                 })
               );
@@ -2332,29 +2388,6 @@ export default function (providerContext: FtrProviderContext) {
           await spacesService.delete(entitiesSpaceId);
         });
 
-        describe('via ENRICH policy (v1)', () => {
-          before(async () => {
-            await esArchiver.load(
-              'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store'
-            );
-
-            // Wait for entity data to be fully indexed
-            await waitForEntityDataIndexed({
-              es,
-              logger,
-              retry,
-              entitiesIndex: `.entities.v1.latest.security_generic_${entitiesSpaceId}`,
-              expectedCount: 13,
-            });
-
-            // Wait for enrich policy to be created and execute it
-            await waitForEnrichPolicyCreated({ es, retry, logger, spaceId: entitiesSpaceId });
-            await executeEnrichPolicy({ es, retry, logger, spaceId: entitiesSpaceId });
-          });
-
-          runEnrichmentTests();
-        });
-
         describe('via LOOKUP JOIN (v2)', () => {
           before(async () => {
             await esArchiver.load(
@@ -2388,7 +2421,7 @@ export default function (providerContext: FtrProviderContext) {
                     originEventIds: [{ id: 'relationships-event-id-12345', isAlert: false }],
                     start: '2024-09-01T12:00:00.000Z',
                     end: '2024-09-01T13:00:00.000Z',
-                    entityIds: [{ id: 'relationships-test-user', isOrigin: false }],
+                    entityIds: [{ id: 'user:relationships-test-user@gcp', isOrigin: false }],
                   },
                 },
                 undefined,
@@ -2396,7 +2429,7 @@ export default function (providerContext: FtrProviderContext) {
               ).expect(result(200, logger));
 
               const userActorNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'relationships-test-user'
+                (node: NodeDataModel) => node.id === 'user:relationships-test-user@gcp'
               ) as EntityNodeDataModel;
 
               expect(userActorNode).not.to.be(undefined);
@@ -2408,20 +2441,22 @@ export default function (providerContext: FtrProviderContext) {
 
               expectExpect(userActorNode!.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'relationships-test-user',
+                  id: 'user:relationships-test-user@gcp',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
-                    ecsParentField: 'user',
                     name: 'Relationships Test User',
                     type: 'Identity',
                     sub_type: 'AWS IAM User',
+                    sourceFields: expectExpect.objectContaining({
+                      'user.id': 'relationships-test-user',
+                    }),
                   }),
                 })
               );
 
               const serviceTargetNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'relationships-target-service'
+                (node: NodeDataModel) => node.id === 'service:Relationships Target Service'
               ) as EntityNodeDataModel;
               expect(serviceTargetNode).not.to.be(undefined);
               expect(serviceTargetNode.label).to.equal('Relationships Target Service');
@@ -2431,20 +2466,22 @@ export default function (providerContext: FtrProviderContext) {
               expect(serviceTargetNode!.documentsData!.length).to.equal(1);
               expectExpect(serviceTargetNode!.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'relationships-target-service',
+                  id: 'service:Relationships Target Service',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'Relationships Target Service',
                     type: 'Service',
                     sub_type: 'AWS Lambda',
-                    ecsParentField: 'service',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'service.target.name': 'Relationships Target Service',
+                    }),
                   }),
                 })
               );
 
               const relationshipGroupedNodeTarget = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === '2773bf5fc5525b52a7b79d31b59834d5'
+                (node: NodeDataModel) => node.id === '5125dc59a9ba3a4a163e0629e0c46f92'
               ) as EntityNodeDataModel;
               expect(relationshipGroupedNodeTarget).not.to.be(undefined);
               expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
@@ -2455,13 +2492,12 @@ export default function (providerContext: FtrProviderContext) {
               expect(relationshipGroupedNodeTarget.documentsData!.length).to.equal(2);
               expectExpect(relationshipGroupedNodeTarget.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'relationships-target-host-1',
+                  id: 'host:relationships-target-host-1',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'Relationships Target Host 1',
                     type: 'Host',
                     sub_type: 'AWS EC2 Instance',
-                    ecsParentField: 'entity',
                     availableInEntityStore: true,
                   }),
                 })
@@ -2494,7 +2530,7 @@ export default function (providerContext: FtrProviderContext) {
                     originEventIds: [],
                     start: '2024-09-01T12:00:00.000Z',
                     end: '2024-09-01T13:00:00.000Z',
-                    entityIds: [{ id: 'relationships-test-user', isOrigin: true }],
+                    entityIds: [{ id: 'user:relationships-test-user@gcp', isOrigin: true }],
                   },
                 },
                 undefined,
@@ -2521,7 +2557,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(entityNodes.length).to.equal(2);
 
               const userActorNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'relationships-test-user'
+                (node: NodeDataModel) => node.id === 'user:relationships-test-user@gcp'
               ) as EntityNodeDataModel;
 
               expect(userActorNode).not.to.be(undefined);
@@ -2533,11 +2569,10 @@ export default function (providerContext: FtrProviderContext) {
 
               expectExpect(userActorNode!.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'relationships-test-user',
+                  id: 'user:relationships-test-user@gcp',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
-                    ecsParentField: 'entity',
                     name: 'Relationships Test User',
                     type: 'Identity',
                     sub_type: 'AWS IAM User',
@@ -2546,7 +2581,7 @@ export default function (providerContext: FtrProviderContext) {
               );
 
               const relationshipGroupedNodeTarget = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === '2773bf5fc5525b52a7b79d31b59834d5'
+                (node: NodeDataModel) => node.id === '5125dc59a9ba3a4a163e0629e0c46f92'
               ) as EntityNodeDataModel;
               expect(relationshipGroupedNodeTarget).not.to.be(undefined);
               expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
@@ -2557,13 +2592,12 @@ export default function (providerContext: FtrProviderContext) {
               expect(relationshipGroupedNodeTarget.documentsData!.length).to.equal(2);
               expectExpect(relationshipGroupedNodeTarget.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'relationships-target-host-1',
+                  id: 'host:relationships-target-host-1',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'Relationships Target Host 1',
                     type: 'Host',
                     sub_type: 'AWS EC2 Instance',
-                    ecsParentField: 'entity',
                     availableInEntityStore: true,
                   }),
                 })
@@ -2588,7 +2622,7 @@ export default function (providerContext: FtrProviderContext) {
                         filter: [
                           {
                             match_phrase: {
-                              'user.entity.id':
+                              'user.id':
                                 'gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com',
                             },
                           },
@@ -2597,11 +2631,11 @@ export default function (providerContext: FtrProviderContext) {
                     },
                     entityIds: [
                       {
-                        id: 'data-pipeline@my-gcp-project.iam.gserviceaccount.com',
+                        id: 'user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp',
                         isOrigin: false,
                       },
                       {
-                        id: 'projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1',
+                        id: 'host:projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1',
                         isOrigin: false,
                       },
                     ],
@@ -2653,29 +2687,30 @@ export default function (providerContext: FtrProviderContext) {
               // Verify Owns relationship node from data-pipeline (stacked with parentId)
               const ownsNode = relationshipNodes.find(
                 (node: NodeDataModel) =>
-                  node.id === 'rel(data-pipeline@my-gcp-project.iam.gserviceaccount.com-Owns)'
+                  node.id ===
+                  'rel(user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp-owns)'
               ) as RelationshipNodeDataModel;
               expect(ownsNode).not.to.be(undefined);
               expect(ownsNode.label).to.equal('Owns');
               expect(ownsNode.shape).to.equal('relationship');
               expect(ownsNode.parentId).to.equal(groupNode.id);
 
-              // Verify Communicates_with relationship node from data-pipeline (stacked with parentId)
+              // Verify communicates_with relationship node from data-pipeline (stacked with parentId)
               const dataPipelineCommunicatesWithNode = relationshipNodes.find(
                 (node: NodeDataModel) =>
                   node.id ===
-                  'rel(data-pipeline@my-gcp-project.iam.gserviceaccount.com-Communicates_with)'
+                  'rel(user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp-communicates_with)'
               ) as RelationshipNodeDataModel;
               expect(dataPipelineCommunicatesWithNode).not.to.be(undefined);
               expect(dataPipelineCommunicatesWithNode.label).to.equal('Communicates with');
               expect(dataPipelineCommunicatesWithNode.shape).to.equal('relationship');
               expect(dataPipelineCommunicatesWithNode.parentId).to.equal(groupNode.id);
 
-              // Verify Communicates_with relationship node from database-server (NOT stacked)
+              // Verify communicates_with relationship node from database-server (NOT stacked)
               const dbServerCommunicatesWithNode = relationshipNodes.find(
                 (node: NodeDataModel) =>
                   node.id ===
-                  'rel(projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1-Communicates_with)'
+                  'rel(host:projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1-communicates_with)'
               ) as RelationshipNodeDataModel;
               expect(dbServerCommunicatesWithNode).not.to.be(undefined);
               expect(dbServerCommunicatesWithNode.label).to.equal('Communicates with');
@@ -2693,7 +2728,7 @@ export default function (providerContext: FtrProviderContext) {
               // Type: Service Account, Sub_type: GCP Service Account
               const actorNode1 = response.body.nodes.find(
                 (node: NodeDataModel) =>
-                  node.id === 'gcp-admin-user@my-gcp-project.iam.gserviceaccount.com'
+                  node.id === 'user:gcp-admin-user@my-gcp-project.iam.gserviceaccount.com@gcp'
               ) as EntityNodeDataModel;
               expect(actorNode1).not.to.be(undefined);
               expect(actorNode1.label).to.equal('GCP Admin User');
@@ -2703,14 +2738,16 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode1.documentsData!.length).to.equal(1);
               expectExpect(actorNode1.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'gcp-admin-user@my-gcp-project.iam.gserviceaccount.com',
+                  id: 'user:gcp-admin-user@my-gcp-project.iam.gserviceaccount.com@gcp',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
-                    ecsParentField: 'user',
                     name: 'GCP Admin User',
                     type: 'Service Account',
                     sub_type: 'GCP Service Account',
+                    sourceFields: expectExpect.objectContaining({
+                      'user.id': 'gcp-admin-user@my-gcp-project.iam.gserviceaccount.com',
+                    }),
                   }),
                 })
               );
@@ -2719,7 +2756,7 @@ export default function (providerContext: FtrProviderContext) {
               // Type: Identity, Sub_type: GCP IAM User
               const actorNode2 = response.body.nodes.find(
                 (node: NodeDataModel) =>
-                  node.id === 'gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com'
+                  node.id === 'user:gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com@gcp'
               ) as EntityNodeDataModel;
               expect(actorNode2).not.to.be(undefined);
               expect(actorNode2.label).to.equal('GCP Compute Operator');
@@ -2729,23 +2766,25 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode2.documentsData!.length).to.equal(1);
               expectExpect(actorNode2.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com',
+                  id: 'user:gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com@gcp',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
-                    ecsParentField: 'user',
                     name: 'GCP Compute Operator',
                     type: 'Identity',
                     sub_type: 'GCP IAM User',
+                    sourceFields: expectExpect.objectContaining({
+                      'user.id': 'gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com',
+                    }),
                   }),
                 })
               );
 
-              // Verify the service target entity (service.target.entity.id from first event)
+              // Verify the user target entity (user.target.id from first event — formerly service.target.entity.id)
               // Type: Service Account, Sub_type: GCP Service Account
               const serviceTargetNode = response.body.nodes.find(
                 (node: NodeDataModel) =>
-                  node.id === 'data-pipeline@my-gcp-project.iam.gserviceaccount.com'
+                  node.id === 'user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp'
               ) as EntityNodeDataModel;
               expect(serviceTargetNode).not.to.be(undefined);
               expect(serviceTargetNode.label).to.equal('data-pipeline Service Account');
@@ -2755,24 +2794,26 @@ export default function (providerContext: FtrProviderContext) {
               expect(serviceTargetNode.documentsData!.length).to.equal(1);
               expectExpect(serviceTargetNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'data-pipeline@my-gcp-project.iam.gserviceaccount.com',
+                  id: 'user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
-                    ecsParentField: 'service',
                     name: 'data-pipeline Service Account',
                     type: 'Service Account',
                     sub_type: 'GCP Service Account',
+                    sourceFields: expectExpect.objectContaining({
+                      'user.target.id': 'data-pipeline@my-gcp-project.iam.gserviceaccount.com',
+                    }),
                   }),
                 })
               );
 
-              // Verify the host target entity (host.target.entity.id from second event)
+              // Verify the host target entity (host.target.id from second event)
               // Type: Host, Sub_type: GCP Compute Instance
               const hostTargetNode = response.body.nodes.find(
                 (node: NodeDataModel) =>
                   node.id ===
-                  'projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1'
+                  'host:projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1'
               ) as EntityNodeDataModel;
               expect(hostTargetNode).not.to.be(undefined);
               expect(hostTargetNode.label).to.equal('database-server-prod-1');
@@ -2782,20 +2823,23 @@ export default function (providerContext: FtrProviderContext) {
               expect(hostTargetNode.documentsData!.length).to.equal(1);
               expectExpect(hostTargetNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1',
+                  id: 'host:projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
-                    ecsParentField: 'host',
                     name: 'database-server-prod-1',
                     type: 'Host',
                     sub_type: 'GCP Compute Instance',
+                    sourceFields: expectExpect.objectContaining({
+                      'host.target.id':
+                        'projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1',
+                    }),
                   }),
                 })
               );
 
               const relationshipsTargetNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'd4f3b950f4345da123745ee6c3806cf1'
+                (node: NodeDataModel) => node.id === '06530c8b5bd27028c4f78cb987f08cc0'
               ) as EntityNodeDataModel;
               expect(relationshipsTargetNode.label).to.equal('GCP Compute Instance');
               expect(relationshipsTargetNode.shape).to.equal('hexagon');
@@ -2806,11 +2850,10 @@ export default function (providerContext: FtrProviderContext) {
 
               expectExpect(relationshipsTargetNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1',
+                  id: 'host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
-                    ecsParentField: 'entity',
                     name: 'web-server-prod-1',
                     type: 'Host',
                     sub_type: 'GCP Compute Instance',
@@ -2819,11 +2862,10 @@ export default function (providerContext: FtrProviderContext) {
               );
               expectExpect(relationshipsTargetNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1',
+                  id: 'host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
-                    ecsParentField: 'entity',
                     name: 'api-gateway-prod-1',
                     type: 'Host',
                     sub_type: 'GCP Compute Instance',
@@ -2857,10 +2899,10 @@ export default function (providerContext: FtrProviderContext) {
                     start: '2024-09-01T12:00:00.000Z',
                     end: '2024-09-01T13:00:00.000Z',
                     entityIds: [
-                      { id: 'rel-hierarchy-root-user', isOrigin: true },
-                      { id: 'rel-hierarchy-host-1', isOrigin: false },
-                      { id: 'rel-hierarchy-service-1', isOrigin: false },
-                      { id: 'rel-hierarchy-identity-1', isOrigin: false },
+                      { id: 'user:rel-hierarchy-root-user@gcp', isOrigin: true },
+                      { id: 'host:rel-hierarchy-host-1', isOrigin: false },
+                      { id: 'service:Hierarchy Service 1', isOrigin: false },
+                      { id: 'user:rel-hierarchy-identity-1@gcp', isOrigin: false },
                     ],
                   },
                 },
@@ -2954,7 +2996,7 @@ export default function (providerContext: FtrProviderContext) {
 
               // Verify root user node
               const rootNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'rel-hierarchy-root-user'
+                (node: NodeDataModel) => node.id === 'user:rel-hierarchy-root-user@gcp'
               ) as EntityNodeDataModel;
               expect(rootNode).not.to.be(undefined);
               expect(rootNode.label).to.equal('Hierarchy Root User');
@@ -2964,20 +3006,23 @@ export default function (providerContext: FtrProviderContext) {
               expect(rootNode.documentsData!.length).to.equal(1);
               expectExpect(rootNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'rel-hierarchy-root-user',
+                  id: 'user:rel-hierarchy-root-user@gcp',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'Hierarchy Root User',
                     type: 'Identity',
                     sub_type: 'AWS IAM User',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'user.id': 'rel-hierarchy-root-user',
+                    }),
                   }),
                 })
               );
 
               // Verify intermediate host node
               const hostNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'rel-hierarchy-host-1'
+                (node: NodeDataModel) => node.id === 'host:rel-hierarchy-host-1'
               ) as EntityNodeDataModel;
               expect(hostNode).not.to.be(undefined);
               expect(hostNode.label).to.equal('Hierarchy Host 1');
@@ -2989,7 +3034,7 @@ export default function (providerContext: FtrProviderContext) {
 
               // Verify intermediate service node
               const serviceNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'rel-hierarchy-service-1'
+                (node: NodeDataModel) => node.id === 'service:Hierarchy Service 1'
               ) as EntityNodeDataModel;
               expect(serviceNode).not.to.be(undefined);
               expect(serviceNode.label).to.equal('Hierarchy Service 1');
@@ -3000,7 +3045,7 @@ export default function (providerContext: FtrProviderContext) {
 
               // Verify intermediate identity node (different from root - AWS IAM Role)
               const identityNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'rel-hierarchy-identity-1'
+                (node: NodeDataModel) => node.id === 'user:rel-hierarchy-identity-1@gcp'
               ) as EntityNodeDataModel;
               expect(identityNode).not.to.be(undefined);
               expect(identityNode.label).to.equal('Hierarchy Identity 1');
@@ -3065,7 +3110,7 @@ export default function (providerContext: FtrProviderContext) {
 
               // Verify delegate node (different type: User, sub_type: AWS Organizations Admin)
               const delegateNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'rel-hierarchy-delegate-1'
+                (node: NodeDataModel) => node.id === 'user:rel-hierarchy-delegate-1@gcp'
               ) as EntityNodeDataModel;
               expect(delegateNode).not.to.be(undefined);
               expect(delegateNode.label).to.equal('Hierarchy Delegate Agent');
@@ -3076,20 +3121,23 @@ export default function (providerContext: FtrProviderContext) {
               expect(delegateNode.documentsData!.length).to.equal(1);
               expectExpect(delegateNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'rel-hierarchy-delegate-1',
+                  id: 'user:rel-hierarchy-delegate-1@gcp',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'Hierarchy Delegate Agent',
                     type: 'User',
                     sub_type: 'AWS Organizations Admin',
                     availableInEntityStore: true,
+                    sourceFields: expectExpect.objectContaining({
+                      'user.target.id': 'rel-hierarchy-delegate-1',
+                    }),
                   }),
                 })
               );
 
               // Verify external-caller entity (has Communicates_with relationship to identity-1)
               const externalCallerNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'rel-hierarchy-external-caller'
+                (node: NodeDataModel) => node.id === 'service:Hierarchy External Caller'
               ) as EntityNodeDataModel;
               expect(externalCallerNode).not.to.be(undefined);
               expect(externalCallerNode.label).to.equal('Hierarchy External Caller');
@@ -3100,7 +3148,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(externalCallerNode.documentsData!.length).to.equal(1);
               expectExpect(externalCallerNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'rel-hierarchy-external-caller',
+                  id: 'service:Hierarchy External Caller',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     name: 'Hierarchy External Caller',
@@ -3131,7 +3179,7 @@ export default function (providerContext: FtrProviderContext) {
               // Verify the external-caller's Communicates_with relationship node (NOT stacked)
               const externalCallerRelNode = communicatesWithNodes.find(
                 (node: NodeDataModel) =>
-                  node.id === 'rel(rel-hierarchy-external-caller-Communicates_with)'
+                  node.id === 'rel(service:Hierarchy External Caller-communicates_with)'
               ) as RelationshipNodeDataModel;
               expect(externalCallerRelNode).not.to.be(undefined);
               expect(externalCallerRelNode.parentId).to.be(undefined);

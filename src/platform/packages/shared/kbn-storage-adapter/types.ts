@@ -16,6 +16,7 @@ type StorageMappingPropertyType = AllMappingPropertyType &
   (
     | 'text'
     | 'match_only_text'
+    | 'search_as_you_type'
     | 'keyword'
     | 'boolean'
     | 'date'
@@ -26,6 +27,7 @@ type StorageMappingPropertyType = AllMappingPropertyType &
     | 'object'
     | 'nested'
     | 'semantic_text'
+    | 'flattened'
   );
 
 type StorageMappingPropertyObjectType = Required<MappingObjectProperty, 'type'>;
@@ -68,6 +70,7 @@ const types = {
   keyword: createFactory('keyword', { ignore_above: 1024 }),
   match_only_text: createFactory('match_only_text'),
   text: createFactory('text'),
+  search_as_you_type: createFactory('search_as_you_type'),
   double: createFactory('double'),
   long: createFactory('long'),
   boolean: createFactory('boolean'),
@@ -77,6 +80,7 @@ const types = {
   object: createFactory('object'),
   nested: createFactory('nested'),
   semantic_text: createFactory('semantic_text'),
+  flattened: createFactory('flattened'),
 } satisfies {
   [TKey in StorageMappingPropertyType]: MappingPropertyFactory<TKey, any>;
 };
@@ -89,6 +93,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
     : string | string[];
   match_only_text: string;
   text: string;
+  search_as_you_type: string;
   boolean: boolean;
   date: TProperty extends { format: 'strict_date_optional_time' } ? string : string | number;
   double: number;
@@ -106,6 +111,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
       }>
     : Array<object>;
   semantic_text: string;
+  flattened: Record<string, unknown>;
 }[TProperty['type']];
 
 export type StorageFieldTypeOf<TProperty extends StorageMappingProperty> = PrimitiveOf<TProperty>;

@@ -10,6 +10,10 @@
 import { pick } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 
+import {
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+} from '@kbn/controls-constants';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasLibraryTransforms,
@@ -22,7 +26,6 @@ import type { DashboardState } from '../../../common';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
 import { initializeLayoutManager } from './layout_manager';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('54321'),
@@ -53,19 +56,21 @@ describe('layout manager', () => {
 
   const pinnedControls: DashboardState['pinned_panels'] = [
     {
+      ...DEFAULT_PINNED_CONTROL_STATE,
       uid: 'control1',
       type: 'options_list_control',
       config: {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         data_view_id: '',
         field_name: '',
       },
     },
     {
+      ...DEFAULT_PINNED_CONTROL_STATE,
       uid: 'control2',
-      grow: true,
-      width: 'small',
       type: 'options_list_control',
       config: {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         data_view_id: '',
         field_name: '',
       },
@@ -366,9 +371,8 @@ describe('layout manager', () => {
           order: 1,
         },
         ['control3']: {
+          ...DEFAULT_PINNED_CONTROL_STATE,
           type: 'options_list_control',
-          grow: DEFAULT_CONTROL_GROW,
-          width: DEFAULT_CONTROL_WIDTH,
           order: 2,
         },
       });

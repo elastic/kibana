@@ -135,7 +135,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             <span
                               class="euiBadge__icon emotion-euiBadge__icon-left"
                               color="inherit"
-                              data-euiicon-type="console"
+                              data-euiicon-type="commandLine"
                             />
                             <span
                               class="euiBadge__text emotion-euiBadge__text"
@@ -292,7 +292,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                 <span
                                   class="euiBadge__icon emotion-euiBadge__icon-left"
                                   color="inherit"
-                                  data-euiicon-type="arrowUp"
+                                  data-euiicon-type="chevronSingleUp"
                                 />
                                 <span
                                   class="euiBadge__text emotion-euiBadge__text"
@@ -540,7 +540,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                               >
                                                 9987
                                                 <span
-                                                  class="emotion-EuiExternalLinkIcon"
+                                                  class="css-1j75qc1"
                                                   data-euiicon-type="external"
                                                   role="presentation"
                                                 />
@@ -833,7 +833,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           >
                             <span
                               color="subdued"
-                              data-euiicon-type="arrowRight"
+                              data-euiicon-type="chevronSingleRight"
                               data-test-subj="arrow-icon"
                             />
                           </div>
@@ -850,7 +850,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           >
                             <span
                               color="subdued"
-                              data-euiicon-type="arrowLeft"
+                              data-euiicon-type="chevronSingleLeft"
                               data-test-subj="arrow-icon"
                             />
                           </div>
@@ -1029,7 +1029,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                               >
                                                 80
                                                 <span
-                                                  class="emotion-EuiExternalLinkIcon"
+                                                  class="css-1j75qc1"
                                                   data-euiicon-type="external"
                                                   role="presentation"
                                                 />
@@ -1261,7 +1261,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           >
                             tls.fingerprints.ja3.hash-value
                             <span
-                              class="emotion-EuiExternalLinkIcon"
+                              class="css-1j75qc1"
                               data-euiicon-type="external"
                               role="presentation"
                             />
@@ -1321,7 +1321,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           >
                             tls.client_certificate.fingerprint.sha1-value
                             <span
-                              class="emotion-EuiExternalLinkIcon"
+                              class="css-1j75qc1"
                               data-euiicon-type="external"
                               role="presentation"
                             />
@@ -1381,7 +1381,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           >
                             tls.server_certificate.fingerprint.sha1-value
                             <span
-                              class="emotion-EuiExternalLinkIcon"
+                              class="css-1j75qc1"
                               data-euiicon-type="external"
                               role="presentation"
                             />

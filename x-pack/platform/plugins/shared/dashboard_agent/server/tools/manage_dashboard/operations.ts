@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   AttachmentPanel,
   DashboardAttachmentData,
@@ -14,7 +15,19 @@ import type {
 } from '@kbn/dashboard-agent-common';
 import { panelGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
-import { upsertMarkdownPanel, type VisualizationFailure } from './utils';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
+import { toEmbeddablePanel } from '@kbn/dashboard-agent-common';
+import {
+  appendPanelsToDashboard,
+  findPanelById,
+  findSectionIndex,
+  getWidgetsBottomY,
+  removePanelsFromDashboard,
+  updatePanelInDashboard,
+} from './dashboard_state';
+import type { ResolveVisualizationConfig } from './inline_visualization';
+import { createVisualizationFailureResult } from './inline_visualization';
+import type { VisualizationFailure } from './utils';
 
 export const setMetadataOperationSchema = z.object({
   operation: z.literal('set_metadata'),
@@ -22,9 +35,18 @@ export const setMetadataOperationSchema = z.object({
   description: z.string().optional(),
 });
 
-export const upsertMarkdownOperationSchema = z.object({
-  operation: z.literal('upsert_markdown'),
-  markdownContent: z.string().describe('Markdown content for the dashboard summary panel.'),
+export const addMarkdownOperationSchema = z.object({
+  operation: z.literal('add_markdown'),
+  markdownContent: z.string().describe('Markdown content for the panel.'),
+  grid: panelGridSchema.describe(
+    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row.'
+  ),
+  sectionId: z
+    .string()
+    .optional()
+    .describe(
+      'UID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+    ),
 });
 
 const attachmentWithGridSchema = z.object({
@@ -47,7 +69,7 @@ export const addPanelsFromAttachmentsOperationSchema = z.object({
           .string()
           .optional()
           .describe(
-            'Optional section ID to add this panel into. If omitted, panel is added at the top level.'
+            'UID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
           ),
       })
     )
@@ -55,18 +77,47 @@ export const addPanelsFromAttachmentsOperationSchema = z.object({
     .describe('Visualization attachments to add, each with its dashboard grid layout.'),
 });
 
+const visualizationPanelInputSchema = z.object({
+  query: z.string().describe('A natural language query describing the desired visualization.'),
+  index: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
+    ),
+  chartType: z
+    .nativeEnum(SupportedChartType)
+    .optional()
+    .describe(
+      '(optional) The type of chart to create as indicated by the user. If not provided, the LLM will suggest the best chart type.'
+    ),
+  esql: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) An ES|QL query. If not provided, the tool will generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
+    ),
+  grid: panelGridSchema.describe(
+    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
+  ),
+});
+
 export const addSectionOperationSchema = z.object({
   operation: z.literal('add_section'),
   title: z.string().describe('Section title.'),
   grid: sectionGridSchema,
   panels: z
-    .array(attachmentWithGridSchema)
-    .describe('Panels to create inside the section. Coordinates are section-relative.'),
+    .array(visualizationPanelInputSchema)
+    .min(1)
+    .optional()
+    .describe(
+      'Optional inline Lens visualization panels to create inside the new section. Panel grids are section-relative.'
+    ),
 });
 
 export const removeSectionOperationSchema = z.object({
   operation: z.literal('remove_section'),
-  sectionId: z.string().describe('Section id to remove.'),
+  uid: z.string().describe('Section uid to remove.'),
   panelAction: z
     .enum(['promote', 'delete'])
     .describe('How to handle section panels: promote to top-level or delete them.'),
@@ -77,10 +128,72 @@ export const removePanelsOperationSchema = z.object({
   panelIds: z.array(z.string()).min(1).describe('Panel ids to remove from the dashboard.'),
 });
 
+const createVisualizationPanelSchema = visualizationPanelInputSchema.extend({
+  sectionId: z
+    .string()
+    .optional()
+    .describe(
+      'UID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+    ),
+});
+
+export const createVisualizationPanelsOperationSchema = z.object({
+  operation: z.literal('create_visualization_panels'),
+  panels: z.array(createVisualizationPanelSchema).min(1),
+});
+
+const editVisualizationPanelSchema = z.object({
+  panelId: z.string().describe('Existing panel uid to update.'),
+  query: z
+    .string()
+    .describe('A natural language query describing how to update the visualization.'),
+  chartType: z
+    .nativeEnum(SupportedChartType)
+    .optional()
+    .describe(
+      '(optional) The type of chart to create as indicated by the user. If not provided, the LLM will suggest the best chart type.'
+    ),
+  esql: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) An ES|QL query. If not provided, the tool will generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
+    ),
+});
+
+export const editVisualizationPanelsOperationSchema = z.object({
+  operation: z.literal('edit_visualization_panels'),
+  panels: z.array(editVisualizationPanelSchema).min(1),
+});
+
+export const updatePanelLayoutsOperationSchema = z.object({
+  operation: z.literal('update_panel_layouts'),
+  panels: z
+    .array(
+      z.object({
+        panelId: z.string().describe('UID of the panel to update.'),
+        grid: panelGridSchema
+          .optional()
+          .describe('New grid position/size. Omit to keep the current grid.'),
+        sectionId: z
+          .string()
+          .nullable()
+          .optional()
+          .describe(
+            'Move panel to an existing section by its uid. The section must already exist (use add_section first). null promotes to top level. Omit to keep the current location.'
+          ),
+      })
+    )
+    .min(1),
+});
+
 export const dashboardOperationSchema = z.discriminatedUnion('operation', [
   setMetadataOperationSchema,
-  upsertMarkdownOperationSchema,
+  addMarkdownOperationSchema,
   addPanelsFromAttachmentsOperationSchema,
+  createVisualizationPanelsOperationSchema,
+  editVisualizationPanelsOperationSchema,
+  updatePanelLayoutsOperationSchema,
   addSectionOperationSchema,
   removeSectionOperationSchema,
   removePanelsOperationSchema,
@@ -94,66 +207,175 @@ interface ExecuteDashboardOperationsParams {
   logger: Logger;
   resolvePanelsFromAttachments: (
     attachmentInputs: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>
-  ) => Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }>;
-  onPanelsAdded: (panels: AttachmentPanel[]) => void;
-  onPanelsRemoved: (panels: AttachmentPanel[]) => void;
+  ) => { panels: AttachmentPanel[]; failures: VisualizationFailure[] };
+  resolveVisualizationConfig?: ResolveVisualizationConfig;
 }
 
-const asOptionalSections = (
-  sections: DashboardSection[] | undefined
-): DashboardSection[] | undefined => {
-  return sections && sections.length > 0 ? sections : undefined;
-};
+type VisualizationPanelInput = z.infer<typeof visualizationPanelInputSchema>;
+type CreateVisualizationPanelInput = z.infer<typeof createVisualizationPanelSchema>;
+type ResolvedVisualizationPanel = Awaited<ReturnType<ResolveVisualizationConfig>>;
+type VisualizationCreationOperationType = 'add_section' | 'create_visualization_panels';
+type VisualizationCreationRequest =
+  | {
+      operationType: 'add_section';
+      panelInput: VisualizationPanelInput;
+    }
+  | {
+      operationType: 'create_visualization_panels';
+      panelInput: CreateVisualizationPanelInput;
+      sectionId?: string;
+    };
+interface ResolvedVisualizationCreationRequest {
+  request: VisualizationCreationRequest;
+  resolvedPanel: ResolvedVisualizationPanel;
+}
 
-const getPanelsBottomY = (panels: AttachmentPanel[]): number => {
-  return panels.reduce((maxY, panel) => Math.max(maxY, panel.grid.y + panel.grid.h), 0);
-};
+/**
+ * Collect inline visualization creation work by operation index so it can be
+ * resolved up front in parallel and then applied later in original operation order.
+ */
+const collectVisualizationCreationRequests = (
+  operations: DashboardOperation[]
+): Map<number, VisualizationCreationRequest[]> => {
+  const requestsByOperationIndex = new Map<number, VisualizationCreationRequest[]>();
 
-const removePanelsFromDashboard = ({
-  dashboardData,
-  panelIds,
-}: {
-  dashboardData: DashboardAttachmentData;
-  panelIds: string[];
-}): {
-  dashboardData: DashboardAttachmentData;
-  removedPanels: AttachmentPanel[];
-} => {
-  const panelIdSet = new Set(panelIds);
-  const removedPanels: AttachmentPanel[] = [];
-  const topLevelPanelsToKeep: AttachmentPanel[] = [];
+  for (const [operationIndex, operation] of operations.entries()) {
+    switch (operation.operation) {
+      case 'add_section': {
+        if (!operation.panels) {
+          break;
+        }
 
-  for (const panel of dashboardData.panels) {
-    if (panelIdSet.has(panel.panelId)) {
-      removedPanels.push(panel);
-    } else {
-      topLevelPanelsToKeep.push(panel);
+        requestsByOperationIndex.set(
+          operationIndex,
+          operation.panels.map((panelInput) => ({
+            operationType: operation.operation,
+            panelInput,
+          }))
+        );
+        break;
+      }
+      case 'create_visualization_panels': {
+        requestsByOperationIndex.set(
+          operationIndex,
+          operation.panels.map((panelInput) => ({
+            operationType: operation.operation,
+            panelInput,
+            sectionId: panelInput.sectionId,
+          }))
+        );
+        break;
+      }
+      default:
+        break;
     }
   }
 
-  const nextSections = (dashboardData.sections ?? []).map((section) => {
-    const sectionPanelsToKeep: AttachmentPanel[] = [];
-    for (const panel of section.panels) {
-      if (panelIdSet.has(panel.panelId)) {
-        removedPanels.push(panel);
-      } else {
-        sectionPanelsToKeep.push(panel);
-      }
-    }
-    return {
-      ...section,
-      panels: sectionPanelsToKeep,
-    };
-  });
+  return requestsByOperationIndex;
+};
 
-  return {
-    dashboardData: {
-      ...dashboardData,
-      panels: topLevelPanelsToKeep,
-      sections: asOptionalSections(nextSections),
-    },
-    removedPanels,
-  };
+/**
+ * Resolve all collected inline visualization creation requests up front while
+ * keeping results grouped by their source operation for ordered application later.
+ */
+const resolveVisualizationCreationRequests = async ({
+  requestsByOperationIndex,
+  resolveVisualizationConfig,
+}: {
+  requestsByOperationIndex: Map<number, VisualizationCreationRequest[]>;
+  resolveVisualizationConfig?: ResolveVisualizationConfig;
+}): Promise<Map<number, ResolvedVisualizationCreationRequest[]>> => {
+  if (requestsByOperationIndex.size === 0) {
+    return new Map();
+  }
+
+  if (!resolveVisualizationConfig) {
+    throw new Error(
+      'Inline visualization resolver is required for visualization creation operations.'
+    );
+  }
+
+  const resolvedRequestsByOperationIndex = await Promise.all(
+    Array.from(requestsByOperationIndex.entries()).map(
+      async ([operationIndex, requests]): Promise<
+        readonly [number, ResolvedVisualizationCreationRequest[]]
+      > =>
+        [
+          operationIndex,
+          await Promise.all(
+            requests.map(async (request) => ({
+              request,
+              resolvedPanel: await resolveVisualizationConfig({
+                operationType: request.operationType,
+                identifier: request.panelInput.query,
+                nlQuery: request.panelInput.query,
+                index: request.panelInput.index,
+                chartType: request.panelInput.chartType,
+                esql: request.panelInput.esql,
+              }),
+            }))
+          ),
+        ] as const
+    )
+  );
+
+  return new Map(resolvedRequestsByOperationIndex);
+};
+
+/**
+ * Return the resolved create results for one operation during the apply phase.
+ * Throw if an operation that should have resolved create results does not have them.
+ */
+const getResolvedVisualizationCreationRequests = ({
+  resolvedRequestsByOperationIndex,
+  operationIndex,
+  operationType,
+}: {
+  resolvedRequestsByOperationIndex: Map<number, ResolvedVisualizationCreationRequest[]>;
+  operationIndex: number;
+  operationType: VisualizationCreationOperationType;
+}): ResolvedVisualizationCreationRequest[] => {
+  const resolvedRequests = resolvedRequestsByOperationIndex.get(operationIndex);
+
+  if (!resolvedRequests) {
+    throw new Error(
+      `Missing pre-resolved visualization requests for ${operationType} operation at index ${operationIndex}.`
+    );
+  }
+
+  return resolvedRequests;
+};
+
+/**
+ * Turn resolved create results into dashboard panels and append any failures.
+ * Successful panels are kept even when sibling requests fail.
+ */
+const materializeResolvedVisualizationPanels = ({
+  resolvedRequests,
+  failures,
+}: {
+  resolvedRequests: ResolvedVisualizationCreationRequest[];
+  failures: VisualizationFailure[];
+}): Array<{ request: VisualizationCreationRequest; panel: AttachmentPanel }> => {
+  const successfulPanels: Array<{ request: VisualizationCreationRequest; panel: AttachmentPanel }> =
+    [];
+
+  for (const { request, resolvedPanel } of resolvedRequests) {
+    if (resolvedPanel.type === 'failure') {
+      failures.push(resolvedPanel.failure);
+      continue;
+    }
+
+    successfulPanels.push({
+      request,
+      panel: toEmbeddablePanel({
+        ...resolvedPanel.visContent,
+        grid: request.panelInput.grid,
+      }),
+    });
+  }
+
+  return successfulPanels;
 };
 
 export const executeDashboardOperations = async ({
@@ -161,16 +383,20 @@ export const executeDashboardOperations = async ({
   operations,
   logger,
   resolvePanelsFromAttachments,
-  onPanelsAdded,
-  onPanelsRemoved,
+  resolveVisualizationConfig,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
   failures: VisualizationFailure[];
 }> => {
   let nextDashboardData = structuredClone(dashboardData);
   const failures: VisualizationFailure[] = [];
+  const visualizationCreationRequests = collectVisualizationCreationRequests(operations);
+  const resolvedVisualizationCreationRequests = await resolveVisualizationCreationRequests({
+    requestsByOperationIndex: visualizationCreationRequests,
+    resolveVisualizationConfig,
+  });
 
-  for (const operation of operations) {
+  for (const [operationIndex, operation] of operations.entries()) {
     switch (operation.operation) {
       case 'set_metadata': {
         if (operation.title === undefined && operation.description === undefined) {
@@ -189,116 +415,230 @@ export const executeDashboardOperations = async ({
         break;
       }
 
-      case 'upsert_markdown': {
-        const markdownResult = upsertMarkdownPanel(
-          nextDashboardData.panels,
-          operation.markdownContent
-        );
-        nextDashboardData = {
-          ...nextDashboardData,
-          panels: markdownResult.panels,
-        };
+      case 'add_markdown': {
+        const markdownPanel = toEmbeddablePanel({
+          type: MARKDOWN_EMBEDDABLE_TYPE,
+          config: { content: operation.markdownContent },
+          grid: operation.grid,
+        });
+        nextDashboardData = appendPanelsToDashboard({
+          dashboardData: nextDashboardData,
+          panelsToAdd: [markdownPanel],
+          sectionId: operation.sectionId,
+        });
 
-        if (markdownResult.changedPanel) {
-          onPanelsAdded([markdownResult.changedPanel]);
-        }
         break;
       }
 
       case 'add_panels_from_attachments': {
         for (const item of operation.items) {
-          const result = await resolvePanelsFromAttachments([
+          const result = resolvePanelsFromAttachments([
             {
               attachmentId: item.attachmentId,
               grid: item.grid,
             },
           ]);
           if (result.panels.length > 0) {
-            if (item.sectionId) {
-              const sectionIndex = (nextDashboardData.sections ?? []).findIndex(
-                ({ sectionId }) => sectionId === item.sectionId
-              );
-              if (sectionIndex === -1) {
-                throw new Error(`Section "${item.sectionId}" not found.`);
-              }
-
-              const sections = [...(nextDashboardData.sections ?? [])];
-              sections[sectionIndex] = {
-                ...sections[sectionIndex],
-                panels: [...sections[sectionIndex].panels, ...result.panels],
-              };
-              nextDashboardData = {
-                ...nextDashboardData,
-                sections: asOptionalSections(sections),
-              };
-            } else {
-              nextDashboardData = {
-                ...nextDashboardData,
-                panels: [...nextDashboardData.panels, ...result.panels],
-              };
-            }
-            onPanelsAdded(result.panels);
+            nextDashboardData = appendPanelsToDashboard({
+              dashboardData: nextDashboardData,
+              panelsToAdd: result.panels,
+              sectionId: item.sectionId,
+            });
           }
           failures.push(...result.failures);
+        }
+        break;
+      }
+
+      case 'create_visualization_panels': {
+        const panelsToAdd = materializeResolvedVisualizationPanels({
+          resolvedRequests: getResolvedVisualizationCreationRequests({
+            resolvedRequestsByOperationIndex: resolvedVisualizationCreationRequests,
+            operationIndex,
+            operationType: operation.operation,
+          }),
+          failures,
+        });
+
+        for (const { request, panel } of panelsToAdd) {
+          nextDashboardData = appendPanelsToDashboard({
+            dashboardData: nextDashboardData,
+            panelsToAdd: [panel],
+            sectionId:
+              request.operationType === 'create_visualization_panels'
+                ? request.sectionId
+                : undefined,
+          });
+        }
+        break;
+      }
+
+      case 'edit_visualization_panels': {
+        if (!resolveVisualizationConfig) {
+          throw new Error(
+            'Inline visualization resolver is required for edit_visualization_panels operations.'
+          );
+        }
+
+        for (const panelInput of operation.panels) {
+          const existingPanel = findPanelById(nextDashboardData.panels, panelInput.panelId);
+          if (!existingPanel) {
+            const failureResult = createVisualizationFailureResult(
+              operation.operation,
+              panelInput.panelId,
+              `Panel "${panelInput.panelId}" not found.`
+            );
+            if (failureResult.type === 'failure') {
+              failures.push(failureResult.failure);
+            }
+            continue;
+          }
+          const resolvedPanel = await resolveVisualizationConfig({
+            operationType: operation.operation,
+            identifier: panelInput.panelId,
+            nlQuery: panelInput.query,
+            chartType: panelInput.chartType,
+            esql: panelInput.esql,
+            existingPanel,
+          });
+
+          if (resolvedPanel.type === 'failure') {
+            failures.push(resolvedPanel.failure);
+            continue;
+          }
+
+          const updateResult = updatePanelInDashboard({
+            dashboardData: nextDashboardData,
+            panelId: panelInput.panelId,
+            transformPanel: (panel) => ({
+              ...toEmbeddablePanel({
+                ...panel,
+                ...resolvedPanel.visContent,
+              }),
+            }),
+          });
+
+          if (!updateResult.updated) {
+            failures.push({
+              type: 'edit_visualization_panels',
+              identifier: panelInput.panelId,
+              error: `Panel "${panelInput.panelId}" not found.`,
+            });
+            continue;
+          }
+
+          nextDashboardData = updateResult.dashboardData;
+        }
+        break;
+      }
+
+      case 'update_panel_layouts': {
+        const recordMissingPanelFailure = (panelId: string) => {
+          failures.push({
+            type: 'update_panel_layouts',
+            identifier: panelId,
+            error: `Panel "${panelId}" not found.`,
+          });
+        };
+
+        for (const { panelId, grid, sectionId } of operation.panels) {
+          // sectionId omitted: do not move the panel
+          if (sectionId === undefined) {
+            const updateResult = updatePanelInDashboard({
+              dashboardData: nextDashboardData,
+              panelId,
+              transformPanel: (panel) => ({
+                ...panel,
+                ...(grid ? { grid } : {}),
+              }),
+            });
+
+            if (!updateResult.updated) {
+              recordMissingPanelFailure(panelId);
+              continue;
+            }
+
+            nextDashboardData = updateResult.dashboardData;
+            continue;
+          }
+          // sectionId provided: move the panel to that section, or to the top level when null
+          const removalResult = removePanelsFromDashboard({
+            dashboardData: nextDashboardData,
+            panelIdsToRemove: [panelId],
+          });
+          const { dashboardData: dashboardAfterRemoval, removedPanels } = removalResult;
+
+          if (removedPanels.length === 0) {
+            recordMissingPanelFailure(panelId);
+            continue;
+          }
+
+          const [panelToMove] = removedPanels;
+          nextDashboardData = appendPanelsToDashboard({
+            dashboardData: dashboardAfterRemoval,
+            panelsToAdd: [
+              {
+                ...panelToMove,
+                ...(grid ? { grid } : {}),
+              },
+            ],
+            // sectionId targets a section; null promotes the panel to the top level
+            sectionId: sectionId ?? undefined,
+          });
         }
         break;
       }
 
       case 'add_section': {
-        const sectionPanels: AttachmentPanel[] = [];
-        for (const panelInput of operation.panels) {
-          const result = await resolvePanelsFromAttachments([
-            {
-              attachmentId: panelInput.attachmentId,
-              grid: panelInput.grid,
-            },
-          ]);
-          if (result.panels.length > 0) {
-            sectionPanels.push(...result.panels);
-            onPanelsAdded(result.panels);
-          }
-          failures.push(...result.failures);
-        }
-
-        const nextSection: DashboardSection = {
-          sectionId: uuidv4(),
+        let nextSection: DashboardSection = {
+          uid: uuidv4(),
           title: operation.title,
           collapsed: false,
           grid: operation.grid,
-          panels: sectionPanels,
+          panels: [],
         };
+
+        if (operation.panels) {
+          const sectionPanels = materializeResolvedVisualizationPanels({
+            resolvedRequests: getResolvedVisualizationCreationRequests({
+              resolvedRequestsByOperationIndex: resolvedVisualizationCreationRequests,
+              operationIndex,
+              operationType: operation.operation,
+            }),
+            failures,
+          }).map(({ panel }) => panel);
+
+          nextSection = {
+            ...nextSection,
+            panels: sectionPanels,
+          };
+        }
 
         nextDashboardData = {
           ...nextDashboardData,
-          sections: [...(nextDashboardData.sections ?? []), nextSection],
+          panels: [...nextDashboardData.panels, nextSection],
         };
         break;
       }
 
       case 'remove_section': {
-        const sectionIndex = (nextDashboardData.sections ?? []).findIndex(
-          ({ sectionId }) => sectionId === operation.sectionId
-        );
+        const sectionIndex = findSectionIndex(nextDashboardData.panels, operation.uid);
         if (sectionIndex === -1) {
-          throw new Error(`Section "${operation.sectionId}" not found.`);
+          throw new Error(`Section "${operation.uid}" not found.`);
         }
 
-        const sections = [...(nextDashboardData.sections ?? [])];
-        const sectionToRemove = sections[sectionIndex];
-        sections.splice(sectionIndex, 1);
+        const sectionToRemove = nextDashboardData.panels[sectionIndex] as DashboardSection;
+        const nextPanels = nextDashboardData.panels.filter((_, i) => i !== sectionIndex);
 
         if (operation.panelAction === 'delete') {
-          if (sectionToRemove.panels.length > 0) {
-            onPanelsRemoved(sectionToRemove.panels);
-          }
           nextDashboardData = {
             ...nextDashboardData,
-            sections: asOptionalSections(sections),
+            panels: nextPanels,
           };
           break;
         }
 
-        const baseY = getPanelsBottomY(nextDashboardData.panels);
+        const baseY = getWidgetsBottomY(nextPanels);
         const promotedPanels = sectionToRemove.panels.map((panel) => ({
           ...panel,
           grid: {
@@ -309,8 +649,7 @@ export const executeDashboardOperations = async ({
 
         nextDashboardData = {
           ...nextDashboardData,
-          panels: [...nextDashboardData.panels, ...promotedPanels],
-          sections: asOptionalSections(sections),
+          panels: [...nextPanels, ...promotedPanels],
         };
         break;
       }
@@ -318,11 +657,10 @@ export const executeDashboardOperations = async ({
       case 'remove_panels': {
         const { dashboardData: dashboardWithoutPanels, removedPanels } = removePanelsFromDashboard({
           dashboardData: nextDashboardData,
-          panelIds: operation.panelIds,
+          panelIdsToRemove: operation.panelIds,
         });
         if (removedPanels.length > 0) {
           nextDashboardData = dashboardWithoutPanels;
-          onPanelsRemoved(removedPanels);
           logger.debug(`Removed ${removedPanels.length} panels from dashboard`);
         }
         break;

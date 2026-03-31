@@ -51,6 +51,7 @@ export interface ActionDetails {
   pack_name?: string;
   space_id?: string;
   pack_prebuilt?: boolean;
+  tags?: string[];
   status?: string;
   result_counts?: ResultCounts;
   queries?: Array<{

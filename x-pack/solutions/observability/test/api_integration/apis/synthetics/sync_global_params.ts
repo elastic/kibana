@@ -101,14 +101,14 @@ export default function ({ getService }: FtrProviderContext) {
             lon: 0,
           },
           agentPolicyId: testFleetPolicyID,
-          spaces: ['*'],
+          spaces: ['default'],
         },
       ];
       expect(apiResponse.body.locations).eql(testLocations);
     });
 
     it('adds a monitor in private location', async () => {
-      const newMonitor = browserMonitorJson;
+      const newMonitor = { ...browserMonitorJson, timeout: null };
 
       const pvtLoc = {
         id: loc.id,

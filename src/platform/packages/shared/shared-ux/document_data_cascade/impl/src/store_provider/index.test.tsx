@@ -14,7 +14,11 @@ import { DataCascadeProvider } from '.';
 describe('DataCascadeProvider', () => {
   it('should render children', () => {
     render(
-      <DataCascadeProvider cascadeGroups={[]}>
+      <DataCascadeProvider
+        data={[]}
+        cascadeGroups={['group1', 'group2']}
+        initialGroupColumn={['group1']}
+      >
         <div>Test Child</div>
       </DataCascadeProvider>
     );

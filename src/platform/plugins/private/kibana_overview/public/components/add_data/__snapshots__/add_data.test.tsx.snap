@@ -33,7 +33,7 @@ exports[`AddData render 1`] = `
           className="kbnOverviewDataAdd__actionButton"
           flush="both"
           href="#/tutorial_directory/sampleData"
-          iconType="visTable"
+          iconType="table"
           size="xs"
         >
           <MemoizedFormattedMessage

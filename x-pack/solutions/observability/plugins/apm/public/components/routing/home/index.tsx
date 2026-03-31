@@ -17,6 +17,7 @@ import { environmentRt } from '../../../../common/environment_rt';
 import { TraceSearchType } from '../../../../common/trace_explorer';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { RedirectTo } from '../redirect_to';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { dependencies } from './dependencies';
 import { legacyBackends } from './legacy_backends';
 import { storageExplorer } from './storage_explorer';
@@ -52,11 +53,13 @@ function serviceGroupPage<TPath extends string>({
   path,
   element,
   title,
+  searchBar,
   serviceGroupContextTab,
 }: {
   path: TPath;
   element: React.ReactElement<any, any>;
   title: string;
+  searchBar?: React.ReactNode;
   serviceGroupContextTab: ComponentProps<typeof ServiceGroupTemplate>['serviceGroupContextTab'];
 }): Record<
   TPath,
@@ -72,6 +75,7 @@ function serviceGroupPage<TPath extends string>({
         <ServiceGroupTemplate
           pageTitle={title}
           pagePath={path}
+          searchBar={searchBar}
           serviceGroupContextTab={serviceGroupContextTab}
         >
           {element}
@@ -144,17 +148,19 @@ export const homeRoute = {
         path: '/services',
         title: ServiceInventoryTitle,
         element: <ServiceInventory />,
+        searchBar: <SearchBar showTimeComparison showEnvironmentFilter />,
         serviceGroupContextTab: 'service-inventory',
       }),
       ...serviceGroupPage({
         path: '/service-map',
         title: ServiceMapTitle,
         element: <ServiceMapHome />,
+        searchBar: <SearchBar showTimeComparison showEnvironmentFilter />,
         serviceGroupContextTab: 'service-map',
       }),
       '/traces': {
         element: (
-          <TraceOverview>
+          <TraceOverview searchBar={<SearchBar showEnvironmentFilter />}>
             <Outlet />
           </TraceOverview>
         ),

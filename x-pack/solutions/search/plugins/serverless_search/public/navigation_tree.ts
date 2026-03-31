@@ -194,7 +194,7 @@ export function createNavigationTree({
     footer: [
       {
         id: 'search_getting_started',
-        icon: 'launch',
+        icon: 'rocket',
         link: 'searchGettingStarted',
       },
       {
@@ -268,6 +268,11 @@ export function createNavigationTree({
               {
                 id: 'searchInferenceEndpointsModelSettings',
                 link: 'management:model_settings',
+                breadcrumbStatus: 'hidden',
+              },
+              {
+                id: 'searchInferenceEndpointsElasticInferenceService',
+                link: 'management:elastic_inference_service',
                 breadcrumbStatus: 'hidden',
               },
               { link: 'management:anomaly_detection' },

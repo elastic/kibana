@@ -1,0 +1,23 @@
+version: '1'
+name: 'sources.gmail.list_messages'
+description: 'List Gmail message IDs by label (e.g. INBOX, SENT). Prefer search when the user has a specific query; limit maxResults (e.g. 10-20).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: maxResults
+    type: number
+    required: false
+    description: "Max messages to return (default 10, max 100). Prefer 10-20 to keep context small."
+  - name: pageToken
+    type: string
+    required: false
+    description: Pagination token from a previous response
+steps:
+  - name: list_messages
+    type: gmail.listMessages
+    connector-id: <%= gmail-stack-connector-id %>
+    with:
+      maxResults: ${{inputs.maxResults}}
+      pageToken: "${{inputs.pageToken}}"

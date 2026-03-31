@@ -102,7 +102,7 @@ export function WelcomeTourCallout({
                       href={docLinks.links.observability.logsStreams}
                       target="_blank"
                       rel="noopener"
-                      iconType="popout"
+                      iconType="external"
                       iconSide="right"
                     >
                       {i18n.translate('xpack.streams.welcomeCallout.docsButton', {

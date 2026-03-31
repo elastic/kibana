@@ -9,7 +9,7 @@ import type { Ast } from '@kbn/interpreter';
 import { fromExpression } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import type { XYState } from './xy_visualization';
+import type { XYVisualizationState } from './xy_visualization';
 import { getXyVisualization } from './xy_visualization';
 import type { OperationDescriptor } from '@kbn/lens-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
@@ -477,6 +477,38 @@ describe('#toExpression', () => {
     );
   });
 
+  it('should include legend maxLines and maxPixels in the legendConfig AST when set', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: {
+          position: Position.Bottom,
+          isVisible: true,
+          maxLines: 3,
+          maxPixels: 333,
+        },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const legendConfig = (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments;
+    expect(legendConfig.maxLines).toEqual([3]);
+    expect(legendConfig.maxPixels).toEqual([333]);
+  });
+
   it('should ignore legend size for inside legend', () => {
     const expression = xyVisualization.toExpression(
       {
@@ -736,7 +768,7 @@ describe('#toExpression', () => {
         return { label: `col_${col}`, dataType: 'date', scale: 'interval' } as OperationDescriptor;
       return { label: `col_${col}`, dataType: 'number' } as OperationDescriptor;
     });
-    const state: XYState = {
+    const state: XYVisualizationState = {
       legend: { position: Position.Bottom, isVisible: true },
       valueLabels: 'show',
       preferredSeriesType: 'bar',
@@ -775,7 +807,7 @@ describe('#toExpression', () => {
   });
 
   it('ignores set current time marker visibility settings if the chart is not time-based', () => {
-    const state: XYState = {
+    const state: XYVisualizationState = {
       legend: { position: Position.Bottom, isVisible: true },
       valueLabels: 'show',
       preferredSeriesType: 'bar',

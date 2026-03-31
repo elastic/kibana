@@ -68,7 +68,7 @@ interface ViewResultsInDiscoverActionProps {
   mode?: string;
 }
 
-function getLensAttributes(
+export function getLensAttributes(
   logsDataView: LogsDataView,
   actionId: string
 ): TypedLensByValueInput['attributes'] {
@@ -494,7 +494,7 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
           <EuiButtonIcon
             isDisabled={!errorsData?.total}
             onClick={handleErrorsToggle}
-            iconType={expanded ? 'arrowUp' : 'arrowDown'}
+            iconType={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
             aria-label={i18n.translate('xpack.osquery.pack.queriesTable.errorsAriaLabel', {
               defaultMessage: 'Error details',
             })}

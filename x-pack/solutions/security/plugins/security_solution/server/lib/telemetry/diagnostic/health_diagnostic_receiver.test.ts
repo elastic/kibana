@@ -27,7 +27,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
   beforeEach(() => {
     mockEsClient = createMockEsClient();
     mockLogger = createMockLogger();
-    queryExecutor = new CircuitBreakingQueryExecutorImpl(mockEsClient as any, mockLogger); // eslint-disable-line @typescript-eslint/no-explicit-any
+    queryExecutor = new CircuitBreakingQueryExecutorImpl(mockEsClient as any, false, mockLogger); // eslint-disable-line @typescript-eslint/no-explicit-any
   });
 
   describe('DSL queries', () => {
@@ -473,11 +473,11 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
         queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
         () => {
           expect(mockEsClient.indices.exists).toHaveBeenCalledWith({
-            index: ['test-index'],
+            index: 'test-index',
             allow_no_indices: false,
           });
           expect(mockEsClient.security.hasPrivileges).toHaveBeenCalledWith({
-            index: [{ names: ['test-index'], privileges: ['read'] }],
+            index: [{ names: 'test-index', privileges: ['read'] }],
           });
           expect(mockEsClient.openPointInTime).toHaveBeenCalled();
           done();
@@ -659,6 +659,30 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     test('should return original index when no tiers are specified', async () => {
       const query = createMockQuery(QueryType.DSL);
       const result = await queryExecutor.indicesFor(query);
+      expect(result).toEqual(['test-index']);
+      expect(mockEsClient.ilm.explainLifecycle).not.toHaveBeenCalled();
+    });
+
+    test('should return original index on serverless when no tiers are specified', async () => {
+      const serverlessExecutor = new CircuitBreakingQueryExecutorImpl(
+        mockEsClient as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+        true,
+        mockLogger
+      );
+      const query = createMockQuery(QueryType.DSL);
+      const result = await serverlessExecutor.indicesFor(query);
+      expect(result).toEqual(['test-index']);
+      expect(mockEsClient.ilm.explainLifecycle).not.toHaveBeenCalled();
+    });
+
+    test('should return original index on serverless even when tiers are specified', async () => {
+      const serverlessExecutor = new CircuitBreakingQueryExecutorImpl(
+        mockEsClient as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+        true,
+        mockLogger
+      );
+      const query = createMockQuery(QueryType.DSL, { tiers: ['hot', 'warm'] });
+      const result = await serverlessExecutor.indicesFor(query);
       expect(result).toEqual(['test-index']);
       expect(mockEsClient.ilm.explainLifecycle).not.toHaveBeenCalled();
     });

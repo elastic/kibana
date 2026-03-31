@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -27,7 +27,7 @@ import {
 import type { PartitionMetric } from './partition_shared';
 import {
   legendNestedSchema,
-  legendVisibleSchema,
+  legendVisibilitySchema,
   validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
@@ -42,7 +42,7 @@ const pieStateSharedSchema = {
       {
         nested: legendNestedSchema,
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visible: legendVisibleSchema,
+        visibility: legendVisibilitySchema,
         size: legendSizeSchema,
       },
       {
@@ -54,11 +54,26 @@ const pieStateSharedSchema = {
       }
     )
   ),
-  value_display: valueDisplaySchema,
-  label_position: schema.maybe(
-    schema.oneOf([schema.literal('hidden'), schema.literal('inside'), schema.literal('outside')], {
-      meta: { description: 'Position of slice labels: hidden, inside, or outside' },
-    })
+  values: valueDisplaySchema,
+  labels: schema.maybe(
+    schema.object(
+      {
+        visible: schema.maybe(schema.boolean({ meta: { description: 'Show slice labels' } })),
+        position: schema.maybe(
+          schema.oneOf([schema.literal('inside'), schema.literal('outside')], {
+            meta: {
+              description: 'Renders the pie/donut chart slice labels inside or outside the pie',
+            },
+          })
+        ),
+      },
+      {
+        meta: {
+          description:
+            'Label configuration for pie/donut chart slice labels inside or outside the pie',
+        },
+      }
+    )
   ),
   donut_hole: schema.maybe(
     schema.oneOf(
@@ -169,10 +184,9 @@ export const pieStateSchemaESQL = schema.object(
     ...datasetEsqlTableSchema,
     ...pieStateSharedSchema,
     metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(
-        partitionStatePrimaryMetricOptionsSchema,
-        { meta: { description: 'ES|QL column reference for primary metric' } }
-      ),
+      esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema, {
+        meta: { description: 'ES|QL column reference for primary metric' },
+      }),
       {
         minSize: 1,
         maxSize: 100,
@@ -180,7 +194,7 @@ export const pieStateSchemaESQL = schema.object(
       }
     ),
     group_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
         meta: { description: 'Array of breakdown dimensions (minimum 1)' },

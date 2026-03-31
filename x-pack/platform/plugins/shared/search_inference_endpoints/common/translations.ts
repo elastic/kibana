@@ -59,9 +59,22 @@ export const SERVICE_PROVIDER = i18n.translate('xpack.searchInferenceEndpoints.s
   defaultMessage: 'Service',
 });
 
+export const SERVICE_PROVIDER_ARIA_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.serviceProvider.ariaLabel',
+  {
+    defaultMessage: 'Service Provider Options',
+  }
+);
+
 export const TASK_TYPE = i18n.translate('xpack.searchInferenceEndpoints.taskType', {
   defaultMessage: 'Type',
 });
+export const TASK_TYPE_ARIA_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.taskType.ariaLabel',
+  {
+    defaultMessage: 'Task Type Options',
+  }
+);
 
 export const BREADCRUMB_RELEVANCE = i18n.translate(
   'xpack.searchInferenceEndpoints.breadcrumbs.relevance',
@@ -150,5 +163,73 @@ export const RESOURCE_BASED_BILLING_DESCRIPTION = i18n.translate(
   'xpack.searchInferenceEndpoints.elasticsearch.description',
   {
     defaultMessage: 'Runs on ML Nodes (resource-based billing)',
+  }
+);
+
+export const SETTINGS_TITLE = i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
+  defaultMessage: 'Settings',
+});
+
+export const SETTINGS_SAVE_BUTTON = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.saveButton',
+  {
+    defaultMessage: 'Save settings',
+  }
+);
+
+export const SETTINGS_RESET_DEFAULTS = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.resetDefaults',
+  {
+    defaultMessage: 'Reset all to defaults',
+  }
+);
+
+export const SETTINGS_ASSIGNED_MODELS = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.assignedModels',
+  {
+    defaultMessage: 'Assigned models',
+  }
+);
+
+export const SETTINGS_DEFAULT_BADGE = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultBadge',
+  {
+    defaultMessage: 'Default',
+  }
+);
+
+export const SETTINGS_NO_FEATURES_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.noFeatures.title',
+  {
+    defaultMessage: 'No features registered',
+  }
+);
+
+export const SETTINGS_NO_FEATURES_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.noFeatures.description',
+  {
+    defaultMessage: 'No features have been registered for inference settings in this project.',
+  }
+);
+
+export const EXTERNAL_INFERENCE_EMPTY_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.externalInference.emptyTitle',
+  {
+    defaultMessage: 'Connect to external model providers',
+  }
+);
+
+export const EXTERNAL_INFERENCE_EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.externalInference.emptyDescription',
+  {
+    defaultMessage:
+      'Add model endpoints from your favorite model providers to use them for AI-powered search.',
+  }
+);
+
+export const VIEW_DOCUMENTATION_LINK = i18n.translate(
+  'xpack.searchInferenceEndpoints.providerInference.viewDocumentation',
+  {
+    defaultMessage: 'View documentation',
   }
 );
