@@ -68,6 +68,7 @@ export function WiredAdvancedView({
       )}
       <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
         <EuiCallOut
+          announceOnMount={false}
           iconType="warning"
           color="primary"
           title={i18n.translate(
