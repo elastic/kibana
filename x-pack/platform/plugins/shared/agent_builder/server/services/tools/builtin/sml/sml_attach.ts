@@ -12,6 +12,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { resolveSmlAttachItems } from '../../../sml/execute_sml_attach_items';
 import type { SmlToolsOptions } from './types';
 
 const smlAttachItemSchema = z.object({
@@ -71,89 +72,37 @@ export const createSmlAttachTool = ({
     const smlService = getSmlService();
     const { spaceId, savedObjectsClient, request, attachments, esClient, logger } = context;
 
-    const accessMap = await smlService.checkItemsAccess({
-      items: items.map((item) => ({ id: item.chunk_id, type: item.attachment_type })),
-      spaceId,
+    const resolvedItems = await resolveSmlAttachItems({
+      items,
+      sml: smlService,
       esClient: esClient.asCurrentUser,
       request,
-    });
-
-    const chunkIds = items.filter((item) => accessMap.get(item.chunk_id)).map((i) => i.chunk_id);
-    const smlDocs = await smlService.getDocuments({
-      ids: chunkIds,
       spaceId,
-      esClient: esClient.asCurrentUser,
+      savedObjectsClient,
+      logger,
     });
 
     const results = await Promise.all(
-      items.map(async (item) => {
-        if (!accessMap.get(item.chunk_id)) {
+      resolvedItems.map(async (r) => {
+        if (!r.success) {
           return createErrorResult({
-            message: `Access denied: you do not have the required permissions to access SML item '${item.chunk_id}'`,
-            metadata: { chunk_id: item.chunk_id, attachment_type: item.attachment_type },
+            message: r.message,
+            metadata: { chunk_id: r.chunk_id, attachment_type: r.attachment_type },
           });
         }
 
-        const smlDoc = smlDocs.get(item.chunk_id);
-        if (!smlDoc) {
-          return createErrorResult({
-            message: `SML document '${item.chunk_id}' not found in the index`,
-            metadata: { chunk_id: item.chunk_id, attachment_type: item.attachment_type },
-          });
-        }
+        const added = await attachments.add(r.attachment, ATTACHMENT_REF_ACTOR.agent);
 
-        const typeDefinition = smlService.getTypeDefinition(smlDoc.type);
-        if (!typeDefinition) {
-          return createErrorResult({
-            message: `SML type '${smlDoc.type}' does not support conversion to attachment`,
-            metadata: { chunk_id: item.chunk_id, attachment_type: smlDoc.type },
-          });
-        }
-
-        try {
-          const convertedAttachment = await typeDefinition.toAttachment(smlDoc, {
-            request,
-            savedObjectsClient,
-            spaceId,
-          });
-
-          if (!convertedAttachment) {
-            return createErrorResult({
-              message: `Failed to convert SML item '${item.chunk_id}' to attachment — toAttachment returned undefined`,
-              metadata: { chunk_id: item.chunk_id, attachment_type: item.attachment_type },
-            });
-          }
-
-          const added = await attachments.add(
-            {
-              type: convertedAttachment.type,
-              data: convertedAttachment.data,
-              origin: convertedAttachment.origin ?? smlDoc.origin_id,
-            },
-            ATTACHMENT_REF_ACTOR.agent
-          );
-
-          return {
-            tool_result_id: getToolResultId(),
-            type: ToolResultType.other as const,
-            data: {
-              success: true,
-              attachment_id: added.id,
-              attachment_type: convertedAttachment.type,
-              message: `Attachment '${added.id}' of type '${convertedAttachment.type}' created from SML item '${item.chunk_id}'`,
-            },
-          };
-        } catch (error) {
-          logger.error(
-            `sml_attach: error converting item '${item.chunk_id}' (type: ${
-              item.attachment_type
-            }): ${(error as Error).message}`
-          );
-          return createErrorResult({
-            message: `Failed to convert SML item '${item.chunk_id}' to attachment`,
-            metadata: { chunk_id: item.chunk_id, attachment_type: item.attachment_type },
-          });
-        }
+        return {
+          tool_result_id: getToolResultId(),
+          type: ToolResultType.other,
+          data: {
+            success: true,
+            attachment_id: added.id,
+            attachment_type: r.attachment.type,
+            message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.chunk_id}'`,
+          },
+        };
       })
     );
 

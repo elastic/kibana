@@ -35,6 +35,7 @@ import type { SearchPlaygroundPluginStart } from '@kbn/search-playground/public'
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-shared-ui';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import {
@@ -88,6 +89,7 @@ export interface PluginsStart {
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
+  spaces?: SpacesPluginStart;
   uiActions: UiActionsStart;
 }
 

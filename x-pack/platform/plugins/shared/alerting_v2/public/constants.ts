@@ -16,9 +16,10 @@ export const ALERTING_V2_RULES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${AL
 export const ALERTING_V2_NOTIFICATION_POLICIES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_NOTIFICATION_POLICIES_APP_ID}`;
 
 export const MANAGEMENT_APP_ID = 'management';
-export const INTERNAL_ALERTING_V2_RULE_API_PATH = '/internal/alerting/v2/rule' as const;
-export const INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH =
-  '/internal/alerting/v2/notification_policies' as const;
+export {
+  ALERTING_V2_RULE_API_PATH,
+  ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
+} from '@kbn/alerting-v2-constants';
 
 export const paths = {
   ruleCreate: `${ALERTING_V2_RULES_BASE_PATH}/create`,
