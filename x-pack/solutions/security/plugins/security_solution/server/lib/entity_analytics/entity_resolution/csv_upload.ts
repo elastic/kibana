@@ -189,7 +189,7 @@ async function findMatchingEntities(
       }
     }
 
-    if (entityIds.length >= MAX_MATCHED_ENTITIES) {
+    if (entityIds.length > MAX_MATCHED_ENTITIES) {
       throw new Error(
         `Matched more than ${MAX_MATCHED_ENTITIES} entities. Narrow your identifying fields to be more specific.`
       );
