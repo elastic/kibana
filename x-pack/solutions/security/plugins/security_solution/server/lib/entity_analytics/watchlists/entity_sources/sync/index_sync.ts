@@ -19,32 +19,28 @@ export const createIndexSyncService = ({
   esClient,
   crudClient,
   logger,
-  targetIndex,
   descriptorClient,
-  watchlistName,
+  watchlist,
 }: {
   esClient: ElasticsearchClient;
   crudClient: CRUDClient;
   logger: Logger;
-  targetIndex: string;
   descriptorClient: WatchlistEntitySourceClient;
-  watchlistName: string;
+  watchlist: { name: string; id: string; index: string };
 }) => {
   const updateDetectionService = createUpdateDetectionService({
     esClient,
     crudClient,
     logger,
-    targetIndex,
     descriptorClient,
-    watchlistName,
+    watchlist,
   });
   const deletionDetectionService = createDeletionDetectionService({
     esClient,
     crudClient,
     logger,
-    targetIndex,
     descriptorClient,
-    watchlistName,
+    watchlist,
   });
   const sourcesSyncService = createSourcesSyncService({ logger });
 

@@ -46,7 +46,7 @@ export const createEntitySourcesService = ({
   const syncWatchlist = async (watchlistId: string) => {
     const watchlist = await watchlistClient.get(watchlistId);
     const sourceIds = await watchlistClient.getEntitySourceIds(watchlistId);
-    const targetIndex = getIndexForWatchlist(watchlist.name, namespace);
+    const targetIndex = getIndexForWatchlist(namespace);
 
     const { sources } = await descriptorClient.list({});
     const entitiesBySource = await Promise.all(
@@ -69,9 +69,8 @@ export const createEntitySourcesService = ({
       esClient,
       crudClient,
       logger,
-      targetIndex,
       descriptorClient,
-      watchlistName: watchlist.name,
+      watchlist: { name: watchlist.name, id: watchlist.id || watchlistId, index: targetIndex },
     });
 
     await indexSyncService.plainIndexSync(entitiesBySource);

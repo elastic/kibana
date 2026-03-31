@@ -83,18 +83,16 @@ export const applyBulkRemoveSource = async ({
   logger,
   staleEntities,
   sourceType,
-  targetIndex,
-  watchlistName,
   watchlistsByEuid,
+  watchlist,
 }: {
   esClient: ElasticsearchClient;
   crudClient: CRUDClient;
   logger: Logger;
   staleEntities: StaleEntity[];
   sourceType: string;
-  targetIndex: string;
-  watchlistName: string;
   watchlistsByEuid: WatchlistsByEuid;
+  watchlist: { name: string; id: string; index: string };
 }): Promise<void> => {
   if (staleEntities.length === 0) {
     return;
@@ -106,7 +104,7 @@ export const applyBulkRemoveSource = async ({
 
   for (let start = 0; start < staleEntities.length; start += chunkSize) {
     const chunk = staleEntities.slice(start, start + chunkSize);
-    const operations = buildOps({ staleEntities: chunk, sourceType, targetIndex });
+    const operations = buildOps({ staleEntities: chunk, sourceType, targetIndex: watchlist.index });
     if (operations.length > 0) {
       const resp = await esClient.bulk({ refresh: 'wait_for', body: operations });
       const errors = getErrorFromBulkResponse(resp);
@@ -133,7 +131,7 @@ export const applyBulkRemoveSource = async ({
         type: euid.split(':')[0] as EntityType,
         currentWatchlists: watchlistsByEuid.get(euid),
       })),
-      watchlistName,
+      watchlistId: watchlist.id,
     });
   }
 };

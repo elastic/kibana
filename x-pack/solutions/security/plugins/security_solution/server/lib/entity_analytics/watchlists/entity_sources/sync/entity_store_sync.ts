@@ -17,27 +17,25 @@ export interface EntityRef {
 }
 
 /**
- * Updates the entity store to add the watchlist name to each entity's
+ * Updates the entity store to add the watchlist ID to each entity's
  * `entity.attributes.watchlists` array using the v2 CRUD client.
  */
 export const addWatchlistAttributeToStore = async ({
   crudClient,
   logger,
   entityRefs,
-  watchlistName,
+  watchlistId,
 }: {
   crudClient: CRUDClient;
   logger: Logger;
   entityRefs: EntityRef[];
-  watchlistName: string;
+  watchlistId: string;
 }): Promise<void> => {
   if (entityRefs.length === 0) return;
 
   const objects = entityRefs.map(({ euid, type, currentWatchlists }) => {
     const watchlists = currentWatchlists ?? [];
-    const updated = watchlists.includes(watchlistName)
-      ? watchlists
-      : [...watchlists, watchlistName];
+    const updated = watchlists.includes(watchlistId) ? watchlists : [...watchlists, watchlistId];
 
     return {
       type,
@@ -59,19 +57,19 @@ export const addWatchlistAttributeToStore = async ({
 };
 
 /**
- * Updates the entity store to remove the watchlist name from each entity's
+ * Updates the entity store to remove the watchlist ID from each entity's
  * `entity.attributes.watchlists` array using the v2 CRUD client.
  */
 export const removeWatchlistAttributeFromStore = async ({
   crudClient,
   logger,
   entityRefs,
-  watchlistName,
+  watchlistId,
 }: {
   crudClient: CRUDClient;
   logger: Logger;
   entityRefs: EntityRef[];
-  watchlistName: string;
+  watchlistId: string;
 }): Promise<void> => {
   // Only update entities whose current watchlists are known — if we don't have the current value we'd blindly write an empty array to the store.
   const knownRefs = entityRefs.filter((ref): ref is EntityRef & { currentWatchlists: string[] } =>
@@ -80,7 +78,7 @@ export const removeWatchlistAttributeFromStore = async ({
   if (knownRefs.length === 0) return;
 
   const objects = knownRefs.map(({ euid, type, currentWatchlists }) => {
-    const updated = currentWatchlists.filter((w) => w !== watchlistName);
+    const updated = currentWatchlists.filter((w) => w !== watchlistId);
 
     return {
       type,

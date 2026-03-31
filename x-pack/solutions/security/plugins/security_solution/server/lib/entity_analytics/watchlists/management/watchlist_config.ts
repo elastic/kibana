@@ -91,7 +91,7 @@ export class WatchlistConfigClient {
       esClient: this.deps.esClient,
       logger: this.deps.logger,
       options: {
-        index: getIndexForWatchlist(attrs.name, this.deps.namespace),
+        index: getIndexForWatchlist(this.deps.namespace),
         mappings: generateWatchlistEntityIndexMappings(),
       },
     });

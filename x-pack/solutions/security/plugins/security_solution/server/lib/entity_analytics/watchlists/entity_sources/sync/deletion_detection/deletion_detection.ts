@@ -22,16 +22,14 @@ export const createDeletionDetectionService = ({
   esClient,
   crudClient,
   logger,
-  targetIndex,
   descriptorClient,
-  watchlistName,
+  watchlist,
 }: {
   esClient: ElasticsearchClient;
   crudClient: CRUDClient;
   logger: Logger;
-  targetIndex: string;
   descriptorClient: WatchlistEntitySourceClient;
-  watchlistName: string;
+  watchlist: { name: string; id: string; index: string };
 }) => {
   const syncMarkersService = createWatchlistSyncMarkersService(descriptorClient, esClient);
 
@@ -41,7 +39,10 @@ export const createDeletionDetectionService = ({
   ): Promise<StaleEntity[]> => {
     const query: Record<string, unknown> = {
       bool: {
-        must: [{ term: { 'labels.source_ids': sourceId } }],
+        must: [
+          { term: { 'labels.source_ids': sourceId } },
+          { term: { 'watchlist.id': watchlist.id } },
+        ],
         ...(currentEuids.length > 0
           ? { must_not: [{ terms: { 'entity.id': currentEuids } }] }
           : {}),
@@ -54,7 +55,7 @@ export const createDeletionDetectionService = ({
 
     while (true) {
       const response = await esClient.search<WatchlistEntityDoc>({
-        index: targetIndex,
+        index: watchlist.index,
         size: pageSize,
         query,
         _source: false,
@@ -108,8 +109,7 @@ export const createDeletionDetectionService = ({
       logger,
       staleEntities,
       sourceType: source.type ?? 'index',
-      targetIndex,
-      watchlistName,
+      watchlist,
       watchlistsByEuid,
     });
   };
