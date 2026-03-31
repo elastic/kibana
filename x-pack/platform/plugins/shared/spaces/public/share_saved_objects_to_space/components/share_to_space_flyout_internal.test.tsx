@@ -7,7 +7,7 @@
 
 import { EuiSelectable } from '@elastic/eui';
 import Boom from '@hapi/boom';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
