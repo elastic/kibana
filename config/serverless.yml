@@ -300,5 +300,5 @@ server.socketTimeout: 120000 # making this explicit
 elasticsearch.idleSocketTimeout: 2m
 data.search.asyncSearch:
   waitForCompletion: 1s
-  pollLength: 1.9m
+  pollLength: 1m50s
   keepAlive: 2m
