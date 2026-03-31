@@ -18,18 +18,24 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_ALERT_API_PATH } from '../constants';
+import { ALERTING_V2_ALERT_API_PATH } from '../constants';
 
 @injectable()
 export class CreateAlertActionRoute implements RouteHandler {
   static method = 'post' as const;
-  static path = `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/{group_hash}/action`;
+  static path = `${ALERTING_V2_ALERT_API_PATH}/{group_hash}/action`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'public',
+    summary: 'Create an alert action',
+    description: 'Create an action for a specific alert group.',
+    tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
+  } as const;
   static validate = {
     request: {
       params: buildRouteValidationWithZod(createAlertActionParamsSchema),
