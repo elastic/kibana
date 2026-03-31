@@ -37,7 +37,7 @@ const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
   const parts: string[] = [];
 
   for (const entityType of ANOMALY_ENTITY_TYPES) {
-    const fieldEvals = euidApi.esql.getFieldEvaluationsEsql(entityType);
+    const fieldEvals = euidApi.esql.getFieldEvaluations(entityType);
     if (fieldEvals) {
       parts.push(`| EVAL ${fieldEvals}`);
     }
