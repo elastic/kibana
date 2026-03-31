@@ -10,6 +10,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AlertingServerStartDependencies } from '../../types';
 import { TASK_ID } from './task_definition';
 import type { LatestTaskStateSchema } from './task_state';
+import type { AlertingV2Usage } from './types';
 
 async function getLatestTaskState(taskManager: AlertingServerStartDependencies['taskManager']) {
   try {
@@ -34,8 +35,6 @@ export function registerAlertingV2UsageCollector(
   getTaskManager: () => AlertingServerStartDependencies['taskManager'],
   usageCollection: UsageCollectionSetup
 ) {
-  type AlertingV2Usage = Omit<LatestTaskStateSchema, 'runs'>;
-
   const collector = usageCollection.makeUsageCollector<AlertingV2Usage>({
     type: 'alerting_v2',
     fetch: async () => {
