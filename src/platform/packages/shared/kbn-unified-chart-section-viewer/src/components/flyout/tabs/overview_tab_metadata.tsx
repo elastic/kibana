@@ -134,11 +134,15 @@ export const OverviewTabMetadata = ({ metricItem }: OverviewTabMetadataProps) =>
         titleProps={{
           css: css`
             min-width: ${labelMinWidthPx}px;
+            padding: ${euiTheme.size.s} ${euiTheme.size.xs};
+            display: flex;
+            align-items: center;
           `,
         }}
         descriptionProps={{
           css: css`
             min-width: 0;
+            padding: ${euiTheme.size.s} ${euiTheme.size.xs};
           `,
         }}
         // TODO: https://github.com/elastic/kibana/issues/260002
@@ -146,16 +150,6 @@ export const OverviewTabMetadata = ({ metricItem }: OverviewTabMetadataProps) =>
           align-items: stretch;
           row-gap: ${euiTheme.size.xxs};
           column-gap: 0;
-
-          & > .euiDescriptionList__title,
-          & > .euiDescriptionList__description {
-            padding: ${euiTheme.size.s} ${euiTheme.size.xs};
-          }
-
-          & > .euiDescriptionList__title {
-            display: flex;
-            align-items: center;
-          }
 
           & > * {
             border-bottom: ${euiTheme.border.thin};
