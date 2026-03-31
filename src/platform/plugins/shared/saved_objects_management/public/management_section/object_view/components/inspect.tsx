@@ -45,7 +45,7 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
                 aria-label={copyToClipboardLabel}
                 size="s"
                 flush="right"
-                iconType="copyClipboard"
+                iconType="copy"
                 onClick={copy}
               >
                 {copyToClipboardLabel}
