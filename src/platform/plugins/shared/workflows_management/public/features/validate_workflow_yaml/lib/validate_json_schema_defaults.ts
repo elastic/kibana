@@ -8,14 +8,15 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import type { Document, Node, Scalar } from 'yaml';
-import { isNode, isPair, isScalar, isSeq, visit } from 'yaml';
+import type { Document } from 'yaml';
+import { isPair, isScalar, visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import { normalizeFieldsToJsonSchema, resolveRef } from '@kbn/workflows/spec/lib/field_conversion';
 import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { YamlValidationResult } from '../model/types';
 
 /**
@@ -32,12 +33,12 @@ export function validateJsonSchemaDefaults(
     return errors;
   }
 
-  const manualTriggerIndex =
-    workflowDefinition.triggers?.findIndex((trigger) => isManualTrigger(trigger)) ?? -1;
-  const manualTrigger =
-    manualTriggerIndex !== -1
-      ? (workflowDefinition.triggers?.[manualTriggerIndex] as ManualTrigger)
-      : undefined;
+  const manualTriggerIndex = workflowDefinition.triggers?.findIndex((trigger) =>
+    isManualTrigger(trigger)
+  );
+  const manualTrigger = workflowDefinition.triggers?.[manualTriggerIndex] as
+    | ManualTrigger
+    | undefined;
 
   if (!manualTrigger?.inputs) {
     return [];
@@ -47,12 +48,6 @@ export function validateJsonSchemaDefaults(
   const inputs = manualTrigger.inputs;
 
   if (!inputs) {
-    return errors;
-  }
-
-  // Get the inputs YAML node so we can scope the visit to just this subtree
-  const inputsYamlNode = yamlDocument.getIn(['triggers', manualTriggerIndex, 'inputs'], true);
-  if (!inputsYamlNode || !isNode(inputsYamlNode)) {
     return errors;
   }
 
@@ -135,15 +130,15 @@ export function validateJsonSchemaDefaults(
   }
 
   /**
-   * Extracts property key and name from a path relative to the inputs node.
-   * Handles both JSON Schema format (properties.*) and legacy array format ([0].*)
+   * Extracts property key and name from a YAML path
+   * Handles both new JSON Schema format (inputs.properties.*) and legacy array format (inputs[0].*)
    */
   function extractPropertyPath(
     path: Array<string | number>
   ): { propertyKey: string; propertyName: string } | null {
-    const isInProperties = path[0] === 'properties';
-    const isInDefinitions = path[0] === 'definitions' || path[0] === '$defs';
-    const isLegacyArray = typeof path[0] === 'number';
+    const isInProperties = path[1] === 'properties';
+    const isInDefinitions = path[1] === 'definitions' || path[1] === '$defs';
+    const isLegacyArray = typeof path[1] === 'number' && path[0] === 'inputs';
 
     if (!isInProperties && !isInDefinitions && !isLegacyArray) {
       return null;
@@ -154,15 +149,15 @@ export function validateJsonSchemaDefaults(
     let filteredPath: string[];
 
     if (isInProperties) {
-      const propertyPath = path.slice(1, -1);
+      const propertyPath = path.slice(2, -1);
       filteredPath = propertyPath
         .filter((segment) => segment !== 'properties')
         .map((segment) => String(segment));
       propertyKey = filteredPath.length > 0 ? `inputs.properties.${filteredPath.join('.')}` : '';
       propertyName = filteredPath[filteredPath.length - 1] as string;
     } else if (isLegacyArray) {
-      // Legacy array format: [0, 'default'] -> find the input name and map to normalized property
-      const arrayIndex = path[0] as number;
+      // Legacy array format: inputs[0].default -> find the input name and map to normalized property
+      const arrayIndex = path[1] as number;
       if (
         Array.isArray(inputs) &&
         inputs[arrayIndex] &&
@@ -176,8 +171,8 @@ export function validateJsonSchemaDefaults(
         return null;
       }
     } else {
-      const definitionName = String(path[1]);
-      const propertyPath = path.slice(3, -1);
+      const definitionName = String(path[2]);
+      const propertyPath = path.slice(4, -1);
       filteredPath = propertyPath
         .filter((segment) => segment !== 'properties')
         .map((segment) => String(segment));
@@ -287,8 +282,8 @@ export function validateJsonSchemaDefaults(
     };
   }
 
-  // Visit only the manual trigger's inputs subtree to find default values
-  visit(inputsYamlNode, {
+  // Visit all scalar nodes in the YAML document to find default values
+  visit(yamlDocument, {
     Scalar(key, node, ancestors) {
       if (!node.range) {
         return;
@@ -309,23 +304,14 @@ export function validateJsonSchemaDefaults(
         return;
       }
 
-      // Build a path relative to the inputs node.
-      // Unlike getPathFromAncestors (which skips index 0 assuming a Document root),
-      // we start at 0 so the Seq index for legacy array format is captured correctly.
-      const path: Array<string | number> = [];
-      for (let i = 0; i < ancestors.length; i++) {
-        const ancestor = ancestors[i];
-        const nextAncestor = ancestors[i + 1];
-        if (isPair(ancestor)) {
-          path.push((ancestor.key as Scalar).value as string);
-        } else if (isSeq(ancestor) && nextAncestor) {
-          const index = ancestor.items.indexOf(nextAncestor as Node);
-          if (index !== -1) path.push(index);
-        }
-      }
+      // Get the path to this default value
+      // slice [triggers, 0] so the path starts from inputs
+      const path = getPathFromAncestors(ancestors, node).slice(2);
 
-      // path[last] is 'default'; need at least one segment before it
-      if (path.length < 2) {
+      // Check if this is within inputs (either properties/definitions format or legacy array format)
+      // New format: ['inputs', 'properties', 'greeting', 'default'] - length 4
+      // Legacy format: ['inputs', 0, 'default'] - length 3
+      if (path.length < 3 || path[0] !== 'inputs') {
         return;
       }
 
