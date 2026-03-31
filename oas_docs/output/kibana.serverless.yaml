@@ -84386,6 +84386,10 @@ components:
               items:
                 type: string
               type: array
+            accesses_infrequently:
+              items:
+                type: string
+              type: array
             communicates_with:
               items:
                 type: string
