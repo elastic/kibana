@@ -29,7 +29,7 @@ interface ESQLRawAnomalyRecord extends Record<string, string | number> {
 /**
  * An Anomaly record that ensures consistent timestamps as milliseconds since Epoch time.
  */
-export interface ESQLAnomalyRecord {
+export interface ESQLAnomalyRecord extends Record<string, unknown> {
   '@timestamp': number;
   record_score: number;
   'user.name': string;
