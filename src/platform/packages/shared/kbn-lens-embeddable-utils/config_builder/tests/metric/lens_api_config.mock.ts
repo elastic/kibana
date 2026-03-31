@@ -74,8 +74,8 @@ export const complexMetricAPIAttributes = {
         palette: 'status',
         value: false,
       },
-      alignments: {
-        value: 'left',
+      value: {
+        alignment: 'left',
       },
     },
   ],

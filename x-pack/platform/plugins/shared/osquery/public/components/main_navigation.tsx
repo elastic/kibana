@@ -106,7 +106,6 @@ export const MainNavigation = () => {
         {topBar}
         {isListView && (
           <div css={navCss}>
-            <EuiSpacer size="l" />
             <EuiFlexGroup gutterSize="l" alignItems="center">
               <EuiFlexItem>
                 <EuiText>

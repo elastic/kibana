@@ -487,6 +487,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   packageInputStream={packageInputStream}
                   totalStreams={inputStreams.length}
                   packagePolicyInputStream={packagePolicyInputStream!}
+                  inputPolicyTemplate={packagePolicyInput.policy_template}
                   showDescriptionColumn={!isSingleInputAndStreams}
                   isUpgrade={isUpgrade}
                   updatePackagePolicyInputStream={(

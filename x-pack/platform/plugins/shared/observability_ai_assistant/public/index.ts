@@ -113,8 +113,6 @@ export {
   aiAssistantSearchConnectorIndexPattern,
 } from '../common/ui_settings/settings_keys';
 
-export { INFERENCE_CONNECTOR_ACTION_TYPE_ID } from './utils/get_elastic_managed_llm_connector';
-
 export const elasticAiAssistantImage = elasticAiAssistantImg;
 
 export const plugin: PluginInitializer<
