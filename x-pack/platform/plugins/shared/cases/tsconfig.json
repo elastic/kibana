@@ -109,8 +109,6 @@
     "@kbn/css-utils",
     "@kbn/shared-ux-column-presets",
     "@kbn/core-ui-settings-browser",
-    "@kbn/core-ui-settings-server",
-    "@kbn/core-ui-settings-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }
