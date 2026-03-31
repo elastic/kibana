@@ -49,7 +49,7 @@ export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRouteP
   React.memo(({ children, pageName, omitSpyRoute = false }) => {
     const link = useLinkInfo(pageName);
     const UpsellingPage = useUpsellingPage(pageName);
-    console.log(link, pageName);
+
     // The upselling page is only returned when the license/product requirements are not met.
     // When it is defined it must be rendered, no need to check anything else.
     if (UpsellingPage) {
