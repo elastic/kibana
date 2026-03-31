@@ -83,7 +83,6 @@ describe('useFetchAlertingEpisodesQuery', () => {
     expect(fetchAlertingEpisodesMock).toHaveBeenCalledWith(
       expect.objectContaining({
         pageSize,
-        dataView: mockDataView,
         services: expect.objectContaining({ expressions: mockExpressions }),
       })
     );
