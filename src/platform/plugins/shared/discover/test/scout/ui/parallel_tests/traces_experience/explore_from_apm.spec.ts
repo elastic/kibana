@@ -293,6 +293,9 @@ spaceTest.describe(
               });
 
               await page.reload();
+              await page.testSubj.waitForSelector('apmWaterfallTimelineContainer', {
+                timeout: 10000,
+              });
             });
         });
 
