@@ -8,6 +8,7 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { extractWorkflowMetadata } from './extract_workflow_metadata';
 
 const minimalConsoleStep = { name: 's1', type: 'console' };
@@ -107,8 +108,12 @@ describe('extractWorkflowMetadata (execution engine)', () => {
     const jsonSchemaInputs = {
       type: 'object' as const,
       properties: { a: { type: 'string' as const }, b: { type: 'number' as const } },
-    } as WorkflowYaml['inputs'];
-    expect(extractWorkflowMetadata(baseWorkflow({ inputs: jsonSchemaInputs })).inputCount).toBe(2);
+    } as ManualTrigger['inputs'];
+    expect(
+      extractWorkflowMetadata(
+        baseWorkflow({ triggers: [{ type: 'manual', inputs: jsonSchemaInputs }] })
+      ).inputCount
+    ).toBe(2);
   });
 
   it('reflects settings key: timeout', () => {
