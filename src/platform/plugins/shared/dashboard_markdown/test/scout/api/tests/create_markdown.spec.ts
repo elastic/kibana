@@ -98,7 +98,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
       const id = `isolated-markdown-panel`;
       const title = `Isolated markdown panel ${Date.now()}`;
 
-      const createResponse = await apiClient.post(`s/${spaceId}/${MARKDOWN_API_PATH}/${id}`, {
+      const createResponse = await apiClient.post(`s/${spaceId}/${MARKDOWN_API_PATH}`, {
         headers: {
           ...COMMON_HEADERS,
           ...editorCredentials.apiKeyHeader,
@@ -112,7 +112,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
 
       expect(createResponse).toHaveStatusCode(201);
 
-      const getResponse = await apiClient.get(`${MARKDOWN_API_PATH}/${id}`, {
+      const getResponse = await apiClient.get(`${MARKDOWN_API_PATH}/${createResponse.body.id}`, {
         headers: {
           ...COMMON_HEADERS,
           ...editorCredentials.apiKeyHeader,

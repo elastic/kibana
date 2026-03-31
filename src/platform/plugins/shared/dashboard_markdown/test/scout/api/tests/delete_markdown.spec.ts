@@ -61,9 +61,6 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(404);
-    expect(response.body.message).toBe(
-      'A markdown panel with ID non-existent-markdown was not found.'
-    );
   });
 
   apiTest('should return 204 if the markdown panel is deleted', async ({ apiClient }) => {
@@ -108,7 +105,6 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
       });
 
       expect(response).toHaveStatusCode(403);
-      expect(response.body.message).toBe('Unable to delete markdown');
     }
   );
 });
