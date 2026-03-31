@@ -57,11 +57,6 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
 
   const separatorCss = { borderLeft: `${euiTheme.border.thin}` };
 
-  const hasDurationBreakdown =
-    item.metrics.total_search_duration_ms != null ||
-    item.metrics.total_indexing_duration_ms != null ||
-    item.metrics.index_duration_ms != null;
-
   return (
     <EuiFlyout
       onClose={onClose}
@@ -157,16 +152,11 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
           executionDurationMs={item.execution_duration_ms}
         />
 
-        {hasDurationBreakdown && (
-          <>
-            <EuiSpacer size="m" />
-            <DurationBreakdownSection
-              totalSearchDurationMs={item.metrics.total_search_duration_ms}
-              totalIndexingDurationMs={item.metrics.total_indexing_duration_ms}
-              indexDurationMs={item.metrics.index_duration_ms}
-            />
-          </>
-        )}
+        <EuiSpacer size="m" />
+        <DurationBreakdownSection
+          totalSearchDurationMs={item.metrics.total_search_duration_ms}
+          totalIndexingDurationMs={item.metrics.total_indexing_duration_ms}
+        />
       </EuiFlyoutBody>
     </EuiFlyout>
   );

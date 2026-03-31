@@ -85,7 +85,6 @@ const extractMetrics = (event: IValidatedEvent): UnifiedExecutionResult['metrics
       : null,
     matched_indices_count: toOptionalInt(additionalMetrics?.matched_indices_count),
     frozen_indices_queried_count: toOptionalInt(metrics?.frozen_indices_queried_count),
-    index_duration_ms: null,
   };
 };
 

@@ -22,13 +22,11 @@ import { RuleDurationFormat } from '../../execution_log_table/rule_duration_form
 interface DurationBreakdownSectionProps {
   totalSearchDurationMs: number | null | undefined;
   totalIndexingDurationMs: number | null | undefined;
-  indexDurationMs: number | null | undefined;
 }
 
 export const DurationBreakdownSection: React.FC<DurationBreakdownSectionProps> = ({
   totalSearchDurationMs,
   totalIndexingDurationMs,
-  indexDurationMs,
 }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'durationBreakdown' });
 
@@ -48,10 +46,6 @@ export const DurationBreakdownSection: React.FC<DurationBreakdownSectionProps> =
                   title: i18n.FLYOUT_INDEX_DURATION,
                   description: i18n.FLYOUT_TOOLTIP_INDEXING_TOTAL,
                 },
-                {
-                  title: i18n.FLYOUT_ALERT_INDEX_DURATION,
-                  description: i18n.FLYOUT_TOOLTIP_INDEXING_ALERTS,
-                },
               ]}
             />
           }
@@ -64,39 +58,29 @@ export const DurationBreakdownSection: React.FC<DurationBreakdownSectionProps> =
       <EuiSpacer size="s" />
       <EuiPanel hasBorder paddingSize="m">
         <EuiFlexGroup>
-          {totalSearchDurationMs != null && (
-            <EuiFlexItem>
-              <FieldLabel label={i18n.FLYOUT_SEARCH_DURATION} />
-              <EuiSpacer size="xs" />
-              <EuiText size="s" data-test-subj="executionDetailsFlyoutSearchDuration">
+          <EuiFlexItem>
+            <FieldLabel label={i18n.FLYOUT_SEARCH_DURATION} />
+            <EuiSpacer size="xs" />
+            <EuiText size="s" data-test-subj="executionDetailsFlyoutSearchDuration">
+              {totalSearchDurationMs != null ? (
                 <RuleDurationFormat duration={totalSearchDurationMs} />
-              </EuiText>
-            </EuiFlexItem>
-          )}
-          {totalIndexingDurationMs != null && (
-            <>
-              <SectionSeparator />
-              <EuiFlexItem>
-                <FieldLabel label={i18n.FLYOUT_INDEX_DURATION} />
-                <EuiSpacer size="xs" />
-                <EuiText size="s" data-test-subj="executionDetailsFlyoutIndexDuration">
-                  <RuleDurationFormat duration={totalIndexingDurationMs} />
-                </EuiText>
-              </EuiFlexItem>
-            </>
-          )}
-          {indexDurationMs != null && (
-            <>
-              <SectionSeparator />
-              <EuiFlexItem>
-                <FieldLabel label={i18n.FLYOUT_ALERT_INDEX_DURATION} />
-                <EuiSpacer size="xs" />
-                <EuiText size="s">
-                  <RuleDurationFormat duration={indexDurationMs} />
-                </EuiText>
-              </EuiFlexItem>
-            </>
-          )}
+              ) : (
+                '—'
+              )}
+            </EuiText>
+          </EuiFlexItem>
+          <SectionSeparator />
+          <EuiFlexItem>
+            <FieldLabel label={i18n.FLYOUT_INDEX_DURATION} />
+            <EuiSpacer size="xs" />
+            <EuiText size="s" data-test-subj="executionDetailsFlyoutIndexDuration">
+              {totalIndexingDurationMs != null ? (
+                <RuleDurationFormat duration={totalIndexingDurationMs} />
+              ) : (
+                '—'
+              )}
+            </EuiText>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     </EuiAccordion>

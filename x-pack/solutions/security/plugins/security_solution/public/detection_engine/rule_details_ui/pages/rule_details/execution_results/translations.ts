@@ -173,7 +173,7 @@ export const FLYOUT_GAP_DURATION = i18n.translate(
 export const FLYOUT_INDEX_DURATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutIndexDuration',
   {
-    defaultMessage: 'Indexing: Total',
+    defaultMessage: 'Indexing',
   }
 );
 
@@ -209,13 +209,6 @@ export const FLYOUT_FROZEN_INDICES_QUERIED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutFrozenIndicesQueried',
   {
     defaultMessage: 'Frozen indices queried',
-  }
-);
-
-export const FLYOUT_ALERT_INDEX_DURATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutAlertIndexDuration',
-  {
-    defaultMessage: 'Indexing: Alerts',
   }
 );
 
@@ -273,14 +266,6 @@ export const FLYOUT_TOOLTIP_INDEXING_TOTAL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipIndexingTotal',
   {
     defaultMessage: 'The length of time it took to index detected alerts (hh:mm:ss:SSS).',
-  }
-);
-
-export const FLYOUT_TOOLTIP_INDEXING_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipIndexingAlerts',
-  {
-    defaultMessage:
-      'The length of time it took to index alerts into the alerts index (hh:mm:ss:SSS).',
   }
 );
 
