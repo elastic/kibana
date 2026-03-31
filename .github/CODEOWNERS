@@ -2073,6 +2073,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/fixtures/es_archives/cases/signals/default @elastic/kibana-cases
 /x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users @elastic/kibana-cases
 /x-pack/platform/test/fixtures/es_archives/alerts_legacy/ @elastic/response-ops
+/x-pack/platform/test/alerting_api_integration/security_and_spaces/group17/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
 
 # Enterprise Search
 # search
