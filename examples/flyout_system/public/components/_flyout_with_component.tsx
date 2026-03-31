@@ -352,83 +352,6 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
 
 SessionFlyout.displayName = 'SessionFlyoutFromComponents';
 
-const GlobalFlyout: React.FC = React.memo(() => {
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-
-  // Refs for manual focus management
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  const handleOpenFlyout = () => {
-    setIsFlyoutVisible(true);
-  };
-
-  // BUG: EuiFlyout does not call onActive when session={false}
-  const flyoutOnActive = useCallback(() => {
-    console.log('activate non-session flyout'); // eslint-disable-line no-console
-  }, []);
-
-  const flyoutOnClose = useCallback(() => {
-    console.log('close non-session flyout'); // eslint-disable-line no-console
-    setIsFlyoutVisible(false);
-
-    // Return focus to trigger button after closing flyout
-    setTimeout(() => {
-      triggerRef.current?.focus();
-    }, 100);
-  }, []);
-
-  return (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <EuiButton buttonRef={triggerRef} disabled={isFlyoutVisible} onClick={handleOpenFlyout}>
-              Open Global Flyout
-            </EuiButton>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {isFlyoutVisible && (
-        <EuiFlyout
-          aria-labelledby="nonSessionFlyoutTitle"
-          onActive={flyoutOnActive}
-          onClose={flyoutOnClose}
-          type="overlay"
-          container={null}
-          size="m"
-          ownFocus={true}
-          session="never"
-        >
-          <EuiFlyoutHeader hasBorder>
-            <EuiText>
-              <h2 id="nonSessionFlyoutTitle">Global flyout</h2>
-            </EuiText>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiText>
-              <p>
-                This flyout is rendered using <EuiCode>EuiFlyout</EuiCode> directly without session
-                management.
-              </p>
-            </EuiText>
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={flyoutOnClose} aria-label="Close">
-                  Close
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
-      )}
-    </>
-  );
-});
-
-GlobalFlyout.displayName = 'GlobalFlyoutFromComponents';
-
 export const FlyoutWithComponent: React.FC<FlyoutFromComponentsProps> = ({ historyKey }) => (
   <>
     <EuiTitle>
@@ -469,24 +392,6 @@ export const FlyoutWithComponent: React.FC<FlyoutFromComponentsProps> = ({ histo
                 historyKey={historyKey}
               />
             ),
-          },
-        ]}
-      />
-
-      <EuiSpacer size="m" />
-
-      <EuiTitle size="s">
-        <h3>
-          With <EuiCode>{'session="never"'}</EuiCode>
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiDescriptionList
-        type="column"
-        listItems={[
-          {
-            title: 'Global flyout: size = m',
-            description: <GlobalFlyout />,
           },
         ]}
       />
