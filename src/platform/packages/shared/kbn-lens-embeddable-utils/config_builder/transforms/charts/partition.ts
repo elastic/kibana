@@ -16,6 +16,7 @@ import {
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { PaletteOutput } from '@kbn/coloring';
+import type { $Values } from 'utility-types';
 import type {
   PartitionState,
   PartitionStateESQL,
@@ -37,10 +38,12 @@ import {
   getDatasourceLayers,
   getDataViewsMetadata,
   getLegendTruncateAfterLines,
+  getReversibleMappings,
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
   stripUndefined,
 } from './utils';
+import { legendSizeCompat } from './legend_sizes';
 import { addLayerColumn, groupIsNotCollapsed, isEsqlTableTypeDataset } from '../../utils';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
@@ -212,7 +215,7 @@ function convertAPILegendDisplayOption(
   const legendOptions = legend
     ? stripUndefined({
         nestedLegend: 'nested' in legend ? legend?.nested : undefined,
-        legendSize: legend?.size,
+        legendSize: legendSizeCompat.toState(legend?.size),
         legendMaxLines: legend?.truncate_after_lines,
         truncateLegend: Boolean(legend?.truncate_after_lines),
       })
@@ -274,15 +277,22 @@ function computeSharedPartitionLayerState(config: PartitionState) {
   };
 }
 
+const donutHoleSizeCompat = getReversibleMappings<
+  NonNullable<PieState['donut_hole']>,
+  $Values<typeof PARTITION_EMPTY_SIZE_RADIUS>
+>([
+  ['s', PARTITION_EMPTY_SIZE_RADIUS.SMALL],
+  ['m', PARTITION_EMPTY_SIZE_RADIUS.MEDIUM],
+  ['l', PARTITION_EMPTY_SIZE_RADIUS.LARGE],
+]);
+
 function getEmptySizeRatioFromDonutHoleOption(
   option: PieState['donut_hole']
 ): { emptySizeRatio: number } | {} {
   if (!option || option === 'none') {
     return {};
   }
-  const partitionEmptySizeRadiusName =
-    option.toUpperCase() as keyof typeof PARTITION_EMPTY_SIZE_RADIUS;
-  return { emptySizeRatio: PARTITION_EMPTY_SIZE_RADIUS[partitionEmptySizeRadiusName] };
+  return { emptySizeRatio: donutHoleSizeCompat.toState(option) };
 }
 
 type PartitionMetricItem =
@@ -449,7 +459,7 @@ function fromLensStateToSharedPartitionAPI(
         : undefined,
     truncate_after_lines: getLegendTruncateAfterLines(layerState),
     nested: isStateWaffleChart(visualization) ? undefined : layerState.nestedLegend,
-    size: layerState.legendSize,
+    size: legendSizeCompat.toAPI(layerState.legendSize),
   });
   const valueDisplay = stripUndefined({
     visible: layerState.numberDisplay !== 'hidden',
@@ -669,9 +679,7 @@ function fromLensStateToPerChartSpecificAPI(visualization: LensPartitionVisualiz
   // Pie and Donut chart have the label_position and donut_hole options
   if (isStatePieChart(visualization)) {
     return stripUndefined({
-      donut_hole: Object.entries(PARTITION_EMPTY_SIZE_RADIUS)
-        .find(([key, value]) => value === vizLayer.emptySizeRatio)?.[0]
-        .toLowerCase(),
+      donut_hole: donutHoleSizeCompat.toAPI(vizLayer.emptySizeRatio),
       labels: convertStateCategoryDisplayOption(vizLayer.categoryDisplay),
     });
   }
