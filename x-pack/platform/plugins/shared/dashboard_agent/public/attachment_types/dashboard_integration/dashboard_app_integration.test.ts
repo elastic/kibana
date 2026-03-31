@@ -13,7 +13,10 @@ import { ATTACHMENT_REF_OPERATION } from '@kbn/agent-builder-common/attachments'
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { createDashboardAppIntegration$, registerDashboardAppIntegration } from './dashboard_app_integration';
+import {
+  createDashboardAppIntegration$,
+  registerDashboardAppIntegration,
+} from './dashboard_app_integration';
 
 const createMockRoundCompleteEvent = (
   attachments: VersionedAttachment[],
@@ -325,7 +328,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApiWithId as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
 
       onConversationChange({
         id: 'existing-conversation',
@@ -358,7 +362,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApiWithId as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
 
       onConversationChange({
         id: 'existing-conversation',
@@ -391,7 +396,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApiWithId as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
 
       onConversationChange({
         id: 'existing-conversation',
@@ -420,7 +426,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApiWithId as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
 
       onConversationChange({
         id: 'existing-conversation',
@@ -449,7 +456,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApiWithId as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
 
       // Switch to conversation with existing dashboard attachment
       onConversationChange({
@@ -482,7 +490,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApiWithId as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
 
       onConversationChange({
         id: 'existing-conversation',
@@ -507,13 +516,65 @@ describe('registerDashboardAppIntegration', () => {
   });
 
   describe('manual changes sync', () => {
+    it('continues syncing manual changes after save-as updates an existing attachment origin', () => {
+      const dashboardApiWithUpdatedId = createMockDashboardApi('original-dashboard-id');
+
+      registerDashboardAppIntegration({
+        agentBuilder,
+        api: dashboardApiWithUpdatedId as unknown as DashboardApi,
+      });
+
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+
+      onConversationChange({
+        id: 'existing-conversation',
+        attachments: [
+          {
+            id: 'existing-dashboard-attachment',
+            type: DASHBOARD_ATTACHMENT_TYPE,
+            versions: [
+              {
+                version: 1,
+                data: { title: 'Test' },
+                content_hash: 'hash',
+                created_at: new Date().toISOString(),
+              },
+            ],
+            current_version: 1,
+            origin: 'original-dashboard-id',
+          },
+        ],
+      });
+
+      dashboardApiWithUpdatedId.savedObjectId$.next('saved-as-dashboard-id');
+      expect(agentBuilder.updateAttachmentOrigin).toHaveBeenCalledWith(
+        'existing-conversation',
+        'existing-dashboard-attachment',
+        'saved-as-dashboard-id'
+      );
+
+      agentBuilder.addAttachment.mockClear();
+
+      dashboardApiWithUpdatedId.title$.next('New Title');
+      jest.advanceTimersByTime(200);
+
+      expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'existing-dashboard-attachment',
+          origin: 'saved-as-dashboard-id',
+        })
+      );
+    });
+
     it('debounces rapid changes with 150ms delay', () => {
       registerDashboardAppIntegration({
         agentBuilder,
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
       // Clear the initial addAttachment call from onConversationChange
@@ -539,7 +600,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
       agentBuilder.addAttachment.mockClear();
 
@@ -555,7 +617,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
       agentBuilder.addAttachment.mockClear();
 
@@ -571,7 +634,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
       agentBuilder.addAttachment.mockClear();
 
@@ -587,7 +651,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
       agentBuilder.addAttachment.mockClear();
 
@@ -603,7 +668,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
       agentBuilder.addAttachment.mockClear();
 
@@ -619,7 +685,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
       agentBuilder.addAttachment.mockClear();
 
@@ -635,7 +702,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
       agentBuilder.addAttachment.mockClear();
 
@@ -652,7 +720,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
       agentBuilder.addAttachment.mockClear();
 
@@ -668,7 +737,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
       agentBuilder.addAttachment.mockClear();
 
@@ -689,7 +759,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApiWithDifferentOrigin as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
 
       // Switch to conversation with existing dashboard attachment with different origin
       onConversationChange({
@@ -698,7 +769,14 @@ describe('registerDashboardAppIntegration', () => {
           {
             id: 'existing-dashboard-attachment',
             type: DASHBOARD_ATTACHMENT_TYPE,
-            versions: [{ version: 1, data: { title: 'Test' }, content_hash: 'hash', created_at: new Date().toISOString() }],
+            versions: [
+              {
+                version: 1,
+                data: { title: 'Test' },
+                content_hash: 'hash',
+                created_at: new Date().toISOString(),
+              },
+            ],
             current_version: 1,
             origin: 'attachment-dashboard-id',
           },
@@ -720,7 +798,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApiWithSameOrigin as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
 
       // Switch to conversation with existing dashboard attachment with same origin
       onConversationChange({
@@ -729,7 +808,14 @@ describe('registerDashboardAppIntegration', () => {
           {
             id: 'existing-dashboard-attachment',
             type: DASHBOARD_ATTACHMENT_TYPE,
-            versions: [{ version: 1, data: { title: 'Test' }, content_hash: 'hash', created_at: new Date().toISOString() }],
+            versions: [
+              {
+                version: 1,
+                data: { title: 'Test' },
+                content_hash: 'hash',
+                created_at: new Date().toISOString(),
+              },
+            ],
             current_version: 1,
             origin: 'same-dashboard-id',
           },
@@ -751,7 +837,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
       agentBuilder.addAttachment.mockClear();
 
@@ -767,7 +854,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
       agentBuilder.addAttachment.mockClear();
 
@@ -790,7 +878,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
       agentBuilder.addAttachment.mockClear();
 
@@ -809,7 +898,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
       const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
@@ -842,7 +932,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
       const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
@@ -866,7 +957,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
       const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
@@ -888,7 +980,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
       const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
@@ -908,7 +1001,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
       const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
@@ -922,13 +1016,41 @@ describe('registerDashboardAppIntegration', () => {
       expect(dashboardApi.setState).not.toHaveBeenCalled();
     });
 
+    it('does not update state when a created ref belongs to a different attachment', () => {
+      registerDashboardAppIntegration({
+        agentBuilder,
+        api: dashboardApi as unknown as DashboardApi,
+      });
+
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      onConversationChange({ id: undefined });
+
+      const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
+
+      chat$.next(
+        createMockRoundCompleteEvent(
+          [createMockVersionedAttachment(pendingAttachmentId)],
+          [
+            {
+              attachment_id: 'different-attachment-id',
+              operation: ATTACHMENT_REF_OPERATION.created,
+            },
+          ]
+        )
+      );
+
+      expect(dashboardApi.setState).not.toHaveBeenCalled();
+    });
+
     it('does not update state when attachment has no versions', () => {
       registerDashboardAppIntegration({
         agentBuilder,
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
       const pendingAttachmentId = getPendingAttachmentId(agentBuilder);
@@ -950,7 +1072,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApiWithDifferentId as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
 
       // Switch to conversation with existing dashboard attachment linked to different dashboard
       onConversationChange({
@@ -959,7 +1082,14 @@ describe('registerDashboardAppIntegration', () => {
           {
             id: 'existing-dashboard-attachment',
             type: DASHBOARD_ATTACHMENT_TYPE,
-            versions: [{ version: 1, data: { title: 'Test' }, content_hash: 'hash', created_at: new Date().toISOString() }],
+            versions: [
+              {
+                version: 1,
+                data: { title: 'Test' },
+                content_hash: 'hash',
+                created_at: new Date().toISOString(),
+              },
+            ],
             current_version: 1,
             origin: 'original-dashboard-id',
           },
@@ -989,7 +1119,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApiWithSameId as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
 
       // Switch to conversation with existing dashboard attachment linked to same dashboard
       onConversationChange({
@@ -998,7 +1129,14 @@ describe('registerDashboardAppIntegration', () => {
           {
             id: 'existing-dashboard-attachment',
             type: DASHBOARD_ATTACHMENT_TYPE,
-            versions: [{ version: 1, data: { title: 'Test' }, content_hash: 'hash', created_at: new Date().toISOString() }],
+            versions: [
+              {
+                version: 1,
+                data: { title: 'Test' },
+                content_hash: 'hash',
+                created_at: new Date().toISOString(),
+              },
+            ],
             current_version: 1,
             origin: 'same-dashboard-id',
           },
@@ -1026,7 +1164,8 @@ describe('registerDashboardAppIntegration', () => {
         api: dashboardApi as unknown as DashboardApi,
       });
 
-      const onConversationChange = agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
       onConversationChange({ id: undefined });
 
       const pendingAttachmentId = getPendingAttachmentId(agentBuilder);

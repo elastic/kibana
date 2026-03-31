@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { filter, Observable, tap, ignoreElements, type Subscription } from 'rxjs';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import { Observable, type Subscription } from 'rxjs';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  attachmentToDashboardState,
-} from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import { createManualChanges$ } from './manual_changes_tracker';
+import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
+import { createManualChangesSubscription } from './manual_changes_subscription';
 import { serializeDashboardAttachment } from './serialize_dashboard_attachment';
 
 /**
@@ -30,12 +27,14 @@ const createOriginSyncSubscription = ({
   attachmentId,
   attachmentOrigin,
   agentBuilder,
+  onOriginUpdated,
 }: {
   api: DashboardApi;
   conversationId: string;
   attachmentId: string;
   attachmentOrigin: string | undefined;
   agentBuilder: AgentBuilderPluginStart;
+  onOriginUpdated?: (origin: string) => void;
 }): Subscription => {
   let previousSavedObjectId = api.savedObjectId$.value;
   let currentOrigin = attachmentOrigin;
@@ -49,15 +48,20 @@ const createOriginSyncSubscription = ({
     //   2. The previous savedObjectId matches the attachment origin (we're on the same dashboard), OR
     //   3. The current savedObjectId matches the attachment origin
     // This prevents linking to unrelated dashboards when navigating
+
     const shouldUpdate =
-      currentSavedObjectId &&
-      currentSavedObjectId !== currentOrigin &&
-      (!currentOrigin ||
-        previousSavedObjectId === currentOrigin ||
-        currentSavedObjectId === currentOrigin);
+    currentSavedObjectId && (
+    !currentOrigin || (  // first save
+      currentSavedObjectId === currentOrigin  // save again
+    ) || (
+      previousSavedObjectId === currentOrigin // save as
+    ))
+
+    console.log('shouldUpdate', shouldUpdate, currentSavedObjectId, currentOrigin, previousSavedObjectId);
 
     if (shouldUpdate) {
       void agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, currentSavedObjectId);
+      onOriginUpdated?.(currentSavedObjectId);
       currentOrigin = currentSavedObjectId;
     }
     previousSavedObjectId = currentSavedObjectId;
@@ -111,6 +115,11 @@ export const registerDashboardAppIntegration = ({
       attachmentId: attachment.id,
       attachmentOrigin: attachment.origin,
       agentBuilder,
+      onOriginUpdated: (origin) => {
+        if (currentAttachment?.id === attachment.id) {
+          currentAttachment = { ...currentAttachment, origin };
+        }
+      },
     });
   };
 
@@ -154,66 +163,16 @@ export const registerDashboardAppIntegration = ({
     );
   };
 
-  /**
-   * Subscribes to chat events and applies LLM-made dashboard changes to the current dashboard.
-   * When the agent updates a dashboard attachment, this applies those changes via api.setState().
-   */
-  const agentLiveUpdatesSubscription = agentBuilder.events.chat$
-    .pipe(filter(isRoundCompleteEvent))
-    .subscribe((event) => {
-      const updatedVersionedAttachment = event.data.attachments?.find(
-        (attachment): attachment is VersionedAttachment<typeof DASHBOARD_ATTACHMENT_TYPE> =>
-          attachment.type === DASHBOARD_ATTACHMENT_TYPE &&
-          event.data.round.input.attachment_refs?.some(
-            (ref) =>
-              (ref.attachment_id === attachment.id &&
-                ref.operation === ATTACHMENT_REF_OPERATION.updated) ||
-              ref.operation === ATTACHMENT_REF_OPERATION.created
-          ) === true
-      );
+  const agentLiveUpdatesSubscription = createAgentLiveUpdatesSubscription({
+    agentBuilder,
+    api,
+  });
 
-      if (!updatedVersionedAttachment) {
-        return;
-      }
-
-      const currentSavedObjectId = api.savedObjectId$.getValue();
-      const attachmentLinkedSavedObjectId = updatedVersionedAttachment.origin;
-
-      // Skip if viewing a saved dashboard that differs from the attachment's linked dashboard
-      if (currentSavedObjectId && attachmentLinkedSavedObjectId !== currentSavedObjectId) {
-        return;
-      }
-
-      const latestVersion = getLatestVersion(updatedVersionedAttachment);
-      if (!latestVersion) {
-        return;
-      }
-
-      const attachment: DashboardAttachment = {
-        id: updatedVersionedAttachment.id,
-        type: DASHBOARD_ATTACHMENT_TYPE,
-        data: latestVersion.data as DashboardAttachment['data'],
-        origin: updatedVersionedAttachment.origin,
-      };
-      api.setState(attachmentToDashboardState(attachment));
-    });
-
-  /**
-   * Tracks manual changes to the dashboard and syncs them back to the attachment.
-   * When the user manually edits the dashboard (changes title, adds panels, etc.),
-   * this updates the attachment to reflect those changes.
-   */
-  const manualChangesSubscription = createManualChanges$({
+  const manualChangesSubscription = createManualChangesSubscription({
+    agentBuilder,
     api,
     getAttachment: () => currentAttachment,
-  })
-    .pipe(
-      tap((attachment) => {
-        agentBuilder.addAttachment(attachment);
-      }),
-      ignoreElements()
-    )
-    .subscribe();
+  });
 
   agentBuilder.setChatConfig({
     onConversationChange: ({ id: conversationId, attachments }) => {
