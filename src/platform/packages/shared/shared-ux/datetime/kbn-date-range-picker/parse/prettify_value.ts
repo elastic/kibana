@@ -63,6 +63,7 @@ const prettifyStartBound = (bound: string): string | null => {
   const match = bound.match(DATEMATH_OFFSET_RE);
   if (!match) return null;
 
+  // first two values omitted on purpose
   const [, , sign, count, unit] = match;
   return `${sign}${count}${unit}`;
 };
@@ -75,6 +76,7 @@ const prettifyEndBound = (bound: string): string | null => {
   const match = bound.match(DATEMATH_OFFSET_RE);
   if (!match) return null;
 
+  // first two values omitted on purpose
   const [, , sign, count, unit, rounding] = match;
   return `${sign}${count}${unit}${rounding ?? ''}`;
 };

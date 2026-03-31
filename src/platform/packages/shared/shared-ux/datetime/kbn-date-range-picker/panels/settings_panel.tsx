@@ -9,14 +9,7 @@
 
 import React, { useCallback } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiSwitch,
-  EuiButtonGroup,
-  EuiText,
-  EuiLink,
-  EuiBetaBadge,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiSwitch, EuiButtonGroup, EuiText, EuiLink, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { TimePrecision } from '../types';
@@ -116,7 +109,7 @@ export function SettingsPanel() {
         </PanelBodySection>
       </PanelBody>
       <PanelFooter>
-        <EuiBetaBadge label="Tech preview" color="hollow" iconType="flask" size="s" />
+        <EuiBadge aria-label="Tech preview" color="hollow" iconType="flask" />
         <EuiText size="xs" color="subdued" component="p">
           <FormattedMessage
             id="sharedUXPackages.dateRangePicker.settingsPanel.technicalPreviewNotice"
