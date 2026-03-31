@@ -47,6 +47,10 @@ export function registerGetWorkflowRoute(deps: RouteDependencies) {
           const spaceId = spaces.getSpaceId(request);
           const workflow = await api.getWorkflow(id, spaceId);
           if (!workflow) {
+            audit.logWorkflowAccessed(request, {
+              id,
+              error: new Error('Workflow not found'),
+            });
             return response.notFound({ body: { message: 'Workflow not found' } });
           }
           audit.logWorkflowAccessed(request, { id });

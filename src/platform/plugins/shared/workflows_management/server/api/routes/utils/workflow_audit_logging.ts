@@ -117,22 +117,6 @@ export class WorkflowManagementAuditLog {
     this.log(request, createEvent(action, 'creation', message, error));
   }
 
-  logBulkCreateRowFailed(
-    request: KibanaRequest,
-    params: { index: number; id: string; error: string }
-  ): void {
-    const { index, id, error: errorMessage } = params;
-    this.log(
-      request,
-      createEvent(
-        WorkflowManagementAuditActions.BULK_CREATE,
-        'creation',
-        `User failed to create workflow via bulk import [index=${index}] [id=${id}]`,
-        errorMessage
-      )
-    );
-  }
-
   /**
    * One `workflow_bulk_create` audit per created workflow and per failed bulk row (bulk POST /api/workflows).
    */

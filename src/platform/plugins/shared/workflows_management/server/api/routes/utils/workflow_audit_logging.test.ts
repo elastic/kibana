@@ -92,25 +92,6 @@ describe('WorkflowManagementAuditLog', () => {
       expect(l2.mock.calls[0][0].event.action).toBe(WorkflowManagementAuditActions.BULK_CREATE);
     });
 
-    it('logBulkCreateRowFailed', async () => {
-      const { audit, request, log } = createAuditHarness();
-      audit.logBulkCreateRowFailed(request, {
-        index: 2,
-        id: 'bad',
-        error: 'invalid yaml',
-      });
-      expect(log.mock.calls[0][0]).toEqual(
-        expect.objectContaining({
-          message: expect.stringContaining('[index=2]'),
-          error: { code: 'Unknown', message: 'invalid yaml' },
-          event: expect.objectContaining({
-            action: WorkflowManagementAuditActions.BULK_CREATE,
-            outcome: 'failure',
-          }),
-        })
-      );
-    });
-
     it('logBulkWorkflowCreateResults', async () => {
       const { audit, request, log } = createAuditHarness();
       audit.logBulkWorkflowCreateResults(request, {
