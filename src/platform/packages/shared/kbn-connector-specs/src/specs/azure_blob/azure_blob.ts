@@ -90,7 +90,7 @@ export const AzureBlob: ConnectorSpec = {
         'Connect to Azure Blob Storage to list containers and blobs, and retrieve blob content.',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

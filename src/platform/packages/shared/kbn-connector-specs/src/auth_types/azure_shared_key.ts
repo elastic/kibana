@@ -85,9 +85,7 @@ export function buildStringToSign(
     return (value ?? '').trim();
   };
 
-  const useXMsDate = Object.keys(requestHeaders).some((k) =>
-    k.toLowerCase().startsWith('x-ms-date')
-  );
+  const useXMsDate = Object.keys(requestHeaders).some((k) => k.toLowerCase() === 'x-ms-date');
   const dateValue = useXMsDate ? '' : get('date');
 
   const lines = [
