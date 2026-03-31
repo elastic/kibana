@@ -52,12 +52,14 @@ export async function runMaintainer({
   namespace,
   crudClient,
   integrations = INTEGRATION_CONFIGS,
+  abortController,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   namespace: string;
   crudClient: EntityUpdateClient;
   integrations?: AccessesIntegrationConfig[];
+  abortController?: AbortController;
 }) {
   let totalBuckets = 0;
   let totalAccessRecords = 0;
@@ -65,12 +67,20 @@ export async function runMaintainer({
   const allRecords: ProcessedEntityRecord[] = [];
 
   for (const integration of integrations) {
+    if (abortController?.signal.aborted) {
+      logger.info('Maintainer run aborted, skipping remaining integrations');
+      break;
+    }
     logger.info(`[${integration.id}] Processing integration: ${integration.name}`);
 
     let afterKey: CompositeAfterKey | undefined;
     let iterations = 0;
 
     do {
+      if (abortController?.signal.aborted) {
+        logger.info(`[${integration.id}] Maintainer run aborted during pagination`);
+        break;
+      }
       iterations++;
       if (iterations > MAX_ITERATIONS) {
         logger.warn(
@@ -89,6 +99,7 @@ export async function runMaintainer({
         aggResult = await esClient.search({
           index: integration.getIndexPattern(namespace),
           ...integration.buildCompositeAggQuery(afterKey),
+          ...(abortController && { signal: abortController.signal }),
         });
       } catch (err) {
         if (isIndexNotFound(err)) {
@@ -123,7 +134,11 @@ export async function runMaintainer({
 
       let esqlResult;
       try {
-        esqlResult = await esClient.esql.query({ query: esqlQuery, filter: esqlFilter });
+        esqlResult = await esClient.esql.query({
+          query: esqlQuery,
+          filter: esqlFilter,
+          ...(abortController && { signal: abortController.signal }),
+        });
       } catch (err) {
         // Break instead of rethrowing so a failure on one integration's ES|QL
         // query only skips the rest of that integration's pages, allowing the
@@ -159,7 +174,11 @@ export async function runMaintainer({
     } while (afterKey);
   }
 
-  totalUpserted = await updateEntityRelationships(crudClient, logger, allRecords);
+  if (!abortController?.signal.aborted) {
+    totalUpserted = await updateEntityRelationships(crudClient, logger, allRecords);
+  } else {
+    logger.info('Maintainer run aborted, skipping entity update');
+  }
 
   return {
     totalBuckets,

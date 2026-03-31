@@ -487,4 +487,141 @@ describe('runMaintainer', () => {
       expect(mockIntegration.buildBucketUserFilter).toHaveBeenCalledWith(buckets);
     });
   });
+
+  describe('abort handling', () => {
+    it('stops before processing any integration when signal is already aborted', async () => {
+      const abortCtrl = new AbortController();
+      abortCtrl.abort();
+
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        integrations: [mockIntegration],
+        abortController: abortCtrl,
+      });
+
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+      expect(result.totalBuckets).toBe(0);
+    });
+
+    it('stops pagination when aborted between pages', async () => {
+      const abortCtrl = new AbortController();
+      const fullPageBuckets = Array.from({ length: COMPOSITE_PAGE_SIZE }, (_, i) =>
+        createBucket(`user-${i}`)
+      );
+      const afterKey: CompositeAfterKey = { 'user.id': 'user-last' };
+
+      esClient.search.mockResolvedValueOnce(createAggResponse(fullPageBuckets, afterKey));
+      esClient.esql.query.mockResolvedValueOnce(createEsqlResponse() as never);
+
+      mockPostprocessEsqlResults.mockImplementationOnce(() => {
+        abortCtrl.abort();
+        return [];
+      });
+
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        integrations: [mockIntegration],
+        abortController: abortCtrl,
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(result.totalBuckets).toBe(COMPOSITE_PAGE_SIZE);
+    });
+
+    it('skips remaining integrations when aborted after the first one', async () => {
+      const abortCtrl = new AbortController();
+      const integration1 = createMockIntegration({ id: 'int_1', name: 'First' });
+      const integration2 = createMockIntegration({ id: 'int_2', name: 'Second' });
+
+      esClient.search.mockResolvedValueOnce(createAggResponse([createBucket('user-1')]));
+      esClient.esql.query.mockResolvedValueOnce(createEsqlResponse() as never);
+
+      mockPostprocessEsqlResults.mockImplementationOnce(() => {
+        abortCtrl.abort();
+        return [];
+      });
+
+      await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        integrations: [integration1, integration2],
+        abortController: abortCtrl,
+      });
+
+      expect(integration1.buildCompositeAggQuery).toHaveBeenCalled();
+      expect(integration2.buildCompositeAggQuery).not.toHaveBeenCalled();
+    });
+
+    it('skips bulk update when aborted after collecting records', async () => {
+      const abortCtrl = new AbortController();
+      const records: ProcessedEntityRecord[] = [
+        { entityId: 'user-1', accesses_frequently: ['host-a'], accesses_infrequently: [] },
+      ];
+
+      esClient.search.mockResolvedValueOnce(createAggResponse([createBucket('user-1')]));
+      esClient.esql.query.mockResolvedValueOnce(createEsqlResponse() as never);
+      mockPostprocessEsqlResults.mockImplementationOnce(() => {
+        abortCtrl.abort();
+        return records;
+      });
+
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        integrations: [mockIntegration],
+        abortController: abortCtrl,
+      });
+
+      expect(mockUpdateEntityRelationships).not.toHaveBeenCalled();
+      expect(result.totalUpserted).toBe(0);
+    });
+
+    it('passes abort signal to esClient.search', async () => {
+      const abortCtrl = new AbortController();
+      esClient.search.mockResolvedValueOnce(createAggResponse([]));
+
+      await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        integrations: [mockIntegration],
+        abortController: abortCtrl,
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ signal: abortCtrl.signal })
+      );
+    });
+
+    it('passes abort signal to esClient.esql.query', async () => {
+      const abortCtrl = new AbortController();
+      esClient.search.mockResolvedValueOnce(createAggResponse([createBucket('user-1')]));
+      esClient.esql.query.mockResolvedValueOnce(createEsqlResponse() as never);
+
+      await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        integrations: [mockIntegration],
+        abortController: abortCtrl,
+      });
+
+      expect(esClient.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({ signal: abortCtrl.signal })
+      );
+    });
+  });
 });
