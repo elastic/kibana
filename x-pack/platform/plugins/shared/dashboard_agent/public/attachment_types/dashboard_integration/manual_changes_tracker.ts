@@ -14,7 +14,7 @@ import { childrenUnsavedChanges$ } from '@kbn/presentation-publishing';
 
 export interface ManualChangesTrackerParams {
   api: DashboardApi;
-  getAttachment: () => DashboardAttachment;
+  getAttachment: () => DashboardAttachment | undefined;
   addAttachment: (attachment: AttachmentInput) => void;
 }
 
@@ -53,6 +53,10 @@ export const createManualChanges$ = ({
     debounceTime(150),
     map((): AttachmentInput | undefined => {
       const currentAttachment = getAttachment();
+      if (!currentAttachment) {
+        return undefined;
+      }
+
       const currentSavedObjectId = api.savedObjectId$.getValue();
 
       // Only sync if: no saved dashboard OR saved dashboard matches attachment's origin
@@ -69,6 +73,7 @@ export const createManualChanges$ = ({
         id: currentAttachment.id,
         type: DASHBOARD_ATTACHMENT_TYPE,
         data: dashboardStateToAttachment(currentDashboardState),
+        origin: currentAttachment.origin,
       };
     }),
     filter((attachment): attachment is AttachmentInput => attachment !== undefined)
