@@ -19,7 +19,9 @@ export const ScheduledTriggerSchema = z.object({
   type: z.literal('scheduled'),
   with: z.union([
     z.object({
-      every: z.string().regex(SCHEDULED_INTERVAL_PATTERN, SCHEDULED_INTERVAL_ERROR),
+      every: z
+        .string()
+        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
     }),
     z.object({
       rrule: z.object({
