@@ -17,7 +17,11 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { EsqlResponseError, extractEsqlResponseErrorCause, formatErrorCause } from './esql_response_error';
+import {
+  EsqlResponseError,
+  extractEsqlResponseErrorCause,
+  formatErrorCause,
+} from './esql_response_error';
 import { executeEsqlQuery, fetchEsqlResponseOrThrow } from './execute_esql_query';
 import { getMetricsExecutionContext } from './execution_context';
 
@@ -273,8 +277,8 @@ describe('fetchEsqlResponseOrThrow', () => {
       params: { query: '' },
     } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
 
-    await expect(fetchEsqlResponseOrThrow({} as Parameters<typeof getESQLResults>[0])).rejects.toThrow(
-      EsqlResponseError
-    );
+    await expect(
+      fetchEsqlResponseOrThrow({} as Parameters<typeof getESQLResults>[0])
+    ).rejects.toThrow(EsqlResponseError);
   });
 });
