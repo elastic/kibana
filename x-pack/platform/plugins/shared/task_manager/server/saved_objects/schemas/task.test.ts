@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateDuration } from './task';
+import { validateCost, validateDuration } from './task';
 
 test('allows valid duration', () => {
   expect(validateDuration('1s')).toBeUndefined();
@@ -21,4 +21,12 @@ test('returns error message for invalid duration', () => {
   expect(validateDuration('foo')).toBe('string is not a valid duration: foo');
   expect(validateDuration('1 minute')).toBe('string is not a valid duration: 1 minute');
   expect(validateDuration('1hr')).toBe('string is not a valid duration: 1hr');
+});
+
+test('allows valid cost', () => {
+  expect(validateCost('tiny')).toBeUndefined();
+  expect(validateCost('normal')).toBeUndefined();
+  expect(validateCost('large')).toBeUndefined();
+  expect(validateCost('extralarge')).toBeUndefined();
+  expect(validateCost('waaaaytoobig')).toBe('Invalid task cost: waaaaytoobig');
 });
