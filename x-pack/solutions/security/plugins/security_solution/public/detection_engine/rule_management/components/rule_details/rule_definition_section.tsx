@@ -317,6 +317,8 @@ const getRuleTypeDescription = (ruleType: Type) => {
       return descriptionStepI18n.THREAT_MATCH_TYPE_DESCRIPTION;
     case 'new_terms':
       return descriptionStepI18n.NEW_TERMS_TYPE_DESCRIPTION;
+    case 'vulnerability_check':
+      return 'Vulnerability Check';
     default:
       return assertUnreachable(ruleType);
   }

@@ -28,7 +28,9 @@ export const normalizeRuleResponse = (rule: RuleResponse): RuleResponse => {
   const commonFields = normalizeCommonResponseFields(rule);
 
   // Needed to correctly narrow typescript types, we add in the correctly typed alert suppression field in the type-specific normalization
-  const { alert_suppression: unUsedField, ...existingRule } = rule;
+  const { alert_suppression: unUsedField, ...existingRule } = rule as RuleResponse & {
+    alert_suppression?: unknown;
+  };
 
   return {
     ...existingRule,
@@ -175,6 +177,17 @@ const normalizeTypeSpecificFields = (rule: RuleResponse): TypeSpecificResponse =
         language: rule.language ?? 'kuery',
         data_view_id: rule.data_view_id,
         alert_suppression: rule.alert_suppression,
+      };
+    }
+    case 'vulnerability_check': {
+      return {
+        type: rule.type,
+        agent_policy_ids: rule.agent_policy_ids,
+        osquery_pack_name: rule.osquery_pack_name,
+        cve_index_pattern: rule.cve_index_pattern,
+        correlation_timespan: rule.correlation_timespan,
+        group_by: rule.group_by,
+        min_cvss_score: rule.min_cvss_score,
       };
     }
     default: {

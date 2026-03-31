@@ -413,6 +413,8 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
     case 'saved_query':
     case 'eql':
       return queryRuleParams;
+    case 'vulnerability_check':
+      return [];
   }
   assertUnreachable(ruleType);
 };

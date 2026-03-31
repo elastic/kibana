@@ -77,6 +77,11 @@ export const createNavigationTree = (
       icon: 'listCheck',
       link: securityLink(SecurityPageName.assetInventory),
     },
+    {
+      id: SecurityPageName.vulnerabilityPosture,
+      icon: 'bug',
+      link: securityLink(SecurityPageName.vulnerabilityPosture),
+    },
     defaultNavigationTree.assets(services),
     defaultNavigationTree.ml(),
   ],

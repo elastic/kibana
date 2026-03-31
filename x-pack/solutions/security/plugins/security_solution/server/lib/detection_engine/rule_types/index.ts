@@ -12,3 +12,5 @@ export { createMlAlertType } from './ml/create_ml_alert_type';
 export { createQueryAlertType } from './query/create_query_alert_type';
 export { createThresholdAlertType } from './threshold/create_threshold_alert_type';
 export { createNewTermsAlertType } from './new_terms/create_new_terms_alert_type';
+export { createVulnerabilityCheckAlertType } from './vulnerability_check/create_vulnerability_check_alert_type';
+export { createCveWatchAlertType } from './vulnerability_check/create_cve_watch_alert_type';

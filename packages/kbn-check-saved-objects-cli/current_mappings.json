@@ -4898,6 +4898,29 @@
       }
     }
   },
+  "vulnerability-posture-view": {
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "description": {
+        "type": "text"
+      },
+      "filters": {
+        "enabled": false,
+        "type": "object"
+      },
+      "isDefault": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "watchlist-config": {
     "dynamic": false,
     "properties": {

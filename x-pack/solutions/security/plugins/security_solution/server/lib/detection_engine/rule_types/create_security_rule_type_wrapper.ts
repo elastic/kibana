@@ -23,6 +23,7 @@ import {
   getRuleRangeTuples,
   isMachineLearningParams,
   isEsqlParams,
+  isVulnerabilityCheckParams,
   getDisabledActionsWarningText,
 } from './utils/utils';
 import { runExecutionValidation } from './validation';
@@ -239,7 +240,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
            */
           if (isEsqlParams(params)) {
             inputIndex = getIndexListFromEsqlQuery(params.query);
-          } else if (!isMachineLearningParams(params)) {
+          } else if (!isMachineLearningParams(params) && !isVulnerabilityCheckParams(params)) {
             try {
               const { index, runtimeMappings: dataViewRuntimeMappings } = await getInputIndex({
                 index: params.index,

@@ -32,4 +32,5 @@ export const ALERTS_QUERY_NAMES = {
   VULNERABLE_USERS: `${APP_UI_ID} fetchAlerts vulnerableUsers`,
   ATTACK_ENTITIES_COUNTS: `${APP_UI_ID} fetchAlerts attackEntitiesCounts`,
   ATTACK_ENTITIES_LISTS: `${APP_UI_ID} fetchAlerts attackEntitiesLists`,
+  VULNERABILITY_POSTURE: `${APP_UI_ID} fetchAlerts vulnerabilityPosture`,
 } as const;

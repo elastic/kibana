@@ -103,6 +103,11 @@ export const convertRuleToDiffable = (ruleResponse: RuleResponse): DiffableRule 
         ...commonFields,
         ...extractDiffableEsqlFieldsFromRuleObject(rule),
       };
+    case 'vulnerability_check':
+      return {
+        ...commonFields,
+        type: rule.type,
+      };
     default:
       return assertUnreachable(rule, 'Unhandled rule type');
   }

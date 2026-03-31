@@ -29,6 +29,7 @@ import { findingsLinks } from '../../cloud_security_posture/links';
 import type { StartPlugins } from '../../types';
 import { dashboardsLinks } from '../../dashboards/links';
 import { entityAnalyticsLinks } from '../../entity_analytics/links';
+import { vulnerabilityPostureLinks } from '../../vulnerability_posture/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
@@ -43,6 +44,7 @@ export const appLinks: AppLinkItems = Object.freeze([
   exploreLinks,
   entityAnalyticsLinks,
   assetInventoryLinks,
+  vulnerabilityPostureLinks,
   rulesLinks,
   siemMigrationsLinks,
   onboardingLinks,
@@ -79,6 +81,7 @@ export const getFilteredLinks = async (
     exploreLinks,
     entityAnalyticsLinks,
     assetInventoryLinks,
+    vulnerabilityPostureLinks,
     rulesLinks,
     siemMigrationsLinks,
     onboardingLinks,

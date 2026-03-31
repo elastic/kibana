@@ -28,6 +28,7 @@ import { UserAlertsTable } from '../components/detection_response/user_alerts_ta
 import * as i18n from './translations';
 import { CasesTable } from '../components/detection_response/cases_table';
 import { CasesByStatus } from '../components/detection_response/cases_by_status';
+import { VulnerabilityPostureOverviewCard } from '../components/detection_response/vulnerability_posture_overview_card';
 import { NoPrivileges } from '../../common/components/no_privileges';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
@@ -138,6 +139,12 @@ const DetectionResponseComponent = () => {
                         <UserAlertsTable signalIndexName={signalIndexName} />
                       </EuiFlexItem>
                     </EuiFlexGroup>
+                  </EuiFlexItem>
+                )}
+
+                {canReadAlerts && (
+                  <EuiFlexItem>
+                    <VulnerabilityPostureOverviewCard />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

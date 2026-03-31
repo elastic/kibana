@@ -164,6 +164,21 @@ export const IOC_RIGHT_PANEL_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Indicator of compromise details' }
 );
 
+export const VULNERABILITY_DETAIL_RIGHT_PANEL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityDetailRight',
+  { defaultMessage: 'Vulnerability detail' }
+);
+
+export const VULNERABILITY_DETAIL_LEFT_PANEL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityDetailLeft',
+  { defaultMessage: 'Vulnerability investigation' }
+);
+
+export const VULNERABILITY_DETAIL_PREVIEW_PANEL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityDetailPreview',
+  { defaultMessage: 'Vulnerability preview' }
+);
+
 export const WATCHLISTS_PANEL_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.panelAriaLabel.watchlists',
   { defaultMessage: 'Watchlists' }

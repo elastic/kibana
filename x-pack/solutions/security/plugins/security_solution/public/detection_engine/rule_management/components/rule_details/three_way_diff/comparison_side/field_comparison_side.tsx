@@ -26,7 +26,7 @@ import * as i18n from './translations';
 export function FieldComparisonSide(): JSX.Element {
   const { fieldName, fieldDiff, finalDiffableRule, hasResolvedValueDifferentFromSuggested } =
     useFieldUpgradeContext();
-  const resolvedValue = finalDiffableRule[fieldName];
+  const resolvedValue = (finalDiffableRule as Record<string, unknown>)[fieldName];
 
   const options = getComparisonOptionsForDiffOutcome(
     fieldDiff.diff_outcome,

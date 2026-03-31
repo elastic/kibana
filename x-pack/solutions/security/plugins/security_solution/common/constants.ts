@@ -128,6 +128,7 @@ export const HOSTS_PATH = '/hosts' as const;
 export const ATTACK_DISCOVERY_PATH = '/attack_discovery' as const;
 export const ASSET_INVENTORY_PATH = '/asset_inventory' as const;
 export const SIEM_READINESS_PATH = '/siem_readiness' as const;
+export const VULNERABILITY_POSTURE_PATH = '/vulnerability_posture' as const;
 export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;

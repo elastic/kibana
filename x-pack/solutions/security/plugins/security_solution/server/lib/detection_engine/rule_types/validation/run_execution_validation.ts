@@ -13,6 +13,7 @@ import type { RuleParams } from '../../rule_schema';
 import {
   hasTimestampFields,
   isMachineLearningParams,
+  isVulnerabilityCheckParams,
   isThreatParams,
   checkForFrozenIndices,
 } from '../utils/utils';
@@ -60,7 +61,7 @@ export const runExecutionValidation = async (
   let skipExecution = false;
   let frozenIndicesQueriedCount = 0;
 
-  if (isMachineLearningParams(params)) {
+  if (isMachineLearningParams(params) || isVulnerabilityCheckParams(params)) {
     return { skipExecution: false, warnings: [], frozenIndicesQueriedCount: 0 };
   }
 

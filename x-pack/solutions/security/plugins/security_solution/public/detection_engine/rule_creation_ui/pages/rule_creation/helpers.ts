@@ -186,6 +186,22 @@ type EsqlRuleFields<T> = Omit<
   | 'dataViewId'
 >;
 
+type VulnerabilityCheckRuleFields<T> = Omit<
+  T,
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threshold'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
+  | 'eqlOptions'
+  | 'index'
+  | 'newTermsFields'
+  | 'historyWindowSize'
+  | 'dataViewId'
+  | 'queryBar'
+>;
+
 const isMlFields = <T>(
   fields:
     | QueryRuleFields<T>
@@ -195,6 +211,7 @@ const isMlFields = <T>(
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
     | EsqlRuleFields<T>
+    | VulnerabilityCheckRuleFields<T>
 ): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
 
 const isThresholdFields = <T>(
@@ -206,6 +223,7 @@ const isThresholdFields = <T>(
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
     | EsqlRuleFields<T>
+    | VulnerabilityCheckRuleFields<T>
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
 const isThreatMatchFields = <T>(
@@ -217,6 +235,7 @@ const isThreatMatchFields = <T>(
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
     | EsqlRuleFields<T>
+    | VulnerabilityCheckRuleFields<T>
 ): fields is ThreatMatchRuleFields<T> => has('threatIndex', fields);
 
 const isNewTermsFields = <T>(
@@ -228,6 +247,7 @@ const isNewTermsFields = <T>(
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
     | EsqlRuleFields<T>
+    | VulnerabilityCheckRuleFields<T>
 ): fields is NewTermsRuleFields<T> => has('newTermsFields', fields);
 
 const isEqlFields = <T>(
@@ -239,6 +259,7 @@ const isEqlFields = <T>(
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
     | EsqlRuleFields<T>
+    | VulnerabilityCheckRuleFields<T>
 ): fields is EqlQueryRuleFields<T> => has('eqlOptions', fields);
 
 const isEsqlFields = <T>(
@@ -250,6 +271,7 @@ const isEsqlFields = <T>(
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
     | EsqlRuleFields<T>
+    | VulnerabilityCheckRuleFields<T>
 ): fields is EsqlRuleFields<T> => get('queryBar.query.language', fields) === 'esql';
 
 export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
@@ -262,7 +284,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   | ThresholdRuleFields<T>
   | ThreatMatchRuleFields<T>
   | EsqlRuleFields<T>
-  | NewTermsRuleFields<T> => {
+  | NewTermsRuleFields<T>
+  | VulnerabilityCheckRuleFields<T> => {
   switch (type) {
     case 'machine_learning':
       return omit(fields, [
@@ -343,6 +366,21 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'eqlOptions',
         'index',
         'dataViewId',
+      ]);
+    case 'vulnerability_check':
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threshold',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'newTermsFields',
+        'historyWindowSize',
+        'eqlOptions',
+        'index',
+        'dataViewId',
+        'queryBar',
       ]);
   }
   assertUnreachable(type);
@@ -442,105 +480,111 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 
   const requiredFields = removeEmptyRequiredFields(defineStepData.requiredFields ?? []);
 
-  const typeFields = isMlFields(ruleFields)
-    ? {
-        anomaly_threshold: ruleFields.anomalyThreshold,
-        machine_learning_job_id: ruleFields.machineLearningJobId,
-        ...alertSuppressionFields,
-      }
-    : isThresholdFields(ruleFields)
-    ? {
-        index: ruleFields.index,
-        filters: ruleFields.queryBar?.filters,
-        language: ruleFields.queryBar?.query?.language,
-        query: ruleFields.queryBar?.query?.query as string,
-        saved_id: ruleFields.queryBar?.saved_id ?? undefined,
-        required_fields: requiredFields,
-        ...(ruleType === 'threshold' && {
-          threshold: {
-            field: ruleFields.threshold?.field ?? [],
-            value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
-            cardinality:
-              !isEmpty(ruleFields.threshold.cardinality?.field) &&
-              ruleFields.threshold.cardinality?.value != null
-                ? [
-                    {
-                      field: ruleFields.threshold.cardinality.field[0],
-                      value: parseInt(ruleFields.threshold.cardinality.value, 10),
-                    },
-                  ]
-                : [],
-          },
-          ...(ruleFields[THRESHOLD_ALERT_SUPPRESSION_ENABLED] && {
-            alert_suppression: { duration: ruleFields[ALERT_SUPPRESSION_DURATION_FIELD_NAME] },
+  const typeFields =
+    ruleType === 'vulnerability_check'
+      ? {
+          required_fields: requiredFields,
+        }
+      : isMlFields(ruleFields)
+      ? {
+          anomaly_threshold: ruleFields.anomalyThreshold,
+          machine_learning_job_id: ruleFields.machineLearningJobId,
+          ...alertSuppressionFields,
+        }
+      : isThresholdFields(ruleFields)
+      ? {
+          index: ruleFields.index,
+          filters: ruleFields.queryBar?.filters,
+          language: ruleFields.queryBar?.query?.language,
+          query: ruleFields.queryBar?.query?.query as string,
+          saved_id: ruleFields.queryBar?.saved_id ?? undefined,
+          required_fields: requiredFields,
+          ...(ruleType === 'threshold' && {
+            threshold: {
+              field: ruleFields.threshold?.field ?? [],
+              value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
+              cardinality:
+                !isEmpty(ruleFields.threshold.cardinality?.field) &&
+                ruleFields.threshold.cardinality?.value != null
+                  ? [
+                      {
+                        field: ruleFields.threshold.cardinality.field[0],
+                        value: parseInt(ruleFields.threshold.cardinality.value, 10),
+                      },
+                    ]
+                  : [],
+            },
+            ...(ruleFields[THRESHOLD_ALERT_SUPPRESSION_ENABLED] && {
+              alert_suppression: { duration: ruleFields[ALERT_SUPPRESSION_DURATION_FIELD_NAME] },
+            }),
           }),
-        }),
-      }
-    : isThreatMatchFields(ruleFields)
-    ? {
-        index: ruleFields.index,
-        filters: ruleFields.queryBar?.filters,
-        language: ruleFields.queryBar?.query?.language,
-        query: ruleFields.queryBar?.query?.query as string,
-        saved_id: ruleFields.queryBar?.saved_id ?? undefined,
-        required_fields: requiredFields,
-        threat_index: ruleFields.threatIndex,
-        threat_query: ruleFields.threatQueryBar?.query?.query as string,
-        threat_filters: ruleFields.threatQueryBar?.filters,
-        threat_mapping: ruleFields.threatMapping,
-        threat_language: ruleFields.threatQueryBar?.query?.language,
-        ...alertSuppressionFields,
-      }
-    : isEqlFields(ruleFields)
-    ? {
-        index: ruleFields.index,
-        filters: ruleFields.queryBar?.filters,
-        language: ruleFields.queryBar?.query?.language,
-        query: ruleFields.queryBar?.query?.query as string,
-        saved_id: ruleFields.queryBar?.saved_id ?? undefined,
-        required_fields: requiredFields,
-        timestamp_field: ruleFields.eqlOptions?.timestampField,
-        event_category_override: ruleFields.eqlOptions?.eventCategoryField,
-        tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
-        ...alertSuppressionFields,
-      }
-    : isNewTermsFields(ruleFields)
-    ? {
-        index: ruleFields.index,
-        filters: ruleFields.queryBar?.filters,
-        language: ruleFields.queryBar?.query?.language,
-        query: ruleFields.queryBar?.query?.query as string,
-        required_fields: requiredFields,
-        new_terms_fields: ruleFields.newTermsFields,
-        history_window_start: convertDurationToDateMath(ruleFields.historyWindowSize),
-        ...alertSuppressionFields,
-      }
-    : isEsqlFields(ruleFields) && !('index' in ruleFields)
-    ? {
-        language: ruleFields.queryBar?.query?.language,
-        query: ruleFields.queryBar?.query?.query as string,
-        required_fields: requiredFields,
-        ...alertSuppressionFields,
-      }
-    : {
-        ...alertSuppressionFields,
-        index: ruleFields.index,
-        filters: ruleFields.queryBar?.filters,
-        language: ruleFields.queryBar?.query?.language,
-        query: ruleFields.queryBar?.query?.query as string,
-        saved_id: undefined,
-        required_fields: requiredFields,
-        type: 'query' as const,
-        // rule only be updated as saved_query type if it has saved_id and shouldLoadQueryDynamically checkbox checked
-        ...(['query', 'saved_query'].includes(ruleType) &&
-          ruleFields.queryBar?.saved_id &&
-          ruleFields.shouldLoadQueryDynamically && {
-            type: 'saved_query' as const,
-            query: undefined,
-            filters: undefined,
-            saved_id: ruleFields.queryBar.saved_id,
-          }),
-      };
+        }
+      : isThreatMatchFields(ruleFields)
+      ? {
+          index: ruleFields.index,
+          filters: ruleFields.queryBar?.filters,
+          language: ruleFields.queryBar?.query?.language,
+          query: ruleFields.queryBar?.query?.query as string,
+          saved_id: ruleFields.queryBar?.saved_id ?? undefined,
+          required_fields: requiredFields,
+          threat_index: ruleFields.threatIndex,
+          threat_query: ruleFields.threatQueryBar?.query?.query as string,
+          threat_filters: ruleFields.threatQueryBar?.filters,
+          threat_mapping: ruleFields.threatMapping,
+          threat_language: ruleFields.threatQueryBar?.query?.language,
+          ...alertSuppressionFields,
+        }
+      : isEqlFields(ruleFields)
+      ? {
+          index: ruleFields.index,
+          filters: ruleFields.queryBar?.filters,
+          language: ruleFields.queryBar?.query?.language,
+          query: ruleFields.queryBar?.query?.query as string,
+          saved_id: ruleFields.queryBar?.saved_id ?? undefined,
+          required_fields: requiredFields,
+          timestamp_field: ruleFields.eqlOptions?.timestampField,
+          event_category_override: ruleFields.eqlOptions?.eventCategoryField,
+          tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
+          ...alertSuppressionFields,
+        }
+      : isNewTermsFields(ruleFields)
+      ? {
+          index: ruleFields.index,
+          filters: ruleFields.queryBar?.filters,
+          language: ruleFields.queryBar?.query?.language,
+          query: ruleFields.queryBar?.query?.query as string,
+          required_fields: requiredFields,
+          new_terms_fields: ruleFields.newTermsFields,
+          history_window_start: convertDurationToDateMath(ruleFields.historyWindowSize),
+          ...alertSuppressionFields,
+        }
+      : isEsqlFields(ruleFields) && !('index' in ruleFields)
+      ? {
+          language: ruleFields.queryBar?.query?.language,
+          query: ruleFields.queryBar?.query?.query as string,
+          required_fields: requiredFields,
+          ...alertSuppressionFields,
+        }
+      : 'queryBar' in ruleFields
+      ? {
+          ...alertSuppressionFields,
+          index: ruleFields.index,
+          filters: ruleFields.queryBar?.filters,
+          language: ruleFields.queryBar?.query?.language,
+          query: ruleFields.queryBar?.query?.query as string,
+          saved_id: undefined,
+          required_fields: requiredFields,
+          type: 'query' as const,
+          ...(['query', 'saved_query'].includes(ruleType) &&
+            ruleFields.queryBar?.saved_id &&
+            ruleFields.shouldLoadQueryDynamically && {
+              type: 'saved_query' as const,
+              query: undefined,
+              filters: undefined,
+              saved_id: ruleFields.queryBar.saved_id,
+            }),
+        }
+      : { required_fields: requiredFields };
 
   return {
     ...baseFields,

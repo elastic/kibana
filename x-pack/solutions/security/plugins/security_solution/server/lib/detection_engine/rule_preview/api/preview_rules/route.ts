@@ -384,6 +384,8 @@ export const previewRulesRoute = (
               const newTermsAlertType = createNewTermsAlertType();
               await runExecutors(newTermsAlertType, previewRuleParams);
               break;
+            case 'vulnerability_check':
+              throw Error('Rule preview is not supported for vulnerability_check rules');
             default:
               assertUnreachable(previewRuleParams);
           }

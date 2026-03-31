@@ -13,6 +13,7 @@ import { EntityAnalyticsDashboardsPage } from './entity_analytics_dashboards';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management';
 import { CspmIntegrationPage } from './cspm_integration_page';
 import { TimelinePage } from './timeline';
+import { VulnerabilityPosturePage } from './vulnerability_posture';
 import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 
 export interface SecurityPageObjects extends PageObjects {
@@ -22,6 +23,7 @@ export interface SecurityPageObjects extends PageObjects {
   entityAnalyticsManagementPage: EntityAnalyticsManagementPage;
   cspmIntegrationPage: CspmIntegrationPage;
   timelinePage: TimelinePage;
+  vulnerabilityPosturePage: VulnerabilityPosturePage;
   detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
 }
 
@@ -38,6 +40,7 @@ export function extendPageObjects(
     entityAnalyticsManagementPage: createLazyPageObject(EntityAnalyticsManagementPage, page),
     cspmIntegrationPage: createLazyPageObject(CspmIntegrationPage, page),
     timelinePage: createLazyPageObject(TimelinePage, page),
+    vulnerabilityPosturePage: createLazyPageObject(VulnerabilityPosturePage, page),
     detectionsAttackDiscoveryPage: createLazyPageObject(
       DetectionsAttackDiscoveryPage,
       page,

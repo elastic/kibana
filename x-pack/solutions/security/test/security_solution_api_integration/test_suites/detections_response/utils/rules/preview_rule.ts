@@ -38,11 +38,11 @@ export const previewRule = async ({
   logs: RulePreviewLogs[];
   isAborted: boolean;
 }> => {
-  const previewRequest: RulePreviewRequestBody = {
+  const previewRequest = {
     ...rule,
     invocationCount,
     timeframeEnd: timeframeEnd.toISOString(),
-  };
+  } as RulePreviewRequestBody;
   const response = await supertest
     .post(DETECTION_ENGINE_RULES_PREVIEW)
     .query(enableLoggedRequests ? { enable_logged_requests: true } : {})

@@ -131,6 +131,17 @@ export const typeSpecificCamelToSnake = (
           : undefined,
       };
     }
+    case 'vulnerability_check': {
+      return {
+        type: params.type,
+        agent_policy_ids: params.agentPolicyIds,
+        osquery_pack_name: params.osqueryPackName,
+        cve_index_pattern: params.cveIndexPattern,
+        correlation_timespan: params.correlationTimespan,
+        group_by: params.groupBy,
+        min_cvss_score: params.minCvssScore,
+      } as unknown as RequiredOptional<TypeSpecificResponse>;
+    }
     default: {
       return assertUnreachable(params);
     }

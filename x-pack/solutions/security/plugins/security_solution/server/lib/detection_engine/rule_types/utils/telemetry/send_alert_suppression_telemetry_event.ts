@@ -45,6 +45,11 @@ export const sendAlertSuppressionTelemetryEvent = ({
   ruleParams,
   ruleAttributes,
 }: SendAlertSuppressionEventArgs): void => {
+  // vulnerability_check rules do not support alert suppression
+  if (ruleParams.type === 'vulnerability_check') {
+    return;
+  }
+
   // do not send any telemetry event if suppression is not configured
   if (ruleParams.alertSuppression == null) {
     return;

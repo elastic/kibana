@@ -93,6 +93,7 @@ import type { Explore } from './explore';
 import type { EntityAnalytics } from './entity_analytics';
 import type { SiemMigrations } from './siem_migrations';
 import type { Configurations } from './configurations';
+import type { VulnerabilityPosture } from './vulnerability_posture';
 
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
@@ -271,6 +272,7 @@ export interface SubPlugins {
   siemMigrations: SiemMigrations;
   siemReadiness: SiemReadiness;
   configurations: Configurations;
+  vulnerabilityPosture: VulnerabilityPosture;
 }
 
 // TODO: find a better way to defined these types
@@ -296,4 +298,5 @@ export interface StartedSubPlugins {
   siemMigrations: ReturnType<SiemMigrations['start']>;
   siemReadiness: ReturnType<SiemReadiness['start']>;
   configurations: ReturnType<Configurations['start']>;
+  vulnerabilityPosture: ReturnType<VulnerabilityPosture['start']>;
 }

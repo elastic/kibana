@@ -16,10 +16,12 @@ import { PREFIX } from '../../../flyout/shared/test_ids';
 import type { RiskInputsTabProps } from './tabs/risk_inputs/risk_inputs_tab';
 import { RiskInputsTab } from './tabs/risk_inputs/risk_inputs_tab';
 import { InsightsTabCsp } from '../../../cloud_security_posture/components/csp_details/insights_tab_csp';
+import { VulnerabilityPostureTab } from '../../../flyout/entity_details/host_right/components/vulnerability_posture_tab';
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightInputsTab` as const;
 export const FIELDS_TABLE_TAB_TEST_ID = `${PREFIX}FieldsTableTab` as const;
+export const VULNERABILITY_POSTURE_TAB_TEST_ID = `${PREFIX}VulnerabilityPostureTab` as const;
 
 export const getRiskInputTab = <T extends EntityType>({
   entityType,
@@ -82,5 +84,19 @@ export const getFieldsTableTab = ({ document, tableStorageKey }: FieldsTableProp
     ),
     content: <FieldsTableTab document={document} tableStorageKey={tableStorageKey} />,
     'data-test-subj': FIELDS_TABLE_TAB_TEST_ID,
+  };
+};
+
+export const getVulnerabilityPostureTab = ({ hostName }: { hostName: string }) => {
+  return {
+    id: EntityDetailsLeftPanelTab.VULNERABILITY_POSTURE,
+    'data-test-subj': VULNERABILITY_POSTURE_TAB_TEST_ID,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.vulnerabilityPosture.tabLabel"
+        defaultMessage="Vulnerability Posture"
+      />
+    ),
+    content: <VulnerabilityPostureTab hostName={hostName} />,
   };
 };

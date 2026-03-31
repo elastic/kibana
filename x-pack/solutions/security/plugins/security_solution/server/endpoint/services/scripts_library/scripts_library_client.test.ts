@@ -615,7 +615,8 @@ describe('scripts library client', () => {
             'alert.attributes.alertTypeId: siem.savedQueryRule OR ' +
             'alert.attributes.alertTypeId: siem.indicatorRule OR ' +
             'alert.attributes.alertTypeId: siem.thresholdRule OR ' +
-            'alert.attributes.alertTypeId: siem.newTermsRule) AND ' +
+            'alert.attributes.alertTypeId: siem.newTermsRule OR ' +
+            'alert.attributes.alertTypeId: siem.vulnerabilityCheckRule) AND ' +
             '(alert.attributes.params.responseActions.actionTypeId:".endpoint" AND ' +
             '(alert.attributes.params.responseActions.params.config.linux.scriptId:("1-2-3")))',
           fields: undefined,
@@ -749,7 +750,7 @@ describe('scripts library client', () => {
         options: {
           fields: undefined,
           filter:
-            '(alert.attributes.alertTypeId: siem.eqlRule OR alert.attributes.alertTypeId: siem.esqlRule OR alert.attributes.alertTypeId: siem.mlRule OR alert.attributes.alertTypeId: siem.queryRule OR alert.attributes.alertTypeId: siem.savedQueryRule OR alert.attributes.alertTypeId: siem.indicatorRule OR alert.attributes.alertTypeId: siem.thresholdRule OR alert.attributes.alertTypeId: siem.newTermsRule) ' +
+            '(alert.attributes.alertTypeId: siem.eqlRule OR alert.attributes.alertTypeId: siem.esqlRule OR alert.attributes.alertTypeId: siem.mlRule OR alert.attributes.alertTypeId: siem.queryRule OR alert.attributes.alertTypeId: siem.savedQueryRule OR alert.attributes.alertTypeId: siem.indicatorRule OR alert.attributes.alertTypeId: siem.thresholdRule OR alert.attributes.alertTypeId: siem.newTermsRule OR alert.attributes.alertTypeId: siem.vulnerabilityCheckRule) ' +
             'AND ' +
             '(alert.attributes.params.responseActions.actionTypeId:".endpoint" AND (alert.attributes.params.responseActions.params.config.macos.scriptId:("1-2-3") OR alert.attributes.params.responseActions.params.config.windows.scriptId:("1-2-3") OR alert.attributes.params.responseActions.params.config.linux.scriptId:("1-2-3")))',
           hasReference: undefined,

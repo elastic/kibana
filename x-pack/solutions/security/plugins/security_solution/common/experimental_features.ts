@@ -247,6 +247,13 @@ export const allowedExperimentalValues = Object.freeze({
    * Uses entity store v2 for entity analytics skill
    */
   entityAnalyticsEntityStoreV2: false,
+
+  /**
+   * Enables the Vulnerability Checker spike — a new detection rule type that
+   * collects endpoint package inventory via osquery, correlates against a CVE
+   * feed index, and produces building-block + shell vulnerability alerts.
+   */
+  vulnerabilityCheckerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

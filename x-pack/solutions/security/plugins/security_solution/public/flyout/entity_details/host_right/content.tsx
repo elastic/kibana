@@ -10,6 +10,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { ObservedDataSection } from './components/observed_data_section';
+import { VulnerabilityPostureInsight } from './components/vulnerability_posture_insight';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { FlyoutBody } from '../../shared/components/flyout_body';
@@ -105,6 +106,12 @@ export const HostPanelContent = ({
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.host}
+      />
+      <VulnerabilityPostureInsight
+        hostName={hostName}
+        scopeId={scopeId}
+        contextID={contextID}
+        isPreviewMode={isPreviewMode}
       />
       <ObservedDataSection
         observedHost={observedHost}

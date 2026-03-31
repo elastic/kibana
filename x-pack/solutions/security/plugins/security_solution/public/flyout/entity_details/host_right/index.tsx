@@ -49,6 +49,7 @@ import {
   type EntityStoreRecord,
 } from '../shared/hooks/use_entity_from_store';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
@@ -94,6 +95,9 @@ export const HostPanel = ({
   const queryClient = useQueryClient();
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+  const vulnerabilityCheckerEnabled = useIsExperimentalFeatureEnabled(
+    'vulnerabilityCheckerEnabled'
+  );
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
@@ -241,6 +245,7 @@ export const HostPanel = ({
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
+    hasVulnerabilityPostureAlerts: vulnerabilityCheckerEnabled,
     isPreviewMode,
     contextID: safeContextID,
   });
@@ -265,7 +270,8 @@ export const HostPanel = ({
           isRiskScoreExist ||
           hasMisconfigurationFindings ||
           hasVulnerabilitiesFindings ||
-          hasNonClosedAlerts
+          hasNonClosedAlerts ||
+          vulnerabilityCheckerEnabled
         }
         expandDetails={openDefaultPanel}
         isPreviewMode={isPreviewMode}

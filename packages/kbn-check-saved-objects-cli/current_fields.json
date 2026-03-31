@@ -1475,6 +1475,14 @@
     "title",
     "version"
   ],
+  "vulnerability-posture-view": [
+    "createdAt",
+    "description",
+    "filters",
+    "isDefault",
+    "name",
+    "updatedAt"
+  ],
   "watchlist-config": [
     "description",
     "managed",

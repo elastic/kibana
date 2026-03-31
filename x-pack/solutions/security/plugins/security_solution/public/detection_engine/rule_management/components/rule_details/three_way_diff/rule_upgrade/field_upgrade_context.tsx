@@ -130,7 +130,7 @@ export function FieldUpgradeContextProvider({
       */
       hasResolvedValueDifferentFromSuggested: !isEqual(
         fieldDiff.merged_version,
-        finalDiffableRule[fieldName]
+        (finalDiffableRule as Record<string, unknown>)[fieldName]
       ),
       isCustomized: calcIsCustomized(fieldDiff),
       fieldDiff,

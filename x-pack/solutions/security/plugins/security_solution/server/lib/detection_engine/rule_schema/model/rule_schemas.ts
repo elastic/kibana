@@ -15,6 +15,7 @@ import type {
   SAVED_QUERY_RULE_TYPE_ID,
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
+  VULNERABILITY_CHECK_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 import * as z from '@kbn/zod/v4';
 import type { CreateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/create';
@@ -298,6 +299,28 @@ export const NewTermsSpecificRuleParams = z.object({
 export type NewTermsRuleParams = BaseRuleParams & NewTermsSpecificRuleParams;
 export const NewTermsRuleParams = z.intersection(BaseRuleParams, NewTermsSpecificRuleParams);
 
+export type VulnerabilityCheckSpecificRuleParams = z.infer<
+  typeof VulnerabilityCheckSpecificRuleParams
+>;
+export const VulnerabilityCheckSpecificRuleParams = z.object({
+  type: z.literal('vulnerability_check'),
+  agentPolicyIds: z.array(z.string()).min(1),
+  osqueryPackName: z.string().optional(),
+  osqueryQueries: z
+    .array(z.object({ id: z.string(), query: z.string(), platform: z.string().optional() }))
+    .optional(),
+  cveIndexPattern: z.string().default('.security-vulnerability-cve-*'),
+  correlationTimespan: z.string().default('24h'),
+  groupBy: z.array(z.string()).default(['host.name']),
+  minCvssScore: z.number().min(0).max(10).default(0),
+});
+
+export type VulnerabilityCheckRuleParams = BaseRuleParams & VulnerabilityCheckSpecificRuleParams;
+export const VulnerabilityCheckRuleParams = z.intersection(
+  BaseRuleParams,
+  VulnerabilityCheckSpecificRuleParams
+);
+
 export type TypeSpecificRuleParams = z.infer<typeof TypeSpecificRuleParams>;
 export const TypeSpecificRuleParams = z.union([
   EqlSpecificRuleParams,
@@ -308,6 +331,7 @@ export const TypeSpecificRuleParams = z.union([
   ThresholdSpecificRuleParams,
   MachineLearningSpecificRuleParams,
   NewTermsSpecificRuleParams,
+  VulnerabilityCheckSpecificRuleParams,
 ]);
 
 export type RuleParams = z.infer<typeof RuleParams>;
@@ -320,6 +344,7 @@ export const RuleParams = z.union([
   ThresholdRuleParams,
   MachineLearningRuleParams,
   NewTermsRuleParams,
+  VulnerabilityCheckRuleParams,
 ]);
 
 export interface CompleteRule<T extends RuleParams> {
@@ -337,7 +362,8 @@ export type AllRuleTypes =
   | typeof QUERY_RULE_TYPE_ID
   | typeof SAVED_QUERY_RULE_TYPE_ID
   | typeof THRESHOLD_RULE_TYPE_ID
-  | typeof NEW_TERMS_RULE_TYPE_ID;
+  | typeof NEW_TERMS_RULE_TYPE_ID
+  | typeof VULNERABILITY_CHECK_RULE_TYPE_ID;
 
 export type InternalRuleCreate = CreateRuleData<RuleParams> & {
   consumer: typeof SERVER_APP_ID;

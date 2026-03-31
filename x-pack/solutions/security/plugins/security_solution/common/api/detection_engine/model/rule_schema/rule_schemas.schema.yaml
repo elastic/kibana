@@ -877,6 +877,92 @@ components:
         - $ref: '#/components/schemas/EsqlRulePatchFields'
           x-modify: partial
 
+    ############################
+    # Vulnerability Check Rule #
+    ############################
+
+    VulnerabilityCheckRuleRequiredFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [vulnerability_check]
+          description: Rule type
+        agent_policy_ids:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: Fleet agent policy IDs to scan for package inventory
+      required:
+        - type
+        - agent_policy_ids
+
+    VulnerabilityCheckRuleOptionalFields:
+      type: object
+      properties:
+        osquery_pack_name:
+          type: string
+          description: Osquery pack name for inventory collection
+        cve_index_pattern:
+          type: string
+          description: Elasticsearch index pattern for CVE data
+        correlation_timespan:
+          type: string
+          description: Time window for correlating inventory with CVE data
+        group_by:
+          type: array
+          items:
+            type: string
+          description: Fields to group results by
+        min_cvss_score:
+          type: number
+          description: Minimum CVSS score threshold for generating alerts
+
+    VulnerabilityCheckRuleDefaultableFields:
+      type: object
+      properties: {}
+
+    VulnerabilityCheckRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleRequiredFields'
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleOptionalFields'
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleDefaultableFields'
+
+    VulnerabilityCheckRulePatchFields:
+      allOf:
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleRequiredFields'
+          x-modify: partial
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleOptionalFields'
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleDefaultableFields'
+
+    VulnerabilityCheckRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleRequiredFields'
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleOptionalFields'
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleDefaultableFields'
+          x-modify: required
+
+    VulnerabilityCheckRule:
+      allOf:
+        - $ref: '#/components/schemas/SharedResponseProps'
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleResponseFields'
+
+    VulnerabilityCheckRuleCreateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedCreateProps'
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleCreateFields'
+
+    VulnerabilityCheckRuleUpdateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedUpdateProps'
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleCreateFields'
+
+    VulnerabilityCheckRulePatchProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedPatchProps'
+        - $ref: '#/components/schemas/VulnerabilityCheckRulePatchFields'
+
     ##########################
     # Final combined schemas #
     ##########################
@@ -893,6 +979,7 @@ components:
         - $ref: '#/components/schemas/MachineLearningRuleCreateFields'
         - $ref: '#/components/schemas/NewTermsRuleCreateFields'
         - $ref: '#/components/schemas/EsqlRuleCreateFields'
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleCreateFields'
 
     TypeSpecificPatchProps:
       anyOf:
@@ -904,6 +991,7 @@ components:
         - $ref: '#/components/schemas/MachineLearningRulePatchFields'
         - $ref: '#/components/schemas/NewTermsRulePatchFields'
         - $ref: '#/components/schemas/EsqlRulePatchFields'
+        - $ref: '#/components/schemas/VulnerabilityCheckRulePatchFields'
 
     TypeSpecificResponse:
       discriminator:
@@ -917,6 +1005,7 @@ components:
         - $ref: '#/components/schemas/MachineLearningRuleResponseFields'
         - $ref: '#/components/schemas/NewTermsRuleResponseFields'
         - $ref: '#/components/schemas/EsqlRuleResponseFields'
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleResponseFields'
 
     RuleCreateProps:
       discriminator:
@@ -939,6 +1028,7 @@ components:
         - $ref: '#/components/schemas/MachineLearningRuleCreateProps'
         - $ref: '#/components/schemas/NewTermsRuleCreateProps'
         - $ref: '#/components/schemas/EsqlRuleCreateProps'
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleCreateProps'
 
     RuleUpdateProps:
       discriminator:
@@ -961,6 +1051,7 @@ components:
         - $ref: '#/components/schemas/MachineLearningRuleUpdateProps'
         - $ref: '#/components/schemas/NewTermsRuleUpdateProps'
         - $ref: '#/components/schemas/EsqlRuleUpdateProps'
+        - $ref: '#/components/schemas/VulnerabilityCheckRuleUpdateProps'
 
     RulePatchProps:
       anyOf:
@@ -972,6 +1063,7 @@ components:
         - $ref: '#/components/schemas/MachineLearningRulePatchProps'
         - $ref: '#/components/schemas/NewTermsRulePatchProps'
         - $ref: '#/components/schemas/EsqlRulePatchProps'
+        - $ref: '#/components/schemas/VulnerabilityCheckRulePatchProps'
 
     RuleResponse:
       discriminator:
@@ -994,3 +1086,4 @@ components:
         - $ref: '#/components/schemas/MachineLearningRule'
         - $ref: '#/components/schemas/NewTermsRule'
         - $ref: '#/components/schemas/EsqlRule'
+        - $ref: '#/components/schemas/VulnerabilityCheckRule'

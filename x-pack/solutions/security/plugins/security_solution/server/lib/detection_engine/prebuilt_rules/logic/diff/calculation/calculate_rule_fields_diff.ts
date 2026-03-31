@@ -43,8 +43,10 @@ export const calculateRuleFieldsDiff = ({
 
   for (const key of keys) {
     const fieldKey = key as keyof TwoWayDiffRule;
-    const valueA = normalizedRuleA[fieldKey];
-    const valueB = normalizedRuleB[fieldKey];
+    const ruleARecord = normalizedRuleA as Record<string, unknown>;
+    const ruleBRecord = normalizedRuleB as Record<string, unknown>;
+    const valueA = ruleARecord[fieldKey];
+    const valueB = ruleBRecord[fieldKey];
 
     const comparator = allFieldsComparators[fieldKey] as
       | ((a: unknown, b: unknown) => boolean)

@@ -29,7 +29,9 @@ export function FieldFinalSideHeader(): JSX.Element {
       setRuleFieldResolvedValue({
         ruleId: finalDiffableRule.rule_id,
         fieldName: fieldName as keyof DiffableAllFields,
-        resolvedValue: finalDiffableRule[fieldName] as DiffableAllFields[typeof fieldName],
+        resolvedValue: (finalDiffableRule as Record<string, unknown>)[
+          fieldName
+        ] as DiffableAllFields[typeof fieldName],
       }),
     [finalDiffableRule, fieldName, setRuleFieldResolvedValue]
   );

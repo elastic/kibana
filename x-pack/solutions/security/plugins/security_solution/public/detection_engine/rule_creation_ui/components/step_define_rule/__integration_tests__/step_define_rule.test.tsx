@@ -1070,7 +1070,7 @@ async function selectRuleType(ruleType: RuleType): Promise<void> {
   expect(within(screen.getByTestId(testId)).getByRole('switch')).toBeChecked();
 }
 
-const RULE_TYPE_TEST_ID_MAP = {
+const RULE_TYPE_TEST_ID_MAP: Record<RuleType, string> = {
   query: 'customRuleType',
   saved_query: 'customRuleType',
   eql: 'eqlRuleType',
@@ -1079,4 +1079,5 @@ const RULE_TYPE_TEST_ID_MAP = {
   threat_match: 'threatMatchRuleType',
   new_terms: 'newTermsRuleType',
   esql: 'esqlRuleType',
+  vulnerability_check: 'vulnerabilityCheckRuleType',
 };
