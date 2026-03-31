@@ -7,7 +7,7 @@
 
 import type { LoadBalancerConfig } from './utils';
 import { SECURITY_SOLUTION_LOAD_BALANCER_CONFIG } from './security_solution_config';
-import { DW_LOAD_BALANCER_CONFIG } from './dw_config';
+import { DW_LOAD_BALANCER_CONFIG, DW_SERVERLESS_LOAD_BALANCER_CONFIG } from './dw_config';
 
 /**
  * Registry that maps Buildkite JOB names to their LoadBalancerConfig.
@@ -20,7 +20,7 @@ import { DW_LOAD_BALANCER_CONFIG } from './dw_config';
 const CONFIG_REGISTRY: Record<string, LoadBalancerConfig> = {
   'kibana-security-solution-chrome': SECURITY_SOLUTION_LOAD_BALANCER_CONFIG,
   'kibana-defend-workflows-cypress': DW_LOAD_BALANCER_CONFIG,
-  'kibana-defend-workflows-serverless-cypress': DW_LOAD_BALANCER_CONFIG,
+  'kibana-defend-workflows-serverless-cypress': DW_SERVERLESS_LOAD_BALANCER_CONFIG,
 };
 
 /**

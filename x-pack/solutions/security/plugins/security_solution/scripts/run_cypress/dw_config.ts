@@ -134,3 +134,20 @@ export const DW_LOAD_BALANCER_CONFIG: LoadBalancerConfig = {
   isolateNonDefaultConfigs: true,
   targetWeightPerAgent: 45,
 };
+
+/**
+ * Serverless variant of the DW config. Inherits all ESS settings but with a
+ * lower targetWeightPerAgent because SL has fewer total specs and lower
+ * aggregate weight (~200 vs ~800 on ESS). At the ESS target of 45 the
+ * overload penalty never fires for SL, letting the greedy LB pile 5+ specs
+ * on one agent. Target of 20 (slightly above the 12-agent avg of ~17)
+ * activates the penalty early enough to spread specs evenly.
+ *
+ * SL also doesn't need config isolation since all SL specs use the default
+ * ftrConfig (no license overrides or experimental kbnServerArgs).
+ */
+export const DW_SERVERLESS_LOAD_BALANCER_CONFIG: LoadBalancerConfig = {
+  ...DW_LOAD_BALANCER_CONFIG,
+  isolateNonDefaultConfigs: false,
+  targetWeightPerAgent: 20,
+};
