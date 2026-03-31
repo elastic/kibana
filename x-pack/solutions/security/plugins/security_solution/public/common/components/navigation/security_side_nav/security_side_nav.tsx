@@ -72,18 +72,14 @@ const formatLink = (
 const formatGetStartedLink = (
   navLink: NavigationLink,
   getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
-): SolutionSideNavItem => {
-  return {
-    id: navLink.id,
-    label: navLink.title,
-    iconType: navLink.sideNavIcon,
-    position: SolutionSideNavItemPosition.bottom,
-    appendSeparator: true,
-    categories: navLink.categories,
-    items: navLink.links?.map((link) => formatLink(link, getSecuritySolutionLinkProps)),
-    ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
-  };
-};
+): SolutionSideNavItem => ({
+  id: navLink.id,
+  label: navLink.title,
+  iconType: navLink.sideNavIcon,
+  position: SolutionSideNavItemPosition.bottom,
+  appendSeparator: true,
+  ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
+});
 
 /**
  * Returns the formatted `items` and `footerItems` to be rendered in the navigation
