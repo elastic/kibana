@@ -65,6 +65,11 @@ Security Solution has multiple API domains scattered across Kibana. Currently th
   - Bundling script: `x-pack/platform/plugins/shared/osquery/scripts/openapi/bundle.js`
   - Bundles location: `x-pack/platform/plugins/shared/osquery/docs/openapi/{ess|serverless}`
 
+- Security Initialization
+
+  - Bundling script: `x-pack/solutions/security/plugins/security_solution/scripts/openapi/bundle_initialization.js`
+  - Bundles location: `x-pack/solutions/security/plugins/security_solution/docs/openapi/{ess|serverless}`
+
 - Security Timeline
 
   - Bundling script: `x-pack/solutions/security/plugins/security_solution/scripts/openapi/bundle_timeline.js`

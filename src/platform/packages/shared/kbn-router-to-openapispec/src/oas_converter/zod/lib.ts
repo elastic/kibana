@@ -8,9 +8,7 @@
  */
 
 import { z, isZod } from '@kbn/zod';
-import { z as z4 } from '@kbn/zod/v4';
 import { isPassThroughAny } from '@kbn/zod-helpers/v4';
-import zodToJsonSchema, { jsonDescription } from 'zod-to-json-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 
 import type { ConvertOptions, KnownParameters } from '../../type';
@@ -30,114 +28,30 @@ function assertInstanceOfZodType(schema: unknown): asserts schema is z.ZodTypeAn
 }
 
 // ---------------------------------------------------------------------------
-// Zod v4 detection and type helpers
+// Type detection helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Detect Zod v4 schemas. V4 schemas have `_zod` but NOT `_def` (v3 has `_def`).
- */
-function isZodV4(schema: unknown): boolean {
-  return (
-    !!schema &&
-    typeof schema === 'object' &&
-    '_zod' in schema &&
-    !('_def' in schema && typeof (schema as any)._def?.typeName === 'string')
-  );
-}
-
-/** Get the v4 def type string from a schema (e.g. "object", "string", "optional") */
-function getV4DefType(schema: any): string | undefined {
+/** Get the def type string from a schema (e.g. "object", "string", "optional") */
+function getDefType(schema: any): string | undefined {
   return schema?._zod?.def?.type;
 }
 
-/**
- * Map from v3 ZodFirstPartyTypeKind enum values to v4 _zod.def.type strings.
- * This allows `instanceofZodTypeKind` to work for both versions.
- */
-const V3_TO_V4_TYPE_MAP: Record<string, string> = {
-  ZodObject: 'object',
-  ZodString: 'string',
-  ZodNumber: 'number',
-  ZodBoolean: 'boolean',
-  ZodBigInt: 'bigint',
-  ZodDate: 'date',
-  ZodOptional: 'optional',
-  ZodDefault: 'default',
-  ZodEffects: '_effects_', // special: v4 uses pipe/transform instead
-  ZodLazy: 'lazy',
-  ZodVoid: 'void',
-  ZodUndefined: 'undefined',
-  ZodNever: 'never',
-  ZodUnion: 'union',
-  ZodArray: 'array',
-  ZodIntersection: 'intersection',
-  ZodLiteral: 'literal',
-  ZodEnum: 'enum',
-  ZodNativeEnum: 'enum', // v4 unifies nativeEnum into enum
-  ZodRecord: 'record',
-  ZodMap: 'map',
-  ZodSet: 'set',
-  ZodAny: 'any',
-  ZodUnknown: 'unknown',
-  ZodNullable: 'nullable',
-  ZodTuple: 'tuple',
+const instanceofZodTypeObject = (type: z.ZodTypeAny): type is z.ZodObject<z.ZodRawShape> => {
+  return getDefType(type) === 'object';
+};
+
+const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny): boolean => {
+  const defType = getDefType(type);
+  return defType === 'void' || defType === 'undefined' || defType === 'never';
 };
 
 // ---------------------------------------------------------------------------
-// Type detection (v3 + v4)
-// ---------------------------------------------------------------------------
-
-const instanceofZodTypeKind = <Z extends z.ZodFirstPartyTypeKind>(
-  type: z.ZodTypeAny,
-  zodTypeKind: Z
-): type is InstanceType<(typeof z)[Z]> => {
-  // v3 path
-  if (type?._def?.typeName === zodTypeKind) {
-    return true;
-  }
-  // v4 path
-  if (isZodV4(type)) {
-    const v4Type = V3_TO_V4_TYPE_MAP[zodTypeKind];
-    if (v4Type && v4Type !== '_effects_') {
-      return getV4DefType(type) === v4Type;
-    }
-    // For ZodEffects, v4 uses "pipe" or "transform"
-    if (zodTypeKind === z.ZodFirstPartyTypeKind.ZodEffects) {
-      const defType = getV4DefType(type);
-      return defType === 'pipe' || defType === 'transform' || defType === 'prefault';
-    }
-  }
-  return false;
-};
-
-const instanceofZodTypeObject = (
-  type: z.ZodTypeAny | z4.ZodTypeAny
-): type is z.ZodObject<z.ZodRawShape> | z4.ZodObject<z4.ZodRawShape> => {
-  return instanceofZodTypeKind(type as z.ZodTypeAny, z.ZodFirstPartyTypeKind.ZodObject);
-};
-
-type ZodTypeLikeVoid = z.ZodVoid | z.ZodUndefined | z.ZodNever;
-
-const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny): type is ZodTypeLikeVoid => {
-  return (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodVoid) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUndefined) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNever)
-  );
-};
-
-// ---------------------------------------------------------------------------
-// Unwrap helpers (v3 + v4)
+// Unwrap helpers
 // ---------------------------------------------------------------------------
 
 const unwrapZodLazy = (type: z.ZodTypeAny): z.ZodTypeAny => {
-  // v4 lazy
-  if (isZodV4(type) && getV4DefType(type) === 'lazy') {
+  if (getDefType(type) === 'lazy') {
     return unwrapZodLazy((type as any)._zod.def.getter());
-  }
-  // v3 lazy
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
-    return unwrapZodLazy(type._def.getter());
   }
   return type;
 };
@@ -155,97 +69,44 @@ const unwrapZodOptionalDefault = (
   let isOptional = false;
   let innerType = type;
 
-  if (isZodV4(innerType)) {
-    // v4 path: use _zod.def for type detection and innerType access
-    while (true) {
-      const defType = getV4DefType(innerType);
-      if (defType === 'optional') {
-        isOptional = true;
-        description = !description ? (innerType as any).description : description;
-        innerType = (innerType as any)._zod.def.innerType;
-      } else if (defType === 'default') {
-        defaultValue = (innerType as any)._zod.def.defaultValue;
-        // In v4, defaultValue might be a getter function or a raw value
-        if (typeof defaultValue === 'function') {
-          defaultValue = (defaultValue as () => unknown)();
-        }
-        description = !description ? (innerType as any).description : description;
-        innerType = (innerType as any)._zod.def.innerType;
-      } else {
-        break;
+  while (true) {
+    const defType = getDefType(innerType);
+    if (defType === 'optional') {
+      isOptional = true;
+      description = !description ? (innerType as any).description : description;
+      innerType = (innerType as any)._zod.def.innerType;
+    } else if (defType === 'default') {
+      defaultValue = (innerType as any)._zod.def.defaultValue;
+      if (typeof defaultValue === 'function') {
+        defaultValue = (defaultValue as () => unknown)();
       }
-    }
-  } else {
-    // v3 path
-    while (
-      instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodOptional) ||
-      instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodDefault)
-    ) {
-      if (instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodOptional)) {
-        isOptional = innerType.isOptional();
-        description = !description ? innerType.description : description;
-        innerType = innerType.unwrap();
-      }
-      if (instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodDefault)) {
-        defaultValue = innerType._def.defaultValue();
-        description = !description ? innerType.description : description;
-        innerType = innerType.removeDefault();
-      }
+      description = !description ? (innerType as any).description : description;
+      innerType = (innerType as any)._zod.def.innerType;
+    } else {
+      break;
     }
   }
 
   return { description, defaultValue, isOptional, innerType };
 };
 
-const unwrapZodType = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTypeAny => {
-  if (isZodV4(type)) {
-    return unwrapZodTypeV4(type, unwrapPreprocess);
-  }
-
-  // v3 path (unchanged)
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
-    return unwrapZodType(unwrapZodLazy(type), unwrapPreprocess);
-  }
-
-  if (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)
-  ) {
-    const { innerType } = unwrapZodOptionalDefault(type);
-    return unwrapZodType(innerType, unwrapPreprocess);
-  }
-
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    if (type._def.effect.type === 'refinement') {
-      return unwrapZodType(type._def.schema, unwrapPreprocess);
-    }
-    if (type._def.effect.type === 'transform') {
-      return unwrapZodType(type._def.schema, unwrapPreprocess);
-    }
-    if (unwrapPreprocess && type._def.effect.type === 'preprocess') {
-      return unwrapZodType(type._def.schema, unwrapPreprocess);
-    }
-  }
-  return type;
-};
-
 /**
- * Unwrap Zod v4 schemas to find the underlying type.
+ * Unwrap Zod schemas to find the underlying type.
  *
- * V4 uses "pipe" instead of "effects". The heuristic for pipes:
+ * Uses "pipe" instead of "effects". The heuristic for pipes:
  * - If `out._zod.def.type === 'transform'`, the original schema is in `in` (e.g. z.string().transform(fn))
  * - Otherwise, the meaningful schema is in `out` (e.g. DeepStrict wrapping: pipe(unknown.check(), schema))
  */
-const unwrapZodTypeV4 = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTypeAny => {
-  const defType = getV4DefType(type);
+const unwrapZodType = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTypeAny => {
+  const defType = getDefType(type);
 
   if (defType === 'lazy') {
-    return unwrapZodTypeV4(unwrapZodLazy(type), unwrapPreprocess);
+    return unwrapZodType(unwrapZodLazy(type), unwrapPreprocess);
   }
 
   if (defType === 'optional' || defType === 'default') {
     const { innerType } = unwrapZodOptionalDefault(type);
-    return unwrapZodTypeV4(innerType, unwrapPreprocess);
+    return unwrapZodType(innerType, unwrapPreprocess);
   }
 
   if (defType === 'pipe') {
@@ -253,11 +114,11 @@ const unwrapZodTypeV4 = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTy
     const pipeOut = (type as any)._zod.def.out;
 
     // If out is a transform, the real schema is in `in`
-    if (getV4DefType(pipeOut) === 'transform') {
-      return unwrapZodTypeV4(pipeIn, unwrapPreprocess);
+    if (getDefType(pipeOut) === 'transform') {
+      return unwrapZodType(pipeIn, unwrapPreprocess);
     }
     // Otherwise (e.g. DeepStrict: pipe(unknown.check(), schema)), the real schema is in `out`
-    return unwrapZodTypeV4(pipeOut, unwrapPreprocess);
+    return unwrapZodType(pipeOut, unwrapPreprocess);
   }
 
   // Handle standalone transform: the input schema is not accessible, treat as pass-through
@@ -265,12 +126,12 @@ const unwrapZodTypeV4 = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTy
     return type;
   }
 
-  // Handle prefault (v4 equivalent of v3 preprocess)
+  // Handle prefault (equivalent of preprocess)
   if (defType === 'prefault') {
     if (unwrapPreprocess) {
       const innerType = (type as any)._zod.def.innerType;
       if (innerType) {
-        return unwrapZodTypeV4(innerType, unwrapPreprocess);
+        return unwrapZodType(innerType, unwrapPreprocess);
       }
     }
     return type;
@@ -280,101 +141,22 @@ const unwrapZodTypeV4 = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTy
 };
 
 // ---------------------------------------------------------------------------
-// String-like and coercible type detection (v3 + v4)
+// String-like and coercible type detection
 // ---------------------------------------------------------------------------
 
-interface NativeEnumType {
-  [k: string]: string | number;
-  [nu: number]: string;
-}
-
-type ZodTypeLikeString =
-  | z.ZodString
-  | z.ZodOptional<ZodTypeLikeString>
-  | z.ZodDefault<ZodTypeLikeString>
-  | z.ZodEffects<ZodTypeLikeString, unknown, unknown>
-  | z.ZodUnion<[ZodTypeLikeString, ...ZodTypeLikeString[]]>
-  | z.ZodIntersection<ZodTypeLikeString, ZodTypeLikeString>
-  | z.ZodLazy<ZodTypeLikeString>
-  | z.ZodLiteral<string>
-  | z.ZodEnum<[string, ...string[]]>
-  | z.ZodNativeEnum<NativeEnumType>;
-
-const zodSupportsCoerce = 'coerce' in z;
-
-type ZodTypeCoercible = z.ZodNumber | z.ZodBoolean | z.ZodBigInt | z.ZodDate;
-
-const instanceofZodTypeCoercible = (_type: z.ZodTypeAny): _type is ZodTypeCoercible => {
+const instanceofZodTypeCoercible = (_type: z.ZodTypeAny): boolean => {
   const type = unwrapZodType(_type, false);
-
-  if (isZodV4(type)) {
-    const defType = getV4DefType(type);
-    return (
-      defType === 'number' || defType === 'boolean' || defType === 'bigint' || defType === 'date'
-    );
-  }
-
+  const defType = getDefType(type);
   return (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNumber) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodBoolean) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodBigInt) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDate)
+    defType === 'number' || defType === 'boolean' || defType === 'bigint' || defType === 'date'
   );
 };
 
-const instanceofZodTypeLikeString = (
-  _type: z.ZodTypeAny,
-  allowMixedUnion: boolean
-): _type is ZodTypeLikeString => {
+const instanceofZodTypeLikeString = (_type: z.ZodTypeAny, allowMixedUnion: boolean): boolean => {
   const type = unwrapZodType(_type, false);
+  const defType = getDefType(type);
 
-  if (isZodV4(type)) {
-    return isV4TypeLikeString(type, allowMixedUnion);
-  }
-
-  // v3 path (unchanged)
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    if (type._def.effect.type === 'preprocess') {
-      return true;
-    }
-  }
-
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUnion)) {
-    return !type._def.options.some(
-      (option) =>
-        !instanceofZodTypeLikeString(option, allowMixedUnion) &&
-        !(allowMixedUnion && instanceofZodTypeCoercible(option))
-    );
-  }
-
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodArray)) {
-    return instanceofZodTypeLikeString(type._def.type, allowMixedUnion);
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodIntersection)) {
-    return (
-      instanceofZodTypeLikeString(type._def.left, allowMixedUnion) &&
-      instanceofZodTypeLikeString(type._def.right, allowMixedUnion)
-    );
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLiteral)) {
-    return typeof type._def.value === 'string';
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEnum)) {
-    return true;
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNativeEnum)) {
-    return !Object.values(type._def.values).some((value) => typeof value === 'number');
-  }
-  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodString);
-};
-
-/**
- * V4-specific string-like type detection.
- */
-function isV4TypeLikeString(type: z.ZodTypeAny, allowMixedUnion: boolean): boolean {
-  const defType = getV4DefType(type);
-
-  // prefault (v4 equivalent of v3 preprocess effect)
+  // prefault (equivalent of preprocess effect)
   if (defType === 'prefault') {
     return true;
   }
@@ -405,7 +187,6 @@ function isV4TypeLikeString(type: z.ZodTypeAny, allowMixedUnion: boolean): boole
   }
 
   if (defType === 'enum') {
-    // v4 enums: check if entries contain numeric values
     const entries = (type as any)._zod.def.entries;
     if (entries && typeof entries === 'object') {
       return !Object.values(entries).some((value) => typeof value === 'number');
@@ -415,10 +196,10 @@ function isV4TypeLikeString(type: z.ZodTypeAny, allowMixedUnion: boolean): boole
 
   // "string" covers both z.string() and z.iso.datetime(), z.email(), etc.
   return defType === 'string';
-}
+};
 
 // ---------------------------------------------------------------------------
-// Converter functions (v3 + v4)
+// Converter functions
 // ---------------------------------------------------------------------------
 
 const convertObjectMembersToParameterObjects = (
@@ -427,7 +208,7 @@ const convertObjectMembersToParameterObjects = (
   knownParameters: KnownParameters = {}
 ): OpenAPIV3.ParameterObject[] => {
   return Object.entries(shape).map(([shapeKey, subShape]) => {
-    const typeWithoutLazy = unwrapZodLazy(subShape);
+    const typeWithoutLazy = unwrapZodLazy(subShape as z.ZodTypeAny);
     const {
       description: outerDescription,
       isOptional,
@@ -437,14 +218,10 @@ const convertObjectMembersToParameterObjects = (
 
     // Except for path parameters, OpenAPI supports mixed unions with `anyOf` e.g. for query parameters
     if (!instanceofZodTypeLikeString(typeWithoutOptionalDefault, !isPathParameter)) {
-      if (zodSupportsCoerce) {
-        if (!instanceofZodTypeCoercible(typeWithoutOptionalDefault)) {
-          throw createError(
-            `Input parser key: "${shapeKey}" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate`
-          );
-        }
-      } else {
-        throw createError(`Input parser key: "${shapeKey}" must be ZodString`);
+      if (!instanceofZodTypeCoercible(typeWithoutOptionalDefault)) {
+        throw createError(
+          `Input parser key: "${shapeKey}" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate`
+        );
       }
     }
 
@@ -468,11 +245,11 @@ const convertObjectMembersToParameterObjects = (
 
 // Returns a z.ZodRawShape to passes through all known parameters with z.any
 const getPassThroughShape = (knownParameters: KnownParameters, isPathParameter = false) => {
-  const passThroughShape: z.ZodRawShape = {};
+  const passThroughShape: Record<string, z.ZodTypeAny> = {};
   for (const [key, { optional }] of Object.entries(knownParameters)) {
     passThroughShape[key] = optional && !isPathParameter ? z.string().optional() : z.string();
   }
-  return passThroughShape;
+  return passThroughShape as z.ZodRawShape;
 };
 
 export const convertQuery = (schema: unknown) => {
@@ -545,7 +322,7 @@ function applyJsonDescription(jsonSchema: Record<string, any>, description?: str
  * Recursively add `additionalProperties: false` to object schema nodes that
  * don't already have an `additionalProperties` setting.
  *
- * z4.toJSONSchema() only emits `additionalProperties: false` for .strict()
+ * z.toJSONSchema() only emits `additionalProperties: false` for .strict()
  * objects. Plain z.object() schemas reject extra keys at runtime — this
  * matches the @kbn/config-schema behaviour of always emitting it.
  */
@@ -588,7 +365,7 @@ function addAdditionalPropertiesFalse(node: Record<string, any>): Record<string,
 
 /**
  * Counter used to generate unique keys when hoisting `$defs` entries
- * from `z4.toJSONSchema()` into OpenAPI `components/schemas`.
+ * from `z.toJSONSchema()` into OpenAPI `components/schemas`.
  * Ensures no key collisions across multiple `convert()` calls.
  */
 let defsCounter = 0;
@@ -599,7 +376,7 @@ export const resetDefsCounter = () => {
 };
 
 /**
- * Internal marker injected into a Zod v4 JSON schema node (via the `override`
+ * Internal marker injected into a Zod JSON schema node (via the `override`
  * callback) to carry the user-supplied OAS component name through the
  * conversion pipeline.  The key intentionally starts with `x-` so it is a
  * valid JSON-Schema extension and is easy to strip afterwards.
@@ -607,15 +384,16 @@ export const resetDefsCounter = () => {
 const COMPONENT_ID_MARKER = 'x-kbn-oas-component-id';
 
 /**
- * Internal marker injected into a Zod v4 JSON schema node to carry OAS-native
- * extensions declared via `.meta({ openapi: { ... } })`. Stripped and merged
- * into the final component schema by `extractDefsToShared` / `hoistMarkedSchemas`.
+ * Maps Zod schema instances to their desired OAS `components/schemas` names.
+ * Uses a WeakMap so schema objects can be GC-ed when no longer referenced.
  */
+const zodV4OasComponentRegistry = new WeakMap<object, string>();
+
 const OAS_EXTENSIONS_MARKER = 'x-kbn-oas-extensions';
 
 /**
- * OAS-specific extensions that can be declared on a Zod v4 schema via
- * `.meta({ openapi: { discriminator: { ... } } })`.
+ * Register a Zod schema so that the OAS converter emits it as a named
+ * component (`$ref: '#/components/schemas/<name>'`) instead of inlining it.
  *
  * These fields are merged verbatim into the generated OAS component schema,
  * filling the gap where Zod/JSON Schema cannot express OAS-native concepts.
@@ -652,25 +430,28 @@ type NormalizedOasMetaExtensions = Omit<OasMetaExtensions, 'availability'> & {
  * The name must be unique across all schemas in the document and follow OpenAPI
  * component naming rules: `[a-zA-Z0-9._-]+`.
  */
-function getZodV4ComponentId(schema: z4.core.$ZodType): string | undefined {
-  const meta = z4.globalRegistry.get(schema);
-  return typeof meta?.id === 'string' ? meta.id : undefined;
+export const registerZodV4Component = (schema: z.ZodType, name: string): void => {
+  zodV4OasComponentRegistry.set(schema as object, name);
+};
+
+interface ZodSchemaMeta {
+  id?: string;
+  openapi?: OasMetaExtensions;
 }
 
-/**
- * Reads OAS-native extensions declared via `.meta({ openapi: { ... } })`.
- */
-function getZodV4OasExtensions(schema: z4.core.$ZodType): OasMetaExtensions | undefined {
-  const meta = z4.globalRegistry.get(schema);
-  return meta?.openapi as OasMetaExtensions | undefined;
-}
+const getZodMeta = (schema: z.ZodType): ZodSchemaMeta =>
+  (z.globalRegistry.get(schema) ?? {}) as ZodSchemaMeta;
+
+const getStableComponentName = (schema: z.ZodType): string | undefined =>
+  zodV4OasComponentRegistry.get(schema as object) ?? getZodMeta(schema).id;
 
 function normalizeOasMetaExtensions(
-  schema: z4.ZodType,
+  schema: z.ZodType,
   env: ConvertOptions['env']
 ): NormalizedOasMetaExtensions | undefined {
-  const meta = getZodV4OasExtensions(schema);
-  const autoDiscriminator = meta?.discriminator ? undefined : getZodV4AutoDiscriminator(schema);
+  const { openapi: meta } = getZodMeta(schema);
+  const autoDisc = meta?.discriminator ? null : buildAutoDiscriminator(schema);
+  const autoDiscriminator = autoDisc?.discriminator;
   const { availability, ...rest } = meta ?? {};
   const xState = getXState(availability, env ?? { serverless: false });
   const extensions = {
@@ -683,43 +464,34 @@ function normalizeOasMetaExtensions(
 }
 
 /**
- * Auto-detects `z4.discriminatedUnion()` schemas and builds an OAS
- * `DiscriminatorObject` from the union's discriminator key and each variant's
- * `meta({ id })`.
- *
- * `z4.toJSONSchema()` produces an identical `anyOf` for both plain unions and
- * discriminated unions — the discriminator information is lost in the JSON
- * Schema output. This function reads it directly from the Zod type's internal
- * `_zod.def.discriminator` field, which is only set on discriminated unions.
- *
- * The `mapping` is only included when every variant has a `meta({ id })` name
- * and a resolvable literal discriminator value. When some variants lack IDs,
- * only `propertyName` is emitted (valid per OAS 3.0 — mapping is optional).
+ * For `z.discriminatedUnion` schemas, auto-generate an OAS discriminator
+ * with property name and (when every variant has a stable component name) a
+ * mapping.  Returns `null` for non-discriminated schemas.
  */
-function getZodV4AutoDiscriminator(schema: z4.ZodType): OpenAPIV3.DiscriminatorObject | undefined {
-  const def = (schema as any)._zod?.def;
-  if (typeof def?.discriminator !== 'string') return undefined;
-
-  const discriminatorKey: string = def.discriminator;
-  const options: z4.ZodType[] = def.options ?? [];
+function buildAutoDiscriminator(schema: z.ZodType): OasMetaExtensions | null {
+  const { discriminator: key, options } = (schema as any)._zod?.def ?? {};
+  if (typeof key !== 'string' || !Array.isArray(options)) return null;
 
   const mapping: Record<string, string> = {};
-  let mappingComplete = true;
+  let allNamed = true;
 
   for (const opt of options) {
-    const id = getZodV4ComponentId(opt);
-    const literalValue = (opt as any)._zod?.def?.shape?.[discriminatorKey]?._zod?.def?.values?.[0];
-    if (id !== undefined && literalValue !== undefined) {
-      mapping[String(literalValue)] = `#/components/schemas/${id}`;
-    } else {
-      mappingComplete = false;
+    const name = getStableComponentName(opt);
+    if (!name) {
+      allNamed = false;
+      continue;
+    }
+    const litValues = opt._zod?.def?.shape?.[key]?._zod?.def?.values;
+    if (Array.isArray(litValues) && litValues.length === 1) {
+      mapping[String(litValues[0])] = `#/components/schemas/${name}`;
     }
   }
 
-  return {
-    propertyName: discriminatorKey,
-    ...(mappingComplete ? { mapping } : {}),
-  };
+  const disc: OpenAPIV3.DiscriminatorObject = { propertyName: key };
+  if (allNamed && Object.keys(mapping).length > 0) {
+    disc.mapping = mapping;
+  }
+  return { discriminator: disc };
 }
 
 /**
@@ -746,7 +518,7 @@ function rewriteDefsRefs(obj: unknown, replacements: Record<string, string>): un
 }
 
 /**
- * Extract `$defs` from a JSON Schema produced by `z4.toJSONSchema()`, move
+ * Extract `$defs` from a JSON Schema produced by `z.toJSONSchema()`, move
  * the entries into `shared` (→ `components/schemas`), and rewrite all
  * `$ref: '#/$defs/...'` pointers so they resolve correctly in the OpenAPI
  * document root.
@@ -806,7 +578,7 @@ function extractDefsToShared(
 /**
  * Recursively traverse a (post-processed) JSON schema and extract any nodes
  * that still carry the `COMPONENT_ID_MARKER`.  This covers the case where a
- * registered schema appears exactly once (so Zod v4 inlined it rather than
+ * registered schema appears exactly once (so Zod inlined it rather than
  * placing it in `$defs`): we still want it as a named OAS component.
  *
  * Marked nodes are moved into `shared` and replaced with a `$ref`.
@@ -909,9 +681,13 @@ function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, un
 
   let result: Record<string, unknown> = {};
 
+  const hasPropertyNames = 'propertyNames' in node;
+
   for (const [key, value] of Object.entries(node)) {
     // Strip `propertyNames` (not supported in OAS 3.0)
     if (key === 'propertyNames') continue;
+    // Strip companion `required` emitted by z.toJSONSchema() for z.record(z.enum([...]), ...)
+    if (key === 'required' && hasPropertyNames) continue;
 
     // `const: value` → `enum: [value]`
     if (key === 'const') {
@@ -977,124 +753,93 @@ function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, un
 }
 
 export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
-  // Unwrap DeepStrict pipes, optional/default wrappers, transforms, etc.
-  // This is critical because makeZodValidationObject wraps ALL Zod schemas
-  // (including v3) with v4's DeepStrict, producing a v4 pipe around v3 schemas.
-  // We must unwrap to find the real inner schema before choosing the converter.
   const unwrapped = unwrapZodType(schema, true);
 
-  if (isZodV4(unwrapped)) {
-    // Use Zod v4's native toJSONSchema
-    const raw = z4.toJSONSchema(unwrapped as unknown as z4.ZodType, {
-      unrepresentable: 'any',
-      io: 'input',
-      override: ({ zodSchema, jsonSchema: js }) => {
-        // z.never() is "unrepresentable" and gets converted to {} (any) by
-        // the 'any' strategy. In JSON Schema / OpenAPI, the correct
-        // representation of "never" is { not: {} }, so fix it up here.
-        if ('_zod' in zodSchema && (zodSchema as any)._zod?.def?.type === 'never') {
-          // Clear all existing keys and set { not: {} }
-          for (const key of Object.keys(js)) {
-            delete (js as any)[key];
-          }
-          (js as any).not = {};
-          return;
+  // Use Zod's native toJSONSchema
+  const raw = z.toJSONSchema(unwrapped as unknown as z.ZodType, {
+    unrepresentable: 'any',
+    io: 'input',
+    override: ({ zodSchema, jsonSchema: js }) => {
+      // z.never() is "unrepresentable" and gets converted to {} (any) by
+      // the 'any' strategy. In JSON Schema / OpenAPI, the correct
+      // representation of "never" is { not: {} }, so fix it up here.
+      if ('_zod' in zodSchema && (zodSchema as any)._zod?.def?.type === 'never') {
+        // Clear all existing keys and set { not: {} }
+        for (const key of Object.keys(js)) {
+          delete (js as any)[key];
         }
+        (js as any).not = {};
+        return;
+      }
 
-        // Zod v4's toJSONSchema() writes the .meta({ id }) value as a plain
-        // `id` property on the JSON schema node. OAS 3.0 Schema Objects do not
-        // allow `id`, so we strip it unconditionally here and track the
-        // component name via our own COMPONENT_ID_MARKER instead.
-        // See https://github.com/colinhacks/zod/issues/5731
+      const zSchema = zodSchema as unknown as z.ZodType;
+
+      const stableName = getStableComponentName(zSchema);
+      if (stableName) {
+        (js as any)[COMPONENT_ID_MARKER] = stableName;
         delete (js as any).id;
+      }
 
-        // Inject stable OAS component name and optional OAS extensions for
-        // schemas that declare .meta({ id }) / .meta({ openapi: { ... } }).
-        // Picked up by extractDefsToShared (for $defs entries) and
-        // hoistMarkedSchemas (for inline, single-use schemas).
-        const componentName = getZodV4ComponentId(zodSchema);
+      const oasExtensions = normalizeOasMetaExtensions(zSchema, opts.env);
+      if (oasExtensions) {
+        (js as any)[OAS_EXTENSIONS_MARKER] = oasExtensions;
+      }
+    },
+  }) as Record<string, any>;
 
-        if (componentName) {
-          (js as any)[COMPONENT_ID_MARKER] = componentName;
-        }
+  // Remove $schema (not valid inside OpenAPI schema objects)
+  const { $schema, $defs, ...jsonSchema } = raw;
 
-        const oasExtensions = normalizeOasMetaExtensions(
-          zodSchema as unknown as z4.ZodType,
-          opts.env
-        );
+  let shared: Record<string, OpenAPIV3.SchemaObject> = {};
+  let processedSchema: Record<string, unknown> = jsonSchema;
 
-        if (oasExtensions) {
-          (js as any)[OAS_EXTENSIONS_MARKER] = oasExtensions;
-        }
-      },
-    }) as Record<string, any>;
-
-    // Remove $schema (not valid inside OpenAPI schema objects)
-    const { $schema, $defs, ...jsonSchema } = raw;
-
-    let shared: Record<string, OpenAPIV3.SchemaObject> = {};
-    let processedSchema: Record<string, unknown> = jsonSchema;
-
-    // z4.toJSONSchema() emits `$defs` for recursive schemas (e.g. FilterCondition
-    // with self-referencing and/or/not). OpenAPI 3.0 doesn't support inline `$defs`
-    // — refs must point to `#/components/schemas/...`. Extract them.
-    if ($defs && typeof $defs === 'object' && Object.keys($defs).length > 0) {
-      const extracted = extractDefsToShared($defs, jsonSchema);
-      processedSchema = extracted.schema;
-      shared = extracted.shared;
-    }
-
-    // Convert JSON Schema (OAS 3.1) constructs to OpenAPI 3.0 equivalents
-    processedSchema = jsonSchemaToOpenApi30(processedSchema);
-    for (const [key, value] of Object.entries(shared)) {
-      shared[key] = jsonSchemaToOpenApi30(
-        value as Record<string, unknown>
-      ) as OpenAPIV3.SchemaObject;
-    }
-
-    // Ensure z.object() schemas carry `additionalProperties: false`.
-    // z4.toJSONSchema() only adds this for .strict() objects, but plain z.object()
-    // schemas reject extra keys at runtime — match the @kbn/config-schema behaviour.
-    processedSchema = addAdditionalPropertiesFalse(processedSchema);
-    for (const [key, value] of Object.entries(shared)) {
-      shared[key] = addAdditionalPropertiesFalse(
-        value as Record<string, any>
-      ) as OpenAPIV3.SchemaObject;
-    }
-
-    // Convert JSON Schema (OAS 3.1) constructs to OpenAPI 3.0 equivalents
-    processedSchema = jsonSchemaToOpenApi30(processedSchema);
-
-    // Extract any registered schemas that were inlined by z4.toJSONSchema()
-    // (single-use, non-recursive schemas don't appear in $defs — we hoist them
-    // here so they still become named components).
-    processedSchema = hoistMarkedSchemas(processedSchema, shared) as Record<string, unknown>;
-    processedSchema = mergeInlineOasExtensions(processedSchema) as Record<string, unknown>;
-
-    for (const [key, value] of Object.entries(shared)) {
-      shared[key] = mergeInlineOasExtensions(
-        hoistMarkedSchemas(value, shared)
-      ) as OpenAPIV3.SchemaObject;
-    }
-
-    // Apply the same JSON-description post-processing as v3
-    const description = (unwrapped as any).description;
-    const processed = applyJsonDescription(processedSchema as Record<string, any>, description);
-
-    return {
-      shared,
-      schema: processed as OpenAPIV3.SchemaObject,
-    };
+  // z.toJSONSchema() emits `$defs` for recursive schemas (e.g. FilterCondition
+  // with self-referencing and/or/not). OpenAPI 3.0 doesn't support inline `$defs`
+  // — refs must point to `#/components/schemas/...`. Extract them.
+  if ($defs && typeof $defs === 'object' && Object.keys($defs).length > 0) {
+    const extracted = extractDefsToShared($defs, jsonSchema);
+    processedSchema = extracted.schema;
+    shared = extracted.shared;
   }
 
-  // v3 path (unchanged)
+  // Convert JSON Schema (OAS 3.1) constructs to OpenAPI 3.0 equivalents
+  processedSchema = jsonSchemaToOpenApi30(processedSchema);
+  for (const [key, value] of Object.entries(shared)) {
+    shared[key] = jsonSchemaToOpenApi30(value as Record<string, unknown>) as OpenAPIV3.SchemaObject;
+  }
+
+  // Ensure z.object() schemas carry `additionalProperties: false`.
+  // z.toJSONSchema() only adds this for .strict() objects, but plain z.object()
+  // schemas reject extra keys at runtime — match the @kbn/config-schema behaviour.
+  processedSchema = addAdditionalPropertiesFalse(processedSchema);
+  for (const [key, value] of Object.entries(shared)) {
+    shared[key] = addAdditionalPropertiesFalse(
+      value as Record<string, any>
+    ) as OpenAPIV3.SchemaObject;
+  }
+
+  // Convert JSON Schema (OAS 3.1) constructs to OpenAPI 3.0 equivalents
+  processedSchema = jsonSchemaToOpenApi30(processedSchema);
+
+  // Extract any registered schemas that were inlined by z.toJSONSchema()
+  // (single-use, non-recursive schemas don't appear in $defs — we hoist them
+  // here so they still become named components).
+  processedSchema = hoistMarkedSchemas(processedSchema, shared) as Record<string, unknown>;
+  processedSchema = mergeInlineOasExtensions(processedSchema) as Record<string, unknown>;
+
+  for (const [key, value] of Object.entries(shared)) {
+    shared[key] = mergeInlineOasExtensions(
+      hoistMarkedSchemas(value, shared)
+    ) as OpenAPIV3.SchemaObject;
+  }
+
+  // Apply the same JSON-description post-processing
+  const description = (unwrapped as any).description;
+  const processed = applyJsonDescription(processedSchema as Record<string, any>, description);
+
   return {
-    shared: {},
-    schema: zodToJsonSchema(unwrapped, {
-      target: 'openApi3',
-      $refStrategy: 'none',
-      postProcess: jsonDescription,
-    }) as OpenAPIV3.SchemaObject,
+    shared,
+    schema: processed as OpenAPIV3.SchemaObject,
   };
 };
 
