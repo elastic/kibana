@@ -523,8 +523,9 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
   i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
 
-export const DEFAULT_ALERT_CLOSE_REASONS_KEY = 'securitySolution:alertCloseReasons' as const;
-export const DEFAULT_ALERT_CLOSE_REASONS_VALUE = [] as const;
+export const DEFAULT_DETECTIONS_CLOSE_REASONS_KEY =
+  'securitySolution:detectionsCloseReasons' as const;
+export const DEFAULT_DETECTIONS_CLOSE_REASONS_VALUE = [] as const;
 
 /**
  * Max length for the comments within security solution
