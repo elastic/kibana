@@ -105,7 +105,7 @@ export function generateOtelcolConfig(
                       'pipelines',
                       suffix,
                       addSuffixToOtelcolPipelinesComponents(
-                        adjustPipelineSignalType(stream, packageInfo),
+                        alignPipelineSignalType(stream, packageInfo),
                         suffix
                       )
                     ).pipelines ?? {},
@@ -315,7 +315,11 @@ function conditionallyAddApmToPipelines(
   return result;
 }
 
-function adjustPipelineSignalType(
+/**
+ * Adjust the signal type of the pipeline to the data stream type.
+ * This is needed when the data stream type is changed by configuration and the pipeline is not dynamic.
+ */
+function alignPipelineSignalType(
   stream: FullAgentPolicyInputStream,
   packageInfo: PackageInfo | undefined
 ): Record<OTelCollectorPipelineID, any> {
