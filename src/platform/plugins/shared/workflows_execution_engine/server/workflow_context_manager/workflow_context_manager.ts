@@ -278,20 +278,15 @@ export class WorkflowContextManager {
         ...(contextOverride.consts || {}),
       };
 
+      stepContext.inputs = {
+        ...stepContext.inputs,
+        ...(contextOverride.inputs || {}),
+      };
+
       stepContext.event = {
-        ...(typeof stepContext.event === 'object' ? stepContext.event : {}),
+        ...stepContext.event,
         ...(contextOverride.event || {}),
       } as StepContext['event'];
-
-      if (
-        stepContext.event &&
-        typeof stepContext.event === 'object' &&
-        'inputs' in stepContext.event
-      ) {
-        // TODO(https://github.com/elastic/security-team/issues/16526): Remove this compatibility bridge.
-        // We copy event.inputs into context.inputs for backwards compatibility with previous workflows.
-        stepContext.inputs = stepContext.event.inputs as Record<string, unknown>;
-      }
 
       stepContext.execution = {
         ...stepContext.execution,
