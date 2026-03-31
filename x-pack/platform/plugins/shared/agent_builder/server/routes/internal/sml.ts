@@ -135,15 +135,6 @@ export function registerInternalSmlRoutes({
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
         const conversationClient = await conversationsService.getScopedClient({ request });
-        const resolvedItems = await resolveSmlAttachItems({
-          items,
-          sml,
-          esClient,
-          request,
-          spaceId,
-          savedObjectsClient,
-          logger,
-        });
 
         const conversationForAttach = await conversationClient.get(conversationId);
         if (conversationForAttach.rounds.length === 0) {
@@ -153,6 +144,16 @@ export function registerInternalSmlRoutes({
             },
           });
         }
+
+        const resolvedItems = await resolveSmlAttachItems({
+          items,
+          sml,
+          esClient,
+          request,
+          spaceId,
+          savedObjectsClient,
+          logger,
+        });
 
         const stateManager = createAttachmentStateManager(conversationForAttach.attachments ?? [], {
           getTypeDefinition: attachmentsService.getTypeDefinition,
@@ -170,29 +171,35 @@ export function registerInternalSmlRoutes({
               };
             }
 
-            const added = await stateManager.add(r.attachment, ATTACHMENT_REF_ACTOR.user, {
-              request,
-              spaceId,
-              savedObjectsClient,
-            });
+            try {
+              const added = await stateManager.add(r.attachment, ATTACHMENT_REF_ACTOR.system, {
+                request,
+                spaceId,
+                savedObjectsClient,
+              });
 
-            return {
-              success: true,
-              chunk_id: r.chunk_id,
-              conversation_attachment_id: added.id,
-              attachment_type: r.attachment.type,
-              message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.chunk_id}'`,
-            };
+              return {
+                success: true,
+                chunk_id: r.chunk_id,
+                conversation_attachment_id: added.id,
+                attachment_type: r.attachment.type,
+                message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.chunk_id}'`,
+              };
+            } catch (e) {
+              return {
+                success: false,
+                chunk_id: r.chunk_id,
+                attachment_type: r.attachment.type,
+                message: e instanceof Error ? e.message : String(e),
+              };
+            }
           })
         );
 
         // Update the conversation with the new attachments
         if (resultItems.some((r) => r.success)) {
           const latestConversation = await conversationClient.get(conversationId);
-          // get the new attachment refs
-          const newRefs = stateManager
-            .getAccessedRefs()
-            .map((ref) => ({ ...ref, actor: ATTACHMENT_REF_ACTOR.system }));
+          const newRefs = stateManager.getAccessedRefs();
 
           const lastRoundIndex = latestConversation.rounds.length - 1;
           const updatedRounds = applyAttachmentRefsToRounds(
