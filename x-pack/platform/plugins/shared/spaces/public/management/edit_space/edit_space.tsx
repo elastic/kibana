@@ -232,7 +232,7 @@ export const EditSpace: FC<PageProps> = ({
                       <React.Fragment>
                         {userActiveSpace?.id !== id ? (
                           <EuiButton
-                            iconType="send"
+                            iconType="merge"
                             href={addSpaceIdToPath(
                               serverBasePath,
                               id,
