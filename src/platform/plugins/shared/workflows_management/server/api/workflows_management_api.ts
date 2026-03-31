@@ -244,7 +244,6 @@ export class WorkflowsManagementApi {
       context.metadata = metadata;
     }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       workflow,
       context,
@@ -316,19 +315,10 @@ export class WorkflowsManagementApi {
 
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
     const { event, ...manualInputs } = inputs;
-
-    let resolvedEvent = event;
-
-    if (!event) {
-      resolvedEvent = {
-        inputs: manualInputs,
-      };
-    }
-
     const context = {
-      event: resolvedEvent,
-      trigger: 'manual', // TODO(https://github.com/elastic/security-team/issues/16526): Remove once trigger context is properly resolved.
+      event,
       spaceId,
+      inputs: manualInputs,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
