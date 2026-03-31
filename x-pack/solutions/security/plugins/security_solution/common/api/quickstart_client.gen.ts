@@ -240,7 +240,7 @@ import type {
   FindAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type {
-  InternalUploadAssetCriticalityRecordsResponse,
+  InternalUploadAssetCriticalityV2CsvResponse,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
@@ -2507,11 +2507,19 @@ providing you with the most current and effective threat detection capabilities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async internalUploadAssetCriticalityRecords(props: InternalUploadAssetCriticalityRecordsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InternalUploadAssetCriticalityRecords`);
+  /**
+    * Uploads a CSV file to assign asset criticality.
+
+CSV must contain header row with "type" and "criticality_level" columns, in addition to ECS fields used to match entities in the entity store (e.g. "host.name", "user.id", "user.email").
+
+Each row will match up to 10,000 entities.
+
+    */
+  async internalUploadAssetCriticalityV2Csv(props: InternalUploadAssetCriticalityV2CsvProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InternalUploadAssetCriticalityV2Csv`);
     return this.kbnClient
-      .request<InternalUploadAssetCriticalityRecordsResponse>({
-        path: '/internal/asset_criticality/upload_csv',
+      .request<InternalUploadAssetCriticalityV2CsvResponse>({
+        path: '/internal/asset_criticality/upload_csv_v2',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -3867,7 +3875,7 @@ export interface InstallMigrationRulesProps {
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
 }
-export interface InternalUploadAssetCriticalityRecordsProps {
+export interface InternalUploadAssetCriticalityV2CsvProps {
   attachment: FormData;
 }
 export interface ListEntitiesProps {
