@@ -5,50 +5,35 @@
  * 2.0.
  */
 
-import { filter, type Observable, type Subscription } from 'rxjs';
-import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
-import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { filter, ignoreElements, merge, tap, type Observable } from 'rxjs';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE, attachmentToDashboardState } from '@kbn/dashboard-agent-common';
-import {
-  type VersionedAttachment,
-  ATTACHMENT_REF_OPERATION,
-  getLatestVersion,
-} from '@kbn/agent-builder-common/attachments';
-export interface OnAttachmentMountParams extends AttachmentLifecycleParams<DashboardAttachment> {
-  dashboardPlugin: DashboardStart;
+import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import { createManualChanges$ } from './manual_changes_tracker';
+
+export interface DashboardAttachmentMountSyncParams {
+  api: DashboardApi;
   chat$: Observable<ChatEvent>;
+  getAttachment: () => DashboardAttachment;
+  updateOrigin: (origin: string) => Promise<unknown>;
+  addAttachment: (attachment: AttachmentInput) => void;
 }
 
-/**
- * Creates the onAttachmentMount handler for dashboard attachments.
- * This handler manages:
- * - Origin sync: Links attachment to saved dashboard when dashboard is saved
- * - (Future) Manual changes sync
- * - (Future) Live changes sync from chat via agentBuilder.chat$
- */
-export const onAttachmentMount = ({
-  dashboardPlugin,
+export const createDashboardAttachmentMountSync$ = ({
+  api,
   chat$,
   getAttachment,
   updateOrigin,
-}: OnAttachmentMountParams) => {
-  let savedObjectIdSubscription: Subscription | undefined;
-  let liveChangesSubscription: Subscription | undefined;
+  addAttachment,
+}: DashboardAttachmentMountSyncParams): Observable<never> => {
+  let previousSavedObjectId = api.savedObjectId$.value;
 
-  // Subscribe to dashboard API changes to manage savedObjectId$ subscription lifecycle
-  const apiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
-    savedObjectIdSubscription?.unsubscribe();
-    savedObjectIdSubscription = undefined;
-    liveChangesSubscription?.unsubscribe();
-    liveChangesSubscription = undefined;
-    if (!api) return;
-
-    let previousSavedObjectId = api.savedObjectId$.value;
-
-    savedObjectIdSubscription = api.savedObjectId$.subscribe(async (currentSavedObjectId) => {
+  const savedDashboardOriginSync$ = api.savedObjectId$.pipe(
+    tap((currentSavedObjectId) => {
       const currentAttachment = getAttachment();
       // Only update origin if:
       // there is an id to update to (currentId is not undefined)
@@ -60,14 +45,20 @@ export const onAttachmentMount = ({
       const shouldUpdate =
         currentSavedObjectId &&
         currentSavedObjectId !== currentAttachment.origin &&
-        (!currentAttachment.origin || previousSavedObjectId === currentAttachment.origin);
+        (!currentAttachment.origin ||
+          previousSavedObjectId === currentAttachment.origin ||
+          currentSavedObjectId === currentAttachment.origin);
       if (shouldUpdate) {
-        await updateOrigin(currentSavedObjectId);
+        void updateOrigin(currentSavedObjectId);
       }
       previousSavedObjectId = currentSavedObjectId;
-    });
+    }),
+    ignoreElements()
+  );
 
-    liveChangesSubscription = chat$.pipe(filter(isRoundCompleteEvent)).subscribe((event) => {
+  const agentLiveUpdates$ = chat$.pipe(
+    filter(isRoundCompleteEvent),
+    tap((event) => {
       const updatedVersionedAttachment = event.data.attachments?.find(
         (attachment): attachment is VersionedAttachment<typeof DASHBOARD_ATTACHMENT_TYPE> =>
           attachment.type === DASHBOARD_ATTACHMENT_TYPE &&
@@ -91,11 +82,11 @@ export const onAttachmentMount = ({
         return;
       }
 
-      // Get the latest version's data
       const latestVersion = getLatestVersion(updatedVersionedAttachment);
       if (!latestVersion) {
         return;
       }
+
       const attachment: DashboardAttachment = {
         id: updatedVersionedAttachment.id,
         type: DASHBOARD_ATTACHMENT_TYPE,
@@ -103,13 +94,19 @@ export const onAttachmentMount = ({
         origin: updatedVersionedAttachment.origin,
       };
       api.setState(attachmentToDashboardState(attachment));
-      setTimeout(() => api!.scrollToBottom(), 0);
-    });
-  });
+    }),
+    ignoreElements()
+  );
 
-  return () => {
-    apiSubscription.unsubscribe();
-    savedObjectIdSubscription?.unsubscribe();
-    liveChangesSubscription?.unsubscribe();
-  };
+  const manualChanges$ = createManualChanges$({
+    api,
+    getAttachment,
+  }).pipe(
+    tap((attachment) => {
+      addAttachment(attachment);
+    }),
+    ignoreElements()
+  );
+
+  return merge(savedDashboardOriginSync$, agentLiveUpdates$, manualChanges$);
 };

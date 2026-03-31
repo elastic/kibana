@@ -133,6 +133,7 @@ import {
   registerEntityStoreSnapshotTask,
   registerEntityStoreHealthTask,
 } from './lib/entity_analytics/entity_store/tasks';
+import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers/accesses';
 import { communicatesWithMaintainer } from './lib/entity_analytics/maintainers/communicates_with';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
@@ -356,6 +357,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     if (!experimentalFeatures.entityStoreDisabled) {
+      plugins.entityStore?.registerEntityMaintainer(accessesFrequentlyMaintainer);
       plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
 
       registerEntityStoreFieldRetentionEnrichTask({
@@ -435,6 +437,15 @@ export class Plugin implements ISecuritySolutionPlugin {
         featureId: 'defend_insights',
         featureName: 'Automatic Troubleshooting',
         featureDescription: 'Automatic Troubleshooting inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: 'security_search_inference_parent',
+        featureId: 'attack_discovery',
+        featureName: 'Attack Discovery',
+        featureDescription: 'Attack Discovery inference endpoint configuration',
         taskType: 'chat_completion',
         recommendedEndpoints: [],
       });
