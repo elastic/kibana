@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/global-search-test-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/global-search-test-plugin'
+  title: '@kbn/global-search-test-plugin'
   description: Moon project for @kbn/global-search-test-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: x-pack/platform/test/plugin_functional/plugins/global_search_test
+  sourceRoot: x-pack/platform/test/plugin_functional/plugins/global_search_test
 dependsOn:
   - '@kbn/core'
   - '@kbn/global-search-plugin'

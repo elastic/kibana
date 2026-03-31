@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/router-utils'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-exploration-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/router-utils'
+  title: '@kbn/router-utils'
   description: Moon project for @kbn/router-utils
   channel: ''
   owner: '@elastic/obs-exploration-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-router-utils
+  sourceRoot: src/platform/packages/shared/kbn-router-utils
 dependsOn: []
 tags:
   - shared-common
@@ -32,14 +31,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

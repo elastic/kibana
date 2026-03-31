@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/custom-integrations-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/fleet'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/custom-integrations-plugin'
+  title: '@kbn/custom-integrations-plugin'
   description: Moon project for @kbn/custom-integrations-plugin
   channel: ''
   owner: '@elastic/fleet'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/custom_integrations
+  sourceRoot: src/platform/plugins/shared/custom_integrations
 dependsOn:
   - '@kbn/core'
   - '@kbn/kibana-react-plugin'
@@ -41,14 +40,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
