@@ -63,40 +63,40 @@ describe(
 
           cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
         });
+
+        it('should display Artifacts in Manage side panel', () => {
+          loginWithReadAccess();
+
+          cy.visit(APP_PATH);
+
+          essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ARTIFACTS);
+          cy.get(essSecurityHeaders.ARTIFACTS).should('exist');
+        });
+
+        it('should be able to navigate to Endpoint Exceptions from the Artifacts side nav link', () => {
+          loginWithReadAccess();
+          cy.visit(APP_PATH);
+
+          essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ARTIFACTS);
+          cy.get(essSecurityHeaders.ARTIFACTS).click();
+
+          cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
+        });
+
+        // todo: add 'should NOT' test case when Endpoint Exceptions sub-feature privilege is separated from Security
       });
 
-      it('should display Artifacts in Manage side panel', () => {
-        loginWithReadAccess();
+      describe('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
+        it('should display Artifacts in Assets side panel ', () => {
+          // testing with t3_analyst with WRITE access, as we don't support custom roles on serverless yet
+          login(ROLE.t3_analyst);
 
-        cy.visit(APP_PATH);
+          cy.visit(APP_PATH);
 
-        essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ARTIFACTS);
-        cy.get(essSecurityHeaders.ARTIFACTS).should('exist');
-      });
-
-      it('should be able to navigate to Endpoint Exceptions from the Artifacts side nav link', () => {
-        loginWithReadAccess();
-        cy.visit(APP_PATH);
-
-        essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ARTIFACTS);
-        cy.get(essSecurityHeaders.ARTIFACTS).click();
-
-        cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
-      });
-
-      // todo: add 'should NOT' test case when Endpoint Exceptions sub-feature privilege is separated from Security
-    });
-
-    describe('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
-      it('should display Artifacts in Assets side panel ', () => {
-        // testing with t3_analyst with WRITE access, as we don't support custom roles on serverless yet
-        login(ROLE.t3_analyst);
-
-        cy.visit(APP_PATH);
-
-        serverlessSecurityHeaders.showMoreItems();
-        serverlessSecurityHeaders.openNavigationPanelFor(serverlessSecurityHeaders.ARTIFACTS);
-        cy.get(serverlessSecurityHeaders.ARTIFACTS).should('exist');
+          serverlessSecurityHeaders.showMoreItems();
+          serverlessSecurityHeaders.openNavigationPanelFor(serverlessSecurityHeaders.ARTIFACTS);
+          cy.get(serverlessSecurityHeaders.ARTIFACTS).should('exist');
+        });
 
         // todo: add 'should NOT' test case when custom roles are available on serverless
       });

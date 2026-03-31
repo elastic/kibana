@@ -324,38 +324,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       );
     }, [labels.pageAboutInfo, secondaryPageInfo]);
 
-    const actionsToDisplay: Action[] = useMemo(
-      () => [
-        ...(areEndpointExceptionsMovedUnderManagementFFEnabled
-          ? [
-              {
-                key: 'ImportButton',
-                icon: 'download',
-                label: labels.pageImportButtonTitle,
-                onClick: handleImport,
-                disabled: !allowCardCreateAction,
-              },
-              {
-                key: 'ExportButton',
-                icon: 'upload',
-                label: labels.pageExportButtonTitle,
-                onClick: handleExport,
-              },
-            ]
-          : []),
-
-        ...(additionalActions ?? []),
-      ],
-      [
-        additionalActions,
-        allowCardCreateAction,
-        areEndpointExceptionsMovedUnderManagementFFEnabled,
-        handleExport,
-        handleImport,
-        labels.pageExportButtonTitle,
-        labels.pageImportButtonTitle,
-      ]
-    );
 
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
