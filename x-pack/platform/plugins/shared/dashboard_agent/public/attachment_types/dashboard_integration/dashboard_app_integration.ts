@@ -7,39 +7,18 @@
 
 import { filter, Observable, tap, ignoreElements, type Subscription } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
-  dashboardStateToAttachment,
   attachmentToDashboardState,
 } from '@kbn/dashboard-agent-common';
-import type { DashboardAttachment, DashboardAttachmentData } from '@kbn/dashboard-agent-common/types';
+import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { createManualChanges$ } from './manual_changes_tracker';
-
-const getCurrentDashboardAttachment = ({
-  api,
-  attachmentId,
-}: {
-  api: DashboardApi;
-  attachmentId: string;
-}): AttachmentInput<typeof DASHBOARD_ATTACHMENT_TYPE, DashboardAttachmentData> | undefined => {
-  const currentDashboardState = api.getSerializedState().attributes;
-
-  if (!currentDashboardState) {
-    return;
-  }
-
-  return {
-    id: attachmentId,
-    type: DASHBOARD_ATTACHMENT_TYPE,
-    data: dashboardStateToAttachment(currentDashboardState),
-    origin: api.savedObjectId$.getValue(),
-  };
-};
+import { serializeDashboardAttachment } from './serialize_dashboard_attachment';
 
 /**
  * Creates a subscription that syncs the dashboard's saved object ID to the attachment's origin.
@@ -156,9 +135,10 @@ export const registerDashboardAppIntegration = ({
 
         if (shouldUpdate && pendingDashboardAttachmentId === attachmentId) {
           // Re-add the attachment with updated origin
-          const updatedAttachment = getCurrentDashboardAttachment({
+          const updatedAttachment = serializeDashboardAttachment({
             api,
             attachmentId,
+            origin: currentSavedObjectId,
           });
           if (updatedAttachment) {
             agentBuilder.addAttachment(updatedAttachment);
@@ -268,17 +248,19 @@ export const registerDashboardAppIntegration = ({
 
       // No existing dashboard attachment - create a new pending attachment
       pendingDashboardAttachmentId = uuidv4();
+      const savedObjectId = api.savedObjectId$.getValue();
 
-      const attachment = getCurrentDashboardAttachment({
+      const attachment = serializeDashboardAttachment({
         api,
         attachmentId: pendingDashboardAttachmentId,
+        origin: savedObjectId,
       });
       if (!attachment || !attachment.data) {
         return;
       }
 
       agentBuilder.addAttachment(attachment);
-      setupPendingAttachmentOriginSync(pendingDashboardAttachmentId, attachment.origin);
+      setupPendingAttachmentOriginSync(pendingDashboardAttachmentId, savedObjectId);
 
       // Set current attachment for manual changes tracking
       currentAttachment = {

@@ -9,8 +9,8 @@ import { debounceTime, filter, map, merge, skip, type Observable } from 'rxjs';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { DASHBOARD_ATTACHMENT_TYPE, dashboardStateToAttachment } from '@kbn/dashboard-agent-common';
 import { childrenUnsavedChanges$ } from '@kbn/presentation-publishing';
+import { serializeDashboardAttachment } from './serialize_dashboard_attachment';
 
 export interface ManualChangesTrackerParams {
   api: DashboardApi;
@@ -61,17 +61,11 @@ export const createManualChanges$ = ({
         return undefined;
       }
 
-      const currentDashboardState = api.getSerializedState().attributes;
-      if (!currentDashboardState) {
-        return undefined;
-      }
-
-      return {
-        id: currentAttachment.id,
-        type: DASHBOARD_ATTACHMENT_TYPE,
-        data: dashboardStateToAttachment(currentDashboardState),
+      return serializeDashboardAttachment({
+        api,
+        attachmentId: currentAttachment.id,
         origin: currentAttachment.origin,
-      };
+      });
     }),
     filter((attachment): attachment is AttachmentInput => attachment !== undefined)
   );
