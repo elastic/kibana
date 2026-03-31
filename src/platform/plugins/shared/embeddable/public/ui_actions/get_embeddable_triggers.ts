@@ -10,13 +10,12 @@
 import type { HasSupportedTriggers } from '@kbn/presentation-publishing';
 import {
   ON_APPLY_FILTER,
-  ON_OPEN_PANEL_MENU,
   ON_SELECT_RANGE,
   ON_CLICK_VALUE,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export function getEmbeddableTriggers(embeddable: HasSupportedTriggers) {
-  return [ON_OPEN_PANEL_MENU, ...ensureNestedTriggers(embeddable.supportedTriggers())];
+  return ensureNestedTriggers(embeddable.supportedTriggers());
 }
 
 /**

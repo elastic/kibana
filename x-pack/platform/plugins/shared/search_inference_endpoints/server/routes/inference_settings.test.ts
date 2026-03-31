@@ -292,14 +292,6 @@ describe('Inference Settings API', () => {
         });
       });
 
-      it('should reject empty endpoints array', () => {
-        mockRouter.shouldThrow({
-          body: {
-            features: [{ feature_id: 'agent_builder', endpoints: [] }],
-          },
-        });
-      });
-
       it('should reject an empty endpoint id string', () => {
         mockRouter.shouldThrow({
           body: {

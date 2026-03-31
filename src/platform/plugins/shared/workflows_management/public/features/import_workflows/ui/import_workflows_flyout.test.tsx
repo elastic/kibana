@@ -772,4 +772,81 @@ describe('ImportWorkflowsFlyout', () => {
       expect(onClose).toHaveBeenCalled();
     });
   });
+
+  describe('parse errors', () => {
+    it('should show parse errors callout when preflight returns parseErrors', async () => {
+      const clientResult = createPreflightResult({
+        format: 'zip',
+        workflows: [createWorkflowPreview({ id: 'w-1', name: 'Valid' })],
+        parseErrors: [
+          'Entry readme.txt is not a .yml file',
+          'Unexpected nested entry subdir/w.yml',
+        ],
+      });
+      mockParseImportFile.mockResolvedValue(clientResult);
+      mockMgetWorkflows.mockResolvedValue([]);
+
+      renderFlyout();
+
+      const input = getFileInput();
+      fireEvent.change(input, {
+        target: { files: [createSmallFile('test.zip', 'zip-content')] },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/2 lines were skipped due to parse errors/)).toBeInTheDocument();
+      });
+    });
+
+    it('should display both conflict and parse error callouts simultaneously', async () => {
+      const clientResult = createPreflightResult({
+        format: 'zip',
+        workflows: [createWorkflowPreview({ id: 'w-1', name: 'Existing' })],
+        parseErrors: ['Entry readme.txt is not a .yml file'],
+      });
+      mockParseImportFile.mockResolvedValue(clientResult);
+      mockMgetWorkflows.mockResolvedValue([{ id: 'w-1', name: 'Existing' }]);
+
+      renderFlyout();
+
+      const input = getFileInput();
+      fireEvent.change(input, {
+        target: { files: [createSmallFile('test.zip', 'zip-content')] },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('import-workflows-conflicts')).toBeInTheDocument();
+        expect(screen.getByText(/1 line was skipped due to parse errors/)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('import error handling', () => {
+    it('should show error toast when import API call fails', async () => {
+      const clientResult = createPreflightResult({
+        workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
+      });
+      mockParseImportFile.mockResolvedValue(clientResult);
+      mockMgetWorkflows.mockResolvedValueOnce([]);
+      mockBulkCreateWorkflows.mockRejectedValueOnce(new Error('Server error'));
+
+      renderFlyout();
+
+      const input = getFileInput();
+      fireEvent.change(input, { target: { files: [createSmallFile('test.yml', 'name: Test')] } });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('import-workflows-confirm')).not.toBeDisabled();
+      });
+
+      fireEvent.click(screen.getByTestId('import-workflows-confirm'));
+
+      await waitFor(() => {
+        expect(mockToasts.addError).toHaveBeenCalledWith(
+          expect.any(Error),
+          expect.objectContaining({ title: 'Failed to import workflows' })
+        );
+      });
+    });
+  });
 });
