@@ -113,7 +113,7 @@ export const OtelLogsPanel: React.FC = () => {
     }
   }, [isMonitoringStepActive, sessionStartTime]);
 
-  const { hasData, isTroubleshootingVisible } = useTimeWindowDataDetection({
+  const { hasData, hasPreExistingData, isTroubleshootingVisible } = useTimeWindowDataDetection({
     isMonitoringActive: isMonitoringStepActive && sessionStartTime !== null,
     sessionStartTime: sessionStartTime ?? '',
     fetchInterval: FETCH_INTERVAL,
@@ -427,32 +427,34 @@ export const OtelLogsPanel: React.FC = () => {
                   defaultMessage: 'Visualize your data',
                 }
               ),
-              status: (hasData
+              status: (hasData || hasPreExistingData
                 ? 'complete'
                 : isMonitoringStepActive
                 ? 'current'
                 : 'incomplete') as EuiStepStatus,
               children: isMonitoringStepActive ? (
                 <>
-                  <ProgressIndicator
-                    title={
-                      hasData
-                        ? i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.monitoringHost',
-                            { defaultMessage: 'We are monitoring your host' }
-                          )
-                        : i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.waitingForData',
-                            { defaultMessage: 'Waiting for data to be shipped' }
-                          )
-                    }
-                    iconType="checkInCircleFilled"
-                    isLoading={!hasData}
-                    css={css`
-                      max-width: 40%;
-                    `}
-                    data-test-subj="observabilityOnboardingOtelHostDataProgressIndicator"
-                  />
+                  {!(hasPreExistingData && !hasData) && (
+                    <ProgressIndicator
+                      title={
+                        hasData
+                          ? i18n.translate(
+                              'xpack.observability_onboarding.otelLogsPanel.monitoringHost',
+                              { defaultMessage: 'We are monitoring your host' }
+                            )
+                          : i18n.translate(
+                              'xpack.observability_onboarding.otelLogsPanel.waitingForData',
+                              { defaultMessage: 'Waiting for data to be shipped' }
+                            )
+                      }
+                      iconType="checkInCircleFilled"
+                      isLoading={!hasData}
+                      css={css`
+                        max-width: 40%;
+                      `}
+                      data-test-subj="observabilityOnboardingOtelHostDataProgressIndicator"
+                    />
+                  )}
 
                   {isTroubleshootingVisible && (
                     <>
@@ -481,7 +483,7 @@ export const OtelLogsPanel: React.FC = () => {
                     </>
                   )}
 
-                  {hasData === true && visualizeActionLinks.length > 0 && (
+                  {(hasData === true || hasPreExistingData) && visualizeActionLinks.length > 0 && (
                     <>
                       <EuiSpacer />
                       <GetStartedPanel

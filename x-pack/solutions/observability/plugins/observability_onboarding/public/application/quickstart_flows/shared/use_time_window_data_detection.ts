@@ -69,7 +69,7 @@ export function useTimeWindowDataDetection({
     status: hasDataStatus,
     refetch: refetchHasData,
   } = useFetcher(
-    (callApi): Promise<{ hasData: boolean }> | undefined => {
+    (callApi): Promise<{ hasData: boolean; hasPreExistingData?: boolean }> | undefined => {
       if (!isMonitoringActive) return;
       return callApi(`GET ${endpoint}` as Parameters<typeof callApi>[0], {
         params: {
@@ -83,7 +83,11 @@ export function useTimeWindowDataDetection({
 
   useEffect(() => {
     const pendingStatusList = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
-    if (pendingStatusList.includes(hasDataStatus) || hasDataResponse?.hasData === true) {
+    if (
+      pendingStatusList.includes(hasDataStatus) ||
+      hasDataResponse?.hasData === true ||
+      hasDataResponse?.hasPreExistingData === true
+    ) {
       return;
     }
     if (hasDataResponse?.hasData === false) {
@@ -93,7 +97,13 @@ export function useTimeWindowDataDetection({
       refetchHasData();
     }, fetchInterval);
     return () => clearTimeout(timeout);
-  }, [hasDataResponse?.hasData, refetchHasData, hasDataStatus, fetchInterval]);
+  }, [
+    hasDataResponse?.hasData,
+    hasDataResponse?.hasPreExistingData,
+    refetchHasData,
+    hasDataStatus,
+    fetchInterval,
+  ]);
 
   useEffect(() => {
     if (hasDataResponse?.hasData === true && !dataReceivedTelemetrySent) {
@@ -122,6 +132,7 @@ export function useTimeWindowDataDetection({
 
   return {
     hasData: hasDataResponse?.hasData ?? false,
+    hasPreExistingData: hasDataResponse?.hasPreExistingData ?? false,
     isTroubleshootingVisible,
   };
 }

@@ -60,6 +60,7 @@ export function DataIngestStatus({
   const hasData = data?.hasData ?? false;
   const hasLogs = data?.hasLogs ?? hasData;
   const hasMetrics = data?.hasMetrics ?? hasData;
+  const hasPreExistingData = data?.hasPreExistingData ?? false;
 
   const needsMetrics = actionLinks.some((actionLink) => actionLink.requires === 'metrics');
   const isReady = needsMetrics ? hasMetrics : hasData;
@@ -67,7 +68,7 @@ export function DataIngestStatus({
   useEffect(() => {
     const pendingStatusList = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
 
-    if (pendingStatusList.includes(status) || isReady) {
+    if (pendingStatusList.includes(status) || isReady || hasPreExistingData) {
       return;
     }
 
@@ -76,7 +77,7 @@ export function DataIngestStatus({
     }, FETCH_INTERVAL);
 
     return () => clearTimeout(timeout);
-  }, [isReady, refetch, status]);
+  }, [isReady, hasPreExistingData, refetch, status]);
 
   useEffect(() => {
     if (hasData === true && !dataReceivedTelemetrySent) {
@@ -103,19 +104,21 @@ export function DataIngestStatus({
   const isTroubleshootingVisible =
     hasData === false && Date.now() - checkDataStartTime > SHOW_TROUBLESHOOTING_DELAY;
 
-  const filteredActionLinks = actionLinks.filter((actionLink) => {
-    const requires = actionLink.requires ?? 'any';
+  const filteredActionLinks = hasPreExistingData
+    ? actionLinks
+    : actionLinks.filter((actionLink) => {
+        const requires = actionLink.requires ?? 'any';
 
-    if (requires === 'logs') {
-      return hasLogs;
-    }
+        if (requires === 'logs') {
+          return hasLogs;
+        }
 
-    if (requires === 'metrics') {
-      return hasMetrics;
-    }
+        if (requires === 'metrics') {
+          return hasMetrics;
+        }
 
-    return hasData;
-  });
+        return hasData;
+      });
 
   const filteredActionLinksWithHref = filteredActionLinks.filter((actionLink) =>
     Boolean(actionLink.href)
@@ -145,15 +148,17 @@ export function DataIngestStatus({
 
   return (
     <>
-      <ProgressIndicator
-        title={progressTitle}
-        iconType="checkCircleFill"
-        isLoading={needsMetrics ? !hasMetrics : !hasData}
-        css={css`
-          max-width: 40%;
-        `}
-        data-test-subj="observabilityOnboardingKubernetesPanelDataProgressIndicator"
-      />
+      {!(hasPreExistingData && !hasData) && (
+        <ProgressIndicator
+          title={progressTitle}
+          iconType="checkCircleFill"
+          isLoading={needsMetrics ? !hasMetrics : !hasData}
+          css={css`
+            max-width: 40%;
+          `}
+          data-test-subj="observabilityOnboardingKubernetesPanelDataProgressIndicator"
+        />
+      )}
 
       {isTroubleshootingVisible && (
         <>
@@ -184,7 +189,7 @@ export function DataIngestStatus({
         </>
       )}
 
-      {hasData === true && filteredActionLinksWithHref.length > 0 && (
+      {(hasData === true || hasPreExistingData) && filteredActionLinksWithHref.length > 0 && (
         <>
           <EuiSpacer />
 

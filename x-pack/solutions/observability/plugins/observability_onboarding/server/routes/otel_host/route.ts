@@ -16,6 +16,7 @@ import {
   isNoShardsAvailableError,
   throwHasDataSearchError,
 } from '../../lib/handle_has_data_search_error';
+import { checkPreExistingData } from '../../lib/check_pre_existing_data';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
@@ -93,9 +94,11 @@ const hasOtelHostDataRoute = createObservabilityOnboardingServerRoute({
       reason: 'Authorization is checked by Elasticsearch',
     },
   },
-  async handler(resources): Promise<{ hasData: boolean }> {
+  async handler(resources): Promise<{ hasData: boolean; hasPreExistingData?: boolean }> {
     const { start, osType } = resources.params.query;
     const { elasticsearch } = await resources.context.core;
+
+    const allIndices = ['logs-*.otel-*', 'logs.otel', 'logs.otel.*', 'metrics-*.otel-*'];
 
     const filters: estypes.QueryDslQueryContainer[] = [{ range: { '@timestamp': { gte: start } } }];
     if (osType) {
@@ -105,23 +108,26 @@ const hasOtelHostDataRoute = createObservabilityOnboardingServerRoute({
       bool: { filter: filters },
     };
 
-    const [logsResult, metricsResult] = await Promise.allSettled([
-      elasticsearch.client.asCurrentUser.search({
-        index: ['logs-*.otel-*', 'logs.otel', 'logs.otel.*'],
-        ignore_unavailable: true,
-        allow_partial_search_results: true,
-        size: 0,
-        terminate_after: 1,
-        query,
-      }),
-      elasticsearch.client.asCurrentUser.search({
-        index: ['metrics-*.otel-*'],
-        ignore_unavailable: true,
-        allow_partial_search_results: true,
-        size: 0,
-        terminate_after: 1,
-        query,
-      }),
+    const [preExisting, [logsResult, metricsResult]] = await Promise.all([
+      checkPreExistingData(elasticsearch.client.asCurrentUser, allIndices, start),
+      Promise.allSettled([
+        elasticsearch.client.asCurrentUser.search({
+          index: ['logs-*.otel-*', 'logs.otel', 'logs.otel.*'],
+          ignore_unavailable: true,
+          allow_partial_search_results: true,
+          size: 0,
+          terminate_after: 1,
+          query,
+        }),
+        elasticsearch.client.asCurrentUser.search({
+          index: ['metrics-*.otel-*'],
+          ignore_unavailable: true,
+          allow_partial_search_results: true,
+          size: 0,
+          terminate_after: 1,
+          query,
+        }),
+      ]),
     ]);
 
     const resolveProbe = (result: PromiseSettledResult<estypes.SearchResponse>): boolean => {
@@ -137,7 +143,10 @@ const hasOtelHostDataRoute = createObservabilityOnboardingServerRoute({
     const hasLogs = resolveProbe(logsResult);
     const hasMetrics = resolveProbe(metricsResult);
 
-    return { hasData: hasLogs || hasMetrics };
+    return {
+      hasData: hasLogs || hasMetrics,
+      hasPreExistingData: preExisting || undefined,
+    };
   },
 });
 

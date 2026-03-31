@@ -81,7 +81,7 @@ export function CloudForwarderPanel() {
     onboardingId: data?.onboardingId,
   });
 
-  const { hasData, isTroubleshootingVisible } = useTimeWindowDataDetection({
+  const { hasData, hasPreExistingData, isTroubleshootingVisible } = useTimeWindowDataDetection({
     isMonitoringActive:
       isMonitoringStepActive && monitoringLogType !== null && sessionStartTime !== null,
     sessionStartTime: sessionStartTime ?? '',
@@ -359,32 +359,34 @@ export function CloudForwarderPanel() {
           defaultMessage: 'Visualize your data',
         }
       ),
-      status: (hasData
+      status: (hasData || hasPreExistingData
         ? 'complete'
         : isMonitoringStepActive
         ? 'current'
         : 'incomplete') as EuiStepStatus,
       children: isMonitoringStepActive ? (
         <>
-          <ProgressIndicator
-            title={
-              hasData
-                ? i18n.translate(
-                    'xpack.observability_onboarding.cloudforwarderPanel.dataReceived',
-                    { defaultMessage: 'We are receiving your AWS logs' }
-                  )
-                : i18n.translate(
-                    'xpack.observability_onboarding.cloudforwarderPanel.waitingForData',
-                    { defaultMessage: 'Waiting for data from EDOT Cloud Forwarder' }
-                  )
-            }
-            iconType="checkInCircleFilled"
-            isLoading={!hasData}
-            css={css`
-              max-width: 40%;
-            `}
-            data-test-subj="observabilityOnboardingCloudForwarderDataProgressIndicator"
-          />
+          {!(hasPreExistingData && !hasData) && (
+            <ProgressIndicator
+              title={
+                hasData
+                  ? i18n.translate(
+                      'xpack.observability_onboarding.cloudforwarderPanel.dataReceived',
+                      { defaultMessage: 'We are receiving your AWS logs' }
+                    )
+                  : i18n.translate(
+                      'xpack.observability_onboarding.cloudforwarderPanel.waitingForData',
+                      { defaultMessage: 'Waiting for data from EDOT Cloud Forwarder' }
+                    )
+              }
+              iconType="checkInCircleFilled"
+              isLoading={!hasData}
+              css={css`
+                max-width: 40%;
+              `}
+              data-test-subj="observabilityOnboardingCloudForwarderDataProgressIndicator"
+            />
+          )}
 
           {isTroubleshootingVisible && (
             <>
@@ -413,7 +415,7 @@ export function CloudForwarderPanel() {
             </>
           )}
 
-          {hasData === true && (
+          {(hasData === true || hasPreExistingData) && (
             <>
               <EuiSpacer />
               <GetStartedPanel
