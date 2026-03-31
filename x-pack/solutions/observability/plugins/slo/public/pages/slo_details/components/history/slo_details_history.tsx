@@ -13,8 +13,10 @@ import React from 'react';
 import { getDefaultRangeFromSlo, useUrlAppState } from './hooks/use_url_app_state';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { isApmIndicatorType } from '../../../../utils/slo/indicator';
 import { toDuration } from '../../../../utils/slo/duration';
 import type { TimeBounds } from '../../types';
+import { ApmSourcePanel } from '../apm_source_panel';
 import { EventsChartPanel } from '../events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
 import { CalendarPeriodPicker } from './calendar_period_picker';
@@ -38,6 +40,7 @@ export function SloDetailsHistory({ slo }: Props) {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
+      {isApmIndicatorType(slo.indicator) && <ApmSourcePanel slo={slo} />}
       <EuiFlexGroup justifyContent="flexEnd" direction="row" gutterSize="s">
         <EuiFlexItem grow css={{ maxWidth: 500 }}>
           {slo.timeWindow.type === 'calendarAligned' ? (

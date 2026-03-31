@@ -42,3 +42,31 @@ export function useFetchApmIndex(): UseFetchApmIndex {
     isError,
   };
 }
+
+export function useFetchApmTracesIndex(): UseFetchApmIndex {
+  const { apmSourcesAccess } = useKibana().services;
+
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
+    queryKey: ['fetchApmTracesIndices'],
+    queryFn: async ({ signal }) => {
+      try {
+        const response = await apmSourcesAccess.getApmIndices({ signal });
+        const { transaction, span } = response;
+        const allIndices = Array.from(
+          new Set([transaction, span].flatMap((idx) => idx.split(',')))
+        );
+        return allIndices.join(',');
+      } catch (error) {
+        // ignore error
+      }
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    data: isInitialLoading ? '' : data ?? '',
+    isLoading: isInitialLoading || isLoading || isRefetching,
+    isSuccess,
+    isError,
+  };
+}
