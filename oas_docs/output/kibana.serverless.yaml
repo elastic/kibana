@@ -14958,7 +14958,7 @@ paths:
         ...
         ```
 
-        Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
+        Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
 
         * Slack
         * Email
@@ -14971,12 +14971,12 @@ paths:
         > info
         > For more information on PagerDuty fields, see [Send a v2 Event](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/).
 
-        To retrieve connector IDs, which are required to configure rule notifications, call the [Find objects API](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-find.html) with `"type": "action"` in the request payload.
+        To retrieve connector IDs, which are required to configure rule notifications, call the [Find objects API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-findsavedobjects) with `"type": "action"` in the request payload.
 
         For detailed information on Kibana actions and alerting, and additional API calls, see:
 
         * [Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
-        * [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
+        * [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting)
         * [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
       operationId: CreateRule
       requestBody:
@@ -16250,7 +16250,7 @@ paths:
                             max_signals: 100
                             name: DNS Tunneling [Duplicate]
                             references:
-                              - https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html
+                              - https://www.elastic.co/docs/reference/machine-learning/ootb-ml-jobs-siem
                             related_integrations: []
                             required_fields: []
                             risk_score: 21
@@ -16865,9 +16865,9 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
+        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ExportRules
       parameters:
         - description: Determines whether a summary of the exported rules is returned.
@@ -17147,14 +17147,14 @@ paths:
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
-        > To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui) for more information.
+        > To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/docs/solutions/security/detect-and-alert/detections-privileges) for more information.
 
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
+        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
       parameters:
         - description: Determines whether existing rules with the same `rule_id` are overwritten.
@@ -73697,7 +73697,7 @@ components:
       description: |
         Determines if the rule acts as a building block. If yes, the value must be `default`.
         By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts.
-        For more information, refer to [About building block rules](https://www.elastic.co/guide/en/security/current/building-block-rule.html).
+        For more information, refer to [About building block rules](https://www.elastic.co/docs/solutions/security/detect-and-alert/about-building-block-rules).
       type: string
     Security_Detections_API_BulkActionEditPayload:
       anyOf:
@@ -75977,9 +75977,9 @@ components:
     Security_Detections_API_MaxSignals:
       default: 100
       description: |
-        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-ui-advanced-params) value).
+        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value).
         > info
-        > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
+        > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/docs/reference/kibana/configuration-reference/alerting-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
       minimum: 1
       type: integer
     Security_Detections_API_NewTermsFields:
@@ -77252,6 +77252,11 @@ components:
         - name
         - type
     Security_Detections_API_ResponseAction:
+      discriminator:
+        mapping:
+          .endpoint: '#/components/schemas/Security_Detections_API_EndpointResponseAction'
+          .osquery: '#/components/schemas/Security_Detections_API_OsqueryResponseAction'
+        propertyName: action_type_id
       oneOf:
         - $ref: '#/components/schemas/Security_Detections_API_OsqueryResponseAction'
         - $ref: '#/components/schemas/Security_Detections_API_EndpointResponseAction'
@@ -77468,6 +77473,15 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRuleCreateProps'
         - $ref: '#/components/schemas/Security_Detections_API_EsqlRuleCreateProps'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/Security_Detections_API_EqlRuleCreateProps'
+          esql: '#/components/schemas/Security_Detections_API_EsqlRuleCreateProps'
+          machine_learning: '#/components/schemas/Security_Detections_API_MachineLearningRuleCreateProps'
+          new_terms: '#/components/schemas/Security_Detections_API_NewTermsRuleCreateProps'
+          query: '#/components/schemas/Security_Detections_API_QueryRuleCreateProps'
+          saved_query: '#/components/schemas/Security_Detections_API_SavedQueryRuleCreateProps'
+          threat_match: '#/components/schemas/Security_Detections_API_ThreatMatchRuleCreateProps'
+          threshold: '#/components/schemas/Security_Detections_API_ThresholdRuleCreateProps'
         propertyName: type
     Security_Detections_API_RuleDescription:
       description: The rule’s description.
@@ -77485,7 +77499,7 @@ components:
         - id
     Security_Detections_API_RuleExceptionList:
       description: |
-        Array of [exception containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html), which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
+        Array of [exception containers](https://www.elastic.co/docs/solutions/security/detect-and-alert/detection-rule-concepts), which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
       type: object
       properties:
         id:
@@ -77707,10 +77721,10 @@ components:
         - timeframeEnd
     Security_Detections_API_RuleQuery:
       description: |
-        [Query](https://www.elastic.co/guide/en/kibana/8.17/search.html) used by the rule to create alerts.
+        [Query](https://www.elastic.co/docs/explore-analyze/query-filter) used by the rule to create alerts.
 
         - For indicator match rules, only the query’s results are used to determine whether an alert is generated.
-        - ES|QL rules have additional query requirements. Refer to [Create ES|QL](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-esql-rule) rules for more information.
+        - ES|QL rules have additional query requirements. Refer to [Create ES|QL](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#create-esql-rule) rules for more information.
       type: string
     Security_Detections_API_RuleReferenceArray:
       description: Array containing notes about or references to relevant information about the rule. Defaults to an empty array.
@@ -77728,6 +77742,15 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRule'
         - $ref: '#/components/schemas/Security_Detections_API_EsqlRule'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/Security_Detections_API_EqlRule'
+          esql: '#/components/schemas/Security_Detections_API_EsqlRule'
+          machine_learning: '#/components/schemas/Security_Detections_API_MachineLearningRule'
+          new_terms: '#/components/schemas/Security_Detections_API_NewTermsRule'
+          query: '#/components/schemas/Security_Detections_API_QueryRule'
+          saved_query: '#/components/schemas/Security_Detections_API_SavedQueryRule'
+          threat_match: '#/components/schemas/Security_Detections_API_ThreatMatchRule'
+          threshold: '#/components/schemas/Security_Detections_API_ThresholdRule'
         propertyName: type
     Security_Detections_API_RuleRevision:
       description: |
@@ -77764,6 +77787,15 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRuleUpdateProps'
         - $ref: '#/components/schemas/Security_Detections_API_EsqlRuleUpdateProps'
       discriminator:
+        mapping:
+          eql: '#/components/schemas/Security_Detections_API_EqlRuleUpdateProps'
+          esql: '#/components/schemas/Security_Detections_API_EsqlRuleUpdateProps'
+          machine_learning: '#/components/schemas/Security_Detections_API_MachineLearningRuleUpdateProps'
+          new_terms: '#/components/schemas/Security_Detections_API_NewTermsRuleUpdateProps'
+          query: '#/components/schemas/Security_Detections_API_QueryRuleUpdateProps'
+          saved_query: '#/components/schemas/Security_Detections_API_SavedQueryRuleUpdateProps'
+          threat_match: '#/components/schemas/Security_Detections_API_ThreatMatchRuleUpdateProps'
+          threshold: '#/components/schemas/Security_Detections_API_ThresholdRuleUpdateProps'
         propertyName: type
     Security_Detections_API_RuleVersion:
       description: |
@@ -77825,7 +77857,7 @@ components:
         - conflict
       type: string
     Security_Detections_API_SavedQueryId:
-      description: Kibana [saved search](https://www.elastic.co/guide/en/kibana/current/save-open-search.html) used by the rule to create alerts.
+      description: Kibana [saved search](https://www.elastic.co/docs/explore-analyze/discover/search-sessions) used by the rule to create alerts.
       type: string
     Security_Detections_API_SavedQueryRule:
       allOf:
@@ -80179,14 +80211,14 @@ components:
           cancel: '#/components/schemas/Security_Endpoint_Management_API_Cancel'
           execute: '#/components/schemas/Security_Endpoint_Management_API_Execute'
           get-file: '#/components/schemas/Security_Endpoint_Management_API_GetFile'
-          isolate: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+          isolate: '#/components/schemas/Security_Endpoint_Management_API_Isolate'
           kill-process: '#/components/schemas/Security_Endpoint_Management_API_KillProcess'
           memory-dump: '#/components/schemas/Security_Endpoint_Management_API_MemoryDump'
           running-processes: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
           runscript: '#/components/schemas/Security_Endpoint_Management_API_Runscript'
           scan: '#/components/schemas/Security_Endpoint_Management_API_Scan'
           suspend-process: '#/components/schemas/Security_Endpoint_Management_API_SuspendProcess'
-          unisolate: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+          unisolate: '#/components/schemas/Security_Endpoint_Management_API_Unisolate'
           upload: '#/components/schemas/Security_Endpoint_Management_API_Upload'
         propertyName: command
       oneOf:
@@ -80197,8 +80229,8 @@ components:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_Upload'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_Scan'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_Cancel'
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Isolate'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Unisolate'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_SuspendProcess'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_MemoryDump'
@@ -80265,9 +80297,12 @@ components:
       example: endpoint
       type: string
     Security_Endpoint_Management_API_ApiPageSize:
-      allOf:
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_PageSize'
-        - maximum: 1000
+      default: 10
+      description: Number of items per page
+      example: 10
+      maximum: 1000
+      minimum: 1
+      type: integer
     Security_Endpoint_Management_API_ApiSortField:
       description: Determines which field is used to sort the results.
       enum:
@@ -80980,7 +81015,10 @@ components:
         type: string
       type: array
     Security_Endpoint_Management_API_Isolate:
-      $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - description: Details of an isolate action response.
+          type: object
     Security_Endpoint_Management_API_IsolateRouteResponse:
       example:
         action: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -82114,7 +82152,10 @@ components:
       minLength: 1
       type: array
     Security_Endpoint_Management_API_Unisolate:
-      $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - description: Details of an unisolate action response.
+          type: object
     Security_Endpoint_Management_API_UnisolateRouteResponse:
       example:
         action: 233db9ea-6733-4849-9226-5a7039c7161d
