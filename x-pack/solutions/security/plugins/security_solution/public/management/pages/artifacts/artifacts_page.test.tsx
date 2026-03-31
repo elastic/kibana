@@ -12,6 +12,7 @@ import {
   BLOCKLIST_PATH,
   ENDPOINT_EXCEPTIONS_PATH,
   EVENT_FILTERS_PATH,
+  HOST_ISOLATION_EXCEPTIONS_PATH,
   TRUSTED_APPS_PATH,
 } from '../../../../common/constants';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -27,9 +28,14 @@ import {
   TRUSTED_APPS_TAB,
   TRUSTED_DEVICES_TAB,
 } from '../../common/translations';
+import { useHostIsolationExceptionsAccess } from '../../hooks/artifacts/use_host_isolation_exceptions_access';
 
 jest.mock('../../../common/components/user_privileges');
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+
+jest.mock('../../hooks/artifacts/use_host_isolation_exceptions_access');
+const mockUseHostIsolationExceptionsAccess =
+  useHostIsolationExceptionsAccess as jest.MockedFunction<typeof useHostIsolationExceptionsAccess>;
 
 jest.mock('../endpoint_exceptions/view/endpoint_exceptions', () => ({
   EndpointExceptions: () => (
@@ -67,6 +73,7 @@ const fullArtifactReadPrivileges: Partial<EndpointPrivileges> = {
   canReadTrustedDevices: true,
   canReadEventFilters: true,
   canReadHostIsolationExceptions: true,
+  canAccessHostIsolationExceptions: true,
   canReadBlocklist: true,
 };
 
@@ -85,10 +92,15 @@ describe('ArtifactsPage', () => {
     mockUseUserPrivileges.mockReturnValue({
       endpointPrivileges: fullArtifactReadPrivileges,
     });
+    mockUseHostIsolationExceptionsAccess.mockReturnValue({
+      hasAccessToHostIsolationExceptions: true,
+      isHostIsolationExceptionsAccessLoading: false,
+    });
   });
 
   afterEach(() => {
     mockUseUserPrivileges.mockReset();
+    mockUseHostIsolationExceptionsAccess.mockReset();
   });
 
   const renderArtifactsAtPath = (path: string) => {
@@ -244,5 +256,33 @@ describe('ArtifactsPage', () => {
     await waitFor(() => {
       expect(renderResult.getByTestId('artifacts-stub-trustedApps')).toBeInTheDocument();
     });
+  });
+
+  it('shows no privileges page when host isolation exceptions URL is visited without access', async () => {
+    mockUseHostIsolationExceptionsAccess.mockReturnValue({
+      hasAccessToHostIsolationExceptions: false,
+      isHostIsolationExceptionsAccessLoading: false,
+    });
+    renderResult = renderArtifactsAtPath(HOST_ISOLATION_EXCEPTIONS_PATH);
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('noPrivilegesPage')).toBeInTheDocument();
+    });
+    expect(
+      renderResult.queryByTestId('artifacts-stub-hostIsolationExceptions')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows a loading indicator while host isolation exceptions access is resolving', async () => {
+    mockUseHostIsolationExceptionsAccess.mockReturnValue({
+      hasAccessToHostIsolationExceptions: false,
+      isHostIsolationExceptionsAccessLoading: true,
+    });
+    renderResult = renderArtifactsAtPath(HOST_ISOLATION_EXCEPTIONS_PATH);
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('artifactsPage-hieAccessLoading')).toBeInTheDocument();
+    });
+    expect(renderResult.queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
   });
 });

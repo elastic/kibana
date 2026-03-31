@@ -7,7 +7,14 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiSpacer,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
@@ -15,6 +22,10 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { AdministrationListPage } from '../../components/administration_list_page';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useHttp } from '../../../common/lib/kibana';
+import { NoPrivilegesPage } from '../../../common/components/no_privileges';
+import { useHostIsolationExceptionsAccess } from '../../hooks/artifacts/use_host_isolation_exceptions_access';
+import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { AdministrationSubTab } from '../../types';
 import {
   getEndpointExceptionsListPath,
@@ -122,6 +133,7 @@ function getActiveTabFromPathname(pathname: string): AdministrationSubTab {
 export const ArtifactsPage = memo(() => {
   const location = useLocation();
   const history = useHistory();
+  const http = useHttp();
   const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
@@ -132,8 +144,21 @@ export const ArtifactsPage = memo(() => {
     canReadTrustedDevices,
     canReadEventFilters,
     canReadHostIsolationExceptions,
+    canAccessHostIsolationExceptions,
     canReadEndpointExceptions,
   } = useUserPrivileges().endpointPrivileges;
+
+  const getHostIsolationExceptionsApiClientInstance = useCallback(
+    () => HostIsolationExceptionsApiClient.getInstance(http),
+    [http]
+  );
+
+  const { hasAccessToHostIsolationExceptions, isHostIsolationExceptionsAccessLoading } =
+    useHostIsolationExceptionsAccess(
+      canAccessHostIsolationExceptions,
+      canReadHostIsolationExceptions,
+      getHostIsolationExceptionsApiClientInstance
+    );
 
   const activeTab = useMemo(() => getActiveTabFromPathname(location.pathname), [location.pathname]);
 
@@ -152,7 +177,10 @@ export const ArtifactsPage = memo(() => {
         return canReadEventFilters;
       }
       if (tab === AdministrationSubTab.hostIsolationExceptions) {
-        return canReadHostIsolationExceptions;
+        return (
+          canReadHostIsolationExceptions &&
+          (isHostIsolationExceptionsAccessLoading || hasAccessToHostIsolationExceptions)
+        );
       }
       if (tab === AdministrationSubTab.blocklist) {
         return canReadBlocklist;
@@ -167,6 +195,8 @@ export const ArtifactsPage = memo(() => {
     canReadTrustedDevices,
     canReadEventFilters,
     canReadHostIsolationExceptions,
+    isHostIsolationExceptionsAccessLoading,
+    hasAccessToHostIsolationExceptions,
     canReadBlocklist,
   ]);
 
@@ -205,9 +235,24 @@ export const ArtifactsPage = memo(() => {
         {activeTab === AdministrationSubTab.trustedApps && <TrustedAppsList />}
         {activeTab === AdministrationSubTab.trustedDevices && <TrustedDevicesList />}
         {activeTab === AdministrationSubTab.eventFilters && <EventFiltersList />}
-        {activeTab === AdministrationSubTab.hostIsolationExceptions && (
-          <HostIsolationExceptionsList />
-        )}
+        {activeTab === AdministrationSubTab.hostIsolationExceptions &&
+          isHostIsolationExceptionsAccessLoading && (
+            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="xl" data-test-subj="artifactsPage-hieAccessLoading" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        {activeTab === AdministrationSubTab.hostIsolationExceptions &&
+          !isHostIsolationExceptionsAccessLoading &&
+          !hasAccessToHostIsolationExceptions && (
+            <NoPrivilegesPage
+              docLinkSelector={({ securitySolution }) => securitySolution.privileges}
+            />
+          )}
+        {activeTab === AdministrationSubTab.hostIsolationExceptions &&
+          !isHostIsolationExceptionsAccessLoading &&
+          hasAccessToHostIsolationExceptions && <HostIsolationExceptionsList />}
         {activeTab === AdministrationSubTab.blocklist && <Blocklist />}
         <SpyRoute pageName={SecurityPageName.artifacts} />
       </TrackApplicationView>
