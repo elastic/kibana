@@ -20,6 +20,7 @@ import type {
 
 import type { HostDetailsPanelProps } from '.';
 import { HostDetailsPanelKey } from '.';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 
 export const useSelectedTab = (params: HostDetailsPanelProps, tabs: LeftPanelTabsType) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
@@ -57,6 +58,8 @@ export const useTabs = ({
   hasNonClosedAlerts,
   entityStoreEntityId,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+
   return useMemo(() => {
     const isRiskScoreTabAvailable = isRiskScoreExist && hostName;
     const riskScoreTab = isRiskScoreTabAvailable
@@ -77,9 +80,10 @@ export const useTabs = ({
           ]
         : [];
 
-    const resolutionTab = entityStoreEntityId
-      ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'host' })]
-      : [];
+    const resolutionTab =
+      entityStoreEntityId && hasEntityResolutionLicense
+        ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'host' })]
+        : [];
 
     return [...riskScoreTab, ...insightsTab, ...resolutionTab];
   }, [
@@ -91,5 +95,6 @@ export const useTabs = ({
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
     entityStoreEntityId,
+    hasEntityResolutionLicense,
   ]);
 };
