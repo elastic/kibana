@@ -19,7 +19,7 @@ import { siemReadinessLinks } from '../siem_readiness/links';
 import { links as siemMigrationsLinks } from '../siem_migrations/links';
 import { aiValueLinks } from '../reports/links';
 
-const getStartedLink: LinkItem = {
+export const onboardingLinks: LinkItem = {
   id: SecurityPageName.landing,
   title: GETTING_STARTED,
   path: ONBOARDING_PATH,
@@ -29,11 +29,13 @@ const getStartedLink: LinkItem = {
       defaultMessage: 'Getting started',
     }),
   ],
-  hideTimeline: true,
+  sideNavIcon: 'launch',
+  sideNavFooter: true,
   skipUrlState: true,
+  hideTimeline: true,
 };
 
-export const onboardingLinks: LinkItem = {
+export const launchPadLinks: LinkItem = {
   id: SecurityPageName.launchpad,
   title: LAUNCHPAD,
   path: ONBOARDING_PATH,
@@ -45,7 +47,7 @@ export const onboardingLinks: LinkItem = {
   categories: [
     {
       type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.landing, SecurityPageName.aiValue],
+      linkIds: [SecurityPageName.landing, SecurityPageName.siemReadiness, SecurityPageName.aiValue],
     },
     {
       label: i18n.translate('xpack.securitySolution.appLinks.category.migrations', {
@@ -54,7 +56,7 @@ export const onboardingLinks: LinkItem = {
       linkIds: [SecurityPageName.siemMigrationsLanding, SecurityPageName.siemMigrationsDashboards],
     },
   ],
-  links: [getStartedLink, aiValueLinks, siemMigrationsLinks, siemReadinessLinks],
+  links: [onboardingLinks, aiValueLinks, siemMigrationsLinks, siemReadinessLinks],
   sideNavIcon: 'launch',
   sideNavFooter: true,
   skipUrlState: true,

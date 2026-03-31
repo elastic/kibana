@@ -296,8 +296,10 @@ const usePanelBottomOffset = (): string | undefined => {
  */
 export const SecuritySideNav: React.FC = () => {
   const { uiSettings, serverless } = useKibana().services;
-  const securityClassicNavUpdate = useIsExperimentalFeatureEnabled('securityClassicNavUpdate');
-  const isClassicNavUpdateLayout = securityClassicNavUpdate && serverless == null;
+  const isSecurityClassicNavUpdateEnabled = useIsExperimentalFeatureEnabled(
+    'securityClassicNavUpdate'
+  );
+  const isClassicNavUpdateLayout = isSecurityClassicNavUpdateEnabled && serverless == null;
 
   const navLinkInteractionVariant: SolutionSideNavInteractionVariant = isClassicNavUpdateLayout
     ? 'unifiedRow'
