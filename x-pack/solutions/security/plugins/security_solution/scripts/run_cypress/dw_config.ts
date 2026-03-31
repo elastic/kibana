@@ -25,10 +25,12 @@ const DYNAMIC_RUNNER_WEIGHTS: Record<string, number> = {
 
 /**
  * Reduced weights for runners when the spec file filters by a single SIEM version.
- * `getArtifactMockedDataTests` produces ~40 tests total but only ~8 per SIEM version.
+ * `getArtifactMockedDataTests` produces ~40 tests total but only ~5 per SIEM version
+ * on serverless (no `read` role tests) and ~8 on ESS. Using 5 since most split specs
+ * now skip serverless for non-latest versions, and the remaining v5 spec runs 5 tests.
  */
 const FILTERED_RUNNER_WEIGHTS: Record<string, number> = {
-  getArtifactMockedDataTests: 8,
+  getArtifactMockedDataTests: 5,
 };
 
 /**

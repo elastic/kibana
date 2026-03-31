@@ -71,6 +71,12 @@ const ARTIFACTS = [
 // Ordered list — a new version should be appended here and in common/constants.ts
 const SIEM_VERSIONS = ['siem', 'siemV2', 'siemV3', 'siemV4', 'siemV5'];
 
+// On serverless, the RBAC runner ignores siemVersionFilter and always tests
+// SECURITY_FEATURE_ID (the latest version). Only the latest-version RBAC spec
+// needs to run on serverless; older versions would just redundantly re-run the
+// same siemV5 tests.
+const LATEST_SIEM_VERSION = SIEM_VERSIONS[SIEM_VERSIONS.length - 1];
+
 function siemVersionIndex(version) {
   const idx = SIEM_VERSIONS.indexOf(version);
   return idx === -1 ? 0 : idx;
@@ -129,6 +135,14 @@ const SPLIT_CONFIGS = [
         const hasExperimentalFlags =
           artifact.experimentalFlags && artifact.experimentalFlags.length > 0;
 
+        // On serverless, the RBAC runner always tests SECURITY_FEATURE_ID (latest
+        // version) regardless of siemVersionFilter. Non-latest RBAC specs would
+        // redundantly re-run the same tests, so we skip them on serverless.
+        const isLatestVersion = version === LATEST_SIEM_VERSION;
+        const tags = isLatestVersion
+          ? "['@ess', '@serverless', '@skipInServerlessMKI']"
+          : "['@ess', '@skipInServerlessMKI']";
+
         const describeConfig = hasExperimentalFlags
           ? [
               '  {',
@@ -141,10 +155,10 @@ const SPLIT_CONFIGS = [
               '        ],',
               '      },',
               '    },',
-              "    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],",
+              `    tags: ${tags},`,
               '  },',
             ]
-          : ["  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },"];
+          : [`  { tags: ${tags} },`];
 
         return {
           filename,
