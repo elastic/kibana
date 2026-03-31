@@ -164,10 +164,10 @@ FROM .alerts-security.alerts-* METADATA _id, _index
           const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
 
           const hasProvidedEntities =
-            (providedHostNames && providedHostNames.length > 0) ||
-            (providedUserNames && providedUserNames.length > 0) ||
-            (providedSourceIps && providedSourceIps.length > 0) ||
-            (providedDestIps && providedDestIps.length > 0);
+            (Array.isArray(providedHostNames) && providedHostNames.length > 0) ||
+            (Array.isArray(providedUserNames) && providedUserNames.length > 0) ||
+            (Array.isArray(providedSourceIps) && providedSourceIps.length > 0) ||
+            (Array.isArray(providedDestIps) && providedDestIps.length > 0);
 
           let hostNames: string[];
           let userNames: string[];
@@ -175,10 +175,10 @@ FROM .alerts-security.alerts-* METADATA _id, _index
           let destIps: string[];
 
           if (hasProvidedEntities) {
-            hostNames = providedHostNames ?? [];
-            userNames = providedUserNames ?? [];
-            sourceIps = providedSourceIps ?? [];
-            destIps = providedDestIps ?? [];
+            hostNames = Array.isArray(providedHostNames) ? providedHostNames : [];
+            userNames = Array.isArray(providedUserNames) ? providedUserNames : [];
+            sourceIps = Array.isArray(providedSourceIps) ? providedSourceIps : [];
+            destIps = Array.isArray(providedDestIps) ? providedDestIps : [];
           } else {
             const alertResult = await context.esClient.asCurrentUser.get({
               index: alertsIndex,
