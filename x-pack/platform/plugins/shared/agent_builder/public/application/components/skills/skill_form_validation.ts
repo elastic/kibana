@@ -15,6 +15,8 @@ import {
   maxToolsPerSkill,
 } from '@kbn/agent-builder-common';
 
+import { normalizeRelativePathSegments } from './referenced_content_path_utils';
+
 export const MAX_REFERENCED_CONTENT_ITEMS = 100;
 
 const validationMessages = {
@@ -110,17 +112,6 @@ const referencedContentItemSchema: z.ZodType<ReferencedContentItem> = z.object({
   relativePath: z.string(),
   content: z.string(),
 });
-
-/** Collapses redundant slashes for root detection and duplicate path keys (aligned with full-path preview). */
-const normalizeRelativePathSegments = (relativePath: string): string => {
-  const trimmed = relativePath.trim();
-  if (trimmed === '.' || trimmed === './') {
-    return './';
-  }
-  const rest = trimmed.startsWith('./') ? trimmed.slice(2) : trimmed;
-  const segments = rest.split('/').filter((segment) => segment.length > 0);
-  return segments.length === 0 ? './' : `./${segments.join('/')}`;
-};
 
 const isRootRelativePath = (relativePath: string): boolean =>
   normalizeRelativePathSegments(relativePath) === './';
