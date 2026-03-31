@@ -78,7 +78,7 @@ export function buildMetadataOption() {
     name: 'METADATA',
     args: [
       Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
-      Builder.expression.column({ args: [Builder.identifier('_source')] }),
+      Builder.expression.column({ args: [Builder.identifier({ name: '_source' })] }),
     ],
   });
 }
@@ -342,7 +342,7 @@ export function extractBucketColumnName(esql: string): string | null {
   }
 }
 
-const MS_PER_UNIT: Record<string, number> = {
+export const MS_PER_UNIT: Record<string, number> = {
   s: 1_000,
   second: 1_000,
   seconds: 1_000,

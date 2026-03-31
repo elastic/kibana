@@ -51,19 +51,23 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
   const isStats = item.query.type === QUERY_TYPE_STATS;
 
   let tooltipContent: string;
+  let ariaLabel: string;
   if (isStats) {
     tooltipContent = STATS_PROMOTE_DISABLED_TOOLTIP;
+    ariaLabel = PROMOTE_QUERY_ACTION_TITLE;
   } else if (item.rule_backed) {
     tooltipContent = PROMOTED_TOOLTIP_CONTENT;
+    ariaLabel = PROMOTED_TOOLTIP_CONTENT;
   } else {
     tooltipContent = PROMOTE_QUERY_ACTION_TITLE;
+    ariaLabel = PROMOTE_QUERY_ACTION_TITLE;
   }
 
   return (
     <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="plusCircle"
-        aria-label={tooltipContent}
+        aria-label={ariaLabel}
         isLoading={promoteMutation.isLoading}
         isDisabled={item.rule_backed || isStats || promoteMutation.isLoading}
         onClick={() => {

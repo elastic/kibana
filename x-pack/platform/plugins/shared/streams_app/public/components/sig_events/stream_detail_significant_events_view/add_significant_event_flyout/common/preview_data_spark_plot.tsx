@@ -77,6 +77,7 @@ export function PreviewDataSparkPlot({
   });
 
   const firingCount = previewFetch.value?.firing_count;
+  const truncated = previewFetch.value?.truncated ?? false;
   const isStatsPreview = hasStatsCommand(query.esql.query);
   const hasTimeseriesData = sparkPlotData.timeseries.some((point) => point.y > 0);
   const noOccurrencesFound = !hasTimeseriesData;
@@ -252,13 +253,23 @@ export function PreviewDataSparkPlot({
                 {isStatsPreview && firingCount > 0 && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="hollow">
-                        {i18n.translate(
+                      {i18n.translate(
                         'xpack.streams.addSignificantEventFlyout.manualFlow.previewFiringCount',
                         {
                           defaultMessage:
                             '{count, plural, one {# threshold breach} other {# threshold breaches}}',
                           values: { count: firingCount },
                         }
+                      )}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {truncated && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="warning">
+                      {i18n.translate(
+                        'xpack.streams.addSignificantEventFlyout.manualFlow.previewTruncated',
+                        { defaultMessage: 'Results capped at 10,000' }
                       )}
                     </EuiBadge>
                   </EuiFlexItem>
@@ -280,10 +291,17 @@ export function PreviewDataSparkPlot({
         )}
         <SparkPlot
           id="query_preview"
-          name={i18n.translate(
-            'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartSeriesName',
-            { defaultMessage: 'Occurrences' }
-          )}
+          name={
+            isStatsPreview
+              ? i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartSeriesNameStats',
+                  { defaultMessage: 'Threshold breaches' }
+                )
+              : i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartSeriesName',
+                  { defaultMessage: 'Occurrences' }
+                )
+          }
           type="bar"
           timeseries={sparkPlotData.timeseries}
           annotations={sparkPlotData.annotations}

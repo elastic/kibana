@@ -16,8 +16,6 @@ import type { FeatureClient } from '../streams/feature/feature_client';
 interface Params {
   definition: Streams.all.Definition;
   connectorId: string;
-  start: number;
-  end: number;
   systemPrompt: string;
 }
 
@@ -37,7 +35,7 @@ export async function generateSignificantEventDefinitions(
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
 }> {
-  const { definition, connectorId, start, end, systemPrompt } = params;
+  const { definition, connectorId, systemPrompt } = params;
   const { inferenceClient, featureClient, logger, signal, esClient } = dependencies;
 
   const boundInferenceClient = inferenceClient.bindTo({
@@ -47,8 +45,6 @@ export async function generateSignificantEventDefinitions(
   const { queries, tokensUsed, toolUsage } = await generateSignificantEvents({
     stream: definition,
     esClient,
-    start,
-    end,
     inferenceClient: boundInferenceClient,
     logger,
     signal,

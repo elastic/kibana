@@ -56,8 +56,6 @@ function getErrorMessage(error: unknown): string {
 export async function generateSignificantEvents({
   stream,
   esClient,
-  start,
-  end,
   getFeatures,
   inferenceClient,
   signal,
@@ -66,8 +64,6 @@ export async function generateSignificantEvents({
 }: {
   stream: Streams.all.Definition;
   esClient: ElasticsearchClient;
-  start: number;
-  end: number;
   getFeatures(params?: {
     type?: string[];
     minConfidence?: number;

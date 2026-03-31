@@ -201,12 +201,11 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
 
   // --- Field-specific pattern: Error rate ---
   const severityField = findFieldInAnalysis(analysis, SEVERITY_FIELD_PATTERNS);
-  const observedErrorPct = severityField
-    ? extractErrorPercentage(analysis, severityField) ?? DEFAULT_ERROR_PCT
-    : undefined;
+  const rawErrorPct = severityField ? extractErrorPercentage(analysis, severityField) : undefined;
+  const isExtractedErrorPct = rawErrorPct != null;
+  const observedErrorPct = severityField ? (rawErrorPct ?? DEFAULT_ERROR_PCT) : undefined;
 
   if (severityField && observedErrorPct != null) {
-    const isExtractedErrorPct = observedErrorPct !== DEFAULT_ERROR_PCT;
     const threshold = roundThreshold(observedErrorPct * BASELINE_MULTIPLIER);
     const baselineNote = isExtractedErrorPct
       ? `Extracted baseline: ~${observedErrorPct}% error rate from analysis.`
@@ -249,10 +248,11 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
         `  Suggested threshold: error_rate > ${httpThreshold}% (${BASELINE_MULTIPLIER}x baseline).`,
         `  Template:`,
         `    FROM <stream>`,
-        `    | STATS errors = COUNT(*) WHERE ${httpStatusField} >= 500, total = COUNT(*)`,
+        `    | STATS errors = COUNT(*) WHERE ${httpStatusField} >= 500, total = COUNT(*) WHERE ${httpStatusField} IS NOT NULL`,
         `      BY bucket = BUCKET(@timestamp, 5 minutes)`,
         `    | EVAL error_rate = errors * 100.0 / total`,
         `    | WHERE total > ${MIN_SAMPLE_SIZE} AND error_rate > ${httpThreshold}`,
+        `  NOTE: The denominator filters on ${httpStatusField} IS NOT NULL to exclude non-HTTP events from mixed streams.`,
       ].join('\n'),
     });
   }
@@ -300,15 +300,12 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
     }
 
     if (!cardinality) {
-      entityField = candidateField;
-      break;
+      continue;
     }
   }
 
-  if (entityField && severityField && observedErrorPct != null) {
-    const cardinalityNote = entityCardinality
-      ? `  Entity field: ${entityField} with ${entityCardinality} distinct values.`
-      : `  Entity field: ${entityField}. WARNING: cardinality unknown — verify it is below ${MAX_ENTITY_CARDINALITY} distinct values before using as a GROUP BY dimension.`;
+  if (entityField && entityCardinality && severityField && observedErrorPct != null) {
+    const cardinalityNote = `  Entity field: ${entityField} with ${entityCardinality} distinct values.`;
 
     const componentThreshold = Math.max(
       DEFAULT_COMPONENT_ERROR_RATE,

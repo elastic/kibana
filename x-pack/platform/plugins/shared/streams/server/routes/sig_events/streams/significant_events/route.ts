@@ -225,8 +225,6 @@ const generateSignificantEventsRoute = createServerRoute({
         {
           definition,
           connectorId,
-          start: params.query.from.valueOf(),
-          end: params.query.to.valueOf(),
           systemPrompt: significantEventsPromptOverride,
         },
         {

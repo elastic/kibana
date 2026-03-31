@@ -36,7 +36,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { QUERY_TYPE_MATCH, deriveQueryType } from '@kbn/streams-schema';
+import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
 import React, { useEffect, useMemo, useState } from 'react';
 import { StreamsESQLEditor } from '../../../../esql_query_editor';
 import type { SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
@@ -304,7 +304,7 @@ export function QueryDetailsFlyout({
                     >
                       <AssetImage type="barChart" size="xs" />
                       <EuiText color="subdued" size="s" textAlign="center">
-                        {queryType === 'stats'
+                        {queryType === QUERY_TYPE_STATS
                           ? NO_OCCURRENCES_STATS_DESCRIPTION
                           : NO_OCCURRENCES_DESCRIPTION}
                       </EuiText>

@@ -10,7 +10,7 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
-import { hasStatsCommand, extractBucketColumnName, extractBucketIntervalMs } from '@kbn/streams-schema';
+import { hasStatsCommand, extractBucketColumnName, extractBucketIntervalMs, MS_PER_UNIT } from '@kbn/streams-schema';
 
 const PREVIEW_STATS_LIMIT = 10_000;
 
@@ -21,15 +21,10 @@ const ESQL_UNITS: Record<string, string> = {
   d: 'days',
 };
 
-const MS_PER_UNIT: Record<string, number> = {
-  s: 1000,
-  m: 60000,
-  h: 3600000,
-  d: 86400000,
-};
-
 function parseBucketSize(raw: string): { value: number; unit: string } {
   const match = raw.match(/^(\d+)([smhd])$/);
+  // 60s (1 minute) is the smallest granularity that produces readable sparklines
+  // while remaining efficient. Invalid inputs are caught upstream by the API schema.
   if (!match) return { value: 60, unit: 's' };
   return { value: parseInt(match[1], 10), unit: match[2] };
 }
@@ -52,7 +47,7 @@ function stripLimitCommand(esql: string): string {
       Builder.expression.query(commandsWithoutLimit as ESQLCommand[])
     );
   } catch {
-    return esql.replace(/\|\s*LIMIT\s+\d+\s*$/i, '').trim();
+    return esql.replace(/\|\s*LIMIT\s+\d+/gi, '').trim();
   }
 }
 
@@ -280,11 +275,19 @@ async function previewStatsQuery(
   });
 
   const firingCount = response.values.length;
+  const truncated = firingCount >= PREVIEW_STATS_LIMIT;
+
+  if (truncated) {
+    logger?.warn(
+      `STATS preview hit PREVIEW_STATS_LIMIT (${PREVIEW_STATS_LIMIT}); firing_count and sparkline data may be incomplete.`
+    );
+  }
 
   const astBucketName = extractBucketColumnName(esqlQuery);
   const bucketCol = astBucketName
     ? response.columns.find((col) => col.name === astBucketName)
-    : response.columns.find((col) => col.type === 'date');
+    : response.columns.find((col) => col.name === '@timestamp' && col.type === 'date') ??
+      response.columns.find((col) => col.type === 'date');
 
   if (bucketCol) {
     const bucketIdx = response.columns.indexOf(bucketCol);
@@ -317,6 +320,7 @@ async function previewStatsQuery(
       change_points: { type: {} },
       occurrences,
       firing_count: firingCount,
+      truncated,
     };
   }
 
@@ -325,5 +329,6 @@ async function previewStatsQuery(
     change_points: { type: {} },
     occurrences: [],
     firing_count: firingCount,
+    truncated,
   };
 }

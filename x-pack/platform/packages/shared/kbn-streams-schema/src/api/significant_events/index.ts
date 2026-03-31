@@ -58,6 +58,11 @@ type SignificantEventsPreviewResponse = Pick<
    * during the preview window. Absent for match-type queries.
    */
   firing_count?: number;
+  /**
+   * True when the STATS preview hit PREVIEW_STATS_LIMIT and the
+   * firing_count / sparkline data may be incomplete.
+   */
+  truncated?: boolean;
 };
 
 interface GeneratedSignificantEventQuery {

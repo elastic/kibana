@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { QUERY_TYPE_MATCH } from '@kbn/streams-schema';
+import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -67,6 +67,7 @@ import {
   NOT_PROMOTED_TOOLTIP_CONTENT,
   OCCURRENCES_COLUMN,
   OCCURRENCES_TOOLTIP_NAME,
+  THRESHOLD_BREACHES_TOOLTIP_NAME,
   OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
   OPEN_IN_DISCOVER_ACTION_TITLE,
   PROMOTED_BADGE_LABEL,
@@ -160,7 +161,12 @@ export function QueriesTable() {
   const promoteAllMutation = useMutation<{ promoted: number; skipped_stats: number }, Error>({
     mutationFn: promoteAll,
     onSuccess: async ({ promoted, skipped_stats: skippedStats }) => {
-      toasts.addSuccess(getPromoteAllSuccessToast(promoted, skippedStats));
+      const toast = getPromoteAllSuccessToast(promoted, skippedStats);
+      if (toast.isInfoOnly) {
+        toasts.add({ title: toast.text, color: 'primary' });
+      } else {
+        toasts.addSuccess(toast.text);
+      }
       await invalidateQueriesData();
     },
     onError: (error) => {
@@ -278,7 +284,7 @@ export function QueriesTable() {
           return (
             <SparkPlot
               id={`sparkplot-${item.query.id}`}
-              name={OCCURRENCES_TOOLTIP_NAME}
+              name={item.query.type === QUERY_TYPE_STATS ? THRESHOLD_BREACHES_TOOLTIP_NAME : OCCURRENCES_TOOLTIP_NAME}
               type="bar"
               timeseries={item.occurrences}
               annotations={[]}

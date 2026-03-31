@@ -122,6 +122,19 @@ describe('buildStatsGuidance', () => {
     expect(result).not.toContain('Component-Level Degradation');
   });
 
+  it('skips component-degradation pattern when entity cardinality is unknown', () => {
+    const features = [
+      makeDatasetFeature('log.level is present with error 5% errors. service.name field present.'),
+      makeFeature({
+        type: 'entity',
+        properties: { field: 'service.name' },
+      }),
+    ];
+    const result = buildStatsGuidance(features);
+    expect(result).not.toBeNull();
+    expect(result).not.toContain('Component-Level Degradation');
+  });
+
   it('includes generic patterns (traffic spike/drop) alongside field-specific', () => {
     const features = [makeDatasetFeature('log.level is present with error rate of 3%.')];
     const result = buildStatsGuidance(features);
