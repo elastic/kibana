@@ -158,6 +158,7 @@ describe('embeddable renderer', () => {
         phase$: expect.any(Object),
         hasLockedHoverActions$: expect.any(Object),
         lockHoverActions: expect.any(Function),
+        applySerializedState: expect.any(Function),
         isCustomizable: true,
         isDuplicable: true,
         isExpandable: true,
