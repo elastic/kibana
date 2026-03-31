@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { debounceTime, merge, skip, type Observable, type Subscription } from 'rxjs';
+import { debounceTime, filter, map, merge, skip, type Observable, type Subscription } from 'rxjs';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
@@ -17,6 +17,8 @@ export interface ManualChangesTrackerParams {
   getAttachment: () => DashboardAttachment;
   addAttachment: (attachment: AttachmentInput) => void;
 }
+
+type ManualChangesSourceParams = Omit<ManualChangesTrackerParams, 'addAttachment'>;
 
 /**
  * Creates a subscription that tracks manual changes to the dashboard
@@ -33,11 +35,10 @@ export interface ManualChangesTrackerParams {
  * - The dashboard is unsaved, OR
  * - The saved dashboard matches the attachment's origin
  */
-export const createManualChangesTracker = ({
+export const createManualChanges$ = ({
   api,
   getAttachment,
-  addAttachment,
-}: ManualChangesTrackerParams): Subscription => {
+}: ManualChangesSourceParams): Observable<AttachmentInput> => {
   // Collect observables for all trackable dashboard state
   const observables: Array<Observable<unknown>> = [
     api.layout$,
@@ -57,29 +58,37 @@ export const createManualChangesTracker = ({
   ].filter((o): o is NonNullable<typeof o> => Boolean(o));
   const childrenChanges$ = childrenUnsavedChanges$(api.children$).pipe(skip(1));
 
-  return merge(...observables, childrenChanges$)
-    .pipe(
-      skip(observables.length), // Skip initial emissions from all BehaviorSubjects
-      debounceTime(150)
-    )
-    .subscribe(() => {
+  return merge(...observables, childrenChanges$).pipe(
+    skip(observables.length), // Skip initial emissions from all BehaviorSubjects
+    debounceTime(150),
+    map((): AttachmentInput | undefined => {
       const currentAttachment = getAttachment();
       const currentSavedObjectId = api.savedObjectId$.getValue();
 
       // Only sync if: no saved dashboard OR saved dashboard matches attachment's origin
       if (currentSavedObjectId && currentSavedObjectId !== currentAttachment.origin) {
-        return;
+        return undefined;
       }
 
       const currentDashboardState = api.getSerializedState().attributes;
       if (!currentDashboardState) {
-        return;
+        return undefined;
       }
 
-      addAttachment({
+      return {
         id: currentAttachment.id,
         type: DASHBOARD_ATTACHMENT_TYPE,
         data: dashboardStateToAttachment(currentDashboardState),
-      });
-    });
+      };
+    }),
+    filter((attachment): attachment is AttachmentInput => attachment !== undefined)
+  );
 };
+
+export const createManualChangesTracker = ({
+  addAttachment,
+  ...params
+}: ManualChangesTrackerParams): Subscription =>
+  createManualChanges$(params).subscribe((attachment) => {
+    addAttachment(attachment);
+  });
