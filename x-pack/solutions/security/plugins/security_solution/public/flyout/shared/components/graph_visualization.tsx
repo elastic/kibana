@@ -183,7 +183,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
                 subType: doc.entity?.sub_type,
                 icon: node.icon,
                 availableInEntityStore: !!doc.entity?.availableInEntityStore,
-                ecsParentField: doc.entity?.ecsParentField,
+                sourceFields: doc.entity?.sourceFields,
               })),
           },
         });

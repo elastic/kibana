@@ -55,7 +55,6 @@ import {
   type IdentityFields,
 } from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
-import { useNavigateToGraphView } from './hooks/use_navigate_to_graph_view';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 
 export { USER_PANEL_RISK_SCORE_QUERY_ID };
@@ -272,17 +271,6 @@ export const UserPanel = ({
     !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
   const hasGraphView = Boolean(entityFromStore);
-  const navigateToGraphView = useNavigateToGraphView({
-    userName,
-    identityFields: documentEntityIdentifiers,
-    entityId: panelDisplayEntityId,
-    scopeId,
-    contextID,
-    isRiskScoreExist,
-    hasMisconfigurationFindings,
-    hasNonClosedAlerts,
-    isPreviewMode,
-  });
 
   return (
     <>
@@ -321,7 +309,6 @@ export const UserPanel = ({
         contextID={safeContextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
-        navigateToGraphView={navigateToGraphView}
         isPreviewMode={isPreviewMode}
         identityFields={documentEntityIdentifiers}
         entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}

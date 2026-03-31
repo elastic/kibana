@@ -29,7 +29,6 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { useNavigateToServiceDetails } from './hooks/use_navigate_to_service_details';
-import { useNavigateToGraphView } from './hooks/use_navigate_to_graph_view';
 import { useEntityFromStore } from '../shared/hooks/use_entity_from_store';
 
 export interface ServicePanelProps extends Record<string, unknown> {
@@ -127,15 +126,6 @@ export const ServicePanel = ({
   });
 
   const hasGraphView = Boolean(entityFromStoreResult.entityRecord);
-  const navigateToGraphView = useNavigateToGraphView({
-    serviceName,
-    entityId,
-    scopeId,
-    contextID: safeContextID,
-    isRiskScoreExist,
-    identityFields: documentEntityIdentifiers,
-    isPreviewMode,
-  });
 
   const openPanelFirstTab = useCallback(
     () =>
@@ -170,7 +160,6 @@ export const ServicePanel = ({
         contextID={safeContextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
-        navigateToGraphView={navigateToGraphView}
         isPreviewMode={isPreviewMode}
       />
     </>

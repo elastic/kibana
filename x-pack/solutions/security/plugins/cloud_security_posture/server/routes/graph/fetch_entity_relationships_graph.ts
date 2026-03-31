@@ -87,24 +87,24 @@ ${enrichmentSection}
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
     ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":", ${JSON_OBJECT_START},
       ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
-      ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprSafe('name', 'entity.name')},
-      ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprSafe('type', 'entity.type')},
-      ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprSafe(
-    'sub_type',
-    'entity.sub_type'
-  )},
-    CASE(
-      host.ip IS NOT NULL,
-      CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-        "\\"ip\\":\\"", TO_STRING(host.ip), "\\"",
-        ${JSON_OBJECT_END}),
-      ""
-    ),
-    ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyEsqlExprSafe('entity.id', 'entity.id')},
+      CASE(entity.name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('name', 'entity.name')}), ""),
+      CASE(entity.type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('type', 'entity.type')}), ""),
+      CASE(entity.sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+        ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'entity.sub_type')}), ""),
+      CASE(
+        host.ip IS NOT NULL,
+        CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
+          "\\"ip\\":\\"", TO_STRING(host.ip), "\\"",
+          ${JSON_OBJECT_END}),
+        ""
+      ),
+      ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
+        ${concatJsonObjectPropertyEsqlExprAsString('entity.id', 'entity.id')},
+      ${JSON_OBJECT_END},
     ${JSON_OBJECT_END},
-  ${JSON_OBJECT_END},
-${JSON_OBJECT_END})
+  ${JSON_OBJECT_END})
 // Build enriched targets doc data with entity metadata
 | EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprSafe('id', '_target_id')},
@@ -114,12 +114,12 @@ ${JSON_OBJECT_END})
       'availableInEntityStore',
       'CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false")'
     )},
-    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprSafe('name', '_target_name')},
-    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprSafe('type', '_target_type')},
-    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprSafe(
-    'sub_type',
-    '_target_sub_type'
-  )},
+    CASE(entity.name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+      ${concatJsonObjectPropertyEsqlExprAsString('name', '_target_name')}), ""),
+    CASE(entity.type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+      ${concatJsonObjectPropertyEsqlExprAsString('type', '_target_type')}), ""),
+    CASE(entity.sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+      ${concatJsonObjectPropertyEsqlExprAsString('sub_type', '_target_sub_type')}), ""),
     CASE(
       _target_host_ip IS NOT NULL,
       CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
@@ -128,7 +128,7 @@ ${JSON_OBJECT_END})
       ""
     ),
     ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyEsqlExprSafe('entity.id', '_target_id')},
+      ${concatJsonObjectPropertyEsqlExprAsString('entity.id', '_target_id')},
     ${JSON_OBJECT_END},
   ${JSON_OBJECT_END},
 ${JSON_OBJECT_END})
@@ -284,28 +284,17 @@ export const fetchEntities = async ({
     | EVAL name = entity.name
     | EVAL type = entity.type
     | EVAL sub_type = entity.sub_type
-    | EVAL ecsParentField = CASE(entity.EngineMetadata.Type == "generic", "entity", entity.EngineMetadata.Type)
     | EVAL docData = CONCAT(${JSON_OBJECT_START},
       ${concatJsonObjectPropertyEsqlExprAsString('id', 'entity.id')},
       ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
       ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":", ${JSON_OBJECT_START},
         ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
-        ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprAsString(
-    'ecsParentField',
-    'ecsParentField'
-  )},
-        CASE(entity.name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprAsString(
-    'name',
-    'entity.name'
-  )}), ""),
-        CASE(entity.type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprAsString(
-    'type',
-    'entity.type'
-  )}), ""),
-        CASE(entity.sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyEsqlExprAsString(
-    'sub_type',
-    'entity.sub_type'
-  )}), ""),
+        CASE(entity.name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+          ${concatJsonObjectPropertyEsqlExprAsString('name', 'entity.name')}), ""),
+        CASE(entity.type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+          ${concatJsonObjectPropertyEsqlExprAsString('type', 'entity.type')}), ""),
+        CASE(entity.sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+          ${concatJsonObjectPropertyEsqlExprAsString('sub_type', 'entity.sub_type')}), ""),
         CASE(
           host.ip IS NOT NULL,
           CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
@@ -313,6 +302,9 @@ export const fetchEntities = async ({
             ${JSON_OBJECT_END}),
           ""
         ),
+        ${JSON_OBJECT_SEPARATOR}, "\\"sourceFields\\":", ${JSON_OBJECT_START},
+          ${concatJsonObjectPropertyEsqlExprAsString('entity.id', 'entity.id')},
+        ${JSON_OBJECT_END},
       ${JSON_OBJECT_END},
     ${JSON_OBJECT_END})
     | KEEP id, name, type, sub_type, docData`;

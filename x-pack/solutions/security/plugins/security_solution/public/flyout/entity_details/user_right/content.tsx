@@ -127,7 +127,7 @@ export const UserPanelContent = ({
             entityId={entityStoreEntityId}
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
-            onExpandGraph={navigateToGraphView}
+            openDetailsPanel={openDetailsPanel}
           />
           <EuiHorizontalRule margin="m" />
         </>

@@ -268,6 +268,7 @@ const createEntityNode = (
               return JSON.parse(d);
             } catch (e) {
               logger?.error(`Failed to parse document data for node [${nodeId}]: ${e}`);
+              logger?.trace(d);
               throw e;
             }
           })
@@ -311,29 +312,37 @@ const createGroupedActorAndTargetNodes = (
   } = record;
 
   // Create actor entity node
-  createEntityNode(nodesMap, {
-    nodeId: actorNodeId,
-    idsCount: actorIdsCount,
-    entityType: actorEntityType,
-    entitySubType: actorEntitySubType,
-    entityName: actorEntityName,
-    docData: actorsDocData,
-    hostIps: actorHostIps ? castArray(actorHostIps) : [],
-  });
+  createEntityNode(
+    nodesMap,
+    {
+      nodeId: actorNodeId,
+      idsCount: actorIdsCount,
+      entityType: actorEntityType,
+      entitySubType: actorEntitySubType,
+      entityName: actorEntityName,
+      docData: actorsDocData,
+      hostIps: actorHostIps ? castArray(actorHostIps) : [],
+    },
+    context.logger
+  );
 
   // Create target entity node (or unknown target)
   const targetId = targetIdsCount > 0 && targetNodeId ? targetNodeId : `unknown-${uuidv4()}`;
 
   if (targetIdsCount > 0 && targetNodeId) {
-    createEntityNode(nodesMap, {
-      nodeId: targetNodeId,
-      idsCount: targetIdsCount,
-      entityType: targetEntityType,
-      entitySubType: targetEntitySubType,
-      entityName: targetEntityName,
-      docData: targetsDocData,
-      hostIps: targetHostIps ? castArray(targetHostIps) : [],
-    });
+    createEntityNode(
+      nodesMap,
+      {
+        nodeId: targetNodeId,
+        idsCount: targetIdsCount,
+        entityType: targetEntityType,
+        entitySubType: targetEntitySubType,
+        entityName: targetEntityName,
+        docData: targetsDocData,
+        hostIps: targetHostIps ? castArray(targetHostIps) : [],
+      },
+      context.logger
+    );
   } else if (nodesMap[targetId] === undefined) {
     // Unknown target
     nodesMap[targetId] = {
@@ -472,25 +481,33 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
   const targetNodeId = record.targetNodeId;
 
   // Create actor and target entity nodes using shared helper
-  createEntityNode(context.nodesMap, {
-    nodeId: actorNodeId,
-    idsCount: record.actorIdsCount,
-    entityType: record.actorEntityType,
-    entitySubType: record.actorEntitySubType,
-    entityName: record.actorEntityName,
-    docData: record.actorsDocData,
-    hostIps: record.actorHostIps ? castArray(record.actorHostIps) : [],
-  });
+  createEntityNode(
+    context.nodesMap,
+    {
+      nodeId: actorNodeId,
+      idsCount: record.actorIdsCount,
+      entityType: record.actorEntityType,
+      entitySubType: record.actorEntitySubType,
+      entityName: record.actorEntityName,
+      docData: record.actorsDocData,
+      hostIps: record.actorHostIps ? castArray(record.actorHostIps) : [],
+    },
+    context.logger
+  );
 
-  createEntityNode(context.nodesMap, {
-    nodeId: targetNodeId,
-    idsCount: record.targetIdsCount,
-    entityType: record.targetEntityType,
-    entitySubType: record.targetEntitySubType,
-    entityName: record.targetEntityName,
-    docData: record.targetsDocData,
-    hostIps: record.targetHostIps ? castArray(record.targetHostIps) : [],
-  });
+  createEntityNode(
+    context.nodesMap,
+    {
+      nodeId: targetNodeId,
+      idsCount: record.targetIdsCount,
+      entityType: record.targetEntityType,
+      entitySubType: record.targetEntitySubType,
+      entityName: record.targetEntityName,
+      docData: record.targetsDocData,
+      hostIps: record.targetHostIps ? castArray(record.targetHostIps) : [],
+    },
+    context.logger
+  );
 
   // Create relationship node - ID is based on actor + relationship (relationshipNodeId)
   // so each actor+relationship combination gets one node that connects to all target groups

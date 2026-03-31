@@ -54,7 +54,6 @@ import {
   type IdentityFields,
 } from '../../document_details/shared/utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
-import { useNavigateToGraphView } from './hooks/use_navigate_to_graph_view';
 import { HOST_PANEL_RISK_SCORE_QUERY_ID, HOST_PANEL_OBSERVED_HOST_QUERY_ID } from './constants';
 
 export { HOST_PANEL_RISK_SCORE_QUERY_ID, HOST_PANEL_OBSERVED_HOST_QUERY_ID };
@@ -275,17 +274,6 @@ export const HostPanel = ({
     entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedHost.entityRecord;
 
   const hasGraphView = Boolean(entityFromStore);
-  const navigateToGraphView = useNavigateToGraphView({
-    hostName,
-    entityId: panelDisplayEntityId,
-    scopeId,
-    contextID: safeContextID,
-    isRiskScoreExist,
-    hasMisconfigurationFindings,
-    hasVulnerabilitiesFindings,
-    hasNonClosedAlerts,
-    isPreviewMode,
-  });
 
   return (
     <>
@@ -323,7 +311,6 @@ export const HostPanel = ({
         contextID={safeContextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
-        navigateToGraphView={navigateToGraphView}
         recalculatingScore={recalculatingScore}
         onAssetCriticalityChange={calculateEntityRiskScore}
         isPreviewMode={isPreviewMode}

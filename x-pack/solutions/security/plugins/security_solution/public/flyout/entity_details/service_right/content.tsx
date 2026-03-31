@@ -33,7 +33,6 @@ interface ServicePanelContentProps {
   isPreviewMode: boolean;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  navigateToGraphView: () => void;
   entityRecord?: Entity;
 }
 
@@ -47,7 +46,6 @@ export const ServicePanelContent = ({
   scopeId,
   isPreviewMode,
   openDetailsPanel,
-  navigateToGraphView,
   onAssetCriticalityChange,
 }: ServicePanelContentProps) => {
   const entityId = entityRecord?.entity.id;
@@ -80,7 +78,7 @@ export const ServicePanelContent = ({
             entityId={entityId}
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
-            onExpandGraph={navigateToGraphView}
+            openDetailsPanel={openDetailsPanel}
           />
           <EuiHorizontalRule margin="m" />
         </>

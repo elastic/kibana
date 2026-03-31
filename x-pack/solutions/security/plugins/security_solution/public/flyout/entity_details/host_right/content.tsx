@@ -34,7 +34,6 @@ interface HostPanelContentProps {
   contextID: string;
   scopeId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  navigateToGraphView: () => void;
   identityFields: IdentityFields;
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
@@ -58,7 +57,6 @@ export const HostPanelContent = ({
   contextID,
   scopeId,
   openDetailsPanel,
-  navigateToGraphView,
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
@@ -124,7 +122,7 @@ export const HostPanelContent = ({
             entityId={entityStoreEntityId}
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
-            onExpandGraph={navigateToGraphView}
+            openDetailsPanel={openDetailsPanel}
           />
           <EuiHorizontalRule margin="m" />
         </>

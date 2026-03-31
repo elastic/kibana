@@ -70,16 +70,12 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
     const memoizedEdges = useMemo(() => data?.edges ?? [], [data?.edges]);
 
     return isLoading ? (
-      <EuiPanel>
-        <LoadingComponent />
-      </EuiPanel>
+      <LoadingComponent />
     ) : isError || memoizedNodes.length === 0 ? (
-      <EuiPanel>
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.right.visualizations.graphPreview.errorDescription"
-          defaultMessage="An error is preventing this alert from being visualized."
-        />
-      </EuiPanel>
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.right.visualizations.graphPreview.errorDescription"
+        defaultMessage="An error is preventing this alert from being visualized."
+      />
     ) : (
       <React.Suspense
         fallback={
