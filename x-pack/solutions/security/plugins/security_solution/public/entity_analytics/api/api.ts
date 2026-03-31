@@ -11,9 +11,10 @@ import {
   API_VERSIONS as ENTITY_STORE_API_VERSIONS,
   type EntityMaintainerResponseItem,
   ENTITY_STORE_ROUTES,
+  FF_ENABLE_ENTITY_STORE_V2,
   type GetEntityMaintainersResponse,
 } from '@kbn/entity-store/common';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { compact } from 'lodash';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
@@ -29,6 +30,7 @@ import type {
   FindAssetCriticalityRecordsResponse,
   InitMonitoringEngineResponse,
   InitRiskEngineResponse,
+  InternalUploadAssetCriticalityV2CsvResponse,
   ListEntitiesRequestQuery,
   ListEntitiesResponse,
   ListEntitySourcesResponse,
@@ -54,6 +56,7 @@ import type {
 } from '../../../common/api/entity_analytics/watchlists/management/update.gen';
 import {
   API_VERSIONS,
+  ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
   ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
@@ -528,6 +531,39 @@ export const useEntityAnalyticsRoutes = () => {
       const body = new FormData();
       body.append('file', file);
 
+      if (isEntityAnalyticsEntityStoreV2Enabled && isEntityStoreV2UiSettingEnabled) {
+        const response = await http.fetch<InternalUploadAssetCriticalityV2CsvResponse>(
+          ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
+          {
+            version: API_VERSIONS.internal.v1,
+            method: 'POST',
+            headers: {
+              'Content-Type': undefined, // Lets the browser set the appropriate content type
+            },
+            body,
+          }
+        );
+
+        return {
+          errors: compact(
+            response.items.map((item, ndx) => {
+              if (item.error) {
+                return {
+                  index: ndx,
+                  message: item.error,
+                };
+              }
+              return null;
+            })
+          ),
+          stats: {
+            successful: response.successful,
+            failed: response.failed,
+            total: response.total,
+          },
+        };
+      }
+
       return http.fetch<UploadAssetCriticalityRecordsResponse>(
         ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
         {
@@ -723,7 +759,12 @@ export const useEntityAnalyticsRoutes = () => {
       fetchEntityDetailsHighlights,
       fetchWatchlists,
     };
-  }, [http, isMaintainerRiskScoreV2Enabled]);
+  }, [
+    http,
+    isEntityStoreV2UiSettingEnabled,
+    isEntityAnalyticsEntityStoreV2Enabled,
+    isMaintainerRiskScoreV2Enabled,
+  ]);
 };
 
 export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;
