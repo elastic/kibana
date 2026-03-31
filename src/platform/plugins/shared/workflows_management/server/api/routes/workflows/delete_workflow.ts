@@ -8,6 +8,7 @@
  */
 
 import path from 'path';
+import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -37,14 +38,24 @@ export function registerDeleteWorkflowRoute({ router, api, spaces }: RouteDepend
         validate: {
           request: {
             params: idParamSchema,
+            query: schema.object({
+              force: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, permanently deletes the workflow (hard delete) instead of soft-deleting it. The workflow ID becomes available for reuse.',
+                },
+              }),
+            }),
           },
         },
       },
       withLicenseCheck(async (context, request, response) => {
         try {
           const { id } = request.params;
+          const { force } = request.query;
           const spaceId = spaces.getSpaceId(request);
-          await api.deleteWorkflows([id], spaceId, request);
+          await api.deleteWorkflows([id], spaceId, request, { force });
           return response.ok();
         } catch (error) {
           return handleRouteError(response, error);
