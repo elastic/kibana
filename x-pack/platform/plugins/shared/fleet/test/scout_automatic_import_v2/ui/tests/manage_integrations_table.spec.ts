@@ -525,7 +525,7 @@ test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () =>
         body: JSON.stringify({ message: 'Internal Server Error' }),
       })
     );
-    await page.reload();
+    await pageObjects.manageIntegrationsTable.navigateToEmpty();
     await expect(pageObjects.manageIntegrationsTable.getErrorCallout()).toBeVisible();
   });
 });
