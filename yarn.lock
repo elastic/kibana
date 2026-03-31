@@ -7702,6 +7702,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/scout-synthtrace@link:src/platform/packages/shared/kbn-scout-synthtrace":
+  version "0.0.0"
+  uid ""
+
 "@kbn/scout@link:src/platform/packages/shared/kbn-scout":
   version "0.0.0"
   uid ""

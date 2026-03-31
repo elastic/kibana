@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { mergeTests, globalSetupHook as obltGlobalSetupHook } from '@kbn/scout-oblt';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
 import type { ApmFields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
 import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { servicesDataFromTheLast24Hours } from '../fixtures/synthtrace/last_24_hours';
 import { generateSpanLinksData } from '../fixtures/synthtrace/generate_span_links_data';
 import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span_stacktrace_data';
 import { testData } from '../fixtures';
+
+const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
 
 globalSetupHook(
   'Ingest data to Elasticsearch',

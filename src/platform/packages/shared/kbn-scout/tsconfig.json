@@ -29,8 +29,6 @@
     "@kbn/core-http-common",
     "@kbn/axe-config",
     "@kbn/peggy",
-    "@kbn/apm-synthtrace",
-    "@kbn/apm-synthtrace-client",
     "@kbn/test-docker-servers",
   ]
 }
