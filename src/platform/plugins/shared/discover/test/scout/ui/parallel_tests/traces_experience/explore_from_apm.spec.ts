@@ -280,6 +280,20 @@ spaceTest.describe(
           await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
             params: transactionDetailParams,
           });
+
+          // Wait for the legacy waterfall to load, if it doesn't, reload the page and retry.
+          // Legacy waterfall setting should be properly propagated on reload.
+          await page.testSubj
+            .waitForSelector('apmWaterfallTimelineContainer', { timeout: 10000 })
+            .catch(async () => {
+              spaceTest.info().annotations.push({
+                type: 'retry',
+                description:
+                  'Legacy waterfall not detected after navigation, UI setting may not have propagated in time. Reloading page and retrying.',
+              });
+
+              await page.reload();
+            });
         });
 
         await spaceTest.step('waterfall size warning is visible', async () => {
