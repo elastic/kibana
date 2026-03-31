@@ -39,7 +39,7 @@ export const AgentOverview: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const { euiTheme } = useEuiTheme();
   const { docLinksService } = useAgentBuilderServices();
-  const { navigateToAgentBuilderUrl } = useNavigation();
+  const { navigateToAgentBuilderUrl, createAgentBuilderUrl } = useNavigation();
 
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const {
@@ -162,6 +162,9 @@ export const AgentOverview: React.FC = () => {
           isExperimentalFeaturesEnabled={isExperimentalFeaturesEnabled}
           isConnectorsEnabled={isConnectorsEnabled}
           hasConnectorsPrivileges={hasConnectorsPrivileges}
+          skillsHref={createAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
+          pluginsHref={createAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
+          connectorsHref={createAgentBuilderUrl(appPaths.agent.connectors({ agentId: agentId! }))}
           onNavigateToSkills={() =>
             navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))
           }
