@@ -77,6 +77,7 @@ describe('BehavioralAnalysisModule', () => {
   it('is enabled when alertsIndexPattern is provided', () => {
     const module = createBehavioralAnalysisModule({ esClient, logger, alertsIndexPattern });
     expect(module.isEnabled()).toBe(true);
+    expect(module.config.weight).toBe(0.3);
   });
 
   it('is disabled when alertsIndexPattern is empty', () => {
@@ -295,6 +296,19 @@ describe('BehavioralAnalysisModule', () => {
 
       expect(observations.find((o) => o.type === 'multi_tactic_attack')).toBeUndefined();
     });
+  });
+
+  it('queries by entity name field for the given type', async () => {
+    const entity = createEntity('user', 'alice');
+    esClient.search.mockResolvedValue(createAlertAggResponse() as never);
+
+    const module = createBehavioralAnalysisModule({ esClient, logger, alertsIndexPattern });
+    await module.collect([entity]);
+
+    const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
+    const queryStr = JSON.stringify(searchCall.query);
+    expect(queryStr).toContain('user.name');
+    expect(queryStr).toContain('alice');
   });
 
   it('returns empty observations when no alerts match', async () => {

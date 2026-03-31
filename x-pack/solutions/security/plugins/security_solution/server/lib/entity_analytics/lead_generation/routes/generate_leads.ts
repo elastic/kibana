@@ -15,15 +15,10 @@ import { GENERATE_LEADS_URL } from '../../../../../common/entity_analytics/lead_
 import { generateLeadsRequestSchema } from '../../../../../common/entity_analytics/lead_generation/types';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
-import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import type { StartPlugins } from '../../../../plugin_contract';
-import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
-import { createRiskScoreModule } from '../observation_modules/risk_score_module';
-import { createTemporalStateModule } from '../observation_modules/temporal_state_module';
-import { createBehavioralAnalysisModule } from '../observation_modules/behavioral_analysis_module';
+import type { StartPlugins } from '../../../../plugin';
 import { fetchAllLeadEntities } from '../entity_conversion';
-import { createLeadDataClient } from '../lead_data_client';
+import { runLeadGenerationPipeline } from '../run_pipeline';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const generateLeadsRoute = (
@@ -51,72 +46,32 @@ export const generateLeadsRoute = (
         },
       },
 
-      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (context, _request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const { getSpaceId } = await context.securitySolution;
-          const spaceId = getSpaceId();
+          const secSol = await context.securitySolution;
+          const spaceId = secSol.getSpaceId();
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const executionUuid = uuidv4();
+          const riskScoreDataClient = secSol.getRiskScoreDataClient();
+
           const [, startPlugins] = await getStartServices();
           const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
-          const executionUuid = uuidv4();
 
           void (async () => {
             try {
-              const fetchStart = Date.now();
-              const leadEntities = await fetchAllLeadEntities(crudClient, logger);
-              logger.info(
-                `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
-                  leadEntities.length
-                } records)`
-              );
-
-              if (leadEntities.length === 0) {
-                logger.info(
-                  `[LeadGeneration] No entities found — skipping generation (executionUuid=${executionUuid})`
-                );
-                return;
-              }
-
-              const engine = createLeadGenerationEngine({ logger });
-              engine.registerModule(createRiskScoreModule({ esClient, logger, spaceId }));
-              engine.registerModule(createTemporalStateModule({ esClient, logger, spaceId }));
-              engine.registerModule(
-                createBehavioralAnalysisModule({
-                  esClient,
-                  logger,
-                  alertsIndexPattern: getAlertsIndex(spaceId),
-                })
-              );
-
-              const generateStart = Date.now();
-              const leads = await engine.generateLeads(leadEntities);
-              logger.info(
-                `[LeadGeneration][Telemetry] Engine pipeline: ${Date.now() - generateStart}ms (${
-                  leads.length
-                } leads)`
-              );
-
-              const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
-              const persistStart = Date.now();
-
-              const leadsWithMeta = leads.map((lead) => ({
-                ...lead,
-                status: 'active' as const,
-                executionUuid,
-                sourceType: 'adhoc' as const,
-              }));
-
-              await leadDataClient.createLeads({
-                leads: leadsWithMeta,
+              await runLeadGenerationPipeline({
+                listEntities: () => fetchAllLeadEntities(crudClient, logger),
+                esClient,
+                logger,
+                spaceId,
+                riskScoreDataClient,
                 executionId: executionUuid,
                 sourceType: 'adhoc',
               });
               logger.info(
-                `[LeadGeneration][Telemetry] Persistence: ${Date.now() - persistStart}ms (${
-                  leads.length
-                } leads)`
+                `[LeadGeneration] Background generation completed (executionUuid=${executionUuid})`
               );
             } catch (pipelineError) {
               logger.error(

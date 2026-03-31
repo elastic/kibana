@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import { createRiskScoreModule } from './risk_score_module';
 import type { LeadEntity } from '../types';
 
@@ -30,28 +30,46 @@ const createEntityWithRisk = (
   name,
 });
 
+const createRiskScoreDataClientMock = (): jest.Mocked<
+  Pick<RiskScoreDataClient, 'getDailyAverageRiskScoreNormSeries'>
+> => ({
+  getDailyAverageRiskScoreNormSeries: jest.fn().mockResolvedValue(new Map()),
+});
+
 describe('RiskScoreModule', () => {
   const logger = loggingSystemMock.createLogger();
-  const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-  const spaceId = 'default';
+  let riskScoreDataClient: jest.Mocked<
+    Pick<RiskScoreDataClient, 'getDailyAverageRiskScoreNormSeries'>
+  >;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    esClient.search.mockResolvedValue({
-      hits: { hits: [] },
-      aggregations: {},
-    } as never);
+    riskScoreDataClient = createRiskScoreDataClientMock();
   });
 
   it('is always enabled', () => {
-    const module = createRiskScoreModule({ esClient, logger, spaceId });
+    const module = createRiskScoreModule({
+      riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+      logger,
+    });
     expect(module.isEnabled()).toBe(true);
+  });
+
+  it('exposes module weight for weighted scoring', () => {
+    const module = createRiskScoreModule({
+      riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+      logger,
+    });
+    expect(module.config.weight).toBe(0.35);
   });
 
   describe('current risk level observations', () => {
     it('produces a critical observation for Critical calculated_level', async () => {
       const entity = createEntityWithRisk('user', 'alice', 95, 'Critical');
-      const module = createRiskScoreModule({ esClient, logger, spaceId });
+      const module = createRiskScoreModule({
+        riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+        logger,
+      });
 
       const observations = await module.collect([entity]);
 
@@ -63,7 +81,10 @@ describe('RiskScoreModule', () => {
 
     it('produces a high observation for High calculated_level', async () => {
       const entity = createEntityWithRisk('user', 'bob', 75, 'High');
-      const module = createRiskScoreModule({ esClient, logger, spaceId });
+      const module = createRiskScoreModule({
+        riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+        logger,
+      });
 
       const observations = await module.collect([entity]);
 
@@ -74,7 +95,10 @@ describe('RiskScoreModule', () => {
 
     it('produces a medium observation for Moderate calculated_level', async () => {
       const entity = createEntityWithRisk('host', 'server-01', 55, 'Moderate');
-      const module = createRiskScoreModule({ esClient, logger, spaceId });
+      const module = createRiskScoreModule({
+        riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+        logger,
+      });
 
       const observations = await module.collect([entity]);
 
@@ -83,20 +107,30 @@ describe('RiskScoreModule', () => {
       expect(riskObs!.severity).toBe('medium');
     });
 
-    it('produces a low_risk_score observation for Low calculated_level with scoreNorm >= 20', async () => {
+    it('does not produce a risk level observation for Low calculated_level', async () => {
       const entity = createEntityWithRisk('user', 'charlie', 25, 'Low');
-      const module = createRiskScoreModule({ esClient, logger, spaceId });
+      const module = createRiskScoreModule({
+        riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+        logger,
+      });
 
       const observations = await module.collect([entity]);
 
-      const riskObs = observations.find((o) => o.type === 'low_risk_score');
-      expect(riskObs).toBeDefined();
-      expect(riskObs!.severity).toBe('low');
+      const riskObs = observations.filter(
+        (o) =>
+          o.type === 'high_risk_score' ||
+          o.type === 'moderate_risk_score' ||
+          o.type === 'low_risk_score'
+      );
+      expect(riskObs).toHaveLength(0);
     });
 
     it('does not produce a risk level observation for Unknown calculated_level', async () => {
       const entity = createEntityWithRisk('user', 'dave', 10, 'Unknown');
-      const module = createRiskScoreModule({ esClient, logger, spaceId });
+      const module = createRiskScoreModule({
+        riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+        logger,
+      });
 
       const observations = await module.collect([entity]);
 
@@ -113,7 +147,10 @@ describe('RiskScoreModule', () => {
   describe('privileged entity observations', () => {
     it('produces a privileged_high_risk observation for privileged entity with score >= 70', async () => {
       const entity = createEntityWithRisk('user', 'admin', 85, 'High', true);
-      const module = createRiskScoreModule({ esClient, logger, spaceId });
+      const module = createRiskScoreModule({
+        riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+        logger,
+      });
 
       const observations = await module.collect([entity]);
 
@@ -125,7 +162,10 @@ describe('RiskScoreModule', () => {
 
     it('does not produce privileged_high_risk for non-privileged entity', async () => {
       const entity = createEntityWithRisk('user', 'regular', 85, 'High', false);
-      const module = createRiskScoreModule({ esClient, logger, spaceId });
+      const module = createRiskScoreModule({
+        riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+        logger,
+      });
 
       const observations = await module.collect([entity]);
 
@@ -134,7 +174,10 @@ describe('RiskScoreModule', () => {
 
     it('does not produce privileged_high_risk for privileged entity with low score', async () => {
       const entity = createEntityWithRisk('user', 'admin', 50, 'Moderate', true);
-      const module = createRiskScoreModule({ esClient, logger, spaceId });
+      const module = createRiskScoreModule({
+        riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+        logger,
+      });
 
       const observations = await module.collect([entity]);
 
@@ -145,23 +188,14 @@ describe('RiskScoreModule', () => {
   describe('risk escalation observations', () => {
     it('detects a 24h escalation when delta >= 10', async () => {
       const entity = createEntityWithRisk('user', 'alice', 80, 'High');
-      esClient.search.mockResolvedValue({
-        hits: { hits: [] },
-        aggregations: {
-          by_entity: {
-            buckets: [
-              {
-                key: 'alice',
-                scores_over_time: {
-                  buckets: [{ avg_score: { value: 65 } }],
-                },
-              },
-            ],
-          },
-        },
-      } as never);
+      riskScoreDataClient.getDailyAverageRiskScoreNormSeries.mockResolvedValue(
+        new Map([['user:alice', [65, 70]]])
+      );
 
-      const module = createRiskScoreModule({ esClient, logger, spaceId });
+      const module = createRiskScoreModule({
+        riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+        logger,
+      });
       const observations = await module.collect([entity]);
 
       const esc = observations.find((o) => o.type === 'risk_escalation_24h');
@@ -171,12 +205,12 @@ describe('RiskScoreModule', () => {
 
     it('does not produce escalation when history is insufficient', async () => {
       const entity = createEntityWithRisk('user', 'alice', 80, 'High');
-      esClient.search.mockResolvedValue({
-        hits: { hits: [] },
-        aggregations: { by_entity: { buckets: [] } },
-      } as never);
+      riskScoreDataClient.getDailyAverageRiskScoreNormSeries.mockResolvedValue(new Map());
 
-      const module = createRiskScoreModule({ esClient, logger, spaceId });
+      const module = createRiskScoreModule({
+        riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+        logger,
+      });
       const observations = await module.collect([entity]);
 
       const escalations = observations.filter((o) => o.type.startsWith('risk_escalation'));
@@ -190,7 +224,10 @@ describe('RiskScoreModule', () => {
       type: 'user',
       name: 'no-risk',
     };
-    const module = createRiskScoreModule({ esClient, logger, spaceId });
+    const module = createRiskScoreModule({
+      riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+      logger,
+    });
 
     const observations = await module.collect([entity]);
 

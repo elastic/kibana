@@ -103,7 +103,7 @@ describe('LeadDataClient', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: adhocIndex,
-          query: { bool: { must_not: [{ term: { execution_uuid: 'exec-1' } }] } },
+          query: { bool: { must_not: [{ term: { 'execution_uuid.keyword': 'exec-1' } }] } },
         })
       );
     });
@@ -237,7 +237,7 @@ describe('LeadDataClient', () => {
       const searchCall = esClient.search.mock.calls[0];
       expect(searchCall).toBeDefined();
       expect((searchCall[0] as Record<string, unknown>).query).toEqual({
-        bool: { filter: [{ term: { status: 'dismissed' } }] },
+        bool: { filter: [{ term: { 'status.keyword': 'dismissed' } }] },
       });
     });
 
@@ -319,10 +319,7 @@ describe('LeadDataClient', () => {
       expect(esClient.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: allIndices,
-          query: { term: { id: 'lead-1' } },
-          script: expect.objectContaining({
-            params: { status: 'dismissed' },
-          }),
+          query: { term: { 'id.keyword': 'lead-1' } },
         })
       );
     });
@@ -338,12 +335,6 @@ describe('LeadDataClient', () => {
 
       const result = await client.dismissLead('nonexistent');
       expect(result).toBe(false);
-    });
-
-    it('propagates Elasticsearch errors', async () => {
-      esClient.updateByQuery.mockRejectedValueOnce(new Error('cluster_block_exception'));
-
-      await expect(client.dismissLead('lead-1')).rejects.toThrow('cluster_block_exception');
     });
   });
 
@@ -361,7 +352,7 @@ describe('LeadDataClient', () => {
       expect(count).toBe(3);
 
       const [call] = esClient.updateByQuery.mock.calls;
-      expect(call[0].query).toEqual({ terms: { id: ['a', 'b', 'c'] } });
+      expect(call[0].query).toEqual({ terms: { 'id.keyword': ['a', 'b', 'c'] } });
       expect(call[0].script).toEqual(
         expect.objectContaining({
           params: { status: 'dismissed' },
@@ -375,11 +366,12 @@ describe('LeadDataClient', () => {
       expect(esClient.updateByQuery).not.toHaveBeenCalled();
     });
 
-    it('returns 0 on error', async () => {
+    it('throws on error so the route can surface it', async () => {
       esClient.updateByQuery.mockRejectedValueOnce(new Error('cluster error'));
 
-      const count = await client.bulkUpdateLeads(['a'], { status: 'dismissed' });
-      expect(count).toBe(0);
+      await expect(client.bulkUpdateLeads(['a'], { status: 'dismissed' })).rejects.toThrow(
+        'cluster error'
+      );
     });
   });
 

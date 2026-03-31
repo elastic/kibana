@@ -39,11 +39,12 @@ const createMockModule = (
   id: string,
   weight: number,
   collectFn: ObservationModule['collect']
-): ObservationModule => ({
-  config: { id, name: id, priority: 50, weight },
-  isEnabled: jest.fn().mockReturnValue(true),
-  collect: collectFn,
-});
+): ObservationModule =>
+  ({
+    config: { id, name: id, priority: 50, weight },
+    isEnabled: jest.fn().mockReturnValue(true),
+    collect: collectFn,
+  }) as ObservationModule;
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -436,7 +437,7 @@ describe('LeadGenerationEngine', () => {
         config: { id: 'disabled', name: 'disabled', priority: 100, weight: 0.5 },
         isEnabled: jest.fn().mockReturnValue(false),
         collect: jest.fn(),
-      };
+      } as ObservationModule;
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(disabledModule);
@@ -446,6 +447,32 @@ describe('LeadGenerationEngine', () => {
 
       expect(leads).toHaveLength(1);
       expect(disabledModule.collect).not.toHaveBeenCalled();
+    });
+
+    it('sets staleness to fresh for newly generated leads', async () => {
+      const entity = createMockEntity('alice');
+      const obs = createMockObservation(entity, 'mod', { score: 80, confidence: 0.9 });
+      const engine = createLeadGenerationEngine({ logger });
+      engine.registerModule(createMockModule('mod', 0.5, jest.fn().mockResolvedValue([obs])));
+
+      const leads = await engine.generateLeads([entity]);
+
+      expect(leads[0].staleness).toBe('fresh');
+    });
+
+    it('includes chatRecommendations in generated leads', async () => {
+      const entity = createMockEntity('alice');
+      const obs = createMockObservation(entity, 'behavioral_analysis', {
+        moduleId: 'behavioral_analysis',
+      });
+      const engine = createLeadGenerationEngine({ logger });
+      engine.registerModule(
+        createMockModule('behavioral_analysis', 0.3, jest.fn().mockResolvedValue([obs]))
+      );
+
+      const leads = await engine.generateLeads([entity]);
+
+      expect(leads[0].chatRecommendations.length).toBeGreaterThan(0);
     });
   });
 });

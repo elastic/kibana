@@ -33,11 +33,13 @@ jest.mock('./lead_data_client', () => ({
   createLeadDataClient: () => ({ createLeads: mockCreateLeads }),
 }));
 
+import { riskScoreDataClientMock } from '../risk_score/risk_score_data_client.mock';
 import { runLeadGenerationPipeline } from './run_pipeline';
 
 describe('runLeadGenerationPipeline', () => {
   const logger = loggingSystemMock.createLogger();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const riskScoreDataClient = riskScoreDataClientMock.create();
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -51,6 +53,7 @@ describe('runLeadGenerationPipeline', () => {
       esClient,
       logger,
       spaceId: 'default',
+      riskScoreDataClient,
       sourceType: 'scheduled',
     });
 
@@ -87,6 +90,7 @@ describe('runLeadGenerationPipeline', () => {
       esClient,
       logger,
       spaceId: 'default',
+      riskScoreDataClient,
       sourceType: 'adhoc',
       executionId: 'exec-123',
     });
@@ -115,6 +119,7 @@ describe('runLeadGenerationPipeline', () => {
       esClient,
       logger,
       spaceId: 'test-space',
+      riskScoreDataClient,
       sourceType: 'scheduled',
     });
 

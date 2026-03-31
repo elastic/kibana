@@ -12,17 +12,12 @@ import type {
   Lead,
   LeadEntity,
   LeadGenerationEngineConfig,
-  LeadStaleness,
   Observation,
   ObservationModule,
 } from '../types';
-import { DEFAULT_ENGINE_CONFIG } from '../types';
+import { computeStaleness, DEFAULT_ENGINE_CONFIG } from '../types';
 import { entityToKey } from '../observation_modules/utils';
 import { llmSynthesizeLeadContent } from './llm_synthesize';
-
-// ---------------------------------------------------------------------------
-// Engine
-// ---------------------------------------------------------------------------
 
 interface LeadGenerationEngineDeps {
   readonly logger: Logger;
@@ -68,24 +63,27 @@ export const createLeadGenerationEngine = ({
       const collectStart = Date.now();
       const observations = await collectAllObservations(modules, entities, logger);
       const collectMs = Date.now() - collectStart;
-      logger.info(
-        `[LeadGenerationEngine][Telemetry] Observation collection: ${collectMs}ms (${observations.length} observations from ${modules.length} modules)`
+      logger.debug(
+        `[LeadGenerationEngine] Observation collection: ${collectMs}ms (${observations.length} observations from ${modules.length} modules)`
       );
 
       if (observations.length === 0) {
-        logger.info('[LeadGenerationEngine] No observations collected - no leads to generate');
+        logger.debug('[LeadGenerationEngine] No observations collected - no leads to generate');
         return [];
       }
 
       // 2. Score entities based on their observations
       const scoreStart = Date.now();
       const moduleWeights = new Map<string, number>(
-        modules.map((m) => [m.config.id, m.config.weight])
+        modules.map((m) => {
+          const cfg = m.config as typeof m.config & { readonly weight?: number };
+          return [m.config.id, cfg.weight ?? 1.0];
+        })
       );
       const scoredEntities = scoreEntities(observations, entities, config, moduleWeights);
       const scoreMs = Date.now() - scoreStart;
-      logger.info(
-        `[LeadGenerationEngine][Telemetry] Entity scoring: ${scoreMs}ms (${scoredEntities.length} entities scored)`
+      logger.debug(
+        `[LeadGenerationEngine] Entity scoring: ${scoreMs}ms (${scoredEntities.length} entities scored)`
       );
 
       // 3. Filter entities below threshold
@@ -94,7 +92,7 @@ export const createLeadGenerationEngine = ({
       );
 
       if (qualifyingEntities.length === 0) {
-        logger.info('[LeadGenerationEngine] No entities met the threshold - no leads to generate');
+        logger.debug('[LeadGenerationEngine] No entities met the threshold - no leads to generate');
         return [];
       }
 
@@ -102,23 +100,19 @@ export const createLeadGenerationEngine = ({
       const groupStart = Date.now();
       const leads = await groupIntoLeads(qualifyingEntities, config, logger, options?.chatModel);
       const groupMs = Date.now() - groupStart;
-      logger.info(
-        `[LeadGenerationEngine][Telemetry] Lead grouping & synthesis: ${groupMs}ms (${leads.length} leads)`
+      logger.debug(
+        `[LeadGenerationEngine] Lead grouping & synthesis: ${groupMs}ms (${leads.length} leads)`
       );
 
       const totalMs = Date.now() - pipelineStart;
-      logger.info(
-        `[LeadGenerationEngine][Telemetry] Total pipeline: ${totalMs}ms | Collection: ${collectMs}ms | Scoring: ${scoreMs}ms | Synthesis: ${groupMs}ms | Entities: ${entities.length} | Observations: ${observations.length} | Leads: ${leads.length}`
+      logger.debug(
+        `[LeadGenerationEngine] Total pipeline: ${totalMs}ms | Collection: ${collectMs}ms | Scoring: ${scoreMs}ms | Synthesis: ${groupMs}ms | Entities: ${entities.length} | Observations: ${observations.length} | Leads: ${leads.length}`
       );
 
       return leads.slice(0, config.maxLeads);
     },
   };
 };
-
-// ---------------------------------------------------------------------------
-// Step 1: Observation collection
-// ---------------------------------------------------------------------------
 
 const collectAllObservations = async (
   modules: ObservationModule[],
@@ -133,8 +127,8 @@ const collectAllObservations = async (
         const moduleStart = Date.now();
         const moduleObservations = await module.collect(entities);
         const moduleMs = Date.now() - moduleStart;
-        logger.info(
-          `[LeadGenerationEngine][Telemetry] Module "${module.config.name}": ${moduleMs}ms (${moduleObservations.length} observations from ${entities.length} entities)`
+        logger.debug(
+          `[LeadGenerationEngine] Module "${module.config.name}": ${moduleMs}ms (${moduleObservations.length} observations from ${entities.length} entities)`
         );
         allObservations.push(...moduleObservations);
       } catch (error) {
@@ -148,19 +142,19 @@ const collectAllObservations = async (
   return allObservations;
 };
 
-// ---------------------------------------------------------------------------
-// Step 2: Entity scoring — weighted formula
-//
-// Contribution per observation:
-//   module_weight × observation.score × observation.confidence
-//
-// Bonuses (multiplicative):
-//   Corroboration: +corroborationBonus% when multiple observations share a module
-//   Diversity:     +diversityBonus% when observations span multiple modules
-//
-// Normalization:
-//   priority = round(rawScore / normalizationCeiling × 9 + 1), clamped to [1, 10]
-// ---------------------------------------------------------------------------
+/**
+ * Entity scoring — weighted formula
+ *
+ * Contribution per observation:
+ *   module_weight × observation.score × observation.confidence
+ *
+ * Bonuses (multiplicative):
+ *   Corroboration: +corroborationBonus when multiple observations share a module
+ *   Diversity:     +diversityBonus when observations span multiple modules
+ *
+ * Normalization:
+ *   priority = round(rawScore / normalizationCeiling × 9 + 1), clamped to [1, 10]
+ */
 
 interface ScoredEntity {
   readonly entity: LeadEntity;
@@ -237,10 +231,6 @@ const calculateWeightedPriority = (
   return Math.max(1, Math.min(10, Math.round(normalized)));
 };
 
-// ---------------------------------------------------------------------------
-// Step 3: Grouping into leads
-// ---------------------------------------------------------------------------
-
 const groupIntoLeads = async (
   scoredEntities: ScoredEntity[],
   _config: LeadGenerationEngineConfig,
@@ -263,12 +253,12 @@ const groupIntoLeads = async (
       group,
       allObservations,
       logger,
-      chatModel,
-      usedTitleTracker
+      usedTitleTracker,
+      chatModel
     );
     const synthMs = Date.now() - synthStart;
-    logger.info(
-      `[LeadGenerationEngine][Telemetry] Lead ${i + 1}/${
+    logger.debug(
+      `[LeadGenerationEngine] Lead ${i + 1}/${
         groups.length
       } synthesis for [${entityLabel}]: ${synthMs}ms (${chatModel ? 'LLM' : 'rule-based'})`
     );
@@ -283,7 +273,7 @@ const groupIntoLeads = async (
       priority: maxPriority,
       chatRecommendations: recommendations,
       timestamp: now.toISOString(),
-      staleness: calculateStaleness(now, now),
+      staleness: computeStaleness(now, now),
       observations: allObservations,
     });
   }
@@ -303,41 +293,12 @@ const groupByObservationPattern = (scoredEntities: ScoredEntity[]): ScoredEntity
   return scoredEntities.map((entity) => [entity]);
 };
 
-// ---------------------------------------------------------------------------
-// Staleness model
-//
-// Fresh:   0-24 hours
-// Stale:   24-72 hours
-// Expired: >72 hours
-// ---------------------------------------------------------------------------
-
-const STALENESS_THRESHOLDS = {
-  fresh: 24 * 60 * 60 * 1000,
-  stale: 72 * 60 * 60 * 1000,
-};
-
-const calculateStaleness = (generatedAt: Date, now: Date): LeadStaleness => {
-  const ageMs = now.getTime() - generatedAt.getTime();
-
-  if (ageMs <= STALENESS_THRESHOLDS.fresh) {
-    return 'fresh';
-  }
-  if (ageMs <= STALENESS_THRESHOLDS.stale) {
-    return 'stale';
-  }
-  return 'expired';
-};
-
-// ---------------------------------------------------------------------------
-// Lead content synthesis (LLM-powered with rule-based fallback)
-// ---------------------------------------------------------------------------
-
 const synthesizeLeadContent = async (
   group: ScoredEntity[],
   observations: Observation[],
   logger: Logger,
-  chatModel: InferenceChatModel | undefined,
-  usedTitleTracker: Map<string, number>
+  usedTitleTracker: Map<string, number>,
+  chatModel?: InferenceChatModel
 ): Promise<{
   title: string;
   byline: string;

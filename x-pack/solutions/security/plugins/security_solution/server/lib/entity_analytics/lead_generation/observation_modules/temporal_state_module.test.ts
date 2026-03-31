@@ -63,6 +63,11 @@ describe('TemporalStateModule', () => {
     expect(module.isEnabled()).toBe(true);
   });
 
+  it('exposes module weight for weighted scoring', () => {
+    const module = createTemporalStateModule({ esClient, logger, spaceId });
+    expect(module.config.weight).toBe(0.25);
+  });
+
   it('detects privilege escalation when entity was not privileged historically', async () => {
     const entity = createPrivilegedEntity('user', 'alice');
     esClient.search.mockResolvedValue(
@@ -78,7 +83,7 @@ describe('TemporalStateModule', () => {
     expect(observations[0].entityId).toBe('user:alice');
   });
 
-  it('queries entity type name field per entity type', async () => {
+  it('queries by entity type name field (e.g. user.name)', async () => {
     const entity = createPrivilegedEntity('user', 'alice');
     esClient.search.mockResolvedValue(
       mockSnapshotResponse([{ key: 'alice', wasPrivileged: false }]) as never
@@ -114,7 +119,7 @@ describe('TemporalStateModule', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
-  it('handles multiple entity types with separate queries per type', async () => {
+  it('handles multiple entity types with one query per type', async () => {
     const userEntity = createPrivilegedEntity('user', 'alice');
     const hostEntity = createPrivilegedEntity('host', 'server-01');
 

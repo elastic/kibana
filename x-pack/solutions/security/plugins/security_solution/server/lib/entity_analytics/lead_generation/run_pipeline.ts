@@ -15,6 +15,7 @@ import { createRiskScoreModule } from './observation_modules/risk_score_module';
 import { createTemporalStateModule } from './observation_modules/temporal_state_module';
 import { createBehavioralAnalysisModule } from './observation_modules/behavioral_analysis_module';
 import { createLeadDataClient } from './lead_data_client';
+import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import type { LeadEntity } from './types';
 
 export interface RunPipelineParams {
@@ -22,6 +23,7 @@ export interface RunPipelineParams {
   readonly esClient: ElasticsearchClient;
   readonly logger: Logger;
   readonly spaceId: string;
+  readonly riskScoreDataClient: RiskScoreDataClient;
   readonly executionId?: string;
   readonly sourceType: LeadGenerationMode;
 }
@@ -39,6 +41,7 @@ export const runLeadGenerationPipeline = async ({
   esClient,
   logger,
   spaceId,
+  riskScoreDataClient,
   executionId: providedExecutionId,
   sourceType,
 }: RunPipelineParams): Promise<RunPipelineResult> => {
@@ -61,7 +64,7 @@ export const runLeadGenerationPipeline = async ({
   }
 
   const engine = createLeadGenerationEngine({ logger });
-  engine.registerModule(createRiskScoreModule({ esClient, logger, spaceId }));
+  engine.registerModule(createRiskScoreModule({ riskScoreDataClient, logger }));
   engine.registerModule(createTemporalStateModule({ esClient, logger, spaceId }));
   engine.registerModule(
     createBehavioralAnalysisModule({

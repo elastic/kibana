@@ -18,6 +18,8 @@ import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
 import type { StartPlugins } from '../../../../plugin_contract';
+import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
+import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from './constants';
 import {
   defaultState,
@@ -65,6 +67,7 @@ export const registerLeadGenerationTask = ({
   taskManager,
   experimentalFeatures,
   config,
+  kibanaVersion,
 }: RegisterParams) => {
   if (!taskManager) {
     logger.info(
@@ -86,6 +89,7 @@ export const registerLeadGenerationTask = ({
         logger,
         getStartServices,
         config,
+        kibanaVersion,
       }),
     },
   });
@@ -102,6 +106,7 @@ const createLeadGenerationTaskRunnerFactory =
     logger: Logger;
     getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
     config: ConfigType;
+    kibanaVersion: string;
   }): TaskRunCreatorFunction =>
   ({ taskInstance }) => {
     let cancelled = false;
@@ -116,6 +121,7 @@ const createLeadGenerationTaskRunnerFactory =
           taskInstance,
           core,
           startPlugins,
+          kibanaVersion: deps.kibanaVersion,
         });
       },
       cancel: async () => {
@@ -134,12 +140,14 @@ const runLeadGenerationTask = async ({
   taskInstance,
   core,
   startPlugins,
+  kibanaVersion,
 }: {
   isCancelled: () => boolean;
   logger: Logger;
   taskInstance: ConcreteTaskInstance;
   core: CoreStart;
   startPlugins: StartPlugins;
+  kibanaVersion: string;
 }): Promise<{ state: LeadGenerationTaskState }> => {
   const state = taskInstance.state as LeadGenerationTaskState;
   const taskStartTime = moment().utc().toISOString();
@@ -157,13 +165,25 @@ const runLeadGenerationTask = async ({
   try {
     logger.info('[LeadGeneration] Running scheduled lead generation task');
     const esClient = core.elasticsearch.client.asInternalUser;
+    const soClient = buildScopedInternalSavedObjectsClientUnsafe({
+      coreStart: core,
+      namespace: state.namespace,
+    });
     const crudClient = startPlugins.entityStore.createCRUDClient(esClient, state.namespace);
+    const riskScoreDataClient = new RiskScoreDataClient({
+      logger,
+      kibanaVersion,
+      esClient,
+      namespace: state.namespace,
+      soClient,
+    });
 
     await runLeadGenerationPipeline({
       listEntities: () => fetchAllLeadEntities(crudClient, logger),
       esClient,
       logger,
       spaceId: state.namespace,
+      riskScoreDataClient,
       sourceType: 'scheduled',
     });
   } catch (e) {
