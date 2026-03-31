@@ -78,6 +78,7 @@ steps:
           imageProject: elastic-images-prod
           machineType: n2-standard-2
           preemptible: true
+          diskSizeGb: 150
         timeout_in_minutes: 30
         depends_on: build
         retry:
