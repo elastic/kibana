@@ -1732,7 +1732,7 @@
           "\nParameters for the event-driven indexing API."
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-        "lineNumber": 164,
+        "lineNumber": 165,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1749,7 +1749,7 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 168,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1762,7 +1762,7 @@
             "label": "originId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 169,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1775,7 +1775,7 @@
             "label": "attachmentType",
             "description": [],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 170,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1791,7 +1791,7 @@
               "\"create\" | \"update\" | \"delete\""
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 171,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1807,7 +1807,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
-            "lineNumber": 172,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2303,7 +2303,11 @@
               "\nRegister a built-in tool to be available in agentBuilder."
             ],
             "signature": [
-              "<RunInput extends ZodObject<any>>(tool: ",
+              "<RunInput extends ",
+              "ZodObject",
+              "<any, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>>(tool: ",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",
@@ -2551,16 +2555,31 @@
     "misc": [
       {
         "parentPluginId": "agentBuilder",
+        "id": "def-server.smlIndexName",
+        "type": "string",
+        "tags": [],
+        "label": "smlIndexName",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/sml_storage.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
         "id": "def-server.SmlSearchResult",
         "type": "Type",
         "tags": [],
         "label": "SmlSearchResult",
         "description": [
-          "\nAn SML search result — an SML document enriched with a search score."
+          "\nAn SML search result — same fields as {@link SmlDocument} plus relevance score.\n`content` is optional when the query excluded it from `_source` (e.g. `skipContent`)."
         ],
         "signature": [
+          "Omit<",
           "SmlDocument",
-          " & { score: number; }"
+          ", \"content\"> & { content?: string | undefined; score: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/types.ts",
         "lineNumber": 133,
@@ -2570,7 +2589,84 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.smlElasticsearchIndexMappings",
+        "type": "Object",
+        "tags": [],
+        "label": "smlElasticsearchIndexMappings",
+        "description": [
+          "\nElasticsearch `mappings` block for the SML data index (e.g. integration tests, tooling).\nField definitions match `smlStorageSchemaProperties` / `storageSettings`."
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/sml_storage.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.smlElasticsearchIndexMappings.dynamic",
+            "type": "string",
+            "tags": [],
+            "label": "dynamic",
+            "description": [],
+            "signature": [
+              "\"strict\""
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/sml_storage.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.smlElasticsearchIndexMappings.properties",
+            "type": "Object",
+            "tags": [],
+            "label": "properties",
+            "description": [],
+            "signature": [
+              "{ id: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; }; type: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; } & { fields: { autocomplete: ",
+              "MappingSearchAsYouTypeProperty",
+              " & Partial<",
+              "MappingSearchAsYouTypeProperty",
+              ">; }; }; title: ",
+              "MappingSearchAsYouTypeProperty",
+              " & Partial<",
+              "MappingSearchAsYouTypeProperty",
+              ">; origin_id: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; }; content: ",
+              "MappingTextProperty",
+              " & Partial<",
+              "MappingTextProperty",
+              ">; created_at: ",
+              "MappingDateProperty",
+              " & { format: \"strict_date_optional_time\"; }; updated_at: ",
+              "MappingDateProperty",
+              " & { format: \"strict_date_optional_time\"; }; spaces: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; }; permissions: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; }; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_builder/server/services/sml/sml_storage.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "agentBuilder",
       "id": "def-server.AgentBuilderPluginSetup",
