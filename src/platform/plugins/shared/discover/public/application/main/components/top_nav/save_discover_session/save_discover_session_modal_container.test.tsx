@@ -504,15 +504,16 @@ describe('DiscoverSessionSaveModalContainer', () => {
       expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveSession);
     });
 
-    it('should not transfer back to editor on Save As without dashboard in embedded editor', async () => {
+    it('should navigate to new session on Save As from embedded editor', async () => {
       const services = createDiscoverServicesMock();
       const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
-      const { modalProps, onClose, toolkit } = await setup({
+      const clearEditorStateSpy = jest.spyOn(services.embeddableEditor, 'clearEditorState');
+      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const { modalProps, onClose } = await setup({
         initialCopyOnSave: true,
         isEmbedded: true,
         services,
       });
-      const currentTabId = toolkit.getCurrentTab().id;
 
       await act(async () => {
         await modalProps?.onSave(
@@ -524,18 +525,22 @@ describe('DiscoverSessionSaveModalContainer', () => {
       });
 
       expect(transferSpy).not.toHaveBeenCalled();
+      expect(clearEditorStateSpy).toHaveBeenCalled();
+      expect(navigateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ savedSearchId: 'the-saved-search-id' })
+      );
       expect(onClose).toHaveBeenCalled();
-      expect(toolkit.getCurrentTab().id).toBe(currentTabId);
     });
 
-    it('should not transfer back to editor when newCopyOnSave is toggled on in embedded editor', async () => {
+    it('should navigate to new session when newCopyOnSave is toggled on in embedded editor', async () => {
       const services = createDiscoverServicesMock();
       const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
-      const { modalProps, onClose, toolkit } = await setup({
+      const clearEditorStateSpy = jest.spyOn(services.embeddableEditor, 'clearEditorState');
+      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const { modalProps, onClose } = await setup({
         isEmbedded: true,
         services,
       });
-      const currentTabId = toolkit.getCurrentTab().id;
 
       await act(async () => {
         await modalProps?.onSave(
@@ -547,11 +552,43 @@ describe('DiscoverSessionSaveModalContainer', () => {
       });
 
       expect(transferSpy).not.toHaveBeenCalled();
+      expect(clearEditorStateSpy).toHaveBeenCalled();
+      expect(navigateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ savedSearchId: 'the-saved-search-id' })
+      );
       expect(onClose).toHaveBeenCalled();
-      expect(toolkit.getCurrentTab().id).toBe(currentTabId);
     });
 
-    it('should not navigate for embedded editor', async () => {
+    it('should navigate to new session on Save As from embedded editor without persisted session', async () => {
+      const services = createDiscoverServicesMock();
+      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const clearEditorStateSpy = jest.spyOn(services.embeddableEditor, 'clearEditorState');
+      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const { modalProps, onClose } = await setup({
+        initialCopyOnSave: true,
+        isEmbedded: true,
+        persistedDiscoverSession: false,
+        services,
+      });
+
+      await act(async () => {
+        await modalProps?.onSave(
+          getOnSaveProps({
+            dashboardId: null,
+            newCopyOnSave: true,
+          })
+        );
+      });
+
+      expect(transferSpy).not.toHaveBeenCalled();
+      expect(clearEditorStateSpy).toHaveBeenCalled();
+      expect(navigateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ savedSearchId: 'new-session' })
+      );
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('should not navigate for embedded editor on regular save', async () => {
       const services = createDiscoverServicesMock();
       const navigateSpy = jest.spyOn(services.locator, 'navigate');
       const { modalProps } = await setup({ isEmbedded: true, services });
