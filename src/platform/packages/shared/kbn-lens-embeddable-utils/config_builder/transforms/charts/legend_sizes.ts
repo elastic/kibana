@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import { LegendSize } from '@kbn/chart-expressions-common';
 
-export interface DateRange {
-  from?: Date;
-  to?: Date;
-}
+import { getReversibleMappings } from './utils';
 
-export function DayPicker() {
-  return <div data-testid="day-picker-mock" />;
-}
+type APILegendSize = 'auto' | 's' | 'm' | 'l' | 'xl';
+
+export const legendSizeCompat = getReversibleMappings<APILegendSize, LegendSize>([
+  ['auto', LegendSize.AUTO],
+  ['s', LegendSize.SMALL],
+  ['m', LegendSize.MEDIUM],
+  ['l', LegendSize.LARGE],
+  ['xl', LegendSize.EXTRA_LARGE],
+]);

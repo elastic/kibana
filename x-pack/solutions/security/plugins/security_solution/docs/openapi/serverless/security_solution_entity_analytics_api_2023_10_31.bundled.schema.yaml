@@ -2159,6 +2159,10 @@ components:
               items:
                 type: string
               type: array
+            accesses_infrequently:
+              items:
+                type: string
+              type: array
             communicates_with:
               items:
                 type: string
@@ -2247,6 +2251,9 @@ components:
           maximum: 100
           minimum: 0
           type: number
+        calculation_run_id:
+          description: Unique identifier for the scoring run that produced this document.
+          type: string
         category_1_count:
           description: >-
             The number of risk input documents that contributed to the Category
@@ -2313,6 +2320,13 @@ components:
           items:
             type: string
           type: array
+        score_type:
+          description: Distinguishes base, propagated, and resolution scores.
+          enum:
+            - base
+            - propagated
+            - resolution
+          type: string
       required:
         - '@timestamp'
         - id_field
@@ -2709,6 +2723,9 @@ components:
         description:
           description: A human-readable description of the risk input document.
           example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
+          type: string
+        entity_id:
+          description: The EUID of the entity within the graph that generated this alert.
           type: string
         id:
           description: The unique identifier (`_id`) of the original source document
