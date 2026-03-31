@@ -162,6 +162,11 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
+import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
+import {
+  initializeEndpointExceptionsPerPolicyOptInStatus,
+  REFERENCE_DATA_SAVED_OBJECT_TYPE,
+} from './endpoint/lib/reference_data';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -520,6 +525,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         endpointAppContextService: this.endpointAppContextService,
         osqueryCreateActionService: plugins.osquery?.createActionService,
       }),
+      endpointAppContextService: this.endpointAppContextService,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -594,6 +600,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
     registerAgentRoutes(router, this.endpointContext);
+    registerEndpointExceptionsRoutes(router, this.endpointContext);
     registerScriptsLibraryRoutes(router, this.endpointContext);
 
     if (plugins.alerting != null) {
@@ -758,6 +765,18 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
     const { config, logger, productFeaturesService } = this;
+
+    initializeEndpointExceptionsPerPolicyOptInStatus(
+      new SavedObjectsClient(
+        core.savedObjects.createInternalRepository([REFERENCE_DATA_SAVED_OBJECT_TYPE])
+      ),
+      config.experimentalFeatures,
+      logger
+    ).catch((error) => {
+      this.logger.error(
+        `Error initializing Endpoint Exceptions per-policy opt-in status: ${error}`
+      );
+    });
 
     this.ruleMonitoringService.start(core, plugins);
 
