@@ -127,7 +127,7 @@ apiTest.describe(
       );
       expect(secondPageRes).toHaveStatusCode(200);
       const secondPage = secondPageRes.body as { results: Array<{ id: string }> };
-      expect(secondPage.results.length).toBeLessThan(2);
+      expect(secondPage.results).toHaveLength(1);
       expect(secondPage.results[0].id).not.toBe(firstPage.results[0].id);
     });
 

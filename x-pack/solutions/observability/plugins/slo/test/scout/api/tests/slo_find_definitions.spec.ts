@@ -66,7 +66,7 @@ apiTest.describe(
         results: Array<{ tags: string[] }>;
       };
       expect(d2.total).toBe(1);
-      expect(d2.results.find((def) => def.tags.includes('tag2'))).toBeUndefined();
+      expect(d2.results.find((def) => def.tags.includes('test2'))).toBeUndefined();
     });
 
     apiTest('finds outdated SLOs', async ({ apiClient }) => {
