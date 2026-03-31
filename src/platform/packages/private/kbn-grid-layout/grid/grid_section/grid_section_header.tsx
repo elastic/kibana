@@ -379,6 +379,7 @@ const styles = {
       },
       '.kbnGridSection--dragHandle': {
         padding: euiTheme.size.xs,
+        cursor: 'move',
       },
 
       // these styles hide the delete + move actions by default and only show them on hover
