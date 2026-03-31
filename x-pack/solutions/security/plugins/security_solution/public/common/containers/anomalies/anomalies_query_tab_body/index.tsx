@@ -13,6 +13,7 @@ import { getAnomaliesFilterQuery } from './utils';
 import { useInstalledSecurityJobs } from '../../../components/ml/hooks/use_installed_security_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { MatrixHistogram } from '../../../components/matrix_histogram';
+import { EaMlJobCallout } from '../../../../entity_analytics/components/ea_ml_job_callout';
 import { histogramConfigs } from './histogram_configs';
 
 const ID = 'anomaliesHistogramQuery';
@@ -54,6 +55,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
 
   return (
     <>
+      <EaMlJobCallout />
       <MatrixHistogram
         endDate={endDate}
         filterQuery={mergedFilterQuery}

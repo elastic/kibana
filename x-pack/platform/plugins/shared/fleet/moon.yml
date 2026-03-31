@@ -124,6 +124,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/rison'
   - '@kbn/rule-data-utils'
+  - '@kbn/doc-links'
 tags:
   - plugin
   - prod
