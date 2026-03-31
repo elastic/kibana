@@ -1,0 +1,53 @@
+version: '1'
+name: 'sources.google_cloud_storage.list_objects'
+description: "List objects in a Google Cloud Storage bucket. This is the only way to find files — there is no search tool. Use prefix to filter by path and delimiter='/' to browse folder-by-folder, or omit delimiter to list all objects recursively under a prefix."
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: bucket
+    type: string
+    description: Name of the GCS bucket to list objects from
+  - name: prefix
+    type: string
+    required: false
+    description: "Filter objects whose names begin with this prefix. Use to navigate 'folders' (e.g. 'reports/2024/')"
+  - name: delimiter
+    type: string
+    required: false
+    description: "Character used to group object names into virtual folders. Use '/' to list only the current folder level"
+  - name: maxResults
+    type: number
+    required: false
+    description: Maximum number of objects to return (default 100, max 1000)
+  - name: pageToken
+    type: string
+    required: false
+    description: "Pagination token from a previous response to get the next page of results"
+steps:
+  - name: list_objects
+    type: google_cloud_storage.listObjects
+    connector-id: <%= google_cloud_storage-stack-connector-id %>
+    with:
+      bucket: "${{inputs.bucket}}"
+      prefix: "${{inputs.prefix}}"
+      delimiter: "${{inputs.delimiter}}"
+      maxResults: ${{inputs.maxResults}}
+      pageToken: "${{inputs.pageToken}}"
+  - name: map_results
+    type: data.map
+    items: ${{ steps.list_objects.output }}
+    with:
+      fields:
+        nextPageToken: "${{ item.nextPageToken }}"
+        prefixes: "${{ item.prefixes }}"
+        objects:
+          $map: { items: "${{ item.items }}", item: "obj" }
+          name: "${{ obj.name }}"
+          bucket: "${{ obj.bucket }}"
+          size: "${{ obj.size }}"
+          contentType: "${{ obj.contentType }}"
+          timeCreated: "${{ obj.timeCreated }}"
+          updated: "${{ obj.updated }}"
+          md5Hash: "${{ obj.md5Hash }}"
