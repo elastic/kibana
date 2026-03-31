@@ -104,6 +104,20 @@ function parseUserProfileWithSecurity<D extends UserProfileData>(
   };
 }
 
+function decodeApiKeyId(authorizationHeader: string | string[] | undefined): string | undefined {
+  if (typeof authorizationHeader !== 'string') {
+    return undefined;
+  }
+  const prefix = 'apikey ';
+  if (!authorizationHeader.toLowerCase().startsWith(prefix)) {
+    return undefined;
+  }
+  const encodedApiKey = authorizationHeader.slice(prefix.length);
+  const decoded = Buffer.from(encodedApiKey, 'base64').toString();
+  const [id] = decoded.split(':');
+  return id;
+}
+
 export class UserProfileService {
   private authz?: AuthorizationServiceSetupInternal;
   private license?: SecurityLicense;
@@ -288,8 +302,19 @@ export class UserProfileService {
     request: UserProfileGetCurrentParams['request']
   ): Promise<string | undefined> {
     try {
-      const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
+      const id = decodeApiKeyId(request.headers.authorization);
+      if (!id) {
+        this.logger.debug(`Failed to decode API key ID from Authorization header.`);
+        return undefined;
+      }
+
+      const response = await clusterClient.asScoped(request).asCurrentUser.security.queryApiKeys({
         with_profile_uid: true,
+        query: {
+          ids: {
+            values: [id],
+          },
+        },
       });
 
       if (response.api_keys && response.api_keys.length > 0) {
