@@ -90,5 +90,24 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(patchedCases[0].status).to.eql(CaseStatuses.closed);
     });
+
+    it('should reject a close request with an invalid closeReason in space1', async () => {
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      await updateCase({
+        supertest: supertestWithoutAuth,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: CaseStatuses.closed,
+              closeReason: 'invalid_custom_reason_not_in_settings',
+            },
+          ],
+        },
+        expectedHttpCode: 400,
+        auth: authSpace1,
+      });
+    });
   });
 };

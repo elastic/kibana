@@ -100,6 +100,25 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('should reject a close request with an invalid closeReason', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.closed,
+                closeReason: 'invalid_custom_reason_not_in_settings',
+              },
+            ],
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
       it('should reopen a case that was previously closed with a closeReason', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
@@ -468,6 +487,74 @@ export default ({ getService }: FtrProviderContext): void => {
         } finally {
           await es.indices.delete({ index: testAlertIndex, ignore_unavailable: true });
         }
+      });
+    });
+
+    describe('non-security-solution owner', () => {
+      it('should reject any close reason for a case owned by observabilityFixture', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({ owner: 'observabilityFixture' })
+        );
+
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.closed,
+                closeReason: 'false_positive',
+              },
+            ],
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('should reject a custom close reason for a case owned by observabilityFixture', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({ owner: 'observabilityFixture' })
+        );
+
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.closed,
+                closeReason: 'some_custom_reason',
+              },
+            ],
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('should close a case owned by observabilityFixture without a close reason', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({ owner: 'observabilityFixture' })
+        );
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+        });
+
+        expect(patchedCases[0].status).to.eql(CaseStatuses.closed);
       });
     });
   });
