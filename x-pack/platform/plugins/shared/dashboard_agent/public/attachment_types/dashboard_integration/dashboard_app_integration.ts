@@ -14,59 +14,18 @@ import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
+import { isDashboardAttachment } from './is_dashboard_attachment';
 import { createManualChangesSubscription } from './manual_changes_subscription';
+import { createOriginSyncSubscription } from './origin_sync_subscription';
 import { serializeDashboardAttachment } from './serialize_dashboard_attachment';
 
-/**
- * Creates a subscription that syncs the dashboard's saved object ID to the attachment's origin.
- * This ensures that when a dashboard is saved (or saved as), the attachment origin is updated.
- */
-const createOriginSyncSubscription = ({
-  api,
-  conversationId,
-  attachmentId,
-  attachmentOrigin,
-  agentBuilder,
-  onOriginUpdated,
-}: {
-  api: DashboardApi;
-  conversationId: string;
-  attachmentId: string;
-  attachmentOrigin: string | undefined;
-  agentBuilder: AgentBuilderPluginStart;
-  onOriginUpdated?: (origin: string) => void;
-}): Subscription => {
-  let previousSavedObjectId = api.savedObjectId$.value;
-  let currentOrigin = attachmentOrigin;
-
-  return api.savedObjectId$.subscribe((currentSavedObjectId) => {
-    // Only update origin if:
-    // - there is an id to update to (currentSavedObjectId is not undefined)
-    // - the id is different from the current origin
-    // - Either:
-    //   1. The attachment has no origin yet (unsaved), OR
-    //   2. The previous savedObjectId matches the attachment origin (we're on the same dashboard), OR
-    //   3. The current savedObjectId matches the attachment origin
-    // This prevents linking to unrelated dashboards when navigating
-
-    const shouldUpdate =
-    currentSavedObjectId && (
-    !currentOrigin || (  // first save
-      currentSavedObjectId === currentOrigin  // save again
-    ) || (
-      previousSavedObjectId === currentOrigin // save as
-    ))
-
-    console.log('shouldUpdate', shouldUpdate, currentSavedObjectId, currentOrigin, previousSavedObjectId);
-
-    if (shouldUpdate) {
-      void agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, currentSavedObjectId);
-      onOriginUpdated?.(currentSavedObjectId);
-      currentOrigin = currentSavedObjectId;
-    }
-    previousSavedObjectId = currentSavedObjectId;
-  });
-};
+interface DashboardAttachmentSessionState {
+  conversationId?: string;
+  attachmentId?: string;
+  data?: DashboardAttachment['data'];
+  conversationOrigin?: string;
+  localOrigin?: string;
+}
 
 export const registerDashboardAppIntegration = ({
   agentBuilder,
@@ -76,9 +35,51 @@ export const registerDashboardAppIntegration = ({
   api: DashboardApi;
 }): (() => void) => {
   let pendingDashboardAttachmentId: string | undefined;
-  let currentAttachment: DashboardAttachment | undefined;
+  let attachmentSession: DashboardAttachmentSessionState = {};
   let originSyncSubscription: Subscription | undefined;
   let pendingAttachmentOriginSyncSubscription: Subscription | undefined;
+
+  const getCurrentAttachment = (): DashboardAttachment | undefined => {
+    if (!attachmentSession.attachmentId || !attachmentSession.data) {
+      return undefined;
+    }
+
+    return {
+      id: attachmentSession.attachmentId,
+      type: DASHBOARD_ATTACHMENT_TYPE,
+      data: attachmentSession.data,
+      origin: attachmentSession.localOrigin ?? attachmentSession.conversationOrigin,
+    };
+  };
+
+  const setCurrentAttachmentSession = ({
+    conversationId,
+    attachmentId,
+    data,
+    conversationOrigin,
+    preserveLocalOrigin = false,
+  }: {
+    conversationId?: string;
+    attachmentId?: string;
+    data?: DashboardAttachment['data'];
+    conversationOrigin?: string;
+    preserveLocalOrigin?: boolean;
+  }) => {
+    const localOrigin =
+      preserveLocalOrigin &&
+      attachmentSession.conversationId === conversationId &&
+      attachmentSession.attachmentId === attachmentId
+        ? attachmentSession.localOrigin
+        : undefined;
+
+    attachmentSession = {
+      conversationId,
+      attachmentId,
+      data,
+      conversationOrigin,
+      localOrigin,
+    };
+  };
 
   const cleanupOriginSync = () => {
     originSyncSubscription?.unsubscribe();
@@ -101,7 +102,7 @@ export const registerDashboardAppIntegration = ({
     cleanupPendingAttachmentOriginSync();
     agentBuilder.removeAttachment(pendingDashboardAttachmentId);
     pendingDashboardAttachmentId = undefined;
-    currentAttachment = undefined;
+    attachmentSession = {};
   };
 
   const setupOriginSyncForExistingAttachment = (
@@ -116,8 +117,14 @@ export const registerDashboardAppIntegration = ({
       attachmentOrigin: attachment.origin,
       agentBuilder,
       onOriginUpdated: (origin) => {
-        if (currentAttachment?.id === attachment.id) {
-          currentAttachment = { ...currentAttachment, origin };
+        if (
+          attachmentSession.conversationId === conversationId &&
+          attachmentSession.attachmentId === attachment.id
+        ) {
+          attachmentSession = {
+            ...attachmentSession,
+            localOrigin: origin,
+          };
         }
       },
     });
@@ -151,9 +158,12 @@ export const registerDashboardAppIntegration = ({
           });
           if (updatedAttachment) {
             agentBuilder.addAttachment(updatedAttachment);
-            // Update current attachment origin
-            if (currentAttachment) {
-              currentAttachment = { ...currentAttachment, origin: currentSavedObjectId };
+            if (attachmentSession.attachmentId === attachmentId) {
+              attachmentSession = {
+                ...attachmentSession,
+                data: updatedAttachment.data,
+                localOrigin: currentSavedObjectId,
+              };
             }
           }
           currentOrigin = currentSavedObjectId;
@@ -171,7 +181,7 @@ export const registerDashboardAppIntegration = ({
   const manualChangesSubscription = createManualChangesSubscription({
     agentBuilder,
     api,
-    getAttachment: () => currentAttachment,
+    getAttachment: getCurrentAttachment,
   });
 
   agentBuilder.setChatConfig({
@@ -182,10 +192,7 @@ export const registerDashboardAppIntegration = ({
       // This ensures we don't carry over attachments from previous conversations
       removePendingDashboardAttachment();
 
-      const existingDashboardAttachment = attachments?.find(
-        (attachment): attachment is VersionedAttachment<typeof DASHBOARD_ATTACHMENT_TYPE> =>
-          attachment.type === DASHBOARD_ATTACHMENT_TYPE
-      );
+      const existingDashboardAttachment = attachments?.find(isDashboardAttachment);
 
       if (existingDashboardAttachment && conversationId) {
         // Switching to a conversation with existing dashboard attachment
@@ -194,14 +201,13 @@ export const registerDashboardAppIntegration = ({
 
         // Set current attachment from existing versioned attachment
         const latestVersion = getLatestVersion(existingDashboardAttachment);
-        if (latestVersion) {
-          currentAttachment = {
-            id: existingDashboardAttachment.id,
-            type: DASHBOARD_ATTACHMENT_TYPE,
-            data: latestVersion.data as DashboardAttachment['data'],
-            origin: existingDashboardAttachment.origin,
-          };
-        }
+        setCurrentAttachmentSession({
+          conversationId,
+          attachmentId: existingDashboardAttachment.id,
+          data: latestVersion?.data as DashboardAttachment['data'] | undefined,
+          conversationOrigin: existingDashboardAttachment.origin,
+          preserveLocalOrigin: true,
+        });
         return;
       }
 
@@ -222,12 +228,12 @@ export const registerDashboardAppIntegration = ({
       setupPendingAttachmentOriginSync(pendingDashboardAttachmentId, savedObjectId);
 
       // Set current attachment for manual changes tracking
-      currentAttachment = {
-        id: pendingDashboardAttachmentId,
-        type: DASHBOARD_ATTACHMENT_TYPE,
+      setCurrentAttachmentSession({
+        conversationId,
+        attachmentId: pendingDashboardAttachmentId,
         data: attachment.data,
-        origin: attachment.origin,
-      };
+        conversationOrigin: attachment.origin,
+      });
     },
   });
 

@@ -7,15 +7,12 @@
 
 import { filter, type Subscription } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import {
-  ATTACHMENT_REF_OPERATION,
-  getLatestVersion,
-  type VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DASHBOARD_ATTACHMENT_TYPE, attachmentToDashboardState } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import { isDashboardAttachment } from './is_dashboard_attachment';
 
 export interface AgentLiveUpdatesSubscriptionParams {
   agentBuilder: AgentBuilderPluginStart;
@@ -31,16 +28,17 @@ export const createAgentLiveUpdatesSubscription = ({
   api,
 }: AgentLiveUpdatesSubscriptionParams): Subscription =>
   agentBuilder.events.chat$.pipe(filter(isRoundCompleteEvent)).subscribe((event) => {
-    const incomingAttachment = event.data.attachments?.find(
-      (attachment): attachment is VersionedAttachment<typeof DASHBOARD_ATTACHMENT_TYPE> =>
-        attachment.type === DASHBOARD_ATTACHMENT_TYPE &&
+    const incomingAttachment = event.data.attachments?.find((attachment) => {
+      return (
+        isDashboardAttachment(attachment) &&
         event.data.round.input.attachment_refs?.some(
           (ref) =>
             ref.attachment_id === attachment.id &&
             (ref.operation === ATTACHMENT_REF_OPERATION.updated ||
               ref.operation === ATTACHMENT_REF_OPERATION.created)
         ) === true
-    );
+      );
+    });
 
     if (!incomingAttachment) {
       return;

@@ -567,6 +567,72 @@ describe('registerDashboardAppIntegration', () => {
       );
     });
 
+    it('preserves the local linked origin when the same attachment refreshes with stale origin data', () => {
+      const dashboardApiWithUpdatedId = createMockDashboardApi('original-dashboard-id');
+
+      registerDashboardAppIntegration({
+        agentBuilder,
+        api: dashboardApiWithUpdatedId as unknown as DashboardApi,
+      });
+
+      const onConversationChange =
+        agentBuilder.setChatConfig.mock.calls[0][0].onConversationChange!;
+
+      onConversationChange({
+        id: 'existing-conversation',
+        attachments: [
+          {
+            id: 'existing-dashboard-attachment',
+            type: DASHBOARD_ATTACHMENT_TYPE,
+            versions: [
+              {
+                version: 1,
+                data: { title: 'Test' },
+                content_hash: 'hash',
+                created_at: new Date().toISOString(),
+              },
+            ],
+            current_version: 1,
+            origin: 'original-dashboard-id',
+          },
+        ],
+      });
+
+      dashboardApiWithUpdatedId.savedObjectId$.next('saved-as-dashboard-id');
+
+      onConversationChange({
+        id: 'existing-conversation',
+        attachments: [
+          {
+            id: 'existing-dashboard-attachment',
+            type: DASHBOARD_ATTACHMENT_TYPE,
+            versions: [
+              {
+                version: 1,
+                data: { title: 'Test' },
+                content_hash: 'hash',
+                created_at: new Date().toISOString(),
+              },
+            ],
+            current_version: 1,
+            origin: 'original-dashboard-id',
+          },
+        ],
+      });
+
+      agentBuilder.addAttachment.mockClear();
+
+      dashboardApiWithUpdatedId.title$.next('New Title');
+      jest.advanceTimersByTime(200);
+
+      expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'existing-dashboard-attachment',
+          origin: 'saved-as-dashboard-id',
+        })
+      );
+    });
+
     it('debounces rapid changes with 150ms delay', () => {
       registerDashboardAppIntegration({
         agentBuilder,
