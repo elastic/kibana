@@ -43,3 +43,31 @@ export const kiFeaturesExtractStreamInputSchema = z.object({
   streamName: z.string(),
   scheduledStreams: z.array(z.object({ streamName: z.string() })),
 });
+
+export const kiSelectStreamsOutputSchema = z.object({
+  connectorId: z.string(),
+  scheduled: z.array(streamCandidateSchema),
+  failedToSchedule: z.array(streamCandidateSchema),
+  alreadyRunning: z.array(z.object({ streamName: z.string(), scheduledAt: z.string().nullable() })),
+  skipped: z.array(streamCandidateSchema),
+  upToDate: z.array(streamCandidateSchema),
+  excluded: z.array(z.string()),
+  settings: z.object({
+    enabled: z.boolean(),
+    intervalHours: z.number(),
+  }),
+});
+
+export const kiFeaturesExtractStreamOutputSchema = z.object({
+  streamName: z.string(),
+  status: z.string(),
+  summary: z.object({
+    durationMs: z.number(),
+    tokensUsed: tokenCountSchema,
+    features: z.object({
+      llm: z.array(featureSummarySchema),
+      computed: z.array(featureSummarySchema),
+    }),
+  }),
+  iterations: z.array(iterationResultSchema),
+});

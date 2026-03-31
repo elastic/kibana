@@ -105,11 +105,29 @@ export const createContinuousExtractionWorkflowService = (
 
       const created = await managementApi.createWorkflow({ yaml: WORKFLOW_YAML }, spaceId, request);
 
-      await modelSettingsClient.updateSettings({
-        continuousExtraction: { workflowId: created.id },
-      });
+      try {
+        await modelSettingsClient.updateSettings({
+          continuousExtraction: { workflowId: created.id },
+        });
 
-      await managementApi.updateWorkflow(created.id, { enabled: true }, spaceId, request);
+        await managementApi.updateWorkflow(created.id, { enabled: true }, spaceId, request);
+      } catch (err) {
+        log.error(
+          `Failed to finalize workflow ${created.id}, deleting orphaned workflow: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+        try {
+          await managementApi.deleteWorkflows([created.id], spaceId, request);
+        } catch (deleteErr) {
+          log.warn(
+            `Failed to clean up orphaned workflow ${created.id}: ${
+              deleteErr instanceof Error ? deleteErr.message : String(deleteErr)
+            }`
+          );
+        }
+        throw err;
+      }
 
       log.info(`Created continuous extraction workflow ${created.id}`);
     },

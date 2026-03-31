@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { Streams, TaskStatus } from '@kbn/streams-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { GetScopedClients } from '../../routes/types';
@@ -25,27 +25,14 @@ import {
   MAX_SCHEDULED_STREAMS,
 } from '../../../common/constants';
 import {
-  streamCandidateSchema,
+  type streamCandidateSchema,
   kiSelectStreamsInputSchema,
+  kiSelectStreamsOutputSchema,
 } from '../../../common/continuous_extraction_schemas';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
 type StreamCandidate = z.infer<typeof streamCandidateSchema>;
-
-const outputSchema = z.object({
-  connectorId: z.string(),
-  scheduled: z.array(streamCandidateSchema),
-  failedToSchedule: z.array(streamCandidateSchema),
-  alreadyRunning: z.array(z.object({ streamName: z.string(), scheduledAt: z.string().nullable() })),
-  skipped: z.array(streamCandidateSchema),
-  upToDate: z.array(streamCandidateSchema),
-  excluded: z.array(z.string()),
-  settings: z.object({
-    enabled: z.boolean(),
-    intervalHours: z.number(),
-  }),
-});
 
 export const registerKiSelectStreamsStep = ({
   workflowsExtensions,
@@ -64,7 +51,7 @@ export const registerKiSelectStreamsStep = ({
     category: StepCategory.Kibana,
     stability: 'tech_preview',
     inputSchema: kiSelectStreamsInputSchema,
-    outputSchema,
+    outputSchema: kiSelectStreamsOutputSchema,
     handler: async (context) => {
       const {
         maxScheduledStreams = MAX_SCHEDULED_STREAMS,

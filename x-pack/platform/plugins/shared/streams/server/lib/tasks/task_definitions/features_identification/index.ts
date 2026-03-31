@@ -534,13 +534,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 } as LogMeta);
 
                 const partialTokensUsed = iterationResults.reduce(
-                  (acc, iter) => ({
-                    prompt: acc.prompt + iter.tokensUsed.prompt,
-                    completion: acc.completion + iter.tokensUsed.completion,
-                    total: acc.total + iter.tokensUsed.total,
-                    cached: (acc.cached ?? 0) + (iter.tokensUsed.cached ?? 0),
-                  }),
-                  { prompt: 0, completion: 0, total: 0, cached: 0 }
+                  (acc, iter) => sumTokens(acc, iter.tokensUsed),
+                  { ...EMPTY_TOKENS }
                 );
 
                 await taskClient.fail<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(

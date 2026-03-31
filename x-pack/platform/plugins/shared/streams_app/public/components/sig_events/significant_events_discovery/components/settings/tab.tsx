@@ -83,20 +83,6 @@ export const SettingsTab = () => {
     [streams.streamsRepositoryClient]
   );
 
-  const streamsListFetch = useStreamsAppFetch(
-    ({ signal }) =>
-      streams.streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', { signal }),
-    [streams.streamsRepositoryClient]
-  );
-
-  const streamOptions: EuiComboBoxOptionOption[] = useMemo(
-    () =>
-      (streamsListFetch.value?.streams ?? [])
-        .filter((s) => !Streams.QueryStream.Definition.is(s))
-        .map((s) => ({ label: s.name })),
-    [streamsListFetch.value]
-  );
-
   const [knowledgeIndicatorExtraction, setKnowledgeIndicatorExtraction] = useState<string>('');
   const [ruleGeneration, setRuleGeneration] = useState<string>('');
   const [discovery, setDiscovery] = useState<string>('');
@@ -108,6 +94,24 @@ export const SettingsTab = () => {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
+
+  const streamsListFetch = useStreamsAppFetch(
+    ({ signal }) => {
+      if (!continuousExtraction.enabled) {
+        return { streams: [] };
+      }
+      return streams.streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', { signal });
+    },
+    [streams.streamsRepositoryClient, continuousExtraction.enabled]
+  );
+
+  const streamOptions: EuiComboBoxOptionOption[] = useMemo(
+    () =>
+      (streamsListFetch.value?.streams ?? [])
+        .filter((s) => !Streams.QueryStream.Definition.is(s))
+        .map((s) => ({ label: s.name })),
+    [streamsListFetch.value]
+  );
 
   const savedCE = useMemo(
     () => ({

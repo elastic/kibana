@@ -7,7 +7,6 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { IdentifyFeaturesResult, IterationResult } from '@kbn/streams-schema';
 import { TaskStatus, isComputedFeature } from '@kbn/streams-schema';
@@ -23,16 +22,16 @@ import {
   COORDINATOR_INTERVAL_MINUTES,
 } from '../../../common/constants';
 import {
-  featureSummarySchema,
-  tokenCountSchema,
-  iterationResultSchema,
   kiFeaturesExtractStreamInputSchema,
+  kiFeaturesExtractStreamOutputSchema,
 } from '../../../common/continuous_extraction_schemas';
 
 const toFeatureSummary = ({ id, title }: { id: string; title?: string }) => ({
   id,
   title: title ?? id,
 });
+
+const EMPTY_TOKENS = { prompt: 0, completion: 0, total: 0, cached: 0 };
 
 const formatIterationsSummary = (
   iterations: IterationResult[],
@@ -47,8 +46,6 @@ const formatIterationsSummary = (
   const tokensLine = totalTokensUsed ? ` | total tokens: ${totalTokensUsed.total}` : '';
   return `\nCompleted iterations (${iterations.length})${tokensLine}:\n${lines.join('\n')}`;
 };
-
-const ZERO_TOKENS = { prompt: 0, completion: 0, total: 0, cached: 0 };
 
 const POLL_INTERVAL_MS = 5_000;
 const MAX_POLL_DURATION_MS = (COORDINATOR_INTERVAL_MINUTES - 1) * 60_000;
@@ -97,19 +94,7 @@ export const registerKiFeaturesExtractStreamStep = ({
     category: StepCategory.Kibana,
     stability: 'tech_preview',
     inputSchema: kiFeaturesExtractStreamInputSchema,
-    outputSchema: z.object({
-      streamName: z.string(),
-      status: z.string(),
-      summary: z.object({
-        durationMs: z.number(),
-        tokensUsed: tokenCountSchema,
-        features: z.object({
-          llm: z.array(featureSummarySchema),
-          computed: z.array(featureSummarySchema),
-        }),
-      }),
-      iterations: z.array(iterationResultSchema),
-    }),
+    outputSchema: kiFeaturesExtractStreamOutputSchema,
     handler: async (context) => {
       const { streamName } = kiFeaturesExtractStreamInputSchema.parse(context.input);
       const taskId = getFeaturesIdentificationTaskId(streamName);
@@ -142,7 +127,7 @@ export const registerKiFeaturesExtractStreamStep = ({
               status: 'completed',
               summary: {
                 durationMs,
-                tokensUsed: totalTokensUsed ?? ZERO_TOKENS,
+                tokensUsed: totalTokensUsed ?? EMPTY_TOKENS,
                 features: { llm, computed },
               },
               iterations,

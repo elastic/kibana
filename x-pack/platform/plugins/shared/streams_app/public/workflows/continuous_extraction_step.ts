@@ -7,16 +7,13 @@
 
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
 import {
   KI_SELECT_STREAMS_STEP_TYPE,
   KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
-  featureSummarySchema,
-  tokenCountSchema,
-  iterationResultSchema,
-  streamCandidateSchema,
   kiSelectStreamsInputSchema,
   kiFeaturesExtractStreamInputSchema,
+  kiSelectStreamsOutputSchema,
+  kiFeaturesExtractStreamOutputSchema,
 } from '@kbn/streams-plugin/common';
 
 export const kiSelectStreamsPublicStepDefinition: PublicStepDefinition = {
@@ -27,21 +24,7 @@ export const kiSelectStreamsPublicStepDefinition: PublicStepDefinition = {
   category: StepCategory.Kibana,
   stability: 'tech_preview',
   inputSchema: kiSelectStreamsInputSchema,
-  outputSchema: z.object({
-    connectorId: z.string(),
-    scheduled: z.array(streamCandidateSchema),
-    failedToSchedule: z.array(streamCandidateSchema),
-    alreadyRunning: z.array(
-      z.object({ streamName: z.string(), scheduledAt: z.string().nullable() })
-    ),
-    skipped: z.array(streamCandidateSchema),
-    upToDate: z.array(streamCandidateSchema),
-    excluded: z.array(z.string()),
-    settings: z.object({
-      enabled: z.boolean(),
-      intervalHours: z.number(),
-    }),
-  }),
+  outputSchema: kiSelectStreamsOutputSchema,
 };
 
 export const kiFeaturesExtractStreamPublicStepDefinition: PublicStepDefinition = {
@@ -52,17 +35,5 @@ export const kiFeaturesExtractStreamPublicStepDefinition: PublicStepDefinition =
   category: StepCategory.Kibana,
   stability: 'tech_preview',
   inputSchema: kiFeaturesExtractStreamInputSchema,
-  outputSchema: z.object({
-    streamName: z.string(),
-    status: z.string(),
-    summary: z.object({
-      durationMs: z.number(),
-      tokensUsed: tokenCountSchema,
-      features: z.object({
-        llm: z.array(featureSummarySchema),
-        computed: z.array(featureSummarySchema),
-      }),
-    }),
-    iterations: z.array(iterationResultSchema),
-  }),
+  outputSchema: kiFeaturesExtractStreamOutputSchema,
 };
