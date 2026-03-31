@@ -14,8 +14,8 @@ export interface EpisodesFilterState {
   status?: string | null;
   /** Rule ID or null */
   ruleId?: string | null;
-  /** KQL query string for full-text search; applied via request filter, not inlined in ES|QL */
-  kuery?: string | null;
+  /** Query string for full-text search */
+  queryString?: string | null;
 }
 
 export interface EpisodesSortState {
@@ -41,23 +41,42 @@ const buildAlertEventsBaseQuery = () => esql.from(ALERT_EVENTS_DATA_STREAM).wher
  * Builds an ES|QL query that aggregates episode data starting from
  * the alerting-events data stream.
  */
-export const buildEpisodesBaseQuery = (): ComposerQuery => {
+export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
+  const query = buildAlertEventsBaseQuery();
+
+  if (search) {
+    // The query string must be applied before EVALs and aggregations
+    query.where`QSTR(${search})`;
+  }
+
   // This will be simplified when the `$.alerting-episodes` ES|QL view works.
-  return buildAlertEventsBaseQuery()
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id`
+  query.pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
+
+  return query;
 };
 
 /**
- * Builds an ES|QL query for episodes request with sorting.
+ * Builds an ES|QL query for episodes request with sorting and filtering.
  */
 export const buildEpisodesQuery = (
-  sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' }
+  sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
+  filterState?: EpisodesFilterState
 ): ComposerQuery => {
   const sortField = sanitizeSortField(sortState.sortField);
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
-  return buildEpisodesBaseQuery().sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`;
+  let query = buildEpisodesBaseQuery(filterState?.queryString?.trim());
+
+  if (filterState?.status) {
+    query = query.where`episode.status == ${filterState.status}`;
+  }
+
+  if (filterState?.ruleId) {
+    query = query.where`rule.id == ${filterState.ruleId}`;
+  }
+
+  return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`;
 };

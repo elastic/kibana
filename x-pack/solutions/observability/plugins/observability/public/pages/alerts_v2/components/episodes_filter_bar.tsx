@@ -42,18 +42,18 @@ export function EpisodesFilterBar({
   isLoading = false,
   services,
 }: EpisodesFilterBarProps) {
-  const [kueryInput, setKueryInput] = useState(filterState.kuery ?? '');
+  const [queryStringInput, setQueryStringInput] = useState(filterState.queryString ?? '');
 
   // Debounced update to filters
   useDebounce(
     () => {
-      const trimmedValue = kueryInput.trim() || undefined;
-      if (trimmedValue !== filterState.kuery) {
-        onFilterChange({ ...filterState, kuery: trimmedValue });
+      const trimmedValue = queryStringInput.trim() || undefined;
+      if (trimmedValue !== filterState.queryString) {
+        onFilterChange({ ...filterState, queryString: trimmedValue });
       }
     },
     300,
-    [kueryInput]
+    [queryStringInput]
   );
 
   const onStatusChange = useCallback(
@@ -77,7 +77,7 @@ export function EpisodesFilterBar({
   );
 
   const onKueryChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setKueryInput(e.target.value);
+    setQueryStringInput(e.target.value);
   }, []);
 
   return (
@@ -90,7 +90,7 @@ export function EpisodesFilterBar({
           placeholder={i18n.translate('xpack.observability.alertsV2.filterBar.searchPlaceholder', {
             defaultMessage: 'Search episodes…',
           })}
-          value={kueryInput}
+          value={queryStringInput}
           onChange={onKueryChange}
           data-test-subj="episodesFilterBar-search"
         />

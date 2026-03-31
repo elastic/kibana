@@ -8,19 +8,16 @@
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { TimeRange, Filter } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import {
   buildEpisodesQuery,
   type EpisodesFilterState,
   type EpisodesSortState,
 } from '../utils/build_episodes_esql_query';
-import { buildEpisodesFilters } from '../utils/build_episodes_filters';
 import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchAlertingEpisodesOptions {
-  dataView: DataView;
   pageSize: number;
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
@@ -40,16 +37,13 @@ export const fetchAlertingEpisodes = ({
   filterState,
   sortState = { sortField: '@timestamp', sortDirection: 'desc' },
   timeRange,
-  dataView,
 }: FetchAlertingEpisodesOptions) => {
-  const query = buildEpisodesQuery(sortState);
-  const filters = buildEpisodesFilters(filterState, dataView);
+  const query = buildEpisodesQuery(sortState, filterState);
 
   const input: {
     type: 'kibana_context';
     esqlVariables: ESQLControlVariable[];
     timeRange?: TimeRange;
-    filters?: Filter[];
   } = {
     type: 'kibana_context',
     esqlVariables: [
@@ -59,10 +53,6 @@ export const fetchAlertingEpisodes = ({
 
   if (timeRange) {
     input.timeRange = timeRange;
-  }
-
-  if (filters.length > 0) {
-    input.filters = filters;
   }
 
   return executeEsqlQuery({

@@ -87,4 +87,82 @@ describe('buildEpisodesQuery', () => {
       expect(queryString).toMatch(new RegExp(`SORT \`?${field.replace('.', '\\.')}\`? ASC`));
     });
   });
+
+  it('should apply status filter', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { status: 'active' }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE episode.status == "active"');
+  });
+
+  it('should apply ruleId filter', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { ruleId: 'rule-123' }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE rule.id == "rule-123"');
+  });
+
+  it('should apply searchString filter with QSTR', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { searchString: 'alert.name: "test"' }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
+  });
+
+  it('should apply multiple filters together', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      {
+        searchString: 'alert.name: "test"',
+        status: 'active',
+        ruleId: 'rule-123',
+      }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
+    expect(queryString).toContain('WHERE episode.status == "active"');
+    expect(queryString).toContain('WHERE rule.id == "rule-123"');
+  });
+
+  it('should trim searchString before applying', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { searchString: '  alert.name: "test"  ' }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
+  });
+
+  it('should not apply filters when they are null or undefined', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { searchString: null, status: null, ruleId: undefined }
+    );
+    const queryString = query.print('basic');
+
+    // Should only have the base WHERE clauses from buildEpisodesBaseQuery
+    const whereCount = (queryString.match(/WHERE/g) || []).length;
+    expect(whereCount).toBe(2); // "type == alert" and "@timestamp == last_timestamp"
+  });
+
+  it('should not apply searchString filter when it is empty or whitespace', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { searchString: '   ' }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).not.toContain('QSTR');
+  });
 });
