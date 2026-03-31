@@ -81,7 +81,7 @@ export function PromotionCallout({ streamName, onReviewClick }: PromotionCallout
       hasBorder={false}
       data-test-subj="streamsAppPromotionCallout"
     >
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <AssetImage type="significantEventsEmptyState" size={32} />
         </EuiFlexItem>

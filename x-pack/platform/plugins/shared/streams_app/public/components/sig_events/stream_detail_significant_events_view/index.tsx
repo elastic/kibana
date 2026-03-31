@@ -40,6 +40,7 @@ import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filte
 import { RulesTable } from './rules_table';
 import { LoadingPanel } from '../../loading_panel';
 import { PromotionCallout } from './promotion_callout';
+import { SuggestedRulesFlyout } from './suggested_rules_flyout';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -145,6 +146,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       ),
     [knowledgeIndicators]
   );
+  const [isSuggestedRulesFlyoutOpen, setIsSuggestedRulesFlyoutOpen] = useState(false);
 
   const isRulesSelected = useMemo(
     () => typeFilterOptions.some((option) => option.key === 'rule' && option.checked === 'on'),
@@ -174,7 +176,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
-        <PromotionCallout streamName={definition.stream.name} onReviewClick={() => {}} />
+        <EuiFlexItem grow={false}>
+          <PromotionCallout
+            streamName={definition.stream.name}
+            onReviewClick={() => setIsSuggestedRulesFlyoutOpen(true)}
+          />
+        </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={true}>
@@ -266,6 +273,13 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           onClose={() => setSelectedKnowledgeIndicator(null)}
         />
       ) : null}
+
+      {isSuggestedRulesFlyoutOpen && (
+        <SuggestedRulesFlyout
+          streamName={definition.stream.name}
+          onClose={() => setIsSuggestedRulesFlyoutOpen(false)}
+        />
+      )}
     </>
   );
 }

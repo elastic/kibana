@@ -25,6 +25,7 @@ export function usePromotableQueries(streamName: string) {
 
   return {
     count: result.data?.total ?? 0,
+    queries: result.data?.queries ?? [],
     queryIds: result.data?.queries.map((q) => q.query.id) ?? [],
     isLoading: result.isLoading,
     refetch: result.refetch,
