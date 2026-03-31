@@ -118,9 +118,26 @@ export const oauthAuthorizeRoute = (
           }
           const oauthConfig = await oauthService.getOAuthConfig(connectorId, namespace);
 
+          const urlsToValidate: string[] = [];
+          let earsAuthorizationUrl: string | undefined;
+          if (oauthConfig.authTypeId === 'oauth_authorization_code') {
+            urlsToValidate.push(oauthConfig.authorizationUrl, oauthConfig.tokenUrl);
+          } else if (oauthConfig.authTypeId === 'ears') {
+            const { authorizeEndpoint } = getEarsEndpointsForProvider(oauthConfig.provider);
+            earsAuthorizationUrl = resolveEarsUrl(
+              authorizeEndpoint,
+              actionsConfigUtils.getEarsUrl()
+            );
+            urlsToValidate.push(earsAuthorizationUrl);
+          } else {
+            const _exhaustiveCheck: never = oauthConfig;
+            throw new Error(`Unsupported OAuth authTypeId: ${String(_exhaustiveCheck)}`);
+          }
+
           try {
-            actionsConfigUtils.ensureUriAllowed(oauthConfig.authorizationUrl);
-            actionsConfigUtils.ensureUriAllowed(oauthConfig.tokenUrl);
+            for (const url of urlsToValidate) {
+              actionsConfigUtils.ensureUriAllowed(url);
+            }
           } catch (allowedHostsErr) {
             const message =
               allowedHostsErr instanceof Error ? allowedHostsErr.message : String(allowedHostsErr);
@@ -172,18 +189,17 @@ export const oauthAuthorizeRoute = (
 
           let authorizationUrl: string;
           if (oauthConfig.authTypeId === 'ears') {
-            const { authorizeEndpoint } = getEarsEndpointsForProvider(oauthConfig.provider);
+            if (!earsAuthorizationUrl) {
+              throw new Error('EARS authorization URL was not resolved');
+            }
             authorizationUrl = oauthService.buildEarsAuthorizationUrl({
-              baseAuthorizationUrl: resolveEarsUrl(
-                authorizeEndpoint,
-                actionsConfigUtils.getEarsUrl()
-              ),
+              baseAuthorizationUrl: earsAuthorizationUrl,
               scope: oauthConfig.scope,
               callbackUri: redirectUri,
               state: state.state,
               pkceChallenge: codeChallenge,
             });
-          } else {
+          } else if (oauthConfig.authTypeId === 'oauth_authorization_code') {
             authorizationUrl = oauthService.buildAuthorizationUrl({
               baseAuthorizationUrl: oauthConfig.authorizationUrl,
               clientId: oauthConfig.clientId,
@@ -192,6 +208,9 @@ export const oauthAuthorizeRoute = (
               state: state.state,
               codeChallenge,
             });
+          } else {
+            const _exhaustiveCheck: never = oauthConfig;
+            throw new Error(`Unsupported OAuth authTypeId: ${String(_exhaustiveCheck)}`);
           }
 
           return res.ok({

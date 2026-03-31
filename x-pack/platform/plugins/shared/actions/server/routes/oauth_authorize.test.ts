@@ -37,6 +37,7 @@ const mockOAuthStateClientInstance = {
 const mockOAuthServiceInstance = {
   getOAuthConfig: jest.fn(),
   buildAuthorizationUrl: jest.fn(),
+  buildEarsAuthorizationUrl: jest.fn(),
 };
 
 const mockEncryptedSavedObjectsClient = {
@@ -376,6 +377,97 @@ describe('oauthAuthorizeRoute', () => {
       redirectUri: 'https://kibana.example.com/api/actions/connector/_oauth_callback',
       state: 'random-state',
       codeChallenge: 'code-challenge-value',
+    });
+  });
+
+  it('returns EARS authorization URL and checks resolved EARS host against allowedHosts', async () => {
+    mockOAuthServiceInstance.getOAuthConfig.mockResolvedValue({
+      authTypeId: 'ears',
+      provider: 'google',
+      scope: 'openid email',
+    });
+    mockConfigurationUtilities.getEarsUrl.mockReturnValue('https://ears.example.com');
+    mockOAuthServiceInstance.buildEarsAuthorizationUrl.mockReturnValue(
+      'https://ears.example.com/v1/google/oauth/authorize?state=ears-state'
+    );
+    mockOAuthStateClientInstance.create.mockResolvedValue({
+      state: {
+        id: 'state-id',
+        state: 'ears-state',
+        connectorId: 'connector-ears',
+      },
+      codeChallenge: 'ears-pkce-challenge',
+    });
+
+    const [, handler] = registerRoute();
+    const context = createMockContext();
+    const req = httpServerMock.createKibanaRequest({
+      params: { connectorId: 'connector-ears' },
+      body: {},
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(mockConfigurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
+      'https://ears.example.com/v1/google/oauth/authorize'
+    );
+    expect(mockOAuthServiceInstance.buildAuthorizationUrl).not.toHaveBeenCalled();
+    expect(mockOAuthServiceInstance.buildEarsAuthorizationUrl).toHaveBeenCalledWith({
+      baseAuthorizationUrl: 'https://ears.example.com/v1/google/oauth/authorize',
+      scope: 'openid email',
+      callbackUri: 'https://kibana.example.com/api/actions/connector/_oauth_callback',
+      state: 'ears-state',
+      pkceChallenge: 'ears-pkce-challenge',
+    });
+    expect(res.ok).toHaveBeenCalledWith({
+      body: {
+        authorizationUrl: 'https://ears.example.com/v1/google/oauth/authorize?state=ears-state',
+        state: 'ears-state',
+      },
+    });
+  });
+
+  it('returns error when resolved EARS authorize URL host is not in allowedHosts', async () => {
+    mockOAuthServiceInstance.getOAuthConfig.mockResolvedValue({
+      authTypeId: 'ears',
+      provider: 'google',
+      scope: 'openid email',
+    });
+    mockConfigurationUtilities.getEarsUrl.mockReturnValue('https://ears-not-allowed.example.com');
+    mockConfigurationUtilities.ensureUriAllowed.mockImplementation(() => {
+      throw new Error(
+        'target url "https://ears-not-allowed.example.com/v1/google/oauth/authorize" is not added to the Kibana config xpack.actions.allowedHosts'
+      );
+    });
+    mockOAuthStateClientInstance.create.mockResolvedValue({
+      state: {
+        id: 'state-id',
+        state: 'ears-state',
+        connectorId: 'connector-ears',
+      },
+      codeChallenge: 'ears-pkce-challenge',
+    });
+
+    const [, handler] = registerRoute();
+    const context = createMockContext();
+    const req = httpServerMock.createKibanaRequest({
+      params: { connectorId: 'connector-ears' },
+      body: {},
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(mockConfigurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
+      'https://ears-not-allowed.example.com/v1/google/oauth/authorize'
+    );
+    expect(mockOAuthServiceInstance.buildEarsAuthorizationUrl).not.toHaveBeenCalled();
+    expect(res.badRequest).toHaveBeenCalledWith({
+      body: {
+        message:
+          'target url "https://ears-not-allowed.example.com/v1/google/oauth/authorize" is not added to the Kibana config xpack.actions.allowedHosts',
+      },
     });
   });
 
