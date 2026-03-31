@@ -73,6 +73,7 @@ import {
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
 import { DEFAULT_MAX_ALERTS } from '../config';
+import { getMaxAlertLimit } from '../../common';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
 import { retryTransientEsErrors } from '../lib/retry_transient_es_errors';
 
@@ -171,7 +172,7 @@ export class AlertsClient<
         this.trackedAlerts = await getTrackedAlerts<AlertData>({
           ruleId: this.options.rule.id,
           lookBackWindow: opts.flappingSettings.lookBackWindow,
-          maxAlertLimit: opts.maxAlerts || DEFAULT_MAX_ALERTS,
+          maxAlertLimit: getMaxAlertLimit(opts.maxAlerts) || DEFAULT_MAX_ALERTS,
           activeAlertsFromState: opts.activeAlertsFromState,
           recoveredAlertsFromState: opts.recoveredAlertsFromState,
           search: (queryBody) => this.search(queryBody),
