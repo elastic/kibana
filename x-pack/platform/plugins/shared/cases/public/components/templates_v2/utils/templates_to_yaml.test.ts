@@ -464,6 +464,186 @@ describe('CHECKBOX_GROUP field serialization', () => {
   });
 });
 
+describe('display and validation serialization', () => {
+  const baseTemplate: ParsedTemplate = {
+    templateId: 'tpl-cond',
+    name: 'Conditions template',
+    owner: 'securitySolution',
+    tags: [],
+    usageCount: 0,
+    fieldCount: 1,
+    templateVersion: 1,
+    latestVersion: 1,
+    isLatest: true,
+    deletedAt: null,
+    definition: { name: 'Conditions template', fields: [] },
+  };
+
+  it('serializes display.show_when with a simple condition rule', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [
+          {
+            name: 'details',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            display: {
+              show_when: { field: 'env', operator: 'eq', value: 'production' },
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      display:');
+    expect(yaml).toContain('        show_when:');
+    expect(yaml).toContain('          field: env');
+    expect(yaml).toContain('          operator: eq');
+    expect(yaml).toContain('          value: production');
+  });
+
+  it('serializes display.show_when with a compound condition', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [
+          {
+            name: 'notes',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            display: {
+              show_when: {
+                combine: 'all',
+                rules: [
+                  { field: 'env', operator: 'eq', value: 'prod' },
+                  { field: 'severity', operator: 'neq', value: 'low' },
+                ],
+              },
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      display:');
+    expect(yaml).toContain('        show_when:');
+    expect(yaml).toContain('          combine: all');
+    expect(yaml).toContain('          rules:');
+    expect(yaml).toContain('            - field: env');
+    expect(yaml).toContain('            - field: severity');
+  });
+
+  it('omits display when not present', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [{ name: 'summary', control: 'INPUT_TEXT', type: 'keyword' }],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).not.toContain('display:');
+  });
+
+  it('serializes simple validation flags', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [
+          {
+            name: 'score',
+            control: 'INPUT_NUMBER',
+            type: 'integer',
+            validation: { required: true, min: 1, max: 100 },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      validation:');
+    expect(yaml).toContain('        required: true');
+    expect(yaml).toContain('        min: 1');
+    expect(yaml).toContain('        max: 100');
+  });
+
+  it('serializes validation.pattern', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [
+          {
+            name: 'ticket_id',
+            control: 'INPUT_TEXT',
+            type: 'keyword',
+            validation: { pattern: { regex: '^[A-Z]+-\\d+$', message: 'Must be a ticket ID' } },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      validation:');
+    expect(yaml).toContain('        pattern:');
+    expect(yaml).toContain('          regex:');
+    expect(yaml).toContain('          message: Must be a ticket ID');
+  });
+
+  it('serializes validation.required_when with a condition', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [
+          {
+            name: 'reason',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            validation: {
+              required_when: { field: 'severity', operator: 'eq', value: 'critical' },
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      validation:');
+    expect(yaml).toContain('        required_when:');
+    expect(yaml).toContain('          field: severity');
+    expect(yaml).toContain('          operator: eq');
+    expect(yaml).toContain('          value: critical');
+  });
+
+  it('omits validation when not present', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [{ name: 'summary', control: 'INPUT_TEXT', type: 'keyword' }],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).not.toContain('validation:');
+  });
+});
+
 describe('templateToYaml', () => {
   it('serializes a single template with a template header', () => {
     const template: ParsedTemplate = {
