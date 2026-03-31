@@ -62,6 +62,38 @@ describe('STATS', () => {
     ]);
   });
 
+  it('adds the generated column when aggregation has an inline WHERE clause', () => {
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+    ];
+
+    const queryString = `FROM index | STATS COUNT() WHERE field2 > 0`;
+
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+
+    const result = columnsAfter(
+      command,
+      previousCommandFields,
+      queryString,
+      additionalFieldsMock,
+      unmappedFieldsStrategy
+    );
+
+    expect(result).toEqual([
+      {
+        name: 'COUNT() WHERE field2 > 0',
+        type: 'long',
+        userDefined: true,
+        location: { min: 19, max: 42 },
+      },
+    ]);
+  });
+
   it('adds the escaped and grouping columns', () => {
     const previousCommandFields: ESQLFieldWithMetadata[] = [
       { name: 'field1', type: 'keyword', userDefined: false },
