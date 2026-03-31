@@ -2853,7 +2853,7 @@
                 "section": "def-common.SavedSearch",
                 "text": "SavedSearch"
               },
-              "; closed: boolean; pipe: { (): ",
+              "; pipe: { (): ",
               "Observable",
               "<",
               {
@@ -3073,7 +3073,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
