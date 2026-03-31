@@ -85,13 +85,6 @@ const imageSets = {
       defaultMessage: 'Bar chart sample',
     }),
   },
-  checklist: {
-    light: () => import('./checklist.svg'),
-    dark: () => import('./checklist.svg'),
-    alt: i18n.translate('xpack.streams.checklistImage', {
-      defaultMessage: 'Checklist',
-    }),
-  },
   attachmentsEmpty: {
     light: () => import('./attachments_empty_light.svg'),
     dark: () => import('./attachments_empty_dark.svg'),
@@ -100,15 +93,15 @@ const imageSets = {
     }),
   },
   suggestPipeline: {
-    light: () => import('./suggest_pipeline.svg'),
+    light: () => import('./suggest_pipeline_light.svg'),
     dark: () => import('./suggest_pipeline_dark.svg'),
     alt: i18n.translate('xpack.streams.suggestPipelineImage', {
       defaultMessage: 'Suggest pipeline',
     }),
   },
   routingSuggestionEmptyState: {
-    light: () => import('./routing_suggestion_empty_state.svg'),
-    dark: () => import('./routing_suggestion_empty_state.svg'),
+    light: () => import('./routing_suggestion_empty_state_light.svg'),
+    dark: () => import('./routing_suggestion_empty_state_dark.svg'),
     alt: i18n.translate('xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.image', {
       defaultMessage: 'Suggest AI partitioning image for the streams app',
     }),

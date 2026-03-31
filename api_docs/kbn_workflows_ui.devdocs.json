@@ -161,7 +161,7 @@
             "label": "createWorkflow",
             "description": [],
             "signature": [
-              "(params: z.infer<any>) => Promise<",
+              "(params: { yaml: string; id?: string | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/workflows",
                 "scope": "common",
@@ -180,12 +180,12 @@
               {
                 "parentPluginId": "@kbn/workflows-ui",
                 "id": "def-public.WorkflowApi.createWorkflow.$1",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "z.infer<any>"
+                  "{ yaml: string; id?: string | undefined; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
                 "lineNumber": 79,
@@ -746,7 +746,9 @@
                 "section": "def-public.GetSchemaParams",
                 "text": "GetSchemaParams"
               },
-              ") => Promise<any>"
+              ") => Promise<",
+              "JSONSchema",
+              " | null>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
             "lineNumber": 174,
@@ -796,7 +798,7 @@
                 "section": "def-public.RunWorkflowOptions",
                 "text": "RunWorkflowOptions"
               },
-              ") => Promise<z.infer<any>>"
+              ") => Promise<{ workflowExecutionId: string; }>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
             "lineNumber": 185,
@@ -863,7 +865,7 @@
                 "section": "def-public.TestWorkflowParams",
                 "text": "TestWorkflowParams"
               },
-              ") => Promise<z.infer<any>>"
+              ") => Promise<{ workflowExecutionId: string; }>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
             "lineNumber": 195,
@@ -905,7 +907,7 @@
             "label": "testStep",
             "description": [],
             "signature": [
-              "(params: z.infer<any>) => Promise<z.infer<any>>"
+              "(params: { workflowYaml: string; stepId: string; workflowId?: string | undefined; executionContext?: Record<string, unknown> | undefined; contextOverride?: Record<string, unknown> | undefined; }) => Promise<{ workflowExecutionId: string; }>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
             "lineNumber": 202,
@@ -916,12 +918,12 @@
               {
                 "parentPluginId": "@kbn/workflows-ui",
                 "id": "def-public.WorkflowApi.testStep.$1",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "z.infer<any>"
+                  "{ workflowYaml: string; stepId: string; workflowId?: string | undefined; executionContext?: Record<string, unknown> | undefined; contextOverride?: Record<string, unknown> | undefined; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/workflows_api.ts",
                 "lineNumber": 202,
@@ -1719,7 +1721,7 @@
         "signature": [
           "<P extends object = {}>(options?: ",
           "UseMutationOptions",
-          "<z.infer<any>, HttpError, ",
+          "<{ workflowExecutionId: string; }, HttpError, ",
           {
             "pluginId": "@kbn/workflows-ui",
             "scope": "public",
@@ -1729,7 +1731,7 @@
           },
           " & { id: string; } & P, unknown> | undefined) => ",
           "UseMutationResult",
-          "<z.infer<any>, HttpError, ",
+          "<{ workflowExecutionId: string; }, HttpError, ",
           {
             "pluginId": "@kbn/workflows-ui",
             "scope": "public",
@@ -1754,7 +1756,7 @@
             "description": [],
             "signature": [
               "UseMutationOptions",
-              "<z.infer<any>, HttpError, ",
+              "<{ workflowExecutionId: string; }, HttpError, ",
               {
                 "pluginId": "@kbn/workflows-ui",
                 "scope": "public",
@@ -2039,12 +2041,12 @@
           {
             "parentPluginId": "@kbn/workflows-ui",
             "id": "def-public.BulkCreateWorkflowsParams.workflows",
-            "type": "Any",
+            "type": "Array",
             "tags": [],
             "label": "workflows",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "{ yaml: string; id?: string | undefined; }[]"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
             "lineNumber": 18,
