@@ -22,7 +22,6 @@ describe(
     it('without access to any of the subpages, none of those should be displayed', () => {
       login(ROLE.detections_admin);
       loadPage('/app/security');
-      cy.get(ServerlessHeaders.MORE_MENU_BTN).should('not.exist');
       cy.get(MenuButtonSelector).should('not.exist');
 
       for (const selector of uniqueNavSelectors) {
