@@ -395,11 +395,13 @@ function processStats(
       chunks: false,
     });
 
-    for (const line of output.split('\n')) {
-      // Filter out "Entrypoint" stats lines — not useful for diagnosing errors
-      if (line.trim() && !line.startsWith('Entrypoint ')) {
-        log?.error(line);
-      }
+    const filteredOutput = output
+      .split('\n')
+      .filter((line) => line.trim() && !line.startsWith('Entrypoint '))
+      .join('\n');
+
+    if (filteredOutput) {
+      log?.error(filteredOutput);
     }
 
     const errorInfo = stats.toJson({ errors: true, warnings: false, assets: false, modules: false, chunks: false });
