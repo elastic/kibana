@@ -468,7 +468,7 @@ function ButtonVariant({
                           defaultMessage: 'Back',
                         }
                       )}
-                      type="arrowLeft"
+                      type="chevronSingleLeft"
                     />{' '}
                     <strong>
                       {i18n.translate('unifiedFieldList.fieldListSidebar.flyoutHeading', {
