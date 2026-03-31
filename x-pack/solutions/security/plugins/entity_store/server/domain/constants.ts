@@ -9,7 +9,6 @@ import type { EngineStatus } from './saved_objects';
 import type { EntityStoreStatus } from './types';
 
 export const ECS_MAPPINGS_COMPONENT_TEMPLATE = 'ecs@mappings';
-export const HASH_ALG = 'sha256' as const;
 
 export const ENTITY_STORE_SOURCE_INDICES_PRIVILEGES = ['read', 'view_index_metadata'];
 export const ENTITY_STORE_TARGET_INDICES_PRIVILEGES = ['read', 'manage'];

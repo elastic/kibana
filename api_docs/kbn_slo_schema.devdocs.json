@@ -867,6 +867,38 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.FindSLOTemplateTagsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindSLOTemplateTagsResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/slo_templates.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.FindSLOTemplateTagsResponse.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/slo_templates.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.GetHealthScanResultsResponse",
         "type": "Interface",
         "tags": [],
@@ -1325,7 +1357,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"pending\" | \"completed\" | \"scheduled\""
+              "\"pending\" | \"scheduled\" | \"completed\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/health_scan.ts",
             "lineNumber": 20,

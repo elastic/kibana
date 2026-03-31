@@ -817,7 +817,7 @@ describe('UnifiedDataTable', () => {
 
         expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
         expect(
-          findTestSubject(component, 'exampleRowControl-visBarVerticalStacked').exists()
+          findTestSubject(component, 'exampleRowControl-chartBarVerticalStack').exists()
         ).toBeTruthy();
 
         // The other actions are within the popover
