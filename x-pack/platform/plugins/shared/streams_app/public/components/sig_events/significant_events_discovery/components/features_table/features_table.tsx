@@ -9,6 +9,7 @@ import {
   EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -23,6 +24,7 @@ import { upperFirst } from 'lodash';
 import React, { useState, useCallback, useMemo } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useBoolean } from '@kbn/react-hooks';
+import { AssetImage } from '../../../../asset_image';
 import { useFetchFeatures } from '../../../../../hooks/sig_events/use_fetch_features';
 import { useDiscoveryFeaturesApi } from '../../../../../hooks/sig_events/use_discovery_features_api';
 import { useKibana } from '../../../../../hooks/use_kibana';
@@ -231,6 +233,35 @@ export function FeaturesTable() {
 
   if (loading && !data) {
     return <LoadingPanel size="l" />;
+  }
+
+  if (!loading && data?.features.length === 0) {
+    return (
+      <EuiEmptyPrompt
+        aria-live="polite"
+        titleSize="xs"
+        icon={<AssetImage type="knowledgeIndicatorsEmptyState" />}
+        title={
+          <h2>
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.emptyState.title',
+              { defaultMessage: 'Knowledge indicators' }
+            )}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.emptyState.description',
+              {
+                defaultMessage:
+                  'Facts about your stream automatically extracted from log data to power rule generation.',
+              }
+            )}
+          </p>
+        }
+      />
+    );
   }
 
   const isSelectionActionsDisabled = selectedFeatures.length === 0 || loading || isBulkDeleting;

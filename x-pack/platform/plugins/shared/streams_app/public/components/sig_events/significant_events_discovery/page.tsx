@@ -96,7 +96,7 @@ export function SignificantEventsDiscoveryPage() {
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
           <EuiFlexItem grow={false}>
             {i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
-              defaultMessage: 'Queries',
+              defaultMessage: 'Rules',
             })}
           </EuiFlexItem>
           {unbackedQueriesCount > 0 && (

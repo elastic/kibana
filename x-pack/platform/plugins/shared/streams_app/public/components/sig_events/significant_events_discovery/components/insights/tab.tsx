@@ -6,18 +6,11 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingElastic,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
+import { AssetImage } from '../../../../asset_image';
 import { Summary } from './summary';
 
 export function InsightsTab() {
@@ -50,47 +43,31 @@ export function InsightsTab() {
 
   const totalEvents = queriesFetch.value?.total ?? 0;
 
-  if (totalEvents === 0 || totalEvents === undefined) {
+  if (totalEvents === 0) {
     return (
-      <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiPanel color="subdued">
-            <EuiFlexGroup
-              direction="column"
-              alignItems="center"
-              justifyContent="center"
-              style={{ minHeight: '30vh', minWidth: '40vh' }}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="createAdvancedJob" size="xxl" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h2>
-                    {i18n.translate(
-                      'xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundTitle',
-                      {
-                        defaultMessage: 'No events found to analyze',
-                      }
-                    )}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" textAlign="center" css={{ maxWidth: 400 }}>
-                  {i18n.translate(
-                    'xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundDescription',
-                    {
-                      defaultMessage:
-                        'Newly created queries need time to collect data before analysis can begin.',
-                    }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiEmptyPrompt
+        aria-live="polite"
+        titleSize="xs"
+        icon={<AssetImage type="significantEventsDiscovery" />}
+        title={
+          <h2>
+            {i18n.translate('xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundTitle', {
+              defaultMessage: 'No events found to analyze',
+            })}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate(
+              'xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundDescription',
+              {
+                defaultMessage:
+                  'Discover Significant Events from your logs, and understand what they mean with the power of AI and Elastic Observability.',
+              }
+            )}
+          </p>
+        }
+      />
     );
   }
 

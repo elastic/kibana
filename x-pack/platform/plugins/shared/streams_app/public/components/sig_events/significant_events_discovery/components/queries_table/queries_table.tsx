@@ -24,6 +24,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import React, { useState, useCallback, useMemo } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -44,6 +45,7 @@ import {
   useUnbackedQueriesCount,
 } from '../../../../../hooks/sig_events/use_unbacked_queries_count';
 import { getFormattedError } from '../../../../../util/errors';
+import { AssetImage } from '../../../../asset_image';
 import { LoadingPanel } from '../../../../loading_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
@@ -357,6 +359,36 @@ export function QueriesTable() {
         color="danger"
         title={<h2>{UNABLE_TO_LOAD_QUERIES_TITLE}</h2>}
         body={<p>{UNABLE_TO_LOAD_QUERIES_BODY}</p>}
+      />
+    );
+  }
+
+  const isEmpty = !queriesLoading && !streamsLoading && (queriesData?.total ?? 0) === 0 && !searchQuery;
+  if (isEmpty) {
+    return (
+      <EuiEmptyPrompt
+        aria-live="polite"
+        titleSize="xs"
+        icon={<AssetImage type="significantEventsEmptyState" />}
+        title={
+          <h2>
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.title',
+              { defaultMessage: 'Rules' }
+            )}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.description',
+              {
+                defaultMessage:
+                  'Continuously scan your stream for errors, anomalies, and signals, feeding matched events into Significant events.',
+              }
+            )}
+          </p>
+        }
       />
     );
   }

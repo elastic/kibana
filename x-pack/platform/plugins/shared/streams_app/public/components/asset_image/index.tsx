@@ -106,6 +106,20 @@ const imageSets = {
       defaultMessage: 'Suggest AI partitioning image for the streams app',
     }),
   },
+  knowledgeIndicatorsEmptyState: {
+    light: () => import('./knowledge_indicators_empty_state_light.svg'),
+    dark: () => import('./knowledge_indicators_empty_state_dark.svg'),
+    alt: i18n.translate('xpack.streams.knowledgeIndicators.emptyStateImage', {
+      defaultMessage: 'Empty state illustration for the Knowledge Indicators view',
+    }),
+  },
+  significantEventsDiscovery: {
+    light: () => import('./significant_events_discovery_light.svg'),
+    dark: () => import('./significant_events_discovery_dark.svg'),
+    alt: i18n.translate('xpack.streams.significantEventsDiscovery.illustrationImage', {
+      defaultMessage: 'Illustration for the Significant Events discovery view',
+    }),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {
