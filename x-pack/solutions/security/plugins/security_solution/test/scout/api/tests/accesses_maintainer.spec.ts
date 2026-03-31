@@ -304,12 +304,30 @@ for (const integration of INTEGRATION_CONFIGS) {
 
       await triggerMaintainerRun(apiClient, defaultHeaders, MAINTAINER_ID);
 
-      const maintainerEntry = await waitForMaintainerSuccess(
-        apiClient,
-        defaultHeaders,
-        MAINTAINER_ID,
-        runsBefore
-      );
+      let maintainerEntry: MaintainerEntry;
+      try {
+        maintainerEntry = await waitForMaintainerSuccess(
+          apiClient,
+          defaultHeaders,
+          MAINTAINER_ID,
+          runsBefore
+        );
+      } catch (err) {
+        // Fetch recent Kibana logs to surface the actual error
+        try {
+          const logsRes = await apiClient.get(
+            `/internal/logging/entries?levels=error&count=20&filters=${encodeURIComponent(
+              JSON.stringify([
+                { field: 'log.logger', value: `plugins.entityStore.${MAINTAINER_ID}` },
+              ])
+            )}`,
+            { headers: defaultHeaders, responseType: 'json' }
+          );
+          // eslint-disable-next-line no-console
+          console.error(
+            'Kibana error logs:',
+            JSON.stringify((logsRes as { body: unknown }).body, null, 2)
+          );
         } catch {
           // logs endpoint may not exist, ignore
         }
