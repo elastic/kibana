@@ -43,7 +43,7 @@ export class QueryActivityPlugin
 
     core.capabilities.registerProvider(() => ({
       management: {
-        insightsAndAlerting: {
+        clusterPerformance: {
           query_activity: true,
         },
       },

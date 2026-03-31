@@ -20,14 +20,14 @@ export const queryActivityFeature: KibanaFeatureConfig = {
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],
   management: {
-    insightsAndAlerting: ['query_activity'],
+    clusterPerformance: ['query_activity'],
   },
   privileges: {
     all: {
       app: [],
       api: [QUERY_ACTIVITY_READ_PRIVILEGE, QUERY_ACTIVITY_WRITE_PRIVILEGE],
       management: {
-        insightsAndAlerting: ['query_activity'],
+        clusterPerformance: ['query_activity'],
       },
       savedObject: {
         all: [],
@@ -39,7 +39,7 @@ export const queryActivityFeature: KibanaFeatureConfig = {
       app: [],
       api: [QUERY_ACTIVITY_READ_PRIVILEGE],
       management: {
-        insightsAndAlerting: ['query_activity'],
+        clusterPerformance: ['query_activity'],
       },
       savedObject: {
         all: [],
