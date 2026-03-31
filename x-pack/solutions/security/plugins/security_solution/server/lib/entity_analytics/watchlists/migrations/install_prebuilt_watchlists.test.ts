@@ -18,10 +18,12 @@ const mockWatchlistGet = jest.fn();
 const mockWatchlistCreate = jest.fn();
 const mockAddEntitySourceReference = jest.fn();
 const mockEntitySourceCreate = jest.fn();
+const mockEntitySourceList = jest.fn();
 
 jest.mock('../entity_sources/infra', () => ({
   WatchlistEntitySourceClient: jest.fn().mockImplementation(() => ({
     create: (...args: unknown[]) => mockEntitySourceCreate(...args),
+    list: (...args: unknown[]) => mockEntitySourceList(...args),
   })),
 }));
 
@@ -76,6 +78,7 @@ describe('installPrebuiltWatchlists', () => {
     jest.clearAllMocks();
     mockWatchlistCreate.mockResolvedValue({ id: PRIVILEGED_USER_WATCHLIST_ID });
     mockEntitySourceCreate.mockResolvedValue({ id: 'entity-source-id' });
+    mockEntitySourceList.mockResolvedValue({ sources: [] });
     mockAddEntitySourceReference.mockResolvedValue(undefined);
     mockGetStartServices.mockResolvedValue([
       {
