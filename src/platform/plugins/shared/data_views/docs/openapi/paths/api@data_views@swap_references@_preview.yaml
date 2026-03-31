@@ -1,8 +1,9 @@
 post:
-  summary: Preview a saved object reference swap
+  summary: Preview swap references
   operationId: previewSwapDataViewsDefault
   description: >
-    Preview the impact of swapping saved object references from one data view identifier to another.
+    Preview the effect of swapping saved object references from one data view to another.
+    Returns the list of affected saved objects without making any changes.
   tags:
     - data views
   x-codeSamples:

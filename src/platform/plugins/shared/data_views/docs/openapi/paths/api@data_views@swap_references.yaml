@@ -2,7 +2,8 @@ post:
   summary: Swap saved object references
   operationId: swapDataViewsDefault
   description: >
-    Changes saved object references from one data view identifier to another.
+    Swap saved object references from one data view to another.
+    Use this endpoint to update dashboards, visualizations, and other saved objects that reference a data view.
     WARNING: Misuse can break large numbers of saved objects! Practicing with a backup is recommended.
   tags:
     - data views

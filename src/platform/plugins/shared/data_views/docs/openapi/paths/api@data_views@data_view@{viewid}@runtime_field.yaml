@@ -1,6 +1,9 @@
 post:
   summary: Create a runtime field
   operationId: createRuntimeFieldDefault
+  description: >
+    Create a runtime field for a data view.
+    Runtime fields are computed at query time using a Painless script and do not require reindexing.
   tags:
     - data views
   x-codeSamples:
@@ -51,6 +54,9 @@ post:
 put:
   summary: Create or update a runtime field
   operationId: createUpdateRuntimeFieldDefault
+  description: >
+    Create or update a runtime field for a data view.
+    If the runtime field already exists, it is replaced with the new definition.
   tags:
     - data views
   x-codeSamples:

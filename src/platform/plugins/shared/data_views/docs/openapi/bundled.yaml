@@ -21,6 +21,8 @@ paths:
     get:
       summary: Get all data views
       operationId: getAllDataViewsDefault
+      description: |
+        Retrieve a list of all data views. Use this endpoint to discover available data views in the current Kibana space.
       tags:
         - data views
       x-codeSamples:
@@ -70,6 +72,8 @@ paths:
     post:
       summary: Create a data view
       operationId: createDataViewDefaultw
+      description: |
+        Create a data view. Data views identify the Elasticsearch data you want to explore and visualize. They can point to one or more data streams, indices, or index aliases, and use optional runtime fields to compute values at query time. Note that data views are not required for ES|QL-based visualizations. To learn more, refer to the [data views documentation](https://www.elastic.co/docs/manage-data/data-store/data-views).
       tags:
         - data views
       x-codeSamples:
@@ -113,6 +117,8 @@ paths:
     get:
       summary: Get a data view
       operationId: getDataViewDefault
+      description: |
+        Retrieve a single data view by its identifier. Data views identify the Elasticsearch data you want to explore and visualize. They can point to one or more data streams, indices, or index aliases, and use optional runtime fields to compute values at query time. Note that data views are not required for ES|QL-based visualizations. To learn more, refer to the [data views documentation](https://www.elastic.co/docs/manage-data/data-store/data-views).
       tags:
         - data views
       x-codeSamples:
@@ -146,7 +152,7 @@ paths:
       summary: Delete a data view
       operationId: deleteDataViewDefault
       description: |
-        WARNING: When you delete a data view, it cannot be recovered.
+        Delete a data view by its identifier. WARNING: When you delete a data view, it cannot be recovered.
       tags:
         - data views
       x-codeSamples:
@@ -174,6 +180,8 @@ paths:
     post:
       summary: Update a data view
       operationId: updateDataViewDefault
+      description: |
+        Update an existing data view. Only the fields provided in the request body are updated.
       tags:
         - data views
       x-codeSamples:
@@ -216,10 +224,10 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/data_views/data_view/{viewId}/fields:
     post:
-      summary: Update data view fields metadata
+      summary: Update field metadata
       operationId: updateFieldsMetadataDefault
       description: |
-        Update fields presentation metadata such as count, customLabel, customDescription, and format.
+        Update field metadata for a data view. Use this endpoint to set custom labels, custom descriptions, and format overrides for individual fields.
       tags:
         - data views
       x-codeSamples:
@@ -273,6 +281,8 @@ paths:
     post:
       summary: Create a runtime field
       operationId: createRuntimeFieldDefault
+      description: |
+        Create a runtime field for a data view. Runtime fields are computed at query time using a Painless script and do not require reindexing.
       tags:
         - data views
       x-codeSamples:
@@ -322,6 +332,8 @@ paths:
     put:
       summary: Create or update a runtime field
       operationId: createUpdateRuntimeFieldDefault
+      description: |
+        Create or update a runtime field for a data view. If the runtime field already exists, it is replaced with the new definition.
       tags:
         - data views
       x-codeSamples:
@@ -391,6 +403,8 @@ paths:
     get:
       summary: Get a runtime field
       operationId: getRuntimeFieldDefault
+      description: |
+        Retrieve a single runtime field by name from a data view.
       tags:
         - data views
       x-codeSamples:
@@ -429,8 +443,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     delete:
-      summary: Delete a runtime field from a data view
+      summary: Delete a runtime field
       operationId: deleteRuntimeFieldDefault
+      description: |
+        Delete a runtime field from a data view.
       tags:
         - data views
       x-codeSamples:
@@ -458,6 +474,8 @@ paths:
     post:
       summary: Update a runtime field
       operationId: updateRuntimeFieldDefault
+      description: |
+        Update an existing runtime field in a data view. Only the fields provided in the request body are updated.
       tags:
         - data views
       x-codeSamples:
@@ -510,6 +528,8 @@ paths:
     get:
       summary: Get the default data view
       operationId: getDefaultDataViewDefault
+      description: |
+        Retrieve the identifier of the default data view for the current Kibana space.
       tags:
         - data views
       x-codeSamples:
@@ -543,6 +563,8 @@ paths:
     post:
       summary: Set the default data view
       operationId: setDefaultDatailViewDefault
+      description: |
+        Set the default data view for the current Kibana space. The default data view is used as a fallback when no specific data view is selected.
       tags:
         - data views
       x-codeSamples:
@@ -602,7 +624,7 @@ paths:
       summary: Swap saved object references
       operationId: swapDataViewsDefault
       description: |
-        Changes saved object references from one data view identifier to another. WARNING: Misuse can break large numbers of saved objects! Practicing with a backup is recommended.
+        Swap saved object references from one data view to another. Use this endpoint to update dashboards, visualizations, and other saved objects that reference a data view. WARNING: Misuse can break large numbers of saved objects! Practicing with a backup is recommended.
       tags:
         - data views
       x-codeSamples:
@@ -657,10 +679,10 @@ paths:
                           description: The saved object type.
   /api/data_views/swap_references/_preview:
     post:
-      summary: Preview a saved object reference swap
+      summary: Preview swap references
       operationId: previewSwapDataViewsDefault
       description: |
-        Preview the impact of swapping saved object references from one data view identifier to another.
+        Preview the effect of swapping saved object references from one data view to another. Returns the list of affected saved objects without making any changes.
       tags:
         - data views
       x-codeSamples:

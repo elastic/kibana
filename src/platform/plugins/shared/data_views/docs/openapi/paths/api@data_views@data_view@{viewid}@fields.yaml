@@ -1,8 +1,9 @@
 post:
-  summary: Update data view fields metadata
+  summary: Update field metadata
   operationId: updateFieldsMetadataDefault
   description: >
-    Update fields presentation metadata such as count, customLabel, customDescription, and format.
+    Update field metadata for a data view.
+    Use this endpoint to set custom labels, custom descriptions, and format overrides for individual fields.
   tags:
     - data views
   x-codeSamples:
