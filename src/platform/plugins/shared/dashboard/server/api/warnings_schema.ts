@@ -21,6 +21,10 @@ const droppedPanelWarningSchema = schema.object({
     }
   ),
   panel_references: schema.maybe(schema.arrayOf(referenceSchema)),
+}, {
+  meta: {
+    id: 'kbn-dashboard-dropped-panel-warning'
+  }
 });
 
 export const warningsSchema = schema.arrayOf(droppedPanelWarningSchema);
