@@ -13,6 +13,7 @@ import {
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { installPrebuiltWatchlists } from './install_prebuilt_watchlists';
 import { PRIVILEGED_USER_WATCHLIST_ID } from '../../../../../common/entity_analytics/watchlists/constants';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 const mockWatchlistGet = jest.fn();
 const mockWatchlistCreate = jest.fn();
@@ -72,6 +73,9 @@ describe('installPrebuiltWatchlists', () => {
       logger: mockLogger,
       getStartServices: mockGetStartServices,
       kibanaVersion: '9.0.0',
+      experimentalFeatures: {
+        entityAnalyticsWatchlistEnabled: true,
+      } as ExperimentalFeatures,
     });
 
   beforeEach(() => {
