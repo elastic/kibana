@@ -4,6 +4,7 @@ steps:
     key: security-investigations
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -22,6 +23,7 @@ steps:
     key: security-serverless-investigations
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
