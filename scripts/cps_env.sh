@@ -4,8 +4,8 @@
 # CPS (Cross-Project Search) Local Environment Setup
 # =============================================================================
 #
-# Starts Elasticsearch and Kibana with CPS enabled, then configures a
-# loopback-linked project so you can query data across multiple projects.
+# Starts Elasticsearch and Kibana with CPS enabled (loopback-CPS setup where
+# one project is linked to itself via a different alias).
 #
 # Usage:
 #   scripts/cps_env.sh [--project-type <type>]
@@ -13,13 +13,8 @@
 # Options:
 #   --project-type  Serverless project type (default: observability)
 #
-# The loopback-CPS setup links a project to itself via a different alias,
-# so queries across multiple projects will return document duplicates.
-#
 # CPS is enabled for Dashboard, Discover, Vega, Lens, and Maps.
-#
-# After startup, verify from Dev Tools (uses proper UIAM credentials):
-#   GET /_project/tags
+# After startup, verify from Dev Tools: GET /_project/tags
 # =============================================================================
 
 set -e
@@ -35,7 +30,6 @@ ES_URL="https://localhost:9200"
 ES_CREDENTIALS="elastic_serverless:changeme"
 ES_READY_TIMEOUT=120
 
-# Parse arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
     --project-type)
@@ -49,7 +43,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     -h|--help)
-      head -25 "${BASH_SOURCE[0]}" | tail -19
+      sed -n '3,16p' "${BASH_SOURCE[0]}"
       exit 0
       ;;
     *)
@@ -67,10 +61,6 @@ cleanup() {
   if [ -n "$ES_PID" ]; then
     kill "$ES_PID" 2>/dev/null || true
     wait "$ES_PID" 2>/dev/null || true
-  fi
-  if [ -n "$KIBANA_PID" ]; then
-    kill "$KIBANA_PID" 2>/dev/null || true
-    wait "$KIBANA_PID" 2>/dev/null || true
   fi
   echo "Done."
 }
@@ -155,18 +145,6 @@ configure_linked_project() {
   fi
 }
 
-verify_linked_project() {
-  echo "Verifying linked project…"
-  local tags
-  tags=$(curl -sku "$ES_CREDENTIALS" -X GET "$ES_URL/_project/tags?pretty" 2>/dev/null)
-  if echo "$tags" | grep -q "linked_local_project"; then
-    echo "Linked project is visible."
-  else
-    echo "Warning: Linked project not yet visible in tags. It may take a moment."
-    echo "Check manually from Dev Tools: GET /_project/tags"
-  fi
-}
-
 # --- Main --------------------------------------------------------------------
 
 cd "$REPO_DIR"
@@ -175,36 +153,31 @@ echo "=== CPS Local Environment Setup ==="
 echo "Project type: $PROJECT_TYPE"
 echo ""
 
-# 1. Start Elasticsearch in the background
-echo "--- Starting Elasticsearch (serverless, UIAM, CPS) ---"
+# Step 1: Start Elasticsearch in the background
+echo "--- Step 1: Starting Elasticsearch ---"
 yarn es serverless --projectType "$PROJECT_TYPE" --uiam \
   -E serverless.cross_project.enabled=true \
   -E remote_cluster_server.enabled=true &
 ES_PID=$!
 
-# 2. Wait for the Docker container and ES to be ready
+# Step 2: Wait for ES to be fully ready
 wait_for_docker_container
 wait_for_es
 
-# 3. Configure the linked project
+# Step 3: Configure the loopback-linked project
+echo ""
+echo "--- Step 2: Linking projects ---"
 configure_linked_project
-verify_linked_project
 
 echo ""
-echo "--- Starting Kibana (serverless, UIAM, CPS) ---"
-
-# 4. Start Kibana in the foreground
-yarn start --serverless="$SERVERLESS_FLAG" --uiam --cps.cpsEnabled=true &
-KIBANA_PID=$!
-
+echo "--- Step 3: Starting Kibana ---"
 echo ""
-echo "=== CPS environment is starting ==="
 echo "  Elasticsearch: $ES_URL"
 echo "  Kibana:        http://localhost:5601"
 echo ""
-echo "Verify from Dev Tools: GET /_project/tags"
-echo "Press Ctrl+C to stop all services."
+echo "  Verify from Dev Tools: GET /_project/tags"
+echo "  Press Ctrl+C to stop all services."
 echo ""
 
-# Wait for either process to exit
-wait -n "$ES_PID" "$KIBANA_PID" 2>/dev/null || true
+# Step 4: Start Kibana in the foreground
+yarn start --serverless="$SERVERLESS_FLAG" --uiam --cps.cpsEnabled=true
