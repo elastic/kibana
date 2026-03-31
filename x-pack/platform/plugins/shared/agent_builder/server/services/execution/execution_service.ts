@@ -17,7 +17,6 @@ import type { ChatEvent } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AttachmentServiceStart } from '../attachments';
 import type {
@@ -64,12 +63,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     this.logger = deps.logger;
   }
 
-  private getAttachmentResolveContext(request: KibanaRequest): AttachmentResolveContext {
-    const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
-    const savedObjectsClient = this.deps.savedObjects.getScopedClient(request);
-    return { request, spaceId, savedObjectsClient };
-  }
-
   private async validateAttachmentsIfProvided(
     attachments: AttachmentInput[] | undefined,
     request: KibanaRequest
@@ -78,10 +71,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       return undefined;
     }
 
-    const resolveContext = this.getAttachmentResolveContext(request);
     const validated: Attachment[] = [];
     for (const attachment of attachments) {
-      const result = await this.deps.attachmentsService.validate(attachment, resolveContext);
+      const result = await this.deps.attachmentsService.validate(attachment, request);
       if (!result.valid) {
         throw createBadRequestError(`Attachment validation failed: ${result.error}`);
       }

@@ -18,9 +18,6 @@ import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/ag
 
 /**
  * Body payload for the public agent_builder converse endpoints (`/api/agent_builder/converse`, `/converse/async`).
- *
- * Attachments may be by-value (`data`), by-reference (`origin` without `data`, resolved once via the type’s
- * `resolve` hook), or both (same shape as conversation attachment APIs).
  */
 export interface ChatRequestBodyPayload {
   agent_id?: string;
