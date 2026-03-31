@@ -34,7 +34,7 @@ export async function bulkUpdateEntities(
   options?: { signal?: AbortSignal }
 ): Promise<BulkUpdateEntitiesResponse> {
   return http.fetch<BulkUpdateEntitiesResponse>(ENTITY_STORE_ROUTES.CRUD_BULK_UPDATE, {
-    version: API_VERSIONS.internal.v2,
+    version: API_VERSIONS.public.v1,
     method: 'PUT',
     query: params.force === undefined ? undefined : { force: params.force },
     body: JSON.stringify({

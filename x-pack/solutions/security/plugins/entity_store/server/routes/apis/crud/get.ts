@@ -83,7 +83,7 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
   router.versioned
     .get({
       path: ENTITY_STORE_ROUTES.CRUD_GET,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -91,7 +91,7 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(querySchema),

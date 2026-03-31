@@ -30,7 +30,7 @@ const statusRequestQuery = {
 
 const getStatusRequest: HttpFetchOptionsWithPath = {
   path: ENTITY_STORE_ROUTES.STATUS,
-  query: { apiVersion: '2', ...statusRequestQuery },
+  query: statusRequestQuery,
 };
 
 const getStatusV1Request: HttpFetchOptionsWithPath = {
@@ -40,7 +40,6 @@ const getStatusV1Request: HttpFetchOptionsWithPath = {
 const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
   path: ENTITY_STORE_ROUTES.INSTALL,
   body: JSON.stringify({}),
-  query: { apiVersion: '2' },
 };
 
 const initEntityMaintainersRequest: HttpFetchOptionsWithPath = {

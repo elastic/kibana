@@ -15,7 +15,7 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
   router.versioned
     .get({
       path: ENTITY_STORE_ROUTES.CHECK_PRIVILEGES,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -23,7 +23,7 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: false,
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {

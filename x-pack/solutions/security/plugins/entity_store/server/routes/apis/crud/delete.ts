@@ -22,7 +22,7 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
   router.versioned
     .delete({
       path: ENTITY_STORE_ROUTES.CRUD_DELETE,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -30,7 +30,7 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(bodySchema),

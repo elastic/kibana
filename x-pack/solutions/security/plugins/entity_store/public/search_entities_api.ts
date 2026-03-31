@@ -37,7 +37,7 @@ export async function searchEntitiesFromEntityStore(
   options?: { signal?: AbortSignal }
 ): Promise<SearchEntitiesFromEntityStoreResponse> {
   return http.fetch<SearchEntitiesFromEntityStoreResponse>(ENTITY_STORE_ROUTES.CRUD_GET, {
-    version: API_VERSIONS.internal.v2,
+    version: API_VERSIONS.public.v1,
     method: 'GET',
     query: {
       entity_types: params.entityTypes,
