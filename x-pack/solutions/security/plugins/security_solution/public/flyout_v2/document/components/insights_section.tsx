@@ -28,6 +28,7 @@ import { PrevalenceDetails } from '../../prevalence/prevalence';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
+import { ThreatIntelligenceDetails } from '../../threat_intelligence';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -81,7 +82,22 @@ export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
     [rule?.investigation_fields?.field_names]
   );
 
-  const onShowThreatIntelligenceDetails = useCallback(() => {}, []);
+  const onShowThreatIntelligenceDetails = useCallback(() => {
+    overlays.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <ThreatIntelligenceDetails hit={hit} />,
+      }),
+      {
+        ownFocus: false,
+        resizable: true,
+        size: 'm',
+        type: 'overlay',
+      }
+    );
+  }, [history, hit, overlays, services, store]);
   const onShowAlert = useCallback(
     (id: string, indexName: string) =>
       services.overlays?.openSystemFlyout(

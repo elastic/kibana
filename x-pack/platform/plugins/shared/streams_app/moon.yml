@@ -108,6 +108,7 @@ dependsOn:
   - '@kbn/stack-connectors-plugin'
   - '@kbn/std'
   - '@kbn/inference-connectors'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod
