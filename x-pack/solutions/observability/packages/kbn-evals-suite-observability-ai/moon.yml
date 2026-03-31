@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/core'
   - '@kbn/alerting-plugin'
+  - '@kbn/response-ops-rule-params'
   - '@kbn/scout'
   - '@kbn/agent-builder-common'
   - '@kbn/es-snapshot-loader'

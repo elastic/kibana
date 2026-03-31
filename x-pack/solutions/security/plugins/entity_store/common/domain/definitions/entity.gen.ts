@@ -35,7 +35,7 @@ export const EntityField = z
     name: z.string().optional(),
     type: z.string().optional(),
     sub_type: z.string().optional(),
-    source: z.string().optional(),
+    source: z.array(z.string()).optional(),
     EngineMetadata: EngineMetadata.optional(),
     attributes: z
       .object({
