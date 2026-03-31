@@ -25,6 +25,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useBoolean } from '@kbn/react-hooks';
 import { AssetImage } from '../../../../asset_image';
+import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useFetchFeatures } from '../../../../../hooks/sig_events/use_fetch_features';
 import { useDiscoveryFeaturesApi } from '../../../../../hooks/sig_events/use_discovery_features_api';
 import { useKibana } from '../../../../../hooks/use_kibana';
@@ -40,6 +41,7 @@ import {
 const featureKey = (feature: Feature) => `${feature.id}::${feature.stream_name}`;
 
 export function FeaturesTable() {
+  const router = useStreamsAppRouter();
   const { data, isLoading: loading, refetch } = useFetchFeatures();
   const { deleteFeaturesInBulk } = useDiscoveryFeaturesApi();
   const {
@@ -255,10 +257,20 @@ export function FeaturesTable() {
               'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.emptyState.description',
               {
                 defaultMessage:
-                  'Facts about your stream automatically extracted from log data to power rule generation.',
+                  'Facts about your stream automatically extracted from log data to power rule generation. To generate knowledge indicators, go to Streams tab and start onboarding.',
               }
             )}
           </p>
+        }
+        actions={
+          <EuiButtonEmpty
+            href={router.link('/_discovery/{tab}', { path: { tab: 'streams' } })}                        
+          >
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.emptyState.goToStreamsButton',
+              { defaultMessage: 'Go to Streams tab' }
+            )}
+          </EuiButtonEmpty>
         }
       />
     );

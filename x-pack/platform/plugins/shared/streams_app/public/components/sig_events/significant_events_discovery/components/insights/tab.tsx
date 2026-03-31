@@ -6,14 +6,16 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
+import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { AssetImage } from '../../../../asset_image';
 import { Summary } from './summary';
 
 export function InsightsTab() {
+  const router = useStreamsAppRouter();
   const {
     dependencies: {
       start: {
@@ -52,7 +54,7 @@ export function InsightsTab() {
         title={
           <h2>
             {i18n.translate('xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundTitle', {
-              defaultMessage: 'No events found to analyze',
+              defaultMessage: 'Significant Events',
             })}
           </h2>
         }
@@ -62,10 +64,20 @@ export function InsightsTab() {
               'xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundDescription',
               {
                 defaultMessage:
-                  'Discover Significant Events from your logs, and understand what they mean with the power of AI and Elastic Observability.',
+                  'To start discovering Significant Events, onboard your streams, extract Knowledge Indicators, and promote rules to begin detecting events.',
               }
             )}
           </p>
+        }
+        actions={
+          <EuiButtonEmpty
+            href={router.link('/_discovery/{tab}', { path: { tab: 'streams' } })}            
+          >
+            {i18n.translate(
+              'xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundGoToStreamsButton',
+              { defaultMessage: 'Go to Streams tab' }
+            )}
+          </EuiButtonEmpty>
         }
       />
     );

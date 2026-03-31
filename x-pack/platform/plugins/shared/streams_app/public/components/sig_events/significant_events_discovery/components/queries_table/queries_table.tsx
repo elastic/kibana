@@ -9,6 +9,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiEmptyPrompt,
@@ -46,6 +47,7 @@ import {
 } from '../../../../../hooks/sig_events/use_unbacked_queries_count';
 import { getFormattedError } from '../../../../../util/errors';
 import { AssetImage } from '../../../../asset_image';
+import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { LoadingPanel } from '../../../../loading_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
@@ -95,6 +97,7 @@ const DEFAULT_PAGINATION = { index: 0, size: 10 };
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
 export function QueriesTable() {
+  const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
@@ -384,10 +387,20 @@ export function QueriesTable() {
               'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.description',
               {
                 defaultMessage:
-                  'Continuously scan your stream for errors, anomalies, and signals, feeding matched events into Significant events.',
+                  'Once your streams data are onboarded, rules will be proposed for promotion. Promoting a rule activates it — matched events feed directly into Significant Events.',
               }
             )}
           </p>
+        }
+        actions={
+          <EuiButtonEmpty
+            href={router.link('/_discovery/{tab}', { path: { tab: 'streams' } })}            
+          >
+            {i18n.translate(
+              'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.goToStreamsButton',
+              { defaultMessage: 'Go to Streams tab' }
+            )}
+          </EuiButtonEmpty>
         }
       />
     );
