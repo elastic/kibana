@@ -42,10 +42,7 @@ import {
  */
 type EntitySourceInput = NonNullable<CreateWatchlistRequestBodyInput['entitySources']>[number];
 
-const getRuleToggleButtons = (
-  isEditMode: boolean,
-  initialEntitySource?: EntitySourceInput
-) => {
+const getRuleToggleButtons = (isEditMode: boolean, initialEntitySource?: EntitySourceInput) => {
   // Only lock the toggle in edit mode so users can't switch source type on an existing entity source.
   // In create mode both buttons stay enabled even though onFieldChange sets initialEntitySource,
   // because isEditMode is explicitly false from the parent.
@@ -269,10 +266,9 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
       if (ruleFilter === 'entityStore') {
         onFieldChange('entitySources', [buildEntityStoreSource(query)]);
       } else {
-        onFieldChange(
-          'entitySources',
-          [buildIndexEntitySource(watchlistName, selectedIndexPatterns, entityField, query)]
-        );
+        onFieldChange('entitySources', [
+          buildIndexEntitySource(watchlistName, selectedIndexPatterns, entityField, query),
+        ]);
       }
     },
     [
@@ -307,10 +303,9 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
         onFieldChange('entitySources', [buildEntityStoreSource(filterQuery)]);
       } else {
         // Immediately send index source with current state
-        onFieldChange(
-          'entitySources',
-          [buildIndexEntitySource(watchlistName, selectedIndexPatterns, entityField, filterQuery)]
-        );
+        onFieldChange('entitySources', [
+          buildIndexEntitySource(watchlistName, selectedIndexPatterns, entityField, filterQuery),
+        ]);
       }
     },
     [
@@ -326,10 +321,9 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
   const onIndexPatternsChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedIndexPatterns(selected);
-      onFieldChange(
-        'entitySources',
-        [buildIndexEntitySource(watchlistName, selected, entityField, filterQuery)]
-      );
+      onFieldChange('entitySources', [
+        buildIndexEntitySource(watchlistName, selected, entityField, filterQuery),
+      ]);
     },
     [entityField, filterQuery, onFieldChange, watchlistName]
   );
@@ -337,10 +331,9 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
   const onEntityFieldChange = useCallback(
     (value: string) => {
       setEntityField(value);
-      onFieldChange(
-        'entitySources',
-        [buildIndexEntitySource(watchlistName, selectedIndexPatterns, value, filterQuery)]
-      );
+      onFieldChange('entitySources', [
+        buildIndexEntitySource(watchlistName, selectedIndexPatterns, value, filterQuery),
+      ]);
     },
     [selectedIndexPatterns, filterQuery, onFieldChange, watchlistName]
   );
