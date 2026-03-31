@@ -44,6 +44,17 @@ const getChildStepArrays = (step: Step): ReadonlyArray<WorkflowYaml['steps']> =>
   return [];
 };
 
+export const collectAllSteps = (steps: WorkflowYaml['steps']): Step[] => {
+  const result: Step[] = [];
+  for (const step of steps) {
+    result.push(step);
+    for (const childSteps of getChildStepArrays(step)) {
+      result.push(...collectAllSteps(childSteps));
+    }
+  }
+  return result;
+};
+
 export function getStepByNameFromNestedSteps(
   steps: WorkflowYaml['steps'],
   stepName: string
