@@ -119,9 +119,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
         // Click on the entity node to show entity details
-        await expandedFlyoutGraph.showEntityDetails(
-          'api-service@your-project-id.iam.gserviceaccount.com'
-        );
+        await expandedFlyoutGraph.showEntityDetails('service:ApiServiceAccount');
 
         // Verify the generic entity preview panel is open
         await genericEntityFlyout.assertGenericEntityPanelIsOpen();
