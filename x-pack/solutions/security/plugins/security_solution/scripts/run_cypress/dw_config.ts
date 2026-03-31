@@ -48,8 +48,14 @@ const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
   // Response actions: real Endpoint operations (~5-7 min)
   { pattern: 'endpoint_operations.cy.ts', weight: 22 },
   { pattern: 'alerts_response_console.cy.ts', weight: 18 },
-  { pattern: 'isolate.cy.ts', weight: 12 },
+  { pattern: 'response_console/execute_and_file_operations.cy.ts', weight: 15 },
+  { pattern: 'response_console/process_operations.cy.ts', weight: 10 },
+  { pattern: 'response_console/scan.cy.ts', weight: 8 },
+  { pattern: 'response_console/isolate.cy.ts', weight: 6 },
+  { pattern: 'response_console/release.cy.ts', weight: 6 },
+  { pattern: 'response_actions/isolate.cy.ts', weight: 12 },
   { pattern: 'responder.cy.ts', weight: 12 },
+  { pattern: 'response_actions/response_actions_history.cy.ts', weight: 8 },
 
   // Standalone artifact CRUD specs (~2-3 min each, consolidated it() blocks)
   { pattern: 'artifacts/blocklist.cy.ts', weight: 9 },
@@ -61,11 +67,25 @@ const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
   { pattern: 'artifacts/trusted_devices.cy.ts', weight: 7 },
   { pattern: 'artifacts/artifacts.cy.ts', weight: 8 },
 
+  // Automated response actions: real Fleet/Endpoint ops despite few it() blocks
+  { pattern: 'automated_response_actions/automated_response_actions.cy.ts', weight: 10 },
+  { pattern: 'automated_response_actions/form.cy.ts', weight: 10 },
+  { pattern: 'automated_response_actions/results.cy.ts', weight: 6 },
+
+  // Policy specs: consolidated it() blocks but same runtime (~2-3 min each)
+  { pattern: 'policy/policy_details_policy_settings.cy.ts', weight: 7 },
+  { pattern: 'policy/policy_details_protection_updates.cy.ts', weight: 8 },
+  { pattern: 'policy/policy_details_mocked_data.cy.ts', weight: 7 },
+
   // Endpoint details (~2.5 min, consolidated from 10 to 7 it() blocks)
   { pattern: 'endpoint_details/insights.cy.ts', weight: 8 },
 
-  // Endpoint list real tests (~3 min)
+  // Endpoint list tests
   { pattern: 'endpoint_list/endpoints.cy.ts', weight: 8 },
+  { pattern: 'endpoint_list/endpoints_mocked_data.cy.ts', weight: 6 },
+
+  // Navigation ESS: dynamic runner (~3 min per version)
+  { pattern: 'navigation_ess_siem_', weight: 8 },
 
   // Serverless role specs: consolidated from per-page to per-category it() blocks.
   // Each spec still tests all pages (~1.5-2.5 min) despite only 1-3 it() blocks.
@@ -82,7 +102,7 @@ const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
  * per unique config on an agent. Value of 20 provides optimal balance between
  * config consolidation and even weight distribution across agents.
  */
-const SETUP_COST_WEIGHT = 20;
+const SETUP_COST_WEIGHT = 25;
 
 /**
  * Per-spec overhead in weight units. Each additional spec on an agent adds Cypress
