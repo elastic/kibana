@@ -124,10 +124,15 @@ describe('useMetricsGridFullScreen', () => {
       'utf-8'
     );
 
+    // Verify --euiFixedHeadersOffset is reset to 0 to remove header offset in fullscreen
+    expect(sourceCode).toMatch(/--euiFixedHeadersOffset:\s*0px/);
+
     // Verify the .euiFlyout block sets bottom: 0 to prevent clipping in fullscreen
-    expect(sourceCode).toMatch(/logicalCSS\s*\(\s*['"]bottom['"]\s*,\s*['"]0['"]\s*\)/);
+    expect(sourceCode).toMatch(/logicalCSS\s*\(\s*['"]bottom['"]\s*,\s*['"]0\s*!important['"]\s*\)/);
 
     // Verify max-height is set to override any EUI-applied max-height constraint
-    expect(sourceCode).toMatch(/logicalCSS\s*\(\s*['"]max-height['"]\s*,\s*['"]100vh['"]\s*\)/);
+    expect(sourceCode).toMatch(
+      /logicalCSS\s*\(\s*['"]max-height['"]\s*,\s*['"]100vh\s*!important['"]\s*\)/
+    );
   });
 });
