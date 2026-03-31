@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/error-boundary-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/error-boundary-example-plugin'
+  title: '@kbn/error-boundary-example-plugin'
   description: Moon project for @kbn/error-boundary-example-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: examples/error_boundary
+  sourceRoot: examples/error_boundary
 dependsOn:
   - '@kbn/core'
   - '@kbn/developer-examples-plugin'

@@ -88,6 +88,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     description,
     sessionViewConfig,
     initialized,
+    changed,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -101,6 +102,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         'initialized',
         'show',
         'activeTab',
+        'changed',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
@@ -158,7 +160,16 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         indexNames: selectedPatterns,
       })
     );
+    // This is an automatic data view sync, not a user-initiated change. If the timeline was
+    // not in a changed state before the sync, reset the changed flag so that page navigation
+    // (e.g. on serverless with the new data view picker, where navigating between pages can
+    // re-initialize the data view and trigger this sync) does not cause a false unsaved-changes
+    // prompt.
+    if (!changed) {
+      dispatch(timelineActions.setChanged({ id: timelineId, changed: false }));
+    }
   }, [
+    changed,
     dispatch,
     savedObjectId,
     selectedDataViewId,

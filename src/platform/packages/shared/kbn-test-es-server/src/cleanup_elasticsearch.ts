@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AxiosError } from 'axios';
-export class KbnClientRequesterError extends Error {
-  axiosError?: AxiosError;
-  constructor(message: string, error: unknown) {
-    super(message);
-    this.name = 'KbnClientRequesterError';
-    if (error instanceof AxiosError) this.axiosError = clean(error);
+import type { ToolingLog } from '@kbn/tooling-log';
+import { extractAndArchiveLogs } from '@kbn/es/src/utils';
+import type { ICluster } from './test_es_cluster';
+
+export async function cleanupElasticsearch(
+  node: ICluster,
+  isServerless: boolean,
+  logsDir: string | undefined,
+  log: ToolingLog
+): Promise<void> {
+  await node.cleanup();
+
+  if (isServerless) {
+    await extractAndArchiveLogs({ outputFolder: logsDir, log });
   }
-}
-function clean(error: Error): AxiosError {
-  const _ = AxiosError.from(error);
-  delete _.cause;
-  delete _.config;
-  delete _.request;
-  delete _.response;
-  return _;
 }

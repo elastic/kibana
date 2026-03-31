@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
-void require('@kbn/test').checkFTRCodeOwnersCLI();
+/**
+ * Minimal config surface used to spawn Kibana (and optional dedicated task runner) for tests.
+ * Satisfied by the FTR {@link Config} type and Scout server configs.
+ */
+export interface KibanaTestServerLaunchConfig {
+  get(path: string): unknown;
+}

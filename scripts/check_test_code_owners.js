@@ -7,9 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  SamlSessionManager,
-  type GetCookieOptions,
-  type HostOptions,
-  type SamlSessionManagerOptions,
-} from './session_manager';
+require('@kbn/setup-node-env');
+void require('@kbn/scout-reporting').cli.checkTestCodeOwnersCLI();
