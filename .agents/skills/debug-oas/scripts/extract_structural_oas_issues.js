@@ -98,8 +98,8 @@ function printHelp(errorMessage) {
   console.log(`Extract structural OAS issues from validate_oas_docs output.
 
 Usage:
-  node scripts/extract_structural_oas_issues.js [validate-output.txt]
-  node scripts/validate_oas_docs.js --only traditional 2>&1 | node scripts/extract_structural_oas_issues.js
+  node .agents/skills/debug-oas/scripts/extract_structural_oas_issues.js [validate-output.txt]
+  node scripts/validate_oas_docs.js --only traditional 2>&1 | node .agents/skills/debug-oas/scripts/extract_structural_oas_issues.js
 
 Options:
   --include-docs   Keep example/description/summary issues in the output.
