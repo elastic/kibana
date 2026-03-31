@@ -213,8 +213,8 @@ describe('DateRangePickerControl', () => {
   });
 
   describe('collapsed prop', () => {
-    describe('collapsed="never" (default)', () => {
-      it('always shows the text label', () => {
+    describe('collapsed=false (default)', () => {
+      it('shows the text label', () => {
         renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
 
         const button = screen.getByTestId('dateRangePickerControlButton');
@@ -235,29 +235,24 @@ describe('DateRangePickerControl', () => {
       });
     });
 
-    describe('collapsed="auto"', () => {
-      it('always shows the text label and sets aria-label', () => {
-        renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed="auto" />);
+    describe('collapsed=true', () => {
+      it('hides the text label and sets aria-label', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed />);
 
         const button = screen.getByTestId('dateRangePickerControlButton');
         expect(button).toHaveAttribute('aria-label');
-        expect(button).toHaveTextContent('Last 20 minutes');
+        expect(button).not.toHaveTextContent('Last 20 minutes');
       });
 
-      it('renders the duration badge for non-relative-to-now ranges', () => {
+      it('shows the duration badge for non-relative-to-now ranges', () => {
         renderWithEuiTheme(
-          <DateRangePicker
-            {...defaultProps}
-            collapsed="auto"
-            defaultValue="2024-01-01 to 2024-02-01"
-          />
+          <DateRangePicker {...defaultProps} collapsed defaultValue="2024-01-01 to 2024-02-01" />
         );
         expect(screen.getByTestId('dateRangePickerDurationBadge')).toBeInTheDocument();
       });
 
-      it('renders the duration badge (hidden by default via CSS) for relative-to-now ranges', () => {
-        renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed="auto" />);
-        // Badge is in the DOM but hidden via CSS container query when expanded
+      it('shows the duration badge for relative-to-now ranges', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed />);
         expect(screen.getByTestId('dateRangePickerDurationBadge')).toBeInTheDocument();
       });
     });

@@ -176,10 +176,12 @@ export function isValidTimeRange(range: TimeRange): boolean {
 }
 
 /**
- * Returns `true` when one bound of the range is RELATIVE and the other is NOW,
- * e.g. "last 15 minutes" (now-15m → now) or "next 3 weeks" (now → now+3w).
+ * Returns `true` when the range label already conveys its duration, making
+ * the badge redundant. This includes relative-to-now ranges (e.g. "Last 15
+ * minutes") and named ranges (e.g. "today", "yesterday", "this week").
  */
 export function isRelativeToNow(range: TimeRange): boolean {
+  if (range.isNaturalLanguage) return true;
   const [startType, endType] = range.type;
   return (
     (startType === 'RELATIVE' && endType === 'NOW') ||

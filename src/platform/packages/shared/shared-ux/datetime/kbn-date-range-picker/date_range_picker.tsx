@@ -103,18 +103,12 @@ export interface DateRangePickerProps {
    */
   compressed?: boolean;
   /**
-   * Controls the collapsed mode of the idle-state control.
-   *
-   * - `'auto'` — the text label collapses automatically via a CSS container
-   *   query when the nearest ancestor with `container-type: inline-size` is
-   *   narrow. The duration badge is always visible when collapsed, but hidden
-   *   in non-collapsed mode when the range is relative-to-now (e.g. "Last 15
-   *   minutes"), since the label already conveys the duration.
-   * - `'never'` — the text label is always shown, never collapses.
-   *
-   * @default 'never'
+   * When true, hides the text label and shows only the duration badge.
+   * The badge is hidden for relative-to-now ranges (e.g. "Last 15 minutes")
+   * when not collapsed, since the label already conveys the duration.
+   * @default false
    */
-  collapsed?: 'auto' | 'never';
+  collapsed?: boolean;
   /**
    * Show time window buttons (previous, zoom out, zoom in, next) beside the control.
    * Pass `true` for defaults, or a config object for fine-grained control.

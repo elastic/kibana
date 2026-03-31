@@ -83,11 +83,10 @@ export const AutoRefresh: Story = {
   render: (args) => <StatefulDateRangePicker {...args} />,
 };
 
-/** Wraps the picker in a resizable container with `container-type: inline-size` so `collapsed="auto"` kicks in. */
-export const CollapsedAuto: Story = {
+export const Collapsed: Story = {
   args: {
     defaultValue: 'last 15 minutes',
-    collapsed: 'auto',
+    collapsed: true,
     presets: [
       { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
       { start: 'now-30m', end: 'now', label: 'Last 30 minutes' },
@@ -98,22 +97,7 @@ export const CollapsedAuto: Story = {
       { start: 'now-30d', end: 'now', label: 'Last 30 days' },
     ],
   },
-  render: (args) => (
-    <div
-      style={
-        {
-          containerType: 'inline-size',
-          width: 600,
-          resize: 'horizontal',
-          overflow: 'auto',
-          border: '1px dashed #ccc',
-          padding: 8,
-        } as React.CSSProperties
-      }
-    >
-      <StatefulDateRangePicker {...args} />
-    </div>
-  ),
+  render: (args) => <StatefulDateRangePicker {...args} />,
 };
 
 const timeRangeKey = (o: Pick<TimeRangeBoundsOption, 'start' | 'end'>) => `${o.start}|${o.end}`;
