@@ -785,6 +785,7 @@ export class WorkflowsService {
       total: ids.length,
       deleted: ids.length - failures.length,
       failures,
+      successfulIds,
     };
   }
 
@@ -843,6 +844,7 @@ export class WorkflowsService {
     failures: Array<{ id: string; error: string }>
   ): Promise<DeleteWorkflowsResponse> {
     const now = new Date();
+    const successfulIds: string[] = [];
 
     const bulkOperations = hits.map((hit) => ({
       index: {
@@ -862,7 +864,6 @@ export class WorkflowsService {
           refresh: true,
         });
 
-        const successfulIds: string[] = [];
         bulkResponse.items.forEach((item) => {
           const operation = item.index;
           if (operation?.error) {
@@ -893,6 +894,7 @@ export class WorkflowsService {
       total: ids.length,
       deleted: ids.length - failures.length,
       failures,
+      successfulIds,
     };
   }
 

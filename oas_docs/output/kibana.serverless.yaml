@@ -19978,12 +19978,58 @@ paths:
                   managed: false
                   name: High Risk Vendors
                   riskModifier: 1.5
+              CreateWatchlistWithSourcesRequest:
+                summary: Create watchlist with entity sources
+                value:
+                  description: High risk vendor watchlist
+                  entitySources:
+                    - enabled: true
+                      identifierField: user.name
+                      indexPattern: my-sync-index
+                      name: My User Index Source
+                      type: index
+                  managed: false
+                  name: High Risk Vendors
+                  riskModifier: 1.5
             schema:
               type: object
               properties:
                 description:
                   description: Description of the watchlist
                   type: string
+                entitySources:
+                  description: Optional entity sources to create and link to the watchlist
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      filter:
+                        $ref: '#/components/schemas/Security_Entity_Analytics_API_Filter'
+                      identifierField:
+                        description: Field used to query the entity store for index-type sources
+                        type: string
+                      indexPattern:
+                        type: string
+                      integrationName:
+                        description: Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+                        type: string
+                      matchers:
+                        items:
+                          $ref: '#/components/schemas/Security_Entity_Analytics_API_Matcher'
+                        type: array
+                      name:
+                        type: string
+                      queryRule:
+                        description: KQL query used to filter data from the provided index patterns
+                        type: string
+                      type:
+                        $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitySourceType'
+                    required:
+                      - type
+                      - name
+                  type: array
                 managed:
                   description: Indicates if the watchlist is managed by the system
                   type: boolean
@@ -20015,7 +20061,14 @@ paths:
                     riskModifier: 1.5
                     updatedAt: '2026-01-28T12:00:00.000Z'
               schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_WatchlistObject'
+                allOf:
+                  - $ref: '#/components/schemas/Security_Entity_Analytics_API_WatchlistObject'
+                  - type: object
+                    properties:
+                      entitySources:
+                        items:
+                          $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEntitySource'
+                        type: array
           description: Watchlist created successfully
       summary: Create a new watchlist
       tags:
@@ -84484,6 +84537,12 @@ components:
         - category_1_count
         - inputs
         - notes
+    Security_Entity_Analytics_API_EntitySourceType:
+      enum:
+        - index
+        - entity_analytics_integration
+        - store
+      type: string
     Security_Entity_Analytics_API_EntityType:
       enum:
         - user
@@ -84491,6 +84550,13 @@ components:
         - service
         - generic
       type: string
+    Security_Entity_Analytics_API_Filter:
+      type: object
+      properties:
+        kuery:
+          oneOf:
+            - type: string
+            - type: object
     Security_Entity_Analytics_API_GenericEntity:
       additionalProperties: false
       type: object
@@ -84616,11 +84682,49 @@ components:
       required:
         - dsl
         - response
+    Security_Entity_Analytics_API_Integrations:
+      type: object
+      properties:
+        syncData:
+          description: integrations latest full sync and update syncData
+          type: object
+          properties:
+            lastFullSync:
+              description: Timestamp of the last full sync from integrations
+              format: date-time
+              type: string
+            lastUpdateProcessed:
+              description: Timestamp of the last update processed from integrations
+              format: date-time
+              type: string
+        syncMarkerIndex:
+          description: Index to read latest sync markers from
+          type: string
     Security_Entity_Analytics_API_Interval:
       description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour. Must be less than or equal to half the duration of the lookback period,
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
+    Security_Entity_Analytics_API_Matcher:
+      type: object
+      properties:
+        fields:
+          items:
+            type: string
+          type: array
+        values:
+          description: |
+            Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
+          oneOf:
+            - items:
+                type: string
+              type: array
+            - items:
+                type: boolean
+              type: array
+      required:
+        - fields
+        - values
     Security_Entity_Analytics_API_Metadata:
       $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
     Security_Entity_Analytics_API_MonitoredUserDoc:
@@ -84708,6 +84812,27 @@ components:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
       required:
         - status
+    Security_Entity_Analytics_API_MonitoringEntitySource:
+      allOf:
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEntitySourceProperties'
+        - type: object
+          properties:
+            id:
+              type: string
+          required:
+            - type
+            - name
+            - id
+            - managed
+    Security_Entity_Analytics_API_MonitoringEntitySourceProperties:
+      allOf:
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_UpdateableMonitoringEntitySourceProperties'
+        - type: object
+          properties:
+            managed:
+              type: boolean
+            type:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitySourceType'
     Security_Entity_Analytics_API_MonitoringLabel:
       type: object
       properties:
@@ -84919,6 +85044,31 @@ components:
         - exponential_avg_checkpoint_duration_ms
         - exponential_avg_documents_indexed
         - exponential_avg_documents_processed
+    Security_Entity_Analytics_API_UpdateableMonitoringEntitySourceProperties:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        filter:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Filter'
+        identifierField:
+          description: Field used to query the entity store for index-type sources
+          type: string
+        indexPattern:
+          type: string
+        integrationName:
+          type: string
+        integrations:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Integrations'
+        matchers:
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_Matcher'
+          type: array
+        name:
+          type: string
+        queryRule:
+          description: KQL query used to filter data from the provided index patterns
+          type: string
     Security_Entity_Analytics_API_UserEntity:
       additionalProperties: false
       type: object

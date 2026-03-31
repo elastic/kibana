@@ -1755,7 +1755,6 @@ x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elasti
 /x-pack/solutions/observability/plugins/infra/public/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/slo/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/services @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/alerting_api.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/slo_api.ts @elastic/actionable-obs-team
@@ -1865,6 +1864,7 @@ x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elasti
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/obs-sig-events-team  @elastic/obs-onboarding-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/obs-sig-events-team @elastic/obs-onboarding-team
+/x-pack/platform/test/api_integration/apis/streams @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/performance/configs/streams_* @elastic/obs-sig-events-team @elastic/obs-onboarding-team
@@ -2447,6 +2447,9 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elasti
 src/platform/packages/shared/kbn-connector-specs/src/specs/zendesk/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_server/** @elastic/workchat-eng
+
+# Connector Agent Skills
+src/platform/packages/shared/kbn-connector-specs/.claude/skills @elastic/workchat-eng
 
 # Connector Workflow Tests
 src/platform/plugins/shared/workflows_management/test/connector_workflows @elastic/workchat-eng
