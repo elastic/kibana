@@ -28,6 +28,9 @@ export const registerSearchAgent = ({
   logger: Logger;
 }) => {
   if (!plugins.agentBuilder) {
+    logger.debug(
+      'Agent Builder plugin is not available, skipping search onboarding agent registration'
+    );
     return;
   }
   const { agentBuilder } = plugins;
