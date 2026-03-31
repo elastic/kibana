@@ -228,12 +228,30 @@ export const retrieveIntegrationsConfigAware = (
     let reservedIdx = 0;
     for (const [configKey, groupSpecs] of nonDefaultGroups) {
       if (reservedIdx >= agents.length) break;
+
+      // Calculate how many agents this group needs based on total weight.
+      const groupWeight = groupSpecs.reduce((sum, s) => sum + s.weight, 0);
+      const target = lbConfig.targetWeightPerAgent ?? groupWeight;
+      const agentsNeeded = Math.min(Math.ceil(groupWeight / target), agents.length - reservedIdx);
+      const groupStart = reservedIdx;
+      reservedIdx += agentsNeeded;
+
+      // Greedy bin-pack this group's specs across its reserved agents.
+      groupSpecs.sort((a, b) => b.weight - a.weight || a.path.localeCompare(b.path));
       for (const spec of groupSpecs) {
-        agents[reservedIdx].paths.push(spec.path);
-        agents[reservedIdx].totalWeight += spec.weight;
-        agents[reservedIdx].configs.add(configKey);
+        let bestIdx = groupStart;
+        let bestCost = Infinity;
+        for (let i = groupStart; i < groupStart + agentsNeeded; i++) {
+          const cost = getAgentCost(agents[i], spec.configKey);
+          if (cost < bestCost) {
+            bestCost = cost;
+            bestIdx = i;
+          }
+        }
+        agents[bestIdx].paths.push(spec.path);
+        agents[bestIdx].totalWeight += spec.weight;
+        agents[bestIdx].configs.add(configKey);
       }
-      reservedIdx++;
     }
 
     // Phase 2: Greedy bin-pack default-config specs across remaining agents.
