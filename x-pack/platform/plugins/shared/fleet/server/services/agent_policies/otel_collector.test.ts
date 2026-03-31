@@ -244,17 +244,17 @@ describe('generateOtelcolConfig', () => {
 
   it('should be empty if there is no input', () => {
     const inputs: FullAgentPolicyInput[] = [];
-    expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({});
+    expect(generateOtelcolConfig({ inputs, dataOutput: defaultOutput })).toEqual({});
   });
 
   it('should be empty if there is no otel config', () => {
     const inputs: FullAgentPolicyInput[] = [logInput];
-    expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({});
+    expect(generateOtelcolConfig({ inputs, dataOutput: defaultOutput })).toEqual({});
   });
 
   it('should return the otel config when there is one', () => {
     const inputs: FullAgentPolicyInput[] = [otelInput1];
-    expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
+    expect(generateOtelcolConfig({ inputs, dataOutput: defaultOutput })).toEqual({
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -307,7 +307,9 @@ describe('generateOtelcolConfig', () => {
 
   it('should use the output id when it is not the default', () => {
     const inputs: FullAgentPolicyInput[] = [otelInput1];
-    expect(generateOtelcolConfig(inputs, { ...defaultOutput, is_default: false })).toEqual({
+    expect(
+      generateOtelcolConfig({ inputs, dataOutput: { ...defaultOutput, is_default: false } })
+    ).toEqual({
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -360,7 +362,7 @@ describe('generateOtelcolConfig', () => {
 
   it('should return the otel config if there is any', () => {
     const inputs: FullAgentPolicyInput[] = [logInput, otelInput1];
-    expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
+    expect(generateOtelcolConfig({ inputs, dataOutput: defaultOutput })).toEqual({
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -413,7 +415,7 @@ describe('generateOtelcolConfig', () => {
 
   it('should also work for templates', () => {
     const inputs: TemplateAgentPolicyInput[] = [otelInputTemplate];
-    expect(generateOtelcolConfig(inputs)).toEqual({
+    expect(generateOtelcolConfig({ inputs })).toEqual({
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -453,7 +455,7 @@ describe('generateOtelcolConfig', () => {
 
   it('should merge otel configs', () => {
     const inputs: FullAgentPolicyInput[] = [logInput, otelInput1, otelInput2];
-    expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
+    expect(generateOtelcolConfig({ inputs, dataOutput: defaultOutput })).toEqual({
       receivers: {
         'httpcheck/test-1-stream-id-1': {
           targets: [
@@ -533,7 +535,7 @@ describe('generateOtelcolConfig', () => {
 
   it('should keep components with the same type', () => {
     const inputs: FullAgentPolicyInput[] = [otelInputMultipleComponentsSameType];
-    expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
+    expect(generateOtelcolConfig({ inputs, dataOutput: defaultOutput })).toEqual({
       receivers: {
         'httpcheck/1/test-3-stream-id-1': {
           targets: [
@@ -600,7 +602,7 @@ describe('generateOtelcolConfig', () => {
 
   it('should add elasticapm connector and processor for traces input with use_apm enabled', () => {
     const inputs: FullAgentPolicyInput[] = [otelTracesInputWithAPM];
-    expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
+    expect(generateOtelcolConfig({ inputs, dataOutput: defaultOutput })).toEqual({
       receivers: {
         'zipkin/test-traces-stream-id-1': {
           endpoint: 'localhost:9411',
@@ -704,7 +706,7 @@ describe('generateOtelcolConfig', () => {
       ],
     };
 
-    const result = generateOtelcolConfig([inputA, inputB], defaultOutput);
+    const result = generateOtelcolConfig({ inputs: [inputA, inputB], dataOutput: defaultOutput });
 
     expect(result.connectors?.['elasticapm/ns-a']).toEqual({});
     expect(result.connectors?.['elasticapm/ns-b']).toEqual({});
@@ -781,7 +783,7 @@ describe('generateOtelcolConfig', () => {
       ],
     };
 
-    const result = generateOtelcolConfig([inputA, inputB], defaultOutput);
+    const result = generateOtelcolConfig({ inputs: [inputA, inputB], dataOutput: defaultOutput });
 
     expect(result.connectors?.['elasticapm/ns-shared']).toEqual({});
     expect(result.connectors?.['elasticapm/policy-a-stream-id-1']).toBeUndefined();
@@ -941,7 +943,7 @@ describe('generateOtelcolConfig', () => {
           })) ?? [],
       };
       const inputs: FullAgentPolicyInput[] = [inputWithUseApm];
-      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
+      const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, packageInfoCache });
 
       expect(result.connectors?.['elasticapm/default']).toEqual({});
       expect(result.processors?.['elasticapm/default']).toEqual({});
@@ -964,7 +966,7 @@ describe('generateOtelcolConfig', () => {
 
     it('should generate transform with multiple signal type statements when dynamic_signal_types is true', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes];
-      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
+      const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, packageInfoCache });
 
       expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
         log_statements: [
@@ -1019,7 +1021,7 @@ describe('generateOtelcolConfig', () => {
 
     it('should generate transform with multiple signal type statements when dynamic_signal_types is true and pipelines have simple names', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes2];
-      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
+      const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, packageInfoCache });
 
       expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
         log_statements: [
@@ -1098,7 +1100,7 @@ describe('generateOtelcolConfig', () => {
       };
 
       const inputs: FullAgentPolicyInput[] = [otelInputWithSubsetSignalTypes];
-      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
+      const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, packageInfoCache });
 
       expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
         log_statements: [
@@ -1151,7 +1153,11 @@ describe('generateOtelcolConfig', () => {
       ]);
 
       const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes];
-      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCacheNoDynamic);
+      const result = generateOtelcolConfig({
+        inputs,
+        dataOutput: defaultOutput,
+        packageInfoCache: packageInfoCacheNoDynamic,
+      });
 
       // Should generate single signal type transform (uses stream.data_stream.type)
       expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
@@ -1213,7 +1219,11 @@ describe('generateOtelcolConfig', () => {
       ]);
 
       const inputs: FullAgentPolicyInput[] = [otelInputWithMetricsType];
-      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCacheNoDynamicVar);
+      const result = generateOtelcolConfig({
+        inputs,
+        dataOutput: defaultOutput,
+        packageInfoCache: packageInfoCacheNoDynamicVar,
+      });
 
       // Should use the stream's data_stream.type (metrics)
       expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
@@ -1261,7 +1271,10 @@ describe('generateOtelcolConfig', () => {
     };
 
     it('generates OTel config for integration package with otelcol input', () => {
-      const result = generateOtelcolConfig([otelIntegrationInput], defaultOutput);
+      const result = generateOtelcolConfig({
+        inputs: [otelIntegrationInput],
+        dataOutput: defaultOutput,
+      });
 
       expect(result.receivers).toHaveProperty('otlp/integration-otel-stream-id-1');
       expect(result.exporters).toHaveProperty('elasticsearch/default');
@@ -1312,14 +1325,10 @@ describe('generateOtelcolConfig', () => {
         ],
       } as any;
 
-      const result = generateOtelcolConfig(
-        [templateInput],
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        integrationPackageInfo
-      );
+      const result = generateOtelcolConfig({
+        inputs: [templateInput],
+        defaultPackageInfo: integrationPackageInfo,
+      });
 
       // With dynamic_signal_types, routing transforms are generated per signal type
       const routingKey = Object.keys(result.processors ?? {}).find((k) =>
@@ -1367,12 +1376,10 @@ describe('generateOtelcolConfig', () => {
         ],
       } as any;
 
-      const result = generateOtelcolConfig(
-        [templateInput],
-        undefined,
-        undefined,
-        integrationPackageInfo
-      );
+      const result = generateOtelcolConfig({
+        inputs: [templateInput],
+        defaultPackageInfo: integrationPackageInfo,
+      });
 
       const routingKey = Object.keys(result.processors ?? {}).find((k) =>
         k.startsWith('transform/')
@@ -1447,12 +1454,11 @@ describe('generateOtelcolConfig', () => {
         ],
       };
 
-      const result = generateOtelcolConfig(
-        [inputWithMeta],
-        undefined,
-        packageInfoCacheWithDynamic,
-        defaultPkgInfoNoDynamic
-      );
+      const result = generateOtelcolConfig({
+        inputs: [inputWithMeta],
+        packageInfoCache: packageInfoCacheWithDynamic,
+        defaultPackageInfo: defaultPkgInfoNoDynamic,
+      });
 
       const routingKey = Object.keys(result.processors ?? {}).find((k) =>
         k.startsWith('transform/')
@@ -1530,7 +1536,7 @@ describe('generateOtelcolConfig', () => {
       };
 
       const cache = new Map([['mixed_pkg-1.0.0', mixedPackageInfo]]);
-      const result = generateOtelcolConfig([nonDynamicInput], undefined, cache);
+      const result = generateOtelcolConfig({ inputs: [nonDynamicInput], packageInfoCache: cache });
 
       const routingKey = Object.keys(result.processors ?? {}).find((k) =>
         k.startsWith('transform/')
@@ -1607,7 +1613,10 @@ describe('generateOtelcolConfig', () => {
       };
 
       const cache = new Map([['combined_pkg-1.0.0', mixedInputsPackageInfo]]);
-      const result = generateOtelcolConfig([nonDynamicOtelInput], undefined, cache);
+      const result = generateOtelcolConfig({
+        inputs: [nonDynamicOtelInput],
+        packageInfoCache: cache,
+      });
 
       const routingKey = Object.keys(result.processors ?? {}).find((k) =>
         k.startsWith('transform/')
@@ -1636,7 +1645,7 @@ describe('generateOtelcolConfig', () => {
         },
       };
 
-      const result = generateOtelcolConfig(inputs, outputWithSSL);
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithSSL });
 
       expect(result.extensions?.['beatsauth/default']).toEqual({
         ssl: {
@@ -1660,7 +1669,7 @@ describe('generateOtelcolConfig', () => {
         ca_trusted_fingerprint: 'myfingerprint',
       };
 
-      const result = generateOtelcolConfig(inputs, outputWithFingerprint);
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithFingerprint });
 
       expect(result.extensions?.['beatsauth/default']).toEqual({
         ssl: { ca_trusted_fingerprint: 'myfingerprint' },
@@ -1673,7 +1682,7 @@ describe('generateOtelcolConfig', () => {
         ca_sha256: 'sha256value',
       };
 
-      const result = generateOtelcolConfig(inputs, outputWithCaSha);
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithCaSha });
 
       expect(result.extensions?.['beatsauth/default']).toEqual({
         ssl: { ca_sha256: 'sha256value' },
@@ -1689,7 +1698,7 @@ describe('generateOtelcolConfig', () => {
         is_preconfigured: false,
       };
 
-      const result = generateOtelcolConfig(inputs, defaultOutput, undefined, proxy);
+      const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, proxy });
 
       expect(result.extensions?.['beatsauth/default']).toEqual({
         proxy_url: 'http://proxy.example.com:3128',
@@ -1706,7 +1715,7 @@ describe('generateOtelcolConfig', () => {
         is_preconfigured: false,
       };
 
-      const result = generateOtelcolConfig(inputs, defaultOutput, undefined, proxy);
+      const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, proxy });
 
       expect(result.extensions?.['beatsauth/default']).toEqual({
         proxy_url: 'http://proxy.example.com:3128',
@@ -1729,7 +1738,7 @@ describe('generateOtelcolConfig', () => {
         is_preconfigured: false,
       };
 
-      const result = generateOtelcolConfig(inputs, outputWithSSL, undefined, proxy);
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithSSL, proxy });
 
       expect(result.extensions?.['beatsauth/default']).toEqual({
         ssl: {
@@ -1742,7 +1751,7 @@ describe('generateOtelcolConfig', () => {
     });
 
     it('should omit beatsauth from extensions and exporter auth when output has no ssl or proxy fields', () => {
-      const result = generateOtelcolConfig(inputs, defaultOutput);
+      const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput });
 
       expect(result.extensions?.['beatsauth/default']).toBeUndefined();
       expect(result.exporters?.['elasticsearch/default']).not.toHaveProperty('auth');
@@ -1760,7 +1769,7 @@ describe('generateOtelcolConfig', () => {
         },
       };
 
-      const result = generateOtelcolConfig(inputs, outputWithSecretKey);
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithSecretKey });
 
       expect(result.extensions?.['beatsauth/default']).toEqual({
         secrets: { ssl: { key: { id: 'secret-id-abc123' } } },
@@ -1775,7 +1784,7 @@ describe('generateOtelcolConfig', () => {
         },
       };
 
-      const result = generateOtelcolConfig(inputs, outputWithSecretOnly);
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithSecretOnly });
 
       expect(result.extensions?.['beatsauth/default']).toEqual({
         secrets: { ssl: { key: { id: 'my-secret-id' } } },
@@ -1792,7 +1801,7 @@ describe('generateOtelcolConfig', () => {
         otel_exporter_config_yaml: 'flush_interval: 10s',
       };
 
-      const result = generateOtelcolConfig(inputs, outputWithExporterYaml);
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithExporterYaml });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual(
         expect.objectContaining({ flush_interval: '10s' })
@@ -1805,7 +1814,7 @@ describe('generateOtelcolConfig', () => {
         otel_exporter_config_yaml: 'endpoints:\n  - http://evil.com',
       };
 
-      const result = generateOtelcolConfig(inputs, outputWithOverrides);
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithOverrides });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual(
         expect.objectContaining({
@@ -1820,7 +1829,7 @@ describe('generateOtelcolConfig', () => {
         otel_exporter_config_yaml: null,
       };
 
-      const result = generateOtelcolConfig(inputs, outputWithNull);
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithNull });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
@@ -1828,7 +1837,7 @@ describe('generateOtelcolConfig', () => {
     });
 
     it('should handle undefined otel_exporter_config_yaml gracefully', () => {
-      const result = generateOtelcolConfig(inputs, defaultOutput);
+      const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
@@ -1841,9 +1850,9 @@ describe('generateOtelcolConfig', () => {
         otel_exporter_config_yaml: ': invalid yaml',
       };
 
-      expect(() => generateOtelcolConfig(inputs, outputWithBadYaml)).not.toThrow();
+      expect(() => generateOtelcolConfig({ inputs, dataOutput: outputWithBadYaml })).not.toThrow();
 
-      const result = generateOtelcolConfig(inputs, outputWithBadYaml);
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithBadYaml });
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
       });
@@ -1855,7 +1864,7 @@ describe('generateOtelcolConfig', () => {
         otel_exporter_config_yaml: 'just a string',
       };
 
-      const result = generateOtelcolConfig(inputs, outputWithScalarYaml);
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithScalarYaml });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
@@ -1868,7 +1877,7 @@ describe('generateOtelcolConfig', () => {
         otel_exporter_config_yaml: '- a\n- b',
       };
 
-      const result = generateOtelcolConfig(inputs, outputWithArrayYaml);
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithArrayYaml });
 
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,

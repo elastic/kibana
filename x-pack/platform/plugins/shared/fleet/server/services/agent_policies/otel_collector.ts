@@ -30,14 +30,21 @@ import { pkgToPkgKey } from '../epm/registry';
 import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
 
 // Generate OTel Collector policy
-export function generateOtelcolConfig(
-  inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[],
-  dataOutput?: Output,
-  packageInfoCache?: Map<string, PackageInfo>,
-  proxy?: FleetProxy,
-  logger?: Logger,
-  defaultPackageInfo?: PackageInfo
-): OTelCollectorConfig {
+export function generateOtelcolConfig({
+  inputs,
+  dataOutput,
+  packageInfoCache,
+  proxy,
+  logger,
+  defaultPackageInfo,
+}: {
+  inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[];
+  dataOutput?: Output;
+  packageInfoCache?: Map<string, PackageInfo>;
+  proxy?: FleetProxy;
+  logger?: Logger;
+  defaultPackageInfo?: PackageInfo;
+}): OTelCollectorConfig {
   const otelConfigs: OTelCollectorConfig[] = inputs
     .filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
     .flatMap((input) => {

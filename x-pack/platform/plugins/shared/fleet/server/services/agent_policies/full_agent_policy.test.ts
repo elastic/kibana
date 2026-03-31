@@ -1832,11 +1832,10 @@ describe('getFullAgentPolicy', () => {
       await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
       expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
-      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0];
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
       expect(callArgs).toBeDefined();
-      // Third argument should be the packageInfoCache Map
-      expect(callArgs[2]).toBeInstanceOf(Map);
-      const packageInfoCache = callArgs[2] as Map<string, PackageInfo>;
+      expect(callArgs.packageInfoCache).toBeInstanceOf(Map);
+      const packageInfoCache = callArgs.packageInfoCache as Map<string, PackageInfo>;
       expect(packageInfoCache.has('otelpackage-1.0.0')).toBe(true);
       expect(packageInfoCache.get('otelpackage-1.0.0')).toEqual(packageInfo);
     });
@@ -2023,9 +2022,9 @@ describe('getFullAgentPolicy', () => {
       await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
       expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
-      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0];
-      // Fourth argument should be the resolved proxy
-      expect(callArgs[3]).toEqual(proxy);
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      // proxy should be the resolved proxy
+      expect(callArgs.proxy).toEqual(proxy);
     });
 
     it('should pass undefined proxy to generateOtelcolConfig when dataOutput has no proxy_id', async () => {
@@ -2034,9 +2033,9 @@ describe('getFullAgentPolicy', () => {
       await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
       expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
-      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0];
-      // Fourth argument should be undefined when no proxy_id
-      expect(callArgs[3]).toBeUndefined();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      // proxy should be undefined when no proxy_id
+      expect(callArgs.proxy).toBeUndefined();
     });
 
     it('should pass undefined proxy to generateOtelcolConfig when proxy_id does not match any proxy', async () => {
@@ -2091,9 +2090,9 @@ describe('getFullAgentPolicy', () => {
       await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
       expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
-      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0];
-      // Fourth argument should be undefined when proxy_id doesn't match
-      expect(callArgs[3]).toBeUndefined();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      // proxy should be undefined when proxy_id doesn't match
+      expect(callArgs.proxy).toBeUndefined();
     });
   });
 });
