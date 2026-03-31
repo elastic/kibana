@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/spaces-plugin'
   - '@kbn/cloud-plugin'
+  - '@kbn/deeplinks-observability'
 tags:
   - plugin
   - prod
