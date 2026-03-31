@@ -75,28 +75,32 @@ const formatLink = (
   getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps,
   options: { isClassicNavUpdateLayout: boolean }
 ): SolutionSideNavItem => {
+  const stripDashboardsPanel =
+    options.isClassicNavUpdateLayout && navLink.id === SecurityPageName.dashboards;
+
   return {
     id: navLink.id,
     label: navLink.title,
     position: getNavItemPosition(navLink.id, options.isClassicNavUpdateLayout),
     ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
     ...(navLink.sideNavIcon && { iconType: navLink.sideNavIcon }),
-    ...(navLink.categories?.length && { categories: navLink.categories }),
-    ...(navLink.links?.length && {
-      items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
-        if (!current.disabled) {
-          acc.push({
-            id: current.id,
-            label: current.title,
-            iconType: current.sideNavIcon,
-            isBeta: current.isBeta,
-            betaOptions: current.betaOptions,
-            ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
-          });
-        }
-        return acc;
-      }, []),
-    }),
+    ...(navLink.categories?.length && !stripDashboardsPanel && { categories: navLink.categories }),
+    ...(navLink.links?.length &&
+      !stripDashboardsPanel && {
+        items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
+          if (!current.disabled) {
+            acc.push({
+              id: current.id,
+              label: current.title,
+              iconType: current.sideNavIcon,
+              isBeta: current.isBeta,
+              betaOptions: current.betaOptions,
+              ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
+            });
+          }
+          return acc;
+        }, []),
+      }),
   };
 };
 
