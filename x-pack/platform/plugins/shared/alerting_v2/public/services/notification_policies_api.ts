@@ -63,10 +63,9 @@ export class NotificationPoliciesApi {
   }
 
   public async createNotificationPolicy(data: CreateNotificationPolicyData) {
-    return this.http.post<NotificationPolicyResponse>(
-      ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
-      { body: JSON.stringify(data) }
-    );
+    return this.http.post<NotificationPolicyResponse>(ALERTING_V2_NOTIFICATION_POLICY_API_PATH, {
+      body: JSON.stringify(data),
+    });
   }
 
   public async updateNotificationPolicy(id: string, data: UpdateNotificationPolicyBody) {
@@ -106,9 +105,7 @@ export class NotificationPoliciesApi {
   }
 
   public async updateNotificationPolicyApiKey(id: string) {
-    await this.http.post(
-      `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_update_api_key`
-    );
+    await this.http.post(`${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_update_api_key`);
   }
 
   public async bulkActionNotificationPolicies(body: BulkActionNotificationPoliciesBody) {

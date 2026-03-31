@@ -49,7 +49,8 @@ export class ListNotificationPoliciesRoute {
   static options = {
     access: 'public',
     summary: 'List notification policies',
-    description: 'Get a paginated list of notification policies with optional filtering and sorting.',
+    description:
+      'Get a paginated list of notification policies with optional filtering and sorting.',
     tags: ['oas-tag:alerting-v2'],
     availability: { stability: 'experimental' },
   } as const;
