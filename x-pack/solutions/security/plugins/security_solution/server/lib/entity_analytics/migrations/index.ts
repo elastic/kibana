@@ -16,6 +16,7 @@ import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_inges
 import { updatePrivilegedMonitoringSourceIndex } from '../privilege_monitoring/migrations/update_source_index';
 import { upsertPrivilegedMonitoringEntitySource } from '../privilege_monitoring/migrations/upsert_entity_source';
 import { installPrebuiltWatchlists } from '../watchlists/migrations/install_prebuilt_watchlists';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 
 export interface EntityAnalyticsMigrationsParams {
   taskManager?: TaskManagerSetupContract;
@@ -23,6 +24,7 @@ export interface EntityAnalyticsMigrationsParams {
   getStartServices: StartServicesAccessor<StartPlugins>;
   auditLogger: AuditLogger | undefined;
   kibanaVersion: string;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -64,5 +66,8 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
   await updateRiskScoreMappings(paramsWithScopedLogger);
   await updatePrivilegedMonitoringSourceIndex(paramsWithScopedLogger);
   await upsertPrivilegedMonitoringEntitySource(paramsWithScopedLogger);
-  await installPrebuiltWatchlists(paramsWithScopedLogger);
+
+  if (paramsWithScopedLogger.experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+    await installPrebuiltWatchlists(paramsWithScopedLogger);
+  }
 };
