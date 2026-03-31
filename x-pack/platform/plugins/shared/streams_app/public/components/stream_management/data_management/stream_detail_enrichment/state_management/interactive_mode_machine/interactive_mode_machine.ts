@@ -18,6 +18,8 @@ import {
 } from '@kbn/streamlang';
 import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import { TaskStatus } from '@kbn/streams-schema';
+import { i18n } from '@kbn/i18n';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { MachineImplementationsFrom } from 'xstate';
 import {
@@ -61,6 +63,7 @@ import {
   type StepSpawner,
 } from './utils';
 import { isNoSuggestionsError } from '../../steps/blocks/action/utils/no_suggestions_error';
+import { getFormattedError } from '../../../../../../util/errors';
 
 export type InteractiveModeActorRef = ActorRefFrom<typeof interactiveModeMachine>;
 export type InteractiveModeSnapshot = SnapshotFrom<typeof interactiveModeMachine>;
@@ -69,6 +72,39 @@ const createId = htmlIdGenerator();
 
 const PIPELINE_SUGGESTION_POLLING_INTERVAL_MS = 2000;
 const PIPELINE_SUGGESTION_MAX_POLLING_TIME_MS = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Fire-and-forget task writes can race (e.g. acknowledge after the task was already cleared).
+ * Only surface unexpected failures so operators and users can spot network or server issues.
+ */
+const isBenignPipelineSuggestionTaskWriteError = (error: unknown): boolean => {
+  if (!isHttpFetchError(error)) {
+    return false;
+  }
+  const status = error.response?.status;
+  return status === 404 || status === 409;
+};
+
+const notifyPipelineSuggestionTaskWriteFailed = (
+  toasts: InteractiveModeMachineDeps['toasts'],
+  action: 'cancel' | 'acknowledge' | 'delete',
+  error: unknown
+) => {
+  const formattedError = getFormattedError(error);
+  const title =
+    action === 'cancel'
+      ? i18n.translate('xpack.streams.pipelineSuggestion.cancelTaskFailedTitle', {
+          defaultMessage: 'Could not cancel pipeline suggestion',
+        })
+      : action === 'acknowledge'
+      ? i18n.translate('xpack.streams.pipelineSuggestion.acknowledgeTaskFailedTitle', {
+          defaultMessage: 'Could not clear pipeline suggestion on the server',
+        })
+      : i18n.translate('xpack.streams.pipelineSuggestion.deleteTaskFailedTitle', {
+          defaultMessage: 'Could not delete pipeline suggestion task',
+        });
+  toasts.addError(formattedError, { title });
+};
 
 export const interactiveModeMachine = setup({
   types: {
@@ -669,7 +705,8 @@ export const interactiveModeMachine = setup({
               {
                 guard: ({ event }) =>
                   event.output.status === TaskStatus.InProgress ||
-                  event.output.status === TaskStatus.NotStarted,
+                  event.output.status === TaskStatus.NotStarted ||
+                  event.output.status === TaskStatus.Stale,
                 target: 'waitingForCompletion',
               },
               {
@@ -1013,8 +1050,11 @@ export const createInteractiveModeMachineImplementations = ({
             body: { action: 'cancel' },
           },
         } as Parameters<typeof streamsRepositoryClient.fetch<'POST /internal/streams/{name}/_pipeline_suggestion/_task'>>[1])
-        .catch(() => {
-          // Ignore errors - task may not exist or may have already completed
+        .catch((error: unknown) => {
+          if (isBenignPipelineSuggestionTaskWriteError(error)) {
+            return;
+          }
+          notifyPipelineSuggestionTaskWriteFailed(toasts, 'cancel', error);
         });
     },
     acknowledgeSuggestionTask: (_, params: { streamName: string }) => {
@@ -1029,8 +1069,11 @@ export const createInteractiveModeMachineImplementations = ({
             body: { action: 'acknowledge' },
           },
         } as Parameters<typeof streamsRepositoryClient.fetch<'POST /internal/streams/{name}/_pipeline_suggestion/_task'>>[1])
-        .catch(() => {
-          // Ignore errors - task may not exist or may have already been acknowledged
+        .catch((error: unknown) => {
+          if (isBenignPipelineSuggestionTaskWriteError(error)) {
+            return;
+          }
+          notifyPipelineSuggestionTaskWriteFailed(toasts, 'acknowledge', error);
         });
     },
     deleteSuggestionTask: (_, params: { streamName: string }) => {
@@ -1041,8 +1084,11 @@ export const createInteractiveModeMachineImplementations = ({
             body: { action: 'delete' },
           },
         } as Parameters<typeof streamsRepositoryClient.fetch<'POST /internal/streams/{name}/_pipeline_suggestion/_task'>>[1])
-        .catch(() => {
-          // Ignore errors - task may not exist or may have already been deleted
+        .catch((error: unknown) => {
+          if (isBenignPipelineSuggestionTaskWriteError(error)) {
+            return;
+          }
+          notifyPipelineSuggestionTaskWriteFailed(toasts, 'delete', error);
         });
     },
   },

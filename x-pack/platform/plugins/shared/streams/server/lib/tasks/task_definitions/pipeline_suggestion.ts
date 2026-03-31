@@ -317,10 +317,8 @@ async function processGrokPatterns({
         processing: {
           steps: [
             {
-              action: 'grok',
+              ...grokProcessor,
               customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
-              from: fieldName,
-              patterns: grokProcessor.patterns,
             },
           ],
         },
@@ -411,10 +409,8 @@ async function processDissectPattern({
         processing: {
           steps: [
             {
-              action: 'dissect',
+              ...dissectProcessor,
               customIdentifier: SUGGESTED_DISSECT_PROCESSOR_ID,
-              from: fieldName,
-              pattern: dissectProcessor.pattern,
             },
           ],
         },

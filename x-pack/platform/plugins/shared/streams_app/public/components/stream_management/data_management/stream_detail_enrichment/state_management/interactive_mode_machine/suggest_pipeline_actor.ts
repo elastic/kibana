@@ -207,7 +207,8 @@ export type LoadExistingSuggestionResult =
  * Load existing pipeline suggestion state from the task status endpoint.
  * - If completed: returns the pipeline
  * - If in_progress: returns in_progress (caller can decide whether to poll)
- * - If failed/stale/not_started: returns appropriate state
+ * - If stale: same as in_progress (still marked running server-side; keep polling)
+ * - If failed/not_started: returns appropriate state
  */
 export async function loadExistingSuggestionLogic(
   input: LoadExistingSuggestionInput
@@ -237,7 +238,7 @@ export async function loadExistingSuggestionLogic(
     throw error;
   }
 
-  if (taskResult.status === TaskStatus.InProgress) {
+  if (taskResult.status === TaskStatus.InProgress || taskResult.status === TaskStatus.Stale) {
     return { type: 'in_progress' };
   }
 
@@ -267,7 +268,6 @@ export async function loadExistingSuggestionLogic(
       return { type: 'none' };
 
     case TaskStatus.NotStarted:
-    case TaskStatus.Stale:
     case TaskStatus.Canceled:
     default:
       return { type: 'none' };
