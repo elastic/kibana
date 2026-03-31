@@ -119,7 +119,7 @@ describe('searchEmbeddableTransforms', () => {
       });
     });
 
-    it('transforms by-referencce state', () => {
+    it('transforms by-reference state', () => {
       const state: StoredSearchEmbeddableState = {
         title: 'Test Title',
         description: 'Test Description',
