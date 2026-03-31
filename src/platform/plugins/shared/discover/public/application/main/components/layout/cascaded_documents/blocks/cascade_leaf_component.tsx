@@ -273,11 +273,11 @@ export const ESQLDataCascadeLeafCell = React.memo(
         isPlainRecord
         dataView={dataView}
         showTimeCol={showTimeCol}
-        showKeyboardShortcuts={showKeyboardShortcuts}
         services={services}
         sort={EMPTY_SORT}
         isSortEnabled={false}
-        enableInTableSearch
+        enableInTableSearch={false}
+        showKeyboardShortcuts={false}
         ariaLabelledBy="data-cascade-leaf-cell"
         // TODO: I think this will pollute local storage
         consumer={`discover_esql_cascade_row_leaf_${cellId}`}
