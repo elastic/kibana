@@ -245,7 +245,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     content = (
       <EuiEmptyPrompt
         data-test-subj="streamsAppRoutingPreviewEmptyPrompt"
-        icon={<AssetImage size="small" type="noDocuments" />}
+        icon={<AssetImage size="m" type="noDocuments" />}
         titleSize="xxs"
         title={
           <h2 data-test-subj="streamsAppRoutingPreviewEmptyPromptTitle">

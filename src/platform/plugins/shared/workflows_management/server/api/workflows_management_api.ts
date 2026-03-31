@@ -220,9 +220,10 @@ export class WorkflowsManagementApi {
   public async deleteWorkflows(
     workflowIds: string[],
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { force?: boolean }
   ): Promise<DeleteWorkflowsResponse> {
-    return this.workflowsService.deleteWorkflows(workflowIds, spaceId);
+    return this.workflowsService.deleteWorkflows(workflowIds, spaceId, options);
   }
 
   public async runWorkflow(
