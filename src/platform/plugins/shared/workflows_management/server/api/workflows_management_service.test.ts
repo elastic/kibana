@@ -86,6 +86,7 @@ describe('WorkflowsService', () => {
       index: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       update: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       delete: jest.fn().mockResolvedValue({ _id: 'test-id' }),
+      deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
       bulk: jest.fn().mockResolvedValue({ items: [] }),
     } as any;
 
@@ -2018,6 +2019,151 @@ steps:
         deleted: 1,
         failures: [{ id: 'workflow-2', error: 'Database error' }],
       });
+    });
+
+    it('should hard delete workflows when force=true', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [mockWorkflowDocument],
+          total: { value: 1 },
+        },
+      } as any);
+      mockEsClient.delete.mockResolvedValue({
+        _id: 'test-workflow-id',
+        result: 'deleted',
+      } as any);
+
+      const result = await service.deleteWorkflows(['test-workflow-id'], 'default', {
+        force: true,
+      });
+
+      expect(result).toEqual({
+        total: 1,
+        deleted: 1,
+        failures: [],
+      });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [{ ids: { values: ['test-workflow-id'] } }, { term: { spaceId: 'default' } }],
+            },
+          },
+        })
+      );
+      expect(mockEsClient.delete).toHaveBeenCalled();
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should purge executions, step executions, and logs on hard delete', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [mockWorkflowDocument],
+          total: { value: 1 },
+        },
+      } as any);
+      mockEsClient.delete.mockResolvedValue({
+        _id: 'test-workflow-id',
+        result: 'deleted',
+      } as any);
+
+      await service.deleteWorkflows(['test-workflow-id'], 'default', { force: true });
+
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: WORKFLOWS_EXECUTIONS_INDEX,
+          query: { terms: { workflowId: ['test-workflow-id'] } },
+        })
+      );
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+          query: { terms: { workflowId: ['test-workflow-id'] } },
+        })
+      );
+    });
+
+    it('should not purge related data on soft delete', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [mockWorkflowDocument],
+          total: { value: 1 },
+        },
+      } as any);
+      mockEsClient.bulk.mockResolvedValue({
+        items: [{ index: { _id: 'test-workflow-id', status: 200 } }],
+      } as any);
+
+      await service.deleteWorkflows(['test-workflow-id'], 'default');
+
+      expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+    });
+
+    it('should handle failures during hard delete', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            { ...mockWorkflowDocument, _id: 'wf-1' },
+            { ...mockWorkflowDocument, _id: 'wf-2' },
+          ],
+          total: { value: 2 },
+        },
+      } as any);
+      mockEsClient.delete
+        .mockResolvedValueOnce({ _id: 'wf-1', result: 'deleted' } as any)
+        .mockRejectedValueOnce(new Error('ES delete failed'));
+
+      const result = await service.deleteWorkflows(['wf-1', 'wf-2'], 'default', { force: true });
+
+      expect(result).toEqual({
+        total: 2,
+        deleted: 1,
+        failures: [{ id: 'wf-2', error: 'ES delete failed' }],
+      });
+    });
+
+    it('should not use bulk index when force=true', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [mockWorkflowDocument],
+          total: { value: 1 },
+        },
+      } as any);
+      mockEsClient.delete.mockResolvedValue({
+        _id: 'test-workflow-id',
+        result: 'deleted',
+      } as any);
+
+      await service.deleteWorkflows(['test-workflow-id'], 'default', { force: true });
+
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should continue even if purge fails', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [mockWorkflowDocument],
+          total: { value: 1 },
+        },
+      } as any);
+      mockEsClient.delete.mockResolvedValue({
+        _id: 'test-workflow-id',
+        result: 'deleted',
+      } as any);
+      mockEsClient.deleteByQuery.mockRejectedValue(new Error('Index not found'));
+
+      const result = await service.deleteWorkflows(['test-workflow-id'], 'default', {
+        force: true,
+      });
+
+      expect(result).toEqual({
+        total: 1,
+        deleted: 1,
+        failures: [],
+      });
+      expect(mockLogger.warn).toHaveBeenCalled();
     });
   });
 

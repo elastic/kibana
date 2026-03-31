@@ -93,6 +93,8 @@ function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefin
 
 const DEFAULT_PAGE_SIZE = 100;
 
+type WorkflowStorageClient = ReturnType<WorkflowStorage['getClient']>;
+
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;
   statuses?: ExecutionStatus[];
@@ -702,10 +704,14 @@ export class WorkflowsService {
     }
   }
 
-  public async deleteWorkflows(ids: string[], spaceId: string): Promise<DeleteWorkflowsResponse> {
+  public async deleteWorkflows(
+    ids: string[],
+    spaceId: string,
+    options?: { force?: boolean }
+  ): Promise<DeleteWorkflowsResponse> {
     await this.ensureInitialized();
 
-    const now = new Date();
+    const force = options?.force ?? false;
     const failures: Array<{ id: string; error: string }> = [];
     const client = this.workflowStorage.getClient();
 
@@ -720,19 +726,109 @@ export class WorkflowsService {
       track_total_hits: false,
     });
 
-    // Build bulk operations for all found workflows
-    const bulkOperations = searchResponse.hits.hits.map((hit) => ({
+    const hits = searchResponse.hits.hits;
+
+    if (force) {
+      return this.hardDeleteWorkflows(ids, hits, client, failures);
+    }
+
+    return this.softDeleteWorkflows(ids, hits, client, failures);
+  }
+
+  private async hardDeleteWorkflows(
+    ids: string[],
+    hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
+    client: WorkflowStorageClient,
+    failures: Array<{ id: string; error: string }>
+  ): Promise<DeleteWorkflowsResponse> {
+    const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
+
+    const successfulIds: string[] = [];
+    for (const id of foundIds) {
+      try {
+        await client.delete({ id, refresh: 'wait_for' });
+        successfulIds.push(id);
+      } catch (error) {
+        failures.push({
+          id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    await this.unscheduleDeletedWorkflowTasks(successfulIds);
+    await this.purgeWorkflowRelatedData(successfulIds);
+
+    return {
+      total: ids.length,
+      deleted: ids.length - failures.length,
+      failures,
+    };
+  }
+
+  /**
+   * Permanently removes all execution history, step executions, and logs
+   * associated with the given workflow IDs. Used during hard (force) delete
+   * so the workflow ID can be fully reused.
+   */
+  private async purgeWorkflowRelatedData(workflowIds: string[]): Promise<void> {
+    if (workflowIds.length === 0) {
+      return;
+    }
+
+    const workflowIdFilter = { terms: { workflowId: workflowIds } };
+
+    const deleteOps = [
+      this.esClient
+        .deleteByQuery({
+          index: WORKFLOWS_EXECUTIONS_INDEX,
+          query: workflowIdFilter,
+          refresh: true,
+          conflicts: 'proceed',
+        })
+        .catch((error) => {
+          this.logger.warn(
+            `Failed to purge executions for workflows [${workflowIds.join(', ')}]: ${error.message}`
+          );
+        }),
+      this.esClient
+        .deleteByQuery({
+          index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+          query: workflowIdFilter,
+          refresh: true,
+          conflicts: 'proceed',
+        })
+        .catch((error) => {
+          this.logger.warn(
+            `Failed to purge step executions for workflows [${workflowIds.join(', ')}]: ${
+              error.message
+            }`
+          );
+        }),
+    ];
+
+    await Promise.allSettled(deleteOps);
+  }
+
+  private async softDeleteWorkflows(
+    ids: string[],
+    hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
+    client: WorkflowStorageClient,
+    failures: Array<{ id: string; error: string }>
+  ): Promise<DeleteWorkflowsResponse> {
+    const now = new Date();
+
+    const bulkOperations = hits.map((hit) => ({
       index: {
         _id: hit._id,
         document: {
-          ...hit._source,
+          ...(hit._source as WorkflowProperties),
           deleted_at: now,
           enabled: false,
         },
       },
     }));
 
-    // Bulk update all found workflows in a single call
     if (bulkOperations.length > 0) {
       try {
         const bulkResponse = await client.bulk({
@@ -740,7 +836,6 @@ export class WorkflowsService {
           refresh: true,
         });
 
-        // Process bulk response to track successes and failures
         const successfulIds: string[] = [];
         bulkResponse.items.forEach((item) => {
           const operation = item.index;
@@ -757,24 +852,8 @@ export class WorkflowsService {
           }
         });
 
-        // Unschedule tasks for successfully deleted workflows to prevent orphaned tasks
-        if (this.taskScheduler && successfulIds.length > 0) {
-          await Promise.allSettled(
-            successfulIds.map((workflowId) =>
-              this.taskScheduler?.unscheduleWorkflowTasks(workflowId)
-            )
-          ).then((results) => {
-            results.forEach((result, i) => {
-              if (result.status === 'rejected') {
-                this.logger.warn(
-                  `Failed to unschedule tasks for deleted workflow ${successfulIds[i]}: ${result.reason}`
-                );
-              }
-            });
-          });
-        }
+        await this.unscheduleDeletedWorkflowTasks(successfulIds);
       } catch (error) {
-        // If the entire bulk operation fails, mark all as failed
         bulkOperations.forEach((op) => {
           failures.push({
             id: op.index._id ?? 'unknown',
@@ -789,6 +868,21 @@ export class WorkflowsService {
       deleted: ids.length - failures.length,
       failures,
     };
+  }
+
+  private async unscheduleDeletedWorkflowTasks(successfulIds: string[]): Promise<void> {
+    if (this.taskScheduler && successfulIds.length > 0) {
+      const results = await Promise.allSettled(
+        successfulIds.map((workflowId) => this.taskScheduler?.unscheduleWorkflowTasks(workflowId))
+      );
+      results.forEach((result, i) => {
+        if (result.status === 'rejected') {
+          this.logger.warn(
+            `Failed to unschedule tasks for deleted workflow ${successfulIds[i]}: ${result.reason}`
+          );
+        }
+      });
+    }
   }
 
   /**
