@@ -418,6 +418,39 @@ describe('loader', () => {
       expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
     });
 
+    it('should skip getESQLAdHocDataview when layer.index resolves to a persisted data view with timeFieldName', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {};
+      const textBasedState = {
+        layers: {
+          layer1: {
+            columns: [],
+            index: 'saved-dv-id',
+            query: { esql: 'FROM logs-*' },
+          },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const mockGet = jest.fn().mockResolvedValue({
+        id: 'saved-dv-id',
+        isPersisted: () => true,
+        timeFieldName: '@timestamp',
+      });
+      const dataViewsWithSaved = {
+        get: mockGet,
+      } as unknown as DataViewsContract;
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: dataViewsWithSaved,
+        http: mockHttp,
+      });
+
+      expect(mockGet).toHaveBeenCalledWith('saved-dv-id');
+      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+      expect(result).toEqual({});
+    });
+
     it('should skip enrichment when the existing spec already has a timeFieldName', async () => {
       const adHocDataViews: Record<string, DataViewSpec> = {
         dv1: { id: 'dv1', title: 'logs-*', timeFieldName: '@timestamp' },

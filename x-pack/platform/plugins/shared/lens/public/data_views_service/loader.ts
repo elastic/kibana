@@ -164,8 +164,11 @@ function onRestrictionMapping(agg: string): string {
  *
  * Persisted specs may be missing time field info. For each text-based layer with
  * an ES|QL query, this function checks whether the corresponding ad-hoc DataView
- * spec already has a `timeFieldName`. If it does, the spec is kept as-is. If not,
- * `getESQLAdHocDataview` is called to detect the time field via the TIMEFIELD_ROUTE.
+ * spec already has a `timeFieldName`. If it does, the spec is kept as-is.
+ * If `layer.index` is a **persisted** data view id that already has a time field,
+ * no ad-hoc spec is added so `loadIndexPatterns` can load it via `dataViews.get`
+ * (avoiding a non-persisted replacement that surfaces as "temporary" in the UI).
+ * Otherwise `getESQLAdHocDataview` is called to detect the time field via the TIMEFIELD_ROUTE.
  *
  * After calling this function the DataViewService instance cache is also populated
  * with the correct DataView, so downstream `dataViews.create(spec)` calls
@@ -199,6 +202,17 @@ export async function ensureESQLTimeFieldOnAdHocDataViews({
     // Skip regeneration when the persisted spec already has a timeFieldName
     if (existingSpec?.timeFieldName) {
       continue;
+    }
+
+    if (layer.index) {
+      try {
+        const dataViewById = await dataViewsService.get(layer.index);
+        if (dataViewById.isPersisted() && dataViewById.timeFieldName) {
+          continue;
+        }
+      } catch {
+        // Not loadable as a saved data view; fall through to ES|QL ad-hoc enrichment.
+      }
     }
 
     const freshDataView = await getESQLAdHocDataview({
