@@ -74,7 +74,7 @@ const validationMessages = {
     pathProtocol: i18n.translate(
       'xpack.agentBuilder.skills.validation.referencedContent.pathProtocol',
       {
-        defaultMessage: 'Folder path must start with ./',
+        defaultMessage: 'Folder path must start with ./.',
       }
     ),
     pathTraversal: i18n.translate(

@@ -45,7 +45,7 @@ export const SkillReferencedContentReadOnly: React.FC<SkillReferencedContentRead
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="m"
+      gutterSize="xl"
       data-test-subj="agentBuilderSkillReferencedContentReadOnlyList"
     >
       {items.map((item, index) => {
@@ -63,6 +63,12 @@ export const SkillReferencedContentReadOnly: React.FC<SkillReferencedContentRead
                   <strong>{fullPath}</strong>
                 </EuiText>
               }
+              buttonProps={{
+                'aria-label':
+                  labels.skills.referencedFileSection.readOnlyFileAccordionAriaLabel(fullPath),
+              }}
+              paddingSize="m"
+              borders="all"
               arrowDisplay="right"
               data-test-subj={`agentBuilderSkillReferencedContentReadOnlyAccordion-${index}`}
             >

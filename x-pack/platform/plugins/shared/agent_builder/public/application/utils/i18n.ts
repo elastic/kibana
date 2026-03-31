@@ -538,7 +538,7 @@ export const labels = {
         defaultMessage: 'File name',
       }),
       fileNameHelp: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.fileNameHelp', {
-        defaultMessage: 'Do not include .md - it is added automatically.',
+        defaultMessage: 'Do not include .md — it is added automatically.',
       }),
       folderPathLabel: i18n.translate(
         'xpack.agentBuilder.skills.referencedFileCard.folderPathLabel',
@@ -600,6 +600,22 @@ export const labels = {
           defaultMessage: 'This skill has no additional files.',
         }
       ),
+      addFileButtonDisabledTooltip: (max: number) =>
+        i18n.translate(
+          'xpack.agentBuilder.skills.referencedFileSection.addFileButtonDisabledTooltip',
+          {
+            defaultMessage: 'You cannot add more than {max} additional files.',
+            values: { max },
+          }
+        ),
+      readOnlyFileAccordionAriaLabel: (path: string) =>
+        i18n.translate(
+          'xpack.agentBuilder.skills.referencedFileSection.readOnlyFileAccordionAriaLabel',
+          {
+            defaultMessage: 'Additional file {path}. Expand to view markdown content.',
+            values: { path },
+          }
+        ),
     },
     typeLabel: i18n.translate('xpack.agentBuilder.skills.typeLabel', { defaultMessage: 'Type' }),
     saveButtonLabel: i18n.translate('xpack.agentBuilder.skills.saveButtonLabel', {

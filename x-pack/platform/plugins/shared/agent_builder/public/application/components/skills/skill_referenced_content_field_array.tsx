@@ -72,6 +72,7 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
           color="danger"
           onClick={onRemove}
           aria-label={labels.skills.referencedFileSection.removeFileAriaLabel}
+          title={labels.skills.referencedFileSection.removeFileAriaLabel}
           data-test-subj={`agentBuilderSkillReferencedContentRemove-${index}`}
         />
       </EuiFlexItem>
@@ -124,6 +125,13 @@ export const SkillReferencedContentFieldArray: React.FC<SkillReferencedContentFi
             iconType="plusInCircle"
             onClick={() => append(DEFAULT_REFERENCED_FILE)}
             disabled={atLimit}
+            title={
+              atLimit
+                ? labels.skills.referencedFileSection.addFileButtonDisabledTooltip(
+                    MAX_REFERENCED_CONTENT_ITEMS
+                  )
+                : undefined
+            }
             data-test-subj="agentBuilderSkillReferencedContentAddFile"
           >
             {labels.skills.referencedFileSection.addFileButton}
@@ -139,9 +147,9 @@ export const SkillReferencedContentFieldArray: React.FC<SkillReferencedContentFi
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
-      <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiFlexGroup direction="column" gutterSize="xl">
         {fields.map((field, index) => (
           <EuiFlexItem key={field.id} grow={false}>
             <ReferencedContentFileRow
