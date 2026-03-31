@@ -36,6 +36,7 @@ globalSetupHook(
       name: 'Default Alerts Data View',
       id: 'default-alerts-data-view',
       title: '.alerts-*',
+      override: true,
     });
 
     await generateLogsData({
