@@ -403,6 +403,7 @@ export const OutputSOForwardCompatSchemaV9 = schema.object({
   sasl: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   auth_type: schema.maybe(schema.string()),
   connection_type: schema.maybe(schema.string()),
+  compression_level: schema.maybe(schema.number()),
 });
 
 // Schema representing the ingest-outputs SO shape at model version 9 (adds otel_exporter_config_yaml)
@@ -430,6 +431,7 @@ export const OutputSchemaV9 = schema.oneOf([
     hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
     version: schema.maybe(schema.string()),
     compression: schema.maybe(schema.string()),
+    compression_level: schema.maybe(schema.number()),
     timeout: schema.maybe(schema.number()),
     broker_timeout: schema.maybe(schema.number()),
     required_acks: schema.maybe(schema.number()),
