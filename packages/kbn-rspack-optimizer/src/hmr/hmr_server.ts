@@ -14,10 +14,13 @@ const DEFAULT_HMR_PORT = 5678;
 export class HmrServer {
   private readonly server: http.Server;
   private readonly clients = new Set<http.ServerResponse>();
+  private readonly basePath: string;
   private assignedPort = 0;
   private lastState: Record<string, unknown> | null = null;
 
-  constructor() {
+  constructor(basePath?: string) {
+    this.basePath = basePath ?? '';
+
     this.server = http.createServer((req, res) => {
       if (req.method === 'OPTIONS') {
         res.writeHead(204, {
@@ -37,6 +40,8 @@ export class HmrServer {
 
       res.write('\n');
       this.clients.add(res);
+
+      res.write(`data: ${JSON.stringify({ basePath: this.basePath })}\n\n`);
 
       if (this.lastState) {
         res.write(`data: ${JSON.stringify({ ...this.lastState, replay: true })}\n\n`);

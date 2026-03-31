@@ -23,6 +23,8 @@ export interface RspackOptimizerOptions {
   themeTags?: ThemeTag[];
   /** Enable HMR in watch mode (undefined = auto-detect) */
   hmr?: boolean;
+  /** Dev server base path (e.g. "/abc") for HMR auto-reload on server restart */
+  basePath?: string;
   log: ToolingLog;
 }
 
@@ -121,6 +123,7 @@ export class RspackOptimizer {
                 examples: this.options.examples,
                 themeTags: this.options.themeTags ?? ['borealislight', 'borealisdark'],
                 hmr: this.options.hmr,
+                basePath: this.options.basePath,
               },
             });
             break;

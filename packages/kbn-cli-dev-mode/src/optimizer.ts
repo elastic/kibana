@@ -40,6 +40,7 @@ export interface Options {
   writeLogTo?: Writable;
   pluginPaths?: string[];
   pluginScanDirs?: string[];
+  basePath?: string;
 }
 
 /**
@@ -130,6 +131,7 @@ export class Optimizer {
             cache: options.cache,
             dist: options.dist,
             examples: options.runExamples,
+            basePath: options.basePath,
             log,
           });
 

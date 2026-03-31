@@ -167,6 +167,7 @@ export class CliDevMode {
       watch: cliArgs.watch,
       pluginPaths: config.plugins.additionalPluginPaths,
       pluginScanDirs: config.plugins.pluginSearchPaths,
+      basePath: this.basePathProxy?.basePath,
     });
   }
 

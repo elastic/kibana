@@ -34,6 +34,8 @@ export interface BuildOptions {
   profileStatsOnly?: boolean;
   /** Enable Hot Module Replacement in watch mode (undefined = auto-detect) */
   hmr?: boolean;
+  /** Dev server base path (e.g. "/abc") for HMR auto-reload on server restart */
+  basePath?: string;
 }
 
 export interface BuildResult {
@@ -91,7 +93,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
     let hmrPort: number | undefined;
     if (hmr) {
-      hmrServer = new HmrServer();
+      hmrServer = new HmrServer(options.basePath);
       hmrPort = await hmrServer.start();
     }
 

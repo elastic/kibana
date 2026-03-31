@@ -300,10 +300,29 @@ document.addEventListener('keydown', onKeyDown);
 
 if (module.hot) {
   var RECONNECT_INITIAL = 1000;
-  var RECONNECT_MAX = 30000;
+  var RECONNECT_MAX = 12000;
   var reconnectDelay = RECONNECT_INITIAL;
   var reconnectTimer = null;
   var source = null;
+  var wasDisconnected = false;
+
+  function reloadWithBasePath(serverBasePath) {
+    if (serverBasePath) {
+      var currentBasePath = '/' + window.location.pathname.split('/')[1];
+      if (currentBasePath !== serverBasePath) {
+        var rest = window.location.pathname.slice(currentBasePath.length);
+        var newUrl = serverBasePath + rest + window.location.search + window.location.hash;
+        console.log(
+          LOG_PREFIX + ' Base path changed from ' + currentBasePath +
+          ' to ' + serverBasePath + ', redirecting...'
+        );
+        window.location.href = newUrl;
+        return;
+      }
+    }
+    console.log(LOG_PREFIX + ' Server restarted, reloading page...');
+    window.location.reload();
+  }
 
   function connect() {
     source = new EventSource('http://localhost:' + __KBN_HMR_PORT__ + '/');
@@ -312,6 +331,13 @@ if (module.hot) {
       reconnectDelay = RECONNECT_INITIAL;
       try {
         var data = JSON.parse(event.data);
+
+        if (data.basePath !== undefined) {
+          if (wasDisconnected) {
+            reloadWithBasePath(data.basePath);
+          }
+          return;
+        }
 
         if (data.building) {
           setIndicatorState('building');
@@ -374,6 +400,7 @@ if (module.hot) {
     source.onerror = function () {
       source.close();
       source = null;
+      wasDisconnected = true;
       setIndicatorState('disconnected');
       scheduleReconnect();
     };
