@@ -106,29 +106,37 @@ class EmitStatsPlugin {
 }
 
 /**
+ * Files that affect the main Kibana RSPack build. Used as the single source of
+ * truth for both getConfigHash (version string) and buildDependencies so they
+ * stay in sync. Paths are relative to the repo root.
+ */
+const CACHE_CONFIG_FILES = [
+  'packages/kbn-rspack-optimizer/src/config/create_single_compile_config.ts',
+  'packages/kbn-rspack-optimizer/src/config/shared_config.ts',
+  'packages/kbn-rspack-optimizer/src/config/externals.ts',
+  'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts',
+  'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
+  'packages/kbn-rspack-optimizer/src/loaders/hmr_boundary_loader.ts',
+  'packages/kbn-swc-config/src/browser.ts',
+  'packages/kbn-transpiler-config/src/shared_config.ts',
+  'package.json',
+];
+
+/**
  * Compute a hash of the config files that affect the build.
  * This ensures cache invalidation when config changes, since RSPack's
  * buildDependencies may not work correctly with TypeScript files.
  */
 function getConfigHash(repoRoot: string): string {
-  const configFiles = [
-    'packages/kbn-rspack-optimizer/src/config/create_single_compile_config.ts',
-    'packages/kbn-rspack-optimizer/src/config/shared_config.ts',
-    'packages/kbn-rspack-optimizer/src/config/externals.ts',
-    'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts',
-    'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
-  ];
-
   const hash = rspack.util.createHash('xxhash64');
-  for (const file of configFiles) {
+  for (const file of CACHE_CONFIG_FILES) {
     try {
-      const content = Fs.readFileSync(Path.resolve(repoRoot, file), 'utf-8');
-      hash.update(content);
+      hash.update(Fs.readFileSync(Path.resolve(repoRoot, file), 'utf-8'));
     } catch {
       // File might not exist in some scenarios, skip
     }
   }
-  return hash.digest('hex').slice(0, 8); // Short hash for readability
+  return hash.digest('hex').slice(0, 8);
 }
 
 /**
@@ -514,30 +522,7 @@ export async function createSingleCompileConfig(
       cache: cache
         ? {
             type: 'persistent',
-            // Build dependencies - files that should invalidate cache when changed
-            buildDependencies: [
-              // RSPack optimizer config files
-              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/externals.ts'),
-              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/shared_config.ts'),
-              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/create_single_compile_config.ts'),
-              // Loaders
-              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts'),
-              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts'),
-              // Transpiler config (SWC settings)
-              Path.resolve(repoRoot, 'packages/kbn-swc-config/src/browser.ts'),
-              Path.resolve(repoRoot, 'packages/kbn-transpiler-config/src/shared_config.ts'),
-              // Root package.json (dependency versions)
-              Path.resolve(repoRoot, 'package.json'),
-              // Shared deps source files that affect externals
-              Path.resolve(
-                repoRoot,
-                'src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js'
-              ),
-              Path.resolve(
-                repoRoot,
-                'src/platform/packages/private/kbn-ui-shared-deps-npm/webpack.config.js'
-              ),
-            ],
+            buildDependencies: CACHE_CONFIG_FILES.map((f) => Path.resolve(repoRoot, f)),
             // Version includes hash of this config file for reliable invalidation
             // RSPack's buildDependencies may not trigger on TypeScript file changes
             version: `v8-${dist ? 'prod' : 'dev'}-${getConfigHash(repoRoot)}`,

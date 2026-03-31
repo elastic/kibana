@@ -20,6 +20,34 @@ import {
 } from './shared_config';
 import type { ThemeTag } from '../types';
 
+/**
+ * Files that affect the external plugin RSPack build. Used as the single source
+ * of truth for both getExternalPluginConfigHash (version string) and
+ * buildDependencies so they stay in sync. Paths are relative to the repo root.
+ */
+const CACHE_CONFIG_FILES = [
+  'packages/kbn-rspack-optimizer/src/config/create_external_plugin_config.ts',
+  'packages/kbn-rspack-optimizer/src/config/shared_config.ts',
+  'packages/kbn-rspack-optimizer/src/config/externals.ts',
+  'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts',
+  'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
+  'packages/kbn-swc-config/src/browser.ts',
+  'packages/kbn-transpiler-config/src/shared_config.ts',
+  'package.json',
+];
+
+function getExternalPluginConfigHash(repoRoot: string): string {
+  const hash = rspack.util.createHash('xxhash64');
+  for (const file of CACHE_CONFIG_FILES) {
+    try {
+      hash.update(Fs.readFileSync(Path.resolve(repoRoot, file), 'utf-8'));
+    } catch {
+      // File might not exist in some scenarios, skip
+    }
+  }
+  return hash.digest('hex').slice(0, 8);
+}
+
 export interface ExternalPluginConfigOptions {
   /** Path to the Kibana repository root */
   repoRoot: string;
@@ -172,24 +200,19 @@ export async function createExternalPluginConfig(
       cache: cache
         ? {
             type: 'persistent',
-            // Build dependencies - cache is invalidated when any of these change
             buildDependencies: [
-              // Plugin's own package.json
               Path.resolve(pluginDir, 'package.json'),
-              // RSPack optimizer config files
-              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/externals.ts'),
-              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/shared_config.ts'),
-              // Shared deps built outputs - invalidate when shared deps are rebuilt
-              Path.resolve(
-                repoRoot,
-                'target/build/src/platform/packages/private/kbn-ui-shared-deps-npm/shared_built_assets/kbn-ui-shared-deps-npm.dll.js'
-              ),
-              Path.resolve(
-                repoRoot,
-                'target/build/src/platform/packages/private/kbn-ui-shared-deps-src/shared_built_assets/kbn-ui-shared-deps-src.js'
-              ),
+              ...CACHE_CONFIG_FILES.map((f) => Path.resolve(repoRoot, f)),
             ],
-            version: `external-plugin-v2-${dist ? 'prod' : 'dev'}`,
+            version: `external-plugin-v3-${dist ? 'prod' : 'dev'}-${getExternalPluginConfigHash(repoRoot)}`,
+            storage: {
+              type: 'filesystem',
+              directory: Path.resolve(
+                pluginDir,
+                'node_modules/.cache/.rspack-cache',
+                dist ? 'dist' : 'dev'
+              ),
+            },
           }
         : false,
     },

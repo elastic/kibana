@@ -15,33 +15,34 @@ import { REPO_ROOT } from '@kbn/repo-info';
  * Unit tests to verify that the RSPack cache invalidation configuration
  * includes all required build dependencies.
  *
- * These tests verify the SOURCE FILES exist and are referenced in the config.
- * They don't test actual RSPack behavior - that would require integration tests.
- *
- * The cache should be invalidated when:
- * 1. Shared deps are rebuilt (kbn-ui-shared-deps-npm, kbn-ui-shared-deps-src)
- * 2. Externals configuration changes
- * 3. RSPack config files change
+ * Both configs use a CACHE_CONFIG_FILES constant as the single source of truth
+ * for getConfigHash / getExternalPluginConfigHash and buildDependencies.
+ * These tests verify the source files listed there exist and are referenced.
  */
 describe('RSPack cache invalidation configuration', () => {
-  // Files that MUST exist and be in buildDependencies for proper cache invalidation
-  const REQUIRED_SOURCE_FILES = [
-    // RSPack optimizer config files
-    'packages/kbn-rspack-optimizer/src/config/externals.ts',
-    'packages/kbn-rspack-optimizer/src/config/shared_config.ts',
-    'packages/kbn-rspack-optimizer/src/config/create_single_compile_config.ts',
-    // Shared deps source files
-    'src/platform/packages/private/kbn-ui-shared-deps-src/src/entry.js',
-    'src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js',
-  ];
-
-  // Built files that should be in buildDependencies (may not exist in fresh checkout)
-  const REQUIRED_BUILD_DEPENDENCY_PATTERNS = [
-    'kbn-ui-shared-deps-npm.dll.js',
-    'kbn-ui-shared-deps-src.js',
+  const SHARED_PATTERNS = [
+    'shared_config.ts',
+    'externals.ts',
+    'theme_loader.ts',
+    'require_interop_loader.ts',
+    'kbn-swc-config/src/browser.ts',
+    'kbn-transpiler-config/src/shared_config.ts',
+    'package.json',
   ];
 
   describe('required source files exist', () => {
+    const REQUIRED_SOURCE_FILES = [
+      'packages/kbn-rspack-optimizer/src/config/externals.ts',
+      'packages/kbn-rspack-optimizer/src/config/shared_config.ts',
+      'packages/kbn-rspack-optimizer/src/config/create_single_compile_config.ts',
+      'packages/kbn-rspack-optimizer/src/config/create_external_plugin_config.ts',
+      'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts',
+      'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
+      'packages/kbn-rspack-optimizer/src/loaders/hmr_boundary_loader.ts',
+      'packages/kbn-swc-config/src/browser.ts',
+      'packages/kbn-transpiler-config/src/shared_config.ts',
+    ];
+
     for (const relativePath of REQUIRED_SOURCE_FILES) {
       it(`${relativePath} should exist`, () => {
         const absolutePath = Path.resolve(REPO_ROOT, relativePath);
@@ -61,31 +62,30 @@ describe('RSPack cache invalidation configuration', () => {
       configSource = Fs.readFileSync(configPath, 'utf-8');
     });
 
-    it('should have buildDependencies configuration', () => {
+    it('should have CACHE_CONFIG_FILES constant', () => {
+      expect(configSource).toContain('CACHE_CONFIG_FILES');
+    });
+
+    it('should have buildDependencies driven by CACHE_CONFIG_FILES', () => {
       expect(configSource).toContain('buildDependencies');
     });
 
-    it('should include externals.ts in buildDependencies', () => {
-      expect(configSource).toContain('externals.ts');
-    });
-
-    it('should include shared_config.ts in buildDependencies', () => {
-      expect(configSource).toContain('shared_config.ts');
-    });
-
-    it('should include shared deps built outputs in buildDependencies', () => {
-      for (const pattern of REQUIRED_BUILD_DEPENDENCY_PATTERNS) {
+    for (const pattern of SHARED_PATTERNS) {
+      it(`should reference ${pattern}`, () => {
         expect(configSource).toContain(pattern);
-      }
+      });
+    }
+
+    it('should reference its own config file', () => {
+      expect(configSource).toContain('create_single_compile_config.ts');
     });
 
-    it('should include shared deps source files in buildDependencies', () => {
-      expect(configSource).toContain('entry.js');
-      expect(configSource).toContain('definitions.js');
+    it('should reference hmr_boundary_loader', () => {
+      expect(configSource).toContain('hmr_boundary_loader');
     });
   });
 
-  describe('create_external_plugin_config.ts references shared deps', () => {
+  describe('create_external_plugin_config.ts references required files', () => {
     let configSource: string;
 
     beforeAll(() => {
@@ -96,18 +96,26 @@ describe('RSPack cache invalidation configuration', () => {
       configSource = Fs.readFileSync(configPath, 'utf-8');
     });
 
-    it('should have buildDependencies configuration', () => {
+    it('should have CACHE_CONFIG_FILES constant', () => {
+      expect(configSource).toContain('CACHE_CONFIG_FILES');
+    });
+
+    it('should have buildDependencies driven by CACHE_CONFIG_FILES', () => {
       expect(configSource).toContain('buildDependencies');
     });
 
-    it('should include externals.ts in buildDependencies', () => {
-      expect(configSource).toContain('externals.ts');
+    for (const pattern of SHARED_PATTERNS) {
+      it(`should reference ${pattern}`, () => {
+        expect(configSource).toContain(pattern);
+      });
+    }
+
+    it('should reference its own config file', () => {
+      expect(configSource).toContain('create_external_plugin_config.ts');
     });
 
-    it('should include shared deps built outputs in buildDependencies', () => {
-      for (const pattern of REQUIRED_BUILD_DEPENDENCY_PATTERNS) {
-        expect(configSource).toContain(pattern);
-      }
+    it('should have getExternalPluginConfigHash function', () => {
+      expect(configSource).toContain('getExternalPluginConfigHash');
     });
   });
 });
