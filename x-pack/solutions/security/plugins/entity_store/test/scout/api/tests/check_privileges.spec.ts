@@ -7,7 +7,7 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2, getLatestEntitiesIndexName } from '../../../../common';
 
 apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }, () => {
@@ -23,7 +23,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
     const response = await apiClient.get(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
-      headers: { ...cookieHeader, ...COMMON_HEADERS },
+      headers: { ...cookieHeader, ...PUBLIC_HEADERS },
       responseType: 'json',
     });
 
@@ -44,7 +44,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
       });
 
       const response = await apiClient.get(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
-        headers: { ...cookieHeader, ...COMMON_HEADERS },
+        headers: { ...cookieHeader, ...PUBLIC_HEADERS },
         responseType: 'json',
       });
 
@@ -67,7 +67,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
       });
 
       const response = await apiClient.get(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
-        headers: { ...cookieHeader, ...COMMON_HEADERS },
+        headers: { ...cookieHeader, ...PUBLIC_HEADERS },
         responseType: 'json',
       });
 
@@ -98,7 +98,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
       });
 
       const response = await apiClient.get(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
-        headers: { ...cookieHeader, ...COMMON_HEADERS },
+        headers: { ...cookieHeader, ...PUBLIC_HEADERS },
         responseType: 'json',
       });
 

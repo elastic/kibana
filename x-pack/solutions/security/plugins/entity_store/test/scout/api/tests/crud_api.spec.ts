@@ -11,7 +11,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { hashEuid, getEuidFromObject } from '../../../../common/domain/euid';
 import type { Entity, HostEntity } from '../../../../common/domain/definitions/entity.gen';
 import {
-  COMMON_HEADERS,
+  PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
@@ -26,7 +26,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
     };
 
     // enable feature flag

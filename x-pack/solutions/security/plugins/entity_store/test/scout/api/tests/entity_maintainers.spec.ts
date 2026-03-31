@@ -17,7 +17,7 @@ import {
 import { getLatestEntitiesIndexName } from '../../../../common/domain/entity_index';
 import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
 import {
-  COMMON_HEADERS,
+  PUBLIC_HEADERS,
   INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
@@ -79,7 +79,7 @@ apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, 
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
     };
     internalHeaders = {
       ...credentials.cookieHeader,

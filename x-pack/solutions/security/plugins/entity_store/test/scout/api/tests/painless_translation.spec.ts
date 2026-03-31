@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-security/api';
 import { apiTest, type EsClient } from '@kbn/scout-security';
 import {
-  COMMON_HEADERS,
+  PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   UPDATES_INDEX,
@@ -97,7 +97,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
     };
 
     await kbnClient.uiSettings.update({

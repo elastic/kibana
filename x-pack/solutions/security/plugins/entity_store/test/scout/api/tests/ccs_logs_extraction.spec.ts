@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout-security/api';
 import type { EsClient } from '@kbn/scout-security';
 import { get } from 'lodash';
 import {
-  COMMON_HEADERS,
+  PUBLIC_HEADERS,
   INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
@@ -107,7 +107,7 @@ apiTest.describe(
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = {
         ...credentials.cookieHeader,
-        ...COMMON_HEADERS,
+        ...PUBLIC_HEADERS,
       };
       internalHeaders = {
         ...credentials.cookieHeader,

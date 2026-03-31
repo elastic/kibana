@@ -9,7 +9,7 @@ import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { Client } from '@elastic/elasticsearch';
 import {
-  COMMON_HEADERS,
+  PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
@@ -27,7 +27,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
     };
 
     await kbnClient.uiSettings.update({

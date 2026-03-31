@@ -23,9 +23,6 @@ export const INTERNAL_HEADERS = {
   'elastic-api-version': '2',
 };
 
-/** @deprecated Use PUBLIC_HEADERS or INTERNAL_HEADERS instead */
-export const COMMON_HEADERS = PUBLIC_HEADERS;
-
 const PUBLIC_BASE = 'api/security/entity_store';
 const INTERNAL_BASE = 'internal/security/entity_store';
 
