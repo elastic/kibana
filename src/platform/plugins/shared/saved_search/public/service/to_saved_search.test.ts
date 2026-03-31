@@ -74,6 +74,7 @@ describe('toSavedSearch', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": false,
+        "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
         "managed": false,
@@ -130,6 +131,7 @@ describe('toSavedSearch', () => {
               ],
               "grid": Object {},
               "hideChart": false,
+              "hideTable": false,
               "isTextBasedQuery": false,
               "kibanaSavedObjectMeta": Object {
                 "searchSourceJSON": "{}",
@@ -210,6 +212,7 @@ describe('toSavedSearch', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": false,
+        "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
         "managed": false,
@@ -267,6 +270,7 @@ describe('toSavedSearch', () => {
               ],
               "grid": Object {},
               "hideChart": false,
+              "hideTable": false,
               "isTextBasedQuery": false,
               "kibanaSavedObjectMeta": Object {
                 "searchSourceJSON": "{}",

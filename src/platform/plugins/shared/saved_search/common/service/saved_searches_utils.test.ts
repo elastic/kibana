@@ -81,6 +81,7 @@ describe('saved_searches_utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": true,
+          "hideTable": false,
           "id": "id",
           "isTextBasedQuery": false,
           "managed": false,
@@ -126,6 +127,7 @@ describe('saved_searches_utils', () => {
                 ],
                 "grid": Object {},
                 "hideChart": true,
+                "hideTable": false,
                 "isTextBasedQuery": false,
                 "kibanaSavedObjectMeta": Object {
                   "searchSourceJSON": "{}",
