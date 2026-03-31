@@ -22,6 +22,7 @@ import {
   type SkillFormData,
 } from './skill_form_validation';
 import { ReferencedContentFileCard } from './referenced_content_file_card';
+import { SkillReferencedContentReadOnly } from './skill_referenced_content_read_only';
 
 const DEFAULT_REFERENCED_FILE: ReferencedContentItem = {
   name: '',
@@ -33,7 +34,6 @@ interface ReferencedContentFileRowProps {
   index: number;
   control: Control<SkillFormData>;
   skillName: string;
-  readOnly?: boolean;
   onRemove: () => void;
 }
 
@@ -41,7 +41,6 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
   index,
   control,
   skillName,
-  readOnly = false,
   onRemove,
 }) => {
   const nameField = useController({ control, name: `referenced_content.${index}.name` });
@@ -52,7 +51,6 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
     <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
       <EuiFlexItem grow={1}>
         <ReferencedContentFileCard
-          readOnly={readOnly}
           skillName={skillName}
           fileName={nameField.field.value}
           relativePath={pathField.field.value}
@@ -68,17 +66,15 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
           contentError={contentField.fieldState.error?.message}
         />
       </EuiFlexItem>
-      {!readOnly && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            onClick={onRemove}
-            aria-label={labels.skills.referencedFileSection.removeFileAriaLabel}
-            data-test-subj={`agentBuilderSkillReferencedContentRemove-${index}`}
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="trash"
+          color="danger"
+          onClick={onRemove}
+          aria-label={labels.skills.referencedFileSection.removeFileAriaLabel}
+          data-test-subj={`agentBuilderSkillReferencedContentRemove-${index}`}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -93,6 +89,8 @@ export const SkillReferencedContentFieldArray: React.FC<SkillReferencedContentFi
   readOnly = false,
 }) => {
   const skillName = useWatch({ control, name: 'name' }) ?? '';
+  const watchedReferencedContent: ReferencedContentItem[] =
+    useWatch({ control, name: 'referenced_content' }) ?? [];
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -110,34 +108,38 @@ export const SkillReferencedContentFieldArray: React.FC<SkillReferencedContentFi
     [fields.length]
   );
 
+  if (readOnly) {
+    return (
+      <div data-test-subj="agentBuilderSkillReferencedContentSection">
+        <SkillReferencedContentReadOnly skillName={skillName} items={watchedReferencedContent} />
+      </div>
+    );
+  }
+
   return (
     <div data-test-subj="agentBuilderSkillReferencedContentSection">
-      {!readOnly && (
-        <>
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType="plusInCircle"
-                onClick={() => append(DEFAULT_REFERENCED_FILE)}
-                disabled={atLimit}
-                data-test-subj="agentBuilderSkillReferencedContentAddFile"
-              >
-                {labels.skills.referencedFileSection.addFileButton}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText
-                size="s"
-                color="subdued"
-                data-test-subj="agentBuilderSkillReferencedContentCount"
-              >
-                {filesAddedLabel}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-        </>
-      )}
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconType="plusInCircle"
+            onClick={() => append(DEFAULT_REFERENCED_FILE)}
+            disabled={atLimit}
+            data-test-subj="agentBuilderSkillReferencedContentAddFile"
+          >
+            {labels.skills.referencedFileSection.addFileButton}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="s"
+            color="subdued"
+            data-test-subj="agentBuilderSkillReferencedContentCount"
+          >
+            {filesAddedLabel}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
 
       <EuiFlexGroup direction="column" gutterSize="l">
         {fields.map((field, index) => (
@@ -146,7 +148,6 @@ export const SkillReferencedContentFieldArray: React.FC<SkillReferencedContentFi
               index={index}
               control={control}
               skillName={skillName}
-              readOnly={readOnly}
               onRemove={() => remove(index)}
             />
           </EuiFlexItem>

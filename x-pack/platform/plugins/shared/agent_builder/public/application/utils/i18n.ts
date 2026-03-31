@@ -594,6 +594,12 @@ export const labels = {
           defaultMessage: 'Remove this additional file',
         }
       ),
+      emptyReadOnly: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.emptyReadOnly',
+        {
+          defaultMessage: 'This skill has no additional files.',
+        }
+      ),
     },
     typeLabel: i18n.translate('xpack.agentBuilder.skills.typeLabel', { defaultMessage: 'Type' }),
     saveButtonLabel: i18n.translate('xpack.agentBuilder.skills.saveButtonLabel', {
