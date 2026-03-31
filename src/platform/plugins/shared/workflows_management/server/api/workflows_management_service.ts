@@ -729,7 +729,7 @@ export class WorkflowsService {
     const hits = searchResponse.hits.hits;
 
     if (force) {
-      return this.hardDeleteWorkflows(ids, hits, client, failures);
+      return this.hardDeleteWorkflows(ids, hits, client, spaceId, failures);
     }
 
     return this.softDeleteWorkflows(ids, hits, client, failures);
@@ -739,6 +739,7 @@ export class WorkflowsService {
     ids: string[],
     hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
     client: WorkflowStorageClient,
+    spaceId: string,
     failures: Array<{ id: string; error: string }>
   ): Promise<DeleteWorkflowsResponse> {
     const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
@@ -746,7 +747,7 @@ export class WorkflowsService {
     const successfulIds: string[] = [];
     for (const id of foundIds) {
       try {
-        await client.delete({ id, refresh: 'wait_for' });
+        await client.delete({ id });
         successfulIds.push(id);
       } catch (error) {
         failures.push({
@@ -757,7 +758,7 @@ export class WorkflowsService {
     }
 
     await this.unscheduleDeletedWorkflowTasks(successfulIds);
-    await this.purgeWorkflowRelatedData(successfulIds);
+    await this.purgeWorkflowRelatedData(successfulIds, spaceId);
 
     return {
       total: ids.length,
@@ -767,22 +768,26 @@ export class WorkflowsService {
   }
 
   /**
-   * Permanently removes all execution history, step executions, and logs
-   * associated with the given workflow IDs. Used during hard (force) delete
-   * so the workflow ID can be fully reused.
+   * Permanently removes all execution history and step executions
+   * associated with the given workflow IDs within the specified space.
+   * Used during hard (force) delete so the workflow ID can be fully reused.
    */
-  private async purgeWorkflowRelatedData(workflowIds: string[]): Promise<void> {
+  private async purgeWorkflowRelatedData(workflowIds: string[], spaceId: string): Promise<void> {
     if (workflowIds.length === 0) {
       return;
     }
 
-    const workflowIdFilter = { terms: { workflowId: workflowIds } };
+    const query = {
+      bool: {
+        must: [{ terms: { workflowId: workflowIds } }, { term: { spaceId } }],
+      },
+    };
 
     const deleteOps = [
       this.esClient
         .deleteByQuery({
           index: WORKFLOWS_EXECUTIONS_INDEX,
-          query: workflowIdFilter,
+          query,
           refresh: true,
           conflicts: 'proceed',
         })
@@ -794,7 +799,7 @@ export class WorkflowsService {
       this.esClient
         .deleteByQuery({
           index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-          query: workflowIdFilter,
+          query,
           refresh: true,
           conflicts: 'proceed',
         })

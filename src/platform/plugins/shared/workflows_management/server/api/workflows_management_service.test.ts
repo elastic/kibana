@@ -2056,7 +2056,7 @@ steps:
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
 
-    it('should purge executions, step executions, and logs on hard delete', async () => {
+    it('should purge executions and step executions scoped to spaceId on hard delete', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [mockWorkflowDocument],
@@ -2070,17 +2070,66 @@ steps:
 
       await service.deleteWorkflows(['test-workflow-id'], 'default', { force: true });
 
+      const expectedQuery = {
+        bool: {
+          must: [{ terms: { workflowId: ['test-workflow-id'] } }, { term: { spaceId: 'default' } }],
+        },
+      };
+
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: WORKFLOWS_EXECUTIONS_INDEX,
-          query: { terms: { workflowId: ['test-workflow-id'] } },
+          query: expectedQuery,
         })
       );
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-          query: { terms: { workflowId: ['test-workflow-id'] } },
+          query: expectedQuery,
+        })
+      );
+    });
+
+    it('should only purge data in the specified space when force deleting', async () => {
+      const workflowInSpaceA = {
+        _id: 'workflow-shared-id',
+        _source: { ...mockWorkflowDocument._source, spaceId: 'space-a' },
+      };
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [workflowInSpaceA], total: { value: 1 } },
+      } as any);
+      mockEsClient.delete.mockResolvedValue({
+        _id: 'workflow-shared-id',
+        result: 'deleted',
+      } as any);
+
+      await service.deleteWorkflows(['workflow-shared-id'], 'space-a', { force: true });
+
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: WORKFLOWS_EXECUTIONS_INDEX,
+          query: {
+            bool: {
+              must: [
+                { terms: { workflowId: ['workflow-shared-id'] } },
+                { term: { spaceId: 'space-a' } },
+              ],
+            },
+          },
+        })
+      );
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+          query: {
+            bool: {
+              must: [
+                { terms: { workflowId: ['workflow-shared-id'] } },
+                { term: { spaceId: 'space-a' } },
+              ],
+            },
+          },
         })
       );
     });
