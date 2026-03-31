@@ -240,6 +240,13 @@ export class StreamsPlugin
       logger: this.logger,
       telemetry: telemetryClient,
       getInternalEsClient: () => this.server!.core.elasticsearch.client.asInternalUser,
+      getConversationsClient: async (request) => {
+        const [, startPlugins] = await core.getStartServices();
+        if (!startPlugins.agentBuilder) {
+          return undefined;
+        }
+        return startPlugins.agentBuilder.conversations.getScopedClient({ request });
+      },
     });
 
     plugins.features.registerKibanaFeature({

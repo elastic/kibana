@@ -8,7 +8,8 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { chatSystemIndex } from '@kbn/agent-builder-server';
+import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { ReadOnlyConversationClient } from '@kbn/agent-builder-plugin/server';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
@@ -27,7 +28,7 @@ export interface ConversationScraperTaskResult {
 export const CONVERSATION_SCRAPER_TASK_TYPE = 'streams_conversation_scraper';
 
 const LAST_SCRAPE_PATH = '_system/last_scrape_timestamp';
-const CONVERSATIONS_INDEX = chatSystemIndex('conversations');
+const MAX_CONVERSATIONS_PER_SCRAPE = 100;
 
 export function createStreamsConversationScraperTask(taskContext: TaskContext) {
   return {
@@ -63,6 +64,23 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                 return;
               }
 
+              const conversationsClient = await taskContext.getConversationsClient(
+                runContext.fakeRequest
+              );
+
+              if (!conversationsClient) {
+                taskLogger.info(
+                  'Agent builder plugin not available, skipping conversation scraping'
+                );
+                if (_task) {
+                  await taskClient.complete<
+                    ConversationScraperTaskParams,
+                    ConversationScraperTaskResult
+                  >(_task, {}, { conversationsProcessed: 0 });
+                }
+                return;
+              }
+
               const connectorId = await resolveConnectorId({
                 connectorId: settings.connectorIdDiscovery,
                 uiSettingsClient,
@@ -76,8 +94,6 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                 esClient: taskContext.getInternalEsClient(),
               });
 
-              const esClient = taskContext.getInternalEsClient();
-
               try {
                 // Read last scrape timestamp from memory
                 const lastScrapeEntry = await memory.getByPath({ path: LAST_SCRAPE_PATH });
@@ -85,22 +101,14 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
 
                 taskLogger.info(`Scraping conversations updated since ${lastScrapeTime}`);
 
-                // Query conversations updated since last scrape
-                const searchResult = await esClient.search({
-                  index: CONVERSATIONS_INDEX,
-                  size: 100,
-                  sort: [{ updated_at: 'asc' }],
-                  query: {
-                    range: {
-                      updated_at: { gt: lastScrapeTime },
-                    },
-                  },
-                  _source: ['id', 'title', 'conversation_rounds', 'updated_at', 'user'],
-                });
+                // List conversations and filter to those updated since last scrape
+                const allConversations = await conversationsClient.list();
+                const recentConversations = allConversations
+                  .filter((c) => c.updated_at > lastScrapeTime)
+                  .sort((a, b) => a.updated_at.localeCompare(b.updated_at))
+                  .slice(0, MAX_CONVERSATIONS_PER_SCRAPE);
 
-                const conversations = searchResult.hits.hits;
-
-                if (conversations.length === 0) {
+                if (recentConversations.length === 0) {
                   taskLogger.info('No new conversations to scrape');
                   if (_task) {
                     await taskClient.complete<
@@ -111,18 +119,16 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                   return;
                 }
 
-                taskLogger.info(`Found ${conversations.length} conversation(s) to process`);
+                taskLogger.info(`Found ${recentConversations.length} conversation(s) to process`);
+
+                // Cache for full conversations fetched on demand
+                const fullConversationCache = new Map<number, Conversation>();
 
                 // Build conversation summaries for the agent
-                const conversationSummaries = conversations
-                  .map((hit, idx) => {
-                    const source = hit._source as Record<string, unknown>;
-                    const rounds = source.conversation_rounds as
-                      | Array<Record<string, unknown>>
-                      | undefined;
-                    const roundCount = rounds?.length ?? 0;
-                    const title = String(source.title ?? 'Untitled');
-                    return `[${idx}] "${title}" (${roundCount} rounds)`;
+                const conversationSummaries = recentConversations
+                  .map((conv, idx) => {
+                    const title = conv.title ?? 'Untitled';
+                    return `[${idx}] "${title}"`;
                   })
                   .join('\n');
 
@@ -141,7 +147,7 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                   inferenceClient: boundInferenceClient,
                   prompt: ConversationScraperPrompt,
                   input: {
-                    conversationCount: conversations.length,
+                    conversationCount: recentConversations.length,
                     conversationSummaries,
                     existingPages,
                   },
@@ -150,40 +156,37 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                     get_conversation_details: async (toolCall) => {
                       const { index } = toolCall.function.arguments;
 
-                      if (typeof index !== 'number' || index < 0 || index >= conversations.length) {
+                      if (
+                        typeof index !== 'number' ||
+                        index < 0 ||
+                        index >= recentConversations.length
+                      ) {
                         return {
                           response: {
                             error: `Invalid index ${index}. Valid range: 0-${
-                              conversations.length - 1
+                              recentConversations.length - 1
                             }`,
                           },
                         };
                       }
 
-                      const source = conversations[index]._source as Record<string, unknown>;
-                      const rounds = source.conversation_rounds as
-                        | Array<Record<string, unknown>>
-                        | undefined;
+                      const fullConversation = await getFullConversation(
+                        index,
+                        recentConversations,
+                        conversationsClient,
+                        fullConversationCache
+                      );
 
-                      // Extract user messages and assistant responses
-                      // ES stores: input.message (user), response.message (assistant)
-                      const roundSummaries = (rounds ?? []).map((round, rIdx) => {
-                        const input = round.input as Record<string, unknown> | undefined;
-                        const userMessage = String(input?.message ?? '');
-                        const response = round.response as Record<string, unknown> | undefined;
-                        const assistantContent = String(response?.message ?? '');
-
-                        return {
-                          round: rIdx,
-                          user: userMessage.substring(0, 2000),
-                          assistant: assistantContent.substring(0, 2000),
-                        };
-                      });
+                      const roundSummaries = (fullConversation.rounds ?? []).map((round, rIdx) => ({
+                        round: rIdx,
+                        user: round.input.message.substring(0, 2000),
+                        assistant: round.response.message.substring(0, 2000),
+                      }));
 
                       return {
                         response: {
-                          title: source.title,
-                          user: source.user,
+                          title: fullConversation.title,
+                          user: fullConversation.user,
                           rounds: roundSummaries,
                         },
                       };
@@ -243,10 +246,10 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                 });
 
                 // Update last scrape timestamp
-                const latestTimestamp = conversations.reduce((latest, hit) => {
-                  const ts = String((hit._source as Record<string, unknown>).updated_at ?? '');
-                  return ts > latest ? ts : latest;
-                }, lastScrapeTime);
+                const latestTimestamp = recentConversations.reduce(
+                  (latest, conv) => (conv.updated_at > latest ? conv.updated_at : latest),
+                  lastScrapeTime
+                );
 
                 if (lastScrapeEntry) {
                   await memory.update({
@@ -266,14 +269,14 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                 }
 
                 taskLogger.info(
-                  `Conversation scraping completed: ${conversations.length} conversation(s) processed, ${pagesWritten} page(s) written`
+                  `Conversation scraping completed: ${recentConversations.length} conversation(s) processed, ${pagesWritten} page(s) written`
                 );
 
                 if (_task) {
                   await taskClient.complete<
                     ConversationScraperTaskParams,
                     ConversationScraperTaskResult
-                  >(_task, {}, { conversationsProcessed: conversations.length });
+                  >(_task, {}, { conversationsProcessed: recentConversations.length });
                 }
               } catch (error) {
                 const errorMessage = getErrorMessage(error);
@@ -301,4 +304,19 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
       },
     },
   } satisfies TaskDefinitionRegistry;
+}
+
+async function getFullConversation(
+  index: number,
+  conversations: ConversationWithoutRounds[],
+  client: ReadOnlyConversationClient,
+  cache: Map<number, Conversation>
+): Promise<Conversation> {
+  const cached = cache.get(index);
+  if (cached) {
+    return cached;
+  }
+  const full = await client.get(conversations[index].id);
+  cache.set(index, full);
+  return full;
 }

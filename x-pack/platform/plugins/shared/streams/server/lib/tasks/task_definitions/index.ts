@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
+import type { ReadOnlyConversationClient } from '@kbn/agent-builder-plugin/server';
 import type { GetScopedClients } from '../../../routes/types';
 import { createStreamsDescriptionGenerationTask } from './description_generation';
 import { createStreamsInsightsDiscoveryTask } from '../../sig_events/tasks/insights_discovery';
@@ -24,6 +25,9 @@ export interface TaskContext {
   getScopedClients: GetScopedClients;
   telemetry: EbtTelemetryClient;
   getInternalEsClient: () => ElasticsearchClient;
+  getConversationsClient: (
+    request: KibanaRequest
+  ) => Promise<ReadOnlyConversationClient | undefined>;
 }
 
 export function createTaskDefinitions(taskContext: TaskContext) {
