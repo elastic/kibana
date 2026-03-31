@@ -312,6 +312,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         connectorId: formData.connectorId,
         integrationId,
         title: formData.title,
+        description: formData.description,
+        ...(formData.logo ? { logo: formData.logo } : {}),
         dataStreams: [newDataStream],
       });
 
