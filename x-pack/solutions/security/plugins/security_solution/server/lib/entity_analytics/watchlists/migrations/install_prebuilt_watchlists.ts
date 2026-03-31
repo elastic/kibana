@@ -10,6 +10,8 @@ import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
 import { PRIVILEGED_USER_WATCHLIST_ID } from '../../../../../common/entity_analytics/watchlists/constants';
+import { getMatchersFor } from '../../privilege_monitoring/data_sources/matchers';
+import { getStreamPatternFor } from '../../privilege_monitoring/data_sources/constants';
 import type { WatchlistConfigClient } from '../management/watchlist_config';
 import { WatchlistConfigClient as WatchlistConfigClientClass } from '../management/watchlist_config';
 
@@ -23,6 +25,14 @@ const PREBUILT_WATCHLISTS = [
     description: 'System-managed watchlist for tracking privileged users',
     managed: true,
     riskModifier: PRIVILEGED_USER_MODIFIER,
+    entitySource: {
+      type: 'entity_analytics_integration',
+      name: 'okta',
+      indexPattern: getStreamPatternFor('entityanalytics_okta', 'default'),
+      integrationName: 'entityanalytics_okta',
+      enabled: true,
+      matchers: getMatchersFor('entityanalytics_okta'),
+    },
   },
 ];
 
