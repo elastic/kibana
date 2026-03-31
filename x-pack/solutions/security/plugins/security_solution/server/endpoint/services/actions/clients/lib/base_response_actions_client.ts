@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api/attachment/v2';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -405,24 +406,42 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.log.debug(() => `Updating cases:\n${stringify(allCases)}`);
 
-    const attachments: BulkCreateAttachmentsRequestV2 = [
-      {
-        type: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
-        attachmentId: actionId,
-        metadata: {
-          targets: hosts.map(({ hostId: endpointId, hostname }) => {
-            return {
-              endpointId,
-              hostname,
-              agentType: this.agentType,
-            };
-          }),
-          command,
-          comment: comment || EMPTY_COMMENT,
-        },
-        owner: APP_ID,
-      },
-    ];
+    const targets = hosts.map(({ hostId: endpointId, hostname }) => ({
+      endpointId,
+      hostname,
+      agentType: this.agentType,
+    }));
+
+    const attachments: BulkCreateAttachmentsRequestV2 =
+      this.options.endpointService.isCasesAttachmentsV2Enabled()
+        ? [
+            {
+              type: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+              attachmentId: actionId,
+              metadata: {
+                targets,
+                command,
+                comment: comment || EMPTY_COMMENT,
+              },
+              owner: APP_ID,
+            },
+          ]
+        : [
+            {
+              type: AttachmentType.externalReference as const,
+              externalReferenceId: actionId,
+              externalReferenceStorage: {
+                type: ExternalReferenceStorageType.elasticSearchDoc as const,
+              },
+              externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+              externalReferenceMetadata: {
+                targets,
+                command,
+                comment: comment || EMPTY_COMMENT,
+              },
+              owner: APP_ID,
+            },
+          ];
 
     const casesUpdateResponse = await Promise.all(
       allCases.map(async (caseId) => {
