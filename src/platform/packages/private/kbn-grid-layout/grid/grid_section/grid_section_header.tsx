@@ -165,6 +165,13 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       switch (type) {
         case 'init':
           hasBeenDragged.current = false;
+          /**
+           * we want active drag styles to be applied on keyboard drag from the start, whereas for mouse/touch
+           * we only want to apply drag styles if there is actual movement(i.e., distinguish between click and drag)
+           */
+          if (event?.sensorType === 'keyboard') {
+            handleFirstDrag();
+          }
           break;
         case 'update':
           if (!hasBeenDragged.current) {
