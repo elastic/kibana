@@ -16,11 +16,20 @@ import { PRIVILEGED_USER_WATCHLIST_ID } from '../../../../../common/entity_analy
 
 const mockWatchlistGet = jest.fn();
 const mockWatchlistCreate = jest.fn();
+const mockAddEntitySourceReference = jest.fn();
+const mockEntitySourceCreate = jest.fn();
+
+jest.mock('../entity_sources/infra', () => ({
+  WatchlistEntitySourceClient: jest.fn().mockImplementation(() => ({
+    create: (...args: unknown[]) => mockEntitySourceCreate(...args),
+  })),
+}));
 
 jest.mock('../management/watchlist_config', () => ({
   WatchlistConfigClient: jest.fn().mockImplementation(() => ({
     get: (...args: unknown[]) => mockWatchlistGet(...args),
     create: (...args: unknown[]) => mockWatchlistCreate(...args),
+    addEntitySourceReference: (...args: unknown[]) => mockAddEntitySourceReference(...args),
   })),
 }));
 
@@ -65,6 +74,9 @@ describe('installPrebuiltWatchlists', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockWatchlistCreate.mockResolvedValue({ id: PRIVILEGED_USER_WATCHLIST_ID });
+    mockEntitySourceCreate.mockResolvedValue({ id: 'entity-source-id' });
+    mockAddEntitySourceReference.mockResolvedValue(undefined);
     mockGetStartServices.mockResolvedValue([
       {
         savedObjects: {
@@ -87,7 +99,7 @@ describe('installPrebuiltWatchlists', () => {
 
     expect(mockWatchlistCreate).toHaveBeenCalledTimes(1);
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining("Prebuilt watchlist 'Privileged Users' initialized.")
+      expect.stringContaining(`Prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_ID}' initialized.`)
     );
   });
 
@@ -109,14 +121,14 @@ describe('installPrebuiltWatchlists', () => {
 
     expect(mockWatchlistCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'Privileged Users',
+        name: PRIVILEGED_USER_WATCHLIST_ID,
         description: 'System-managed watchlist for tracking privileged users',
         managed: true,
       }),
       { id: PRIVILEGED_USER_WATCHLIST_ID }
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining("Prebuilt watchlist 'Privileged Users' initialized.")
+      expect.stringContaining(`Prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_ID}' initialized.`)
     );
   });
 
@@ -129,7 +141,7 @@ describe('installPrebuiltWatchlists', () => {
     expect(mockWatchlistCreate).not.toHaveBeenCalled();
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.stringContaining(
-        "Error checking prebuilt watchlist 'Privileged Users': Connection refused"
+        `Error checking prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_ID}': Connection refused`
       )
     );
   });
