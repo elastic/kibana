@@ -144,6 +144,18 @@ const serializeFieldMetadata = (out: string[], field: Field) => {
     serializeCheckboxGroupMetadata(out, field);
     return;
   }
+  if (field.control === FieldType.RADIO_GROUP) {
+    out.push(`      metadata:`);
+    out.push(`        options:`);
+    for (const option of field.metadata.options) {
+      out.push(`          - ${yamlString(option)}`);
+    }
+    const defaultValue = field.metadata?.default;
+    if (defaultValue !== undefined && typeof defaultValue === 'string') {
+      out.push(`        default: ${yamlString(defaultValue)}`);
+    }
+    return;
+  }
   // INPUT_TEXT, INPUT_NUMBER, TEXTAREA
   const defaultValue = field.metadata?.default;
   if (

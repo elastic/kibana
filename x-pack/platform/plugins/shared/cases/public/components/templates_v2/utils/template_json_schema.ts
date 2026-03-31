@@ -117,9 +117,6 @@ function addUniqueItemsToCheckboxArrays(ctx: OverrideCtx) {
   ) {
     const schema = ctx.jsonSchema as Record<string, unknown>;
     schema.uniqueItems = true;
-    if (lastPathPart === 'options') {
-      schema.maxItems = 30;
-    }
   }
 }
 

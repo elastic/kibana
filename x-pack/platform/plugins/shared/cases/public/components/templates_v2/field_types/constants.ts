@@ -120,6 +120,17 @@ fields:
         field: scheduled_at
         operator: eq
         value: "2024-06-01T09:00:00.000Z"
+  # RADIO_GROUP: select exactly one option, requires at least 2 options (max 20)
+  - name: environment
+    control: RADIO_GROUP
+    label: Environment
+    type: keyword
+    metadata:
+      options:
+        - development
+        - staging
+        - production
+      default: staging
   # CHECKBOX_GROUP: select 0-N options, optional defaults
   - name: affected_components
     control: CHECKBOX_GROUP

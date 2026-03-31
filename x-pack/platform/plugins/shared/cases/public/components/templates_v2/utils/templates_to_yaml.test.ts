@@ -291,6 +291,77 @@ describe('templatesToYaml', () => {
   });
 });
 
+describe('RADIO_GROUP field serialization', () => {
+  const baseTemplate: ParsedTemplate = {
+    templateId: 'tpl-radio',
+    name: 'Radio template',
+    owner: 'securitySolution',
+    tags: [],
+    usageCount: 0,
+    fieldCount: 1,
+    templateVersion: 1,
+    latestVersion: 1,
+    isLatest: true,
+    deletedAt: null,
+    definition: { name: 'Radio template', fields: [] },
+  };
+
+  it('serializes options as a YAML sequence and default as a scalar', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Radio template',
+        fields: [
+          {
+            name: 'severity',
+            control: 'RADIO_GROUP',
+            type: 'keyword',
+            metadata: {
+              options: ['low', 'medium', 'high'],
+              default: 'medium',
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      control: "RADIO_GROUP"');
+    expect(yaml).toContain('        options:');
+    expect(yaml).toContain('          - "low"');
+    expect(yaml).toContain('          - "medium"');
+    expect(yaml).toContain('          - "high"');
+    expect(yaml).toContain('        default: "medium"');
+    // default must be a scalar, not a YAML sequence
+    expect(yaml).not.toMatch(/default:\n\s+- /);
+  });
+
+  it('omits the default line when no default is provided', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Radio template',
+        fields: [
+          {
+            name: 'env',
+            control: 'RADIO_GROUP',
+            type: 'keyword',
+            metadata: {
+              options: ['staging', 'production'],
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('        options:');
+    expect(yaml).not.toContain('        default:');
+  });
+});
+
 describe('CHECKBOX_GROUP field serialization', () => {
   const baseTemplate: ParsedTemplate = {
     templateId: 'tpl-1',

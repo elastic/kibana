@@ -14,6 +14,7 @@ export const FieldType = {
   TEXTAREA: 'TEXTAREA',
   DATE_PICKER: 'DATE_PICKER',
   CHECKBOX_GROUP: 'CHECKBOX_GROUP',
+  RADIO_GROUP: 'RADIO_GROUP',
 } as const;
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType];
@@ -135,7 +136,7 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
 const uniqueStrings = (arr: string[]) => new Set(arr).size === arr.length;
 
 export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
-  control: z.literal('CHECKBOX_GROUP'),
+  control: z.literal(FieldType.CHECKBOX_GROUP),
   metadata: z
     .object({
       options: z
@@ -150,6 +151,20 @@ export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
     .catchall(z.unknown()),
 });
 
+export const RadioGroupFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.RADIO_GROUP),
+  metadata: z
+    .object({
+      options: z
+        .array(z.string())
+        .min(2, { message: 'Options must have at least 2 items.' })
+        .max(20, { message: 'Options must not exceed 20 items.' })
+        .refine(uniqueStrings, { message: 'Options must be unique.' }),
+      default: z.string().optional(),
+    })
+    .catchall(z.unknown()),
+});
+
 /**
  * This can be used to parse `fields` section in the YAML `definition` of the template.
  */
@@ -160,4 +175,5 @@ export const FieldSchema = z.discriminatedUnion('control', [
   TextareaFieldSchema,
   DatePickerFieldSchema,
   CheckboxGroupFieldSchema,
+  RadioGroupFieldSchema,
 ]);
