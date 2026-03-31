@@ -154,6 +154,7 @@ import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { FiltersGlobal } from '../../../../common/components/filters_global';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -843,15 +844,17 @@ export const RuleDetailsPage = connector(
                     </Route>
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
-                        <SiemSearchBar
-                          pollForSignalIndex={pollForSignalIndex}
-                          id={InputsModelId.global}
-                          sourcererDataView={
-                            newDataViewPickerEnabled
-                              ? experimentalDataView
-                              : oldSourcererDataViewSpec
-                          } // TODO remove when we remove the newDataViewPickerEnabled feature flag
-                        />
+                        <FiltersGlobal>
+                          <SiemSearchBar
+                            pollForSignalIndex={pollForSignalIndex}
+                            id={InputsModelId.global}
+                            sourcererDataView={
+                              newDataViewPickerEnabled
+                                ? experimentalDataView
+                                : oldSourcererDataViewSpec
+                            } // TODO remove when we remove the newDataViewPickerEnabled feature flag
+                          />
+                        </FiltersGlobal>
                         <EuiSpacer />
                         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                           <EuiFlexItem grow={false}>
