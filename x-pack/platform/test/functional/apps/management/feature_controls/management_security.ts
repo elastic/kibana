@@ -63,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should only render management entries controllable via Kibana privileges', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(5);
+        expect(sections).to.have.length(6);
 
         // Order of the sections in Stack Management might change in the future
         // so we need to find the sections by their id
@@ -78,9 +78,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'cases',
           'triggersActionsConnectors',
           'reporting',
-          'query_activity',
           'maintenanceWindows',
         ]);
+        const clusterPerformanceSection = sections.find(
+          (section) => section.sectionId === 'clusterPerformance'
+        );
+        expect(clusterPerformanceSection?.sectionLinks).to.eql(['query_activity']);
         const kibanaSection = sections.find((section) => section.sectionId === 'kibana');
         expect(kibanaSection?.sectionLinks).to.eql([
           'dataViews',
