@@ -74,6 +74,7 @@ dependsOn:
   - '@kbn/saved-objects-tagging-plugin'
   - '@kbn/config-schema'
   - '@kbn/scout'
+  - '@kbn/scout-synthtrace'
   - '@kbn/unified-doc-viewer'
   - '@kbn/monaco'
   - '@kbn/unified-doc-viewer-plugin'

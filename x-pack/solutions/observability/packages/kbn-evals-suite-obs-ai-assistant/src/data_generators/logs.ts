@@ -8,7 +8,7 @@
 import moment from 'moment';
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { timerange, log } from '@kbn/apm-synthtrace-client';
-import type { SynthtraceFixture } from '@kbn/scout-oblt';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
 import { randomInt } from 'crypto';
 
 export async function generateFrequentErrorLogs({
