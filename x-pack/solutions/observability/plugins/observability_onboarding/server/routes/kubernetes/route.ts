@@ -14,6 +14,7 @@ import {
   isNoShardsAvailableError,
   throwHasDataSearchError,
 } from '../../lib/handle_has_data_search_error';
+import { resolveProbe } from './resolve_has_data_probes';
 import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
@@ -126,6 +127,9 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
     path: t.type({
       onboardingId: t.string,
     }),
+    query: t.partial({
+      start: t.string,
+    }),
   }),
   security: {
     authz: {
@@ -135,6 +139,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
   },
   async handler(resources): Promise<HasKubernetesDataRouteResponse> {
     const { onboardingId } = resources.params.path;
+    const { start } = resources.params.query;
     const { elasticsearch } = await resources.context.core;
 
     try {
@@ -145,7 +150,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         terminate_after: 1,
       };
 
-      // Indexed fields only, no runtime mapping (broad logs-*/metrics-* would time out with scripts).
+      // Classic data streams: use indexed onboarding ID fields (fast inverted-index lookups).
       const indexedQuery: estypes.QueryDslQueryContainer = {
         bool: {
           filter: [
@@ -163,68 +168,50 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         },
       };
 
-      // Logs Essentials + Wired Streams: logs.otel uses a passthrough mapping
-      // for resource.attributes, storing fields in _source without indexing
-      // them. A runtime field extracts onboarding.id at query time.
-      // We scope this to wired stream indices only (logs.*, metrics.*) to
-      // avoid running the script across all classic data streams which would
-      // time out on large clusters.
-      const runtimeMappings: estypes.MappingRuntimeFields = {
-        'resource.attributes.onboarding.id._rt': {
-          type: 'keyword',
-          script: {
-            source:
-              "def v = params._source?.resource?.attributes?.get('onboarding.id'); if (v != null) emit(v.toString())",
-          },
-        },
-      };
+      // Wired streams (logs.otel*, logs.ecs*) use passthrough mapping where
+      // onboarding.id is not indexed, so we cannot filter by it without a
+      // runtime mapping (which times out on large clusters). Instead, fall
+      // back to a time-range-only query when a start time is provided.
+      const wiredStreamQuery: estypes.QueryDslQueryContainer | undefined = start
+        ? { bool: { filter: [{ range: { '@timestamp': { gte: start } } }] } }
+        : undefined;
 
-      const wiredStreamQuery: estypes.QueryDslQueryContainer = {
-        bool: {
-          filter: termQuery('resource.attributes.onboarding.id._rt', onboardingId),
-        },
-      };
+      const searches: Array<Promise<estypes.SearchResponse>> = [
+        elasticsearch.client.asCurrentUser.search({
+          index: ['logs-*'],
+          ...commonSearchParams,
+          query: indexedQuery,
+        }),
+        elasticsearch.client.asCurrentUser.search({
+          index: ['metrics-*'],
+          ...commonSearchParams,
+          query: indexedQuery,
+        }),
+      ];
 
-      const [logsResult, metricsResult, wiredLogsResult, wiredMetricsResult] =
-        await Promise.allSettled([
-          // Fast: indexed fields on broad index patterns, no runtime mapping
+      if (wiredStreamQuery) {
+        searches.push(
           elasticsearch.client.asCurrentUser.search({
-            index: ['logs-*'],
+            index: ['logs.otel*', 'logs.ecs*'],
             ...commonSearchParams,
-            query: indexedQuery,
-          }),
-          elasticsearch.client.asCurrentUser.search({
-            index: ['metrics-*'],
-            ...commonSearchParams,
-            query: indexedQuery,
-          }),
-          // Scoped: runtime mapping only on wired stream indices
-          elasticsearch.client.asCurrentUser.search({
-            index: ['logs.*'],
-            ...commonSearchParams,
-            runtime_mappings: runtimeMappings,
             query: wiredStreamQuery,
           }),
           elasticsearch.client.asCurrentUser.search({
-            index: ['metrics.*'],
+            index: ['metrics.otel*', 'metrics.ecs*'],
             ...commonSearchParams,
-            runtime_mappings: runtimeMappings,
             query: wiredStreamQuery,
-          }),
-        ]);
+          })
+        );
+      }
 
-      const resolveProbe = (result: PromiseSettledResult<estypes.SearchResponse>): boolean => {
-        if (result.status === 'fulfilled') {
-          return (result.value.hits.total as estypes.SearchTotalHits).value > 0;
-        }
-        if (isNoShardsAvailableError(result.reason)) {
-          return false;
-        }
-        throwHasDataSearchError(result.reason);
-      };
+      const results = await Promise.allSettled(searches);
+      const [logsResult, metricsResult, wiredLogsResult, wiredMetricsResult] = results;
 
-      const hasLogs = resolveProbe(logsResult) || resolveProbe(wiredLogsResult);
-      const hasMetrics = resolveProbe(metricsResult) || resolveProbe(wiredMetricsResult);
+      const hasLogs =
+        resolveProbe(logsResult) || (wiredLogsResult ? resolveProbe(wiredLogsResult) : false);
+      const hasMetrics =
+        resolveProbe(metricsResult) ||
+        (wiredMetricsResult ? resolveProbe(wiredMetricsResult) : false);
 
       return {
         hasData: hasLogs || hasMetrics,

@@ -46,13 +46,15 @@ export function DataIngestStatus({
     services: { analytics },
   } = useKibana<ObservabilityOnboardingContextValue>();
 
+  const startIso = new Date(checkDataStartTime).toISOString();
+
   const { data, status, refetch } = useFetcher(
     (callApi) => {
       return callApi('GET /internal/observability_onboarding/kubernetes/{onboardingId}/has-data', {
-        params: { path: { onboardingId } },
+        params: { path: { onboardingId }, query: { start: startIso } },
       });
     },
-    [onboardingId]
+    [onboardingId, startIso]
   );
 
   const hasData = data?.hasData ?? false;
