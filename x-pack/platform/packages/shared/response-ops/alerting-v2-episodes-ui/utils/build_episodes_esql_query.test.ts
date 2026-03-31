@@ -108,10 +108,10 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain('WHERE rule.id == "rule-123"');
   });
 
-  it('should apply searchString filter with QSTR', () => {
+  it('should apply queryString filter with QSTR', () => {
     const query = buildEpisodesQuery(
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { searchString: 'alert.name: "test"' }
+      { queryString: 'alert.name: "test"' }
     );
     const queryString = query.print('basic');
 
@@ -122,7 +122,7 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery(
       { sortField: '@timestamp', sortDirection: 'desc' },
       {
-        searchString: 'alert.name: "test"',
+        queryString: 'alert.name: "test"',
         status: 'active',
         ruleId: 'rule-123',
       }
@@ -134,10 +134,10 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain('WHERE rule.id == "rule-123"');
   });
 
-  it('should trim searchString before applying', () => {
+  it('should trim queryString before applying', () => {
     const query = buildEpisodesQuery(
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { searchString: '  alert.name: "test"  ' }
+      { queryString: '  alert.name: "test"  ' }
     );
     const queryString = query.print('basic');
 
@@ -147,7 +147,7 @@ describe('buildEpisodesQuery', () => {
   it('should not apply filters when they are null or undefined', () => {
     const query = buildEpisodesQuery(
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { searchString: null, status: null, ruleId: undefined }
+      { queryString: null, status: null, ruleId: undefined }
     );
     const queryString = query.print('basic');
 
@@ -156,10 +156,10 @@ describe('buildEpisodesQuery', () => {
     expect(whereCount).toBe(2); // "type == alert" and "@timestamp == last_timestamp"
   });
 
-  it('should not apply searchString filter when it is empty or whitespace', () => {
+  it('should not apply queryString filter when it is empty or whitespace', () => {
     const query = buildEpisodesQuery(
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { searchString: '   ' }
+      { queryString: '   ' }
     );
     const queryString = query.print('basic');
 
