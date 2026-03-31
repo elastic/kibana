@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { ShareGlobalAction } from './global_actions/share';
 import { useNextHeader } from '../shared/chrome_hooks';
-
-const SHARE_ARIA_LABEL = i18n.translate('core.ui.chrome.projectNextHeader.globalShareAriaLabel', {
-  defaultMessage: 'Share',
-});
 
 const useGlobalActionsStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -62,17 +58,7 @@ export const ProjectNextGlobalActions = React.memo(() => {
   return (
     <div css={styles.root} data-test-subj="chromeProjectNextHeaderGlobalActions">
       {/* TODO: editTitle — Chrome-controlled inline title editor; wire onSave from config */}
-      {share ? (
-        <EuiButtonIcon
-          iconType="share"
-          color="text"
-          display="empty"
-          size="s"
-          aria-label={SHARE_ARIA_LABEL}
-          data-test-subj="chromeProjectNextHeaderGlobalShare"
-          onClick={share.onClick}
-        />
-      ) : null}
+      {share ? <ShareGlobalAction share={share} /> : null}
       {favorite ? (
         <div css={styles.favoriteSlot} data-test-subj="chromeProjectNextHeaderGlobalFavoriteSlot">
           {favorite}

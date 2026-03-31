@@ -89,6 +89,33 @@ export type ChromeNextHeaderMetadataSlotItem =
   | { type: 'button'; label: string; onClick: () => void; iconType?: string };
 
 /**
+ * Minimal structural mirror of `ShowShareMenuOptions` from the share plugin.
+ */
+export interface ChromeNextHeaderShareOptions {
+  objectType: string;
+  objectTypeAlias?: string;
+  objectTypeMeta: {
+    title: string;
+    config: Record<string, unknown>;
+  };
+  objectId?: string;
+  shareableUrl?: string;
+  shareableUrlForSavedObject?: string;
+  shareableUrlLocatorParams?: {
+    locator: unknown;
+    params: Record<string, unknown>;
+  };
+  sharingData: Record<string, unknown>;
+  isDirty: boolean;
+  asExport?: boolean;
+  anchorElement?: HTMLElement;
+  allowShortUrl: boolean;
+  onClose?: () => void;
+  publicAPIEnabled?: boolean;
+  onSave?: () => Promise<void>;
+}
+
+/**
  * Global actions beside the Chrome-Next title.
  */
 export interface ChromeNextHeaderGlobalActions {
@@ -100,7 +127,10 @@ export interface ChromeNextHeaderGlobalActions {
   };
   /** Share; Chrome renders the icon. */
   share?: {
-    onClick: () => void;
+    service: {
+      toggleShareContextMenu: (options: ChromeNextHeaderShareOptions) => Promise<void>;
+    };
+    options: ChromeNextHeaderShareOptions;
   };
   /** Favorite control as `ReactNode` (e.g. FavoriteButton) so apps supply providers and clients. */
   /** TODO: should become a structured API */
