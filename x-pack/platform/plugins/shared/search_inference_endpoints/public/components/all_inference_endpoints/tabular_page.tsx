@@ -170,7 +170,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({
           {
             name: ENDPOINT_COPY_ID_ACTION_LABEL,
             description: ENDPOINT_COPY_ID_ACTION_LABEL,
-            icon: 'copyClipboard',
+            icon: 'copy',
             type: 'icon',
             onClick: (item) => copyContent(item.inference_id),
             'data-test-subj': 'inference-endpoints-action-copy-id-label',
