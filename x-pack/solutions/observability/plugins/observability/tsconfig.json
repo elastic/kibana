@@ -9,8 +9,7 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../../../typings/**/*",
-    "test/scout/**/*"
+    "../../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/rule-data-utils",
@@ -126,8 +125,6 @@
     "@kbn/esql",
     "@kbn/react-query",
     "@kbn/core-elasticsearch-server-utils",
-    "@kbn/scout-oblt",
-    "@kbn/scout-synthtrace",
   ],
   "exclude": [
     "target/**/*"
