@@ -30,7 +30,7 @@ const { applyBulkRemoveSource } = jest.requireMock('../../bulk/soft_delete') as 
 describe('DeletionDetectionService', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.createLogger();
-  const targetIndex = '.entity-analytics.watchlists.test-default';
+  const targetIndex = '.entity_analytics.watchlists.test-default';
 
   const createService = () => {
     const descriptorClient = new WatchlistEntitySourceClient({

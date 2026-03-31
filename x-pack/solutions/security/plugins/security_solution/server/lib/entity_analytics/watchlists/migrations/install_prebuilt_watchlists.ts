@@ -63,31 +63,89 @@ export const ensurePrebuiltWatchlists = async ({
   logger: Logger;
 }) => {
   for (const watchlist of PREBUILT_WATCHLISTS) {
-    try {
-      await watchlistClient.get(watchlist.id);
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      if (errorMessage.includes('not found')) {
-        logger.info(`Prebuilt watchlist '${watchlist.name}' not found, initializing...`);
-        const { id, entitySources, ...attrs } = watchlist;
-        const created = await watchlistClient.create(attrs, { id });
+    const { id, entitySources, ...attrs } = watchlist;
 
-        if (!created.id) {
-          throw new Error('Prebuilt watchlist creation succeeded but no ID was returned');
-        }
+    const watchlistId = await getOrCreateWatchlist({ watchlistClient, logger, id, attrs });
+    if (!watchlistId) {
+      return;
+    }
 
-        if (entitySources?.length) {
-          const sourceClient = new WatchlistEntitySourceClient({ soClient, namespace });
-          for (const entitySourceInput of entitySources) {
-            const entitySource = await sourceClient.create(entitySourceInput);
-            await watchlistClient.addEntitySourceReference(created.id, entitySource.id);
-          }
-        }
+    // Ensure entity sources exist, even if the watchlist was already present
+    if (entitySources?.length) {
+      await ensureEntitySources({
+        watchlistClient,
+        soClient,
+        namespace,
+        logger,
+        watchlistId,
+        entitySources,
+      });
+    }
 
-        logger.info(`Prebuilt watchlist '${watchlist.name}' initialized.`);
-      } else {
-        logger.error(`Error checking prebuilt watchlist '${watchlist.name}': ${errorMessage}`);
-      }
+    logger.info(`Prebuilt watchlist '${watchlist.name}' initialized.`);
+  }
+};
+
+const getOrCreateWatchlist = async ({
+  watchlistClient,
+  logger,
+  id,
+  attrs,
+}: {
+  watchlistClient: WatchlistConfigClient;
+  logger: Logger;
+  id: string;
+  attrs: Omit<(typeof PREBUILT_WATCHLISTS)[number], 'id' | 'entitySources'>;
+}): Promise<string | undefined> => {
+  try {
+    const existing = await watchlistClient.get(id);
+    return existing.id ?? id;
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    if (!errorMessage.includes('not found')) {
+      logger.error(`Error checking prebuilt watchlist '${attrs.name}': ${errorMessage}`);
+      return undefined;
+    }
+
+    logger.info(`Prebuilt watchlist '${attrs.name}' not found, creating...`);
+    const created = await watchlistClient.create(attrs, { id });
+    if (!created.id) {
+      throw new Error('Prebuilt watchlist creation succeeded but no ID was returned');
+    }
+    return created.id;
+  }
+};
+
+const ensureEntitySources = async ({
+  watchlistClient,
+  soClient,
+  namespace,
+  logger,
+  watchlistId,
+  entitySources,
+}: {
+  watchlistClient: WatchlistConfigClient;
+  soClient: SavedObjectsClientContract;
+  namespace: string;
+  logger: Logger;
+  watchlistId: string;
+  entitySources: (typeof PREBUILT_WATCHLISTS)[number]['entitySources'];
+}) => {
+  const sourceClient = new WatchlistEntitySourceClient({ soClient, namespace });
+
+  for (const entitySourceInput of entitySources) {
+    const { sources } = await sourceClient.list({ name: entitySourceInput.name, per_page: 1 });
+    const existingId = sources[0]?.id;
+
+    if (existingId) {
+      logger.debug(
+        `Entity source '${entitySourceInput.name}' already exists, ensuring link to watchlist`
+      );
+      await watchlistClient.addEntitySourceReference(watchlistId, existingId);
+    } else {
+      const entitySource = await sourceClient.create(entitySourceInput);
+      await watchlistClient.addEntitySourceReference(watchlistId, entitySource.id);
+      logger.info(`Entity source '${entitySourceInput.name}' created and linked to watchlist`);
     }
   }
 };
