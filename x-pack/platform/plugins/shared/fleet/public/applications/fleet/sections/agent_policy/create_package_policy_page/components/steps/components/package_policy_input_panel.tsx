@@ -112,6 +112,11 @@ export const MigrationTooltip = ({
   </EuiFlexItem>
 );
 
+/**
+ * Automatically apply the use_apm var to the stream state
+ *  if it is not already defined in the package schema and it qualifies for use.
+ * This helps make sure its included when data stream type is changed.
+ */
 const applyUseAPMVar = (
   streamState: NewPackagePolicyInputStream,
   packageInputStream: RegistryStreamWithDataStream,
