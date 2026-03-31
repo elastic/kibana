@@ -85,7 +85,7 @@ export const EntityNameList: React.FC<EntityNameListProps> = ({
             `}
             grow={false}
           >
-            <EuiText textAlign={'right'}>
+            <EuiText textAlign={'right'} size={'s'}>
               <EuiLink
                 onClick={() => {
                   openEntityFlyout(entityId);

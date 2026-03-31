@@ -39,6 +39,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   const { isLoading, data, isError } = useQuery(
     [filterQuery, topRowsEsqlSource],
     async ({ signal }) => {
+      if (!topRowsEsqlSource) return [];
       return esqlResponseToRecords<Record<string, string>>(
         (
           await getESQLResults({
@@ -49,7 +50,8 @@ const useRecentAnomaliesTopRowsQuery = (params: {
           })
         )?.response
       );
-    }
+    },
+    { enabled: !!topRowsEsqlSource }
   );
   return {
     isLoading,

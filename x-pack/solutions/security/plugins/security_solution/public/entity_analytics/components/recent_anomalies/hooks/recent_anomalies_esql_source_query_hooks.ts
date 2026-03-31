@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import { useIntervalForHeatmap } from '../anomaly_heatmap_interval';
 import type { AnomalyBand } from '../anomaly_bands';
@@ -13,19 +15,30 @@ import { getLatestEntitiesIndexName } from '../../home/constants';
 
 export type ViewByMode = 'entity' | 'jobId';
 
+const ANOMALY_ENTITY_TYPES = ['user', 'host', 'service'] as const;
+
 /**
  * EUID evaluation block for ES|QL queries on ML anomaly records.
- * Computes entity_id as a typed EUID (e.g. "user:alice", "host:server1", "service:api")
- * by checking user.name, host.name, and service.name fields from ML anomaly records.
- *
- * Note: We cannot use the `@kbn/entity-store` EUID helpers here because they depend on
- * `@kbn/streamlang` which is not available in browser code.
+ * Uses the entity store EUID helpers to compute typed EUIDs (e.g. "user:alice@okta", "host:server1")
+ * that match the entity store's EUID format for accurate LOOKUP JOIN matching.
  */
-const getEuidEvaluationBlock = () => `
-    | EVAL user_euid = CASE(user.name IS NOT NULL AND user.name != "", CONCAT("user:", user.name), NULL)
-    | EVAL host_euid = CASE(host.name IS NOT NULL AND host.name != "", CONCAT("host:", host.name), NULL)
-    | EVAL service_euid = CASE(service.name IS NOT NULL AND service.name != "", CONCAT("service:", service.name), NULL)
-    | EVAL entity_id = COALESCE(user_euid, host_euid, service_euid)`;
+const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
+  const parts: string[] = [];
+
+  for (const entityType of ANOMALY_ENTITY_TYPES) {
+    const fieldEvals = euidApi.esql.getFieldEvaluationsEsql(entityType);
+    if (fieldEvals) {
+      parts.push(`| EVAL ${fieldEvals}`);
+    }
+    parts.push(`| EVAL ${entityType}_euid = ${euidApi.esql.getEuidEvaluation(entityType)}`);
+  }
+
+  parts.push(
+    `| EVAL entity_id = COALESCE(${ANOMALY_ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`
+  );
+
+  return `\n    ${parts.join('\n    ')}`;
+};
 
 /**
  * LOOKUP JOIN block that joins ML anomaly records with the entity store to filter by watchlist.
@@ -52,8 +65,11 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
   viewBy,
   watchlistName,
   spaceId,
-}: EsqlSourceParams & { rowsLimit: number }) => {
+}: EsqlSourceParams & { rowsLimit: number }): string | undefined => {
+  const euidApi = useEntityStoreEuidApi();
   const needsWatchlistJoin = !!watchlistName && !!spaceId;
+
+  if (!euidApi) return undefined;
 
   if (viewBy === 'jobId') {
     // Job ID mode with watchlist: need EUID eval + join to filter by watchlist entities,
@@ -62,7 +78,7 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
       return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
     | WHERE record_score IS NOT NULL
-    ${getEuidEvaluationBlock()}
+    ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
     ${getWatchlistJoinBlock(watchlistName, spaceId)}
     ${getHiddenBandsFilters(anomalyBands)}
@@ -87,7 +103,7 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
   return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
     | WHERE record_score IS NOT NULL
-    ${getEuidEvaluationBlock()}
+    ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
     ${needsWatchlistJoin ? getWatchlistJoinBlock(watchlistName, spaceId) : ''}
     ${getHiddenBandsFilters(anomalyBands)}
@@ -104,10 +120,11 @@ export const useRecentAnomaliesDataEsqlSource = ({
   watchlistName,
   spaceId,
 }: EsqlSourceParams & { rowLabels?: string[] }) => {
+  const euidApi = useEntityStoreEuidApi();
   const interval = useIntervalForHeatmap();
   const needsWatchlistJoin = !!watchlistName && !!spaceId;
 
-  if (!rowLabels) return undefined;
+  if (!euidApi || !rowLabels) return undefined;
   const formattedLabels = rowLabels.map((each) => `"${each}"`).join(', ');
 
   if (viewBy === 'jobId') {
@@ -116,7 +133,7 @@ export const useRecentAnomaliesDataEsqlSource = ({
       return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
     | WHERE record_score IS NOT NULL AND job_id IN (${formattedLabels})
-    ${getEuidEvaluationBlock()}
+    ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
     ${getWatchlistJoinBlock(watchlistName, spaceId)}
     ${getHiddenBandsFilters(anomalyBands)}
@@ -151,7 +168,7 @@ export const useRecentAnomaliesDataEsqlSource = ({
   return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
     | WHERE record_score IS NOT NULL
-    ${getEuidEvaluationBlock()}
+    ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IN (${formattedLabels})
     ${needsWatchlistJoin ? getWatchlistJoinBlock(watchlistName, spaceId) : ''}
     ${getHiddenBandsFilters(anomalyBands)}
