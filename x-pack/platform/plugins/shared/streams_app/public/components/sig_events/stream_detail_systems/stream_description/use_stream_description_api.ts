@@ -6,7 +6,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, TaskStatus } from '@kbn/streams-schema';
+import type { DescriptionGenerationTaskResult } from '@kbn/streams-plugin/server/routes/internal/sig_events/description_generation/route';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
@@ -117,9 +118,9 @@ export const useStreamDescriptionApi = ({
     setIsEditing(true);
   }, [setIsEditing]);
 
-  const getDescriptionGenerationStatus = useCallback(async () => {
+  const getDescriptionGenerationStatus = useCallback(async (): Promise<DescriptionGenerationTaskResult> => {
     if (!enableGeneration) {
-      return { status: 'not_started' as const };
+      return { status: TaskStatus.NotStarted };
     }
     return await streams.streamsRepositoryClient.fetch(
       'GET /internal/streams/{name}/_description_generation/_status',
