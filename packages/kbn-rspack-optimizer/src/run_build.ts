@@ -174,7 +174,7 @@ async function runProductionBuild(
       const result = processStats(stats, log, { duration });
 
       if (result.success) {
-        copyBundlesToPluginDirs(repoRoot, log);
+        log?.debug('Bundles ready at target/public/bundles/');
       }
 
       compiler.close(() => {
