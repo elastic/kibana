@@ -183,13 +183,6 @@ export const AzureBlob: ConnectorSpec = {
       input: z.object({
         container: z.string(),
         blobName: z.string(),
-        maximumDownloadSizeBytes: z
-          .number()
-          .positive()
-          .optional()
-          .describe(
-            'Maximum blob size in bytes that can be downloaded. Defaults to 131072 (128 KB). Requests for blobs larger than this will fail.'
-          ),
       }),
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
@@ -197,7 +190,7 @@ export const AzureBlob: ConnectorSpec = {
         const blobName = encodePathSegment(input.blobName);
         const blobUrl = `${baseUrl}/${container}/${blobName}`;
 
-        const maxSize = input.maximumDownloadSizeBytes ?? MAX_BLOB_DOWNLOAD_SIZE_BYTES;
+        const maxSize = MAX_BLOB_DOWNLOAD_SIZE_BYTES;
         const headResponse = await ctx.client.head(blobUrl);
         const rawLength = headResponse.headers['content-length'];
         const contentLength = rawLength ? parseInt(String(rawLength), 10) : undefined;
