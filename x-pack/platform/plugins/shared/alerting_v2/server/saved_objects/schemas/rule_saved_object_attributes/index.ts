@@ -11,3 +11,4 @@ import { ruleSavedObjectAttributesSchema } from './v1';
 export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchema>;
 
 export { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV1 };
+export { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV2 };
