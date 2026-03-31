@@ -21,7 +21,11 @@ export type {
   ToolsSetup,
   ToolsStart,
   SmlStart,
+  ConversationsStart,
+  ReadOnlyConversationClient,
 } from './types';
+
+export type { ConversationListOptions } from './services/conversation/client/types';
 
 export type {
   SmlTypeDefinition,

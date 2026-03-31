@@ -285,7 +285,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       )}
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="right" iconType="arrowLeft" onClick={onCancel}>
+          <EuiButtonEmpty flush="right" iconType="chevronSingleLeft" onClick={onCancel}>
             <FormattedMessage
               id="interactiveSetup.clusterConfigurationForm.cancelButton"
               defaultMessage="Back"
