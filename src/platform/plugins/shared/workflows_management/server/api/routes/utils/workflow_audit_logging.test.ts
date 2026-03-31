@@ -155,6 +155,16 @@ describe('WorkflowManagementAuditLog', () => {
       expect(l3.mock.calls[0][0].message).toContain('via bulk delete');
     });
 
+    it('logWorkflowDeleted includes (force) tag when force is true', async () => {
+      const { audit, request, log } = createAuditHarness();
+      audit.logWorkflowDeleted(request, { id: 'd-1', force: true });
+      expect(log.mock.calls[0][0].message).toBe('User deleted workflow [id=d-1] (force)');
+
+      const { audit: a2, request: r2, log: l2 } = createAuditHarness();
+      a2.logWorkflowDeleted(r2, { id: 'd-1', force: false });
+      expect(l2.mock.calls[0][0].message).not.toContain('(force)');
+    });
+
     it('logBulkWorkflowDeleteResults and logBulkWorkflowDeleteFailed', async () => {
       const { audit, request, log } = createAuditHarness();
       audit.logBulkWorkflowDeleteResults(request, {
@@ -176,6 +186,27 @@ describe('WorkflowManagementAuditLog', () => {
       const { audit: a2, request: r2, log: l2 } = createAuditHarness();
       a2.logBulkWorkflowDeleteFailed(r2, err);
       expect(l2.mock.calls[0][0].event.action).toBe(WorkflowManagementAuditActions.BULK_DELETE);
+    });
+
+    it('logBulkWorkflowDeleteResults includes (force) tag when force is true', async () => {
+      const { audit, request, log } = createAuditHarness();
+      audit.logBulkWorkflowDeleteResults(request, {
+        successfulIds: ['w1'],
+        failures: [{ id: 'w2', error: 'es error' }],
+        force: true,
+      });
+      expect(log.mock.calls[0][0].message).toContain('(force)');
+      expect(log.mock.calls[1][0].message).toContain('(force)');
+    });
+
+    it('logBulkWorkflowDeleteFailed includes (force) tag when force is true', async () => {
+      const { audit, request, log } = createAuditHarness();
+      audit.logBulkWorkflowDeleteFailed(request, err, { force: true });
+      expect(log.mock.calls[0][0].message).toContain('(force)');
+
+      const { audit: a2, request: r2, log: l2 } = createAuditHarness();
+      a2.logBulkWorkflowDeleteFailed(r2, err);
+      expect(l2.mock.calls[0][0].message).not.toContain('(force)');
     });
 
     it('logWorkflowCloned (success and failure)', async () => {

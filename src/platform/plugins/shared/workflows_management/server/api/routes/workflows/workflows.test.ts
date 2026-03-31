@@ -265,15 +265,37 @@ describe('Workflow routes', () => {
       expect(routeHandlers[key]).toBeDefined();
     });
 
-    it('should call api.deleteWorkflows with a single id, space id, and request', async () => {
+    it('should call api.deleteWorkflows with a single id, space id, and request (soft delete)', async () => {
       mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 1, failures: [] });
-      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+      const request = httpServerMock.createKibanaRequest({
+        params: { id: 'wf-1' },
+        query: { force: false },
+      });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default-space', request);
+      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default-space', request, {
+        force: false,
+      });
+      expect(response.ok).toHaveBeenCalledWith();
+    });
+
+    it('should call api.deleteWorkflows with force=true (hard delete)', async () => {
+      mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 1, failures: [] });
+      const request = httpServerMock.createKibanaRequest({
+        params: { id: 'wf-1' },
+        query: { force: true },
+      });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default-space', request, {
+        force: true,
+      });
       expect(response.ok).toHaveBeenCalledWith();
     });
   });
@@ -339,7 +361,7 @@ describe('Workflow routes', () => {
       expect(routeHandlers[key]).toBeDefined();
     });
 
-    it('should call api.deleteWorkflows with ids, space id, and request', async () => {
+    it('should call api.deleteWorkflows with ids, space id, and request (soft delete)', async () => {
       const apiResult = {
         total: 2,
         deleted: 2,
@@ -347,13 +369,43 @@ describe('Workflow routes', () => {
         successfulIds: ['a', 'b'],
       };
       mockApi.deleteWorkflows.mockResolvedValue(apiResult);
-      const request = httpServerMock.createKibanaRequest({ body: { ids: ['a', 'b'] } });
+      const request = httpServerMock.createKibanaRequest({
+        body: { ids: ['a', 'b'] },
+        query: { force: false },
+      });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request);
+      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request, {
+        force: false,
+      });
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { total: 2, deleted: 2, failures: [] },
+      });
+    });
+
+    it('should call api.deleteWorkflows with force=true (hard delete)', async () => {
+      const apiResult = {
+        total: 2,
+        deleted: 2,
+        failures: [] as Array<{ id: string; error: string }>,
+        successfulIds: ['a', 'b'],
+      };
+      mockApi.deleteWorkflows.mockResolvedValue(apiResult);
+      const request = httpServerMock.createKibanaRequest({
+        body: { ids: ['a', 'b'] },
+        query: { force: true },
+      });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request, {
+        force: true,
+      });
       expect(response.ok).toHaveBeenCalledWith({
         body: { total: 2, deleted: 2, failures: [] },
       });

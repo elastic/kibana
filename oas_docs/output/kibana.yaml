@@ -2902,7 +2902,7 @@ paths:
                     properties:
                       data:
                         additionalProperties: {}
-                        description: Payload of the attachment.
+                        description: Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).
                         type: object
                       hidden:
                         description: When true, the attachment will not be displayed in the UI.
@@ -2910,12 +2910,14 @@ paths:
                       id:
                         description: Optional id for the attachment.
                         type: string
+                      origin:
+                        description: Origin string (for example, saved object ID) for by-reference attachments. When provided without `data`, the content is resolved once using the attachment type’s `resolve` hook.
+                        type: string
                       type:
                         description: Type of the attachment.
                         type: string
                     required:
                       - type
-                      - data
                   type: array
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
@@ -3269,7 +3271,7 @@ paths:
                     properties:
                       data:
                         additionalProperties: {}
-                        description: Payload of the attachment.
+                        description: Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).
                         type: object
                       hidden:
                         description: When true, the attachment will not be displayed in the UI.
@@ -3277,12 +3279,14 @@ paths:
                       id:
                         description: Optional id for the attachment.
                         type: string
+                      origin:
+                        description: Origin string (for example, saved object ID) for by-reference attachments. When provided without `data`, the content is resolved once using the attachment type’s `resolve` hook.
+                        type: string
                       type:
                         description: Type of the attachment.
                         type: string
                     required:
                       - type
-                      - data
                   type: array
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
@@ -3569,6 +3573,13 @@ paths:
           required: true
           schema:
             type: string
+        - description: If true, removes the plugin skills from agents that use them and then deletes the plugin. If false and any agent uses the plugin skills, the request returns 409 Conflict with the list of agents.
+          in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -67044,6 +67055,13 @@ paths:
           schema:
             example: 'true'
             type: string
+        - description: When true, permanently deletes the workflows (hard delete) instead of soft-deleting them. The workflow IDs become available for reuse.
+          in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -67083,10 +67101,22 @@ paths:
       tags:
         - workflows
       x-codeSamples:
-        - lang: curl
+        - label: Soft delete (default)
+          lang: curl
           source: |
             curl \
               -X DELETE "${KIBANA_URL}/api/workflows" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "ids": ["workflow-c3d4e5f6-a7b8-9012-cdef-234567890123", "workflow-d4e5f6a7-b8c9-0123-defa-345678901234"]
+              }'
+        - label: Hard delete (permanent)
+          lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/workflows?force=true" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -68656,6 +68686,13 @@ paths:
           required: true
           schema:
             type: string
+        - description: When true, permanently deletes the workflow (hard delete) instead of soft-deleting it. The workflow ID becomes available for reuse.
+          in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           description: Indicates a successful response
@@ -68663,10 +68700,18 @@ paths:
       tags:
         - workflows
       x-codeSamples:
-        - lang: curl
+        - label: Soft delete (default)
+          lang: curl
           source: |
             curl \
               -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - label: Hard delete (permanent)
+          lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}?force=true" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true"
         - lang: Console

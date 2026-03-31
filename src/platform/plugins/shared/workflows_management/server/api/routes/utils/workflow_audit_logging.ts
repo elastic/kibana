@@ -161,18 +161,19 @@ export class WorkflowManagementAuditLog {
 
   logWorkflowDeleted(
     request: KibanaRequest,
-    params: { id: string; viaBulkDelete?: boolean; error?: unknown }
+    params: { id: string; viaBulkDelete?: boolean; force?: boolean; error?: unknown }
   ): void {
-    const { id, viaBulkDelete, error } = params;
+    const { id, viaBulkDelete, force, error } = params;
+    const forceTag = force ? ' (force)' : '';
     let message: string;
     if (error !== undefined) {
       message = viaBulkDelete
-        ? `User failed to delete workflow via bulk delete [id=${id}]`
-        : `User failed to delete workflow [id=${id}]`;
+        ? `User failed to delete workflow via bulk delete [id=${id}]${forceTag}`
+        : `User failed to delete workflow [id=${id}]${forceTag}`;
     } else {
       message = viaBulkDelete
-        ? `User deleted workflow via bulk delete [id=${id}]`
-        : `User deleted workflow [id=${id}]`;
+        ? `User deleted workflow via bulk delete [id=${id}]${forceTag}`
+        : `User deleted workflow [id=${id}]${forceTag}`;
     }
     const action = viaBulkDelete
       ? WorkflowManagementAuditActions.BULK_DELETE
@@ -188,15 +189,17 @@ export class WorkflowManagementAuditLog {
     params: {
       successfulIds: readonly string[];
       failures: ReadonlyArray<{ id: string; error: string }>;
+      force?: boolean;
     }
   ): void {
+    const forceTag = params.force ? ' (force)' : '';
     for (const id of params.successfulIds) {
       this.log(
         request,
         createEvent(
           WorkflowManagementAuditActions.BULK_DELETE,
           'deletion',
-          `User deleted workflow via bulk delete [id=${id}]`
+          `User deleted workflow via bulk delete [id=${id}]${forceTag}`
         )
       );
     }
@@ -206,20 +209,25 @@ export class WorkflowManagementAuditLog {
         createEvent(
           WorkflowManagementAuditActions.BULK_DELETE,
           'deletion',
-          `User failed to delete workflow via bulk delete [id=${f.id}]`,
+          `User failed to delete workflow via bulk delete [id=${f.id}]${forceTag}`,
           f.error
         )
       );
     }
   }
 
-  logBulkWorkflowDeleteFailed(request: KibanaRequest, error: unknown): void {
+  logBulkWorkflowDeleteFailed(
+    request: KibanaRequest,
+    error: unknown,
+    options: { force?: boolean } = {}
+  ): void {
+    const forceTag = options.force ? ' (force)' : '';
     this.log(
       request,
       createEvent(
         WorkflowManagementAuditActions.BULK_DELETE,
         'deletion',
-        'User failed bulk workflow delete',
+        `User failed bulk workflow delete${forceTag}`,
         error
       )
     );
