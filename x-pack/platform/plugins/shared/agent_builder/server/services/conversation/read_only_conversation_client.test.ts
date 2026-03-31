@@ -19,9 +19,7 @@ import type { ConversationService } from './conversation_service';
  * the same way `plugin.ts` does, so we can verify the wrapping logic in
  * isolation without booting the full plugin.
  */
-const createConversationsStart = (
-  internalService: ConversationService
-): ConversationsStart => ({
+const createConversationsStart = (internalService: ConversationService): ConversationsStart => ({
   getScopedClient: async ({ request }) => {
     const client = await internalService.getScopedClient({ request });
     return {
