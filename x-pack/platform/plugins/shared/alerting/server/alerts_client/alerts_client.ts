@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import {
   ALERT_UUID,
+  ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
@@ -32,6 +33,7 @@ import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleAlertData,
+  RawAlertInstance,
   WithoutReservedActionGroups,
   DataStreamAdapter,
 } from '../types';
@@ -152,15 +154,24 @@ export class AlertsClient<
     if (runTimestamp) {
       this.runTimestampString = runTimestamp.toISOString();
     }
-    await this.legacyAlertsClient.initializeExecution(opts);
 
-    // No need to fetch the tracked alerts for the non-lifecycle rules
+    // Fetch tracked alerts from ES before initializing the legacy client so we can
+    // reconstitute activeAlertsFromState when task state was lost due to a task
+    // reclaim
+    //
+    // Without this, a reclaimed execution starts with empty activeAlertsFromState,
+    // generates a fresh UUID for the same alert instance, and the original alert
+    // document is permanently orphaned as status=active with no kibana.alert.end.
+    //
+    // No need to fetch tracked alerts for non-lifecycle rules.
+    let effectiveActiveAlertsFromState = opts.activeAlertsFromState;
+
     if (this.ruleType.autoRecoverAlerts) {
       try {
         this.trackedAlerts = await getTrackedAlerts<AlertData>({
           ruleId: this.options.rule.id,
           lookBackWindow: opts.flappingSettings.lookBackWindow,
-          maxAlertLimit: this.legacyAlertsClient.getMaxAlertLimit() || DEFAULT_MAX_ALERTS,
+          maxAlertLimit: opts.maxAlerts || DEFAULT_MAX_ALERTS,
           activeAlertsFromState: opts.activeAlertsFromState,
           recoveredAlertsFromState: opts.recoveredAlertsFromState,
           search: (queryBody) => this.search(queryBody),
@@ -175,7 +186,41 @@ export class AlertsClient<
         );
         throw err;
       }
+
+      // If task state was empty but there are active alert documents in the index,
+      // the execution context was likely lost due to a task reclaim mid-execution.
+      // Reconstitute activeAlertsFromState from the index so the legacy client
+      // reuses the existing UUIDs instead of generating new ones.
+      const taskStateWasEmpty = Object.keys(opts.activeAlertsFromState).length === 0;
+      const indexHasActiveAlerts = Object.keys(this.trackedAlerts.active).length > 0;
+
+      if (taskStateWasEmpty && indexHasActiveAlerts) {
+        const reconstituted: Record<string, RawAlertInstance> = {};
+
+        for (const [uuid, alertDoc] of Object.entries(this.trackedAlerts.active)) {
+          const instanceId = get(alertDoc, ALERT_INSTANCE_ID) as string | undefined;
+          if (instanceId) {
+            // Only preserve the UUID — state and context are not available after a
+            // reclaim, so this execution will treat the alert as ongoing but without
+            // the original state payload. The UUID is what matters to avoid orphaning.
+            reconstituted[instanceId] = { meta: { uuid } };
+          }
+        }
+
+        if (Object.keys(reconstituted).length > 0) {
+          this.options.logger.warn(
+            `Task state was empty but found ${Object.keys(reconstituted).length} active alert(s) in the index ${this.ruleInfoMessage}. This may indicate a task reclaim occurred mid-execution. Reconstituting alert UUIDs from the index to prevent orphaning.`,
+            this.logTags
+          );
+          effectiveActiveAlertsFromState = reconstituted;
+        }
+      }
     }
+
+    await this.legacyAlertsClient.initializeExecution({
+      ...opts,
+      activeAlertsFromState: effectiveActiveAlertsFromState,
+    });
   }
 
   public async search<Aggregation = unknown>(
