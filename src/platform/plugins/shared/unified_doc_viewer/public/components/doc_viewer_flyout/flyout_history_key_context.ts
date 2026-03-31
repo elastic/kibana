@@ -19,9 +19,9 @@ import { createContext, useContext } from 'react';
  * enabling the "Back" button on the Trace Waterfall to return the user to
  * the Document Viewer.
  */
-export const FlyoutHistoryKeyContext = createContext<symbol | null>(null);
+export const FlyoutHistoryKeyContext = createContext<symbol | undefined>(undefined);
 
 export const useFlyoutHistoryKey = () => {
-  // Don't be strict: if the context wasn't provided, just return null.
+  // Don't be strict: if the context wasn't provided, just return undefined.
   return useContext(FlyoutHistoryKeyContext);
 };
