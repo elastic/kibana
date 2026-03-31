@@ -24,7 +24,7 @@ export interface EntityAnalyticsMigrationsParams {
   getStartServices: StartServicesAccessor<StartPlugins>;
   auditLogger: AuditLogger | undefined;
   kibanaVersion: string;
-  experimentalFeatures: ExperimentalFeatures;
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 /**
@@ -67,7 +67,7 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
   await updatePrivilegedMonitoringSourceIndex(paramsWithScopedLogger);
   await upsertPrivilegedMonitoringEntitySource(paramsWithScopedLogger);
 
-  if (paramsWithScopedLogger.experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+  if (paramsWithScopedLogger.experimentalFeatures?.entityAnalyticsWatchlistEnabled) {
     await installPrebuiltWatchlists(paramsWithScopedLogger);
   }
 };
