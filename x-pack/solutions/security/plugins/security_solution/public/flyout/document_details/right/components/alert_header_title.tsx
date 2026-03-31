@@ -11,24 +11,25 @@ import { buildDataTableRecord, type EsHitRecord, getFieldValue } from '@kbn/disc
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { ALERT_RULE_UUID, ALERT_WORKFLOW_ASSIGNEE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
 import { useDocumentDetailsContext } from '../../shared/context';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { Assignees } from './assignees';
+import { Assignees } from '../../../../flyout_v2/document/components/assignees';
+import { Notes } from '../../../../flyout_v2/document/components/notes';
+import { RiskScore } from '../../../../flyout_v2/document/components/risk_score';
+import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
+import { AlertHeaderBlock } from '../../../../flyout_v2/shared/components/alert_header_block';
 import {
   ALERT_SUMMARY_PANEL_TEST_ID,
-  ASSIGNEES_TITLE_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
 } from '../../../../flyout_v2/shared/components/test_ids';
+import { LeftPanelNotesTab } from '../../left';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
 import { HeaderTitle } from '../../../../flyout_v2/document/components/header_title';
 import { HeaderStatus } from '../../../../flyout_v2/document/components/header_status';
-import { RiskScore } from '../../../../flyout_v2/document/components/risk_score';
-import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
 import type { CellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
-import { AlertHeaderBlock } from '../../../../flyout_v2/shared/components/alert_header_block';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { CellActions } from '../../shared/components/cell_actions';
 
@@ -43,8 +44,9 @@ const urlParamOverride = { timeline: { isOpen: false } };
  * Alert details flyout right section header
  */
 export const AlertHeaderTitle = memo(() => {
-  const { eventId, scopeId, isRulePreview, refetchFlyoutData, getFieldsData, searchHit } =
+  const { eventId, scopeId, isRulePreview, refetchFlyoutData, searchHit } =
     useDocumentDetailsContext();
+  const openNotesTab = useNavigateToLeftPanel({ tab: LeftPanelNotesTab });
   const { closeFlyout } = useExpandableFlyoutApi();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   const ruleId = useMemo(() => getFieldValue(hit, ALERT_RULE_UUID) as string, [hit]);
@@ -115,29 +117,6 @@ export const AlertHeaderTitle = memo(() => {
     [hit, isRulePreview, onStatusUpdated, renderStatusCellActions]
   );
 
-  const assignees = useMemo(
-    () => (
-      <AlertHeaderBlock
-        hasBorder
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.header.assignedTitle"
-            defaultMessage="Assignees"
-          />
-        }
-        data-test-subj={ASSIGNEES_TITLE_TEST_ID}
-      >
-        <Assignees
-          eventId={eventId}
-          assignedUserIds={alertAssignees}
-          onAssigneesUpdated={onAssigneesUpdated}
-          showAssignees={!isRulePreview}
-        />
-      </AlertHeaderBlock>
-    ),
-    [alertAssignees, eventId, isRulePreview, onAssigneesUpdated]
-  );
-
   return (
     <>
       <DocumentSeverity hit={hit} />
@@ -161,9 +140,20 @@ export const AlertHeaderTitle = memo(() => {
         </EuiFlexItem>
         <EuiFlexItem css={blockStyles}>
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-            <EuiFlexItem>{assignees}</EuiFlexItem>
             <EuiFlexItem>
-              <Notes />
+              <Assignees
+                hit={hit}
+                onAssigneesUpdated={onAssigneesUpdated}
+                showAssignees={!isRulePreview}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Notes
+                hit={hit}
+                documentId={eventId}
+                onOpenNotesTab={openNotesTab}
+                disabled={isRulePreview}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

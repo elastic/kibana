@@ -11,10 +11,21 @@ export const FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID = `${PREFIX}MissingAlertsPr
 
 /* Header */
 
+export const ALERT_SUMMARY_PANEL_TEST_ID = `${PREFIX}HeaderAlertSumaryPanel` as const;
 export const HEADER_TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
 export const HEADER_TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
 export const HEADER_EVENT_TITLE_TEST_ID = `${PREFIX}EventTitle` as const;
 export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
+export const NOTES_TITLE_TEST_ID = `${PREFIX}HeaderNotesTitle` as const;
+export const NOTES_ADD_NOTE_BUTTON_TEST_ID = `${PREFIX}HeaderNotesAddNoteButton` as const;
+export const NOTES_VIEW_NOTES_BUTTON_TEST_ID = `${PREFIX}HeaderNotesViewNotesButton` as const;
+export const NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID = `${PREFIX}HeaderNotesAddNoteIconButton` as const;
+export const NOTES_COUNT_TEST_ID = `${PREFIX}HeaderNotesCount` as const;
+export const NOTES_LOADING_TEST_ID = `${PREFIX}HeaderNotesLoading` as const;
+export const ASSIGNEES_EMPTY_TEST_ID = `${PREFIX}HeaderAssigneesEmpty` as const;
+export const ASSIGNEES_TEST_ID = `${PREFIX}HeaderAssignees` as const;
+export const ASSIGNEES_TITLE_TEST_ID = `${PREFIX}HeaderAssigneesTitle` as const;
+export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${PREFIX}HeaderAssigneesAddButton` as const;
 
 /* About */
 

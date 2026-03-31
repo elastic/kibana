@@ -69,7 +69,7 @@ export interface NotesHeaderProps {
   /**
    * Called when the user clicks to open the notes tab (View notes / Add note).
    */
-  onOpenNotesTab: () => void;
+  onOpenNotesTab?: () => void;
   /**
    * When true, the block shows a dash and does not fetch notes (e.g. rule preview).
    */
@@ -93,6 +93,7 @@ export const NotesHeader = memo(
 
     const cannotAddNotes = disabled || !notesPrivileges.crud;
     const cannotReadNotes = disabled || !notesPrivileges.read;
+    const canOpenNotesTab = onOpenNotesTab != null;
 
     useEffect(() => {
       if (!cannotReadNotes) {
@@ -117,7 +118,7 @@ export const NotesHeader = memo(
         <EuiButtonEmpty
           onClick={onOpenNotesTab}
           size="s"
-          disabled={cannotReadNotes}
+          disabled={cannotReadNotes || !canOpenNotesTab}
           aria-label={VIEW_NOTES_BUTTON_ARIA_LABEL}
           data-test-subj={testIds.viewNotesButton}
         >
@@ -128,7 +129,7 @@ export const NotesHeader = memo(
           />
         </EuiButtonEmpty>
       ),
-      [cannotReadNotes, notes.length, onOpenNotesTab, testIds.viewNotesButton]
+      [canOpenNotesTab, cannotReadNotes, notes.length, onOpenNotesTab, testIds.viewNotesButton]
     );
 
     const addNoteButton = useMemo(
@@ -137,14 +138,14 @@ export const NotesHeader = memo(
           iconType="plusInCircle"
           onClick={onOpenNotesTab}
           size="s"
-          disabled={cannotAddNotes}
+          disabled={cannotAddNotes || !canOpenNotesTab}
           aria-label={ADD_NOTE_BUTTON}
           data-test-subj={testIds.addNoteButton}
         >
           {ADD_NOTE_BUTTON}
         </EuiButtonEmpty>
       ),
-      [cannotAddNotes, onOpenNotesTab, testIds.addNoteButton]
+      [canOpenNotesTab, cannotAddNotes, onOpenNotesTab, testIds.addNoteButton]
     );
 
     const addNoteButtonIcon = useMemo(
@@ -152,7 +153,7 @@ export const NotesHeader = memo(
         <EuiButtonIcon
           onClick={onOpenNotesTab}
           iconType="plusInCircle"
-          disabled={cannotAddNotes}
+          disabled={cannotAddNotes || !canOpenNotesTab}
           css={css`
             margin-left: ${euiTheme.size.xs};
           `}
@@ -160,7 +161,7 @@ export const NotesHeader = memo(
           data-test-subj={testIds.addNoteIconButton}
         />
       ),
-      [euiTheme.size.xs, cannotAddNotes, onOpenNotesTab, testIds.addNoteIconButton]
+      [canOpenNotesTab, euiTheme.size.xs, cannotAddNotes, onOpenNotesTab, testIds.addNoteIconButton]
     );
 
     return (
@@ -182,7 +183,11 @@ export const NotesHeader = memo(
               <EuiLoadingSpinner data-test-subj={testIds.loading} size="m" />
             ) : (
               <>
-                {notes.length === 0 ? (
+                {!canOpenNotesTab ? (
+                  <div data-test-subj={testIds.count}>
+                    <FormattedCount count={notes.length} />
+                  </div>
+                ) : notes.length === 0 ? (
                   <>{notesPrivileges.crud ? addNoteButton : getEmptyTagValue()}</>
                 ) : (
                   <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">

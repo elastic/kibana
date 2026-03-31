@@ -27,7 +27,11 @@ import type {
   SetEventsLoading,
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
+import {
+  TimelineId,
+  type ColumnHeaderOptions,
+  type OnRowSelected,
+} from '../../../../../common/types/timeline';
 import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
@@ -129,6 +133,7 @@ const RowActionComponent = ({
               indexName={indexName ?? undefined}
               renderCellActions={cellActionRenderer}
               onAlertUpdated={handleAlertUpdated}
+              isTimelineFlyout={tableId === TimelineId.active || tableId === TimelineId.test}
             />
           ),
         }),

@@ -13,8 +13,11 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { ALERT_RULE_UUID, EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { EventKind } from './constants/event_kinds';
+import { Assignees } from './components/assignees';
 import { HeaderTitle } from './components/header_title';
 import { HeaderStatus } from './components/header_status';
+import { Notes } from './components/notes';
 import { DocumentSeverity } from './components/severity';
 import { RiskScore } from './components/risk_score';
 import { AlertHeaderBlock } from '../shared/components/alert_header_block';
@@ -27,6 +30,10 @@ import { noopCellActionRenderer } from '../shared/components/cell_actions';
 import { useKibana } from '../../common/lib/kibana';
 import { getRuleDetailsUrl } from '../../common/components/link_to';
 import { PreferenceFormattedDate } from '../../common/components/formatted_date';
+
+const blockStyles = {
+  minWidth: 280,
+};
 
 export interface HeaderProps {
   /**
@@ -41,15 +48,20 @@ export interface HeaderProps {
    * Optional callback invoked after alert mutations to refresh flyout data.
    */
   onAlertUpdated?: () => void;
+  /**
+   * Optional callback that opens the notes details view.
+   * When omitted, notes render as a read-only count.
+   */
+  onOpenNotesTab?: () => void;
 }
 
 /**
  * Document header for the flyout_v2 document flyout.
  * Renders severity, timestamp, title (as a rule-details link for alerts),
- * and alert-only summary blocks (status and risk score).
+ * and alert-only summary blocks (risk score, assignees, and notes).
  */
 export const Header: FC<HeaderProps> = memo(
-  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated }) => {
+  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onOpenNotesTab }) => {
     const { services } = useKibana();
     const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
     const ruleId = useMemo(
@@ -84,14 +96,14 @@ export const Header: FC<HeaderProps> = memo(
               wrap
               data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
             >
-              <EuiFlexItem>
+              <EuiFlexItem css={blockStyles}>
                 <HeaderStatus
                   hit={hit}
                   renderCellActions={renderCellActions}
                   onAlertUpdated={onAlertUpdated}
                 />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem css={blockStyles}>
                 <AlertHeaderBlock
                   hasBorder
                   title={
@@ -104,6 +116,12 @@ export const Header: FC<HeaderProps> = memo(
                 >
                   <RiskScore hit={hit} />
                 </AlertHeaderBlock>
+              </EuiFlexItem>
+              <EuiFlexItem css={blockStyles}>
+                <Assignees hit={hit} />
+              </EuiFlexItem>
+              <EuiFlexItem css={blockStyles}>
+                <Notes hit={hit} onOpenNotesTab={onOpenNotesTab} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>

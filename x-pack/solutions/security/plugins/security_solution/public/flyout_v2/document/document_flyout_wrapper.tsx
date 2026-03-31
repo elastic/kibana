@@ -42,6 +42,48 @@ const FETCH_ERROR = i18n.translate(
   }
 );
 
+const renderErrorCallout = (title: string, dataTestSubj: string) => (
+  <EuiCallOut
+    announceOnMount
+    color="danger"
+    iconType="warning"
+    title={title}
+    data-test-subj={dataTestSubj}
+  />
+);
+
+const renderRequestState = ({
+  requestState,
+  hit,
+  renderCellActions,
+  isTimelineFlyout,
+}: {
+  requestState: ElasticRequestState;
+  hit: ReturnType<typeof useEsDocSearch>[1];
+  renderCellActions: CellActionRenderer;
+  isTimelineFlyout?: boolean;
+}) => {
+  if (requestState === ElasticRequestState.Found && hit) {
+    return (
+      <DocumentFlyout
+        hit={hit}
+        renderCellActions={renderCellActions}
+        isTimelineFlyout={isTimelineFlyout}
+      />
+    );
+  }
+
+  if (requestState === ElasticRequestState.NotFound) {
+    return renderErrorCallout(DOCUMENT_NOT_FOUND, 'document-overview-wrapper-not-found');
+  }
+
+  if (requestState === ElasticRequestState.Error) {
+    return renderErrorCallout(FETCH_ERROR, 'document-overview-fetch-error');
+  }
+
+  return renderErrorCallout(SOMETHING_WENT_WRONG, 'document-overview-something-went-wrong');
+};
+
 export interface DocumentFlyoutWrapperProps {
   /**
    * The ID of the document to display. This is required to fetch the document details.
@@ -59,6 +101,10 @@ export interface DocumentFlyoutWrapperProps {
    * Callback invoked after alert mutations to refresh parent and current flyouts.
    */
   onAlertUpdated: () => void;
+  /**
+   * Whether notes should render Timeline-specific actions.
+   */
+  isTimelineFlyout?: boolean;
 }
 
 /**
@@ -68,6 +114,7 @@ export interface DocumentFlyoutWrapperProps {
  */
 export const DocumentFlyoutWrapper = memo(
   ({ documentId, indexName, renderCellActions, onAlertUpdated }: DocumentFlyoutWrapperProps) => {
+  ({ documentId, indexName, renderCellActions, isTimelineFlyout }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
 
     const isDataViewLoading = status === 'loading' || status === 'pristine';
@@ -112,52 +159,15 @@ export const DocumentFlyoutWrapper = memo(
     }
 
     if (isDataViewInvalid) {
-      return (
-        <EuiCallOut
-          announceOnMount
-          color="danger"
-          iconType="warning"
-          title={DATA_VIEW_ERROR}
-          data-test-subj="document-overview-wrapper-data-view-error"
-        />
-      );
+      return renderErrorCallout(DATA_VIEW_ERROR, 'document-overview-wrapper-data-view-error');
     }
 
-    if (requestState === ElasticRequestState.Found && hit) {
-      return (
-        <DocumentFlyout
-          hit={hit}
-          renderCellActions={renderCellActions}
-          onAlertUpdated={handleAlertUpdated}
-        />
-      );
-    }
-
-    if (requestState === ElasticRequestState.NotFound) {
-      return (
-        <EuiCallOut
-          announceOnMount
-          color="danger"
-          iconType="warning"
-          title={DOCUMENT_NOT_FOUND}
-          data-test-subj="document-overview-wrapper-not-found"
-        />
-      );
-    }
-
-    if (requestState === ElasticRequestState.Error) {
-      return (
-        <EuiCallOut
-          announceOnMount
-          color="danger"
-          iconType="warning"
-          title={FETCH_ERROR}
-          data-test-subj="document-overview-fetch-error"
-        />
-      );
-    }
-
-    return null;
+    return renderRequestState({
+      requestState,
+      hit,
+      renderCellActions,
+      isTimelineFlyout,
+    });
   }
 );
 

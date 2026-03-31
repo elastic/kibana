@@ -6,16 +6,24 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { DocumentFlyout } from '.';
 import { TestProviders } from '../../common/mock';
+import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('./header', () => ({ Header: () => <div data-test-subj="mock-header" /> }));
+jest.mock('./header', () => ({
+  Header: ({ onOpenNotesTab }: { onOpenNotesTab?: () => void }) => (
+    <button type="button" data-test-subj="mock-header" onClick={onOpenNotesTab} />
+  ),
+}));
 jest.mock('./tabs/overview_tab', () => ({
   OverviewTab: () => <div data-test-subj="mock-overview-tab" />,
+}));
+jest.mock('../notes', () => ({
+  NotesDetails: () => <div data-test-subj="mock-notes-details" />,
 }));
 jest.mock('./footer', () => ({ Footer: () => <div data-test-subj="mock-footer" /> }));
 
@@ -28,6 +36,8 @@ const createAlertHit = (): DataTableRecord =>
   } as DataTableRecord);
 
 describe('<DocumentFlyout />', () => {
+  const startServices = createStartServicesMock();
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -36,7 +46,7 @@ describe('<DocumentFlyout />', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: false });
 
     const { getByTestId } = render(
-      <TestProviders>
+      <TestProviders startServices={startServices}>
         <DocumentFlyout
           hit={createAlertHit()}
           onAlertUpdated={jest.fn()}
@@ -52,7 +62,7 @@ describe('<DocumentFlyout />', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
 
     const { getByTestId, queryByTestId } = render(
-      <TestProviders>
+      <TestProviders startServices={startServices}>
         <DocumentFlyout
           hit={createAlertHit()}
           onAlertUpdated={jest.fn()}
@@ -63,6 +73,34 @@ describe('<DocumentFlyout />', () => {
 
     expect(getByTestId('document-overview-loading')).toBeInTheDocument();
     expect(queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
+  });
+
+  it('opens notes in a system flyout when notes action is clicked', () => {
+    const openSystemFlyout = jest.fn();
+    startServices.overlays = {
+      ...startServices.overlays,
+      openSystemFlyout,
+    };
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+
+    const { getByTestId } = render(
+      <TestProviders startServices={startServices}>
+        <DocumentFlyout hit={createAlertHit()} renderCellActions={jest.fn()} isTimelineFlyout />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('mock-header'));
+
+    expect(openSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        ownFocus: false,
+        resizable: true,
+        size: 'm',
+        type: 'overlay',
+      })
+    );
   });
 
   it('renders the header, overview tab and footer', () => {

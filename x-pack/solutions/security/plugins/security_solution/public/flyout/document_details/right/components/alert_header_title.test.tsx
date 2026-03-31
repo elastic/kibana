@@ -9,12 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsContext } from '../../shared/context';
-import {
-  ASSIGNEES_EMPTY_TEST_ID,
-  ASSIGNEES_TEST_ID,
-  NOTES_TITLE_TEST_ID,
-  STATUS_TITLE_TEST_ID,
-} from './test_ids';
+import { STATUS_TITLE_TEST_ID } from './test_ids';
 import { AlertHeaderTitle } from './alert_header_title';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
@@ -23,12 +18,15 @@ import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_f
 import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { TestProviders } from '../../../../common/mock';
 import {
+  ASSIGNEES_EMPTY_TEST_ID,
+  ASSIGNEES_TEST_ID,
+  ASSIGNEES_TITLE_TEST_ID,
   HEADER_TITLE_TEST_ID,
+  NOTES_TITLE_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
 import {
   ALERT_SUMMARY_PANEL_TEST_ID,
-  ASSIGNEES_TITLE_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
   RISK_SCORE_VALUE_TEST_ID,
   STATUS_BUTTON_TEST_ID,

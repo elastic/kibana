@@ -8,7 +8,6 @@
 import { noop } from 'lodash';
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -17,21 +16,26 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getFieldValue, type DataTableRecord } from '@kbn/discover-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { ASSIGNEES_PANEL_WIDTH } from '../../../../common/components/assignees/constants';
-import type { AssigneesApplyPanelProps } from '../../../../common/components/assignees/assignees_apply_panel';
-import { AssigneesApplyPanel } from '../../../../common/components/assignees/assignees_apply_panel';
-import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
-import { useLicense } from '../../../../common/hooks/use_license';
-import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
-import { UsersAvatarsPanel } from '../../../../common/components/user_profiles/users_avatars_panel';
+import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import { ASSIGNEES_PANEL_WIDTH } from '../../../common/components/assignees/constants';
+import type { AssigneesApplyPanelProps } from '../../../common/components/assignees/assignees_apply_panel';
+import { AssigneesApplyPanel } from '../../../common/components/assignees/assignees_apply_panel';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { useLicense } from '../../../common/hooks/use_license';
+import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
+import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
+import { UsersAvatarsPanel } from '../../../common/components/user_profiles/users_avatars_panel';
+import { useSetAlertAssignees } from '../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { AlertHeaderBlock } from '../../../flyout/shared/components/alert_header_block';
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
   ASSIGNEES_EMPTY_TEST_ID,
   ASSIGNEES_TEST_ID,
+  ASSIGNEES_TITLE_TEST_ID,
 } from './test_ids';
 
 const UpdateAssigneesButton: FC<{
@@ -53,34 +57,35 @@ UpdateAssigneesButton.displayName = 'UpdateAssigneesButton';
 
 export interface AssigneesProps {
   /**
-   * Id of the document
+   * Document to display assignees for.
    */
-  eventId: string;
-
+  hit: DataTableRecord;
   /**
-   * The array of ids of the users assigned to the alert
-   */
-  assignedUserIds: string[];
-
-  /**
-   * Callback to handle the successful assignees update
+   * Callback fired after the assignees update succeeds.
+   * Used by the legacy flyout to refetch its context-backed data.
    */
   onAssigneesUpdated?: () => void;
-
   /**
-   * Boolean to indicate whether to show assignees
+   * Boolean to indicate whether to show assignees.
    */
   showAssignees?: boolean;
 }
 
-/**
- * Document assignees details displayed in flyout right section header
- */
 export const Assignees = memo(
-  ({ eventId, assignedUserIds, onAssigneesUpdated, showAssignees = true }: AssigneesProps) => {
+  ({ hit, onAssigneesUpdated, showAssignees = true }: AssigneesProps) => {
+    const eventId = useMemo(() => hit.raw._id ?? hit.id, [hit]);
+    const assignedUserIds = useMemo(() => {
+      const value = getFieldValue(hit, ALERT_WORKFLOW_ASSIGNEE_IDS) as string[] | string | null;
+
+      if (Array.isArray(value)) {
+        return value;
+      }
+
+      return value ? [value] : [];
+    }, [hit]);
+
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
-
     const { hasAlertsUpdate } = useAlertsPrivileges();
     const setAlertAssignees = useSetAlertAssignees();
 
@@ -88,9 +93,14 @@ export const Assignees = memo(
     const { data: assignedUsers } = useBulkGetUserProfiles({ uids });
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const searchInputId = useGeneratedHtmlId({ prefix: 'searchInput' });
 
-    const onSuccess = useCallback(() => {
-      if (onAssigneesUpdated) onAssigneesUpdated();
+    const onSuccess = useCallback<
+      NonNullable<Parameters<NonNullable<typeof setAlertAssignees>>[2]>
+    >(() => {
+      if (onAssigneesUpdated) {
+        onAssigneesUpdated();
+      }
     }, [onAssigneesUpdated]);
 
     const togglePopover = useCallback(() => {
@@ -100,26 +110,27 @@ export const Assignees = memo(
     const handleApplyAssignees = useCallback<AssigneesApplyPanelProps['onApply']>(
       async (assignees) => {
         setIsPopoverOpen(false);
-        if (setAlertAssignees) {
-          await setAlertAssignees(assignees, [eventId], onSuccess, noop);
+
+        if (!setAlertAssignees || !eventId) {
+          return;
         }
+
+        await setAlertAssignees(assignees, [eventId], onSuccess, noop);
       },
       [eventId, onSuccess, setAlertAssignees]
     );
 
-    const searchInputId = useGeneratedHtmlId({
-      prefix: 'searchInput',
-    });
+    const isUpdateDisabled = !eventId || !hasAlertsUpdate || !isPlatinumPlus;
 
-    const updateAssigneesPopover = useMemo(() => {
-      return (
+    const updateAssigneesPopover = useMemo(
+      () => (
         <EuiPopover
           panelPaddingSize="none"
           initialFocus={`[id="${searchInputId}"]`}
           button={
             <UpdateAssigneesButton
               togglePopover={togglePopover}
-              isDisabled={!hasAlertsUpdate || !isPlatinumPlus}
+              isDisabled={isUpdateDisabled}
               toolTipMessage={
                 upsellingMessage ??
                 i18n.translate(
@@ -143,20 +154,29 @@ export const Assignees = memo(
             onApply={handleApplyAssignees}
           />
         </EuiPopover>
-      );
-    }, [
-      assignedUserIds,
-      handleApplyAssignees,
-      hasAlertsUpdate,
-      isPlatinumPlus,
-      isPopoverOpen,
-      searchInputId,
-      togglePopover,
-      upsellingMessage,
-    ]);
+      ),
+      [
+        assignedUserIds,
+        handleApplyAssignees,
+        isPopoverOpen,
+        isUpdateDisabled,
+        searchInputId,
+        togglePopover,
+        upsellingMessage,
+      ]
+    );
 
     return (
-      <>
+      <AlertHeaderBlock
+        hasBorder
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.document.header.assignedTitle"
+            defaultMessage="Assignees"
+          />
+        }
+        data-test-subj={ASSIGNEES_TITLE_TEST_ID}
+      >
         {!showAssignees ? (
           <div data-test-subj={ASSIGNEES_EMPTY_TEST_ID}>{getEmptyTagValue()}</div>
         ) : (
@@ -169,7 +189,7 @@ export const Assignees = memo(
             <EuiFlexItem grow={false}>{updateAssigneesPopover}</EuiFlexItem>
           </EuiFlexGroup>
         )}
-      </>
+      </AlertHeaderBlock>
     );
   }
 );
