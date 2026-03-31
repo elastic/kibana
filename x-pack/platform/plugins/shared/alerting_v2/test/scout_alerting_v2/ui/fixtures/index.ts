@@ -16,8 +16,14 @@ interface AlertingV2Fixtures extends ScoutTestFixtures {
 
 export const test = baseTest.extend<AlertingV2Fixtures, ScoutWorkerFixtures>({
   pageObjects: async (
-    { pageObjects, page }: { pageObjects: AlertingV2Fixtures['pageObjects']; page: ScoutPage },
-    use
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: AlertingV2Fixtures['pageObjects'];
+      page: ScoutPage;
+    },
+    use: (pageObjects: AlertingV2Fixtures['pageObjects']) => Promise<void>
   ) => {
     const ruleForm = createLazyPageObject(RuleFormPage, page);
     await use({ ...pageObjects, ruleForm });
