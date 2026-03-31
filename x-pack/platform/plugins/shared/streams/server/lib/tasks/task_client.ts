@@ -80,6 +80,7 @@ export class TaskClient<TaskType extends string> {
       return {
         status: TaskStatus.Failed,
         error: task.task.error,
+        ...(task.task.payload !== undefined ? task.task.payload : {}),
       };
     } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
       return {

@@ -86,11 +86,11 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'streams.ki_features_extract_stream',
-    handlerHash: '810591de9dd790ef22c87246d3c33eb87a7c193757951d58e95686842118616b',
+    handlerHash: 'd67c0429bf6c7972c214fe0e3b3dd7cd4fc7c2149f6cbc35fa0e79266eead317',
   },
   {
     id: 'streams.ki_select_streams',
-    handlerHash: 'b07b088b8675e3b24452099b3333337500f0596489f4ed284c17cf4053d17941',
+    handlerHash: 'ec1f50e731dc9ac056d2b4f095de691566eed04373de01146b59259776e3f571',
   },
   {
     id: 'cases.createCase',

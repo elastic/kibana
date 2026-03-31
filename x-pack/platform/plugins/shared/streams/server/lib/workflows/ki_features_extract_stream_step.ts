@@ -10,7 +10,7 @@ import { StepCategory, type StepContext } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { IdentifyFeaturesResult, IterationResult } from '@kbn/streams-schema';
-import { TaskStatus, baseFeatureSchema, isComputedFeature } from '@kbn/streams-schema';
+import { TaskStatus, isComputedFeature } from '@kbn/streams-schema';
 import type { GetScopedClients } from '../../routes/types';
 import {
   getFeaturesIdentificationTaskId,
@@ -20,6 +20,11 @@ import {
   KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
   COORDINATOR_INTERVAL_MINUTES,
 } from '../../../common/constants';
+import {
+  featureSummarySchema,
+  tokenCountSchema,
+  iterationResultSchema,
+} from '../../../common/continuous_extraction_schemas';
 
 const toFeatureSummary = ({ id, title }: { id: string; title?: string }) => ({ id, title });
 
@@ -41,28 +46,7 @@ const inputSchema = z.object({
   streamName: z.string(),
 });
 
-const featureSummarySchema = baseFeatureSchema.pick({
-  id: true,
-  title: true,
-});
-
-const tokenCountSchema = z.object({
-  prompt: z.number(),
-  completion: z.number(),
-  total: z.number(),
-  cached: z.number(),
-});
-
 const ZERO_TOKENS = { prompt: 0, completion: 0, total: 0, cached: 0 };
-
-const iterationSchema = z.object({
-  iteration: z.number(),
-  durationMs: z.number(),
-  state: z.string(),
-  tokensUsed: tokenCountSchema,
-  newFeatures: z.array(featureSummarySchema),
-  updatedFeatures: z.array(featureSummarySchema),
-});
 
 const POLL_INTERVAL_MS = 5_000;
 const MAX_POLL_DURATION_MS = (COORDINATOR_INTERVAL_MINUTES - 1) * 60_000;
@@ -79,7 +63,22 @@ const TERMINAL_STATUSES = new Set<string>([
   TaskStatus.NotStarted,
 ]);
 
-const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
+  new Promise((resolve) => {
+    if (signal?.aborted) {
+      resolve();
+      return;
+    }
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer);
+        resolve();
+      },
+      { once: true }
+    );
+  });
 
 const parseScheduledStreams = (workflowContext: StepContext): Array<{ streamName: string }> => {
   const raw = (workflowContext.steps?.select_streams?.output as Record<string, unknown> | undefined)
@@ -118,7 +117,7 @@ export const registerKiFeaturesExtractStreamStep = ({
           computed: z.array(featureSummarySchema),
         }),
       }),
-      iterations: z.array(iterationSchema),
+      iterations: z.array(iterationResultSchema),
     }),
     handler: async (context) => {
       const { streamName } = inputSchema.parse(context.input);
@@ -193,7 +192,7 @@ export const registerKiFeaturesExtractStreamStep = ({
               `Stream ${streamName}: polling failed after ${MAX_CONSECUTIVE_ERRORS} consecutive errors`
             );
           }
-          await sleep(POLL_INTERVAL_MS);
+          await sleep(POLL_INTERVAL_MS, context.abortSignal);
           continue;
         }
 
@@ -201,7 +200,7 @@ export const registerKiFeaturesExtractStreamStep = ({
           return await processTerminal();
         }
 
-        await sleep(POLL_INTERVAL_MS);
+        await sleep(POLL_INTERVAL_MS, context.abortSignal);
       }
 
       throw new Error(`Stream ${streamName}: polling timed out after ${MAX_POLL_DURATION_MS}ms`);

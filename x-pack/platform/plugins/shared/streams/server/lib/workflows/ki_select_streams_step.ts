@@ -24,25 +24,21 @@ import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MAX_CONCURRENT_TASKS,
 } from '../../../common/constants';
+import { streamCandidateSchema } from '../../../common/continuous_extraction_schemas';
 
 // Fixed look-back window for each extraction run; independent of the configurable
 // scheduling interval, which controls *how often* we run, not *how far back* we look.
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 
-const scheduledItemSchema = z.object({
-  streamName: z.string(),
-  lastCompletedAt: z.string().nullable(),
-});
-
-type ScheduledItem = z.infer<typeof scheduledItemSchema>;
+type StreamCandidate = z.infer<typeof streamCandidateSchema>;
 
 const outputSchema = z.object({
   connectorId: z.string(),
-  scheduled: z.array(scheduledItemSchema),
-  failedToSchedule: z.array(scheduledItemSchema),
+  scheduled: z.array(streamCandidateSchema),
+  failedToSchedule: z.array(streamCandidateSchema),
   alreadyRunning: z.array(z.object({ streamName: z.string(), scheduledAt: z.string().nullable() })),
-  skipped: z.array(scheduledItemSchema),
-  upToDate: z.array(scheduledItemSchema),
+  skipped: z.array(streamCandidateSchema),
+  upToDate: z.array(streamCandidateSchema),
   excluded: z.array(z.string()),
   settings: z.object({
     enabled: z.boolean(),
@@ -59,8 +55,6 @@ export const registerKiSelectStreamsStep = ({
   getScopedClients: GetScopedClients;
   logger: Logger;
 }) => {
-  const stepLogger = logger.get('ki-select-streams-step');
-
   workflowsExtensions.registerStepDefinition({
     id: KI_SELECT_STREAMS_STEP_TYPE,
     label: 'KI Select Streams',
@@ -86,7 +80,7 @@ export const registerKiSelectStreamsStep = ({
         resolveConnectorId({
           connectorId: settings.connectorIdKnowledgeIndicatorExtraction,
           uiSettingsClient,
-          logger: stepLogger,
+          logger,
         }),
         taskClient.findByType<FeaturesIdentificationTaskParams>(FEATURES_IDENTIFICATION_TASK_TYPE, {
           sort: [
@@ -117,8 +111,8 @@ export const registerKiSelectStreamsStep = ({
       const intervalMs = intervalHours * 3_600_000;
       const now = Date.now();
       const alreadyRunning: Array<{ streamName: string; scheduledAt: string | null }> = [];
-      const candidates: ScheduledItem[] = [];
-      const upToDate: ScheduledItem[] = [];
+      const candidates: StreamCandidate[] = [];
+      const upToDate: StreamCandidate[] = [];
       const streamsWithTask = new Set<string>();
 
       for (const task of sortedTasks) {
@@ -153,8 +147,8 @@ export const registerKiSelectStreamsStep = ({
       const toSchedule = allCandidates.slice(0, availableSlots);
       const skipped = allCandidates.slice(availableSlots);
 
-      const scheduled: ScheduledItem[] = [];
-      const failedToSchedule: ScheduledItem[] = [];
+      const scheduled: StreamCandidate[] = [];
+      const failedToSchedule: StreamCandidate[] = [];
       const end = now;
       const start = end - TWENTY_FOUR_HOURS_MS;
       for (const candidate of toSchedule) {

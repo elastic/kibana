@@ -25,6 +25,13 @@ export {
   KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
 } from './constants';
 
+export {
+  featureSummarySchema,
+  tokenCountSchema,
+  iterationResultSchema,
+  streamCandidateSchema,
+} from './continuous_extraction_schemas';
+
 export type { StreamDocsStat } from './doc_counts';
 export {
   excludeFrozenQuery,

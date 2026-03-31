@@ -8,21 +8,14 @@
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { baseFeatureSchema } from '@kbn/streams-schema';
 import {
   KI_SELECT_STREAMS_STEP_TYPE,
   KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
+  featureSummarySchema,
+  tokenCountSchema,
+  iterationResultSchema,
+  streamCandidateSchema,
 } from '@kbn/streams-plugin/common';
-
-const featureSummarySchema = baseFeatureSchema.pick({
-  id: true,
-  title: true,
-});
-
-const scheduledItemSchema = z.object({
-  streamName: z.string(),
-  lastCompletedAt: z.string().nullable(),
-});
 
 export const kiSelectStreamsPublicStepDefinition: PublicStepDefinition = {
   id: KI_SELECT_STREAMS_STEP_TYPE,
@@ -33,13 +26,13 @@ export const kiSelectStreamsPublicStepDefinition: PublicStepDefinition = {
   inputSchema: z.object({}),
   outputSchema: z.object({
     connectorId: z.string(),
-    scheduled: z.array(scheduledItemSchema),
-    failedToSchedule: z.array(scheduledItemSchema),
+    scheduled: z.array(streamCandidateSchema),
+    failedToSchedule: z.array(streamCandidateSchema),
     alreadyRunning: z.array(
       z.object({ streamName: z.string(), scheduledAt: z.string().nullable() })
     ),
-    skipped: z.array(scheduledItemSchema),
-    upToDate: z.array(scheduledItemSchema),
+    skipped: z.array(streamCandidateSchema),
+    upToDate: z.array(streamCandidateSchema),
     excluded: z.array(z.string()),
     settings: z.object({
       enabled: z.boolean(),
@@ -47,22 +40,6 @@ export const kiSelectStreamsPublicStepDefinition: PublicStepDefinition = {
     }),
   }),
 };
-
-const tokenCountSchema = z.object({
-  prompt: z.number(),
-  completion: z.number(),
-  total: z.number(),
-  cached: z.number(),
-});
-
-const iterationSchema = z.object({
-  iteration: z.number(),
-  durationMs: z.number(),
-  state: z.string(),
-  tokensUsed: tokenCountSchema,
-  newFeatures: z.array(featureSummarySchema),
-  updatedFeatures: z.array(featureSummarySchema),
-});
 
 export const kiFeaturesExtractStreamPublicStepDefinition: PublicStepDefinition = {
   id: KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
@@ -84,6 +61,6 @@ export const kiFeaturesExtractStreamPublicStepDefinition: PublicStepDefinition =
         computed: z.array(featureSummarySchema),
       }),
     }),
-    iterations: z.array(iterationSchema),
+    iterations: z.array(iterationResultSchema),
   }),
 };

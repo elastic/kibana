@@ -57,32 +57,21 @@ export const createContinuousExtractionWorkflowService = (
 ): ContinuousExtractionWorkflowService => {
   const log = logger.get('continuous-extraction-workflow');
 
-  const disableById = async (workflowId: string, spaceId: string, request: KibanaRequest) => {
-    const existing = await managementApi.getWorkflow(workflowId, spaceId);
-    if (existing?.enabled) {
-      await managementApi.updateWorkflow(workflowId, { enabled: false }, spaceId, request);
-      log.info(`Disabled continuous extraction workflow ${workflowId}`);
-    }
-  };
-
   return {
     async ensureWorkflow({ enabled, request, spaceId, modelSettingsClient }) {
       const settings = await modelSettingsClient.getSettings();
       const existingWorkflowId = settings.continuousExtraction?.workflowId;
 
-      if (!enabled) {
-        if (existingWorkflowId) {
-          await disableById(existingWorkflowId, spaceId, request);
-        }
-        return;
-      }
-
       if (existingWorkflowId) {
         const existing = await managementApi.getWorkflow(existingWorkflowId, spaceId);
         if (existing) {
+          if (existing.yaml === WORKFLOW_YAML && existing.enabled === enabled) {
+            log.debug(`Continuous extraction workflow ${existingWorkflowId} is already up to date`);
+            return;
+          }
           await managementApi.updateWorkflow(
             existingWorkflowId,
-            { yaml: WORKFLOW_YAML, enabled: true },
+            { yaml: WORKFLOW_YAML, enabled },
             spaceId,
             request
           );
@@ -90,6 +79,10 @@ export const createContinuousExtractionWorkflowService = (
           return;
         }
         log.warn(`Stored workflow ID ${existingWorkflowId} not found, creating a new workflow`);
+      }
+
+      if (!enabled) {
+        return;
       }
 
       const created = await managementApi.createWorkflow({ yaml: WORKFLOW_YAML }, spaceId, request);

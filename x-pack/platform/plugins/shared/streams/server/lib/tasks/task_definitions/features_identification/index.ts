@@ -502,12 +502,21 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   return getDeleteTaskRunResult();
                 }
 
-                // Get connector info for error enrichment
-                const connector = await inferenceClient.getConnectorById(connectorId);
+                let connector;
+                try {
+                  connector = await inferenceClient.getConnectorById(connectorId);
+                } catch (connectorErr) {
+                  taskLogger.warn(
+                    `Failed to fetch connector ${connectorId} for error enrichment: ${
+                      connectorErr instanceof Error ? connectorErr.message : String(connectorErr)
+                    }`
+                  );
+                }
 
-                const errorMessage = isInferenceProviderError(error)
-                  ? formatInferenceProviderError(error, connector)
-                  : parseError(error).message;
+                const errorMessage =
+                  isInferenceProviderError(error) && connector
+                    ? formatInferenceProviderError(error, connector)
+                    : parseError(error).message;
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
