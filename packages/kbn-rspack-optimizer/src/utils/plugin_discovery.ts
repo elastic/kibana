@@ -9,79 +9,79 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { Jsonc } from '@kbn/repo-packages';
+import { readPackageMap, Package, getPluginPackagesFilter } from '@kbn/repo-packages';
+import type { PluginPackage } from '@kbn/repo-packages';
 import type { PluginEntry } from '../types';
-
-/**
- * Minimal shape of a raw kibana.jsonc manifest as returned by Jsonc.parse().
- * This is NOT the same as KibanaPackageManifest from @kbn/repo-packages, which
- * represents the processed form where fields like testPlugin are moved to a
- * symbol-keyed PluginCategoryInfo object.
- */
-interface RawKibanaManifest {
-  id?: string;
-  type?: string;
-  plugin?: {
-    id: string;
-    browser?: boolean;
-    testPlugin?: boolean;
-    extraPublicDirs?: string[];
-    requiredPlugins?: string[];
-    requiredBundles?: string[];
-    ignoreMetrics?: boolean;
-  };
-}
 
 export type { PluginEntry };
 
 export interface DiscoverPluginsOptions {
   repoRoot: string;
-  outputRoot?: string;
   examples?: boolean;
   testPlugins?: boolean;
-  limits?: Record<string, number>;
   focus?: string[];
   filter?: string[];
 }
 
-// Directories to scan for plugins
-export const PLUGIN_DIRS = [
-  'src/platform/plugins',
-  'x-pack/platform/plugins',
-  'x-pack/solutions',
-  'src/plugins', // legacy location
-  'x-pack/plugins', // legacy location
-];
-
-export const EXAMPLE_DIRS = ['examples'];
+const isDefaultPlugin = getPluginPackagesFilter();
 
 /**
- * Discover all Kibana plugins with UI bundles by scanning directories
+ * Convert a PluginPackage into a PluginEntry, or return null if the plugin
+ * does not have a public/ directory (no UI bundle to build).
+ */
+function toPluginEntry(repoRoot: string, pkg: PluginPackage): PluginEntry | null {
+  const contextDir = Path.resolve(repoRoot, pkg.normalizedRepoRelativeDir);
+  if (!Fs.existsSync(Path.join(contextDir, 'public'))) {
+    return null;
+  }
+
+  return {
+    id: pkg.manifest.plugin.id,
+    pkgId: pkg.manifest.id,
+    contextDir,
+    targets: ['public', ...(pkg.manifest.plugin.extraPublicDirs ?? [])],
+    requiredPlugins: pkg.manifest.plugin.requiredPlugins ?? [],
+    requiredBundles: pkg.manifest.plugin.requiredBundles ?? [],
+    manifestPath: Path.resolve(contextDir, 'kibana.jsonc'),
+    type: 'plugin',
+    ignoreMetrics: !isDefaultPlugin(pkg),
+  };
+}
+
+/**
+ * Discover all Kibana plugins with UI bundles using the repo package map.
  */
 export async function discoverPlugins(options: DiscoverPluginsOptions): Promise<PluginEntry[]> {
-  const { repoRoot, outputRoot = repoRoot, examples = false, testPlugins = false } = options;
+  const { repoRoot, examples = false, testPlugins = false } = options;
+
+  const packageMap = readPackageMap();
+  const pluginFilter = getPluginPackagesFilter({ examples, testPlugins, browser: true });
+
+  const packages: Package[] = [];
+  for (const relDir of packageMap.values()) {
+    const manifestPath = Path.resolve(repoRoot, relDir, 'kibana.jsonc');
+    if (!Fs.existsSync(manifestPath)) {
+      continue;
+    }
+    try {
+      packages.push(Package.fromManifest(repoRoot, manifestPath));
+    } catch {
+      // skip malformed manifests
+    }
+  }
 
   const plugins: PluginEntry[] = [];
+  for (const pkg of packages) {
+    if (!pluginFilter(pkg)) {
+      continue;
+    }
 
-  // Scan standard plugin directories
-  for (const dir of PLUGIN_DIRS) {
-    const fullDir = Path.resolve(repoRoot, dir);
-    if (Fs.existsSync(fullDir)) {
-      scanDirectory(fullDir, repoRoot, outputRoot, plugins, { examples, testPlugins });
+    const entry = toPluginEntry(repoRoot, pkg as PluginPackage);
+    if (entry) {
+      plugins.push(entry);
     }
   }
 
-  // Scan example directories if requested
-  if (examples) {
-    for (const dir of EXAMPLE_DIRS) {
-      const fullDir = Path.resolve(repoRoot, dir);
-      if (Fs.existsSync(fullDir)) {
-        scanDirectory(fullDir, repoRoot, outputRoot, plugins, { examples: true, testPlugins });
-      }
-    }
-  }
-
-  // Apply filters if specified
   let result = plugins;
 
   if (options.focus?.length) {
@@ -95,116 +95,22 @@ export async function discoverPlugins(options: DiscoverPluginsOptions): Promise<
   return result;
 }
 
-function scanDirectory(
-  dir: string,
-  repoRoot: string,
-  outputRoot: string,
-  plugins: PluginEntry[],
-  options: { examples: boolean; testPlugins: boolean }
-) {
-  const entries = Fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-
-    const subDir = Path.join(dir, entry.name);
-
-    // Check for kibana.jsonc manifest
-    const manifestPath = Path.join(subDir, 'kibana.jsonc');
-    if (Fs.existsSync(manifestPath)) {
-      const plugin = parsePlugin(manifestPath, repoRoot, outputRoot, options);
-      if (plugin) {
-        plugins.push(plugin);
-      } else {
-        // Manifest exists but is not a plugin (e.g., test-helper, package)
-        // Continue scanning subdirectories for nested plugins
-        scanDirectory(subDir, repoRoot, outputRoot, plugins, options);
-      }
-    } else {
-      // No manifest, recursively scan subdirectories
-      scanDirectory(subDir, repoRoot, outputRoot, plugins, options);
-    }
-  }
+/**
+ * Resolve the absolute path to package-map.json from @kbn/repo-packages.
+ * Used by the watch plugin to detect new/removed packages.
+ */
+export function getPackageMapPath(): string {
+  return Path.resolve(Path.dirname(require.resolve('@kbn/repo-packages')), 'package-map.json');
 }
-
-function parsePlugin(
-  manifestPath: string,
-  repoRoot: string,
-  outputRoot: string,
-  options: { examples: boolean; testPlugins: boolean }
-): PluginEntry | null {
-  try {
-    const manifestContent = Fs.readFileSync(manifestPath, 'utf8');
-    const manifest = Jsonc.parse(manifestContent) as RawKibanaManifest;
-
-    // Must be a plugin
-    if (manifest.type !== 'plugin' || !manifest.plugin) {
-      return null;
-    }
-
-    // Must have browser/UI
-    if (!manifest.plugin.browser) {
-      return null;
-    }
-
-    const contextDir = Path.dirname(manifestPath);
-    const publicDir = Path.join(contextDir, 'public');
-
-    // Must have public directory
-    if (!Fs.existsSync(publicDir)) {
-      return null;
-    }
-
-    // Skip examples unless requested
-    const isExample = isExamplePlugin(contextDir, repoRoot);
-    if (isExample && !options.examples) {
-      return null;
-    }
-
-    // Skip test plugins unless requested
-    // Use manifest-based detection (matching webpack optimizer's approach)
-    // A plugin is a test plugin if it has "testPlugin: true" in its manifest categories
-    const isTest = manifest.plugin.testPlugin === true;
-    if (isTest && !options.testPlugins) {
-      return null;
-    }
-
-    const id = manifest.plugin.id;
-    const pkgId = manifest.id ?? id;
-
-    return {
-      id,
-      pkgId,
-      contextDir,
-      outputDir: Path.join(contextDir, 'target/public'),
-      targets: ['public', ...(manifest.plugin.extraPublicDirs ?? [])],
-      requiredPlugins: manifest.plugin.requiredPlugins ?? [],
-      requiredBundles: manifest.plugin.requiredBundles ?? [],
-      manifestPath,
-      type: 'plugin',
-      ignoreMetrics: manifest.plugin.ignoreMetrics ?? false,
-    };
-  } catch (error) {
-    // Skip invalid manifests
-    return null;
-  }
-}
-
-function isExamplePlugin(pluginDir: string, repoRoot: string): boolean {
-  const relative = Path.relative(repoRoot, pluginDir);
-  return relative.startsWith('examples') || relative.includes('/examples/');
-}
-
 
 /**
- * Create the core entry configuration
+ * Create the core entry configuration.
  */
-export function createCoreEntry(repoRoot: string, outputRoot: string): PluginEntry {
+export function createCoreEntry(repoRoot: string): PluginEntry {
   return {
     id: 'core',
     pkgId: '@kbn/core',
     contextDir: Path.resolve(repoRoot, 'src/core'),
-    outputDir: Path.resolve(outputRoot, 'src/core/target/public'),
     targets: ['public'],
     requiredPlugins: [],
     requiredBundles: [],

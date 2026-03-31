@@ -12,7 +12,7 @@ import Fs from 'fs';
 import { rspack, type Configuration, type Compiler, type RspackPluginInstance } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { discoverPlugins, createCoreEntry, type PluginEntry, PLUGIN_DIRS, EXAMPLE_DIRS } from '../utils/plugin_discovery';
+import { discoverPlugins, createCoreEntry, getPackageMapPath, type PluginEntry } from '../utils/plugin_discovery';
 import { getExternals } from './externals';
 import {
   getSharedResolveConfig,
@@ -323,7 +323,6 @@ export async function createSingleCompileConfig(
   // Discover all plugins
   const allPlugins = await discoverPlugins({
     repoRoot,
-    outputRoot,
     examples,
     testPlugins,
     focus: targetPlugins,
@@ -341,7 +340,7 @@ export async function createSingleCompileConfig(
   }
 
   // Collect all plugin entries (core + plugins)
-  const pluginEntries = collectPluginEntries(repoRoot, outputRoot, plugins);
+  const pluginEntries = collectPluginEntries(repoRoot, plugins);
 
   // Create unified entry that imports and registers all plugins
   // Uses relative paths for cache portability across machines
@@ -754,13 +753,12 @@ export { core_0 as core };
  */
 function collectPluginEntries(
   repoRoot: string,
-  outputRoot: string,
   plugins: PluginEntry[]
 ): Array<{ id: string; path: string; bundleId: string }> {
   const pluginEntries: Array<{ id: string; path: string; bundleId: string }> = [];
 
   // Add core
-  const coreEntry = createCoreEntry(repoRoot, outputRoot);
+  const coreEntry = createCoreEntry(repoRoot);
   const coreEntryPath = findEntry(coreEntry.contextDir);
   if (coreEntryPath) {
     pluginEntries.push({ id: 'core', path: coreEntryPath, bundleId: 'entry/core/public' });
@@ -823,8 +821,10 @@ class PluginWatchPlugin {
       f.endsWith('/kibana.jsonc') || f.endsWith('\\kibana.jsonc');
     const isPluginEntry = (f: string) =>
       /[/\\]public[/\\]index\.(?!test\.)[^/\\]+$/.test(f);
+    const isPackageMap = (f: string) =>
+      f.endsWith('/package-map.json') || f.endsWith('\\package-map.json');
 
-    const isRelevant = (f: string) => isManifest(f) || isPluginEntry(f);
+    const isRelevant = (f: string) => isManifest(f) || isPluginEntry(f) || isPackageMap(f);
 
     if (modified) {
       for (const f of modified) {
@@ -841,36 +841,15 @@ class PluginWatchPlugin {
   }
 
   apply(compiler: Compiler) {
-    // Add plugin directories as context dependencies so RSPack watches them
     compiler.hooks.afterCompile.tap('PluginWatchPlugin', (compilation) => {
-      // Watch existing plugin directories
+      // Watch existing plugin directories for manifest changes
       for (const manifest of this.pluginManifests) {
         compilation.contextDependencies.add(Path.dirname(manifest));
       }
 
-      // Watch parent plugin directories to detect NEW plugins being added
-      const dirsToWatch = [...PLUGIN_DIRS];
-      if (this.options.examples) {
-        dirsToWatch.push(...EXAMPLE_DIRS);
-      }
-
-      for (const dir of dirsToWatch) {
-        const fullDir = Path.resolve(this.options.repoRoot, dir);
-        if (Fs.existsSync(fullDir)) {
-          compilation.contextDependencies.add(fullDir);
-          // Also watch immediate subdirectories (for nested structures like x-pack/solutions/security)
-          try {
-            const entries = Fs.readdirSync(fullDir, { withFileTypes: true });
-            for (const entry of entries) {
-              if (entry.isDirectory()) {
-                compilation.contextDependencies.add(Path.join(fullDir, entry.name));
-              }
-            }
-          } catch {
-            // Ignore errors reading directories
-          }
-        }
-      }
+      // Watch package-map.json to detect new/removed plugins
+      // (updated by `yarn kbn bootstrap` when plugins are added/removed)
+      compilation.fileDependencies.add(getPackageMapPath());
     });
 
     compiler.hooks.watchRun.tapAsync('PluginWatchPlugin', async (_compiler, callback) => {
@@ -884,7 +863,6 @@ class PluginWatchPlugin {
       try {
         const currentPlugins = await discoverPlugins({
           repoRoot: this.options.repoRoot,
-          outputRoot: this.options.outputRoot || this.options.repoRoot,
           examples: this.options.examples || false,
           testPlugins: this.options.testPlugins || false,
           focus: this.options.plugins,
@@ -894,7 +872,6 @@ class PluginWatchPlugin {
         // Collect plugin entries
         const pluginEntries = collectPluginEntries(
           this.options.repoRoot,
-          this.options.outputRoot || this.options.repoRoot,
           currentPlugins
         );
 
