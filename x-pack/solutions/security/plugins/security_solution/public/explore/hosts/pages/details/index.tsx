@@ -249,8 +249,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
 
   const euidApi = useEntityStoreEuidApi();
 
+  const noEntityInStore =
+    entityStoreV2Enabled && !entityFromStoreResult.isLoading && !entityFromStoreResult.entityRecord;
+
   const hostDetailsEventsPageFilters = useMemo(() => {
-    if (!entityStoreV2Enabled) {
+    if (!entityStoreV2Enabled || noEntityInStore) {
       return getHostDetailsPageFilters(detailName);
     }
     const fromStore =
@@ -265,6 +268,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     detailName,
     entityFromStoreResult.entityRecord,
     entityStoreV2Enabled,
+    noEntityInStore,
     euidApi?.euid,
     resolvedIdentityFields,
   ]);
@@ -311,9 +315,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
       observedHost.refetchEntityStore,
     ]
   );
-
-  const noEntityInStore =
-    entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedHost.entityRecord;
 
   const displayEntityId = useMemo(
     () => (entityStoreV2Enabled ? observedHost.entityRecord?.entity?.id : entityId),

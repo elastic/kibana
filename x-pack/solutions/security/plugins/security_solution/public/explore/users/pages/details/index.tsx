@@ -252,7 +252,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     entityStoreV2Enabled && !entityFromStoreResult.isLoading && !entityFromStoreResult.entityRecord;
 
   const usersDetailsEventsPageFilters = useMemo(() => {
-    if (!entityStoreV2Enabled || !noEntityInStore) {
+    if (!entityStoreV2Enabled || noEntityInStore) {
       return getUsersDetailsPageFilters(detailName);
     }
     const fromStore =
