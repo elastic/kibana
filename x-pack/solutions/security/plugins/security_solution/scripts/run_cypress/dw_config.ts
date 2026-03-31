@@ -37,7 +37,9 @@ const FILTERED_RUNNER_WEIGHTS: Record<string, number> = {
  * Per-spec weight overrides for specs where `it()` count doesn't reflect actual runtime.
  * Patterns are matched against the full file path; the first match wins.
  *
- * Calibrated from CI runtimes (build 401746).
+ * Calibrated from CI runtimes (build 401746), adjusted for consolidated it() blocks
+ * from PR #260152 — same runtime, fewer it() blocks, so overrides prevent
+ * the load balancer from underweighting these specs.
  */
 const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
   // Tamper protection: real Fleet agent ops (~4.7 min avg despite only 3 tests)
@@ -49,20 +51,28 @@ const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
   { pattern: 'isolate.cy.ts', weight: 12 },
   { pattern: 'responder.cy.ts', weight: 12 },
 
-  // Standalone artifact CRUD specs (~2-3 min)
+  // Standalone artifact CRUD specs (~2-3 min each, consolidated it() blocks)
   { pattern: 'artifacts/blocklist.cy.ts', weight: 9 },
-  { pattern: 'artifacts/trusted_apps.cy.ts', weight: 7 },
+  { pattern: 'artifacts/trusted_apps.cy.ts', weight: 9 },
   { pattern: 'artifacts/event_filters.cy.ts', weight: 8 },
   { pattern: 'artifacts/host_isolation_exceptions.cy.ts', weight: 8 },
   { pattern: 'artifacts/endpoint_exceptions.cy.ts', weight: 8 },
+  { pattern: 'artifacts/endpoint_exceptions.no_ff.cy.ts', weight: 5 },
   { pattern: 'artifacts/trusted_devices.cy.ts', weight: 7 },
   { pattern: 'artifacts/artifacts.cy.ts', weight: 8 },
 
-  // Endpoint details (~2.5 min)
+  // Endpoint details (~2.5 min, consolidated from 10 to 7 it() blocks)
   { pattern: 'endpoint_details/insights.cy.ts', weight: 8 },
 
   // Endpoint list real tests (~3 min)
   { pattern: 'endpoint_list/endpoints.cy.ts', weight: 8 },
+
+  // Serverless role specs: consolidated from per-page to per-category it() blocks.
+  // Each spec still tests all pages (~1.5-2.5 min) despite only 1-3 it() blocks.
+  { pattern: 'roles/complete_with_endpoint_roles_endpoint_operations_analyst', weight: 6 },
+  { pattern: 'roles/complete_with_endpoint_roles_t3_analyst', weight: 6 },
+  { pattern: 'roles/complete_with_endpoint_roles_', weight: 5 },
+  { pattern: 'roles/essentials_with_endpoint_roles_', weight: 4 },
 ];
 
 /**
