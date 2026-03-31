@@ -495,6 +495,7 @@ describe('InternalStateStore', () => {
       internalStateActions.setExpandedDoc({
         tabId,
         expandedDoc: mockDoc,
+        expandedDocOwner: 'grid-1',
         initialDocViewerTabId: 'Table',
       })
     );
@@ -506,10 +507,12 @@ describe('InternalStateStore', () => {
     );
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+    expect(selectTab(store.getState(), tabId).expandedDocOwner).toBe('grid-1');
 
     store.dispatch(internalStateActions.resetOnSavedSearchChange({ tabId }));
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).expandedDocOwner).toBeUndefined();
     expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBeUndefined();
   });
