@@ -19,6 +19,7 @@ import { getCurrentSpaceId } from '../../utils/spaces';
 import type {
   AgentsServiceSetup,
   AgentsServiceStart,
+  PluginRefsParams,
   SkillRefsParams,
   ToolRefsParams,
 } from './types';
@@ -125,6 +126,22 @@ export class AgentsService {
       return client.getAgentsUsingTools({ toolIds });
     };
 
+    const removePluginRefsFromAgents = async ({
+      request,
+      pluginIds,
+    }: PluginRefsParams): Promise<AgentsUsingToolsResult> => {
+      const client = await getAgentClient({ request });
+      return client.removePluginRefsFromAgents({ pluginIds });
+    };
+
+    const getAgentsUsingPlugins = async ({
+      request,
+      pluginIds,
+    }: PluginRefsParams): Promise<AgentsUsingToolsResult> => {
+      const client = await getAgentClient({ request });
+      return client.getAgentsUsingPlugins({ pluginIds });
+    };
+
     const removeSkillRefsFromAgents = async ({
       request,
       skillIds,
@@ -145,6 +162,8 @@ export class AgentsService {
       getRegistry,
       removeToolRefsFromAgents,
       getAgentsUsingTools,
+      removePluginRefsFromAgents,
+      getAgentsUsingPlugins,
       removeSkillRefsFromAgents,
       getAgentsUsingSkills,
     };

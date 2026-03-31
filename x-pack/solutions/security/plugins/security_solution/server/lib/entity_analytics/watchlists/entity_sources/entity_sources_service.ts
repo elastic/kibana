@@ -91,5 +91,36 @@ export const createEntitySourcesService = ({
     logger.info(`[WatchlistSync] Completed sync for watchlist ${watchlistId} (${watchlist.name})`);
   };
 
-  return { syncWatchlist };
+  const syncAllWatchlists = async () => {
+    const allWatchlists = await watchlistClient.list();
+    // The id field is always present on persisted watchlists (set from saved object id);
+    // it is only optional in the shared OpenAPI schema because create requests omit it.
+    const watchlists = allWatchlists.filter((w): w is typeof w & { id: string } => w.id != null);
+
+    if (watchlists.length === 0) {
+      logger.debug(`No watchlists found for namespace "${namespace}". Skipping sync.`);
+      return;
+    }
+
+    logger.debug(`Found ${watchlists.length} watchlist(s) to sync in namespace "${namespace}"`);
+
+    for (const watchlist of watchlists) {
+      try {
+        logger.debug(`Syncing watchlist "${watchlist.name}" (${watchlist.id})`);
+        await syncWatchlist(watchlist.id);
+      } catch (err) {
+        logger.error(
+          `Failed to sync watchlist "${watchlist.name}" (${watchlist.id}): ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    }
+
+    logger.info(
+      `[WatchlistSync] Completed sync of ${watchlists.length} watchlist(s) for namespace "${namespace}"`
+    );
+  };
+
+  return { syncWatchlist, syncAllWatchlists };
 };
