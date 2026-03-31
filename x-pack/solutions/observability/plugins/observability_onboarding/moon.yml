@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/synthtrace-client'
   - '@kbn/streams-plugin'
   - '@kbn/data-views-plugin'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - plugin
   - prod
