@@ -802,6 +802,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     set(event, 'kibana.alert.rule.execution.metrics', {
       ...event.kibana?.alert?.rule?.execution?.metrics,
       matched_indices_count: consumerMetrics.matched_indices_count,
+      matched_indicator_indices_count: consumerMetrics.matched_indicator_indices_count,
       alerts_candidate_count: consumerMetrics.alerts_candidate_count,
       alerts_suppressed_count: consumerMetrics.alerts_suppressed_count,
       frozen_indices_queried_count: consumerMetrics.frozen_indices_queried_count,

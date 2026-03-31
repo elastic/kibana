@@ -85,8 +85,16 @@ export const runExecutionValidation = async (
 
   if (isThreatParams(params)) {
     try {
-      const { matchedIndexPatterns: matchedThreatIndexPatterns } =
-        await indexPatterns.getIndexPatternsWithMatches(params.threatIndex);
+      const {
+        matchedIndexPatterns: matchedThreatIndexPatterns,
+        matchedIndices: matchedThreatIndices,
+      } = await indexPatterns.getIndexPatternsWithMatches(params.threatIndex);
+
+      // Collect rule execution metrics
+      ruleExecutionLogger.logMetric(
+        'matched_indicator_indices_count',
+        matchedThreatIndices?.length
+      );
 
       if (matchedThreatIndexPatterns.length === 0) {
         warnings.push(
