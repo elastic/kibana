@@ -69,8 +69,8 @@ export function validateProcessorValues(
     case 'split':
     case 'sort':
     case 'network_direction':
+    case 'enrich':
     case 'manual_ingest_pipeline':
-      // No value validation implemented for these processors yet
       break;
     case 'json_extract': {
       for (let i = 0; i < step.extractions.length; i++) {
