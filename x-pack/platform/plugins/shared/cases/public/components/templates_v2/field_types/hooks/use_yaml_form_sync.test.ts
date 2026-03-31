@@ -32,7 +32,7 @@ describe('useYamlFormSync', () => {
       name: string;
       type: string;
       control: string;
-      defaultValue?: string | number;
+      defaultValue?: string | number | string[];
     }>
   ) =>
     fields.map((f) => ({
@@ -95,6 +95,37 @@ describe('useYamlFormSync', () => {
       expect(mockForm.setFieldValue).toHaveBeenCalledWith(
         `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
         ''
+      );
+    });
+
+    it('sets form field to a JSON string when YAML default is an array (CHECKBOX_GROUP)', () => {
+      const parsedFields = createParsedFields([
+        {
+          name: 'systems',
+          type: 'keyword',
+          control: 'CHECKBOX_GROUP',
+          defaultValue: ['api', 'database'],
+        },
+      ]);
+
+      renderHook(() => useYamlFormSync(mockForm, parsedFields));
+
+      expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.systems_as_keyword`,
+        '["api","database"]'
+      );
+    });
+
+    it('sets form field to empty JSON array string when YAML default is an empty array', () => {
+      const parsedFields = createParsedFields([
+        { name: 'systems', type: 'keyword', control: 'CHECKBOX_GROUP', defaultValue: [] },
+      ]);
+
+      renderHook(() => useYamlFormSync(mockForm, parsedFields));
+
+      expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+        `${CASE_EXTENDED_FIELDS}.systems_as_keyword`,
+        '[]'
       );
     });
 
@@ -210,6 +241,113 @@ describe('useYamlFormSync', () => {
       expect(mockOnFieldDefaultChange).not.toHaveBeenCalled();
     });
 
+    it('calls onFieldDefaultChange with JSON string when CHECKBOX_GROUP value changes', () => {
+      const mockOnFieldDefaultChange = jest.fn();
+      const parsedFields = createParsedFields([
+        {
+          name: 'systems',
+          type: 'keyword',
+          control: 'CHECKBOX_GROUP',
+          defaultValue: ['api'],
+        },
+      ]);
+
+      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+
+      act(() => {
+        jest.advanceTimersByTime(0);
+      });
+
+      act(() => {
+        mockSubscriptionCallback({
+          data: {
+            internal: {
+              [CASE_EXTENDED_FIELDS]: {
+                systems_as_keyword: '["api","database"]',
+              },
+            },
+          },
+        });
+      });
+
+      expect(mockOnFieldDefaultChange).toHaveBeenCalledWith(
+        'systems',
+        '["api","database"]',
+        'CHECKBOX_GROUP'
+      );
+    });
+
+    it('does not call onFieldDefaultChange when CHECKBOX_GROUP JSON string matches YAML array', () => {
+      const mockOnFieldDefaultChange = jest.fn();
+      const parsedFields = createParsedFields([
+        {
+          name: 'systems',
+          type: 'keyword',
+          control: 'CHECKBOX_GROUP',
+          defaultValue: ['api', 'database'],
+        },
+      ]);
+
+      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+
+      act(() => {
+        jest.advanceTimersByTime(0);
+      });
+
+      // Form value is the JSON string equivalent of the YAML array default
+      act(() => {
+        mockSubscriptionCallback({
+          data: {
+            internal: {
+              [CASE_EXTENDED_FIELDS]: {
+                systems_as_keyword: '["api","database"]',
+              },
+            },
+          },
+        });
+      });
+
+      expect(mockOnFieldDefaultChange).not.toHaveBeenCalled();
+    });
+
+    it('serializes a raw array rawValue to JSON string before comparing (Array.isArray branch)', () => {
+      const mockOnFieldDefaultChange = jest.fn();
+      const parsedFields = createParsedFields([
+        {
+          name: 'systems',
+          type: 'keyword',
+          control: 'CHECKBOX_GROUP',
+          defaultValue: ['api'],
+        },
+      ]);
+
+      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+
+      act(() => {
+        jest.advanceTimersByTime(0);
+      });
+
+      // Form library returns a raw array instead of a JSON string
+      act(() => {
+        mockSubscriptionCallback({
+          data: {
+            internal: {
+              [CASE_EXTENDED_FIELDS]: {
+                systems_as_keyword: ['api', 'ui'],
+              },
+            },
+          },
+        });
+      });
+
+      // Raw array ['api','ui'] → '["api","ui"]' which differs from '["api"]'
+      expect(mockOnFieldDefaultChange).toHaveBeenCalledWith(
+        'systems',
+        '["api","ui"]',
+        'CHECKBOX_GROUP'
+      );
+    });
+
     it('does not call onFieldDefaultChange when syncing from YAML', () => {
       const mockOnFieldDefaultChange = jest.fn();
       const parsedFields = createParsedFields([
@@ -300,6 +438,23 @@ describe('useYamlFormSync', () => {
       expect(result.current.yamlDefaults).toEqual({
         summary: 'Default',
         count: '5',
+      });
+    });
+
+    it('returns yamlDefaults with JSON-stringified array for CHECKBOX_GROUP', () => {
+      const parsedFields = createParsedFields([
+        {
+          name: 'systems',
+          type: 'keyword',
+          control: 'CHECKBOX_GROUP',
+          defaultValue: ['api', 'ui'],
+        },
+      ]);
+
+      const { result } = renderHook(() => useYamlFormSync(mockForm, parsedFields));
+
+      expect(result.current.yamlDefaults).toEqual({
+        systems: '["api","ui"]',
       });
     });
 
@@ -441,6 +596,46 @@ describe('useYamlFormSync', () => {
 
       expect(mockOnFieldDefaultChange).toHaveBeenCalledWith('number', '20', 'INPUT_NUMBER');
       expect(mockOnFieldDefaultChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('handles CHECKBOX_GROUP alongside other field types, only notifying changed fields', () => {
+      const mockOnFieldDefaultChange = jest.fn();
+      const parsedFields = createParsedFields([
+        { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'text' },
+        {
+          name: 'systems',
+          type: 'keyword',
+          control: 'CHECKBOX_GROUP',
+          defaultValue: ['api'],
+        },
+      ]);
+
+      renderHook(() => useYamlFormSync(mockForm, parsedFields, mockOnFieldDefaultChange));
+
+      act(() => {
+        jest.advanceTimersByTime(0);
+      });
+
+      // Only the checkbox group changes
+      act(() => {
+        mockSubscriptionCallback({
+          data: {
+            internal: {
+              [CASE_EXTENDED_FIELDS]: {
+                summary_as_keyword: 'text',
+                systems_as_keyword: '["api","database"]',
+              },
+            },
+          },
+        });
+      });
+
+      expect(mockOnFieldDefaultChange).toHaveBeenCalledTimes(1);
+      expect(mockOnFieldDefaultChange).toHaveBeenCalledWith(
+        'systems',
+        '["api","database"]',
+        'CHECKBOX_GROUP'
+      );
     });
   });
 

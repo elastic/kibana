@@ -84,8 +84,18 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const handleFieldDefaultChange = useCallback(
     (fieldName: string, value: string, control: string) => {
-      const isNumericControl = control === FieldType.INPUT_NUMBER;
-      const parsedValue = isNumericControl && value !== '' ? Number(value) : value;
+      let parsedValue: string | number | string[];
+      if (control === FieldType.INPUT_NUMBER && value !== '') {
+        parsedValue = Number(value);
+      } else if (control === FieldType.CHECKBOX_GROUP) {
+        try {
+          parsedValue = JSON.parse(value) as string[];
+        } catch {
+          parsedValue = [];
+        }
+      } else {
+        parsedValue = value;
+      }
       const updatedYaml = updateYamlFieldDefault(yamlValueRef.current, fieldName, parsedValue);
       if (updatedYaml !== yamlValueRef.current) {
         onYamlChange(updatedYaml);

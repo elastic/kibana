@@ -11,7 +11,7 @@ import { load as parseYaml } from 'js-yaml';
 interface FieldDefinition {
   name: string;
   metadata?: {
-    default?: string | number;
+    default?: string | number | string[];
   };
 }
 
@@ -26,7 +26,7 @@ interface ParsedDefinition {
 export const updateYamlFieldDefault = (
   yaml: string,
   fieldName: string,
-  newValue: string | number
+  newValue: string | number | string[]
 ): string => {
   if (!yaml || yaml.trim() === '') {
     return yaml;

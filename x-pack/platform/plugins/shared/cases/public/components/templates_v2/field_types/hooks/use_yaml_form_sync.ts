@@ -84,6 +84,8 @@ export const useYamlFormSync = (
             ? rawValue.toISOString()
             : moment.isMoment(rawValue)
             ? rawValue.utc().toISOString()
+            : Array.isArray(rawValue)
+            ? JSON.stringify(rawValue)
             : String(rawValue ?? '');
         const currentYamlValue = yamlDefaultsRef.current[field.name] ?? '';
 

@@ -13,6 +13,7 @@ export const FieldType = {
   SELECT_BASIC: 'SELECT_BASIC',
   TEXTAREA: 'TEXTAREA',
   DATE_PICKER: 'DATE_PICKER',
+  CHECKBOX_GROUP: 'CHECKBOX_GROUP',
 } as const;
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType];
@@ -75,10 +76,7 @@ const BaseFieldSchema = z.object({
   validation: ValidationSchema.optional(),
   metadata: z
     .object({
-      default: z.preprocess(
-        (val) => (val instanceof Date ? val.toISOString() : val),
-        z.string().optional()
-      ),
+      default: z.union([z.string(), z.number(), z.array(z.string())]).optional(),
     })
     .catchall(z.unknown())
     .optional(),
@@ -134,6 +132,24 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
     .optional(),
 });
 
+const uniqueStrings = (arr: string[]) => new Set(arr).size === arr.length;
+
+export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
+  control: z.literal('CHECKBOX_GROUP'),
+  metadata: z
+    .object({
+      options: z
+        .array(z.string())
+        .max(30, { message: 'Options must not exceed 30 items.' })
+        .refine(uniqueStrings, { message: 'Options must be unique.' }),
+      default: z
+        .array(z.string())
+        .refine(uniqueStrings, { message: 'Default values must be unique.' })
+        .optional(),
+    })
+    .catchall(z.unknown()),
+});
+
 /**
  * This can be used to parse `fields` section in the YAML `definition` of the template.
  */
@@ -143,4 +159,5 @@ export const FieldSchema = z.discriminatedUnion('control', [
   SelectBasicFieldSchema,
   TextareaFieldSchema,
   DatePickerFieldSchema,
+  CheckboxGroupFieldSchema,
 ]);

@@ -24,6 +24,7 @@ interface OverrideCtx {
 function applySchemaOverrides(ctx: OverrideCtx) {
   removeAdditionalPropertiesFromAllOfItems(ctx);
   addDiscriminatorEnumHints(ctx);
+  addUniqueItemsToCheckboxArrays(ctx);
 }
 
 /**
@@ -100,6 +101,24 @@ function addDiscriminatorEnumHints(ctx: OverrideCtx) {
         type: 'string',
         enum: values,
       };
+    }
+  }
+}
+
+/**
+ * Adds `uniqueItems: true` to string array schemas for CHECKBOX_GROUP's
+ * `options` and `default` properties so Monaco YAML flags duplicate values.
+ */
+function addUniqueItemsToCheckboxArrays(ctx: OverrideCtx) {
+  const lastPathPart = ctx.path[ctx.path.length - 1];
+  if (
+    (lastPathPart === 'options' || lastPathPart === 'default') &&
+    ctx.jsonSchema.type === 'array'
+  ) {
+    const schema = ctx.jsonSchema as Record<string, unknown>;
+    schema.uniqueItems = true;
+    if (lastPathPart === 'options') {
+      schema.maxItems = 30;
     }
   }
 }

@@ -120,4 +120,60 @@ fields:
         field: scheduled_at
         operator: eq
         value: "2024-06-01T09:00:00.000Z"
+  # CHECKBOX_GROUP: select 0-N options, optional defaults
+  - name: affected_components
+    control: CHECKBOX_GROUP
+    label: Affected components
+    type: keyword
+    metadata:
+      options:
+        - api
+        - ui
+        - database
+        - auth
+        - infrastructure
+      default:
+        - api
+  # shown only when "database" is among the selected components
+  # contains checks for the substring in the stored JSON string,
+  # wrapping the value in double-quotes ensures an exact element match
+  - name: db_connection
+    control: INPUT_TEXT
+    label: Database connection string
+    type: keyword
+    display:
+      show_when:
+        field: affected_components
+        operator: contains
+        value: '"database"'
+    validation:
+      required_when:
+        field: affected_components
+        operator: contains
+        value: '"database"'
+  # shown only when "auth" is among the selected components
+  - name: auth_details
+    control: TEXTAREA
+    label: Auth provider details
+    type: keyword
+    display:
+      show_when:
+        field: affected_components
+        operator: contains
+        value: '"auth"'
+  # shown only when BOTH "api" and "ui" are selected (compound all condition)
+  - name: integration_notes
+    control: TEXTAREA
+    label: Integration test notes
+    type: keyword
+    display:
+      show_when:
+        combine: all
+        rules:
+          - field: affected_components
+            operator: contains
+            value: '"api"'
+          - field: affected_components
+            operator: contains
+            value: '"ui"'
 `.trimStart();

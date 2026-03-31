@@ -73,6 +73,172 @@ fields:
     expect(result).toContain('default: 42');
   });
 
+  it('should handle array values as a YAML sequence', () => {
+    const checkboxYaml = `name: Test
+fields:
+  - name: affected_systems
+    control: CHECKBOX_GROUP
+    type: keyword
+    metadata:
+      options:
+        - frontend
+        - backend
+`;
+
+    const result = updateYamlFieldDefault(checkboxYaml, 'affected_systems', [
+      'frontend',
+      'backend',
+    ]);
+
+    expect(result).toContain('default:');
+    expect(result).toContain('- frontend');
+    expect(result).toContain('- backend');
+    expect(result).not.toContain('["frontend","backend"]');
+  });
+
+  it('should update existing array default with new array value', () => {
+    const yamlWithArrayDefault = `name: Test
+fields:
+  - name: affected_systems
+    control: CHECKBOX_GROUP
+    type: keyword
+    metadata:
+      options:
+        - frontend
+        - backend
+        - database
+      default:
+        - frontend
+`;
+
+    const result = updateYamlFieldDefault(yamlWithArrayDefault, 'affected_systems', [
+      'frontend',
+      'database',
+    ]);
+
+    // default section contains only frontend and database
+    const defaultMatch = result.match(/default:\n((?:\s+- .+\n?)+)/);
+    expect(defaultMatch).not.toBeNull();
+    const defaultBlock = defaultMatch![1];
+    expect(defaultBlock).toContain('frontend');
+    expect(defaultBlock).toContain('database');
+    expect(defaultBlock).not.toContain('backend');
+  });
+
+  it('should handle an empty array value', () => {
+    const checkboxYaml = `name: Test
+fields:
+  - name: tags
+    control: CHECKBOX_GROUP
+    type: keyword
+    metadata:
+      options:
+        - a
+        - b
+      default:
+        - a
+`;
+
+    const result = updateYamlFieldDefault(checkboxYaml, 'tags', []);
+
+    // yaml library serialises [] as an inline empty sequence
+    expect(result).toContain('default: []');
+  });
+
+  it('should handle a single-element array', () => {
+    const checkboxYaml = `name: Test
+fields:
+  - name: tags
+    control: CHECKBOX_GROUP
+    type: keyword
+    metadata:
+      options:
+        - a
+        - b
+`;
+
+    const result = updateYamlFieldDefault(checkboxYaml, 'tags', ['b']);
+
+    expect(result).toContain('- b');
+    expect(result).not.toContain('["b"]');
+  });
+
+  it('should handle array items that contain special characters', () => {
+    const checkboxYaml = `name: Test
+fields:
+  - name: systems
+    control: CHECKBOX_GROUP
+    type: keyword
+    metadata:
+      options:
+        - "key: value"
+        - "with spaces"
+`;
+
+    const result = updateYamlFieldDefault(checkboxYaml, 'systems', ['key: value', 'with spaces']);
+
+    expect(result).toContain('key: value');
+    expect(result).toContain('with spaces');
+    expect(result).not.toContain('["key: value","with spaces"]');
+  });
+
+  it('should replace a scalar default with an array', () => {
+    const yamlWithScalarDefault = `name: Test
+fields:
+  - name: systems
+    control: CHECKBOX_GROUP
+    type: keyword
+    metadata:
+      default: old-string-value
+`;
+
+    const result = updateYamlFieldDefault(yamlWithScalarDefault, 'systems', ['a', 'b']);
+
+    expect(result).not.toContain('old-string-value');
+    expect(result).toContain('- a');
+    expect(result).toContain('- b');
+  });
+
+  it('should replace an array default with a scalar string', () => {
+    const yamlWithArrayDefault = `name: Test
+fields:
+  - name: priority
+    control: SELECT_BASIC
+    type: keyword
+    metadata:
+      default:
+        - low
+        - medium
+`;
+
+    const result = updateYamlFieldDefault(yamlWithArrayDefault, 'priority', 'high');
+
+    expect(result).toContain('default: high');
+    expect(result).not.toContain('- low');
+    expect(result).not.toContain('- medium');
+  });
+
+  it('should preserve options and other metadata keys when updating array default', () => {
+    const checkboxYaml = `name: Test
+fields:
+  - name: systems
+    control: CHECKBOX_GROUP
+    type: keyword
+    metadata:
+      options:
+        - api
+        - ui
+        - database
+`;
+
+    const result = updateYamlFieldDefault(checkboxYaml, 'systems', ['api', 'database']);
+
+    expect(result).toContain('- api');
+    expect(result).toContain('- ui');
+    expect(result).toContain('- database');
+    expect(result).toContain('default:');
+  });
+
   it('should return original yaml if field not found', () => {
     const result = updateYamlFieldDefault(baseYaml, 'nonexistent', 'value');
 
@@ -270,5 +436,37 @@ fields:
 `;
 
     expect(hasFieldDefault(yaml, 'count')).toBe(true);
+  });
+
+  it('should return true when field has an array default', () => {
+    const yaml = `name: Test
+fields:
+  - name: systems
+    control: CHECKBOX_GROUP
+    type: keyword
+    metadata:
+      options:
+        - api
+        - ui
+      default:
+        - api
+`;
+
+    expect(hasFieldDefault(yaml, 'systems')).toBe(true);
+  });
+
+  it('should return true when field has an empty array default', () => {
+    const yaml = `name: Test
+fields:
+  - name: systems
+    control: CHECKBOX_GROUP
+    type: keyword
+    metadata:
+      options:
+        - api
+      default: []
+`;
+
+    expect(hasFieldDefault(yaml, 'systems')).toBe(true);
   });
 });

@@ -68,50 +68,82 @@ const serializeTemplateHeader = (out: string[], template: ParsedTemplate) => {
   }
 };
 
+const serializeSelectMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'SELECT_BASIC' }>
+) => {
+  out.push(`      metadata:`);
+  out.push(`        options:`);
+  for (const option of field.metadata.options) {
+    out.push(`          - ${yamlString(option)}`);
+  }
+  const defaultValue = field.metadata?.default;
+  if (
+    defaultValue !== undefined &&
+    (typeof defaultValue === 'string' || typeof defaultValue === 'number')
+  ) {
+    out.push(`        default: ${yamlString(defaultValue)}`);
+  }
+};
+
+const serializeDatePickerMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'DATE_PICKER' }>
+) => {
+  const meta = field.metadata;
+  if (!meta) return;
+  // `default` is in the catchall bucket, typed as unknown
+  const defaultValue = meta.default;
+  const hasDefault =
+    typeof defaultValue === 'string' ||
+    typeof defaultValue === 'number' ||
+    defaultValue instanceof Date;
+  if (!hasDefault && meta.show_time === undefined && meta.timezone === undefined) return;
+  out.push(`      metadata:`);
+  if (hasDefault) {
+    const serialized =
+      defaultValue instanceof Date ? defaultValue.toISOString() : (defaultValue as string | number);
+    out.push(`        default: ${yamlString(serialized)}`);
+  }
+  if (meta.show_time !== undefined) {
+    out.push(`        show_time: ${meta.show_time}`);
+  }
+  if (meta.timezone !== undefined) {
+    out.push(`        timezone: ${meta.timezone}`);
+  }
+};
+
+const serializeCheckboxGroupMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'CHECKBOX_GROUP' }>
+) => {
+  out.push(`      metadata:`);
+  out.push(`        options:`);
+  for (const option of field.metadata.options) {
+    out.push(`          - ${yamlString(option)}`);
+  }
+  const defaults = field.metadata.default;
+  if (defaults && defaults.length > 0) {
+    out.push(`        default:`);
+    for (const d of defaults) {
+      out.push(`          - ${yamlString(d)}`);
+    }
+  }
+};
+
 const serializeFieldMetadata = (out: string[], field: Field) => {
   if (field.control === FieldType.SELECT_BASIC) {
-    out.push(`      metadata:`);
-    out.push(`        options:`);
-    for (const option of field.metadata.options) {
-      out.push(`          - ${yamlString(option)}`);
-    }
-    const defaultValue = field.metadata?.default;
-    if (
-      defaultValue !== undefined &&
-      (typeof defaultValue === 'string' || typeof defaultValue === 'number')
-    ) {
-      out.push(`        default: ${yamlString(defaultValue)}`);
-    }
+    serializeSelectMetadata(out, field);
     return;
   }
-
   if (field.control === FieldType.DATE_PICKER) {
-    const meta = field.metadata;
-    if (!meta) return;
-    // `default` is in the catchall bucket, typed as unknown
-    const defaultValue = meta.default;
-    const hasDefault =
-      typeof defaultValue === 'string' ||
-      typeof defaultValue === 'number' ||
-      defaultValue instanceof Date;
-    if (!hasDefault && meta.show_time === undefined && meta.timezone === undefined) return;
-    out.push(`      metadata:`);
-    if (hasDefault) {
-      const serialized =
-        defaultValue instanceof Date
-          ? defaultValue.toISOString()
-          : (defaultValue as string | number);
-      out.push(`        default: ${yamlString(serialized)}`);
-    }
-    if (meta.show_time !== undefined) {
-      out.push(`        show_time: ${meta.show_time}`);
-    }
-    if (meta.timezone !== undefined) {
-      out.push(`        timezone: ${meta.timezone}`);
-    }
+    serializeDatePickerMetadata(out, field);
     return;
   }
-
+  if (field.control === FieldType.CHECKBOX_GROUP) {
+    serializeCheckboxGroupMetadata(out, field);
+    return;
+  }
   // INPUT_TEXT, INPUT_NUMBER, TEXTAREA
   const defaultValue = field.metadata?.default;
   if (
