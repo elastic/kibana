@@ -70,9 +70,7 @@ export function InsightsTab() {
           </p>
         }
         actions={
-          <EuiButtonEmpty
-            href={router.link('/_discovery/{tab}', { path: { tab: 'streams' } })}            
-          >
+          <EuiButtonEmpty href={router.link('/_discovery/{tab}', { path: { tab: 'streams' } })}>
             {i18n.translate(
               'xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundGoToStreamsButton',
               { defaultMessage: 'Go to Streams tab' }

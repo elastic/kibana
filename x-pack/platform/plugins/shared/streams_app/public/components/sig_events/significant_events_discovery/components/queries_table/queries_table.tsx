@@ -394,9 +394,7 @@ export function QueriesTable() {
           </p>
         }
         actions={
-          <EuiButtonEmpty
-            href={router.link('/_discovery/{tab}', { path: { tab: 'streams' } })}            
-          >
+          <EuiButtonEmpty href={router.link('/_discovery/{tab}', { path: { tab: 'streams' } })}>
             {i18n.translate(
               'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.goToStreamsButton',
               { defaultMessage: 'Go to Streams tab' }

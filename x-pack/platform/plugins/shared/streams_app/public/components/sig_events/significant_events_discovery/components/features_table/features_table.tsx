@@ -263,9 +263,7 @@ export function FeaturesTable() {
           </p>
         }
         actions={
-          <EuiButtonEmpty
-            href={router.link('/_discovery/{tab}', { path: { tab: 'streams' } })}                        
-          >
+          <EuiButtonEmpty href={router.link('/_discovery/{tab}', { path: { tab: 'streams' } })}>
             {i18n.translate(
               'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.emptyState.goToStreamsButton',
               { defaultMessage: 'Go to Streams tab' }
