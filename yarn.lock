@@ -22985,10 +22985,10 @@ handle-thing@^2.0.0:
   resolved "https://registry.yarnpkg.com/handle-thing/-/handle-thing-2.0.0.tgz#0e039695ff50c93fc288557d696f3c1dc6776754"
   integrity sha512-d4sze1JNC454Wdo2fkuyzCr6aHcbL6PGGuFAz0Li/NcOm1tCHGnWDRmJP85dh9IhQErTc2svWFEX5xHIOo//kQ==
 
-handlebars@4.7.8, handlebars@^4.7.6, handlebars@^4.7.8:
-  version "4.7.8"
-  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.7.8.tgz#41c42c18b1be2365439188c77c6afae71c0cd9e9"
-  integrity sha512-vafaFqs8MZkRrSX7sFVUdo3ap/eNiLnb4IakshzvP56X5Nr1iGKAIqdX6tMlm6HcNRIkr6AxO5jFEoJzzpT8aQ==
+handlebars@4.7.9, handlebars@^4.7.6, handlebars@^4.7.8:
+  version "4.7.9"
+  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.7.9.tgz#6f139082ab58dc4e5a0e51efe7db5ae890d56a0f"
+  integrity sha512-4E71E0rpOaQuJR2A3xDZ+GM1HyWYv1clR58tC8emQNeQe3RH7MAzSbat+V0wG78LQBo6m6bzSG/L4pBuCsgnUQ==
   dependencies:
     minimist "^1.2.5"
     neo-async "^2.6.2"
@@ -25965,10 +25965,10 @@ linkify-it@^5.0.0:
   dependencies:
     uc.micro "^2.0.0"
 
-liquidjs@10.25.0:
-  version "10.25.0"
-  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.25.0.tgz#a5ec7063c3202348dc5988343502ad27072f4997"
-  integrity sha512-XpO7AiGULTG4xcTlwkcTI5JreFG7b6esLCLp+aUSh7YuQErJZEoUXre9u9rbdb0057pfWG4l0VursvLd5Q/eAw==
+liquidjs@10.25.2:
+  version "10.25.2"
+  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.25.2.tgz#73258b4089d3bc466d224268e70335fe77646207"
+  integrity sha512-ZbgcjEjGNlAIjqhuMzymO3lCpHgmVMftKfrq4/YLLxmKaFFeQMXRGrJTqKX7OXX1hKVPUDpTIrvL7lxt3X/hmw==
   dependencies:
     commander "^10.0.0"
 
@@ -27670,10 +27670,10 @@ node-fetch@^3.3.2:
     fetch-blob "^3.1.4"
     formdata-polyfill "^4.0.10"
 
-node-forge@1.3.3, node-forge@^1, node-forge@^1.2.1:
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.3.tgz#0ad80f6333b3a0045e827ac20b7f735f93716751"
-  integrity sha512-rLvcdSyRCyouf6jcOIPe/BgwG/d7hKjzMKOas33/pHEr6gbq18IK9zV7DiPvzsz0oBJPme6qr6H6kGZuI9/DZg==
+node-forge@1.4.0, node-forge@^1, node-forge@^1.2.1:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.4.0.tgz#1c7b7d8bdc2d078739f58287d589d903a11b2fc2"
+  integrity sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==
 
 node-gyp-build-optional-packages@5.0.7:
   version "5.0.7"
@@ -28831,9 +28831,9 @@ path-to-regexp@^6.3.0:
   integrity sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==
 
 path-to-regexp@^8.0.0, path-to-regexp@^8.1.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-8.2.0.tgz#73990cc29e57a3ff2a0d914095156df5db79e8b4"
-  integrity sha512-TdrF7fW9Rphjq4RjrW0Kp2AW0Ahwu9sRGTkS6bvDi0SCwZlEZYmcfDbEsTz8RVk0EHIS/Vd1bv3JhG+1xZuAyQ==
+  version "8.4.1"
+  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-8.4.1.tgz#1dbe9c340367a44340e5bc114f515b56c7210f19"
+  integrity sha512-fvU78fIjZ+SBM9YwCknCvKOUKkLVqtWDVctl0s7xIqfmfb38t2TT4ZU2gHm+Z8xGwgW+QWEU3oQSAzIbo89Ggw==
 
 path-type@^3.0.0:
   version "3.0.0"
@@ -28960,15 +28960,15 @@ picocolors@1.1.1, picocolors@^1.0.0, picocolors@^1.1.1:
   resolved "https://registry.yarnpkg.com/picocolors/-/picocolors-1.1.1.tgz#3d321af3eab939b083c8f929a1d12cda81c26b6b"
   integrity sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==
 
-picomatch@4.0.3, picomatch@^4.0.3:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.3.tgz#796c76136d1eead715db1e7bad785dedd695a042"
-  integrity sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==
+picomatch@4.0.4, picomatch@^4.0.3:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.4.tgz#fd6f5e00a143086e074dffe4c924b8fb293b0589"
+  integrity sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==
 
 picomatch@^2.0.4, picomatch@^2.2.1, picomatch@^2.2.3, picomatch@^2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
-  integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.2.tgz#5a942915e26b372dc0f0e6753149a16e6b1c5601"
+  integrity sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA==
 
 pify@^2.0.0, pify@^2.2.0:
   version "2.3.0"
@@ -34282,15 +34282,15 @@ undici-types@~6.21.0:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.21.0.tgz#691d00af3909be93a7faa13be61b3a5b50ef12cb"
   integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
 
-undici@6.23.0, undici@^6.21.1, undici@^6.21.2, undici@^6.23.0:
-  version "6.23.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-6.23.0.tgz#7953087744d9095a96f115de3140ca3828aff3a4"
-  integrity sha512-VfQPToRA5FZs/qJxLIinmU59u0r7LXqoJkCzinq3ckNJp3vKEh7jTWN589YQ5+aoAC/TGRLyJLCPKcLQbM8r9g==
+undici@6.24.0, undici@^6.21.1, undici@^6.21.2, undici@^6.23.0:
+  version "6.24.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-6.24.0.tgz#ad36b879b4882d14addc13dd641da7ed7ac7623a"
+  integrity sha512-lVLNosgqo5EkGqh5XUDhGfsMSoO8K0BAN0TyJLvwNRSl4xWGZlCVYsAIpa/OpA3TvmnM01GWcoKmc3ZWo5wKKA==
 
 undici@^7.19.1:
-  version "7.22.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-7.22.0.tgz#7a82590a5908e504a47d85c60b0f89ca14240e60"
-  integrity sha512-RqslV2Us5BrllB+JeiZnK4peryVTndy9Dnqq62S3yYRRTj0tFQCwEniUy2167skdGOy3vqRzEvl1Dm4sV2ReDg==
+  version "7.24.6"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-7.24.6.tgz#b7e977e1bab53d0aab3fa5722fc1efff093aa5e9"
+  integrity sha512-Xi4agocCbRzt0yYMZGMA6ApD7gvtUFaxm4ZmeacWI4cZxaF6C+8I8QfofC20NAePiB/IcvZmzkJ7XPa471AEtA==
 
 unherit@^1.0.4:
   version "1.1.0"
