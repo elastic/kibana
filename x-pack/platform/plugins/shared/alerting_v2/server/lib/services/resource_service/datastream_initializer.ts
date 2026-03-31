@@ -11,22 +11,14 @@ import { Logger as LoggerToken } from '@kbn/core-di';
 import type { Logger } from '@kbn/logging';
 import { inject, injectable } from 'inversify';
 import { isResponseError } from '@kbn/es-errors';
-import type { ResourceDefinition } from '../../../resources/types';
+import type { ResourceDefinition } from '../../../resources/datastreams/types';
+import type { IResourceInitializer } from './resource_manager';
 import { EsServiceInternalToken } from '../es_service/tokens';
-
-export interface IResourceInitializer {
-  initialize(): Promise<void>;
-}
-
-export interface ResourceInitializerOptions {
-  esClient: ElasticsearchClient;
-  resourceDefinition: ResourceDefinition;
-}
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
 @injectable()
-export class ResourceInitializer implements IResourceInitializer {
+export class DatastreamInitializer implements IResourceInitializer {
   constructor(
     @inject(LoggerToken) private readonly logger: Logger,
     @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,

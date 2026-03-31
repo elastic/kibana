@@ -7,22 +7,31 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { ESQLViewInitializer } from '../lib/services/esql_views_service/esql_view_initializer';
-import type { EsqlViewDefinition } from '../lib/services/esql_views_service/types';
+import {
+  ESQLViewInitializer,
+  type EsqlViewDefinition,
+} from '../../lib/services/resource_service/esql_view_initializer';
+import type { ResourceManagerContract } from '../../lib/services/resource_service/resource_manager';
 import { getAlertEventsViewDefinition } from './alert_events';
 import { getAlertActionsViewDefinition } from './alert_actions';
 import { getAlertEpisodesViewDefinition } from './alert_episodes';
 
-export interface RegisterViewsOptions {
+export interface RegisterEsqlViewsOptions {
+  resourceManager: ResourceManagerContract;
   esClient: ElasticsearchClient;
   logger: Logger;
 }
 
-export function initializeESQLViews({ esClient, logger }: RegisterViewsOptions): void {
-  const viewDefinitions = getEsqlViewDefinitions();
-  const viewInitializer = new ESQLViewInitializer(logger, esClient);
+export function registerEsqlViews({
+  resourceManager,
+  esClient,
+  logger,
+}: RegisterEsqlViewsOptions): void {
+  for (const viewDefinition of getEsqlViewDefinitions()) {
+    const initializer = new ESQLViewInitializer(logger, esClient, viewDefinition);
 
-  viewInitializer.startInitialization({ viewDefinitions });
+    resourceManager.registerResource(viewDefinition.key, initializer, { optional: true });
+  }
 }
 
 function getEsqlViewDefinitions(): EsqlViewDefinition[] {
