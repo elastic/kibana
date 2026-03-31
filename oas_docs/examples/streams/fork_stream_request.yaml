@@ -1,8 +1,0 @@
-summary: Fork a wired stream to create a child stream
-value:
-  stream:
-    name: logs.nginx.errors
-  where:
-    field: http.response.status_code
-    eq: '500'
-  status: enabled

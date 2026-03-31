@@ -1,4 +1,0 @@
-summary: Update the ES|QL query for a query stream
-value:
-  query:
-    esql: FROM logs* | WHERE log.level == "error" | KEEP @timestamp, message, host.name, log.level

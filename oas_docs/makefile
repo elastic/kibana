@@ -49,12 +49,8 @@ api-docs-lint-stateful: ## Run redocly API docs linter on kibana.yaml
 api-docs-lint-serverless: ## Run redocly API docs linter on kibana.serverless.yaml
 	@npx @redocly/cli lint "output/kibana.serverless.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
 
-.PHONY: generate-examples
-generate-examples: ## Generate OAS example YAML files from typed TypeScript constants
-	@node scripts/generate_examples.js
-
 .PHONY: api-docs-overlay
-api-docs-overlay: generate-examples ## Apply all overlays
+api-docs-overlay: ## Apply all overlays
 	@npx bump-cli overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.tmp1.yaml"
 	@npx bump-cli overlay "output/kibana.serverless.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.serverless.tmp2.yaml"
 	@npx bump-cli overlay "output/kibana.serverless.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.serverless.tmp3.yaml"
