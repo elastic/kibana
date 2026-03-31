@@ -48,7 +48,7 @@ describe('QueryDetailFlyout', () => {
 
     mockUseQueryActivityAppContext.mockReturnValue({
       chrome: {} as any,
-      http: {} as any,
+      http: { basePath: { prepend: jest.fn((path: string) => path) } } as any,
       notifications: {} as any,
       apiService: {} as any,
       url: {

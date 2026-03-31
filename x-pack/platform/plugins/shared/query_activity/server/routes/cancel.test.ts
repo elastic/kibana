@@ -23,12 +23,17 @@ describe(`POST ${API_BASE_PATH}/cancel`, () => {
     const coreContext = coreMock.createRequestHandlerContext();
     const context = coreMock.createCustomRequestHandlerContext({ core: coreContext });
     const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const asCurrentUserClient = coreContext.elasticsearch.client.asCurrentUser as any;
 
-    return { handler, context, esClient, logger };
+    return { handler, context, esClient, asCurrentUserClient, logger };
   };
 
   it('calls ES tasks.cancel and returns the result', async () => {
-    const { handler, context, esClient } = setup();
+    const { handler, context, esClient, asCurrentUserClient } = setup();
+
+    jest.spyOn(asCurrentUserClient, 'security', 'get').mockReturnValue({
+      hasPrivileges: jest.fn().mockResolvedValue({ cluster: { manage: true } }),
+    });
 
     esClient.tasks.cancel.mockResolvedValueOnce({ acknowledged: true } as any);
 
@@ -49,7 +54,11 @@ describe(`POST ${API_BASE_PATH}/cancel`, () => {
   });
 
   it('treats 404 as success to keep the operation idempotent', async () => {
-    const { handler, context, esClient } = setup();
+    const { handler, context, esClient, asCurrentUserClient } = setup();
+
+    jest.spyOn(asCurrentUserClient, 'security', 'get').mockReturnValue({
+      hasPrivileges: jest.fn().mockResolvedValue({ cluster: { manage: true } }),
+    });
 
     const error: any = new Error('Not found');
     error.statusCode = 404;
@@ -68,7 +77,11 @@ describe(`POST ${API_BASE_PATH}/cancel`, () => {
   });
 
   it('returns 403 when the user lacks privileges to cancel tasks', async () => {
-    const { handler, context, esClient } = setup();
+    const { handler, context, esClient, asCurrentUserClient } = setup();
+
+    jest.spyOn(asCurrentUserClient, 'security', 'get').mockReturnValue({
+      hasPrivileges: jest.fn().mockResolvedValue({ cluster: { manage: true } }),
+    });
 
     const error: any = new Error('Forbidden');
     error.statusCode = 403;

@@ -40,7 +40,7 @@ const createQuery = (overrides: Partial<RunningQuery> = {}): RunningQuery => ({
 const mockContext = (overrides: Partial<QueryActivityAppContextValue> = {}) =>
   ({
     chrome: {} as any,
-    http: {} as any,
+    http: { basePath: { prepend: jest.fn((path: string) => path) } } as any,
     notifications: {} as any,
     apiService: {} as any,
     url: {

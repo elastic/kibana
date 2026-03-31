@@ -93,6 +93,6 @@ describe(`GET ${API_BASE_PATH}/privileges`, () => {
       canViewTasks: false,
       missingClusterPrivileges: [],
     });
-    expect(logger.debug).toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
   });
 });

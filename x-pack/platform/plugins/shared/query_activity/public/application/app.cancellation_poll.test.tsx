@@ -45,7 +45,7 @@ const mockContext = (
       setBreadcrumbs: jest.fn(),
       docTitle: { change: jest.fn() },
     } as any,
-    http: {} as any,
+    http: { basePath: { prepend: jest.fn((path: string) => path) } } as any,
     notifications: {
       toasts: {
         addSuccess: jest.fn(),

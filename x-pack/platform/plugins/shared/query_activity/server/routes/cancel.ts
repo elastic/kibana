@@ -68,6 +68,12 @@ export const registerCancelRoute = ({ router, logger }: RouteOptions) => {
           return response.ok({ body: { acknowledged: true } });
         }
 
+        if (statusCode === 403) {
+          return response.forbidden({
+            body: { message: 'Insufficient privileges to cancel query' },
+          });
+        }
+
         logger.error(`Failed to cancel query activity task "${taskId}": ${error}`);
         return response.customError({
           statusCode: statusCode ?? 500,
