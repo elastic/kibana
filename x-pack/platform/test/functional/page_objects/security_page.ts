@@ -312,116 +312,44 @@ export class SecurityPageObject extends FtrService {
       return;
     }
 
-    const acceptNativeAlertIfPresent = async () => {
-      // Tests may leave Kibana in a state that triggers a native beforeunload dialog (e.g. unsaved changes).
-      // Navigations can fail before we can reach the login page; proactively accept the dialog when present.
-      try {
-        const alert = await this.browser.getAlert();
-        if (alert?.accept) {
-          await alert.accept();
-        }
-      } catch (e) {
-        // ignore: if WebDriver is in a bad state, we'll recover via retries below
-      }
-    };
-
-    const withAlertRecovery = async <T>(fn: () => Promise<T>): Promise<T> => {
-      try {
-        return await fn();
-      } catch (e) {
-        await acceptNativeAlertIfPresent();
-        return await fn();
-      }
-    };
-
-    const ensureOnKibanaHost = async () => {
-      await withAlertRecovery(async () => {
-        const currentUrl = await this.browser.getCurrentUrl();
-        const hostPort = this.deployment.getHostPort();
-
-        // Cookies can throw when we're on a non-http(s) URL (e.g. data:, about:blank). Ensure we are on Kibana's origin.
-        if (!currentUrl.startsWith(hostPort)) {
-          await this.browser.get(hostPort);
-        }
-      });
-    };
-
     const performForceLogout = async () => {
-      await acceptNativeAlertIfPresent();
+      this.log.debug(`Redirecting to ${this.deployment.getHostPort()}/logout to force the logout`);
+      const url = this.deployment.getHostPort() + '/logout';
+      await this.browser.get(url);
 
-      await ensureOnKibanaHost();
-
-      const sidCookie = await withAlertRecovery(async () => {
-        try {
-          return await this.browser.getCookie('sid');
-        } catch (e) {
-          return null;
-        }
-      });
-
-      // If we don't have a session cookie, just clear any remaining cookies and optionally navigate to login.
-      if (!sidCookie?.value) {
-        await withAlertRecovery(async () => {
-          await ensureOnKibanaHost();
-          await this.browser.deleteAllCookies();
-        });
-        if (waitForLoginPage) {
-          try {
-            await this.common.navigateToApp('login', { shouldLoginIfPrompted: false });
-            await this.waitForLoginPage();
-          } catch (e) {
-            this.log.debug('Failed to navigate to login after logout; continuing');
-          }
-        }
-        return;
-      }
-
-      // Prefer invalidating the session via the API to avoid relying on the /logout view (which can be flaky in CI).
-      try {
-        const response = await this.supertest
-          .get('/api/security/logout')
-          .set('Cookie', `sid=${sidCookie.value}`);
-
-        // /api/security/logout redirects on success, but response codes can vary by auth provider.
-        if (![200, 204, 302, 303].includes(response.status)) {
-          this.log.debug(`Unexpected response from /api/security/logout: ${response.status}`);
-        }
-      } catch (e) {
-        this.log.debug(`Failed to call /api/security/logout: ${e.message}`);
-      }
-
-      await withAlertRecovery(async () => {
-        await ensureOnKibanaHost();
-        await this.browser.deleteAllCookies();
-      });
-
-      await acceptNativeAlertIfPresent();
-      try {
-        await this.retry.waitForWithTimeout(
-          'sid cookie to be cleared',
-          this.config.get('timeouts.waitFor'),
-          async () => {
-            const cookie = await withAlertRecovery(async () => {
-              try {
-                return await this.browser.getCookie('sid');
-              } catch (e) {
-                return null;
-              }
-            });
-            return !cookie?.value;
-          }
-        );
-      } catch (e) {
-        this.log.debug('Timed out waiting for sid cookie to clear; continuing');
-      }
-
+      // After logging out, the user can be redirected to various locations depending on the context. By default, we
+      // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
+      // we should simply wait until the user is redirected *elsewhere*.
       if (waitForLoginPage) {
-        try {
-          await this.common.navigateToApp('login', { shouldLoginIfPrompted: false });
-          await this.waitForLoginPage();
-        } catch (e) {
-          this.log.debug('Failed to navigate to login after logout; continuing');
-        }
+        this.log.debug('Waiting on the login form to appear');
+        await this.waitForLoginPage();
+      } else {
+        this.log.debug('Waiting for logout to complete');
+        await this.retry.waitFor('logout to complete', async () => {
+          // There are cases when browser/Kibana would like users to confirm that they want to navigate away from the
+          // current page and lose the state (e.g. unsaved changes) via native alert dialog.
+          const alert = await this.browser.getAlert();
+          if (alert?.accept) {
+            await alert.accept();
+          }
+
+          // Timeout has been doubled to 40s here in attempt to quiet the flakiness
+          await this.retry.waitForWithTimeout('URL redirects to finish', 40000, async () => {
+            const urlBefore = await this.browser.getCurrentUrl();
+            await this.delay(1000);
+            const urlAfter = await this.browser.getCurrentUrl();
+            this.log.debug(`Expecting before URL '${urlBefore}' to equal after URL '${urlAfter}'`);
+            return urlAfter === urlBefore;
+          });
+
+          const currentUrl = await this.browser.getCurrentUrl();
+          if (this.config.get('serverless')) {
+            // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
+            return currentUrl.includes('/login') || currentUrl.includes('/projects');
+          } else {
+            return !currentUrl.includes('/logout');
+          }
+        });
       }
     };
 
