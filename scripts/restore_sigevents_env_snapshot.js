@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/evals-suite-streams/scripts/significant_events_snapshots/restore_env_snapshot');
+require('@kbn/evals-suite-significant-events/scripts/restore_env_snapshot');
