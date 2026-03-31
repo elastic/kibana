@@ -1,3 +1,4 @@
+42
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -38,8 +39,8 @@ export const createEntitySourcesService = ({
     const watchlist = await watchlistClient.get(watchlistId);
     const sourceIds = await watchlistClient.getEntitySourceIds(watchlistId);
     const targetIndex = getIndexForWatchlist(watchlist.name, namespace);
-
-    const { sources } = await descriptorClient.list({ per_page: 10000 });
+    
+    const { sources } = await descriptorClient.list({}); // default to 10 sources, each watchlist has 1/2 sources so this is ok for now but not ideal. 
     const entitiesBySource = await Promise.all(
       sources
         .filter((s) => sourceIds.includes(s.id))
