@@ -144,6 +144,7 @@ import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../common/siem_migrations/constants';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/search_strategy';
@@ -410,6 +411,15 @@ export class Plugin implements ISecuritySolutionPlugin {
         featureId: 'entity_ai_highlight_summary',
         featureName: 'Entity AI Highlight Summary',
         featureDescription: 'Entity AI Highlight Summary inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: 'security_search_inference_parent',
+        featureId: SIEM_MIGRATION_INFERENCE_FEATURE_ID,
+        featureName: 'SIEM Rule Migrations',
+        featureDescription: 'Automatic SIEM rule migration inference endpoint configuration',
         taskType: 'chat_completion',
         recommendedEndpoints: [],
       });
