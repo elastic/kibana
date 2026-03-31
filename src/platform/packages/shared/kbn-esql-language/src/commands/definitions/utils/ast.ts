@@ -96,7 +96,27 @@ export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLAs
 }
 
 export function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
-  return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
+  if (Array.isArray(arg)) {
+    return arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode);
+  }
+
+  if ('args' in arg) {
+    return {
+      ...arg,
+      args: arg.args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) as typeof arg.args,
+    } as typeof arg;
+  }
+
+  if ('values' in arg) {
+    return {
+      ...arg,
+      values: arg.values
+        .filter((value) => !isMarkerNode(value))
+        .map((value) => mapToNonMarkerNode(value) as ESQLAstExpression) as typeof arg.values,
+    } as typeof arg;
+  }
+
+  return arg;
 }
 
 function cleanMarkerNode(node: ESQLSingleAstItem | undefined): ESQLSingleAstItem | undefined {

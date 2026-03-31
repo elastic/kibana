@@ -40,7 +40,7 @@ import {
 import { getAllFunctions } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
 import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
-import { isMarkerNode, findAstPosition } from '../../definitions/utils/ast';
+import { findAstPosition } from '../../definitions/utils/ast';
 import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
 import { inOperators, nullCheckOperators } from '../../definitions/all_operators';
 import { buildExpressionFunctionParameterContext } from '../../definitions/utils';
@@ -181,8 +181,7 @@ export async function autocomplete(
 
     case 'after_where': {
       const whereFn = command.args[command.args.length - 1] as ESQLFunction;
-      // TODO do we still need this check?
-      const expressionRoot = isMarkerNode(whereFn.args[1]) ? undefined : whereFn.args[1]!;
+      const expressionRoot = whereFn.args[1];
 
       if (expressionRoot && !!Array.isArray(expressionRoot)) {
         return [];

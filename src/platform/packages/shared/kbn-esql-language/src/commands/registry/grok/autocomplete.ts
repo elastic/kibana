@@ -8,14 +8,13 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
-import { Parser } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
 import type { ICommandCallbacks } from '../types';
 import type { ISuggestionItem, ICommandContext } from '../types';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 
 export async function autocomplete(
   query: string,
@@ -28,9 +27,7 @@ export async function autocomplete(
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
   // If cursor is inside a string literal, don't suggest anything
-  const correctedQuery = correctQuerySyntax(innerText);
-  const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-  const { node } = findAstPosition(root, innerText.length);
+  const { node } = findAutocompleteAstPosition(query, cursorPosition);
 
   if (node?.type === 'literal' && node.literalType === 'keyword') {
     return [];
