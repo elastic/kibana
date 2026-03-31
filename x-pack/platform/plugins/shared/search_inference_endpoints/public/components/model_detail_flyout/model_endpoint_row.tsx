@@ -75,7 +75,7 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                   color="text"
                   aria-label={i18n.translate(
                     'xpack.searchInferenceEndpoints.modelDetailFlyout.copyEndpointIdAriaLabel',
-                    { defaultMessage: 'Copy endpoint id' }
+                    { defaultMessage: 'Copy endpoint ID' }
                   )}
                   onClick={() => onCopy(endpoint.inference_id)}
                 />

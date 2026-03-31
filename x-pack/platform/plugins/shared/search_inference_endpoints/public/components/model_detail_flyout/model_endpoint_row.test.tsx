@@ -45,7 +45,7 @@ describe('ModelEndpointRow', () => {
   it('calls onCopy when copy button is clicked', () => {
     render(<ModelEndpointRow endpoint={createEndpoint()} onView={onView} onCopy={onCopy} />);
 
-    fireEvent.click(screen.getByLabelText('Copy endpoint id'));
+    fireEvent.click(screen.getByLabelText('Copy endpoint ID'));
     expect(onCopy).toHaveBeenCalledWith('my-endpoint');
   });
 

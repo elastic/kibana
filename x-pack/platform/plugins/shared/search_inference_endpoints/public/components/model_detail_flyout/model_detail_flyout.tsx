@@ -57,24 +57,24 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEndpoint, setEditingEndpoint] = useState<InferenceAPIConfigResponse | undefined>();
 
-  const endpoints = useMemo(
-    () => allEndpoints.filter((ep) => getModelId(ep) === modelId),
-    [allEndpoints, modelId]
-  );
+  const { endpoints, displayName, modelAuthor } = useMemo(() => {
+    const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
 
-  const firstEndpoint = endpoints[0];
+    const endpointWithName = filtered.find((ep) => isInferenceEndpointWithDisplayNameMetadata(ep));
+    const endpointWithCreator = filtered.find((ep) =>
+      isInferenceEndpointWithDisplayCreatorMetadata(ep)
+    );
 
-  const displayName =
-    firstEndpoint && isInferenceEndpointWithDisplayNameMetadata(firstEndpoint)
-      ? firstEndpoint.metadata.display.name
-      : modelId;
-
-  const modelAuthor =
-    firstEndpoint && isInferenceEndpointWithDisplayCreatorMetadata(firstEndpoint)
-      ? firstEndpoint.metadata.display.model_creator
-      : i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.unknownAuthor', {
-          defaultMessage: 'Unknown',
-        });
+    return {
+      endpoints: filtered,
+      displayName: endpointWithName ? endpointWithName.metadata.display.name : modelId,
+      modelAuthor: endpointWithCreator
+        ? endpointWithCreator.metadata.display.model_creator
+        : i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.unknownAuthor', {
+            defaultMessage: 'Unknown',
+          }),
+    };
+  }, [allEndpoints, modelId]);
 
   const { taskTypeOptions, uniqueTaskTypes } = useMemo(() => {
     const taskTypes = [...new Set(endpoints.map((e) => e.task_type))];
