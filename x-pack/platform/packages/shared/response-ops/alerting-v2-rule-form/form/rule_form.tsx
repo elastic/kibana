@@ -244,8 +244,10 @@ const RuleFormContent = ({
   if (layout === 'page') {
     return (
       <EuiFlexGroup gutterSize="l" alignItems="flexStart">
-        <EuiFlexItem grow={1}>{formContent}</EuiFlexItem>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
+          {formContent}
+        </EuiFlexItem>
+        <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
           <RulePreviewPanel />
         </EuiFlexItem>
       </EuiFlexGroup>

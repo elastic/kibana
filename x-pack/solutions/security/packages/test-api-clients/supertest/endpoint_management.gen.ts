@@ -268,6 +268,18 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  getEndpointExceptionsPerPolicyOptIn(kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          '/internal/api/endpoint/endpoint_exceptions_per_policy_opt_in',
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
   getEndpointMetadataList(props: GetEndpointMetadataListProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/endpoint/metadata', kibanaSpace))
@@ -327,6 +339,18 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
+  },
+  performEndpointExceptionsPerPolicyOptIn(kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          '/internal/api/endpoint/endpoint_exceptions_per_policy_opt_in',
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
    * Run a script on a host. Currently supported only for some agent types.

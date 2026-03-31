@@ -4747,7 +4747,7 @@
               "\nJSON Schema representation of the tool's parameters.\nGenerated from the tool's Zod schema."
             ],
             "signature": [
-              "{ [k: string]: unknown; $schema?: \"https://json-schema.org/draft/2020-12/schema\" | \"http://json-schema.org/draft-07/schema#\" | undefined; $id?: string | undefined; $anchor?: string | undefined; $ref?: string | undefined; $dynamicRef?: string | undefined; $dynamicAnchor?: string | undefined; $vocabulary?: Record<string, boolean> | undefined; $comment?: string | undefined; $defs?: Record<string, ",
+              "{ [k: string]: unknown; $schema?: \"https://json-schema.org/draft/2020-12/schema\" | \"http://json-schema.org/draft-07/schema#\" | \"http://json-schema.org/draft-04/schema#\" | undefined; $id?: string | undefined; $anchor?: string | undefined; $ref?: string | undefined; $dynamicRef?: string | undefined; $dynamicAnchor?: string | undefined; $vocabulary?: Record<string, boolean> | undefined; $comment?: string | undefined; $defs?: Record<string, ",
               "JSONSchema",
               "> | undefined; type?: \"string\" | \"number\" | \"boolean\" | \"object\" | \"integer\" | \"null\" | \"array\" | undefined; additionalItems?: ",
               "_JSONSchema",
@@ -4787,7 +4787,7 @@
               "JSONSchema",
               "[] | undefined; not?: ",
               "_JSONSchema",
-              " | undefined; multipleOf?: number | undefined; maximum?: number | undefined; exclusiveMaximum?: number | undefined; minimum?: number | undefined; exclusiveMinimum?: number | undefined; maxLength?: number | undefined; minLength?: number | undefined; pattern?: string | undefined; maxItems?: number | undefined; minItems?: number | undefined; uniqueItems?: boolean | undefined; maxContains?: number | undefined; minContains?: number | undefined; maxProperties?: number | undefined; minProperties?: number | undefined; required?: string[] | undefined; dependentRequired?: Record<string, string[]> | undefined; enum?: (string | number | boolean | null)[] | undefined; const?: string | number | boolean | null | undefined; id?: string | undefined; title?: string | undefined; description?: string | undefined; default?: unknown; deprecated?: boolean | undefined; readOnly?: boolean | undefined; writeOnly?: boolean | undefined; examples?: unknown[] | undefined; format?: string | undefined; contentMediaType?: string | undefined; contentEncoding?: string | undefined; contentSchema?: ",
+              " | undefined; multipleOf?: number | undefined; maximum?: number | undefined; exclusiveMaximum?: number | boolean | undefined; minimum?: number | undefined; exclusiveMinimum?: number | boolean | undefined; maxLength?: number | undefined; minLength?: number | undefined; pattern?: string | undefined; maxItems?: number | undefined; minItems?: number | undefined; uniqueItems?: boolean | undefined; maxContains?: number | undefined; minContains?: number | undefined; maxProperties?: number | undefined; minProperties?: number | undefined; required?: string[] | undefined; dependentRequired?: Record<string, string[]> | undefined; enum?: (string | number | boolean | null)[] | undefined; const?: string | number | boolean | null | undefined; id?: string | undefined; title?: string | undefined; description?: string | undefined; default?: unknown; deprecated?: boolean | undefined; readOnly?: boolean | undefined; writeOnly?: boolean | undefined; nullable?: boolean | undefined; examples?: unknown[] | undefined; format?: string | undefined; contentMediaType?: string | undefined; contentEncoding?: string | undefined; contentSchema?: ",
               "JSONSchema",
               " | undefined; _prefault?: unknown; }"
             ],
@@ -8779,7 +8779,7 @@
               "\nthe JSON schema associated with this tool's input parameters."
             ],
             "signature": [
-              "{ [k: string]: unknown; $schema?: \"https://json-schema.org/draft/2020-12/schema\" | \"http://json-schema.org/draft-07/schema#\" | undefined; $id?: string | undefined; $anchor?: string | undefined; $ref?: string | undefined; $dynamicRef?: string | undefined; $dynamicAnchor?: string | undefined; $vocabulary?: Record<string, boolean> | undefined; $comment?: string | undefined; $defs?: Record<string, ",
+              "{ [k: string]: unknown; $schema?: \"https://json-schema.org/draft/2020-12/schema\" | \"http://json-schema.org/draft-07/schema#\" | \"http://json-schema.org/draft-04/schema#\" | undefined; $id?: string | undefined; $anchor?: string | undefined; $ref?: string | undefined; $dynamicRef?: string | undefined; $dynamicAnchor?: string | undefined; $vocabulary?: Record<string, boolean> | undefined; $comment?: string | undefined; $defs?: Record<string, ",
               "JSONSchema",
               "> | undefined; type?: \"string\" | \"number\" | \"boolean\" | \"object\" | \"integer\" | \"null\" | \"array\" | undefined; additionalItems?: ",
               "_JSONSchema",
@@ -8819,7 +8819,7 @@
               "JSONSchema",
               "[] | undefined; not?: ",
               "_JSONSchema",
-              " | undefined; multipleOf?: number | undefined; maximum?: number | undefined; exclusiveMaximum?: number | undefined; minimum?: number | undefined; exclusiveMinimum?: number | undefined; maxLength?: number | undefined; minLength?: number | undefined; pattern?: string | undefined; maxItems?: number | undefined; minItems?: number | undefined; uniqueItems?: boolean | undefined; maxContains?: number | undefined; minContains?: number | undefined; maxProperties?: number | undefined; minProperties?: number | undefined; required?: string[] | undefined; dependentRequired?: Record<string, string[]> | undefined; enum?: (string | number | boolean | null)[] | undefined; const?: string | number | boolean | null | undefined; id?: string | undefined; title?: string | undefined; description?: string | undefined; default?: unknown; deprecated?: boolean | undefined; readOnly?: boolean | undefined; writeOnly?: boolean | undefined; examples?: unknown[] | undefined; format?: string | undefined; contentMediaType?: string | undefined; contentEncoding?: string | undefined; contentSchema?: ",
+              " | undefined; multipleOf?: number | undefined; maximum?: number | undefined; exclusiveMaximum?: number | boolean | undefined; minimum?: number | undefined; exclusiveMinimum?: number | boolean | undefined; maxLength?: number | undefined; minLength?: number | undefined; pattern?: string | undefined; maxItems?: number | undefined; minItems?: number | undefined; uniqueItems?: boolean | undefined; maxContains?: number | undefined; minContains?: number | undefined; maxProperties?: number | undefined; minProperties?: number | undefined; required?: string[] | undefined; dependentRequired?: Record<string, string[]> | undefined; enum?: (string | number | boolean | null)[] | undefined; const?: string | number | boolean | null | undefined; id?: string | undefined; title?: string | undefined; description?: string | undefined; default?: unknown; deprecated?: boolean | undefined; readOnly?: boolean | undefined; writeOnly?: boolean | undefined; nullable?: boolean | undefined; examples?: unknown[] | undefined; format?: string | undefined; contentMediaType?: string | undefined; contentEncoding?: string | undefined; contentSchema?: ",
               "JSONSchema",
               " | undefined; _prefault?: unknown; }"
             ],
@@ -10784,7 +10784,7 @@
         "label": "ConversationWithoutRounds",
         "description": [],
         "signature": [
-          "{ id: string; title: string; user: ",
+          "{ id: string; title: string; created_at: string; updated_at: string; user: ",
           {
             "pluginId": "@kbn/agent-builder-common",
             "scope": "common",
@@ -10794,7 +10794,7 @@
           },
           "; state?: ",
           "ConversationInternalState",
-          " | undefined; created_at: string; updated_at: string; attachments?: ",
+          " | undefined; attachments?: ",
           {
             "pluginId": "@kbn/agent-builder-common",
             "scope": "common",
@@ -11481,25 +11481,6 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.skillCreateRequestSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "skillCreateRequestSchema",
-        "description": [
-          "\nZod schema for validating skill create request bodies."
-        ],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts",
-        "lineNumber": 63,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.skillIdMaxLength",
         "type": "number",
         "tags": [],
@@ -11531,25 +11512,6 @@
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts",
         "lineNumber": 13,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.skillUpdateRequestSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "skillUpdateRequestSchema",
-        "description": [
-          "\nZod schema for validating skill update request bodies."
-        ],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts",
-        "lineNumber": 82,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -13241,6 +13203,54 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.skillCreateRequestSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "skillCreateRequestSchema",
+        "description": [
+          "\nZod schema for validating skill create request bodies."
+        ],
+        "signature": [
+          "ZodObject",
+          "<{ id: ",
+          "ZodString",
+          "; name: ",
+          "ZodString",
+          "; description: ",
+          "ZodString",
+          "; content: ",
+          "ZodString",
+          "; referenced_content: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ name: ",
+          "ZodString",
+          "; relativePath: ",
+          "ZodString",
+          "; content: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>>; tool_ids: ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.skillIdRegexp",
         "type": "Object",
         "tags": [],
@@ -13272,6 +13282,60 @@
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts",
         "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.skillUpdateRequestSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "skillUpdateRequestSchema",
+        "description": [
+          "\nZod schema for validating skill update request bodies."
+        ],
+        "signature": [
+          "ZodObject",
+          "<{ name: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; description: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; content: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; referenced_content: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ name: ",
+          "ZodString",
+          "; relativePath: ",
+          "ZodString",
+          "; content: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>>; tool_ids: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ">>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts",
+        "lineNumber": 82,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

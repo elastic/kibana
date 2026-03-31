@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/evals-suite-streams/scripts/significant_events_snapshots/capture_otel_demo_snapshots');
+require('@kbn/evals-suite-significant-events/scripts/capture_otel_demo_snapshots');
