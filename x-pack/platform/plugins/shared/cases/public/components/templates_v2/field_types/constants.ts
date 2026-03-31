@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-export const FieldType = {
-  INPUT_TEXT: 'INPUT_TEXT',
-  INPUT_NUMBER: 'INPUT_NUMBER',
-  SELECT_BASIC: 'SELECT_BASIC',
-  TEXTAREA: 'TEXTAREA',
-} as const;
+import { FieldType } from '../../../../common/types/domain/template/fields';
+import type { FieldType as FieldTypeType } from '../../../../common/types/domain/template/fields';
 
-export type FieldType = (typeof FieldType)[keyof typeof FieldType];
-
-export const fieldTypesArray = Object.keys(FieldType) as FieldType[];
+export const fieldTypesArray = Object.keys(FieldType) as FieldTypeType[];
 
 export const exampleTemplateDefinition = `
 # name is required
@@ -29,6 +23,16 @@ category: General
 tags:
   - example
 fields:
+  - name: start_date
+    control: DATE_PICKER
+    label: Start date
+    type: date
+    metadata:
+      default: "2024-01-01T00:00:00Z"
+      # set to true to include time selection
+      # show_time: true
+      # 'utc' (default) or 'local' to use the browser's timezone
+      # timezone: local     
   - name: summary
     control: INPUT_TEXT
     label: Summary
@@ -84,4 +88,36 @@ fields:
       required: true
       min: 0
       max: 100
+  # DATE_PICKER with show_time enabled and local timezone
+  # show_when: not_empty — this field appears only when a date is selected above
+  - name: scheduled_at
+    control: DATE_PICKER
+    label: Scheduled date and time
+    type: date
+    metadata:
+      show_time: true
+      timezone: local
+  # deadline_notes is shown and required only when scheduled_at has been filled in
+  - name: deadline_notes
+    control: TEXTAREA
+    label: Deadline notes
+    type: keyword
+    display:
+      show_when:
+        field: scheduled_at
+        operator: not_empty
+    validation:
+      required_when:
+        field: scheduled_at
+        operator: not_empty
+  # kickoff_agenda is shown only when scheduled_at equals a specific ISO datetime value
+  - name: kickoff_agenda
+    control: TEXTAREA
+    label: Kickoff agenda
+    type: keyword
+    display:
+      show_when:
+        field: scheduled_at
+        operator: eq
+        value: "2024-06-01T09:00:00.000Z"
 `.trimStart();
