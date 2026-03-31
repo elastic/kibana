@@ -32,11 +32,6 @@ export const validateWorkflowInputs = async (
   workflowExecutionRepository: WorkflowExecutionRepository,
   logger: Logger
 ): Promise<boolean> => {
-  // TODO(https://github.com/elastic/security-team/issues/16526): This is a workaround to skip validation for alert triggers.
-  if (context.event && typeof context.event === 'object' && 'alerts' in context.event) {
-    return true;
-  }
-
   const manualTrigger = workflow.definition?.triggers?.find((trigger) =>
     isManualTrigger(trigger as { type?: string })
   ) as ManualTrigger | undefined;
@@ -46,7 +41,6 @@ export const validateWorkflowInputs = async (
   if (!inputsDef) {
     return true;
   }
-
   const normalizedSchema = normalizeFieldsToJsonSchema(inputsDef);
   const validator = buildFieldsZodValidator(normalizedSchema);
   if (!normalizedSchema?.properties) {
