@@ -159,6 +159,7 @@ import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_up
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { CpsMlRuleCallout } from '../../../rule_management_ui/components/cps_ml_rule_callout/callout';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { FiltersGlobal } from '../../../../common/components/filters_global';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -855,12 +856,14 @@ export const RuleDetailsPage = connector(
                     {canReadAlerts && (
                       <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                         <>
-                          <SiemSearchBar
-                            dataView={experimentalDataView}
-                            pollForSignalIndex={pollForSignalIndex}
-                            id={InputsModelId.global}
-                            sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-                          />
+                          <FiltersGlobal>
+                            <SiemSearchBar
+                              dataView={experimentalDataView}
+                              pollForSignalIndex={pollForSignalIndex}
+                              id={InputsModelId.global}
+                              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+                            />
+                          </FiltersGlobal>
                           <EuiSpacer />
                           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                             <EuiFlexItem grow={false}>
