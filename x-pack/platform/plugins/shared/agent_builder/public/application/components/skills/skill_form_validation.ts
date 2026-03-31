@@ -108,8 +108,8 @@ export interface ReferencedContentItem {
 }
 
 const referencedContentItemSchema: z.ZodType<ReferencedContentItem> = z.object({
-  name: z.string(),
-  relativePath: z.string(),
+  name: z.string().trim(),
+  relativePath: z.string().trim(),
   content: z.string(),
 });
 
