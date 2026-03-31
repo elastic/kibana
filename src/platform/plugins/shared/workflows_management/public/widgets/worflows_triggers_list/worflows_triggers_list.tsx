@@ -91,7 +91,7 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
         css={triggersListStyles.container}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="crossInCircle" size="m" aria-hidden={true} />
+          <EuiIcon type="crossCircle" size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={triggersListStyles.textContainer}>
           <EuiText size="s" color="subdued" css={triggersListStyles.text}>

@@ -22,6 +22,7 @@ import { useLocation } from 'react-router-dom';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
 import { useApi } from '@kbn/securitysolution-list-hooks';
+import type { Action } from '@kbn/securitysolution-exception-list-components';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import type { ServerApiError } from '../../../common/types';
 import { AdministrationListPage } from '../administration_list_page';
@@ -88,7 +89,9 @@ export interface ArtifactListPageProps {
   allowCardDeleteAction?: boolean;
   allowCardCreateAction?: boolean;
   secondaryPageInfo?: React.ReactNode;
+  callout?: React.ReactNode;
   CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
+  additionalActions?: Action[];
 }
 
 export const ArtifactListPage = memo<ArtifactListPageProps>(
@@ -98,6 +101,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     searchableFields = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
     labels: _labels = {},
     secondaryPageInfo,
+    callout,
     onFormSubmit,
     flyoutSize,
     'data-test-subj': dataTestSubj,
@@ -105,6 +109,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     allowCardCreateAction = true,
     allowCardDeleteAction = true,
     CardDecorator,
+    additionalActions,
   }) => {
     const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
       'endpointExceptionsMovedUnderManagement'
@@ -319,6 +324,39 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       );
     }, [labels.pageAboutInfo, secondaryPageInfo]);
 
+    const actionsToDisplay: Action[] = useMemo(
+      () => [
+        ...(areEndpointExceptionsMovedUnderManagementFFEnabled
+          ? [
+              {
+                key: 'ImportButton',
+                icon: 'download',
+                label: labels.pageImportButtonTitle,
+                onClick: handleImport,
+                disabled: !allowCardCreateAction,
+              },
+              {
+                key: 'ExportButton',
+                icon: 'upload',
+                label: labels.pageExportButtonTitle,
+                onClick: handleExport,
+              },
+            ]
+          : []),
+
+        ...(additionalActions ?? []),
+      ],
+      [
+        additionalActions,
+        allowCardCreateAction,
+        areEndpointExceptionsMovedUnderManagementFFEnabled,
+        handleExport,
+        handleImport,
+        labels.pageExportButtonTitle,
+        labels.pageImportButtonTitle,
+      ]
+    );
+
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
     }
@@ -398,6 +436,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         ) : (
           <>
             {description}
+            <EuiSpacer size="m" />
+            {callout}
             <EuiSpacer size="m" />
             <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
               <EuiFlexItem grow={true}>

@@ -57,6 +57,7 @@ import { IconArtifacts } from '../common/icons/artifacts';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { IconScriptLibrary } from '../common/icons/script_library';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { KibanaServices } from '../common/lib/kibana';
 
 const categories = [
   {
@@ -259,6 +260,7 @@ export const getManagementFilteredLinks = async (
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
   const currentUser = await plugins.security.authc.getCurrentUser();
+  const isServerless = KibanaServices.getBuildFlavor() === 'serverless';
 
   const {
     canReadActionsLogManagement,
@@ -274,7 +276,7 @@ export const getManagementFilteredLinks = async (
     canReadScriptsLibrary,
   } =
     fleetAuthz && currentUser
-      ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
+      ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles, isServerless)
       : getEndpointAuthzInitialState();
 
   const showHostIsolationExceptions =
