@@ -145,6 +145,24 @@ export class WatchlistConfigClient {
   }
 
   async delete(id: string) {
+    // Cascade-delete linked entity sources to prevent orphans
+    const entitySourceIds = await this.getEntitySourceIds(id);
+    const results = await Promise.allSettled(
+      entitySourceIds.map((sourceId) =>
+        this.deps.soClient.delete(watchlistEntitySourceTypeName, sourceId, {
+          refresh: 'wait_for',
+        })
+      )
+    );
+
+    for (const [i, result] of results.entries()) {
+      if (result.status === 'rejected') {
+        this.deps.logger.warn(
+          `Failed to delete entity source '${entitySourceIds[i]}' while deleting watchlist '${id}': ${result.reason.message}`
+        );
+      }
+    }
+
     return this.deps.soClient.delete(watchlistConfigTypeName, id, { refresh: 'wait_for' });
   }
 

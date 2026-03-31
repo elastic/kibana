@@ -31,6 +31,7 @@ import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../common/lib/kibana';
@@ -98,6 +99,7 @@ export const SharedLists = React.memo(() => {
   const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
 
   const canAccessEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
@@ -604,9 +606,11 @@ export const SharedLists = React.memo(() => {
 
       <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
-        {isEndpointExceptionsMovedFFEnabled && (
-          <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
-        )}
+        {isEndpointExceptionsMovedFFEnabled &&
+          (endpointPerPolicyOptIn?.status === false ||
+            endpointPerPolicyOptIn?.reason === 'userOptedIn') && (
+            <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
+          )}
 
         {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
         <EuiSpacer size="m" />
