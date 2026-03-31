@@ -9,28 +9,34 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const metaSchema = schema.object({
-  created_at: schema.maybe(schema.string()),
-  created_by: schema.maybe(schema.string()),
-  error: schema.maybe(
-    schema.object({
-      error: schema.string(),
-      message: schema.string(),
-      statusCode: schema.number(),
-      metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    }, {
-      meta: {
-        id: 'kbn-dashboard-meta-error'
-      }
-    })
-  ),
-  managed: schema.maybe(schema.boolean()),
-  owner: schema.maybe(schema.string()),
-  updated_at: schema.maybe(schema.string()),
-  updated_by: schema.maybe(schema.string()),
-  version: schema.maybe(schema.string()),
-}, {
-  meta: {
-    id: 'kbn-dashboard-meta'
+export const metaSchema = schema.object(
+  {
+    created_at: schema.maybe(schema.string()),
+    created_by: schema.maybe(schema.string()),
+    error: schema.maybe(
+      schema.object(
+        {
+          error: schema.string(),
+          message: schema.string(),
+          statusCode: schema.number(),
+          metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+        },
+        {
+          meta: {
+            id: 'kbn-dashboard-meta-error',
+          },
+        }
+      )
+    ),
+    managed: schema.maybe(schema.boolean()),
+    owner: schema.maybe(schema.string()),
+    updated_at: schema.maybe(schema.string()),
+    updated_by: schema.maybe(schema.string()),
+    version: schema.maybe(schema.string()),
+  },
+  {
+    meta: {
+      id: 'kbn-dashboard-meta',
+    },
   }
-});
+);

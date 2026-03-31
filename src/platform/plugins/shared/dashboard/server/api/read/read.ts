@@ -45,6 +45,6 @@ export async function read(
       alias_target_id,
       alias_purpose,
       outcome,
-    }
+    },
   };
 }

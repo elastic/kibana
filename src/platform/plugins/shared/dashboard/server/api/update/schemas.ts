@@ -13,7 +13,8 @@ import { metaSchema } from '../meta_schemas';
 
 export function getUpdateRequestBodySchema(isDashboardAppRequest: boolean) {
   // changing access control is not allowed through update endpoint
-  const { access_control, ...rest } = getDashboardStateSchema(isDashboardAppRequest).getPropSchemas();
+  const { access_control, ...rest } =
+    getDashboardStateSchema(isDashboardAppRequest).getPropSchemas();
   return schema.object(rest);
 }
 
