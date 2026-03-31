@@ -143,13 +143,13 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete, onError }: 
 const KNOWLEDGE_INDICATORS_TASK_SCHEDULING_FAILURE_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTaskSchedulingFailureTitle',
   {
-    defaultMessage: 'Failed to schedule insights discovery',
+    defaultMessage: 'Failed to schedule KIs generation',
   }
 );
 
 const INSIGHTS_DISCOVERY_CANCELLATION_FAILURE_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTaskCancellationFailureTitle',
   {
-    defaultMessage: 'Failed to cancel insights discovery',
+    defaultMessage: 'Failed to cancel KIs generation',
   }
 );
