@@ -85,3 +85,5 @@ Follow existing patterns in the target area first; below are common defaults.
 - Make focused changes; avoid unrelated refactors.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
+- Update your branch from `main` with `git merge origin/main` (after fetching). Do not rebase or reset against `main`.
+- Always open PRs as draft.
