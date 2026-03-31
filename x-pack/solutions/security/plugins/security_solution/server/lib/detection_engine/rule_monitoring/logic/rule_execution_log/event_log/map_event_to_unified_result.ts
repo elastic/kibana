@@ -70,16 +70,14 @@ const extractOutcome = (event: IValidatedEvent): UnifiedExecutionResult['outcome
 
 const extractMetrics = (event: IValidatedEvent): UnifiedExecutionResult['metrics'] => {
   const metrics = event?.kibana?.alert?.rule?.execution?.metrics;
-  // TODO: Remove this comment along with `additionalMetrics` once we merge Maxim's PR
-  // `alerts_candidate_count` and `matched_indices_count` are to be added to the
-  // Alerting Framework event log schema in an upcoming PR.
+  // `matched_indices_count` is not yet in the Alerting Framework event log schema
   const additionalMetrics = metrics as Record<string, unknown> | undefined;
 
   return {
     total_search_duration_ms: toOptionalInt(metrics?.total_search_duration_ms),
     total_indexing_duration_ms: toOptionalInt(metrics?.total_indexing_duration_ms),
     execution_gap_duration_s: toOptionalInt(metrics?.execution_gap_duration_s),
-    alerts_candidate_count: toOptionalInt(additionalMetrics?.alerts_candidate_count),
+    alerts_candidate_count: toOptionalInt(metrics?.alerts_candidate_count),
     alert_counts: metrics?.alert_counts
       ? {
           new: toOptionalInt(metrics.alert_counts.new),
