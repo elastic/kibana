@@ -31,6 +31,9 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
   const restrictWidth: EuiPageTemplateProps['restrictWidth'] = false;
   const bottomBorder: EuiPageTemplateProps['bottomBorder'] = 'extended';
 
+  // all flyouts share the same history group using a shared `historyKey` object
+  const historyKey = Symbol('flyout-history-group');
+
   return (
     <EuiPageTemplate
       panelled={panelled}
@@ -42,11 +45,11 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
       <EuiPageTemplate.Header iconType="logoElastic" pageTitle="Flyout System Example" />
 
       <EuiPageTemplate.Section grow={false} alignment="top">
-        <FlyoutWithComponent />
+        <FlyoutWithComponent historyKey={historyKey} />
       </EuiPageTemplate.Section>
 
       <EuiPageTemplate.Section grow={false} alignment="top">
-        <FlyoutWithOverlays overlays={overlays} rendering={rendering} />
+        <FlyoutWithOverlays historyKey={historyKey} overlays={overlays} rendering={rendering} />
       </EuiPageTemplate.Section>
 
       <EuiPageTemplate.Section grow={true} alignment="top">
