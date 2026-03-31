@@ -44,6 +44,7 @@ export class GenAiSettingsPlugin
 {
   constructor(private initializerContext: PluginInitializerContext<GenAiSettingsConfigType>) {}
 
+  // test comment
   public async setup(
     core: CoreSetup<GenAiSettingsStartDeps, GenAiSettingsPluginStart>,
     { management }: GenAiSettingsSetupDeps
