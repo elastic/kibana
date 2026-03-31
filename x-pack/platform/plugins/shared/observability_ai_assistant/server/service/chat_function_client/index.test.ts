@@ -60,6 +60,152 @@ describe('chatFunctionClient', () => {
     });
   });
 
+  describe('when executing a function with valid arguments', () => {
+    it('does not throw and calls the respond function', async () => {
+      const respondFn = jest.fn().mockResolvedValue({ content: 'ok' });
+      const client = new ChatFunctionClient([]);
+
+      client.registerFunction(
+        {
+          description: '',
+          name: 'myFunction',
+          parameters: {
+            properties: {
+              foo: { type: 'string' },
+            },
+            required: ['foo'],
+          },
+        },
+        respondFn
+      );
+
+      const result = await client.executeFunction({
+        chat: jest.fn(),
+        name: 'myFunction',
+        args: JSON.stringify({ foo: 'valid_string' }),
+        messages: [],
+        signal: new AbortController().signal,
+        logger: getLoggerMock(),
+        connectorId: 'foo',
+        simulateFunctionCalling: false,
+      });
+
+      expect(respondFn).toHaveBeenCalled();
+      expect(result).toEqual({ content: 'ok' });
+    });
+  });
+
+  describe('when a required property is missing', () => {
+    it('throws a validation error', async () => {
+      const respondFn = jest.fn().mockResolvedValue({});
+      const client = new ChatFunctionClient([]);
+
+      client.registerFunction(
+        {
+          description: '',
+          name: 'myFunction',
+          parameters: {
+            properties: {
+              foo: { type: 'string' },
+            },
+            required: ['foo'],
+          },
+        },
+        respondFn
+      );
+
+      await expect(async () => {
+        await client.executeFunction({
+          chat: jest.fn(),
+          name: 'myFunction',
+          args: JSON.stringify({}),
+          messages: [],
+          signal: new AbortController().signal,
+          logger: getLoggerMock(),
+          connectorId: 'foo',
+          simulateFunctionCalling: false,
+        });
+      }).rejects.toThrowError('Tool call arguments for myFunction were invalid');
+
+      expect(respondFn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when parameters schema has no explicit type field', () => {
+    it('validates correctly via toZodSchema normalization', async () => {
+      const respondFn = jest.fn().mockResolvedValue({ content: 'ok' });
+      const client = new ChatFunctionClient([]);
+
+      client.registerFunction(
+        {
+          description: '',
+          name: 'noTypeFunction',
+          parameters: {
+            properties: {
+              bar: { type: 'number' },
+            },
+            required: ['bar'],
+          },
+        },
+        respondFn
+      );
+
+      await expect(async () => {
+        await client.executeFunction({
+          chat: jest.fn(),
+          name: 'noTypeFunction',
+          args: JSON.stringify({ bar: 'not_a_number' }),
+          messages: [],
+          signal: new AbortController().signal,
+          logger: getLoggerMock(),
+          connectorId: 'foo',
+          simulateFunctionCalling: false,
+        });
+      }).rejects.toThrowError('Tool call arguments for noTypeFunction were invalid');
+
+      const result = await client.executeFunction({
+        chat: jest.fn(),
+        name: 'noTypeFunction',
+        args: JSON.stringify({ bar: 42 }),
+        messages: [],
+        signal: new AbortController().signal,
+        logger: getLoggerMock(),
+        connectorId: 'foo',
+        simulateFunctionCalling: false,
+      });
+
+      expect(result).toEqual({ content: 'ok' });
+    });
+  });
+
+  describe('when actions have parameter schemas', () => {
+    it('validates action parameters via constructor-compiled schemas', () => {
+      const client = new ChatFunctionClient([
+        {
+          actions: [
+            {
+              name: 'myAction',
+              description: 'An action',
+              parameters: {
+                type: 'object' as const,
+                properties: {
+                  count: { type: 'number' as const },
+                },
+                required: ['count'] as string[],
+              },
+            },
+          ],
+        },
+      ]);
+
+      expect(() => client.validate('myAction', { count: 'not_a_number' })).toThrowError(
+        'Tool call arguments for myAction were invalid'
+      );
+
+      expect(() => client.validate('myAction', { count: 5 })).not.toThrow();
+    });
+  });
+
   describe('when providing application context', () => {
     it('exposes a function that returns the requested data', async () => {
       const client = new ChatFunctionClient([

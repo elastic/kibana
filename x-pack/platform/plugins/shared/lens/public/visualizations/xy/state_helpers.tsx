@@ -104,6 +104,10 @@ export const hasAreaSeries = (layers: XYLayerConfig[]) =>
 export const getBarSeriesLayers = (layers: XYLayerConfig[]): XYDataLayerConfig[] =>
   getDataLayers(layers).filter((layer) => BAR_SERIES.includes(layer.seriesType));
 
+export function isLineSeries(seriesType: SeriesType) {
+  return seriesType === 'line';
+}
+
 export function isStackedChart(seriesType: SeriesType) {
   return seriesType.includes('stacked');
 }

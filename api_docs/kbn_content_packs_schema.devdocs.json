@@ -901,7 +901,13 @@
             "signature": [
               "BaseStream",
               ".UpsertRequest<OmitWiredStreamUpsertProps<",
-              "WiredStream",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredStream",
+                "text": "WiredStream"
+              },
               ".Definition>>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
@@ -1151,8 +1157,8 @@
             "pluginId": "@kbn/lens-common",
             "scope": "common",
             "docId": "kibKbnLensCommonPluginApi",
-            "section": "def-common.XYState",
-            "text": "XYState"
+            "section": "def-common.XYPersistedState",
+            "text": "XYPersistedState"
           },
           "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
@@ -1986,9 +1992,9 @@
             "section": "def-common.ContentPackIncludedObjects",
             "text": "ContentPackIncludedObjects"
           },
-          ", ",
-          "ZodTypeDef",
-          ", ",
+          ", unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<",
           {
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",
@@ -1996,7 +2002,7 @@
             "section": "def-common.ContentPackIncludedObjects",
             "text": "ContentPackIncludedObjects"
           },
-          ">"
+          ", unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
         "lineNumber": 32,
@@ -2022,9 +2028,9 @@
             "section": "def-common.ContentPackManifest",
             "text": "ContentPackManifest"
           },
-          ", ",
-          "ZodTypeDef",
-          ", ",
+          ", unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<",
           {
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",
@@ -2032,7 +2038,7 @@
             "section": "def-common.ContentPackManifest",
             "text": "ContentPackManifest"
           },
-          ">"
+          ", unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
         "lineNumber": 53,

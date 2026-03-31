@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LegendValue } from '@elastic/charts';
+import type { LegendValue, Position } from '@elastic/charts';
 
 export enum LegendSize {
   AUTO = 'auto',
@@ -18,8 +18,27 @@ export enum LegendSize {
 }
 
 export enum LegendLayout {
-  Table = 'table',
   List = 'list',
+}
+
+export function getLegendLayout({
+  isInside,
+  position,
+  layout,
+}: {
+  isInside?: boolean;
+  position?: Position;
+  layout?: LegendLayout;
+}): LegendLayout | undefined {
+  if (isInside) {
+    return undefined;
+  }
+
+  if (position !== 'top' && position !== 'bottom') {
+    return undefined;
+  }
+
+  return layout === LegendLayout.List ? LegendLayout.List : undefined;
 }
 
 export const LegendSizeToPixels = {

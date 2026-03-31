@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { featureStatusSchema } from '@kbn/streams-schema/src/feature';
+import { conditionSchema } from '@kbn/streamlang/types/conditions';
 import {
   STREAM_NAME,
   FEATURE_UUID,
   FEATURE_DESCRIPTION,
   FEATURE_CONFIDENCE,
   FEATURE_EVIDENCE,
+  FEATURE_EVIDENCE_DOC_IDS,
   FEATURE_STATUS,
   FEATURE_LAST_SEEN,
   FEATURE_TITLE,
@@ -20,9 +22,11 @@ import {
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
+  FEATURE_EXCLUDED_AT,
   FEATURE_ID,
   FEATURE_PROPERTIES,
   FEATURE_SUBTYPE,
+  FEATURE_FILTER,
 } from './fields';
 
 export const storedFeatureSchema = z.object({
@@ -35,12 +39,15 @@ export const storedFeatureSchema = z.object({
   [FEATURE_PROPERTIES]: z.record(z.string(), z.any()),
   [FEATURE_CONFIDENCE]: z.number(),
   [FEATURE_EVIDENCE]: z.array(z.string()).optional(),
+  [FEATURE_EVIDENCE_DOC_IDS]: z.array(z.string()).optional(),
   [FEATURE_STATUS]: featureStatusSchema,
   [FEATURE_LAST_SEEN]: z.string(),
   [FEATURE_TAGS]: z.array(z.string()).optional(),
   [FEATURE_META]: z.record(z.string(), z.any()).optional(),
   [FEATURE_EXPIRES_AT]: z.string().optional(),
+  [FEATURE_EXCLUDED_AT]: z.string().optional(),
   [FEATURE_TITLE]: z.string().optional(),
+  [FEATURE_FILTER]: conditionSchema.optional(),
 });
 
 export type StoredFeature = z.infer<typeof storedFeatureSchema>;

@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type RuleExecutionMetrics = z.infer<typeof RuleExecutionMetrics>;
 export const RuleExecutionMetrics = z.object({
@@ -51,6 +51,17 @@ export const RuleExecutionMetrics = z.object({
        * End date of the execution gap
        */
       lte: z.string(),
+    })
+    .optional(),
+  /**
+   * Detected reason for the execution gap
+   */
+  gap_reason: z
+    .object({
+      /**
+       * The type of reason for the gap (rule_disabled or rule_did_not_run)
+       */
+      type: z.enum(['rule_disabled', 'rule_did_not_run']),
     })
     .optional(),
 });

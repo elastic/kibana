@@ -1143,6 +1143,7 @@ exports[`XYChart component it renders area 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -1177,6 +1178,7 @@ exports[`XYChart component it renders area 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -2597,6 +2599,7 @@ exports[`XYChart component it renders bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -2631,6 +2634,7 @@ exports[`XYChart component it renders bar 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -4051,6 +4055,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -4085,6 +4090,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -5505,6 +5511,7 @@ exports[`XYChart component it renders line 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -5539,6 +5546,7 @@ exports[`XYChart component it renders line 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -6959,6 +6967,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -6993,6 +7002,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -8413,6 +8423,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -8447,6 +8458,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -9867,6 +9879,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -9901,6 +9914,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -11340,6 +11354,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -11374,6 +11389,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -12884,6 +12900,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -12918,6 +12935,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -14421,6 +14439,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -14455,6 +14474,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,

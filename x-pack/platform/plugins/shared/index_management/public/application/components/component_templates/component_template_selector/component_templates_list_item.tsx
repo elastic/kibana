@@ -92,7 +92,7 @@ export const ComponentTemplatesListItem = ({
             {isDraggable && (
               <EuiFlexItem>
                 <div {...dragHandleProps}>
-                  <EuiIcon type="grab" />
+                  <EuiIcon type="dragVertical" />
                 </div>
               </EuiFlexItem>
             )}

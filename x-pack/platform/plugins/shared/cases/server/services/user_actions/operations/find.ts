@@ -17,6 +17,7 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 
 import type { FindOptions, ServiceContext } from '../types';
 import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
@@ -106,11 +107,11 @@ export class UserActionFinder {
   }
 
   private static buildActionFilter(): KueryNode | undefined {
-    const filterForUserActionsExcludingComment = fromKueryExpression(
-      `not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user}`
+    const filterForUserActionsExcludingComments = fromKueryExpression(
+      `not (${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user} or ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${COMMENT_ATTACHMENT_TYPE})`
     );
 
-    return filterForUserActionsExcludingComment;
+    return filterForUserActionsExcludingComments;
   }
 
   private static buildCommentTypeFilter(): KueryNode | undefined {
@@ -123,7 +124,7 @@ export class UserActionFinder {
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
         buildFilter({
-          filters: [AttachmentType.user],
+          filters: [AttachmentType.user, COMMENT_ATTACHMENT_TYPE],
           field: 'payload.comment.type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,

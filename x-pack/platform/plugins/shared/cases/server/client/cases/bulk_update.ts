@@ -189,12 +189,13 @@ async function getAlertComments({
   const idsOfCasesToSync = casesToSync.map(({ updateReq }) => updateReq.id);
 
   // getAllCaseComments will by default get all the comments, unless page or perPage fields are set
-  return caseService.getAllCaseComments({
+  return (await caseService.getAllCaseComments({
     id: idsOfCasesToSync,
     options: {
       filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
     },
-  });
+    mode: 'legacy',
+  })) as SavedObjectsFindResponse<AttachmentAttributes>;
 }
 
 /**
@@ -430,7 +431,7 @@ export const bulkUpdate = async (
       throw Boom.conflict(
         `These cases ${conflictedCases
           .map((c) => c.id)
-          .join(', ')} has been updated. Please refresh before saving additional updates.`
+          .join(', ')} have been updated. Please refresh before saving additional updates.`
       );
     }
 

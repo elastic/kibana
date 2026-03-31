@@ -14,6 +14,7 @@ import {
   modelVersion6,
   modelVersion7,
   modelVersion8,
+  modelVersion9,
 } from '.';
 
 describe('Model versions', () => {
@@ -222,6 +223,34 @@ describe('Model versions', () => {
           Object {
             "backfillFn": [Function],
             "type": "data_backfill",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('version 9', () => {
+    it('returns version 9 changes correctly', () => {
+      expect(modelVersion9.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "extended_fields": Object {
+                "type": "flattened",
+              },
+              "template": Object {
+                "properties": Object {
+                  "id": Object {
+                    "type": "keyword",
+                  },
+                  "version": Object {
+                    "type": "integer",
+                  },
+                },
+                "type": "object",
+              },
+            },
+            "type": "mappings_addition",
           },
         ]
       `);

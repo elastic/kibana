@@ -218,10 +218,13 @@ function changeSpaceSelection(selectedSpaces: string[]) {
   });
 }
 
-async function clickButton(button: 'continue' | 'save' | 'copy') {
+async function clickButton(wrapper: ReactWrapper, button: 'continue' | 'save' | 'copy') {
+  wrapper.update();
+  const buttonNode = findTestSubject(wrapper, `sts-${button}-button`);
   await act(async () => {
-    fireEvent.click(screen.getByTestId(`sts-${button}-button`));
-    await new Promise((r) => setTimeout(r, 0));
+    buttonNode.first().simulate('click');
+    await nextTick();
+    wrapper.update();
   });
 }
 

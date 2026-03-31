@@ -5,7 +5,6 @@ steps:
       - build
     steps:
       - command: .buildkite/scripts/steps/test/ftr_configs.sh
-        cancel_on_build_failing: true
         env:
           FTR_CONFIG: 'x-pack/platform/test/functional_gen_ai/inference/config.ts'
           FTR_CONFIG_GROUP_KEY: 'ftr-ai-infra-gen-ai-inference-api'

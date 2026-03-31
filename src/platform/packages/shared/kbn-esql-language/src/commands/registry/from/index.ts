@@ -17,7 +17,7 @@ import { summary } from './summary';
 const fromCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
-  columnsAfter,
+  columnsAfter: (...args) => columnsAfter(...args),
   summary,
 };
 
@@ -26,7 +26,6 @@ export const fromCommand = {
   methods: fromCommandMethods,
   metadata: {
     type: 'source' as const,
-    subquerySupport: process.env.NODE_ENV === 'test' ? true : false, // Temporary until making it Preview
     viewsSupport: process.env.NODE_ENV === 'test' ? true : false, // Temporary until making it Preview
     description: i18n.translate('kbn-esql-language.esql.definitions.fromDoc', {
       defaultMessage:

@@ -15,7 +15,7 @@
       "label": "GenAiSettingsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/private/gen_ai_settings/public/plugin.ts",
-      "lineNumber": 29,
+      "lineNumber": 31,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -31,7 +31,7 @@
       "label": "GenAiSettingsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/private/gen_ai_settings/public/plugin.ts",
-      "lineNumber": 32,
+      "lineNumber": 34,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -54,10 +54,10 @@
         "label": "GenAiSettingsConfigType",
         "description": [],
         "signature": [
-          "{ readonly showAiBreadcrumb: boolean; readonly showSpacesIntegration: boolean; readonly showAiAssistantsVisibilitySetting: boolean; readonly showChatExperienceSetting: boolean; }"
+          "{ readonly showAiBreadcrumb: boolean; readonly showSpacesIntegration: boolean; readonly showAiAssistantsVisibilitySetting: boolean; readonly showChatExperienceSetting: boolean; readonly showAnonymizationProfileSettings: boolean; }"
         ],
         "path": "x-pack/platform/plugins/private/gen_ai_settings/common/config.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -71,7 +71,37 @@
         "label": "GenAiSettingsServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /internal/gen_ai_settings/connectors\": ",
+          "{ \"GET /internal/gen_ai_settings/connectors/{connectorId}\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/gen_ai_settings/connectors/{connectorId}\", ",
+          "ZodObject",
+          "<{ path: ",
+          "ZodObject",
+          "<{ connectorId: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>, ",
+          "GenAiSettingsRouteHandlerResources",
+          ", ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          },
+          ", ",
+          "GenAiSettingsRouteCreateOptions",
+          ">; \"GET /internal/gen_ai_settings/connectors\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -83,11 +113,11 @@
           "GenAiSettingsRouteHandlerResources",
           ", ",
           {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ConnectorWithExtraFindData",
-            "text": "ConnectorWithExtraFindData"
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
           },
           "[], ",
           "GenAiSettingsRouteCreateOptions",
@@ -113,7 +143,7 @@
         "{ [x: string]: never; }"
       ],
       "path": "x-pack/platform/plugins/private/gen_ai_settings/server/plugin.ts",
-      "lineNumber": 23,
+      "lineNumber": 24,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -131,7 +161,7 @@
         "{ [x: string]: never; }"
       ],
       "path": "x-pack/platform/plugins/private/gen_ai_settings/server/plugin.ts",
-      "lineNumber": 24,
+      "lineNumber": 25,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

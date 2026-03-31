@@ -36,14 +36,17 @@ export const isOptionsListESQLControlState = (
  * ----------------------------------------------------------------
  */
 
-export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCount?: number }>;
+export type OptionsListSuggestions<SelectionType = OptionsListSelection> = Array<{
+  value: SelectionType;
+  docCount?: number;
+}>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
  */
 export interface OptionsListSuccessResponse {
-  suggestions: OptionsListSuggestions;
-  totalCardinality?: number; // total cardinality will be undefined when `useExpensiveQueries` is `false`
+  suggestions: OptionsListSuggestions<OptionsListSelection>;
+  totalCardinality: number;
   invalidSelections?: OptionsListSelection[];
 }
 
@@ -86,7 +89,6 @@ export interface OptionsListRequestBody {
   selectedOptions?: OptionsListDSLControlState['selected_options'];
 
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
-  allowExpensiveQueries: boolean;
   ignoreValidations?: boolean;
   filters?: Array<{ bool: BoolQuery }>;
   runPastTimeout?: boolean;

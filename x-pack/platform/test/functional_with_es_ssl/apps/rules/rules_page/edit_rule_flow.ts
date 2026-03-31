@@ -194,7 +194,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Edit from rule details page', () => {
       it('navigates to edit page when clicking edit button from details', async () => {
         // Navigate directly to rule details page
-        await pageObjects.common.navigateToUrl('rules', testRuleId, {
+        await pageObjects.common.navigateToUrl('rules', `rule/${testRuleId}`, {
           shouldUseHashForSubUrl: false,
         });
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -205,6 +205,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Click the edit button
+        await testSubjects.click('ruleActionsButton');
         await testSubjects.click('openEditRuleFlyoutButton');
 
         // Wait for navigation to edit page
@@ -245,7 +246,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          if (!url.includes(`/app/rules/${testRuleId}`) || url.includes('/edit/')) {
+          if (!url.includes(`/app/rules/rule/${testRuleId}`) || url.includes('/edit/')) {
             throw new Error(`Expected to be on rule details page but got: ${url}`);
           }
         });
@@ -275,12 +276,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('returns to rule details page after clicking cancel from details', async () => {
         // Navigate to rule details page
-        await pageObjects.common.navigateToUrl('rules', testRuleId, {
+        await pageObjects.common.navigateToUrl('rules', `rule/${testRuleId}`, {
           shouldUseHashForSubUrl: false,
         });
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Click the edit button
+        await testSubjects.click('ruleActionsButton');
         await testSubjects.click('openEditRuleFlyoutButton');
 
         // Wait for edit form to load
@@ -295,7 +297,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          if (!url.includes(`/app/rules/${testRuleId}`) || url.includes('/edit/')) {
+          if (!url.includes(`/app/rules/rule/${testRuleId}`) || url.includes('/edit/')) {
             throw new Error(`Expected to be on rule details page but got: ${url}`);
           }
         });

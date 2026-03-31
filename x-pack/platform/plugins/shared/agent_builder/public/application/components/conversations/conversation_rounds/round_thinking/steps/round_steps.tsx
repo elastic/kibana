@@ -6,7 +6,11 @@
  */
 
 import type { ConversationRoundStep } from '@kbn/agent-builder-common/chat/conversation';
-import { isReasoningStep, isToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import {
+  isReasoningStep,
+  isToolCallStep,
+  isCompactionStep,
+} from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ReactNode } from 'react';
@@ -20,6 +24,7 @@ import { ToolCallDisplay } from './tool_call_display';
 import { ToolProgressDisplay } from './tool_progress_display';
 import { ToolResultDisplay } from './tool_result_display';
 import { FlyoutResultItem } from './flyout_result_item';
+import { CompactionDisplay } from './compaction_display';
 
 const labels = {
   roundThinkingSteps: i18n.translate('xpack.agentBuilder.conversation.thinking.stepsList', {
@@ -48,7 +53,7 @@ const disabledToolResultIconTypes: string[] = [ToolResultType.error, ToolResultT
 
 const getItemIcon = (isLastItem: boolean, isLoading: boolean): ReactNode => {
   if (isLastItem && isLoading) {
-    return <EuiIcon type="doubleArrowRight" color="text" />;
+    return <EuiIcon type="chevronDoubleRight" color="text" />;
   }
   return <EuiIcon type="check" color="success" />;
 };
@@ -160,6 +165,20 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
                 {step.reasoning}
               </div>
             </ThinkingItemLayout>
+          ),
+        });
+      } else if (isCompactionStep(step)) {
+        const compactionInProgress = step.token_count_after === 0;
+        itemFactories.push({
+          key: `step-compaction-${stepIndex}`,
+          factory: (icon, textColor) => (
+            <CompactionDisplay
+              key={`step-compaction-${stepIndex}`}
+              step={step}
+              icon={icon}
+              textColor={textColor}
+              isInProgress={compactionInProgress}
+            />
           ),
         });
       }

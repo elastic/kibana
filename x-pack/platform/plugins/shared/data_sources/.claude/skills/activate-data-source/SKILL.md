@@ -88,6 +88,7 @@ For these connectors, the auth type is defined in the connector spec at `src/pla
 | **GitHub** | `.mcp` | Bearer token | GitHub personal access token (`ghp_...` or `github_pat_...`) |
 | **Google Drive** | `.google_drive` | Bearer token | Google OAuth 2.0 access token (`ya29.…`) |
 | **SharePoint Online** | `.sharepoint-online` | OAuth Client Credentials | **Not a simple token** — requires OAuth client credentials flow (clientId, clientSecret, tenantId). This type may need to be configured through the Kibana UI instead. |
+| **Zendesk** | `.zendesk` | Basic (email + API token) | Single string: `your_email@example.com/token:your_api_token`. The connector also requires **subdomain** in config (e.g. create connector in UI with subdomain, or pass config when creating). |
 
 ### For unknown / newly added data sources
 

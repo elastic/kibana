@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { BoolQuery } from '@kbn/es-query';
 import {
   getGroupingQuery,
@@ -35,6 +36,10 @@ export interface AlertsGroupingQueryParams {
    * Sort order for the grouping results.
    */
   sort?: GroupingSort;
+  /**
+   * Filter specifically for the unitsCount aggregation
+   */
+  unitsCountFilter?: estypes.QueryDslQueryContainer;
 }
 
 export const getAlertsGroupingQuery = ({
@@ -49,6 +54,7 @@ export const getAlertsGroupingQuery = ({
   to,
   multiValueFieldsToFlatten,
   sort = [{ unitsCount: { order: 'desc' } }],
+  unitsCountFilter,
 }: AlertsGroupingQueryParams) =>
   getGroupingQuery({
     additionalFilters,
@@ -64,4 +70,5 @@ export const getAlertsGroupingQuery = ({
     size: pageSize,
     sort,
     multiValueFieldsToFlatten,
+    unitsCountFilter,
   });

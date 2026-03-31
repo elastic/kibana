@@ -41,6 +41,9 @@ export interface JsonSchema {
   enum?: (string | number | boolean | null)[];
   const?: string | number | boolean | null;
 
+  /** When true, the value may be null in addition to the defined type */
+  nullable?: boolean;
+
   default?: unknown;
 
   title?: string;

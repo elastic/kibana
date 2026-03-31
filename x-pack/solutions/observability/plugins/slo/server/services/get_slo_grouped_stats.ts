@@ -22,6 +22,7 @@ import type { SLOSettings } from '../domain/models';
 import { typedSearch } from '../utils/queries';
 import { getSummaryIndices } from './utils/get_summary_indices';
 import { excludeStaleSummaryFilter } from './utils/summary_stale_filter';
+import { getElasticsearchQueryOrThrow } from './transform_generators/common';
 import { IllegalArgumentError } from '../errors/errors';
 
 interface SloTypeConfig {
@@ -99,7 +100,15 @@ export class GetSLOGroupedStats {
           filter: [
             ...termQuery('spaceId', this.spaceId),
             ...config.getFilters(params),
-            ...excludeStaleSummaryFilter({ settings: this.settings, forceExclude: true }),
+            ...excludeStaleSummaryFilter({
+              settings: this.settings,
+              kqlFilter: params.kqlQuery,
+              forceExclude: true,
+            }),
+            ...(params.kqlQuery ? [getElasticsearchQueryOrThrow(params.kqlQuery)] : []),
+            ...(params.statusFilters && params.statusFilters.length > 0
+              ? termsQuery('status', ...params.statusFilters)
+              : []),
           ],
         },
       },

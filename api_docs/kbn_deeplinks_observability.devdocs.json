@@ -1366,10 +1366,10 @@
             "section": "def-common.AppId",
             "text": "AppId"
           },
-          " | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\""
+          " | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"observability-overview:alerts_v2\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/deep_links.ts",
-        "lineNumber": 106,
+        "lineNumber": 107,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

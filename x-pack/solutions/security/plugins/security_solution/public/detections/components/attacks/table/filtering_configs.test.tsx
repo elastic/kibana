@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { buildConnectorIdFilter } from './filtering_configs';
+import { buildConnectorIdFilter, buildAttacksOnlyFilter } from './filtering_configs';
+import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 
 describe('filtering configs', () => {
   describe('buildConnectorIdFilter', () => {
@@ -36,6 +37,29 @@ describe('filtering configs', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('buildAttacksOnlyFilter', () => {
+    it('should return exists filter', () => {
+      const result = buildAttacksOnlyFilter();
+      expect(result).toEqual([
+        {
+          query: {
+            exists: {
+              field: ALERT_ATTACK_IDS,
+            },
+          },
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            key: ALERT_ATTACK_IDS,
+            type: 'exists',
+            value: 'exists',
+          },
+        },
+      ]);
     });
   });
 });

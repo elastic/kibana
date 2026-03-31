@@ -40,7 +40,7 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
-        "lineNumber": 98,
+        "lineNumber": 102,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -64,7 +64,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
-            "lineNumber": 98,
+            "lineNumber": 102,
             "columnNumber": 82,
             "deprecated": false,
             "trackAdoption": false,

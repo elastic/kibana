@@ -28,7 +28,9 @@
             "label": "create",
             "description": [],
             "signature": [
-              "() => jest.Mocked<ChromeServiceContract>"
+              "() => jest.Mocked<",
+              "ChromeServiceContract",
+              ">"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
             "lineNumber": 127,

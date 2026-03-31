@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type ResponseActionTypes = z.infer<typeof ResponseActionTypes>;
 export const ResponseActionTypes = z.enum(['.osquery', '.endpoint']);
@@ -102,6 +102,37 @@ export const DefaultParams = z.object({
   comment: z.string().optional(),
 });
 
+export type RunScriptOsConfigValues = z.infer<typeof RunScriptOsConfigValues>;
+export const RunScriptOsConfigValues = z.object({
+  scriptId: z.string().optional(),
+  scriptInput: z.string().optional(),
+  /**
+   * Specify the timeout in seconds for the script execution
+   */
+  timeout: z.number().int().optional(),
+});
+
+/**
+  * > warn
+> This functionality is currently not available
+
+  */
+export type RunscriptParams = z.infer<typeof RunscriptParams>;
+export const RunscriptParams = z.object({
+  command: z.literal('runscript'),
+  /**
+   * Add a note that explains or describes the action. You can find your comment in the response actions history log
+   */
+  comment: z.string().optional(),
+  config: z
+    .object({
+      linux: RunScriptOsConfigValues.optional(),
+      macos: RunScriptOsConfigValues.optional(),
+      windows: RunScriptOsConfigValues.optional(),
+    })
+    .optional(),
+});
+
 export type ProcessesParams = z.infer<typeof ProcessesParams>;
 export const ProcessesParams = z.object({
   /**
@@ -127,17 +158,23 @@ export const ProcessesParams = z.object({
 export type EndpointResponseAction = z.infer<typeof EndpointResponseAction>;
 export const EndpointResponseAction = z.object({
   action_type_id: z.literal('.endpoint'),
-  params: z.union([DefaultParams, ProcessesParams]),
+  params: z.union([DefaultParams, ProcessesParams, RunscriptParams]),
 });
 
 export type RuleResponseEndpointAction = z.infer<typeof RuleResponseEndpointAction>;
 export const RuleResponseEndpointAction = z.object({
   actionTypeId: z.literal('.endpoint'),
-  params: z.union([DefaultParams, ProcessesParams]),
+  params: z.union([DefaultParams, ProcessesParams, RunscriptParams]),
 });
 
 export type ResponseAction = z.infer<typeof ResponseAction>;
-export const ResponseAction = z.union([OsqueryResponseAction, EndpointResponseAction]);
+export const ResponseAction = z.discriminatedUnion('action_type_id', [
+  OsqueryResponseAction,
+  EndpointResponseAction,
+]);
 
 export type RuleResponseAction = z.infer<typeof RuleResponseAction>;
-export const RuleResponseAction = z.union([RuleResponseOsqueryAction, RuleResponseEndpointAction]);
+export const RuleResponseAction = z.discriminatedUnion('actionTypeId', [
+  RuleResponseOsqueryAction,
+  RuleResponseEndpointAction,
+]);

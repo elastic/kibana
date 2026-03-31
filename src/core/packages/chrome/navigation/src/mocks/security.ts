@@ -171,7 +171,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
   {
     id: 'hosts',
     label: 'Explore',
-    iconType: 'search',
+    iconType: 'magnify',
     href: '/explore/hosts',
     sections: [
       {
@@ -360,7 +360,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
   {
     id: 'coverage',
     label: 'Coverage',
-    iconType: 'visGauge',
+    iconType: 'chartGauge',
     href: '/coverage',
   },
 ];
@@ -369,7 +369,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
   {
     id: 'getting_started',
     label: 'Getting started',
-    iconType: 'launch',
+    iconType: 'rocket',
     href: '/getting-started',
   },
   {

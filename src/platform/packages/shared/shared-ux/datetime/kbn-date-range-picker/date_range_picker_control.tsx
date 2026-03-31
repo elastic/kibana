@@ -22,8 +22,8 @@ import {
 
 import { FOCUSABLE_SELECTOR } from './constants';
 import { resolveInitialFocus } from './utils';
+import { DateRangePickerAutoRefreshButton } from './date_range_picker_auto_refresh_button';
 import { useDateRangePickerContext } from './date_range_picker_context';
-import { TimeWindowButtons } from './date_range_picker_time_window_buttons';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
 import { useInputHintText } from './hooks/use_input_hint_text';
 
@@ -40,7 +40,7 @@ export function DateRangePickerControl() {
     isEditing,
     setIsEditing,
     compressed,
-    maxWidth,
+    collapsed,
     displayText,
     displayFullFormattedText,
     displayShortDuration,
@@ -49,7 +49,14 @@ export function DateRangePickerControl() {
     panelRef,
     panelId,
     initialFocus,
-    timeWindowButtonsConfig,
+    onInputChange,
+    width,
+    disabled,
+    isLoading,
+    settings,
+    hasAutoRefresh,
+    autoRefreshSecondsRemaining,
+    toggleAutoRefresh,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
@@ -74,9 +81,12 @@ export function DateRangePickerControl() {
       const value = parseInt(part.text, 10);
       if (isNaN(value)) return undefined;
       const nextValue = action === 'increase' ? value + 1 : value - 1;
+      // Values below 1 not useful, so return
+      if (nextValue < 1) return undefined;
       const newText =
         currentText.substring(0, part.start) + String(nextValue) + currentText.substring(part.end);
       setText(newText);
+      onInputChange?.(newText);
       return newText;
     },
   });
@@ -85,8 +95,10 @@ export function DateRangePickerControl() {
     setIsEditing(true);
   };
 
-  const onInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setText(event.target.value);
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextValue = event.target.value;
+    setText(nextValue);
+    onInputChange?.(nextValue);
   };
 
   const onInputKeyDown = (event: KeyboardEvent) => {
@@ -98,7 +110,7 @@ export function DateRangePickerControl() {
     if (event.key === keys.ESCAPE && isEditing) {
       setIsEditing(false);
     }
-    if (event.key === keys.ARROW_DOWN && isEditing) {
+    if ((event.key === keys.ARROW_DOWN || event.key === keys.ARROW_UP) && isEditing) {
       event.preventDefault();
       resolveInitialFocus(panelRef, initialFocus)?.focus();
     }
@@ -106,6 +118,7 @@ export function DateRangePickerControl() {
 
   const onInputClear = () => {
     setText('');
+    onInputChange?.('');
     inputRef.current?.focus();
   };
 
@@ -134,23 +147,40 @@ export function DateRangePickerControl() {
     [isEditing, setIsEditing]
   );
 
-  const containerStyles = css`
-    display: flex;
-    align-items: center;
-    gap: ${euiTheme.size.s};
-    max-inline-size: ${maxWidth};
+  // The CSS custom property --kbnDateRangePickerWidth is not set by this component,
+  // allowing consumers to override the width; 21.25rem is the default fallback.
+  const wrapperRestrictedStyles = css`
+    inline-size: var(--kbnDateRangePickerWidth, 21.25rem);
   `;
-
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
   `;
 
   return (
-    <div css={containerStyles} ref={controlRef} onKeyDown={onControlKeyDown}>
+    <div
+      ref={controlRef}
+      onKeyDown={onControlKeyDown}
+      css={width === 'restricted' ? wrapperRestrictedStyles : undefined}
+      data-test-subj="dateRangePickerControlWrapper"
+    >
       <EuiFormControlLayout
         compressed={compressed}
         isInvalid={isInvalid}
+        isDisabled={disabled}
+        isLoading={isLoading}
+        fullWidth={width !== 'auto'}
         clear={isEditing && text !== '' ? { onClick: onInputClear } : undefined}
+        append={
+          hasAutoRefresh && settings.autoRefresh?.isEnabled ? (
+            <DateRangePickerAutoRefreshButton
+              isPaused={settings.autoRefresh.isPaused}
+              interval={settings.autoRefresh.interval}
+              secondsRemaining={autoRefreshSecondsRemaining}
+              onClick={toggleAutoRefresh}
+              disabled={disabled}
+            />
+          ) : undefined
+        }
       >
         {isEditing ? (
           <EuiFieldText
@@ -164,7 +194,9 @@ export function DateRangePickerControl() {
             controlOnly
             value={text}
             isInvalid={isInvalid}
-            onChange={onInputChange}
+            disabled={disabled}
+            fullWidth={width !== 'auto'}
+            onChange={handleInputChange}
             onKeyDown={onInputKeyDown}
             compressed={compressed}
             placeholder={hintText}
@@ -172,7 +204,9 @@ export function DateRangePickerControl() {
         ) : (
           <EuiToolTip
             content={
-              displayFullFormattedText !== displayText ? displayFullFormattedText : undefined
+              !disabled && displayFullFormattedText !== displayText
+                ? displayFullFormattedText
+                : undefined
             }
             display="block"
             css={tooltipStyles}
@@ -181,17 +215,18 @@ export function DateRangePickerControl() {
             <EuiFormControlButton
               data-test-subj="dateRangePickerControlButton"
               buttonRef={buttonRef}
-              value={displayText}
+              aria-label={collapsed ? displayText : undefined}
+              value={collapsed ? '' : displayText}
               onClick={onButtonClick}
               isInvalid={isInvalid}
+              disabled={disabled}
               compressed={compressed}
             >
-              {displayShortDuration && <EuiBadge>{displayShortDuration}</EuiBadge>}
+              <EuiBadge>{displayShortDuration ?? '--'}</EuiBadge>
             </EuiFormControlButton>
           </EuiToolTip>
         )}
       </EuiFormControlLayout>
-      {timeWindowButtonsConfig && <TimeWindowButtons config={timeWindowButtonsConfig} />}
     </div>
   );
 }
