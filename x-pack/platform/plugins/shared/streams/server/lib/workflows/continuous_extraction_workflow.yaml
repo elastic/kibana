@@ -28,16 +28,16 @@ steps:
   - name: select_streams
     type: streams.ki_select_streams
     with:
-      maxScheduledStreams: "{{ inputs.maxScheduledStreams }}"
-      lookbackHours: "{{ inputs.lookbackHours }}"
-      extractionIntervalHours: "{{ inputs.extractionIntervalHours }}"
+      maxScheduledStreams: "${{ inputs.maxScheduledStreams }}"
+      lookbackHours: "${{ inputs.lookbackHours }}"
+      extractionIntervalHours: "${{ inputs.extractionIntervalHours }}"
   - name: has_scheduled_streams
     type: if
     condition: "steps.select_streams.output.scheduled[0].streamName:*"
     steps:
       - name: extract_ki_features
         type: foreach
-        foreach: "{{ steps.select_streams.output.scheduled }}"
+        foreach: "${{ steps.select_streams.output.scheduled }}"
         iteration-on-failure:
           continue: true
         steps:

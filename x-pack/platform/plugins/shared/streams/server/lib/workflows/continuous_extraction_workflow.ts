@@ -105,11 +105,11 @@ export const createContinuousExtractionWorkflowService = (
 
       const created = await managementApi.createWorkflow({ yaml: WORKFLOW_YAML }, spaceId, request);
 
-      await managementApi.updateWorkflow(created.id, { enabled: true }, spaceId, request);
-
       await modelSettingsClient.updateSettings({
         continuousExtraction: { workflowId: created.id },
       });
+
+      await managementApi.updateWorkflow(created.id, { enabled: true }, spaceId, request);
 
       log.info(`Created continuous extraction workflow ${created.id}`);
     },

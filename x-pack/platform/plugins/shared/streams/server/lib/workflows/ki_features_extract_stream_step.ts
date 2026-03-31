@@ -16,6 +16,8 @@ import {
   getFeaturesIdentificationTaskId,
   type FeaturesIdentificationTaskParams,
 } from '../tasks/task_definitions/features_identification';
+import { isStale } from '../tasks/is_stale';
+import type { PersistedTask } from '../tasks/types';
 import {
   KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
   COORDINATOR_INTERVAL_MINUTES,
@@ -117,11 +119,10 @@ export const registerKiFeaturesExtractStreamStep = ({
 
       const pollStart = Date.now();
 
-      const processTerminal = async () => {
-        const task = await taskClient.get<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
-          taskId
-        );
-
+      const processTerminal = (
+        task: PersistedTask<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>,
+        effectiveStatus: string
+      ) => {
         const createdAt = task.created_at ? new Date(task.created_at).getTime() : pollStart;
         const endedAtRaw = task.last_completed_at ?? task.last_failed_at;
         const endedAt = endedAtRaw ? new Date(endedAtRaw).getTime() : Date.now();
@@ -157,7 +158,7 @@ export const registerKiFeaturesExtractStreamStep = ({
           );
         }
 
-        throw new Error(`Stream ${streamName}: task ended with status ${task.status}`);
+        throw new Error(`Stream ${streamName}: task ended with status ${effectiveStatus}`);
       };
 
       let consecutiveErrors = 0;
@@ -167,9 +168,11 @@ export const registerKiFeaturesExtractStreamStep = ({
           throw new Error(`Stream ${streamName}: polling was aborted`);
         }
 
-        let result;
+        let task: PersistedTask<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>;
         try {
-          result = await taskClient.getStatus(taskId);
+          task = await taskClient.get<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
+            taskId
+          );
           consecutiveErrors = 0;
         } catch (err) {
           consecutiveErrors++;
@@ -185,8 +188,13 @@ export const registerKiFeaturesExtractStreamStep = ({
           continue;
         }
 
-        if (TERMINAL_STATUSES.has(result.status)) {
-          return await processTerminal();
+        const effectiveStatus =
+          task.status === TaskStatus.InProgress && isStale(task.created_at)
+            ? TaskStatus.Stale
+            : task.status;
+
+        if (TERMINAL_STATUSES.has(effectiveStatus)) {
+          return processTerminal(task, effectiveStatus);
         }
 
         await sleep(POLL_INTERVAL_MS, context.abortSignal);

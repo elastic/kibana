@@ -167,6 +167,11 @@ export const SettingsTab = () => {
     setSaveError(null);
     setIsSaving(true);
     try {
+      const ceChanged =
+        continuousExtraction.enabled !== savedCE.enabled ||
+        continuousExtraction.intervalHours !== savedCE.intervalHours ||
+        !isEqual(continuousExtraction.excludedStreams, savedCE.excludedStreams);
+
       await streams.streamsRepositoryClient.fetch(
         'PUT /internal/streams/_significant_events/settings',
         {
@@ -177,7 +182,7 @@ export const SettingsTab = () => {
               connectorIdRuleGeneration: ruleGeneration,
               connectorIdDiscovery: discovery,
               indexPatterns,
-              continuousExtraction,
+              ...(ceChanged ? { continuousExtraction } : {}),
             },
           },
         }
@@ -196,6 +201,7 @@ export const SettingsTab = () => {
     discovery,
     indexPatterns,
     continuousExtraction,
+    savedCE,
     settingsFetch,
   ]);
 
