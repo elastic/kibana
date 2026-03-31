@@ -12,7 +12,13 @@ import type {
 } from '@kbn/controls-plugin/public';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildCustomFilter, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import {
+  buildCustomFilter,
+  FilterStateStore,
+  type Filter,
+  type Query,
+  type TimeRange,
+} from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -74,7 +80,7 @@ export const ControlsContent = ({
         false,
         false,
         null,
-        'appState'
+        FilterStateStore.APP_STATE
       ),
     ];
   }, [schema, dataView?.id]);
