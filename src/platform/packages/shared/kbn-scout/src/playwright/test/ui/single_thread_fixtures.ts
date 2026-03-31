@@ -74,12 +74,6 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   esArchiver: EsArchiverFixture;
   uiSettings: UiSettingsFixture;
   apiServices: ApiServicesFixture;
-<<<<<<< HEAD
-  apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];
-  infraSynthtraceEsClient: SynthtraceFixture['infraSynthtraceEsClient'];
-  otelSynthtraceEsClient: SynthtraceFixture['otelSynthtraceEsClient'];
-=======
->>>>>>> 5df5c02aa0a9 (add kbn/scout-synthtrace (#258961))
 }
 
 export const lighthouseFixtures = mergeTests(scoutFixtures, persistentContext, lighthouseFixture);

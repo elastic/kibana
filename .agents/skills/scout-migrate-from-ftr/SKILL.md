@@ -18,42 +18,6 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 
 ## Core workflow
 
-<<<<<<< HEAD
-1. Decide whether the test should be Scout UI or Scout API.
-   - UI tests: verify user flows and rendering.
-   - API tests: validate server responses, data setup, or backend behaviors.
-2. Identify the module root and target Scout path.
-   - Place tests under `<module-root>/test/scout*/{ui,api}/{tests,parallel_tests}`.
-   - UI: use `ui/parallel_tests/` + `spaceTest` when the flow can be isolated by a Kibana space and should run in parallel; otherwise use `ui/tests/` + `test`.
-   - API: default to `api/tests/` (sequential). Use `api/parallel_tests/` + `parallel.playwright.config.ts` only when the test is safe to run in parallel (no shared state) and you need the speedup.
-3. Translate FTR suites into Scout specs.
-   - Split `loadTestFile` suites into standalone Scout spec files.
-   - If a single FTR file contains multiple top-level `describe` blocks, split into multiple Scout specs (one describe per file).
-4. Replace FTR-only patterns.
-   - Replace `supertest` calls with Scout `apiClient` (endpoint under test) + `requestAuth`/`samlAuth` (auth).
-   - Use `apiServices`/`kbnClient` for setup/teardown and verifying side effects.
-   - Replace webdriver waits with Playwright/page object methods.
-5. Move UI selectors/actions into page objects.
-   - Create a page object for the page under test and register it in plugin fixtures.
-   - Keep test-subject constants in fixtures (for reuse across tests and page objects).
-6. Port data ingestion to Scout fixtures/global setup (when needed).
-   - For parallel tests, prefer a `parallel_tests/global.setup.ts` that loads data once.
-   - If using synthtrace generators, add `@kbn/synthtrace-client` to the test tsconfig references.
-7. Move isolated UI logic to component/unit tests when possible.
-   - If a feature can be tested in isolation (dropdowns, sorting, small components), prefer RTL/unit tests instead of Scout e2e.
-8. Clean up FTR wiring.
-   - Remove the `loadTestFile` entry from the FTR index.
-   - If the test exists in both stateful and serverless FTR suites, remove from all relevant config/index files.
-   - Delete the old FTR test file once Scout coverage is in place.
-   - For staged migrations, mark the remaining FTR suite as `describe.skip` to avoid duplicate coverage.
-9. Update Scout manifests (discovery/CI).
-   - Run `node scripts/scout.js update-test-config-manifests` so `.meta` manifests reflect the new/changed tests and configs.
-10. Verify in both stateful and serverless when applicable.
-   - Use `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <path>` and
-     `node scripts/scout.js run-tests --arch serverless --domain observability_complete --testFiles <path>` (adjust the serverless domain).
-   - If tests are under `test/scout_<configSet>/...`, `run-tests` auto-detects the config set from the Playwright config path.
-   - If you start servers separately, pass `--serverConfigSet <configSet>` to `node scripts/scout.js start-server ...`.
-=======
 ### 1) Decide the test type
 
 - **Component/unit test (RTL/Jest)**: if the behavior can be tested in isolation, prefer RTL/Jest and skip Scout entirely. Strong candidates:
@@ -130,7 +94,7 @@ test('create and edit entity', async () => {
 - Put shared helpers in `test/scout*/ui/fixtures/helpers.ts` (or API helpers in API fixtures).
 - Add test-subject constants in `fixtures/constants.ts` for reuse across tests and page objects.
 - For `parallel_tests/` ingestion, use `parallel_tests/global.setup.ts` + `globalSetupHook` (no `esArchiver` in spec files).
-- If using synthtrace generators, add `@kbn/synthtrace-client` (and `@kbn/scout-synthtrace` when merging `synthtraceFixture` / `getSynthtraceClient`) to the test tsconfig `kbn_references`.
+- If using synthtrace generators, add `@kbn/apm-synthtrace-client` (and `@kbn/scout-synthtrace` when merging `synthtraceFixture`) to the test tsconfig `kbn_references`.
 
 ### 7) Extract component/unit tests where possible
 
@@ -166,7 +130,6 @@ test('create and edit entity', async () => {
 - Read and follow the `scout-best-practices-reviewer` skill on all new/changed Scout spec files.
 - Provide the removed FTR test files as context so the reviewer can verify migration parity.
 - Address `blocker` and `major` findings before finalizing; discuss `minor` and `nit` items as appropriate.
->>>>>>> 5df5c02aa0a9 (add kbn/scout-synthtrace (#258961))
 
 ## Common patterns
 

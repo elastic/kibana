@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getSynthtraceClient, type SynthtraceClientOptions } from './src/get_synthtrace_client';
+export {
+  getApmSynthtraceEsClient,
+  getInfraSynthtraceEsClient,
+} from './src/get_synthtrace_client';
 export { synthtraceFixture, type SynthtraceFixture } from './src/synthtrace_fixture';
 export { globalSetupHookWithSynthtrace } from './src/global_setup_fixtures';

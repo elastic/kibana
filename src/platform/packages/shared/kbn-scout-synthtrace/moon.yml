@@ -18,8 +18,8 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-scout-synthtrace
 dependsOn:
   - '@kbn/scout'
-  - '@kbn/synthtrace'
-  - '@kbn/synthtrace-client'
+  - '@kbn/apm-synthtrace'
+  - '@kbn/apm-synthtrace-client'
 tags:
   - test-helper
   - package
