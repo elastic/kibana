@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/packages/private/kbn-scout-release-testing
 dependsOn:
   - '@kbn/scout'
+  - '@kbn/kbn-client'
 tags:
   - functional-tests
   - package
