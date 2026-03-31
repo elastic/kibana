@@ -25,7 +25,7 @@ const alertHit = createMockHit({
   'kibana.alert.risk_score': 0,
 });
 
-const eventHit = createMockHit({
+const nonAlertHit = createMockHit({
   'event.kind': 'event',
   'kibana.alert.risk_score': 21,
 });
@@ -43,23 +43,23 @@ describe('<RiskScore />', () => {
     expect(riskScore).toHaveTextContent('0');
   });
 
-  it('should render empty component if missing risk score value', () => {
-    const { container } = render(
+  it('should render an empty risk score value if missing risk score', () => {
+    const { getByTestId } = render(
       <IntlProvider locale="en">
         <RiskScore hit={createMockHit({ 'event.kind': 'signal' })} />
       </IntlProvider>
     );
 
-    expect(container).toBeEmptyDOMElement();
+    expect(getByTestId(RISK_SCORE_VALUE_TEST_ID)).toBeEmptyDOMElement();
   });
 
-  it('should render empty component for non-alert documents', () => {
-    const { container } = render(
+  it('should render risk score for non-alert documents when a value is present', () => {
+    const { getByTestId } = render(
       <IntlProvider locale="en">
-        <RiskScore hit={eventHit} />
+        <RiskScore hit={nonAlertHit} />
       </IntlProvider>
     );
 
-    expect(container).toBeEmptyDOMElement();
+    expect(getByTestId(RISK_SCORE_VALUE_TEST_ID)).toHaveTextContent('21');
   });
 });

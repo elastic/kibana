@@ -157,9 +157,11 @@ describe('<DocumentHeader />', () => {
     expect(queryByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('should not render the risk score block when the alert has no risk score', () => {
-    const { queryByTestId } = renderHeader({ hit: alertHitNoRiskScore });
+  it('should render the risk score block when the alert has no risk score', () => {
+    const { getByTestId } = renderHeader({ hit: alertHitNoRiskScore });
 
-    expect(queryByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RISK_SCORE_TITLE_TEST_ID)).toHaveTextContent('Risk score');
+    expect(getByTestId('mockRiskScore')).toBeInTheDocument();
   });
 });

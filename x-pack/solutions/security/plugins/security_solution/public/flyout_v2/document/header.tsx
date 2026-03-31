@@ -10,7 +10,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
-import { ALERT_RISK_SCORE, ALERT_RULE_UUID, EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { HeaderTitle } from './components/header_title';
@@ -50,15 +50,6 @@ export const Header: FC<HeaderProps> = memo(({ hit }) => {
     [hit]
   );
   const isAlert = useMemo(() => (getFieldValue(hit, EVENT_KIND) as string) === 'signal', [hit]);
-  const hasRiskScore = useMemo(() => {
-    const riskScore = getFieldValue(hit, ALERT_RISK_SCORE);
-
-    return (
-      typeof riskScore === 'string' ||
-      typeof riskScore === 'number' ||
-      (Array.isArray(riskScore) && riskScore.length > 0)
-    );
-  }, [hit]);
 
   const ruleDetailsHref = useMemo(() => {
     if (!ruleId) return undefined;
@@ -76,7 +67,7 @@ export const Header: FC<HeaderProps> = memo(({ hit }) => {
       {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />
       <HeaderTitle hit={hit} titleHref={ruleDetailsHref} />
-      {isAlert && hasRiskScore && (
+      {isAlert && (
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup

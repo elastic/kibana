@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
-import { ALERT_RISK_SCORE, EVENT_KIND } from '@kbn/rule-data-utils';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { RISK_SCORE_VALUE_TEST_ID } from '../../shared/components/test_ids';
 
 export interface RiskScoreProps {
@@ -22,23 +22,18 @@ export interface RiskScoreProps {
  * Document details risk score displayed in flyout right section header
  */
 export const RiskScore = memo(({ hit }: RiskScoreProps) => {
-  const isAlert = useMemo(() => (getFieldValue(hit, EVENT_KIND) as string) === 'signal', [hit]);
-  const fieldsData = useMemo(() => getFieldValue(hit, ALERT_RISK_SCORE), [hit]);
+  const riskScore = useMemo(() => {
+    const rs = getFieldValue(hit, ALERT_RISK_SCORE);
+    if (typeof rs === 'string' || typeof rs === 'number') {
+      return rs;
+    } else if (Array.isArray(rs) && rs.length > 0) {
+      return rs[0];
+    } else {
+      return null;
+    }
+  }, [hit]);
 
-  if (!isAlert || fieldsData == null) {
-    return null;
-  }
-
-  let alertRiskScore: string | number;
-  if (typeof fieldsData === 'string' || typeof fieldsData === 'number') {
-    alertRiskScore = fieldsData;
-  } else if (Array.isArray(fieldsData) && fieldsData.length > 0) {
-    alertRiskScore = fieldsData[0];
-  } else {
-    return null;
-  }
-
-  return <span data-test-subj={RISK_SCORE_VALUE_TEST_ID}>{String(alertRiskScore)}</span>;
+  return <span data-test-subj={RISK_SCORE_VALUE_TEST_ID}>{riskScore}</span>;
 });
 
 RiskScore.displayName = 'RiskScore';
