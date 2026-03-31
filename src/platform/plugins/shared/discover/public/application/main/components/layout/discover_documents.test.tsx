@@ -294,7 +294,23 @@ describe('Discover documents layout', () => {
 
       const discoverGridProps = discoverGridMock.mock.lastCall?.[0]!;
       expect(discoverGridProps.expandedDoc).toBeUndefined();
-      expect(discoverGridProps.setRenderDocumentViewMeta).toBeUndefined();
+
+      const unrelatedRenderDocumentViewMeta = {
+        displayedRows: [nextExpandedDoc],
+        displayedColumns: ['extension'],
+      };
+
+      expect(discoverGridProps.setRenderDocumentViewMeta).toEqual(expect.any(Function));
+
+      act(() => {
+        discoverGridProps.setRenderDocumentViewMeta?.(unrelatedRenderDocumentViewMeta);
+      });
+
+      expect(toolkit.getCurrentTab().expandedDocOwner).toBe('nested-grid');
+      expect(toolkit.getCurrentTab().renderDocumentViewMeta).toEqual({
+        displayedRows: [expandedDoc, nextExpandedDoc],
+        displayedColumns: ['bytes'],
+      });
 
       await waitFor(() => {
         expect(screen.getByTestId('discoverGridFlyoutMock')).toBeVisible();

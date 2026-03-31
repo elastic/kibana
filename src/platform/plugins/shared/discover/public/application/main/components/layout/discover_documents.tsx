@@ -249,18 +249,19 @@ function DiscoverDocumentsComponent({
     [expandedDocOwner, getExpandedDocSetter]
   );
 
+  const latestExpandedDocOwner = useLatest(expandedDocOwner);
   const setRenderDocumentViewMeta = useCurrentTabAction(
     internalStateActions.setRenderDocumentViewMeta
   );
   const getRenderDocumentViewMetaSetter = useCallback(
     (owner: string): UnifiedDataTableProps['setRenderDocumentViewMeta'] | undefined => {
-      if (expandedDocOwner === owner) {
-        return (meta) => {
+      return (meta) => {
+        if (latestExpandedDocOwner.current === owner) {
           dispatch(setRenderDocumentViewMeta({ renderDocumentViewMeta: meta }));
-        };
-      }
+        }
+      };
     },
-    [dispatch, expandedDocOwner, setRenderDocumentViewMeta]
+    [dispatch, latestExpandedDocOwner, setRenderDocumentViewMeta]
   );
 
   const setRenderDocumentViewMetaForDefaultOwner = useMemo(
