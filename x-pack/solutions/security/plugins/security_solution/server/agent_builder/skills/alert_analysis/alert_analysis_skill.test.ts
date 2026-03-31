@@ -60,7 +60,14 @@ describe('alertAnalysisSkill', () => {
     });
 
     const callHandler = async (
-      params: { alertId: string; timeWindowHours?: number },
+      params: {
+        alertId: string;
+        timeWindowHours?: number;
+        hostNames?: string[];
+        userNames?: string[];
+        sourceIps?: string[];
+        destIps?: string[];
+      },
       spaceId = 'default'
     ) => {
       return tool.handler(
@@ -203,6 +210,53 @@ describe('alertAnalysisSkill', () => {
       const query = searchCall.query as Record<string, Record<string, unknown>>;
       expect(query.bool.should).toEqual([{ terms: { 'host.name': ['host-a', 'host-b'] } }]);
       expect(getData(result).sourceEntities?.hostNames).toEqual(['host-a', 'host-b']);
+    });
+
+    it('skips GET when entity fields are provided', async () => {
+      mockSearchResponse([
+        {
+          _id: 'related-1',
+          _index: '.alerts-security.alerts-default',
+          _source: { 'kibana.alert.rule.name': 'Related Rule' },
+        },
+      ]);
+
+      const result = await callHandler({
+        alertId: 'alert-123',
+        hostNames: ['host-1'],
+        userNames: ['admin'],
+      });
+
+      expect(mockEsClient.asCurrentUser.get).not.toHaveBeenCalled();
+      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
+
+      const searchCall = mockEsClient.asCurrentUser.search.mock.calls[0][0] as Record<
+        string,
+        unknown
+      >;
+      const query = searchCall.query as Record<string, Record<string, unknown>>;
+      expect(query.bool.should).toEqual([
+        { terms: { 'host.name': ['host-1'] } },
+        { terms: { 'user.name': ['admin'] } },
+      ]);
+
+      expect(result.results).toHaveLength(1);
+      expect(getData(result).relatedAlerts).toHaveLength(1);
+      expect(getData(result).sourceEntities).toEqual({
+        hostNames: ['host-1'],
+        userNames: ['admin'],
+        sourceIps: [],
+        destIps: [],
+      });
+    });
+
+    it('falls back to GET when no entity fields are provided', async () => {
+      mockGetResponse({ host: { name: 'host-1' } });
+      mockSearchResponse();
+
+      await callHandler({ alertId: 'alert-123' });
+
+      expect(mockEsClient.asCurrentUser.get).toHaveBeenCalledTimes(1);
     });
 
     it('returns error result when ES get throws', async () => {

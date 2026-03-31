@@ -46,6 +46,7 @@ Use this skill when:
 ### 2. Find Related Alerts
 - Use 'security.alert-analysis.get-related-alerts' to find alerts sharing entities with the investigated alert
 - Specify the alert ID and an appropriate time window (default 24h, extend to 168h for slow attacks)
+- If you already have entity values (host.name, user.name, source.ip, destination.ip) from a previous tool call, pass them as optional parameters to skip refetching the alert
 - Review the related alerts for patterns: same rule triggering, escalating severity, or multi-stage attack chains
 
 ### 3. Search Security Labs
@@ -112,7 +113,7 @@ FROM .alerts-security.alerts-* METADATA _id, _index
       id: 'security.alert-analysis.get-related-alerts',
       type: ToolType.builtin,
       description:
-        'Find alerts that share entities (host.name, user.name, source.ip, destination.ip) with a given alert. Returns related alerts within the specified time window.',
+        'Find alerts that share entities (host.name, user.name, source.ip, destination.ip) with a given alert. Returns related alerts within the specified time window. Pass entity values directly if already available to skip refetching the alert.',
       schema: z.object({
         alertId: z.string().describe('The _id of the alert to find related alerts for'),
         timeWindowHours: z
@@ -121,34 +122,86 @@ FROM .alerts-security.alerts-* METADATA _id, _index
           .max(168)
           .default(24)
           .describe('Time window in hours to search for related alerts (1-168, default 24)'),
+        hostNames: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'Optional: host.name values from the alert. If provided along with other entity fields, skips fetching the alert.'
+          ),
+        userNames: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'Optional: user.name values from the alert. If provided along with other entity fields, skips fetching the alert.'
+          ),
+        sourceIps: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'Optional: source.ip values from the alert. If provided along with other entity fields, skips fetching the alert.'
+          ),
+        destIps: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'Optional: destination.ip values from the alert. If provided along with other entity fields, skips fetching the alert.'
+          ),
       }),
-      handler: async ({ alertId, timeWindowHours }, context) => {
+      handler: async (
+        {
+          alertId,
+          timeWindowHours,
+          hostNames: providedHostNames,
+          userNames: providedUserNames,
+          sourceIps: providedSourceIps,
+          destIps: providedDestIps,
+        },
+        context
+      ) => {
         const id = String(alertId);
         const hours = Number(timeWindowHours);
         try {
           const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
 
-          const alertResult = await context.esClient.asCurrentUser.get({
-            index: alertsIndex,
-            id,
-          });
+          const hasProvidedEntities =
+            (providedHostNames && providedHostNames.length > 0) ||
+            (providedUserNames && providedUserNames.length > 0) ||
+            (providedSourceIps && providedSourceIps.length > 0) ||
+            (providedDestIps && providedDestIps.length > 0);
 
-          const alertSource = alertResult._source as Record<string, unknown> | undefined;
-          if (!alertSource) {
-            return {
-              results: [
-                {
-                  type: ToolResultType.error,
-                  data: { message: `Alert ${id} not found or has no source data.` },
-                },
-              ],
-            };
+          let hostNames: string[];
+          let userNames: string[];
+          let sourceIps: string[];
+          let destIps: string[];
+
+          if (hasProvidedEntities) {
+            hostNames = providedHostNames ?? [];
+            userNames = providedUserNames ?? [];
+            sourceIps = providedSourceIps ?? [];
+            destIps = providedDestIps ?? [];
+          } else {
+            const alertResult = await context.esClient.asCurrentUser.get({
+              index: alertsIndex,
+              id,
+            });
+
+            const alertSource = alertResult._source as Record<string, unknown> | undefined;
+            if (!alertSource) {
+              return {
+                results: [
+                  {
+                    type: ToolResultType.error,
+                    data: { message: `Alert ${id} not found or has no source data.` },
+                  },
+                ],
+              };
+            }
+
+            hostNames = getNestedValues(alertSource, 'host.name');
+            userNames = getNestedValues(alertSource, 'user.name');
+            sourceIps = getNestedValues(alertSource, 'source.ip');
+            destIps = getNestedValues(alertSource, 'destination.ip');
           }
-
-          const hostNames = getNestedValues(alertSource, 'host.name');
-          const userNames = getNestedValues(alertSource, 'user.name');
-          const sourceIps = getNestedValues(alertSource, 'source.ip');
-          const destIps = getNestedValues(alertSource, 'destination.ip');
 
           const hasEntities =
             hostNames.length > 0 ||

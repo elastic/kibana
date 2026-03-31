@@ -84,7 +84,7 @@ describe('attackDiscoverySearchTool', () => {
         'MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"alert-2")'
       );
       expect(callArgs.query).toContain('@timestamp >=');
-      expect(callArgs.query).toContain('LIMIT 100');
+      expect(callArgs.query).toContain('LIMIT 10');
     });
 
     it('uses handler context spaceId in ES|QL index pattern', async () => {
@@ -130,7 +130,7 @@ describe('attackDiscoverySearchTool', () => {
     it('limits results appropriately', async () => {
       const mockEsqlResponse = {
         columns: [{ name: '_id', type: 'keyword' }],
-        values: Array.from({ length: 100 }, (_, i) => [`attack-discovery-${i}`]),
+        values: Array.from({ length: 10 }, (_, i) => [`attack-discovery-${i}`]),
       };
       (executeEsql as jest.Mock).mockResolvedValue(mockEsqlResponse);
 
@@ -140,7 +140,7 @@ describe('attackDiscoverySearchTool', () => {
       );
 
       const callArgs = (executeEsql as jest.Mock).mock.calls[0][0];
-      expect(callArgs.query).toContain('LIMIT 100');
+      expect(callArgs.query).toContain('LIMIT 10');
     });
 
     it('returns error for invalid spaceId format', async () => {

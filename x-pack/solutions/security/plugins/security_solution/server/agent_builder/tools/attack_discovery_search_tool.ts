@@ -34,7 +34,7 @@ export const attackDiscoverySearchTool = (
   return {
     id: SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
     type: ToolType.builtin,
-    description: `Search and analyze attack discoveries. Use this tool to find attack discoveries related to specific alerts by providing alert IDs. The tool searches the kibana.alert.attack_discovery.alert_ids field. Automatically queries both scheduled and ad-hoc attack discovery indices for the current space. Returns up to 100 attack discoveries from the last 7 days.`,
+    description: `Search and analyze attack discoveries. Use this tool to find attack discoveries related to specific alerts by providing alert IDs. The tool searches the kibana.alert.attack_discovery.alert_ids field. Automatically queries both scheduled and ad-hoc attack discovery indices for the current space. Returns up to 10 attack discoveries from the last 7 days.`,
     schema: attackDiscoverySearchSchema,
     availability: {
       cacheMode: 'space',
@@ -117,7 +117,7 @@ export const attackDiscoverySearchTool = (
         | WHERE ${whereClause}
         | KEEP _id, kibana.alert.attack_discovery.title, kibana.alert.severity, kibana.alert.workflow_status, kibana.alert.attack_discovery.alert_ids, kibana.alert.case_ids, @timestamp
         | SORT @timestamp DESC
-        | LIMIT 100`;
+        | LIMIT 10`;
 
         logger.debug(`Executing ES|QL query: ${esqlQuery}`);
 
