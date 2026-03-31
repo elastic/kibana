@@ -13,7 +13,7 @@ import {
   mergeSloApiHeaders,
   pollUntilTrue,
   sloApiPathWithQuery,
-} from '../fixtures';
+} from '../../fixtures';
 
 apiTest.describe(
   'Find SLOs using kql query',

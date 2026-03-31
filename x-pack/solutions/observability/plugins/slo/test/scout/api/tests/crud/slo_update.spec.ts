@@ -7,14 +7,14 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
+import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../../common/constants';
 import {
   apiTest,
   createSloTransformAssertions,
   DEFAULT_SLO,
   mergeSloApiHeaders,
   type SloTransformAssertions,
-} from '../fixtures';
+} from '../../fixtures';
 
 apiTest.describe(
   'Update SLOs',

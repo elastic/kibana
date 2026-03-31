@@ -15,7 +15,7 @@ import {
   getSLOSummaryTransformId,
   getSLOTransformId,
   getWildcardPipelineId,
-} from '../../../../common/constants';
+} from '../../../../../common/constants';
 import {
   apiTest,
   createSloPipelineAssertions,
@@ -25,7 +25,7 @@ import {
   pollUntilTrue,
   type SloPipelineAssertions,
   type SloTransformAssertions,
-} from '../fixtures';
+} from '../../fixtures';
 
 apiTest.describe(
   'Delete SLOs',

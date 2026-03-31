@@ -134,7 +134,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - ./emotion.d.ts
-    - test/scout/**/*
+    - test/scout*/**/*
     - '!target/**/*'
 tasks:
   jest:

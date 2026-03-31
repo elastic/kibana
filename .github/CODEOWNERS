@@ -1614,7 +1614,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/infra/public/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/slo/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/services @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/alerting_api.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/slo_api.ts @elastic/actionable-obs-team

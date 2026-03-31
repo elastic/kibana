@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
+import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../../common/constants';
 import {
   apiTest,
   createSloTransformAssertions,
@@ -15,7 +15,7 @@ import {
   mergeSloApiHeaders,
   pollUntilTrue,
   type SloTransformAssertions,
-} from '../fixtures';
+} from '../../fixtures';
 
 const getRollupDataEsQuery = (id: string) => ({
   index: '.slo-observability.sli-v3*',

@@ -10,7 +10,7 @@
     "../../../../typings/**/*",
     // Emotion theme typing
     "./emotion.d.ts",
-    "test/scout/**/*"
+    "test/scout*/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [

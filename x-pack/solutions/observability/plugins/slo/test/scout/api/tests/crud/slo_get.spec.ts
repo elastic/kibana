@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, DEFAULT_SLO, mergeSloApiHeaders } from '../fixtures';
+import { apiTest, DEFAULT_SLO, mergeSloApiHeaders } from '../../fixtures';
 
 apiTest.describe(
   'Get SLOs',
