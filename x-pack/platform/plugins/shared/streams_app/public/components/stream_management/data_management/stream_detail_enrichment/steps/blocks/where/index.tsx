@@ -6,12 +6,12 @@
  */
 
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -233,15 +233,26 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                   `}
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">
+                    <EuiText
+                      size="s"
+                      css={css`
+                        font-weight: ${euiTheme.font.weight.bold};
+                      `}
+                    >
                       {i18n.translate(
                         'xpack.streams.streamDetailView.managementTab.enrichment.elseBranchLabel',
-                        { defaultMessage: 'Else' }
+                        { defaultMessage: 'ELSE' }
                       )}
-                    </EuiBadge>
+                    </EuiText>
                   </EuiFlexItem>
                   {!props.readOnly && (
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem
+                      grow
+                      css={css`
+                        display: flex;
+                        justify-content: flex-end;
+                      `}
+                    >
                       <CreateStepButton
                         parentId={step.customIdentifier}
                         branch="else"
