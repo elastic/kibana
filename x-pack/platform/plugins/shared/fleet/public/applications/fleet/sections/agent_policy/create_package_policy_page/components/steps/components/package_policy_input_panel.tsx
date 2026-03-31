@@ -255,8 +255,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       () =>
         hasDynamicSignalTypes(packageInfo, {
           policyTemplateName: packagePolicyInput.policy_template,
+          inputType: packageInput.type,
         }),
-      [packageInfo, packagePolicyInput.policy_template]
+      [packageInfo, packagePolicyInput.policy_template, packageInput.type]
     );
 
     // When isSingleInputAndStreams, check if all stream vars are advanced so we can
