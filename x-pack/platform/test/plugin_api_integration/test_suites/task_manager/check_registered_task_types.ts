@@ -44,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
     'taskToDisable',
+    'extraLargeCostTask',
     'sampleLongRunningRecurringTask',
     'sampleRecurringTaskTimingOutWithError',
   ];
@@ -185,6 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_store:health',
         'entity_store:snapshot',
         'entity_store:v2:entity_maintainer_task:automated-resolution',
+        'entity_store:v2:entity_maintainer_task:communicates_with',
         'entity_store:v2:extract_entity_task:generic',
         'entity_store:v2:extract_entity_task:host',
         'entity_store:v2:extract_entity_task:service',

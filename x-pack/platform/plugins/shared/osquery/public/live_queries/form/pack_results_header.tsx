@@ -116,15 +116,20 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                   </EuiFlexItem>
                   {showAddTags && (
                     <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="m"
-                        iconType="tag"
-                        color="primary"
-                        onClick={handleOpenFlyout}
-                        data-test-subj="add-tags-button"
+                      <EuiToolTip
+                        content={isScheduled ? SCHEDULED_TAGS_DISABLED_LABEL : ADD_TAGS_LABEL}
                       >
-                        {ADD_TAGS_LABEL}
-                      </EuiButtonEmpty>
+                        <EuiButtonEmpty
+                          size="m"
+                          iconType="tag"
+                          color="primary"
+                          onClick={handleOpenFlyout}
+                          isDisabled={isScheduled}
+                          data-test-subj="add-tags-button"
+                        >
+                          {ADD_TAGS_LABEL}
+                        </EuiButtonEmpty>
+                      </EuiToolTip>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
