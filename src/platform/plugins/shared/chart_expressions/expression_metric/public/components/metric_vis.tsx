@@ -78,17 +78,13 @@ function buildTrendConfig(
   if (!palette) return undefined;
 
   const isPrimaryNumeric = typeof value === 'number';
-  // When baseline is 'primary' but the primary value is non-numeric at runtime,
-  // disable compare-to-primary and fall back to baseline 0.
-  // This handles cases related to wrong datatypes that cannot be handled in the toExpression
-  const compareToPrimary = baseline === 'primary' && isPrimaryNumeric;
+  const isNumericBaseline = Number.isFinite(baseline);
 
-  let baselineValue: number | undefined;
-  if (baseline === 'primary') {
-    baselineValue = isPrimaryNumeric ? value : 0;
-  } else {
-    baselineValue = Number(baseline);
-  }
+  // When baseline is not a valid finite number ('primary'), but the primary value is numeric at runtime,
+  // disable compare-to-primary and fall back to baseline 0.
+  const compareToPrimary = !isNumericBaseline && isPrimaryNumeric;
+
+  const baselineValue = isNumericBaseline ? Number(baseline) : isPrimaryNumeric ? value : 0;
 
   return {
     showIcon: visuals !== 'value',
@@ -204,8 +200,8 @@ export const MetricVis = ({
     if (secondaryMetric) {
       // When baseline is 'primary' but the primary value is non-numeric at runtime,
       // reset the label to use the column name
-      const isCompareToPrimaryInvalid =
-        config.metric.secondaryTrend.baseline === 'primary' && typeof value !== 'number';
+      const isNumericBaseline = Number.isFinite(config.metric.secondaryTrend.baseline);
+      const isCompareToPrimaryInvalid = !isNumericBaseline && typeof value !== 'number';
 
       const secondaryMetricInfo = getSecondaryMetricInfo({
         row,
