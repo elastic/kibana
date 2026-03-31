@@ -197,14 +197,15 @@ async function paginate({
     return true;
   });
 
-  const mergedHits = [...hits, ...newHits];
-  const hitLimit = mergedHits.length >= maxTraceItems;
-  const truncatedHits = hitLimit ? mergedHits.slice(0, maxTraceItems) : mergedHits;
+  hits.push(...newHits);
+  const hitLimit = hits.length >= maxTraceItems;
+  if (hitLimit) hits.length = maxTraceItems;
+  const truncatedHits = hits;
 
   const lastSort = response.hits[response.hits.length - 1]?.sort;
   if (
     hitLimit ||
-    mergedHits.length >= response.total ||
+    hits.length >= response.total ||
     response.hits.length === 0 ||
     response.hits.length < size ||
     !lastSort
