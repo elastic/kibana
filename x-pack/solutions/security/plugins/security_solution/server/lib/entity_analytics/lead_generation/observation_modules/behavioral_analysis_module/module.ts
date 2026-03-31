@@ -48,6 +48,3 @@ export const createBehavioralAnalysisModule = ({
     return observations;
   },
 });
-
-/** @deprecated Use createBehavioralAnalysisModule. */
-export const createAlertAnalysisModule = createBehavioralAnalysisModule;

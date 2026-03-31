@@ -3502,6 +3502,13 @@ paths:
           required: true
           schema:
             type: string
+        - description: If true, removes the plugin skills from agents that use them and then deletes the plugin. If false and any agent uses the plugin skills, the request returns 409 Conflict with the list of agents.
+          in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:

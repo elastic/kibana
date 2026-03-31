@@ -2404,6 +2404,12 @@ x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 /x-pack/platform/test/fixtures/es_archives/alerting/8_2_0 @elastic/response-ops
 /x-pack/solutions/**/test/serverless/**/test_suites/rules/ @elastic/response-ops
 
+# EARS
+/x-pack/platform/plugins/shared/actions/server/lib/ears @elastic/workchat-eng
+x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.ts @elastic/workchat-eng @elastic/response-ops
+x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.test.ts @elastic/workchat-eng @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-specs/src/auth_types/ears.ts @elastic/workchat-eng
+
 # Connector Specs
 src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
 src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
