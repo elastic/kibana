@@ -46,10 +46,11 @@ function parseListContainersXml(xml: string): {
   nextMarker?: string;
 } {
   const containers: Array<{ name: string }> = [];
-  const nameRegex = /<Name>([^<]*)<\/Name>/g;
-  let match;
-  while ((match = nameRegex.exec(xml)) !== null) {
-    containers.push({ name: match[1] });
+  const containerBlockRegex = /<Container>(.*?)<\/Container>/gs;
+  const containerBlocks = xml.match(containerBlockRegex) ?? [];
+  for (const block of containerBlocks) {
+    const nameMatch = block.match(/<Name>([^<]*)<\/Name>/);
+    if (nameMatch?.[1]) containers.push({ name: nameMatch[1] });
   }
   return {
     containers,
