@@ -16,7 +16,6 @@ export const fetchSizeStats = async (
 ): Promise<StatsResponse> => {
   if (isServerless) {
     // This API is only available on Serverless.
-
     const value = await client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>({
       method: 'GET',
       path: '/_metering/stats',

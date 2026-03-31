@@ -18,7 +18,7 @@ interface Props {
 }
 
 export const GettingStartedRedirectGate = ({ coreStart, children }: Props) => {
-  const { cloud, isServerless } = useKibana().services;
+  const { cloud } = useKibana().services;
   const { data: storageStats, isLoading, isError } = useStats();
 
   const hasRedirected = useRef(false);
@@ -28,16 +28,19 @@ export const GettingStartedRedirectGate = ({ coreStart, children }: Props) => {
   const shouldVisitGettingStartedPage =
     !visitedGettingStartedPage || visitedGettingStartedPage === 'false'; // visit if null or value is false
 
+  const isServerless = cloud?.isCloudEnabled && cloud?.isServerlessEnabled;
   const shouldRedirect =
     storageStats !== undefined &&
-    ((isServerless ? cloud?.isInTrial() : isTrial) || storageStats.shouldDefaultGettingStartedPage);
+    ((isServerless ? cloud?.isInTrial() : isTrial) ||
+      storageStats.shouldDefaultGettingStartedPage) &&
+    shouldVisitGettingStartedPage;
 
   useEffect(() => {
-    if (shouldRedirect && shouldVisitGettingStartedPage && !hasRedirected.current) {
+    if (shouldRedirect && !hasRedirected.current) {
       hasRedirected.current = true;
       coreStart.application.navigateToApp('searchGettingStarted');
     }
-  }, [coreStart, shouldVisitGettingStartedPage, shouldRedirect]);
+  }, [coreStart, shouldRedirect]);
 
   // While stats are loading, suppress children to avoid mounting the homepage
   // only to immediately unmount it if a redirect is needed. If the stats call

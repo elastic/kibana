@@ -11,7 +11,7 @@ import { GettingStartedRedirectGate } from './getting_started_redirect_gate';
 import { GETTING_STARTED_SESSIONSTORAGE_KEY } from '@kbn/search-shared-ui';
 
 jest.mock('@kbn/search-shared-ui', () => ({
-  GETTING_STARTED_SESSIONSTORAGE_KEY: 'search.gettingStarted.visited',
+  GETTING_STARTED_SESSIONSTORAGE_KEY: 'gettingStartedVisited',
 }));
 
 const mockUseKibana = jest.fn();
