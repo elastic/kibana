@@ -116,6 +116,7 @@ export const useRegisterActionButtons = ({
         );
         if (existingAttachmentOrigin) {
           await dashboardApi.runQuickSave();
+          await updateOrigin(existingAttachmentOrigin);
           return;
         }
         const result = await dashboardApi.runInteractiveSave();
