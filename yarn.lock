@@ -4711,6 +4711,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-constants@link:x-pack/platform/packages/shared/response-ops/alerting-v2-constants":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-v2-episodes-ui@link:x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui":
   version "0.0.0"
   uid ""
@@ -27424,10 +27428,10 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@2.12.11:
-  version "2.12.11"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.11.tgz#e36754a5f58589eb19b705bc87db82fb0638d035"
-  integrity sha512-dVg20zi2I2EvnwH/+WupzsOC2mCa7qsIhyMAWtfRikn6RKtwL9+7SaF1IQ5LyZry4tlUtf6KyTVhnlQiZXozTQ==
+msw@2.12.12:
+  version "2.12.12"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.12.tgz#0b3b036165463455d9f880d3535e26552cb97372"
+  integrity sha512-u5tmUr6cO29q61vhOR6CDzasMvq7/WqI4eej6HmyIwjVsTpObtoAin5ac3iwK2vU/9eEo1P4FdY/0tsz7C/4fw==
   dependencies:
     "@inquirer/confirm" "^5.0.0"
     "@mswjs/interceptors" "^0.41.2"
