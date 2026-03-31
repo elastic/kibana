@@ -37,6 +37,19 @@ export interface LoadBalancerConfig {
    * or `endpoint_operations.cy.ts`). The first matching entry wins.
    */
   specWeightOverrides?: Array<{ pattern: string; weight: number }>;
+  /**
+   * When true, non-default ftrConfig groups are assigned to dedicated agents
+   * in a first pass (Phase 1), then default-config specs are bin-packed across
+   * the remaining agents (Phase 2). This guarantees no agent pays a double
+   * stack-boot penalty from having 2+ ftrConfig groups.
+   */
+  isolateNonDefaultConfigs?: boolean;
+  /**
+   * Soft target weight per agent. When an agent exceeds this value, a progressive
+   * penalty is applied to discourage the LB from overloading it further.
+   * Set to totalWeight / agentCount with a buffer for overhead.
+   */
+  targetWeightPerAgent?: number;
 }
 
 const DEFAULT_MIN_SPEC_WEIGHT = 1;
@@ -181,29 +194,86 @@ export const retrieveIntegrationsConfigAware = (
 
   const getAgentCost = (agent: (typeof agents)[number], specConfigKey: string): number => {
     const newConfigPenalty = agent.configs.has(specConfigKey) ? 0 : lbConfig.setupCostWeight;
-    return (
+    let cost =
       agent.totalWeight +
       agent.paths.length * lbConfig.perSpecOverhead +
       agent.configs.size * lbConfig.setupCostWeight +
-      newConfigPenalty
-    );
+      newConfigPenalty;
+
+    if (lbConfig.targetWeightPerAgent) {
+      const excess = Math.max(0, agent.totalWeight - lbConfig.targetWeightPerAgent);
+      cost += excess * 2;
+    }
+
+    return cost;
   };
 
-  for (const spec of specs) {
-    let bestIdx = 0;
-    let bestCost = Infinity;
+  const defaultConfigKey = ftrConfigToKey({});
 
-    for (let i = 0; i < agents.length; i++) {
-      const cost = getAgentCost(agents[i], spec.configKey);
-      if (cost < bestCost) {
-        bestCost = cost;
-        bestIdx = i;
+  if (lbConfig.isolateNonDefaultConfigs) {
+    // Phase 1: Reserve dedicated agents for each non-default config group.
+    // This guarantees no agent pays a double stack-boot penalty.
+    const nonDefaultGroups = new Map<string, typeof specs>();
+    for (const spec of specs) {
+      if (spec.configKey !== defaultConfigKey) {
+        const group = nonDefaultGroups.get(spec.configKey);
+        if (group) {
+          group.push(spec);
+        } else {
+          nonDefaultGroups.set(spec.configKey, [spec]);
+        }
       }
     }
 
-    agents[bestIdx].paths.push(spec.path);
-    agents[bestIdx].totalWeight += spec.weight;
-    agents[bestIdx].configs.add(spec.configKey);
+    let reservedIdx = 0;
+    for (const [configKey, groupSpecs] of nonDefaultGroups) {
+      if (reservedIdx >= agents.length) break;
+      for (const spec of groupSpecs) {
+        agents[reservedIdx].paths.push(spec.path);
+        agents[reservedIdx].totalWeight += spec.weight;
+        agents[reservedIdx].configs.add(configKey);
+      }
+      reservedIdx++;
+    }
+
+    // Phase 2: Greedy bin-pack default-config specs across remaining agents.
+    const defaultSpecs = specs.filter((s) => s.configKey === defaultConfigKey);
+    defaultSpecs.sort((a, b) => b.weight - a.weight || a.path.localeCompare(b.path));
+
+    for (const spec of defaultSpecs) {
+      let bestIdx = reservedIdx;
+      let bestCost = Infinity;
+
+      for (let i = reservedIdx; i < agents.length; i++) {
+        const cost = getAgentCost(agents[i], spec.configKey);
+        if (cost < bestCost) {
+          bestCost = cost;
+          bestIdx = i;
+        }
+      }
+
+      agents[bestIdx].paths.push(spec.path);
+      agents[bestIdx].totalWeight += spec.weight;
+      agents[bestIdx].configs.add(spec.configKey);
+    }
+  } else {
+    // Original greedy bin-packing across all agents
+    for (const spec of specs) {
+      let bestIdx = 0;
+      let bestCost = Infinity;
+
+      for (let i = 0; i < agents.length; i++) {
+        const cost = getAgentCost(agents[i], spec.configKey);
+        if (cost < bestCost) {
+          bestCost = cost;
+          bestIdx = i;
+        }
+      }
+
+      agents[bestIdx].paths.push(spec.path);
+      agents[bestIdx].totalWeight += spec.weight;
+      agents[bestIdx].configs.add(spec.configKey);
+    }
   }
 
   return agents[chunkIndex].paths;

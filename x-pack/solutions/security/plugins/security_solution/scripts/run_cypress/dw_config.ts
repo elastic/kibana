@@ -126,4 +126,6 @@ export const DW_LOAD_BALANCER_CONFIG: LoadBalancerConfig = {
   perSpecOverhead: PER_SPEC_OVERHEAD,
   minSpecWeight: MIN_SPEC_WEIGHT,
   specWeightOverrides: SPEC_WEIGHT_OVERRIDES,
+  isolateNonDefaultConfigs: true,
+  targetWeightPerAgent: 45,
 };
