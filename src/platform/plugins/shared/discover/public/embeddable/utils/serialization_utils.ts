@@ -148,8 +148,8 @@ export const serializeState = ({
   }
 
   const serializedTitles = serializeTitles();
-  const title = serializedTitles.title || initialState.savedObjectTitle;
-  const description = serializedTitles.description || initialState.savedObjectDescription;
+  const title = serializedTitles?.title || initialState.savedObjectTitle;
+  const description = serializedTitles?.description || initialState.savedObjectDescription;
 
   return {
     ...serializeTimeRange(),
