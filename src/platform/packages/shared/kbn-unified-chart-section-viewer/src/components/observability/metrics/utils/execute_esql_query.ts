@@ -19,6 +19,7 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
+import { EsqlResponseError, extractEsqlResponseErrorCause } from './esql_response_error';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 import { getMetricsExecutionContext } from './execution_context';
 
@@ -33,26 +34,21 @@ export interface ExecuteEsqlParams {
   uiSettings: IUiSettingsClient;
 }
 
-export function getErrorMessageFromEsqlResponse(response: object): string | undefined {
-  if (!('error' in response) || response.error == null || typeof response.error !== 'object') {
-    return undefined;
+export const fetchEsqlResponseOrThrow = async (
+  params: Parameters<typeof getESQLResults>[0]
+): Promise<Awaited<ReturnType<typeof getESQLResults>>['response']> => {
+  const { response } = await getESQLResults(params);
+  const errorCause = extractEsqlResponseErrorCause(response);
+  if (errorCause) {
+    throw new EsqlResponseError(errorCause);
   }
-  const e = response.error as {
-    type?: string;
-    reason?: string;
-    root_cause?: Array<{ type?: string; reason?: string }>;
-  };
-  const head = [e.type, e.reason].filter((x): x is string => Boolean(x?.trim())).join(': ');
-  if (head) {
-    return head;
-  }
-  const rc = e.root_cause?.[0];
-  const fromRoot = [rc?.type, rc?.reason].filter((x): x is string => Boolean(x?.trim())).join(': ');
-  return fromRoot || 'Elasticsearch returned an error';
-}
+
+  return response;
+};
 
 /**
  * Executes an ES|QL query using the data plugin's search service.
+ * Rejects when Elasticsearch returns a response body that contains an `error` object.
  */
 export async function executeEsqlQuery<TDocument extends object = Record<string, unknown>>({
   esqlQuery,
@@ -75,7 +71,7 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
       ? buildEsQuery(undefined, [], filtersWithTime, esQueryConfig)
       : undefined;
 
-  const { response } = await getESQLResults({
+  const response = await fetchEsqlResponseOrThrow({
     esqlQuery,
     search,
     signal,
@@ -87,11 +83,6 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
       MetricsExecutionContextName.METRICS_INFO
     ),
   });
-
-  const errorMessage = getErrorMessageFromEsqlResponse(response as object);
-  if (errorMessage) {
-    throw new Error(errorMessage);
-  }
 
   return esqlResultToPlainObjects<TDocument>(response);
 }

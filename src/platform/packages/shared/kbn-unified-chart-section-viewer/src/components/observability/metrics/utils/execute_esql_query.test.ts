@@ -17,7 +17,8 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { executeEsqlQuery, getErrorMessageFromEsqlResponse } from './execute_esql_query';
+import { EsqlResponseError, extractEsqlResponseErrorCause, formatErrorCause } from './esql_response_error';
+import { executeEsqlQuery, fetchEsqlResponseOrThrow } from './execute_esql_query';
 import { getMetricsExecutionContext } from './execution_context';
 
 jest.mock('@kbn/esql-utils', () => ({
@@ -178,34 +179,6 @@ describe('executeEsqlQuery', () => {
     );
   });
 
-  describe('getErrorMessageFromEsqlResponse', () => {
-    it('returns message from error type and reason', () => {
-      const result = getErrorMessageFromEsqlResponse({
-        error: { type: 'remote_transport_exception', reason: 'ccs query failed' },
-      });
-
-      expect(result).toBe('remote_transport_exception: ccs query failed');
-    });
-
-    it('returns message from root_cause when type and reason are missing', () => {
-      const result = getErrorMessageFromEsqlResponse({
-        error: {
-          root_cause: [{ type: 'index_not_found_exception', reason: 'no such index [metrics-*]' }],
-        },
-      });
-
-      expect(result).toBe('index_not_found_exception: no such index [metrics-*]');
-    });
-
-    it('returns generic message for empty error object', () => {
-      const result = getErrorMessageFromEsqlResponse({
-        error: {},
-      });
-
-      expect(result).toBe('Elasticsearch returned an error');
-    });
-  });
-
   it('does not throw when response has no error object (happy path)', async () => {
     await expect(
       executeEsqlQuery({
@@ -224,5 +197,84 @@ describe('executeEsqlQuery', () => {
         dimension_fields: 'host',
       },
     ]);
+  });
+
+  it('throws EsqlResponseError when response contains an Elasticsearch error object', async () => {
+    mockGetESQLResults.mockResolvedValueOnce({
+      response: {
+        error: {
+          type: 'remote_transport_exception',
+          reason: 'ccs query failed',
+        },
+      },
+      params: { query: '' },
+    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
+
+    await expect(
+      executeEsqlQuery({
+        esqlQuery: 'TS metrics-* | METRICS_INFO',
+        search: mockSearch,
+        dataView: dataViewWithAtTimefieldMock,
+        uiSettings: mockUiSettings,
+      })
+    ).rejects.toThrow(EsqlResponseError);
+  });
+});
+
+describe('esql response error helpers', () => {
+  it('extracts error cause from response error object', () => {
+    const result = extractEsqlResponseErrorCause({
+      error: { type: 'remote_transport_exception', reason: 'ccs query failed' },
+    });
+
+    expect(result).toEqual({
+      type: 'remote_transport_exception',
+      reason: 'ccs query failed',
+    });
+  });
+
+  it('returns undefined when response has no error object', () => {
+    const result = extractEsqlResponseErrorCause({ columns: [], values: [] });
+    expect(result).toBeUndefined();
+  });
+
+  it('formats message from error type and reason', () => {
+    const result = formatErrorCause({
+      type: 'remote_transport_exception',
+      reason: 'ccs query failed',
+    });
+
+    expect(result).toBe('remote_transport_exception: ccs query failed');
+  });
+
+  it('formats message from root_cause when type and reason are missing', () => {
+    const result = formatErrorCause({
+      root_cause: [{ type: 'index_not_found_exception', reason: 'no such index [metrics-*]' }],
+    });
+
+    expect(result).toBe('index_not_found_exception: no such index [metrics-*]');
+  });
+
+  it('formats generic message for empty error object', () => {
+    const result = formatErrorCause({});
+    expect(result).toBe('Elasticsearch returned an error');
+  });
+});
+
+describe('fetchEsqlResponseOrThrow', () => {
+  it('throws EsqlResponseError for error responses', async () => {
+    mockGetESQLResults.mockResolvedValueOnce({
+      response: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason: 'bad request',
+        },
+      },
+      params: { query: '' },
+    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
+
+    await expect(fetchEsqlResponseOrThrow({} as Parameters<typeof getESQLResults>[0])).rejects.toThrow(
+      EsqlResponseError
+    );
   });
 });
