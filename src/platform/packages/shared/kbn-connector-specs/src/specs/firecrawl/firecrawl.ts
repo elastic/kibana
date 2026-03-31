@@ -18,6 +18,10 @@ import {
   CrawlAndWaitInputSchema,
   GetCrawlStatusInputSchema,
 } from './types';
+import crawlWorkflow from './workflows/crawl.yaml';
+import mapWorkflow from './workflows/map.yaml';
+import scrapeWorkflow from './workflows/scrape.yaml';
+import searchWorkflow from './workflows/search.yaml';
 
 const FIRECRAWL_API_BASE = 'https://api.firecrawl.dev';
 
@@ -83,7 +87,7 @@ export const FirecrawlConnector: ConnectorSpec = {
     id: '.firecrawl',
     displayName: 'Firecrawl',
     description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.metadata.description', {
-      defaultMessage: 'Scrape, search, map, and crawl the web via the Firecrawl API.',
+      defaultMessage: 'Scrape, search, map, and crawl the web via the Firecrawl API',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -280,4 +284,6 @@ export const FirecrawlConnector: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [crawlWorkflow, mapWorkflow, scrapeWorkflow, searchWorkflow],
 };

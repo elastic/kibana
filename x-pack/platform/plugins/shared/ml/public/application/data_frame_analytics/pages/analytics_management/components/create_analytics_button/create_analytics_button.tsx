@@ -28,7 +28,7 @@ export const CreateAnalyticsButton: FC<Props> = ({
       disabled={isDisabled}
       fill
       onClick={navigateToSourceSelection}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       size={size}
       data-test-subj="mlAnalyticsButtonCreate"
     >

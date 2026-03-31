@@ -9,12 +9,12 @@ import qs from 'query-string';
 import axios from 'axios';
 import { stableStringify } from '@kbn/std';
 import type { Logger } from '@kbn/core/server';
-import { request } from './axios_utils';
-import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { AsApiContract } from '../../common';
 import type { RefreshTokenOAuthRequestParams } from './request_oauth_refresh_token';
 import type { JWTOAuthRequestParams } from './request_oauth_jwt_token';
 import type { ClientCredentialsOAuthRequestParams } from './request_oauth_client_credentials_token';
+import { request } from './axios_utils';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { AsApiContract } from '../../common';
 import type { AuthorizationCodeOAuthRequestParams } from './request_oauth_authorization_code_token';
 
 export interface OAuthTokenResponse {

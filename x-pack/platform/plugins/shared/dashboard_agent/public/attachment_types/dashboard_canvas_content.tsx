@@ -14,7 +14,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { DEFAULT_TIME_RANGE, getStateFromAttachment } from './attachment_to_dashboard_state';
+import { DEFAULT_TIME_RANGE, attachmentToDashboardState } from '@kbn/dashboard-agent-common';
 import type { SavedObjectStatus } from './use_register_action_buttons';
 import { useRegisterActionButtons } from './use_register_action_buttons';
 
@@ -35,11 +35,16 @@ const dashboardCanvasContentStyles = {
     css({
       padding: euiTheme.size.m,
     }),
-  renderer: css({
-    flex: 1,
-    minHeight: 0,
-    display: 'flex',
-  }),
+  renderer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: 1,
+      minHeight: 0,
+      display: 'flex',
+      '.controlGroup': {
+        padding: `${euiTheme.size.s} !important`,
+        borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+      },
+    }),
   searchBar: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexShrink: 0,
@@ -53,29 +58,34 @@ const dashboardCanvasContentStyles = {
 };
 
 export const DashboardCanvasContent = ({
+  isSidebar,
   attachment,
   registerActionButtons,
   updateOrigin,
+  closeCanvas,
+  openSidebarConversation,
   dashboardLocator,
   searchBarComponent: SearchBar,
   checkSavedDashboardExist,
 }: AttachmentRenderProps<DashboardAttachment> & {
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: string) => Promise<unknown>;
+  closeCanvas: () => void;
   dashboardLocator?: DashboardRendererProps['locator'];
+  openSidebarConversation?: () => void;
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }) => {
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
-  const linkedSavedObjectId = attachment.origin;
+  const attachmentOrigin = attachment.origin;
   const [savedObjectStatus, setSavedObjectStatus] = useState<SavedObjectStatus>({
     status: 'idle',
   });
 
   useEffect(
     function checkSavedObjectExists() {
-      if (!linkedSavedObjectId) {
+      if (!attachmentOrigin) {
         setSavedObjectStatus({ status: 'resolved', exists: false });
         return;
       }
@@ -83,7 +93,7 @@ export const DashboardCanvasContent = ({
       let canceled = false;
       setSavedObjectStatus({ status: 'loading' });
 
-      checkSavedDashboardExist(linkedSavedObjectId)
+      checkSavedDashboardExist(attachmentOrigin)
         .then((exists) => {
           if (!canceled) {
             setSavedObjectStatus({ status: 'resolved', exists });
@@ -99,10 +109,10 @@ export const DashboardCanvasContent = ({
         canceled = true;
       };
     },
-    [linkedSavedObjectId, checkSavedDashboardExist]
+    [attachmentOrigin, checkSavedDashboardExist]
   );
 
-  const dashboardState = useMemo(() => getStateFromAttachment(attachment), [attachment]);
+  const dashboardState = useMemo(() => attachmentToDashboardState(attachment), [attachment]);
 
   const [timeRange, setTimeRange] = useState<{ from: string; to: string }>(
     dashboardState.time_range ?? DEFAULT_TIME_RANGE
@@ -120,10 +130,13 @@ export const DashboardCanvasContent = ({
     dashboardApi,
     registerActionButtons,
     updateOrigin,
+    closeCanvas,
+    openSidebarConversation,
     timeRange,
     dashboardState,
-    linkedSavedObjectId,
+    attachmentOrigin,
     checkSavedDashboardExist,
+    isSidebar,
   });
 
   return (
@@ -153,24 +166,26 @@ export const DashboardCanvasContent = ({
         />
       </div>
       <div css={styles.renderer}>
-        <DashboardRenderer
-          getCreationOptions={getCreationOptions}
-          showPlainSpinner
-          locator={dashboardLocator}
-          savedObjectId={
-            savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
-              ? linkedSavedObjectId
-              : undefined
-          }
-          onApiAvailable={(api) => {
-            api.setViewMode('view');
-            const initialTimeRange = api.timeRange$.value;
-            if (initialTimeRange) {
-              api.setTimeRange(initialTimeRange);
+        {savedObjectStatus.status !== 'resolved' ? null : (
+          <DashboardRenderer
+            getCreationOptions={getCreationOptions}
+            showPlainSpinner
+            locator={dashboardLocator}
+            savedObjectId={
+              savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
+                ? attachmentOrigin
+                : undefined
             }
-            setDashboardApi(api);
-          }}
-        />
+            onApiAvailable={(api) => {
+              api.setViewMode('view');
+              const initialTimeRange = api.timeRange$.value;
+              if (initialTimeRange) {
+                api.setTimeRange(initialTimeRange);
+              }
+              setDashboardApi(api);
+            }}
+          />
+        )}
       </div>
     </div>
   );

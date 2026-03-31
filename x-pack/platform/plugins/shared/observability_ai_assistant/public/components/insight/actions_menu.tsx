@@ -42,7 +42,11 @@ export function ActionsMenu({
                 defaultMessage: 'Connector',
               })}{' '}
               <strong>
-                {connectors.connectors?.find(({ id }) => id === connectors.selectedConnector)?.name}
+                {
+                  connectors.connectors?.find(
+                    ({ connectorId }) => connectorId === connectors.selectedConnector
+                  )?.name
+                }
               </strong>
             </div>
           ),

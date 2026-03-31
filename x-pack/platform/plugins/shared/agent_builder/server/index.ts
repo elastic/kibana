@@ -34,6 +34,8 @@ export type {
   SmlIndexAttachmentParams,
 } from './services/sml';
 
+export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
+
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -44,3 +46,5 @@ export const plugin: PluginInitializer<
 };
 
 export { config } from './config';
+
+export { ExecutionStatus } from './services/execution';

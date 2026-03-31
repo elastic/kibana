@@ -51,6 +51,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
         configuration.enable_elastic_capabilities ??
         (resolvedId === agentBuilderDefaultAgentId ? true : undefined),
       workflow_ids: configuration.workflow_ids,
+      plugin_ids: configuration.plugin_ids,
     },
   };
 };
@@ -84,6 +85,7 @@ export const createRequestToEs = ({
       skill_ids: profile.configuration.skill_ids,
       enable_elastic_capabilities: profile.configuration.enable_elastic_capabilities,
       workflow_ids: profile.configuration.workflow_ids,
+      plugin_ids: profile.configuration.plugin_ids,
     },
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),

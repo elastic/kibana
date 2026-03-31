@@ -18,7 +18,8 @@ import {
 
 const STREAM_NAMES_CREATED_BY_SPEC = ['logs.ecs.host-1', 'test-query-stream'];
 
-test.describe('Query streams - Create query stream', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/258151
+test.describe.skip('Query streams - Create query stream', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
     await browserAuth.loginAsAdmin();
     await enableQueryStreams(kbnClient);

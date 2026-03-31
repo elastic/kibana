@@ -31,7 +31,7 @@ export {
 } from './saved_objects';
 
 export type { RruleSchedule } from './task';
-export { TaskStatus, TaskPriority, TaskCost } from './task';
+export { TaskStatus, TaskPriority, TaskCost, InstanceTaskCost } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
@@ -60,6 +60,8 @@ export type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from './plugin';
+
+export { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants';
 
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,

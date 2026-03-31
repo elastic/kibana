@@ -473,7 +473,7 @@ export const Slack: ConnectorSpec = {
     id: '.slack2',
     displayName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
-      defaultMessage: 'List public channels and send messages to Slack channels',
+      defaultMessage: 'Search messages, list public channels, and send messages in Slack',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,

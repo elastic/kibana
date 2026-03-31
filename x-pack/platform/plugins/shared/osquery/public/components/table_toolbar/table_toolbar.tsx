@@ -26,14 +26,16 @@ interface TableToolbarProps {
   searchValue: string;
   onSearchSubmit: (value: string) => void;
 
-  creators: string[];
-  selectedCreators: string[];
-  onSelectedCreatorsChange: (creators: string[]) => void;
-  profilesMap: Map<string, UserProfileWithAvatar>;
+  users?: string[];
+  selectedUsers?: string[];
+  onSelectedUsersChange?: (users: string[]) => void;
+  profilesMap?: Map<string, UserProfileWithAvatar>;
 
   enabledFilter?: EnabledFilter;
   onEnabledFilterChange?: (value: EnabledFilter) => void;
   showEnabledFilter?: boolean;
+
+  additionalFilters?: React.ReactNode;
 
   columnConfigs: ColumnConfig[];
   visibleColumns: string[];
@@ -53,13 +55,14 @@ const TableToolbarComponent: React.FC<TableToolbarProps> = ({
   searchPlaceholder,
   searchValue,
   onSearchSubmit,
-  creators,
-  selectedCreators,
-  onSelectedCreatorsChange,
+  users,
+  selectedUsers,
+  onSelectedUsersChange,
   profilesMap,
   enabledFilter,
   onEnabledFilterChange,
   showEnabledFilter = false,
+  additionalFilters,
   columnConfigs,
   visibleColumns,
   onVisibleColumnsChange,
@@ -109,25 +112,33 @@ const TableToolbarComponent: React.FC<TableToolbarProps> = ({
             data-test-subj={`${dataTestSubj}-search`}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFilterGroup>
-            <CreatedByFilterPopover
-              creators={creators}
-              selectedCreators={selectedCreators}
-              onSelectionChange={onSelectedCreatorsChange}
-              profilesMap={profilesMap}
-              data-test-subj={`${dataTestSubj}-created-by`}
-            />
-          </EuiFilterGroup>
-        </EuiFlexItem>
-        {showEnabledFilter && onEnabledFilterChange && (
-          <EuiFlexItem grow={false}>
-            <EnabledFilterButtons
-              value={enabledFilter}
-              onChange={onEnabledFilterChange}
-              data-test-subj={`${dataTestSubj}-enabled`}
-            />
-          </EuiFlexItem>
+        {additionalFilters ? (
+          <EuiFlexItem grow={false}>{additionalFilters}</EuiFlexItem>
+        ) : (
+          <>
+            {users && selectedUsers && onSelectedUsersChange && profilesMap && (
+              <EuiFlexItem grow={false}>
+                <EuiFilterGroup>
+                  <CreatedByFilterPopover
+                    users={users}
+                    selectedUsers={selectedUsers}
+                    onSelectionChange={onSelectedUsersChange}
+                    profilesMap={profilesMap}
+                    data-test-subj={`${dataTestSubj}-created-by`}
+                  />
+                </EuiFilterGroup>
+              </EuiFlexItem>
+            )}
+            {showEnabledFilter && onEnabledFilterChange && (
+              <EuiFlexItem grow={false}>
+                <EnabledFilterButtons
+                  value={enabledFilter}
+                  onChange={onEnabledFilterChange}
+                  data-test-subj={`${dataTestSubj}-enabled`}
+                />
+              </EuiFlexItem>
+            )}
+          </>
         )}
         {actionButton && <EuiFlexItem grow={false}>{actionButton}</EuiFlexItem>}
       </EuiFlexGroup>

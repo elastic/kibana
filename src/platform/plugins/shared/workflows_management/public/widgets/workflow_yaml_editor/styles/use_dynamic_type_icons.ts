@@ -57,6 +57,10 @@ export const predefinedStepTypes = [
     displayName: 'While',
   },
   {
+    actionTypeId: 'switch',
+    displayName: 'Switch',
+  },
+  {
     actionTypeId: 'parallel',
     displayName: 'Parallel',
   },
@@ -67,6 +71,10 @@ export const predefinedStepTypes = [
   {
     actionTypeId: 'wait',
     displayName: 'Wait',
+  },
+  {
+    actionTypeId: 'waitForInput',
+    displayName: 'Wait For Input',
   },
   {
     actionTypeId: 'data.set',

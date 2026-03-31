@@ -42,7 +42,7 @@ describe('createCopyToClipboardDiscoverCellActionFactory', () => {
   });
 
   it('should return icon type', () => {
-    expect(copyToClipboardAction.getIconType(context)).toEqual('copyClipboard');
+    expect(copyToClipboardAction.getIconType(context)).toEqual('copy');
   });
 
   describe('isCompatible', () => {

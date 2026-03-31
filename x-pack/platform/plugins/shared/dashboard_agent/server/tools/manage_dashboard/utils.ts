@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type {
-  AttachmentPanel,
-  DashboardAttachmentData,
-  LensAttachmentPanel,
-} from '@kbn/dashboard-agent-common';
+import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
+import { toEmbeddablePanel, type VisualizationContent } from '@kbn/dashboard-agent-common';
 
 /**
  * Failure record for tracking visualization errors.
@@ -37,35 +33,24 @@ export const getErrorMessage = (error: unknown): string => {
 
 const visualizationAttachmentDataSchema = z.object({
   visualization: z.record(z.string(), z.unknown()),
-  query: z.string().optional(),
 });
 
-type ResolvedPanelWithoutGrid = Omit<LensAttachmentPanel, 'grid'>;
-
-const resolvePanelsFromVisualizationAttachment = (data: unknown): ResolvedPanelWithoutGrid[] => {
+const resolvePanelsFromVisualizationAttachment = (data: unknown): VisualizationContent[] => {
   const parseResult = visualizationAttachmentDataSchema.safeParse(data);
   if (!parseResult.success) {
     throw new Error('Visualization attachment does not contain a valid visualization payload.');
   }
-
-  const { visualization, query } = parseResult.data;
-  const title =
-    typeof visualization.title === 'string'
-      ? visualization.title
-      : query ?? 'Generated visualization';
+  const { visualization } = parseResult.data;
 
   return [
     {
       type: 'lens',
-      panelId: uuidv4(),
-      visualization: visualization as LensApiSchemaType,
-      title,
-      ...(query ? { query } : {}),
+      config: visualization as LensApiSchemaType,
     },
   ];
 };
 
-const resolvePanelsFromAttachment = (type: string, data: unknown): ResolvedPanelWithoutGrid[] => {
+const resolvePanelsFromAttachment = (type: string, data: unknown): VisualizationContent[] => {
   if (type === AttachmentType.visualization) {
     return resolvePanelsFromVisualizationAttachment(data);
   }
@@ -79,7 +64,7 @@ const resolvePanelsFromAttachment = (type: string, data: unknown): ResolvedPanel
  * Resolves attachment ids into dashboard panel entries.
  * Supports visualization attachments and dashboard-compatible panel payloads.
  */
-export const resolvePanelsFromAttachments = async ({
+export const resolvePanelsFromAttachments = ({
   attachmentInputs,
   attachments,
   logger,
@@ -87,7 +72,7 @@ export const resolvePanelsFromAttachments = async ({
   attachmentInputs?: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>;
   attachments: AttachmentStateManager;
   logger: Logger;
-}): Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }> => {
+}): { panels: AttachmentPanel[]; failures: VisualizationFailure[] } => {
   if (!attachmentInputs || attachmentInputs.length === 0) {
     return { panels: [], failures: [] };
   }
@@ -108,7 +93,9 @@ export const resolvePanelsFromAttachments = async ({
       }
 
       const resolvedPanels = resolvePanelsFromAttachment(attachmentRecord.type, latestVersion.data);
-      panels.push(...resolvedPanels.map((panel) => ({ ...panel, grid })));
+      panels.push(
+        ...resolvedPanels.map((visContent) => toEmbeddablePanel({ ...visContent, grid }))
+      );
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       logger.error(
@@ -145,7 +132,7 @@ export const getRemovedPanels = (
   const panelsToKeep: AttachmentPanel[] = [];
 
   for (const panel of panels) {
-    if (removeSet.has(panel.panelId)) {
+    if (removeSet.has(panel.uid)) {
       panelsToRemove.push(panel);
     } else {
       panelsToKeep.push(panel);

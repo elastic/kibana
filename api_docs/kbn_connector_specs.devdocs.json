@@ -2375,7 +2375,7 @@
             "label": "parser",
             "description": [],
             "signature": [
-              "\"text\" | \"custom\" | \"ndjson\" | \"json\" | undefined"
+              "\"text\" | \"ndjson\" | \"json\" | \"custom\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "lineNumber": 168,

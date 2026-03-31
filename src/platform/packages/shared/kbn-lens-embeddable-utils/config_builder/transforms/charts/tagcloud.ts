@@ -70,7 +70,7 @@ function buildVisualizationState(config: TagcloudState): LensTagCloudState {
       : LENS_TAGCLOUD_DEFAULT_STATE.orientation,
     maxFontSize: layer.font_size?.max ?? LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
     minFontSize: layer.font_size?.min ?? LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
-    showLabel: layer.metric?.show_metric_label ?? LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
+    showLabel: layer.caption?.visible ?? LENS_TAGCLOUD_DEFAULT_STATE.showCaption,
     tagAccessor: getAccessorName('tag'),
     ...(layer.tag_by.color ? { ...fromColorMappingAPIToLensState(layer.tag_by.color) } : {}),
   };
@@ -107,7 +107,6 @@ function getTagcloudMetric(
           visualization.valueAccessor,
           layer
         ) as LensApiAllMetricOrFormulaOperations)),
-    show_metric_label: visualization.showLabel,
   };
 }
 
@@ -157,6 +156,7 @@ function reverseBuildVisualizationState(
       min: visualization.minFontSize,
       max: visualization.maxFontSize,
     },
+    caption: { visible: visualization.showLabel },
   } as TagcloudState;
 }
 
@@ -178,8 +178,8 @@ function buildFormBasedLayer(layer: TagcloudStateNoESQL): FormBasedPersistedStat
 
 function getValueColumns(layer: TagcloudStateESQL) {
   return [
-    getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
-    getValueColumn(getAccessorName('tag'), layer.tag_by.column),
+    getValueColumn(getAccessorName('metric'), layer.metric, 'number'),
+    getValueColumn(getAccessorName('tag'), layer.tag_by),
   ];
 }
 
