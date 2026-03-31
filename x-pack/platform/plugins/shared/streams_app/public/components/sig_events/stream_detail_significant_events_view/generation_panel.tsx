@@ -64,7 +64,7 @@ export function SignificantEventsGenerationPanel({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <AssetImage type="checklist" size={80} />
+              <AssetImage type="significantEventsEmptyState" size={80} />
             </EuiFlexItem>
           </EuiFlexGroup>
 
