@@ -1475,7 +1475,7 @@ export const labels = {
       defaultMessage: 'Docs',
     }),
     editDetailsButton: i18n.translate('xpack.agentBuilder.overview.editDetailsButton', {
-      defaultMessage: 'Edit details',
+      defaultMessage: 'Edit agent settings',
     }),
     capabilitiesTitle: i18n.translate('xpack.agentBuilder.overview.capabilities.title', {
       defaultMessage: 'Capabilities',
@@ -1592,6 +1592,9 @@ export const labels = {
         defaultMessage: 'ID {id}',
         values: { id },
       }),
+    copyIdAriaLabel: i18n.translate('xpack.agentBuilder.overview.copyIdAriaLabel', {
+      defaultMessage: 'Copy agent ID',
+    }),
     skillsLabel: (count: number) =>
       i18n.translate('xpack.agentBuilder.overview.capabilities.skills', {
         defaultMessage: '{count, plural, one {Skill} other {Skills}}',
