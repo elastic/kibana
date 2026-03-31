@@ -43,7 +43,7 @@ export const AnomalySeverityFilter: React.FC<SeverityFilterProps> = ({
                   grow={false}
                 >
                   <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
-                    <EuiIcon type={'eyeClosed'} />
+                    <EuiIcon type={'eyeSlash'} />
                     <EuiText size={'s'} color={euiTheme.colors.textSubdued}>
                       <p>{`${band.start}-${band.end}`}</p>
                     </EuiText>
