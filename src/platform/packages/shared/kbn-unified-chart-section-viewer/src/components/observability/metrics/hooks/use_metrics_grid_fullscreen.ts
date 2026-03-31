@@ -83,6 +83,10 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
         ${logicalCSS('right', 'var(--euiPushFlyoutOffsetInlineEnd, 0px)')}
         background-color: ${euiTheme.colors.backgroundBasePlain};
 
+        // Embeddable panels set high z-index values that can stack above the
+        // fullscreen overlay and interfere with flyouts. Reset to auto so they
+        // participate in normal stacking context.
+        // See https://github.com/elastic/kibana/issues/260087
         .embPanel {
           z-index: auto !important;
         }
