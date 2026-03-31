@@ -260,7 +260,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           gridLayoutStateManager.headerRefs.current[sectionId] = element;
         }}
         onMouseDown={readOnly ? toggleIsCollapsed : handleSectionDragStart}
-        // using `onTouchStart` in `readOnly` mode will cause `toggleIsCollapsed` to be called twice
         onTouchStart={readOnly ? toggleIsCollapsed : handleSectionDragStart}
         onTouchEnd={(e) => {
           // prevents both `onMouseDown` and `onTouchStart` from firing during touch events
