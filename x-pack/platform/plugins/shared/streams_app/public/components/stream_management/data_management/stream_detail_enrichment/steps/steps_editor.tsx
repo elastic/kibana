@@ -176,7 +176,7 @@ const ErrorPanel = React.memo(() => {
                 }
               >
                 <EuiSpacer size="xs" />
-                <EuiText component="p" size="xs">
+                <EuiText size="xs">
                   <p>
                     <FormattedMessage
                       id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
