@@ -107,19 +107,30 @@ export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: Serv
     setQuery,
   });
 
+  const entityStoreEntityId = entityStoreV2Enabled
+    ? entityFromStoreResult.entityRecord?.entity?.id
+    : undefined;
+
   const openDetailsPanel = useNavigateToServiceDetails({
     serviceName,
     entityId,
     scopeId,
     isRiskScoreExist,
+    entityStoreEntityId,
   });
+
+  const defaultTab = useMemo(() => {
+    if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;
+    if (entityStoreEntityId) return EntityDetailsLeftPanelTab.RESOLUTION_GROUP;
+    return EntityDetailsLeftPanelTab.RISK_INPUTS;
+  }, [isRiskScoreExist, entityStoreEntityId]);
 
   const openPanelFirstTab = useCallback(
     () =>
       openDetailsPanel({
-        tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+        tab: defaultTab,
       }),
-    [openDetailsPanel]
+    [openDetailsPanel, defaultTab]
   );
 
   if (observedService.isLoading) {
@@ -129,7 +140,7 @@ export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: Serv
   return (
     <>
       <FlyoutNavigation
-        flyoutIsExpandable={isRiskScoreExist}
+        flyoutIsExpandable={isRiskScoreExist || !!entityStoreEntityId}
         expandDetails={openPanelFirstTab}
         isRulePreview={scopeId === TableId.rulePreview}
       />
@@ -144,6 +155,7 @@ export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: Serv
         contextID={contextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
+        entityStoreEntityId={entityStoreEntityId}
       />
     </>
   );
