@@ -26,6 +26,8 @@ import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine
 import { useConfigurableRiskEngineSettings } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
 import { RiskScoreTab } from '../components/risk_score_management/risk_score_tab';
 import { AssetCriticalityTab } from '../components/asset_criticality/asset_criticality_tab';
+import { EntityResolutionTab } from '../components/entity_resolution';
+import { useUiSetting$ } from '../../common/lib/kibana';
 import { EntityStoreMissingPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
 import { ClearEntityDataButton } from '../components/entity_store/components/clear_entity_data_button';
@@ -51,6 +53,7 @@ import {
 export enum TabId {
   RiskScore = 'risk_score',
   AssetCriticality = 'asset_criticality',
+  EntityResolution = 'entity_resolution',
   Status = 'status',
 }
 
@@ -85,6 +88,7 @@ export const EntityAnalyticsManagementPage = () => {
   }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
 
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
+  const [isEntityStoreV2Enabled] = useUiSetting$<boolean>('securitySolution:entityStoreEnableV2');
 
   const entityStoreStatus = useEntityStoreStatus();
   const entityTypes = useEntityStoreTypes();
@@ -136,7 +140,16 @@ export const EntityAnalyticsManagementPage = () => {
     if (selectedTabId === TabId.Status && !isStatusDataLoading && !shouldDisplayEngineStatusTab) {
       history.replace(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${TabId.RiskScore}`);
     }
-  }, [shouldDisplayEngineStatusTab, isStatusDataLoading, selectedTabId, history]);
+    if (selectedTabId === TabId.EntityResolution && !isEntityStoreV2Enabled) {
+      history.replace(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${TabId.RiskScore}`);
+    }
+  }, [
+    shouldDisplayEngineStatusTab,
+    isStatusDataLoading,
+    isEntityStoreV2Enabled,
+    selectedTabId,
+    history,
+  ]);
 
   const deleteError = safeErrorMessage(deleteEntityStoreMutation.error);
 
@@ -239,6 +252,19 @@ export const EntityAnalyticsManagementPage = () => {
             defaultMessage="Asset Criticality"
           />
         </EuiTab>
+        {isEntityStoreV2Enabled && (
+          <EuiTab
+            key={TabId.EntityResolution}
+            isSelected={selectedTabId === TabId.EntityResolution}
+            onClick={() => handleTabChange(TabId.EntityResolution)}
+            data-test-subj="entityResolutionTab"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.entityResolution.tabTitle"
+              defaultMessage="Entity Resolution"
+            />
+          </EuiTab>
+        )}
         {shouldDisplayEngineStatusTab && (
           <EuiTab
             key={TabId.Status}
@@ -279,6 +305,12 @@ export const EntityAnalyticsManagementPage = () => {
       <div hidden={selectedTabId !== TabId.AssetCriticality}>
         <AssetCriticalityTab />
       </div>
+
+      {isEntityStoreV2Enabled && (
+        <div hidden={selectedTabId !== TabId.EntityResolution}>
+          <EntityResolutionTab />
+        </div>
+      )}
 
       {shouldDisplayEngineStatusTab && (
         <div hidden={selectedTabId !== TabId.Status}>

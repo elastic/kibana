@@ -141,6 +141,23 @@
       },
       {
         "parentPluginId": "workflowsManagement",
+        "id": "def-common.WORKFLOWS_DOCUMENTATION_URL",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOWS_DOCUMENTATION_URL",
+        "description": [],
+        "signature": [
+          "\"https://ela.st/workflows-docs\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsManagement",
         "id": "def-common.WORKFLOWS_EXECUTIONS_INDEX",
         "type": "string",
         "tags": [],

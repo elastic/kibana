@@ -97,7 +97,7 @@ export const CodeBox = (props: CodeBoxProps) => {
         values: { languageName: selectedOption.language.title },
       })}
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="left"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
     >
@@ -144,7 +144,7 @@ export const CodeBox = (props: CodeBoxProps) => {
                         dataTestSubj ? `${dataTestSubj}-copy-code-btn` : 'copy-code-btn'
                       }
                       color="text"
-                      iconType="copyClipboard"
+                      iconType="copy"
                       size="s"
                       onClick={copy}
                       aria-label={i18n.translate('xpack.searchIndices.codeBox.copyCode.ariaLabel', {

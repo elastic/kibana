@@ -16,7 +16,7 @@ export default {
 export const Default = () => (
   <ReferencesReadOnly
     references={[
-      'https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html',
+      'https://www.elastic.co/docs/reference/machine-learning/ootb-ml-jobs-siem',
       'https://docs.elastic.co/en/integrations/beaconing',
       'https://www.elastic.co/security-labs/identifying-beaconing-malware-using-elastic',
     ]}

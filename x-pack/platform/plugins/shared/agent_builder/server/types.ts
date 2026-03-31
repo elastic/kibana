@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import type { RunToolFn, RunAgentFn } from '@kbn/agent-builder-server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -39,6 +40,7 @@ import type { AgentExecutionService } from './services/execution';
 import type { ModelProviderFactoryFn } from './services/runner/model_provider';
 import type { SmlTypeDefinition, SmlIndexAttachmentParams } from './services/sml';
 import type { PluginsServiceSetup, PluginRegistry } from './services/plugins';
+import type { ConversationListOptions } from './services/conversation/client/types';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -247,6 +249,30 @@ export interface PluginsStart {
 }
 
 /**
+ * A read-only conversation client exposing only get and list operations.
+ */
+export interface ReadOnlyConversationClient {
+  /**
+   * Retrieve a single conversation by its ID, including all rounds.
+   */
+  get(conversationId: string): Promise<Conversation>;
+  /**
+   * List conversations for the current user, optionally filtered by agent ID.
+   */
+  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
+}
+
+/**
+ * AgentBuilder conversations service's start contract (read-only).
+ */
+export interface ConversationsStart {
+  /**
+   * Returns a read-only conversation client scoped to the given request's user and space.
+   */
+  getScopedClient(opts: { request: KibanaRequest }): Promise<ReadOnlyConversationClient>;
+}
+
+/**
  * Start contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginStart {
@@ -280,4 +306,8 @@ export interface AgentBuilderPluginStart {
    * discoverable content.
    */
   sml: SmlStart;
+  /**
+   * Conversations service (read-only), to list and retrieve conversations.
+   */
+  conversations: ConversationsStart;
 }
