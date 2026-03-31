@@ -38,6 +38,15 @@ export function registerBulkDeleteWorkflowsRoute({ router, api, spaces }: RouteD
         },
         validate: {
           request: {
+            query: schema.object({
+              force: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, permanently deletes the workflows (hard delete) instead of soft-deleting them. The workflow IDs become available for reuse.',
+                },
+              }),
+            }),
             body: schema.object({
               ids: schema.arrayOf(
                 schema.string({ meta: { description: 'Workflow ID to delete.' } }),
@@ -53,8 +62,9 @@ export function registerBulkDeleteWorkflowsRoute({ router, api, spaces }: RouteD
       withLicenseCheck(async (context, request, response) => {
         try {
           const { ids } = request.body;
+          const { force } = request.query;
           const spaceId = spaces.getSpaceId(request);
-          const result = await api.deleteWorkflows(ids, spaceId, request);
+          const result = await api.deleteWorkflows(ids, spaceId, request, { force });
           return response.ok({ body: result });
         } catch (error) {
           return handleRouteError(response, error);

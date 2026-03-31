@@ -9,7 +9,7 @@
 
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { findTestPluginPaths } from '@kbn/test';
+import { findTestPluginPaths } from '@kbn/test-kibana-server';
 
 /**
  * Server args aligned with x-pack/platform/test/examples/config.ts so developer

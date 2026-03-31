@@ -161,6 +161,7 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
+import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -318,6 +319,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         auditLogger: plugins.security?.audit.withoutRequest,
         productFeaturesService,
       });
+      if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+        registerWatchlistMaintainer({
+          entityStore: plugins.entityStore,
+          getStartServices: core.getStartServices,
+          logger: this.logger,
+        });
+      }
     } else {
       registerRiskScoringTask({
         getStartServices: core.getStartServices,
@@ -392,6 +400,28 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures,
       config: this.config,
     });
+
+    if (plugins.searchInferenceEndpoints) {
+      plugins.searchInferenceEndpoints.features.register({
+        featureId: 'security_search_inference_parent',
+        featureName: 'Security',
+        featureDescription: 'Parent feature for Security',
+        taskType: 'chat_completion',
+        // If no list is set, the Kibana-wide default endpoint will be surfaced first
+        // and the other available endpoints will be made available in the order they're
+        //  returned from the inference API.
+        recommendedEndpoints: [],
+      });
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: 'security_search_inference_parent',
+        featureId: 'entity_ai_highlight_summary',
+        featureName: 'Entity AI Highlight Summary',
+        featureDescription: 'Entity AI Highlight Summary inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+    }
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -693,6 +723,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (plugins.taskManager) {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
+        isServerless: this.isServerless,
       });
 
       this.trialCompanionMilestoneService.setup({

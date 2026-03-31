@@ -94,7 +94,7 @@ export const SampleDataActionButton = ({
         color="text"
         data-test-subj="viewDataBtn"
         size="s"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={onViewButtonClick}
       >
