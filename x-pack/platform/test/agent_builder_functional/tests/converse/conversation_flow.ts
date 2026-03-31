@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('navigates to new conversation page and shows initial state', async () => {
-      await agentBuilder.navigateToApp('conversations/new');
+      await agentBuilder.navigateToApp();
 
       // Assert the welcome page is displayed
       await testSubjects.existOrFail('agentBuilderWelcomePage');
@@ -76,15 +76,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const responseText = await responseElement.getVisibleText();
         expect(responseText).to.contain(MOCKED_RESPONSE);
 
-        const titleElement = await testSubjects.find('agentBuilderConversationTitle');
+        const titleElement = await testSubjects.find('agentBuilderConversationTitleButton');
         const titleText = await titleElement.getVisibleText();
         expect(titleText).to.contain(MOCKED_TITLE);
 
-        await agentBuilder.openConversationsHistory();
-        // Wait for the conversation to appear in the list
+        // Wait for the conversation to appear in the sidebar
         await retry.try(async () => {
-          const conversationList = await testSubjects.find('agentBuilderConversationList');
-          const conversationText = await conversationList.getVisibleText();
+          const conversationItem = await testSubjects.find(
+            `agentBuilderSidebarConversation-${conversationId}`
+          );
+          const conversationText = await conversationItem.getVisibleText();
           expect(conversationText).to.contain(MOCKED_TITLE);
         });
       });
