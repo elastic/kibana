@@ -364,4 +364,21 @@ describe('RulesListTable', () => {
       });
     });
   });
+
+  describe('rule name link', () => {
+    it('renders rule name as a clickable link', () => {
+      renderTable();
+
+      expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
+    });
+
+    it('calls onNavigateToDetails when rule name link is clicked', () => {
+      const onNavigateToDetails = jest.fn();
+      renderTable({ onNavigateToDetails });
+
+      fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
+
+      expect(onNavigateToDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+  });
 });
