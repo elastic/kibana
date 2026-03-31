@@ -19,8 +19,6 @@ export type {
   OptionsListDisplaySettings,
   OptionsListDSLControlState,
   OptionsListESQLControlState,
-  StaticESQLControlState,
-  QueryESQLControlState,
   OptionsListSearchTechnique,
   OptionsListSelection,
   OptionsListSortingType,

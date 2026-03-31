@@ -57,14 +57,6 @@ export type OptionsListDisplaySettings = TypeOf<typeof optionsListDisplaySetting
 
 export type OptionsListDSLControlState = TypeOf<typeof optionsListDSLControlSchema>;
 export type OptionsListESQLControlState = TypeOf<typeof optionsListESQLControlSchema>;
-export type StaticESQLControlState = Extract<
-  OptionsListESQLControlState,
-  { control_type: 'STATIC_VALUES' }
->;
-export type QueryESQLControlState = Extract<
-  OptionsListESQLControlState,
-  { control_type: 'VALUES_FROM_QUERY' }
->;
 export type OptionsListControlState = OptionsListDSLControlState | OptionsListESQLControlState;
 
 export type OptionsListSearchTechnique = TypeOf<typeof optionsListSearchTechniqueSchema>;
