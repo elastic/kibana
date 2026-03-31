@@ -201,7 +201,11 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
                       <EuiSpacer size="xs" />
                     </>
                   )}
-                  <EuiIcon type={itemIdToExpandedRowMapValues[id] ? 'arrowDown' : 'arrowRight'} />
+                  <EuiIcon
+                    type={
+                      itemIdToExpandedRowMapValues[id] ? 'chevronSingleDown' : 'chevronSingleRight'
+                    }
+                  />
                 </EuiFlexGroup>
               </EuiButtonEmpty>
             ) : (
