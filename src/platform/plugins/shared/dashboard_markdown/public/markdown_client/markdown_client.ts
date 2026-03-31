@@ -8,7 +8,6 @@
  */
 
 import { buildPath } from '@kbn/core-http-browser';
-import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 
