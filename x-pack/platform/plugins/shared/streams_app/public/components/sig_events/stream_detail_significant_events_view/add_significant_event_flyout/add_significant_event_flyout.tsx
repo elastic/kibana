@@ -13,6 +13,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -21,7 +22,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { TaskStatus, type StreamQuery, type Streams } from '@kbn/streams-schema';
+import {
+  TaskStatus,
+  CONNECTOR_NOT_CONFIGURED_ERROR_CODE,
+  type StreamQuery,
+  type Streams,
+} from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -31,6 +37,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
+import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
@@ -40,6 +47,11 @@ import { validateEsqlQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useTaskPolling } from '../../../../hooks/use_task_polling';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
+
+const CONFIGURE_SETTINGS_LINK_LABEL = i18n.translate(
+  'xpack.streams.streamDetailView.addSignificantEventFlyout.configureSettingsLinkLabel',
+  { defaultMessage: 'Go to settings' }
+);
 
 const defaultTask: TaskResult<OnboardingResult> = {
   status: TaskStatus.NotStarted,
@@ -69,6 +81,8 @@ export function AddSignificantEventFlyout({
       start: { data },
     },
   } = useKibana();
+  const router = useStreamsAppRouter();
+  const settingsHref = router.link('/_discovery/{tab}', { path: { tab: 'settings' } });
 
   const dataViewsFetch = useStreamsAppFetch(() => {
     return data.dataViews.create({ title: definition.stream.name }).then((value) => {
@@ -252,6 +266,7 @@ export function AddSignificantEventFlyout({
                   onGenerateSuggestionsClick={generateQueries}
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
+                  aiFeatures={aiFeatures}
                   selectedFlow={selectedFlow}
                 />
               </EuiPanel>
@@ -316,7 +331,28 @@ export function AddSignificantEventFlyout({
                       }}
                       dataViews={dataViewsFetch.value ?? []}
                       taskStatus={task?.status}
-                      taskError={task?.status === 'failed' ? task.error : undefined}
+                      taskError={
+                        task?.status === 'failed' ? (
+                          task.errorCode === CONNECTOR_NOT_CONFIGURED_ERROR_CODE ? (
+                            <>
+                              {i18n.translate(
+                                'xpack.streams.streamDetailView.addSignificantEventFlyout.connectorNotConfiguredDescription',
+                                {
+                                  defaultMessage:
+                                    'No AI connector is configured. Please configure one in the settings page.',
+                                }
+                              )}{' '}
+                              <EuiLink href={settingsHref}>{CONFIGURE_SETTINGS_LINK_LABEL}</EuiLink>
+                            </>
+                          ) : (
+                            <>
+                              {task.error}
+                              <EuiSpacer size="s" />
+                              <EuiLink href={settingsHref}>{CONFIGURE_SETTINGS_LINK_LABEL}</EuiLink>
+                            </>
+                          )
+                        ) : undefined
+                      }
                     />
                   )}
                 </EuiPanel>

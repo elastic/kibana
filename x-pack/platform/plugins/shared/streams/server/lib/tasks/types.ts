@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TaskStatus } from '@kbn/streams-schema';
+import type { TaskErrorCode, TaskStatus } from '@kbn/streams-schema';
 
 interface PersistedTaskBase<TParams extends {} = {}> {
   id: string;
@@ -52,6 +52,7 @@ interface FailedTask<TParams extends {} = {}> extends PersistedTaskBase<TParams>
   status: TaskStatus.Failed;
   task: PersistedTaskBase<TParams>['task'] & {
     error: string;
+    errorCode?: TaskErrorCode;
   };
 }
 

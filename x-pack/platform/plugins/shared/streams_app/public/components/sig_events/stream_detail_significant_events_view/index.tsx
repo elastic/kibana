@@ -96,6 +96,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             setInitialFlow('ai');
             setIsEditFlyoutOpen(true);
           }}
+          aiFeatures={aiFeatures}
         />
         {editFlyout(true)}
       </>

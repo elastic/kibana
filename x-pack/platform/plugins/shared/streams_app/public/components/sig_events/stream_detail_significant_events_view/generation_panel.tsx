@@ -19,20 +19,28 @@ import {
 import { i18n } from '@kbn/i18n';
 import { AssetImage } from '../../asset_image';
 import type { Flow } from './add_significant_event_flyout/types';
+import { ConnectorNotConfiguredCallout } from '../connector_not_configured_callout';
+import type { AIFeatures } from '../../../hooks/use_ai_features';
+import { useConnectorIdSettings } from '../../../hooks/sig_events/use_connector_id_settings';
 
 export function SignificantEventsGenerationPanel({
   onGenerateSuggestionsClick,
   onManualEntryClick,
   isGeneratingQueries,
   isSavingManualEntry,
+  aiFeatures,
   selectedFlow,
 }: {
   onManualEntryClick: () => void;
   onGenerateSuggestionsClick: () => void;
   isGeneratingQueries: boolean;
   isSavingManualEntry: boolean;
+  aiFeatures: AIFeatures | null;
   selectedFlow?: Flow;
 }) {
+  const { isRuleGenerationConnectorConfigured: isConnectorConfigured } = useConnectorIdSettings(
+    aiFeatures?.genAiConnectors?.defaultConnector
+  );
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
@@ -74,7 +82,7 @@ export function SignificantEventsGenerationPanel({
             <EuiButton
               iconType="sparkles"
               isLoading={isGeneratingQueries}
-              isDisabled={isGeneratingQueries || isSavingManualEntry}
+              isDisabled={isGeneratingQueries || isSavingManualEntry || !isConnectorConfigured}
               onClick={onGenerateSuggestionsClick}
               data-test-subj="significant_events_generate_suggestions_button"
             >
@@ -86,6 +94,13 @@ export function SignificantEventsGenerationPanel({
               )}
             </EuiButton>
           </EuiFlexItem>
+
+          {!isConnectorConfigured && (
+            <EuiFlexItem>
+              <EuiSpacer size="s" />
+              <ConnectorNotConfiguredCallout />
+            </EuiFlexItem>
+          )}
         </EuiPanel>
       </EuiFlexItem>
 

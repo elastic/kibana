@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+export type TaskErrorCode = 'connector_not_configured';
+
+export const CONNECTOR_NOT_CONFIGURED_ERROR_CODE: TaskErrorCode = 'connector_not_configured';
+
 export enum TaskStatus {
   NotStarted = 'not_started',
   InProgress = 'in_progress',
@@ -29,5 +33,5 @@ export type TaskResult<TPayload> =
         | TaskStatus.BeingCanceled
         | TaskStatus.Canceled;
     }
-  | { status: TaskStatus.Failed; error: string }
+  | { status: TaskStatus.Failed; error: string; errorCode?: TaskErrorCode }
   | ({ status: TaskStatus.Completed | TaskStatus.Acknowledged } & TPayload);

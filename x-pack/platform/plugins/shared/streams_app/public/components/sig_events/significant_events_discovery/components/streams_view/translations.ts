@@ -145,3 +145,10 @@ export const NO_INSIGHTS_TOAST_TITLE = i18n.translate(
     defaultMessage: 'No Significant Events found',
   }
 );
+
+export const CONNECTOR_NOT_CONFIGURED_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.connectorNotConfiguredTooltip',
+  {
+    defaultMessage: 'No AI connector is configured. Configure one in the settings page.',
+  }
+);

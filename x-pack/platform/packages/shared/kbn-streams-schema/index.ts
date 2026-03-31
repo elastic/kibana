@@ -233,7 +233,12 @@ export {
 
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
 
-export { TaskStatus, type TaskResult } from './src/tasks/types';
+export {
+  TaskStatus,
+  CONNECTOR_NOT_CONFIGURED_ERROR_CODE,
+  type TaskErrorCode,
+  type TaskResult,
+} from './src/tasks/types';
 
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult } from './src/api/features';

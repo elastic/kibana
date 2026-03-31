@@ -7,7 +7,7 @@
 
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-import { StatusError } from '../../lib/streams/errors/status_error';
+import { ConnectorNotConfiguredError } from '../../lib/streams/errors/connector_not_configured_error';
 
 /**
  * Resolves the connector ID to use for AI operations.
@@ -45,8 +45,5 @@ export async function resolveConnectorId({
     return defaultConnector;
   }
 
-  throw new StatusError(
-    'No connector ID provided and no default AI connector configured. Please provide a connectorId or configure a default AI connector in settings.',
-    400
-  );
+  throw new ConnectorNotConfiguredError();
 }

@@ -26,6 +26,7 @@ import type { TableRow } from './utils';
 import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 import { useIndexPatternsConfig } from '../../../../../hooks/use_index_patterns_config';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { useConnectorIdSettings } from '../../../../../hooks/sig_events/use_connector_id_settings';
 import { useInsightsDiscoveryApi } from '../../../../../hooks/sig_events/use_insights_discovery_api';
 import { useOnboardingApi } from '../../../../../hooks/use_onboarding_api';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
@@ -46,6 +47,7 @@ import {
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
+import { ConnectorNotConfiguredCallout } from '../../../connector_not_configured_callout';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -89,6 +91,9 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   >({});
   const router = useStreamsAppRouter();
   const aiFeatures = useAIFeatures();
+  const { isOnboardingConnectorConfigured } = useConnectorIdSettings(
+    aiFeatures?.genAiConnectors?.defaultConnector
+  );
   const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi();
   const { scheduleInsightsDiscoveryTask, getInsightsDiscoveryTaskStatus } =
     useInsightsDiscoveryApi();
@@ -291,7 +296,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           <EuiButtonEmpty
             onClick={onBulkOnboardStreamsClick}
             iconType="radar"
-            disabled={selectedStreams.length === 0}
+            disabled={selectedStreams.length === 0 || !isOnboardingConnectorConfigured}
           >
             {RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL}
           </EuiButtonEmpty>
@@ -308,6 +313,12 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
         </EuiFlexGroup>
       </EuiFlexItem>
 
+      {!isOnboardingConnectorConfigured && (
+        <EuiFlexItem grow={false}>
+          <ConnectorNotConfiguredCallout />
+        </EuiFlexItem>
+      )}
+
       <EuiFlexItem>
         <StreamsTreeTable
           streams={streamsListFetch.data?.streams}
@@ -317,6 +328,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           selection={{ selected: selectedStreams, onSelectionChange: setSelectedStreams }}
           onOnboardStreamActionClick={onOnboardStreamActionClick}
           onStopOnboardingActionClick={onStopOnboardingActionClick}
+          isConnectorConfigured={isOnboardingConnectorConfigured}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

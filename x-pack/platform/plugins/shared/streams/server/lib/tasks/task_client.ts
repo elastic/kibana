@@ -9,7 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { TaskPriority, type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import { TaskStatus } from '@kbn/streams-schema';
-import type { TaskResult } from '@kbn/streams-schema';
+import type { TaskErrorCode, TaskResult } from '@kbn/streams-schema';
 import type { TaskStorageClient } from './storage';
 import type { PersistedTask, TaskParams } from './types';
 import { CancellationInProgressError } from './cancellation_in_progress_error';
@@ -79,6 +79,7 @@ export class TaskClient<TaskType extends string> {
       return {
         status: TaskStatus.Failed,
         error: task.task.error,
+        errorCode: task.task.errorCode,
       };
     } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
       return {
@@ -100,6 +101,15 @@ export class TaskClient<TaskType extends string> {
     const storedTask = await this.get(task.id);
     if (storedTask.status === TaskStatus.BeingCanceled) {
       throw new CancellationInProgressError('Previous task run is still being canceled');
+    }
+
+    if (storedTask.status === TaskStatus.Failed) {
+      try {
+        await this.taskManagerStart.removeIfExists(task.id);
+        this.logger.debug(`Removed stale TM doc for failed task ${task.id}`);
+      } catch (removeError) {
+        this.logger.warn(`Failed to remove stale TM doc for task ${task.id}: ${removeError}`);
+      }
     }
 
     const taskDoc: PersistedTask<TParams> = {
@@ -220,7 +230,8 @@ export class TaskClient<TaskType extends string> {
   public async fail<TParams extends {} = {}>(
     task: PersistedTask,
     params: TParams,
-    error: string
+    error: string,
+    errorCode?: TaskErrorCode
   ): Promise<void> {
     this.logger.debug(`Failing task ${task.id}`);
 
@@ -231,6 +242,7 @@ export class TaskClient<TaskType extends string> {
       task: {
         params,
         error,
+        errorCode,
       },
     });
   }

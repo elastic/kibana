@@ -28,7 +28,7 @@ interface Props {
   setCanSave: (canSave: boolean) => void;
   dataViews: DataView[];
   taskStatus?: string;
-  taskError?: string;
+  taskError?: React.ReactNode;
 }
 
 export function GeneratedFlowForm({

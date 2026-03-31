@@ -32,6 +32,7 @@ import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
 import {
   ACTIONS_COLUMN_HEADER,
+  CONNECTOR_NOT_CONFIGURED_TOOLTIP,
   KNOWLEDGE_INDICATORS_COLUMN_HEADER,
   NAME_COLUMN_HEADER,
   NO_STREAMS_MESSAGE,
@@ -60,6 +61,7 @@ export function StreamsTreeTable({
   selection,
   onOnboardStreamActionClick,
   onStopOnboardingActionClick,
+  isConnectorConfigured,
 }: {
   streams?: ListStreamDetail[];
   streamOnboardingResultMap: Record<string, TaskResult<OnboardingResult>>;
@@ -68,6 +70,7 @@ export function StreamsTreeTable({
   selection: EuiTableSelectionType<TableRow>;
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
+  isConnectorConfigured: boolean;
 }) {
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
@@ -431,13 +434,18 @@ export function StreamsTreeTable({
                 return (
                   <EuiToolTip
                     position="top"
-                    content={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+                    content={
+                      isConnectorConfigured
+                        ? RUN_STREAM_ONBOARDING_BUTTON_LABEL
+                        : CONNECTOR_NOT_CONFIGURED_TOOLTIP
+                    }
                     display="block"
                     disableScreenReaderOutput
                   >
                     <EuiButtonIcon
                       iconType="radar"
                       aria-label={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+                      disabled={!isConnectorConfigured}
                       onClick={() => onOnboardStreamActionClick(item.stream.name)}
                     />
                   </EuiToolTip>

@@ -11,9 +11,11 @@ import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from
 import { useBoolean } from '@kbn/react-hooks';
 import { i18n } from '@kbn/i18n';
 import { TaskStatus, type Streams } from '@kbn/streams-schema';
-import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { useStreamFeaturesApi } from '../../../hooks/sig_events/use_stream_features_api';
 import { useTaskPolling } from '../../../hooks/use_task_polling';
+import type { AIFeatures } from '../../../hooks/use_ai_features';
+import { useConnectorIdSettings } from '../../../hooks/sig_events/use_connector_id_settings';
+import { ConnectorNotConfiguredCallout } from '../connector_not_configured_callout';
 
 interface FeatureIdentificationControlProps {
   definition: Streams.all.Definition;
@@ -32,6 +34,8 @@ export function FeatureIdentificationControl({
   onTaskStart,
   onTaskEnd,
 }: FeatureIdentificationControlProps) {
+  const { isKnowledgeIndicatorExtractionConnectorConfigured: isConnectorConfigured } =
+    useConnectorIdSettings(aiFeatures?.genAiConnectors?.defaultConnector);
   const {
     getFeaturesIdentificationStatus,
     scheduleFeaturesIdentificationTask,
@@ -115,7 +119,7 @@ export function FeatureIdentificationControl({
         <TriggerButton
           isLoading={isLoading}
           onClick={handleStartIdentification}
-          aiFeatures={aiFeatures}
+          isConnectorConfigured={isConnectorConfigured}
         />
       );
 
@@ -126,7 +130,7 @@ export function FeatureIdentificationControl({
           onStartIdentification={handleStartIdentification}
           showNoResultsCallout={task.features.length === 0 && !isNoResultsDismissed}
           onDismissNoResults={dismissNoResults}
-          aiFeatures={aiFeatures}
+          isConnectorConfigured={isConnectorConfigured}
         />
       );
 
@@ -148,7 +152,7 @@ export function FeatureIdentificationControl({
           calloutTitle={TASK_FAILED_TITLE}
           calloutColor="danger"
           calloutIcon="error"
-          aiFeatures={aiFeatures}
+          isConnectorConfigured={isConnectorConfigured}
         >
           {task.error}
         </StateWithCallout>
@@ -162,7 +166,7 @@ export function FeatureIdentificationControl({
           calloutTitle={TASK_STALE_TITLE}
           calloutColor="warning"
           calloutIcon="warning"
-          aiFeatures={aiFeatures}
+          isConnectorConfigured={isConnectorConfigured}
         >
           {TASK_STALE_DESCRIPTION}
         </StateWithCallout>
@@ -187,19 +191,30 @@ const COMMON_BUTTON_PROPS = {
 interface TriggerButtonProps {
   isLoading: boolean;
   onClick: () => void;
-  aiFeatures: AIFeatures | null;
+  isConnectorConfigured: boolean;
 }
 
-function TriggerButton({ isLoading, onClick, aiFeatures }: TriggerButtonProps) {
+function TriggerButton({ isLoading, onClick, isConnectorConfigured }: TriggerButtonProps) {
   return (
-    <EuiButton
-      {...COMMON_BUTTON_PROPS}
-      isLoading={isLoading}
-      onClick={onClick}
-      isDisabled={!aiFeatures?.enabled}
-    >
-      {IDENTIFY_FEATURES_BUTTON_LABEL}
-    </EuiButton>
+    <>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem grow={false} style={{ alignSelf: 'flex-start' }}>
+          <EuiButton
+            {...COMMON_BUTTON_PROPS}
+            isLoading={isLoading}
+            onClick={onClick}
+            isDisabled={!isConnectorConfigured}
+          >
+            {IDENTIFY_FEATURES_BUTTON_LABEL}
+          </EuiButton>
+        </EuiFlexItem>
+        {!isConnectorConfigured && (
+          <EuiFlexItem>
+            <ConnectorNotConfiguredCallout />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </>
   );
 }
 
@@ -208,7 +223,7 @@ interface CompletedStateProps {
   onStartIdentification: () => void;
   showNoResultsCallout: boolean;
   onDismissNoResults: () => void;
-  aiFeatures: AIFeatures | null;
+  isConnectorConfigured: boolean;
 }
 
 function CompletedState({
@@ -216,7 +231,7 @@ function CompletedState({
   onStartIdentification,
   showNoResultsCallout,
   onDismissNoResults,
-  aiFeatures,
+  isConnectorConfigured,
 }: CompletedStateProps) {
   if (showNoResultsCallout) {
     return (
@@ -225,7 +240,7 @@ function CompletedState({
           <TriggerButton
             isLoading={isLoading}
             onClick={onStartIdentification}
-            aiFeatures={aiFeatures}
+            isConnectorConfigured={isConnectorConfigured}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -244,7 +259,11 @@ function CompletedState({
   }
 
   return (
-    <TriggerButton isLoading={isLoading} onClick={onStartIdentification} aiFeatures={aiFeatures} />
+    <TriggerButton
+      isLoading={isLoading}
+      onClick={onStartIdentification}
+      isConnectorConfigured={isConnectorConfigured}
+    />
   );
 }
 
@@ -292,7 +311,7 @@ interface StateWithCalloutProps {
   calloutColor: 'danger' | 'warning' | 'primary';
   calloutIcon: 'error' | 'warning' | 'search';
   children: React.ReactNode;
-  aiFeatures: AIFeatures | null;
+  isConnectorConfigured: boolean;
 }
 
 function StateWithCallout({
@@ -302,7 +321,7 @@ function StateWithCallout({
   calloutColor,
   calloutIcon,
   children,
-  aiFeatures,
+  isConnectorConfigured,
 }: StateWithCalloutProps) {
   return (
     <EuiFlexGroup direction="column">
@@ -310,7 +329,7 @@ function StateWithCallout({
         <TriggerButton
           isLoading={isLoading}
           onClick={onStartIdentification}
-          aiFeatures={aiFeatures}
+          isConnectorConfigured={isConnectorConfigured}
         />
       </EuiFlexItem>
       <EuiFlexItem>

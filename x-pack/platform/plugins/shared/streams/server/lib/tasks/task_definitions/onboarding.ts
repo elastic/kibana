@@ -14,13 +14,19 @@ import type {
   SignificantEventsQueriesGenerationResult,
   TaskResult,
 } from '@kbn/streams-schema';
-import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
+import {
+  OnboardingStep,
+  TaskStatus,
+  CONNECTOR_NOT_CONFIGURED_ERROR_CODE,
+  type TaskErrorCode,
+} from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
 import type { StreamsTaskType, TaskContext } from '.';
 import { getErrorMessage } from '../../streams/errors/parse_error';
+import { ConnectorNotConfiguredError } from '../../streams/errors/connector_not_configured_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import type { QueryClient } from '../../streams/assets/query/query_client';
@@ -220,6 +226,11 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   { error } as LogMeta
                 );
 
+                const connectorErrorCode: TaskErrorCode | undefined =
+                  error instanceof ConnectorNotConfiguredError
+                    ? CONNECTOR_NOT_CONFIGURED_ERROR_CODE
+                    : undefined;
+
                 await taskClient.fail<OnboardingTaskParams>(
                   _task,
                   {
@@ -229,7 +240,8 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     steps,
                     saveQueries,
                   },
-                  errorMessage
+                  errorMessage,
+                  connectorErrorCode
                 );
                 return getDeleteTaskRunResult();
               }
