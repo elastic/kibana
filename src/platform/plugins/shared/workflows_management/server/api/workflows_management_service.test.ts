@@ -2021,13 +2021,23 @@ steps:
       });
     });
 
+    const noRunningExecutions = () => ({ hits: { hits: [], total: { value: 0 } } } as any);
+
+    const mockHardDeleteSearchSequence = (
+      workflowDoc: typeof mockWorkflowDocument = mockWorkflowDocument
+    ) => {
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: { hits: [workflowDoc], total: { value: 1 } },
+        } as any)
+        .mockResolvedValueOnce(noRunningExecutions())
+        .mockResolvedValueOnce({
+          hits: { hits: [workflowDoc], total: { value: 1 } },
+        } as any);
+    };
+
     it('should hard delete workflows when force=true', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [mockWorkflowDocument],
-          total: { value: 1 },
-        },
-      } as any);
+      mockHardDeleteSearchSequence();
       mockEsClient.delete.mockResolvedValue({
         _id: 'test-workflow-id',
         result: 'deleted',
@@ -2056,13 +2066,38 @@ steps:
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
 
+    it('should reject hard delete when workflows have running executions', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: { hits: [mockWorkflowDocument], total: { value: 1 } },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'exec-1',
+                _source: {
+                  spaceId: 'default',
+                  status: 'running',
+                  workflowId: 'test-workflow-id',
+                  triggeredBy: 'manual',
+                },
+              },
+            ],
+            total: { value: 1 },
+          },
+        } as any);
+
+      await expect(
+        service.deleteWorkflows(['test-workflow-id'], 'default', { force: true })
+      ).rejects.toThrow('Cannot force-delete workflows with running executions');
+
+      expect(mockEsClient.delete).not.toHaveBeenCalled();
+      expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+    });
+
     it('should purge executions and step executions scoped to spaceId on hard delete', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [mockWorkflowDocument],
-          total: { value: 1 },
-        },
-      } as any);
+      mockHardDeleteSearchSequence();
       mockEsClient.delete.mockResolvedValue({
         _id: 'test-workflow-id',
         result: 'deleted',
@@ -2096,9 +2131,7 @@ steps:
         _id: 'workflow-shared-id',
         _source: { ...mockWorkflowDocument._source, spaceId: 'space-a' },
       };
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [workflowInSpaceA], total: { value: 1 } },
-      } as any);
+      mockHardDeleteSearchSequence(workflowInSpaceA as typeof mockWorkflowDocument);
       mockEsClient.delete.mockResolvedValue({
         _id: 'workflow-shared-id',
         result: 'deleted',
@@ -2135,7 +2168,7 @@ steps:
     });
 
     it('should not purge related data on soft delete', async () => {
-      mockEsClient.search.mockResolvedValue({
+      mockEsClient.search.mockResolvedValueOnce({
         hits: {
           hits: [mockWorkflowDocument],
           total: { value: 1 },
@@ -2151,15 +2184,24 @@ steps:
     });
 
     it('should handle failures during hard delete', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            { ...mockWorkflowDocument, _id: 'wf-1' },
-            { ...mockWorkflowDocument, _id: 'wf-2' },
-          ],
-          total: { value: 2 },
-        },
-      } as any);
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              { ...mockWorkflowDocument, _id: 'wf-1' },
+              { ...mockWorkflowDocument, _id: 'wf-2' },
+            ],
+            total: { value: 2 },
+          },
+        } as any)
+        .mockResolvedValueOnce(noRunningExecutions())
+        .mockResolvedValueOnce(noRunningExecutions())
+        .mockResolvedValueOnce({
+          hits: { hits: [{ ...mockWorkflowDocument, _id: 'wf-1' }], total: { value: 1 } },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: { hits: [{ ...mockWorkflowDocument, _id: 'wf-2' }], total: { value: 1 } },
+        } as any);
       mockEsClient.delete
         .mockResolvedValueOnce({ _id: 'wf-1', result: 'deleted' } as any)
         .mockRejectedValueOnce(new Error('ES delete failed'));
@@ -2174,12 +2216,7 @@ steps:
     });
 
     it('should not use bulk index when force=true', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [mockWorkflowDocument],
-          total: { value: 1 },
-        },
-      } as any);
+      mockHardDeleteSearchSequence();
       mockEsClient.delete.mockResolvedValue({
         _id: 'test-workflow-id',
         result: 'deleted',
@@ -2191,12 +2228,7 @@ steps:
     });
 
     it('should continue even if purge fails', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [mockWorkflowDocument],
-          total: { value: 1 },
-        },
-      } as any);
+      mockHardDeleteSearchSequence();
       mockEsClient.delete.mockResolvedValue({
         _id: 'test-workflow-id',
         result: 'deleted',

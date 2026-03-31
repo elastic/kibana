@@ -21,7 +21,11 @@ import type {
 } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import {
+  ExecutionType,
+  NonTerminalExecutionStatuses,
+  transformWorkflowYamlJsontoEsWorkflow,
+} from '@kbn/workflows';
 import type {
   ConnectorTypeInfo,
   CreateWorkflowCommand,
@@ -743,6 +747,23 @@ export class WorkflowsService {
     failures: Array<{ id: string; error: string }>
   ): Promise<DeleteWorkflowsResponse> {
     const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
+
+    const runningIds: string[] = [];
+    for (const id of foundIds) {
+      const executions = await this.getWorkflowExecutions(
+        { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+        spaceId
+      );
+      if (executions.total > 0) {
+        runningIds.push(id);
+      }
+    }
+    if (runningIds.length > 0) {
+      throw new WorkflowConflictError(
+        `Cannot force-delete workflows with running executions: [${runningIds.join(', ')}]`,
+        runningIds[0]
+      );
+    }
 
     const successfulIds: string[] = [];
     for (const id of foundIds) {
