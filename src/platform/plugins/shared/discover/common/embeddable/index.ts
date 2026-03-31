@@ -12,14 +12,14 @@ export {
   type SearchEmbeddablePanelApiState,
 } from './search_embeddable_transforms';
 export {
-  isByReferenceDiscoverSessionEmbeddableState,
+  isDiscoverSessionEmbeddableByReferenceState,
   isSearchEmbeddableLegacyPanelState,
 } from './type_guards';
 export {
-  byReferenceSavedSearchToDiscoverSessionEmbeddableState,
-  byValueDiscoverSessionToSavedSearchEmbeddableState,
-  byValueSavedSearchToDiscoverSessionEmbeddableState,
-  discoverSessionToSavedSearchEmbeddableState,
-  savedSearchToDiscoverSessionEmbeddableState,
-  toStoredSearchEmbeddableState,
+  fromStoredSearchEmbeddable,
+  fromStoredSearchEmbeddableByRef,
+  fromStoredSearchEmbeddableByValue,
+  toStoredSearchEmbeddable,
+  toStoredSearchEmbeddableByValue,
+  fromDiscoverSessionPanelOverrides,
 } from './transform_utils';

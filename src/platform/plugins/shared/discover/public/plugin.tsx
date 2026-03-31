@@ -30,12 +30,7 @@ import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/co
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { registerUnifiedChartSectionViewerEbtEvents } from '@kbn/unified-chart-section-viewer/src/analytics';
-import {
-  DISCOVER_APP_LOCATOR,
-  EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY,
-  PLUGIN_ID,
-  type DiscoverAppLocator,
-} from '../common';
+import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
   type DiscoverContextAppLocator,
@@ -477,18 +472,14 @@ export class DiscoverPlugin
       });
     });
 
-    let embeddableTransformsEnabled = false;
-    core.getStartServices().then(([{ featureFlags }]) => {
-      embeddableTransformsEnabled = featureFlags.getBooleanValue(
-        EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY,
-        false
-      );
-    });
     plugins.embeddable.registerLegacyURLTransform(
       SEARCH_EMBEDDABLE_TYPE,
       async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+        const discoverServices = await getDiscoverServicesForEmbeddable();
         const { getTransformOut } = await getEmbeddableServices();
-        return getTransformOut(transformDrilldownsOut, () => embeddableTransformsEnabled);
+        return getTransformOut(transformDrilldownsOut, () =>
+          discoverServices.discoverFeatureFlags.getEmbeddableTransformsEnabled()
+        );
       }
     );
   }

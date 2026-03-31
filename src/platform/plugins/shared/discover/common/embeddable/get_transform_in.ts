@@ -12,11 +12,8 @@ import { extractReferences, parseSearchSourceJSON } from '@kbn/data-plugin/commo
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './constants';
-import {
-  isByValueSavedSearchEmbeddableState,
-  isSearchEmbeddableLegacyPanelState,
-} from './type_guards';
-import { discoverSessionToSavedSearchEmbeddableState } from './transform_utils';
+import { isSearchEmbeddableByValueState, isSearchEmbeddableLegacyPanelState } from './type_guards';
+import { toStoredSearchEmbeddable } from './transform_utils';
 import type {
   SearchEmbeddablePanelApiState,
   SearchEmbeddableState,
@@ -31,7 +28,7 @@ export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['trans
     const { state, references } = transformDrilldownsIn(apiState);
     return isSearchEmbeddableLegacyPanelState(state)
       ? legacyTransformIn(state, references)
-      : discoverSessionToSavedSearchEmbeddableState(state, references);
+      : toStoredSearchEmbeddable(state, references);
   };
 }
 
@@ -39,7 +36,7 @@ function legacyTransformIn(
   storedState: SearchEmbeddableState,
   drilldownReferences: SavedObjectReference[] = []
 ): { state: StoredSearchEmbeddableState; references: SavedObjectReference[] } {
-  if (!isByValueSavedSearchEmbeddableState(storedState)) {
+  if (!isSearchEmbeddableByValueState(storedState)) {
     const { savedObjectId, ...rest } = storedState;
     return {
       state: rest,

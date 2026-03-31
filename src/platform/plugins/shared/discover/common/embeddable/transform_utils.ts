@@ -22,8 +22,8 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { DataGridDensity } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
-  isByReferenceDiscoverSessionEmbeddableState,
-  isByValueSavedSearchEmbeddableState,
+  isDiscoverSessionEmbeddableByReferenceState,
+  isSearchEmbeddableByValueState,
 } from './type_guards';
 import type {
   DiscoverSessionClassicTab,
@@ -42,28 +42,28 @@ import type {
 } from './types';
 import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './constants';
 
-export function savedSearchToDiscoverSessionEmbeddableState(
+export function fromStoredSearchEmbeddable(
   storedState: SearchEmbeddableState | StoredSearchEmbeddableState,
   references: SavedObjectReference[] = []
 ): DiscoverSessionEmbeddableState {
-  return isByValueSavedSearchEmbeddableState(storedState)
-    ? byValueSavedSearchToDiscoverSessionEmbeddableState(storedState, [
+  return isSearchEmbeddableByValueState(storedState)
+    ? fromStoredSearchEmbeddableByValue(storedState, [
         ...references,
         ...(storedState.attributes.references ?? []),
       ])
-    : byReferenceSavedSearchToDiscoverSessionEmbeddableState(storedState, references);
+    : fromStoredSearchEmbeddableByRef(storedState, references);
 }
 
-export function discoverSessionToSavedSearchEmbeddableState(
+export function toStoredSearchEmbeddable(
   apiState: DiscoverSessionEmbeddableState,
   references: SavedObjectReference[] = []
 ): { state: StoredSearchEmbeddableState; references: SavedObjectReference[] } {
-  return isByReferenceDiscoverSessionEmbeddableState(apiState)
-    ? byReferenceDiscoverSessionToSavedSearchEmbeddableState(apiState, references)
-    : byValueDiscoverSessionToSavedSearchEmbeddableState(apiState, references);
+  return isDiscoverSessionEmbeddableByReferenceState(apiState)
+    ? toStoredSearchEmbeddableByRef(apiState, references)
+    : toStoredSearchEmbeddableByValue(apiState, references);
 }
 
-export function byReferenceSavedSearchToDiscoverSessionEmbeddableState(
+export function fromStoredSearchEmbeddableByRef(
   storedState: SearchEmbeddableByReferenceState | StoredSearchEmbeddableByReferenceState,
   references: SavedObjectReference[] = []
 ): DiscoverSessionEmbeddableByReferenceState {
@@ -90,11 +90,11 @@ export function byReferenceSavedSearchToDiscoverSessionEmbeddableState(
     ...otherAttrs,
     discover_session_id: savedObjectId,
     selected_tab_id: selectedTabId,
-    overrides: fromStoredSearchEmbeddableState(storedState),
+    overrides: toDiscoverSessionPanelOverrides(storedState),
   };
 }
 
-export function byReferenceDiscoverSessionToSavedSearchEmbeddableState(
+export function toStoredSearchEmbeddableByRef(
   apiState: DiscoverSessionEmbeddableByReferenceState,
   references: SavedObjectReference[] = []
 ): { state: StoredSearchEmbeddableByReferenceState; references: SavedObjectReference[] } {
@@ -106,7 +106,7 @@ export function byReferenceDiscoverSessionToSavedSearchEmbeddableState(
   const { discover_session_id, selected_tab_id, overrides, ...otherAttrs } = apiState;
   const state: StoredSearchEmbeddableByReferenceState = {
     ...otherAttrs,
-    ...toStoredSearchEmbeddableState(overrides ?? {}),
+    ...fromDiscoverSessionPanelOverrides(overrides ?? {}),
     ...(selected_tab_id != null && { selectedTabId: selected_tab_id }),
   };
   return {
@@ -115,7 +115,7 @@ export function byReferenceDiscoverSessionToSavedSearchEmbeddableState(
   };
 }
 
-export function byValueSavedSearchToDiscoverSessionEmbeddableState(
+export function fromStoredSearchEmbeddableByValue(
   storedState: StoredSearchEmbeddableByValueState,
   references: SavedObjectReference[] = []
 ): DiscoverSessionEmbeddableByValueState {
@@ -133,14 +133,14 @@ export function byValueSavedSearchToDiscoverSessionEmbeddableState(
   } = storedState;
   const [tab] = attributes.tabs ?? extractTabs(attributes).tabs;
   const apiTab = fromStoredTab(tab.attributes, references);
-  const panelOverrides = fromStoredSearchEmbeddableState(storedState);
+  const panelOverrides = toDiscoverSessionPanelOverrides(storedState);
   return {
     ...otherAttrs,
     tabs: [{ ...apiTab, ...panelOverrides }],
   };
 }
 
-export function byValueDiscoverSessionToSavedSearchEmbeddableState(
+export function toStoredSearchEmbeddableByValue(
   apiState: DiscoverSessionEmbeddableByValueState,
   references: SavedObjectReference[] = []
 ): { state: StoredSearchEmbeddableByValueState; references: SavedObjectReference[] } {
@@ -151,7 +151,7 @@ export function byValueDiscoverSessionToSavedSearchEmbeddableState(
   const { state: tabAttributes, references: tabReferences } = toStoredTab(apiTab);
   const state: StoredSearchEmbeddableByValueState = {
     ...otherAttrs,
-    ...toStoredSearchEmbeddableState(apiTab),
+    ...fromDiscoverSessionPanelOverrides(apiTab),
     attributes: {
       ...tabAttributes,
       sort: tabAttributes.sort as SavedSearchAttributes['sort'],
@@ -186,7 +186,7 @@ export function fromStoredTab(
     kibanaSavedObjectMeta: { searchSourceJSON },
   } = tab;
   const apiTab = {
-    ...fromStoredSearchEmbeddableState(tab),
+    ...toDiscoverSessionPanelOverrides(tab),
     sort: fromStoredSort(sort),
     header_row_height: fromStoredHeight(headerRowHeight)!,
     density: density ?? DataGridDensity.COMPACT,
@@ -220,7 +220,7 @@ export function toStoredTab(apiTab: DiscoverSessionTab): {
   };
   const [searchSourceFields, references] = extractReferences(searchSourceValues);
   const state: DiscoverSessionTabAttributes = {
-    ...toStoredSearchEmbeddableState(apiTab),
+    ...fromDiscoverSessionPanelOverrides(apiTab),
     sort: toStoredSort(sort),
     columns: columnOrder ?? [],
     grid: toStoredGrid(columnSettings),
@@ -232,7 +232,7 @@ export function toStoredTab(apiTab: DiscoverSessionTab): {
   return { state, references };
 }
 
-export function fromStoredSearchEmbeddableState(
+export function toDiscoverSessionPanelOverrides(
   storedState: StoredSearchEmbeddableState | DiscoverSessionTabAttributes
 ): DiscoverSessionPanelOverrides {
   const { sort, columns, rowHeight, sampleSize, rowsPerPage, headerRowHeight, density, grid } =
@@ -252,7 +252,7 @@ export function fromStoredSearchEmbeddableState(
   };
 }
 
-export function toStoredSearchEmbeddableState(
+export function fromDiscoverSessionPanelOverrides(
   apiState: DiscoverSessionPanelOverrides
 ): StoredSearchEmbeddableState {
   const {
@@ -286,7 +286,7 @@ export function fromStoredGrid(
 export function toStoredGrid(
   columnSettings: DiscoverSessionTab['column_settings'] = {}
 ): DiscoverSessionTabAttributes['grid'] {
-  return Object.keys(columnSettings ?? {}).length > 0 ? { columns: columnSettings } : {};
+  return Object.keys(columnSettings).length > 0 ? { columns: columnSettings } : {};
 }
 
 export function fromStoredSort(

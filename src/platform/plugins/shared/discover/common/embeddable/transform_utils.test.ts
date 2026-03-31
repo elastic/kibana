@@ -13,20 +13,20 @@ import {
 } from '@kbn/as-code-data-views-schema';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import {
-  byReferenceDiscoverSessionToSavedSearchEmbeddableState,
-  byReferenceSavedSearchToDiscoverSessionEmbeddableState,
-  byValueDiscoverSessionToSavedSearchEmbeddableState,
-  byValueSavedSearchToDiscoverSessionEmbeddableState,
-  discoverSessionToSavedSearchEmbeddableState,
+  fromStoredSearchEmbeddable,
+  fromStoredSearchEmbeddableByRef,
+  fromStoredSearchEmbeddableByValue,
   fromStoredGrid,
   fromStoredHeight,
-  fromStoredSearchEmbeddableState,
+  toDiscoverSessionPanelOverrides,
   fromStoredSort,
   fromStoredTab,
-  savedSearchToDiscoverSessionEmbeddableState,
+  toStoredSearchEmbeddable,
+  toStoredSearchEmbeddableByRef,
+  toStoredSearchEmbeddableByValue,
   toStoredGrid,
   toStoredHeight,
-  toStoredSearchEmbeddableState,
+  fromDiscoverSessionPanelOverrides,
   toStoredSort,
   toStoredTab,
 } from './transform_utils';
@@ -50,7 +50,7 @@ describe('search embeddable transform utils', () => {
     jest.clearAllMocks();
   });
 
-  describe('savedSearchToDiscoverSessionEmbeddableState', () => {
+  describe('fromStoredSearchEmbeddable', () => {
     it('dispatches to by-reference transform when state has no attributes', () => {
       const storedState: StoredSearchEmbeddableByReferenceState = {
         title: 'My Search',
@@ -60,7 +60,7 @@ describe('search embeddable transform utils', () => {
       const references: SavedObjectReference[] = [
         { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: 'session-123' },
       ];
-      const result = savedSearchToDiscoverSessionEmbeddableState(storedState, references);
+      const result = fromStoredSearchEmbeddable(storedState, references);
       expect(result).toMatchObject({
         title: 'My Search',
         description: 'My description',
@@ -112,7 +112,7 @@ describe('search embeddable transform utils', () => {
       const references: SavedObjectReference[] = [
         { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', type: 'index-pattern', id: 'dv-1' },
       ];
-      const result = savedSearchToDiscoverSessionEmbeddableState(storedState, references);
+      const result = fromStoredSearchEmbeddable(storedState, references);
       expect('tabs' in result && result.tabs).toBeDefined();
       expect('tabs' in result && Array.isArray(result.tabs)).toBe(true);
       expect('tabs' in result && result.tabs.length).toBe(1);
@@ -163,7 +163,7 @@ describe('search embeddable transform utils', () => {
         },
       } as StoredSearchEmbeddableByValueState;
 
-      const result = savedSearchToDiscoverSessionEmbeddableState(storedState);
+      const result = fromStoredSearchEmbeddable(storedState);
 
       expect('tabs' in result && result.tabs).toBeDefined();
       expect('tabs' in result && result.tabs?.[0]).toMatchObject({
@@ -172,7 +172,7 @@ describe('search embeddable transform utils', () => {
     });
   });
 
-  describe('discoverSessionToSavedSearchEmbeddableState', () => {
+  describe('toStoredSearchEmbeddable', () => {
     it('dispatches to by-reference transform when state has discover_session_id', () => {
       const apiState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'My Search',
@@ -182,7 +182,7 @@ describe('search embeddable transform utils', () => {
         selected_tab_id: undefined,
         overrides: {},
       };
-      const { state, references } = discoverSessionToSavedSearchEmbeddableState(apiState);
+      const { state, references } = toStoredSearchEmbeddable(apiState);
       expect(references).toContainEqual({
         name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
         type: SavedSearchType,
@@ -213,7 +213,7 @@ describe('search embeddable transform utils', () => {
           },
         ],
       };
-      const { state, references } = discoverSessionToSavedSearchEmbeddableState(apiState);
+      const { state, references } = toStoredSearchEmbeddable(apiState);
       expect(state).toHaveProperty('attributes');
       expect((state as StoredSearchEmbeddableByValueState).attributes.tabs).toHaveLength(1);
       expect(references).toContainEqual({
@@ -224,8 +224,8 @@ describe('search embeddable transform utils', () => {
     });
   });
 
-  describe('byValueSavedSearchToDiscoverSessionEmbeddableState', () => {
-    it('converts to DiscoverSessionEmbeddableByValueState', () => {
+  describe('fromStoredSearchEmbeddableByValue', () => {
+    it('converts stored by-value SearchEmbeddable state to panel API shape', () => {
       const storedState: StoredSearchEmbeddableByValueState = {
         title: '[filebeat-*] elasticsearch logs',
         description: 'my description',
@@ -298,14 +298,14 @@ describe('search embeddable transform utils', () => {
         ],
       };
 
-      const result = byValueSavedSearchToDiscoverSessionEmbeddableState(storedState);
+      const result = fromStoredSearchEmbeddableByValue(storedState);
 
       expect(result).toEqual(expected);
     });
   });
 
-  describe('byReferenceSavedSearchToDiscoverSessionEmbeddableState', () => {
-    it('converts stored by-reference state to discover session embeddable state with references', () => {
+  describe('fromStoredSearchEmbeddableByRef', () => {
+    it('converts stored by-reference SearchEmbeddable state to panel API shape', () => {
       const storedSearch: StoredSearchEmbeddableByReferenceState = {
         title: 'My Saved Search',
         description: 'My description',
@@ -314,10 +314,7 @@ describe('search embeddable transform utils', () => {
       const references: SavedObjectReference[] = [
         { name: 'savedObjectRef', type: SavedSearchType, id: 'session-123' },
       ];
-      const result = byReferenceSavedSearchToDiscoverSessionEmbeddableState(
-        storedSearch,
-        references
-      );
+      const result = fromStoredSearchEmbeddableByRef(storedSearch, references);
       expect(result).toEqual({
         title: 'My Saved Search',
         description: 'My description',
@@ -350,10 +347,7 @@ describe('search embeddable transform utils', () => {
       const references: SavedObjectReference[] = [
         { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: 'session-xyz' },
       ];
-      const result = byReferenceSavedSearchToDiscoverSessionEmbeddableState(
-        storedSearch,
-        references
-      );
+      const result = fromStoredSearchEmbeddableByRef(storedSearch, references);
       expect(result).toEqual({
         title: 'My Saved Search',
         description: 'My description',
@@ -380,11 +374,11 @@ describe('search embeddable transform utils', () => {
       const storedSearch: StoredSearchEmbeddableByReferenceState = {
         title: 'My Saved Search',
       };
+      expect(() => fromStoredSearchEmbeddableByRef(storedSearch, [])).toThrow(
+        `Missing reference of type "${SavedSearchType}"`
+      );
       expect(() =>
-        byReferenceSavedSearchToDiscoverSessionEmbeddableState(storedSearch, [])
-      ).toThrow(`Missing reference of type "${SavedSearchType}"`);
-      expect(() =>
-        byReferenceSavedSearchToDiscoverSessionEmbeddableState(storedSearch, [
+        fromStoredSearchEmbeddableByRef(storedSearch, [
           { name: 'wrongRefName', type: SavedSearchType, id: 'id-1' },
         ])
       ).toThrow(`Missing reference of type "${SavedSearchType}"`);
@@ -398,10 +392,7 @@ describe('search embeddable transform utils', () => {
         { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', type: 'index-pattern', id: 'dv-1' },
         { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: 'session-picked' },
       ];
-      const result = byReferenceSavedSearchToDiscoverSessionEmbeddableState(
-        storedSearch,
-        references
-      );
+      const result = fromStoredSearchEmbeddableByRef(storedSearch, references);
       expect(result.discover_session_id).toBe('session-picked');
     });
 
@@ -410,7 +401,7 @@ describe('search embeddable transform utils', () => {
         title: 'Runtime / API state',
         savedObjectId: 'session-without-ref-array',
       };
-      const result = byReferenceSavedSearchToDiscoverSessionEmbeddableState(storedSearch, []);
+      const result = fromStoredSearchEmbeddableByRef(storedSearch, []);
       expect(result.discover_session_id).toBe('session-without-ref-array');
     });
 
@@ -426,16 +417,13 @@ describe('search embeddable transform utils', () => {
           id: 'id-from-reference',
         },
       ];
-      const result = byReferenceSavedSearchToDiscoverSessionEmbeddableState(
-        storedSearch,
-        references
-      );
+      const result = fromStoredSearchEmbeddableByRef(storedSearch, references);
       expect(result.discover_session_id).toBe('id-from-state');
     });
   });
 
-  describe('byReferenceDiscoverSessionToSavedSearchEmbeddableState', () => {
-    it('converts discover session by-reference state to stored state with references', () => {
+  describe('toStoredSearchEmbeddableByRef', () => {
+    it('converts panel API by-reference state to stored SearchEmbeddable state with references', () => {
       const apiState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'My Search',
         description: 'My description',
@@ -444,7 +432,7 @@ describe('search embeddable transform utils', () => {
         selected_tab_id: 'tab-1',
         overrides: {},
       };
-      const result = byReferenceDiscoverSessionToSavedSearchEmbeddableState(apiState);
+      const result = toStoredSearchEmbeddableByRef(apiState);
       expect(result.references).toEqual([
         {
           name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
@@ -461,8 +449,8 @@ describe('search embeddable transform utils', () => {
     });
   });
 
-  describe('byValueDiscoverSessionToSavedSearchEmbeddableState', () => {
-    it('converts discover session by-value state to stored state with references', () => {
+  describe('toStoredSearchEmbeddableByValue', () => {
+    it('converts panel API by-value state to stored SearchEmbeddable state with references', () => {
       const apiState: DiscoverSessionEmbeddableByValueState = {
         title: 'Panel Title',
         description: 'Panel description',
@@ -484,7 +472,7 @@ describe('search embeddable transform utils', () => {
           },
         ],
       };
-      const result = byValueDiscoverSessionToSavedSearchEmbeddableState(apiState);
+      const result = toStoredSearchEmbeddableByValue(apiState);
       expect(result.references).toEqual([
         {
           id: 'data-view-1',
@@ -543,7 +531,7 @@ describe('search embeddable transform utils', () => {
           },
         ],
       };
-      const result = byValueDiscoverSessionToSavedSearchEmbeddableState(apiState);
+      const result = toStoredSearchEmbeddableByValue(apiState);
       const searchSource = JSON.parse(
         result.state.attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
       );
@@ -616,9 +604,11 @@ describe('search embeddable transform utils', () => {
         },
       ];
 
-      const apiState = byValueSavedSearchToDiscoverSessionEmbeddableState(storedState, references);
-      const { state: reverted, references: revertedRefs } =
-        byValueDiscoverSessionToSavedSearchEmbeddableState(apiState, []);
+      const apiState = fromStoredSearchEmbeddableByValue(storedState, references);
+      const { state: reverted, references: revertedRefs } = toStoredSearchEmbeddableByValue(
+        apiState,
+        []
+      );
 
       expect(reverted.attributes.title).toBe(storedState.title);
       expect(reverted.attributes.description).toBe(storedState.description);
@@ -655,12 +645,11 @@ describe('search embeddable transform utils', () => {
         { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: 'session-ref-1' },
       ];
 
-      const apiState = byReferenceSavedSearchToDiscoverSessionEmbeddableState(
-        storedState,
-        references
+      const apiState = fromStoredSearchEmbeddableByRef(storedState, references);
+      const { state: reverted, references: revertedRefs } = toStoredSearchEmbeddableByRef(
+        apiState,
+        []
       );
-      const { state: reverted, references: revertedRefs } =
-        byReferenceDiscoverSessionToSavedSearchEmbeddableState(apiState, []);
 
       expect(reverted.title).toBe(storedState.title);
       expect(reverted.description).toBe(storedState.description);
@@ -717,7 +706,7 @@ describe('search embeddable transform utils', () => {
     });
   });
 
-  describe('fromStoredSearchEmbeddableState', () => {
+  describe('fromStoredPanelOverrides', () => {
     it('converts stored state with all fields to panel overrides', () => {
       const storedState: StoredSearchEmbeddableState = {
         sort: [['@timestamp', 'desc']],
@@ -734,7 +723,7 @@ describe('search embeddable transform utils', () => {
           },
         },
       };
-      const result = fromStoredSearchEmbeddableState(storedState);
+      const result = toDiscoverSessionPanelOverrides(storedState);
       expect(result).toEqual({
         sort: [{ name: '@timestamp', direction: 'desc' }],
         column_order: ['message', '@timestamp'],
@@ -756,7 +745,7 @@ describe('search embeddable transform utils', () => {
         columns: ['message'],
         grid: { columns: {} },
       };
-      const result = fromStoredSearchEmbeddableState(storedState);
+      const result = toDiscoverSessionPanelOverrides(storedState);
       expect(result).toEqual({
         sort: [{ name: '@timestamp', direction: 'desc' }],
         column_order: ['message'],
@@ -773,7 +762,7 @@ describe('search embeddable transform utils', () => {
         rowHeight: 5,
         headerRowHeight: 2,
       };
-      const result = fromStoredSearchEmbeddableState(storedState);
+      const result = toDiscoverSessionPanelOverrides(storedState);
       expect(result.row_height).toBe(5);
       expect(result.header_row_height).toBe(2);
     });
@@ -783,13 +772,13 @@ describe('search embeddable transform utils', () => {
         rowHeight: -1,
         headerRowHeight: -1,
       };
-      const result = fromStoredSearchEmbeddableState(storedState);
+      const result = toDiscoverSessionPanelOverrides(storedState);
       expect(result.row_height).toBe('auto');
       expect(result.header_row_height).toBe('auto');
     });
   });
 
-  describe('toStoredSearchEmbeddableState', () => {
+  describe('toStoredPanelOverrides', () => {
     it('converts panel overrides with all fields to stored state', () => {
       const apiState = {
         sort: [{ name: '@timestamp', direction: 'desc' as const }],
@@ -801,7 +790,7 @@ describe('search embeddable transform utils', () => {
         header_row_height: 3,
         density: DataGridDensity.COMPACT,
       };
-      const result = toStoredSearchEmbeddableState(apiState);
+      const result = fromDiscoverSessionPanelOverrides(apiState);
       expect(result).toEqual({
         sort: [['@timestamp', 'desc']],
         columns: ['message', '@timestamp'],
@@ -823,7 +812,7 @@ describe('search embeddable transform utils', () => {
         sort: [{ name: '@timestamp', direction: 'desc' as const }],
         column_order: ['message'],
       };
-      const result = toStoredSearchEmbeddableState(apiState);
+      const result = fromDiscoverSessionPanelOverrides(apiState);
       expect(result).toEqual({
         sort: [['@timestamp', 'desc']],
         columns: ['message'],
@@ -840,7 +829,7 @@ describe('search embeddable transform utils', () => {
         row_height: 'auto' as const,
         header_row_height: 'auto' as const,
       };
-      const result = toStoredSearchEmbeddableState(apiState);
+      const result = fromDiscoverSessionPanelOverrides(apiState);
       expect(result.rowHeight).toBe(-1);
       expect(result.headerRowHeight).toBe(-1);
     });
@@ -850,12 +839,12 @@ describe('search embeddable transform utils', () => {
         row_height: 5,
         header_row_height: 2,
       };
-      const result = toStoredSearchEmbeddableState(apiState);
+      const result = fromDiscoverSessionPanelOverrides(apiState);
       expect(result.rowHeight).toBe(5);
       expect(result.headerRowHeight).toBe(2);
     });
 
-    it('round-trips with fromStoredSearchEmbeddableState', () => {
+    it('round-trips with fromStoredPanelOverrides', () => {
       const storedState: StoredSearchEmbeddableState = {
         sort: [
           ['@timestamp', 'desc'],
@@ -873,8 +862,8 @@ describe('search embeddable transform utils', () => {
           },
         },
       };
-      const overrides = fromStoredSearchEmbeddableState(storedState);
-      const back = toStoredSearchEmbeddableState(overrides);
+      const overrides = toDiscoverSessionPanelOverrides(storedState);
+      const back = fromDiscoverSessionPanelOverrides(overrides);
       expect(back.sort).toEqual(storedState.sort);
       expect(back.columns).toEqual(storedState.columns);
       expect(back.rowHeight).toBe(storedState.rowHeight);

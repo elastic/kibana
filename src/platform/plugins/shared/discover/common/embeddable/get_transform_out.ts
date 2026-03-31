@@ -19,8 +19,8 @@ import type {
   SearchEmbeddableState,
   StoredSearchEmbeddableState,
 } from './types';
-import { isByValueSavedSearchEmbeddableState } from './type_guards';
-import { savedSearchToDiscoverSessionEmbeddableState } from './transform_utils';
+import { isSearchEmbeddableByValueState } from './type_guards';
+import { fromStoredSearchEmbeddable } from './transform_utils';
 
 export function getTransformOut(
   transformDrilldownsOut: DrilldownTransforms['transformOut'],
@@ -38,7 +38,7 @@ export function getTransformOut(
     const state = transformsFlow(storedState);
     return !isEmbeddableTransformsEnabled()
       ? legacyTransformOut(state, references)
-      : savedSearchToDiscoverSessionEmbeddableState(state, references);
+      : fromStoredSearchEmbeddable(state, references);
   };
 }
 
@@ -46,7 +46,7 @@ function legacyTransformOut(
   state: StoredSearchEmbeddableState,
   references: SavedObjectReference[] | undefined
 ): SearchEmbeddableState {
-  if (isByValueSavedSearchEmbeddableState(state)) {
+  if (isSearchEmbeddableByValueState(state)) {
     const tabsState = { ...state, attributes: extractTabs(state.attributes) };
     const tabs = tabsState.attributes.tabs.map((tab) => {
       try {

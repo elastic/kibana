@@ -19,13 +19,13 @@ import type {
   StoredSearchEmbeddableState,
 } from './types';
 
-export function isByReferenceDiscoverSessionEmbeddableState(
+export function isDiscoverSessionEmbeddableByReferenceState(
   state: DiscoverSessionEmbeddableState
 ): state is DiscoverSessionEmbeddableByReferenceState {
   return 'discover_session_id' in state;
 }
 
-export function isByValueSavedSearchEmbeddableState(
+export function isSearchEmbeddableByValueState(
   state: SearchEmbeddableState | StoredSearchEmbeddableState
 ): state is SearchEmbeddableByValueState | StoredSearchEmbeddableByValueState {
   return 'attributes' in state && typeof state.attributes === 'object' && state.attributes !== null;
@@ -34,5 +34,5 @@ export function isByValueSavedSearchEmbeddableState(
 export function isSearchEmbeddableLegacyPanelState(
   state: SearchEmbeddablePanelApiState
 ): state is SearchEmbeddableState {
-  return 'savedObjectId' in state || isByValueSavedSearchEmbeddableState(state);
+  return 'savedObjectId' in state || isSearchEmbeddableByValueState(state);
 }

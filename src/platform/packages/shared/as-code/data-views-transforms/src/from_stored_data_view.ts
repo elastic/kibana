@@ -25,12 +25,12 @@ import { fromStoredRuntimeFields } from './from_stored_runtime_fields';
 export function fromStoredDataView(
   index: string | DataViewSpec | null | undefined
 ): AsCodeDataView {
-  if (index == null) throw new Error('Data view is required to convert from stored data view');
-  if (typeof index === 'string') return { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: index };
-  const title = index.title ?? index.id;
-  if (title == null || title === '') {
-    throw new Error('Stored index object must have a title or id to convert to data view');
+  if (!index) throw new Error('Cannot derive data view from empty index');
+  if (typeof index === 'string') {
+    return { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: index };
   }
+  const title = index.title ?? index.id;
+  if (!title) throw new Error('Cannot derive data view without `title` or `id`');
   return {
     type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: title,
