@@ -10,7 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
-import { defer, from } from 'rxjs';
+import { catchError, defer, from, map, of } from 'rxjs';
 import { rateLimitingForkJoin } from '../../common/data_views/utils';
 import type { QueryDslQueryContainer } from '../../common/types';
 
@@ -163,7 +163,9 @@ export class IndexPatternsFetcher {
    * @param indexPatterns - index pattern list
    * @returns index pattern list of index patterns that match indices
    */
-  async getIndexPatternsWithMatches(indexPatterns: string[]): Promise<string[]> {
+  async getIndexPatternsWithMatches(
+    indexPatterns: string[]
+  ): Promise<{ matchedIndexPatterns: string[]; matchedIndices?: string[] }> {
     const indexPatternsObs = indexPatterns.map((indexPattern) => {
       // when checking a negative pattern, check if the positive pattern exists
       const indexToQuery = indexPattern.trim().startsWith('-')
@@ -176,20 +178,37 @@ export class IndexPatternsFetcher {
             fields: ['_id'],
             pattern: indexToQuery,
           })
+        ).pipe(
+          map((match) => ({ ...match, indexPattern })),
+          catchError(() => of({ fields: [], indices: [], indexPattern }))
         )
       );
     });
 
-    return new Promise<boolean[]>((resolve) => {
-      rateLimitingForkJoin(indexPatternsObs, 3, { fields: [], indices: [] }).subscribe((value) => {
-        resolve(value.map((v) => v.indices.length > 0));
+    return new Promise<{ matchedIndexPatterns: string[]; matchedIndices?: string[] }>((resolve) => {
+      rateLimitingForkJoin(indexPatternsObs, 3, {
+        fields: [],
+        indices: [],
+        indexPattern: '',
+      }).subscribe((indexPatternMatches) => {
+        const matchedIndexPatterns = new Set<string>();
+        const uniqueMatchedIndices = new Set<string>();
+
+        for (const indexPatternMatch of indexPatternMatches) {
+          if (indexPatternMatch.indices.length > 0) {
+            matchedIndexPatterns.add(indexPatternMatch.indexPattern);
+          }
+
+          for (const index of indexPatternMatch.indices) {
+            uniqueMatchedIndices.add(index);
+          }
+        }
+
+        resolve({
+          matchedIndexPatterns: Array.from(matchedIndexPatterns),
+          matchedIndices: Array.from(uniqueMatchedIndices),
+        });
       });
-    })
-      .then((allPatterns: boolean[]) =>
-        indexPatterns.filter(
-          (indexPattern, i, self) => self.indexOf(indexPattern) === i && allPatterns[i]
-        )
-      )
-      .catch(() => indexPatterns);
+    }).catch(() => ({ matchedIndexPatterns: indexPatterns }));
   }
 }
