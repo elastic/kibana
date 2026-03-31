@@ -14,8 +14,10 @@ export const WATCHLISTS_DATA_SOURCE_LIST_URL = `${WATCHLISTS_DATA_SOURCE_URL}/li
 export const WATCHLISTS_SYNC_URL = `${WATCHLISTS_URL}/{watchlist_id}/sync` as const;
 export const WATCHLISTS_INDICES_URL = `${WATCHLISTS_URL}/indices` as const;
 
+export const PRIVILEGED_USER_WATCHLIST_ID = 'privileged-user-monitoring-watchlist-id';
+
 export const PREBUILT_WATCHLIST_NAMES: Record<string, string> = {
-  'prebuilt-priv': i18n.translate(
+  [PRIVILEGED_USER_WATCHLIST_ID]: i18n.translate(
     'xpack.securitySolution.entityAnalytics.watchlists.prebuiltPrivName',
     {
       defaultMessage: 'Privileged User',
