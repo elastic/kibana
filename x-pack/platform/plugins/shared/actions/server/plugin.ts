@@ -686,13 +686,9 @@ export class ActionsPlugin
 
         const response = await core.elasticsearch.client
           .asScoped(request)
-          .asCurrentUser.security.queryApiKeys({
+          .asCurrentUser.security.getApiKey({
             with_profile_uid: true,
-            query: {
-              ids: {
-                values: [id],
-              },
-            },
+            id,
           });
 
         if (response.api_keys && response.api_keys.length > 0) {

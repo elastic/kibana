@@ -308,13 +308,9 @@ export class UserProfileService {
         return undefined;
       }
 
-      const response = await clusterClient.asScoped(request).asCurrentUser.security.queryApiKeys({
+      const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
         with_profile_uid: true,
-        query: {
-          ids: {
-            values: [id],
-          },
-        },
+        id,
       });
 
       if (response.api_keys && response.api_keys.length > 0) {
