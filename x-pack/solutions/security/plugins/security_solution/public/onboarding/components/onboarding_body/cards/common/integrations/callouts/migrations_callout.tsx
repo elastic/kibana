@@ -7,25 +7,23 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiButton, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { useNavigateTo } from '@kbn/security-solution-navigation';
+import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigation';
 import { IconAgent } from '../../../../../../../common/icons/agent';
-import { SIEM_MIGRATIONS_CREATE_PATH } from '../../../../../../../../common/constants';
-import { useKibana } from '../../../../../../../common/lib/kibana';
+import { useGetSecuritySolutionUrl } from '../../../../../../../common/components/link_to';
 
 export const MigrationsCallout = memo(() => {
-  const {
-    http: {
-      basePath: { prepend },
-    },
-  } = useKibana().services;
   const { navigateTo } = useNavigateTo();
-  const href = useMemo(() => prepend(SIEM_MIGRATIONS_CREATE_PATH), [prepend]);
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const href = useMemo(
+    () => getSecuritySolutionUrl({ deepLinkId: SecurityPageName.siemMigrationsCreate }),
+    [getSecuritySolutionUrl]
+  );
   const onClick = useCallback(
     (e: React.SyntheticEvent) => {
       e.preventDefault();
-      navigateTo({ url: href });
+      navigateTo({ deepLinkId: SecurityPageName.siemMigrationsCreate });
     },
-    [href, navigateTo]
+    [navigateTo]
   );
 
   return (
