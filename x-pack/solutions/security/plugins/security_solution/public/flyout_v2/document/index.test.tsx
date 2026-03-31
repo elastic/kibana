@@ -15,8 +15,19 @@ import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mo
 
 jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('./header', () => ({
-  Header: ({ onOpenNotesTab }: { onOpenNotesTab?: () => void }) => (
-    <button type="button" data-test-subj="mock-header" onClick={onOpenNotesTab} />
+  Header: ({
+    onAssigneesUpdated,
+    onOpenNotesTab,
+  }: {
+    onAssigneesUpdated?: () => void;
+    onOpenNotesTab?: () => void;
+  }) => (
+    <button
+      type="button"
+      data-test-subj="mock-header"
+      data-has-on-assignees-updated={String(onAssigneesUpdated != null)}
+      onClick={onOpenNotesTab}
+    />
   ),
 }));
 jest.mock('./tabs/overview_tab', () => ({
@@ -119,5 +130,21 @@ describe('<DocumentFlyout />', () => {
     expect(getByTestId('mock-header')).toBeInTheDocument();
     expect(getByTestId('mock-overview-tab')).toBeInTheDocument();
     expect(getByTestId('mock-footer')).toBeInTheDocument();
+  });
+
+  it('passes assignee updates callback to the header', () => {
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+
+    const { getByTestId } = render(
+      <TestProviders startServices={startServices}>
+        <DocumentFlyout
+          hit={createAlertHit()}
+          onAssigneesUpdated={jest.fn()}
+          renderCellActions={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('mock-header')).toHaveAttribute('data-has-on-assignees-updated', 'true');
   });
 });

@@ -84,8 +84,18 @@ jest.mock('./components/notes', () => ({
 }));
 
 jest.mock('./components/assignees', () => ({
-  Assignees: ({ hit }: { hit: DataTableRecord }) => (
-    <div data-test-subj="mockAssignees" data-hit-id={hit.id} />
+  Assignees: ({
+    hit,
+    onAssigneesUpdated,
+  }: {
+    hit: DataTableRecord;
+    onAssigneesUpdated?: () => void;
+  }) => (
+    <div
+      data-test-subj="mockAssignees"
+      data-hit-id={hit.id}
+      data-has-on-assignees-updated={String(onAssigneesUpdated != null)}
+    />
   ),
 }));
 
@@ -169,13 +179,15 @@ describe('<DocumentHeader />', () => {
 
   it('should render the alert summary blocks for alerts', () => {
     const onOpenNotesTab = jest.fn();
-    const { getByTestId } = renderHeader({ hit: alertHit, onOpenNotesTab });
+    const onAssigneesUpdated = jest.fn();
+    const { getByTestId } = renderHeader({ hit: alertHit, onAssigneesUpdated, onOpenNotesTab });
 
     expect(getByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
     expect(getByTestId('mockHeaderStatus')).toBeInTheDocument();
     expect(getByTestId(RISK_SCORE_TITLE_TEST_ID)).toHaveTextContent('Risk score');
     expect(getByTestId('mockRiskScore')).toBeInTheDocument();
     expect(getByTestId('mockAssignees')).toHaveAttribute('data-hit-id', '1');
+    expect(getByTestId('mockAssignees')).toHaveAttribute('data-has-on-assignees-updated', 'true');
     expect(getByTestId('mockNotes')).toHaveAttribute('data-has-open-notes-tab', 'true');
   });
 

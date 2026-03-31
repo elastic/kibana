@@ -32,7 +32,7 @@ import { getRuleDetailsUrl } from '../../common/components/link_to';
 import { PreferenceFormattedDate } from '../../common/components/formatted_date';
 
 const blockStyles = {
-  minWidth: 280,
+  minWidth: 130,
 };
 
 export interface HeaderProps {
@@ -48,6 +48,10 @@ export interface HeaderProps {
    * Optional callback invoked after alert mutations to refresh flyout data.
    */
   onAlertUpdated?: () => void;
+  /**
+   * Optional callback fired after assignees are updated.
+   */
+  onAssigneesUpdated?: () => void;
   /**
    * Optional callback that opens the notes details view.
    * When omitted, notes render as a read-only count.

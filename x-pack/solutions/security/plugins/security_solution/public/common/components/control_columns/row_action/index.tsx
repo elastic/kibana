@@ -131,6 +131,7 @@ const RowActionComponent = ({
             <DocumentFlyoutWrapper
               documentId={eventId}
               indexName={indexName ?? undefined}
+              onAssigneesUpdated={refetch}
               renderCellActions={cellActionRenderer}
               onAlertUpdated={handleAlertUpdated}
               isTimelineFlyout={tableId === TimelineId.active || tableId === TimelineId.test}
@@ -168,6 +169,7 @@ const RowActionComponent = ({
     openFlyout,
     overlays,
     history,
+    refetch,
     services,
     store,
     tableId,
