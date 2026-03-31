@@ -4,13 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiButton, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { useNavigateTo } from '@kbn/security-solution-navigation';
 import { IconAgent } from '../../../../../../../common/icons/agent';
 import { SIEM_MIGRATIONS_CREATE_PATH } from '../../../../../../../../common/constants';
+import { useKibana } from '../../../../../../../common/lib/kibana';
 
-export const MigrationsCallout = React.memo(() => {
+export const MigrationsCallout = memo(() => {
+  const {
+    http: {
+      basePath: { prepend },
+    },
+  } = useKibana().services;
+  const { navigateTo } = useNavigateTo();
+  const href = useMemo(() => prepend(SIEM_MIGRATIONS_CREATE_PATH), [prepend]);
+  const onClick = useCallback(
+    (e: React.SyntheticEvent) => {
+      e.preventDefault();
+      navigateTo({ url: href });
+    },
+    [href, navigateTo]
+  );
+
   return (
     <EuiPanel color="primary" hasShadow={false} paddingSize="l">
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
@@ -28,7 +45,7 @@ export const MigrationsCallout = React.memo(() => {
           />
         </EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiButton href={SIEM_MIGRATIONS_CREATE_PATH}>
+          <EuiButton href={href} onClick={onClick}>
             <FormattedMessage
               id="xpack.securitySolution.onboarding.migrations.callout.button"
               defaultMessage="Start automatic migration"
