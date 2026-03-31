@@ -19,7 +19,7 @@ export type WatchlistFormValues = CreateWatchlistRequestBodyInput;
  */
 const toEntitySourceFormValues = (
   source: MonitoringEntitySource
-): CreateWatchlistRequestBodyInput['entitySource'] => ({
+): NonNullable<CreateWatchlistRequestBodyInput['entitySources']>[number] => ({
   type: source.type ?? 'index',
   name: source.name ?? '',
   indexPattern: source.indexPattern,
@@ -39,7 +39,7 @@ const toWatchlistFormValues = (
   description: watchlist.description ?? '',
   riskModifier: watchlist.riskModifier,
   managed: watchlist.managed ?? false,
-  entitySource: entitySource ? toEntitySourceFormValues(entitySource) : undefined,
+  entitySources: entitySource ? [toEntitySourceFormValues(entitySource)] : undefined,
 });
 
 export const useGetWatchlistFormData = (watchlistId?: string) => {

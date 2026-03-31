@@ -124,7 +124,7 @@ export const WatchlistForm = ({
         watchlistName={watchlist.name}
         isEditMode={isEditMode}
         onFieldChange={onFieldChange}
-        initialEntitySource={watchlist.entitySource}
+        initialEntitySource={watchlist.entitySources?.[0]}
       />
     </EuiForm>
   );

@@ -74,7 +74,7 @@ export const useEditWatchlistFormState = ({
     watchlist.name.trim() !== initialWatchlist.name.trim() ||
     watchlist.description?.trim() !== initialWatchlist.description?.trim() ||
     watchlist.riskModifier !== initialWatchlist.riskModifier ||
-    JSON.stringify(watchlist.entitySource) !== JSON.stringify(initialWatchlist.entitySource);
+    JSON.stringify(watchlist.entitySources) !== JSON.stringify(initialWatchlist.entitySources);
   const isDisabled = isMissingId || isNameInvalid || !hasChanges;
 
   return {

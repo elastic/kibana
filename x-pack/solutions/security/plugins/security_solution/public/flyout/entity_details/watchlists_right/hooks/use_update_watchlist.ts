@@ -43,13 +43,14 @@ export const useUpdateWatchlist = ({
       const updatedWatchlist = await updateWatchlist({ id: watchlistId, body: watchlist });
 
       // If we have an entity source to update, send the update
-      if (entitySourceId && watchlist.entitySource) {
+      const firstEntitySource = watchlist.entitySources?.[0];
+      if (entitySourceId && firstEntitySource) {
         const entitySourceBody: UpdateWatchlistEntitySourceRequestBodyInput = {
-          name: watchlist.entitySource.name,
-          indexPattern: watchlist.entitySource.indexPattern,
-          identifierField: watchlist.entitySource.identifierField,
-          queryRule: watchlist.entitySource.queryRule,
-          enabled: watchlist.entitySource.enabled,
+          name: firstEntitySource.name,
+          indexPattern: firstEntitySource.indexPattern,
+          identifierField: firstEntitySource.identifierField,
+          queryRule: firstEntitySource.queryRule,
+          enabled: firstEntitySource.enabled,
         };
 
         await updateWatchlistEntitySource({
