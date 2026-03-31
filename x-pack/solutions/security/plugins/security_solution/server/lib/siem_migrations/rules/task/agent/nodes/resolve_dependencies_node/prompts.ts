@@ -110,11 +110,15 @@ Flow Type tests check whether a flow matches Standard, Superflow A, Superflow B,
 
 #### How to resolve Flow Type test conditions:
 
+#### Time window (shared for all flow types below)
+
+For all flow types: extract the time window from the original QRadar rule's test parameters (XML \`<parameter>\` elements, \`<userSelection>\`, and human-readable \`<text>\`). If no time window is specified in the rule, use a short default (e.g., one minute). Always state the chosen window and its source (rule-specified or default) in the output so the downstream system uses the correct value. Create a \`time_window\` field by truncating the event timestamp to that interval — the downstream translator will implement this as a timestamp bucketing operation.
+
 **Standard Flow:**
-- **How to phrase:** "Standard Flow is not a stored field value — it is derived by aggregating raw flow records into individual connections identified by their source IP, source port, destination IP, destination port, and protocol. There is no field equality check for this condition. Within each (typically short) time window—often one minute, but in general any window that is short enough that abnormal communication patterns stand out yet long enough that minor jitter or a few normal connections don't get split across too many buckets—summarize ordinary bidirectional conversations between hosts into standard flow records that capture who talked to whom, on which application/protocol, with how many bytes and packets and for how long, so that later detections (like scans, DDoS, or exfiltration) can reason over these flows instead of raw packets."
+- **How to phrase:** "Standard Flow is not a stored field value — it is derived by aggregating raw flow records into individual connections identified by their source IP, source port, destination IP, destination port, and protocol. There is no field equality check for this condition. Within each applicable time window—summarize ordinary bidirectional conversations between hosts into standard flow records that capture who talked to whom, on which application/protocol, with how many bytes and packets and for how long, so that later detections (like scans, DDoS, or exfiltration) can reason over these flows instead of raw packets."
 
 - Decide the time window
-"First, choose a time window for summarising traffic (for example, one minute, or any window that is short enough to keep flows reasonably fresh but long enough to cover a typical connection's lifetime). Then create a 'time_window' field by truncating the event timestamp to that interval — the downstream translator will implement this as a timestamp bucketing operation."
+"Use the time window determined above."
 
 - Select and filter the data
 "Read from your network traffic indices and keep only records that represent standard flows (normal bidirectional sessions) and that have at least source IP, destination IP, ports, protocol, bytes, and packets populated."
@@ -135,11 +139,11 @@ Flow Type tests check whether a flow matches Standard, Superflow A, Superflow B,
 ---
 
 **Superflow A (Network Scan):**
-- "Superflow A is not a stored field value — it is identified by finding source hosts that contacted an unusually large number of distinct destination IPs within a time window (fan-out / network scan pattern). Do not represent this as a field equality check. Within each (typically short) time window—often one minute, but in general any window that is short enough that scan‑like patterns stand out as abnormal yet long enough that minor jitter, retries, or a few normal connections don't get split across too many buckets—find hosts that talk to an unusually large number of different destination IPs (fans‑out "one‑to‑many"), using thresholds that you tune so they are high enough to avoid normal service discovery or load‑balancing but low enough to reliably catch real network scans, and then show those scanning source hosts with the counts and lists of the destinations they touched because that pattern looks like active network reconnaissance."
+- "Superflow A is not a stored field value — it is identified by finding source hosts that contacted an unusually large number of distinct destination IPs within a time window (fan-out / network scan pattern). Do not represent this as a field equality check. Within each applicable time window—find hosts that talk to an unusually large number of different destination IPs (fans‑out "one‑to‑many"), using thresholds that you tune so they are high enough to avoid normal service discovery or load‑balancing but low enough to reliably catch real network scans, and then show those scanning source hosts with the counts and lists of the destinations they touched because that pattern looks like active network reconnaissance."
 - **How to phrase:**
 
 - Decide the time window
-"First, choose a short time window (for example, one minute, or any window that is short enough that scan bursts look abnormal but long enough that minor jitter and retries are still in the same bucket). Then create a 'time_window' field by truncating the event timestamp to that interval — the downstream translator will implement this as a timestamp bucketing operation."
+"Use the time window determined above."
 
 - Select and filter the data
 "Read from your network traffic indices, expand the action field if needed, and keep only events that represent network flows and that have at least source IP, destination IP, and protocol populated."
@@ -159,11 +163,11 @@ Flow Type tests check whether a flow matches Standard, Superflow A, Superflow B,
 ---
 
 **Superflow B (DDoS):**
-- "Superflow B is not a stored field value — it is identified by finding hosts sending or receiving an unusually large volume of traffic within a time window (flood / DDoS pattern). Do not represent this as a field equality check. Within each (typically short) time window—often one minute, but in general any window that is short enough that abnormal traffic spikes stand out yet long enough that minor jitter, retries, or a few normal connections don't get split across too many buckets—find hosts that are sending or receiving an unusually large volume of traffic to or from one or many peers, using thresholds that you tune so they are high enough to avoid normal bursts but low enough to reliably catch real DDoS‑like floods, and then show those source/destination pairs (or victim hosts) with the key volume metrics because that pattern looks like a possible DDoS attack."
+- "Superflow B is not a stored field value — it is identified by finding hosts sending or receiving an unusually large volume of traffic within a time window (flood / DDoS pattern). Do not represent this as a field equality check. Within each applicable time window—find hosts that are sending or receiving an unusually large volume of traffic to or from one or many peers, using thresholds that you tune so they are high enough to avoid normal bursts but low enough to reliably catch real DDoS‑like floods, and then show those source/destination pairs (or victim hosts) with the key volume metrics because that pattern looks like a possible DDoS attack."
 - **How to phrase:**
 
 - Decide the time window
-"First, choose a short time window (for example, one minute, or any window that is short enough that DDoS spikes look abnormal but long enough that minor jitter and normal bursts from applications are still in the same bucket). Then create a 'time_window' field by truncating the event timestamp to that interval — the downstream translator will implement this as a timestamp bucketing operation."
+"Use the time window determined above."
 
 - Select and filter the data
 "Read from your network traffic indices, expand the action field if needed, and keep only events that represent network flows and that have source IP, destination IP, and the basic volume fields populated (such as bytes, packets, or flow count)."
@@ -183,11 +187,11 @@ Flow Type tests check whether a flow matches Standard, Superflow A, Superflow B,
 ---
 
 **Superflow C (Port Scan):**
-- "Superflow C is not a stored field value — it is identified by finding source hosts that contacted a single destination on an unusually large number of distinct ports within a time window (port scan pattern). Do not represent this as a field equality check. Within each (typically short) time window—often one minute, but in general any window that is short enough that a scan stands out as abnormal yet long enough that minor jitter, retries, or a few normal connections don't get split across too many buckets—find internal machines that connect to another host on lots of different ports (or several important/sensitive ports), using thresholds that you tune so they are high enough to avoid normal traffic but low enough to reliably catch real scans, and then show those source/destination pairs with the counts and lists of ports they touched because that pattern looks like potential port scanning or reconnaissance."
+- "Superflow C is not a stored field value — it is identified by finding source hosts that contacted a single destination on an unusually large number of distinct ports within a time window (port scan pattern). Do not represent this as a field equality check. Within each applicable time window—find internal machines that connect to another host on lots of different ports (or several important/sensitive ports), using thresholds that you tune so they are high enough to avoid normal traffic but low enough to reliably catch real scans, and then show those source/destination pairs with the counts and lists of ports they touched because that pattern looks like potential port scanning or reconnaissance."
 - **How to phrase:**
 
 - Decide the time window
-"First, choose a short time window (for example, one minute, or any window that is short enough that scans look abnormal but long enough that minor jitter and retries are still in the same bucket). Then create a 'time_window' field by truncating the event timestamp to that interval — the downstream translator will implement this as a timestamp bucketing operation."
+"Use the time window determined above."
 
 - Select and filter the data
 "Read from your network traffic indices, expand the action field if needed, and keep only events that represent network flows and that have source IP, destination IP, and destination port populated."
@@ -210,11 +214,11 @@ Flow Type tests check whether a flow matches Standard, Superflow A, Superflow B,
 ---
 
 **Overflow:**
-- "Overflow is not a stored field value — it is identified by detecting records where the flow collector was receiving more traffic than it could process, causing it to emit overflow summaries instead of full flow records. Do not represent this as a field equality check. Within each (typically short) time window—often one minute, but in general any window that is short enough that abnormal traffic bursts stand out yet long enough that minor jitter and routine peaks don't get split across too many buckets—watch for situations where the flow system itself is receiving more traffic than it can safely process and starts generating overflow summaries instead of full flows, using thresholds that you tune so they are high enough to cover normal busy periods but low enough to still flag true overload conditions, and then surface those overflow records with their volume metrics because that pattern means 'we are dropping flow detail and might be blind to some attacks.'"
+- "Overflow is not a stored field value — it is identified by detecting records where the flow collector was receiving more traffic than it could process, causing it to emit overflow summaries instead of full flow records. Do not represent this as a field equality check. Within each applicable time window—watch for situations where the flow system itself is receiving more traffic than it can safely process and starts generating overflow summaries instead of full flows, using thresholds that you tune so they are high enough to cover normal busy periods but low enough to still flag true overload conditions, and then surface those overflow records with their volume metrics because that pattern means 'we are dropping flow detail and might be blind to some attacks.'"
 - **How to phrase:**
 
 - Decide the time window
-"First, choose a short time window (for example, one minute, or any window that is short enough that overload spikes look abnormal but long enough that minor jitter or short busy bursts are still in the same bucket). Then create a 'time_window' field by truncating the event timestamp to that interval — the downstream translator will implement this as a timestamp bucketing operation."
+"Use the time window determined above."
 
 - Select and filter the data
 "Read from your flow/telemetry indices and keep only records that represent overflow or flow‑capacity conditions (for example, special source/destination markers or specific event types that indicate overflow), along with their packet and byte counters."
@@ -236,9 +240,11 @@ Flow Type tests check whether a flow matches Standard, Superflow A, Superflow B,
 - com.q1labs.semsources.cre.tests.TCPFlags
 - com.q1labs.semsources.cre.tests.TCPFlagsCombo
 
-TCP Flags tests check source or destination TCP flag combinations (e.g., SR, SF, FUP, SRAFU, FUPSAR78). Both source and destination TCP flags are stored in the single field \`netflow.tcp_control_bits\`. There are no separate source/destination TCP flag fields — always use \`netflow.tcp_control_bits\` regardless of whether the condition refers to source or destination flags.
+TCP Flags tests check source or destination TCP flag combinations (e.g., SR, SF, FUP, SRAFU, FUPSAR78). In the target schema, source and destination TCP flags are represented in a single integer field (not separate per-direction fields). In your flattened logic, give the full path of **the TCP control bits field**; it must match the **Data Sources** you list for this rule. **Do not** assume a fixed integration prefix (e.g. \`netflow.*\`) or default to Netflow as a data source unless the QRadar rule, log sources, or dependencies explicitly indicate it.
 
-\`netflow.tcp_control_bits\` is a single integer field that encodes all TCP control flags simultaneously. Each flag occupies one bit position and has a fixed numeric value (FIN=1, SYN=2, RST=4, PSH=8, ACK=16, URG=32). Because multiple flags can be active at the same time, the field value is the arithmetic sum of all active flags. A TCP flags condition cannot be described as a range check. For a **single** named combination (one row in the table below), describe the check using that combination's numeric mask: either exact equality to that value, or a bitwise test \`(netflow.tcp_control_bits & mask) === mask\` when the intent is “all bits of this combination are present.” **Never** sum the numeric values of several different combinations into one “combined mask” and use that to mean “any of” those combinations — that changes the rule logic (for example, SR=6 would not match a bogus presence check against the sum 360). For **“any of” multiple distinct QRadar combinations**, describe a **disjunction**: either an **OR of exact equality** to each combination's encoded integer, or an **OR of per-combination predicates** \`(netflow.tcp_control_bits & mask) === mask\` for each required mask.
+In bitwise expressions below, **value** means the integer read from the TCP control bits field.
+
+The TCP control bits field stores all TCP control flags in one integer. Each flag occupies one bit position and has a fixed numeric value (FIN=1, SYN=2, RST=4, PSH=8, ACK=16, URG=32). Because multiple flags can be active at the same time, the field value is the arithmetic sum of all active flags. A TCP flags condition cannot be described as a range check. For a **single** named combination (one row in the table below), describe the check using that combination's numeric mask: either exact equality to that value, or a bitwise test \`(value & mask) === mask\` when the intent is “all bits of this combination are present.” **Never** sum the numeric values of several different combinations into one “combined mask” and use that to mean “any of” those combinations — that changes the rule logic (for example, SR=6 would not match a bogus presence check against the sum 360). For **“any of” multiple distinct QRadar combinations**, describe a **disjunction**: either an **OR of exact equality** to each combination's encoded integer, or an **OR of per-combination predicates** \`(value & mask) === mask\` for each required mask.
 
 #### TCP Flag Bit Values:
 
@@ -274,26 +280,26 @@ TCP Flags tests check source or destination TCP flag combinations (e.g., SR, SF,
 Every TCP flags condition description MUST contain all four of the following elements:
 
 1. **Direction** — state whether it is source or destination TCP flags.
-2. **Field name** — always name the field as \`netflow.tcp_control_bits\`. Never use any other field name. The following names do not exist and must never appear: \`tcp.flags\`, \`source.tcp.flags\`, \`destination.tcp.flags\`, or any boolean subfield such as \`source.tcp.flags.syn\` or \`destination.tcp.flags.ack\`.
+2. **Field name** — give the full path of the TCP control bits field that matches your **Data Sources** for this rule; do not hardcode a Netflow-specific field. The following names do not exist and must never appear: \`tcp.flags\`, \`source.tcp.flags\`, \`destination.tcp.flags\`, or any boolean subfield such as \`source.tcp.flags.syn\` or \`destination.tcp.flags.ack\`.
 3. **Values and derivation** — for each distinct QRadar combination involved, show the step-by-step sum of bit values that yields that combination's encoded integer (one mask per combination). For “any of” multiple combinations, list each combination's mask separately — do **not** add those integers together into one number.
-4. **Check type** — state explicitly what kind of check is being performed: exact equality to a single value; **OR** of equalities or per-mask \`(field & mask) === mask\` tests for “any of”; bitwise AND for absence; or combined bitwise check only when a **single** mask describes one intended flag set. Never describe the check as a range or boundary comparison.
+4. **Check type** — state explicitly what kind of check is being performed: exact equality to a single value; **OR** of equalities or per-mask \`(value & mask) === mask\` tests for “any of” (using **value** as defined above); bitwise AND for absence; or combined bitwise check only when a **single** mask describes one intended flag set. Never describe the check as a range or boundary comparison.
 
 #### Required natural language format:
 
 **For "includes any of" (multiple distinct QRadar combinations):**
-- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` match any of [FLAG NAMES] — for each combination, [NAME]=[derived mask] (e.g. SR: SYN=2 + RST=4 = 6); the condition is true if **any** of: [equality or \`(netflow.tcp_control_bits & mask) === mask\` for each mask] holds."
+- "Check if the [source/destination] TCP flags in the TCP control bits field match any of [FLAG NAMES] — for each combination, [NAME]=[derived mask] (e.g. SR: SYN=2 + RST=4 = 6); the condition is true if **any** of: [equality or \`(value & mask) === mask\` for each mask] holds."
 
 **For negated "includes any of":**
-- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` do NOT match any of [FLAG NAMES] — list each combination's mask as above; the condition is true if **none** of the per-combination checks match (negate the disjunction)."
+- "Check if the [source/destination] TCP flags in the TCP control bits field do NOT match any of [FLAG NAMES] — list each combination's mask as above; the condition is true if **none** of the per-combination checks match (negate the disjunction)."
 
 **For "includes all of" (single set of flags that must all be present):**
-- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` include ALL of [FLAG NAMES] — single mask: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using \`(netflow.tcp_control_bits & [TOTAL]) === [TOTAL]\` (or exact equality if no other flags may be set)."
+- "Check if the [source/destination] TCP flags in the TCP control bits field include ALL of [FLAG NAMES] — single mask: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using \`(value & [TOTAL]) === [TOTAL]\` (or exact equality if no other flags may be set)."
 
 **For "are exactly":**
-- "Check if the [source/destination] TCP flags in \`netflow.tcp_control_bits\` are exactly [FLAG NAMES] — exact value: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using an exact equality check."
+- "Check if the [source/destination] TCP flags in the TCP control bits field are exactly [FLAG NAMES] — exact value: [FLAG1]=[V1] + [FLAG2]=[V2] + ... = [TOTAL], using an exact equality check."
 
 #### Concrete example — "source TCP flags are any of SR, SF, FUP, SRAFU, FUPSAR78":
-- "Check if the source TCP flags in \`netflow.tcp_control_bits\` match any of SR, SF, FUP, SRAFU, FUPSAR78 — per-combination masks: SR=6 (SYN+RST), SF=3 (SYN+FIN), FUP=41 (FIN+URG+PSH), SRAFU=55, FUPSAR78=255; the condition is true if **any** of: \`netflow.tcp_control_bits === 6\`, \`netflow.tcp_control_bits === 3\`, \`netflow.tcp_control_bits === 41\`, \`netflow.tcp_control_bits === 55\`, \`netflow.tcp_control_bits === 255\`, **or** equivalently if any of \`(netflow.tcp_control_bits & 6) === 6\`, \`(netflow.tcp_control_bits & 3) === 3\`, … for each mask (use equality when the rule means exact combo only). Do **not** use a single summed value such as 6+3+41+55+255."
+- "Check if the source TCP flags in the TCP control bits field match any of SR, SF, FUP, SRAFU, FUPSAR78 — per-combination masks: SR=6 (SYN+RST), SF=3 (SYN+FIN), FUP=41 (FIN+URG+PSH), SRAFU=55, FUPSAR78=255; the condition is true if **any** of: \`value === 6\`, \`value === 3\`, \`value === 41\`, \`value === 55\`, \`value === 255\`, **or** equivalently if any of \`(value & 6) === 6\`, \`(value & 3) === 3\`, … for each mask (use equality when the rule means exact combo only). Do **not** use a single summed value such as 6+3+41+55+255."
 
 #### What a correct description must NOT say:
 
@@ -302,6 +308,7 @@ Every TCP flags condition description MUST contain all four of the following ele
 - **Do not omit per-combination derivation:** when several combinations are listed, show how each mask is derived, not a single bogus total.
 - **Do not use invented field names:** "where \`source.tcp.flags\` contains SR" or "where \`tcp.flags\` is SF" — these fields do not exist.
 - **Do not use boolean subfields:** "where \`source.tcp.flags.syn\` is true" — TCP flag subfields do not exist.
+- **Do not default to Netflow for data source:** a TCP flags test does not by itself imply Netflow—tie **Data Sources** and the TCP control bits field path to what the rule implies.
 
 
 
@@ -385,7 +392,7 @@ The downstream system does **not** understand what a "Building Block" or a "Depe
     - Bullet list of data source names.
     - Use only data sources that are clearly implied by the rule and its dependencies.
     - Pay special attention to Software Entity names as data sources. For example Cloudflare, Zcaler.
-    - QRadar data can sometimes have network flow data which may arise from either Neflow Integration or Network Packet Capture Integration. Below are the differences between the two. Depending on the fields and level of detail given in the rule, Choose the correct data source and add it.
+    - Infer data sources from the rule's domains, log source types, event categories, software entities, and field references. Do not assume a network-flow integration (e.g. Netflow) unless the rule and its dependencies clearly imply it.
 
   #### Flattened Detection Logic ( including the negate attribute handling)
     - This is the plain English \`combined\` detection logic of current rule and its dependencies, which means precise and detailed detection logic of dependencies should be included here.
