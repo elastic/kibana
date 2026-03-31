@@ -28,9 +28,9 @@ export class EndpointExceptionsValidator extends BaseValidator {
   protected async validateHasWritePrivilege(): Promise<void> {
     await this.validateHasPrivilege('canWriteEndpointExceptions');
 
-    if (!this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
-      // With disabled FF, Endpoint Exceptions are ONLY global, so we need to make sure the user
-      // also has the new Global Artifacts privilege
+    if (!(await this.endpointAppContext.isEndpointExceptionsPerPolicyEnabled())) {
+      // Without the user opting in, Endpoint Exceptions are ONLY global,
+      // so we need to make sure the user also has the new Global Artifacts privilege
       try {
         await this.validateHasPrivilege('canManageGlobalArtifacts');
       } catch (error) {
@@ -60,7 +60,7 @@ export class EndpointExceptionsValidator extends BaseValidator {
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
     await this.validateHasWritePrivilege();
 
-    if (this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+    if (await this.endpointAppContext.isEndpointExceptionsPerPolicyEnabled()) {
       await this.validateCanCreateByPolicyArtifacts(item);
       await this.validateByPolicyItem(item);
     }
@@ -79,7 +79,7 @@ export class EndpointExceptionsValidator extends BaseValidator {
 
     await this.validateHasWritePrivilege();
 
-    if (this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+    if (await this.endpointAppContext.isEndpointExceptionsPerPolicyEnabled()) {
       try {
         await this.validateCanCreateByPolicyArtifacts(updatedItem);
       } catch (noByPolicyAuthzError) {

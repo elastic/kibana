@@ -91,6 +91,7 @@ describe('InferenceConnector', () => {
         {
           asStream: true,
           meta: true,
+          requestTimeout: 180_000,
           headers: {
             'X-Elastic-Product-Use-Case': 'security_ai_assistant',
           },
@@ -322,6 +323,7 @@ describe('InferenceConnector', () => {
         {
           asStream: true,
           meta: true,
+          requestTimeout: 180_000,
         }
       );
     });
@@ -348,6 +350,7 @@ describe('InferenceConnector', () => {
         {
           asStream: true,
           meta: true,
+          requestTimeout: 180_000,
           signal,
         }
       );
