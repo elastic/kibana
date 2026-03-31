@@ -96,11 +96,13 @@ export async function runMaintainer({
 
       let aggResult;
       try {
-        aggResult = await esClient.search({
-          index: integration.getIndexPattern(namespace),
-          ...integration.buildCompositeAggQuery(afterKey),
-          ...(abortController && { signal: abortController.signal }),
-        });
+        aggResult = await esClient.search(
+          {
+            index: integration.getIndexPattern(namespace),
+            ...integration.buildCompositeAggQuery(afterKey),
+          },
+          abortController ? { signal: abortController.signal } : undefined
+        );
       } catch (err) {
         if (isIndexNotFound(err)) {
           const idx = integration.getIndexPattern(namespace);
@@ -134,11 +136,13 @@ export async function runMaintainer({
 
       let esqlResult;
       try {
-        esqlResult = await esClient.esql.query({
-          query: esqlQuery,
-          filter: esqlFilter,
-          ...(abortController && { signal: abortController.signal }),
-        });
+        esqlResult = await esClient.esql.query(
+          {
+            query: esqlQuery,
+            filter: esqlFilter,
+          },
+          abortController ? { signal: abortController.signal } : undefined
+        );
       } catch (err) {
         // Break instead of rethrowing so a failure on one integration's ES|QL
         // query only skips the rest of that integration's pages, allowing the

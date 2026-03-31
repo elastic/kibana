@@ -601,6 +601,7 @@ describe('runMaintainer', () => {
       });
 
       expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: expect.any(String) }),
         expect.objectContaining({ signal: abortCtrl.signal })
       );
     });
@@ -620,6 +621,7 @@ describe('runMaintainer', () => {
       });
 
       expect(esClient.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({ query: expect.any(String) }),
         expect.objectContaining({ signal: abortCtrl.signal })
       );
     });

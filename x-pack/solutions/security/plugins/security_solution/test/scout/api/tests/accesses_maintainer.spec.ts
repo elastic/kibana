@@ -310,6 +310,11 @@ for (const integration of INTEGRATION_CONFIGS) {
         MAINTAINER_ID,
         runsBefore
       );
+        } catch {
+          // logs endpoint may not exist, ignore
+        }
+        throw err;
+      }
 
       expect(maintainerEntry.customState).toBeDefined();
 

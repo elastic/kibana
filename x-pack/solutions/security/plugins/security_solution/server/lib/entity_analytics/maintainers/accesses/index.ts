@@ -19,16 +19,22 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
   run: async ({ esClient, logger, status, crudClient, abortController }) => {
     const namespace = status.metadata.namespace;
     logger.info('Starting accesses_frequently maintainer run');
-    const result = await runMaintainer({
-      esClient,
-      logger,
-      namespace,
-      crudClient,
-      abortController,
-    });
-    logger.info(
-      `Completed run: ${result.totalBuckets} user buckets, ${result.totalAccessRecords} access records, ${result.totalUpserted} entities upserted`
-    );
-    return result;
+    try {
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace,
+        crudClient,
+        abortController,
+      });
+      logger.info(
+        `Completed run: ${result.totalBuckets} user buckets, ${result.totalAccessRecords} access records, ${result.totalUpserted} entities upserted`
+      );
+      return result;
+    } catch (err) {
+      logger.error(`Maintainer run failed with error: ${err?.message ?? JSON.stringify(err)}`);
+      logger.error(`Full error: ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
+      throw err;
+    }
   },
 };
