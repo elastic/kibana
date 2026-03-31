@@ -2835,7 +2835,7 @@ paths:
                     properties:
                       data:
                         additionalProperties: {}
-                        description: Payload of the attachment.
+                        description: Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).
                         type: object
                       hidden:
                         description: When true, the attachment will not be displayed in the UI.
@@ -2843,12 +2843,14 @@ paths:
                       id:
                         description: Optional id for the attachment.
                         type: string
+                      origin:
+                        description: Origin string (for example, saved object ID) for by-reference attachments. When provided without `data`, the content is resolved once using the attachment type’s `resolve` hook.
+                        type: string
                       type:
                         description: Type of the attachment.
                         type: string
                     required:
                       - type
-                      - data
                   type: array
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
@@ -3202,7 +3204,7 @@ paths:
                     properties:
                       data:
                         additionalProperties: {}
-                        description: Payload of the attachment.
+                        description: Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).
                         type: object
                       hidden:
                         description: When true, the attachment will not be displayed in the UI.
@@ -3210,12 +3212,14 @@ paths:
                       id:
                         description: Optional id for the attachment.
                         type: string
+                      origin:
+                        description: Origin string (for example, saved object ID) for by-reference attachments. When provided without `data`, the content is resolved once using the attachment type’s `resolve` hook.
+                        type: string
                       type:
                         description: Type of the attachment.
                         type: string
                     required:
                       - type
-                      - data
                   type: array
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
