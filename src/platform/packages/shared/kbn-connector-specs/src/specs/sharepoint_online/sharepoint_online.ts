@@ -523,7 +523,7 @@ export const SharepointOnline: ConnectorSpec = {
           entityTypes?: Array<'site' | 'list' | 'listItem' | 'drive' | 'driveItem'>;
           from?: number;
           size?: number;
-          region?: 'US' | 'EUR' | 'APC' | 'LAM' | 'MEA';
+          region?: 'NAM' | 'EUR' | 'APC' | 'LAM' | 'MEA';
         };
 
         if (!typedInput.query) {
