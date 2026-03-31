@@ -9,7 +9,6 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { i18n } from '@kbn/i18n';
 import type { ModelSettingsConfigClient } from '../sig_events/saved_objects/model_settings_config_service';
 
 import {
@@ -18,26 +17,23 @@ import {
   COORDINATOR_INTERVAL_MINUTES,
 } from '../../../common/constants';
 
-const renderTemplate = (template: string, vars: Record<string, string>): string =>
-  Object.entries(vars).reduce(
-    (result, [key, value]) => result.replaceAll(`<%= ${key} %>`, value),
-    template
-  );
-
-const WORKFLOW_TEMPLATE = readFileSync(
+const WORKFLOW_YAML = readFileSync(
   resolve(__dirname, 'continuous_extraction_workflow.yaml'),
   'utf-8'
 );
 
-const WORKFLOW_YAML = renderTemplate(WORKFLOW_TEMPLATE, {
-  description: i18n.translate('xpack.streams.continuousExtraction.workflowDescription', {
-    defaultMessage: 'This workflow is used by the system and should not be modified.',
-  }),
-  timeout: `${COORDINATOR_INTERVAL_MINUTES - 1}m`,
-  coordinatorInterval: `${COORDINATOR_INTERVAL_MINUTES}m`,
-  kiSelectStreamsStepType: KI_SELECT_STREAMS_STEP_TYPE,
-  kiFeaturesExtractStreamStepType: KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
-});
+const assertYamlInSync = (yaml: string, expected: string, label: string) => {
+  if (!yaml.includes(expected)) {
+    throw new Error(
+      `continuous_extraction_workflow.yaml is out of sync: expected ${label} "${expected}" not found`
+    );
+  }
+};
+
+assertYamlInSync(WORKFLOW_YAML, KI_SELECT_STREAMS_STEP_TYPE, 'step type');
+assertYamlInSync(WORKFLOW_YAML, KI_FEATURES_EXTRACT_STREAM_STEP_TYPE, 'step type');
+assertYamlInSync(WORKFLOW_YAML, `timeout: "${COORDINATOR_INTERVAL_MINUTES - 1}m"`, 'timeout');
+assertYamlInSync(WORKFLOW_YAML, `every: "${COORDINATOR_INTERVAL_MINUTES}m"`, 'coordinator interval');
 
 export interface ContinuousExtractionWorkflowService {
   ensureWorkflow(params: {

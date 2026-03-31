@@ -1,8 +1,8 @@
 version: "1"
 name: ".streams-continuous-ki-extraction"
-description: "<%= description %>"
+description: "This workflow is used by the system and should not be modified."
 settings:
-  timeout: "<%= timeout %>"
+  timeout: "9m"
   concurrency:
     key: streams-continuous-ki-extraction
     strategy: drop
@@ -10,10 +10,10 @@ settings:
 triggers:
   - type: scheduled
     with:
-      every: "<%= coordinatorInterval %>"
+      every: "10m"
 steps:
   - name: select_streams
-    type: <%= kiSelectStreamsStepType %>
+    type: streams.ki_select_streams
     with: {}
   - name: has_scheduled_streams
     type: if
@@ -26,6 +26,6 @@ steps:
           continue: true
         steps:
           - name: poll_ki_features_extraction
-            type: <%= kiFeaturesExtractStreamStepType %>
+            type: streams.ki_features_extract_stream
             with:
               streamName: "{{ foreach.item.streamName }}"
