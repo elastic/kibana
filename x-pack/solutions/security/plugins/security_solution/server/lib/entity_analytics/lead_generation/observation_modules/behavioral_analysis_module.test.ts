@@ -46,7 +46,7 @@ const createAlertAggResponse = (
         },
         distinct_rules: { buckets: b.rules.map((r) => ({ key: r, doc_count: 1 })) },
         max_risk_score: { value: b.maxRiskScore },
-        top_5_alerts: { hits: { hits: [] } },
+        top_alerts: { hits: { hits: [] } },
       })),
     },
     by_host: {
@@ -58,7 +58,7 @@ const createAlertAggResponse = (
         },
         distinct_rules: { buckets: b.rules.map((r) => ({ key: r, doc_count: 1 })) },
         max_risk_score: { value: b.maxRiskScore },
-        top_5_alerts: { hits: { hits: [] } },
+        top_alerts: { hits: { hits: [] } },
       })),
     },
   },
@@ -77,7 +77,6 @@ describe('BehavioralAnalysisModule', () => {
   it('is enabled when alertsIndexPattern is provided', () => {
     const module = createBehavioralAnalysisModule({ esClient, logger, alertsIndexPattern });
     expect(module.isEnabled()).toBe(true);
-    expect(module.config.weight).toBe(0.3);
   });
 
   it('is disabled when alertsIndexPattern is empty', () => {

@@ -344,7 +344,7 @@ export const createLeadDataClient = ({
       return (resp.updated ?? 0) > 0;
     } catch (e) {
       logger.error(`[LeadGeneration] Error updating lead ${id}: ${e}`);
-      return false;
+      throw e;
     }
   };
 

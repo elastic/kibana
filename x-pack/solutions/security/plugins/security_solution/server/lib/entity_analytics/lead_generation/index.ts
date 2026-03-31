@@ -17,7 +17,6 @@ export {
   createRiskScoreModule,
   createTemporalStateModule,
   createBehavioralAnalysisModule,
-  createAlertAnalysisModule,
 } from './observation_modules';
 export { entityRecordToLeadEntity, fetchAllLeadEntities } from './entity_conversion';
 export { createLeadGenerationService } from './services/lead_generation_service';

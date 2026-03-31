@@ -162,35 +162,32 @@ interface ScoredEntity {
   readonly observations: Observation[];
 }
 
+const groupObservationsByEntity = (
+  observations: readonly Observation[]
+): ReadonlyMap<string, Observation[]> =>
+  observations.reduce((acc, obs) => {
+    const existing = acc.get(obs.entityId) ?? [];
+    acc.set(obs.entityId, [...existing, obs]);
+    return acc;
+  }, new Map<string, Observation[]>());
+
 const scoreEntities = (
   observations: Observation[],
   allEntities: LeadEntity[],
   config: LeadGenerationEngineConfig,
   moduleWeights: ReadonlyMap<string, number>
 ): ScoredEntity[] => {
-  const entityByKey = new Map<string, LeadEntity>();
-  for (const entity of allEntities) {
-    entityByKey.set(entityToKey(entity), entity);
-  }
+  const entityByKey = new Map(allEntities.map((e) => [entityToKey(e), e]));
+  const observationsByEntity = groupObservationsByEntity(observations);
 
-  const observationsByEntity = new Map<string, Observation[]>();
-  for (const obs of observations) {
-    const existing = observationsByEntity.get(obs.entityId) ?? [];
-    existing.push(obs);
-    observationsByEntity.set(obs.entityId, existing);
-  }
-
-  const scored: ScoredEntity[] = [];
-  for (const [entityId, entityObservations] of observationsByEntity.entries()) {
-    const entity = entityByKey.get(entityId);
-    if (entity) {
+  return [...observationsByEntity.entries()]
+    .flatMap(([entityId, entityObservations]) => {
+      const entity = entityByKey.get(entityId);
+      if (!entity) return [];
       const priority = calculateWeightedPriority(entityObservations, moduleWeights, config);
-      scored.push({ entity, priority, observations: entityObservations });
-    }
-  }
-
-  scored.sort((a, b) => b.priority - a.priority);
-  return scored;
+      return [{ entity, priority, observations: entityObservations }];
+    })
+    .sort((a, b) => b.priority - a.priority);
 };
 
 /**
@@ -199,36 +196,55 @@ const scoreEntities = (
  * Falls back to weight=1.0 for observations from unregistered modules so the
  * pipeline degrades gracefully when a module is added without engine wiring.
  */
+interface ScoreAccumulation {
+  readonly rawScore: number;
+  readonly countByModule: ReadonlyMap<string, number>;
+}
+
+const accumulateRawScore = (
+  observations: readonly Observation[],
+  moduleWeights: ReadonlyMap<string, number>
+): ScoreAccumulation =>
+  observations.reduce<ScoreAccumulation>(
+    (acc, obs) => {
+      const weight = moduleWeights.get(obs.moduleId) ?? 1.0;
+      return {
+        rawScore: acc.rawScore + weight * obs.score * obs.confidence,
+        countByModule: new Map([
+          ...acc.countByModule,
+          [obs.moduleId, (acc.countByModule.get(obs.moduleId) ?? 0) + 1],
+        ]),
+      };
+    },
+    { rawScore: 0, countByModule: new Map() }
+  );
+
+const applyBonuses = (
+  { rawScore, countByModule }: ScoreAccumulation,
+  config: LeadGenerationEngineConfig
+): number => {
+  const hasCorroboration = [...countByModule.values()].some((count) => count > 1);
+  const hasDiversity = countByModule.size > 1;
+
+  let adjusted = rawScore;
+  if (hasCorroboration) adjusted *= 1 + config.corroborationBonus;
+  if (hasDiversity) adjusted *= 1 + config.diversityBonus;
+  return adjusted;
+};
+
+const normalizePriority = (adjustedScore: number, ceiling: number): number =>
+  Math.max(1, Math.min(10, Math.round((adjustedScore / ceiling) * 9 + 1)));
+
 const calculateWeightedPriority = (
   observations: Observation[],
   moduleWeights: ReadonlyMap<string, number>,
   config: LeadGenerationEngineConfig
 ): number => {
-  if (observations.length === 0) {
-    return 1;
-  }
+  if (observations.length === 0) return 1;
 
-  let rawScore = 0;
-  const countByModule = new Map<string, number>();
-
-  for (const obs of observations) {
-    const weight = moduleWeights.get(obs.moduleId) ?? 1.0;
-    rawScore += weight * obs.score * obs.confidence;
-    countByModule.set(obs.moduleId, (countByModule.get(obs.moduleId) ?? 0) + 1);
-  }
-
-  const hasCorroboration = [...countByModule.values()].some((count) => count > 1);
-  if (hasCorroboration) {
-    rawScore *= 1 + config.corroborationBonus;
-  }
-
-  const hasDiversity = countByModule.size > 1;
-  if (hasDiversity) {
-    rawScore *= 1 + config.diversityBonus;
-  }
-
-  const normalized = (rawScore / config.normalizationCeiling) * 9 + 1;
-  return Math.max(1, Math.min(10, Math.round(normalized)));
+  const accumulated = accumulateRawScore(observations, moduleWeights);
+  const adjusted = applyBonuses(accumulated, config);
+  return normalizePriority(adjusted, config.normalizationCeiling);
 };
 
 const groupIntoLeads = async (

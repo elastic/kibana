@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getRiskScoreTimeSeriesIndex } from '../../../../common/entity_analytics/risk_engine/indices';
 import type { LeadEntity } from './types';
 import { getEntityField, groupEntitiesByType, entityToKey } from './observation_modules/utils';
+import { parseAlertBuckets } from './observation_modules/types';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -287,7 +288,7 @@ const fetchAlertSummaries = async (
     });
 
     for (const type of Object.keys(namesByType)) {
-      parseAlertBuckets(response.aggregations?.[`by_${type}`], type, result);
+      parseEnrichmentAlertBuckets(response.aggregations?.[`by_${type}`], type, result);
     }
   } catch (error) {
     logger.warn(`[LeadGeneration][EntityEnricher] Failed to fetch alert summaries: ${error}`);
@@ -296,20 +297,12 @@ const fetchAlertSummaries = async (
   return result;
 };
 
-interface AlertBucket {
-  key: string;
-  doc_count: number;
-  severity_breakdown: { buckets: Array<{ key: string; doc_count: number }> };
-  distinct_rules: { buckets: Array<{ key: string; doc_count: number }> };
-  top_alerts: { hits: { hits: Array<{ _id: string; fields?: Record<string, unknown[]> }> } };
-}
-
-const parseAlertBuckets = (
+const parseEnrichmentAlertBuckets = (
   agg: unknown,
   entityType: string,
   target: Map<string, AlertEnrichment>
 ): void => {
-  const buckets = ((agg as Record<string, unknown>)?.buckets ?? []) as AlertBucket[];
+  const buckets = parseAlertBuckets(agg);
 
   for (const bucket of buckets) {
     const topAlerts = bucket.top_alerts.hits.hits.map(({ _id, fields = {} }) => ({
