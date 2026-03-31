@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ModelSettingsConfigClient } from '../sig_events/saved_objects/model_settings_config_service';
@@ -18,11 +16,7 @@ import {
   MAX_SCHEDULED_STREAMS,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
 } from '../../../common/constants';
-
-const WORKFLOW_YAML = readFileSync(
-  resolve(__dirname, 'continuous_extraction_workflow.yaml'),
-  'utf-8'
-);
+import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 
 const assertYamlInSync = (yaml: string, expected: string, label: string) => {
   if (!yaml.includes(expected)) {
