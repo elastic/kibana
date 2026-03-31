@@ -64,7 +64,7 @@ export const serverless: Command = {
                           ${SERVERLESS_RESOURCES_PATHS.map((filePath) => basename(filePath)).join(
                             ' | '
                           )}
-      --uiam              Configure ES serverless with Universal Identity and Access Management (UIAM) support.
+      --uiam              Configure ES serverless with Universal Identity and Access Management (UIAM) support [default: true].
 
       -E                  Additional key=value settings to pass to ES
       -F                  Absolute paths for files to mount into containers
@@ -118,6 +118,7 @@ export const serverless: Command = {
         kibanaUrl: 'http://localhost:5601/',
         dataPath: 'stateless',
         ssl: true,
+        uiam: true,
       },
     }) as unknown as ServerlessOptions;
 

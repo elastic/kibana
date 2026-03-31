@@ -318,11 +318,16 @@ export async function createUiamSessionTokens({
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';
   const familyName = fullName ? fullName.split(' ').slice(1).join(' ') : 'User';
 
+  // UIAM expects project types to be in a specific format, so we need to convert the project type
+  // if it's one of the known types.
+  const uiamProjectType =
+    projectType === 'oblt' ? 'observability' : projectType === 'es' ? 'elasticsearch' : projectType;
+
   const userSeedResult = await seedTestUser({
     userId: username,
     organizationId,
     roleId: 'cloud-role-id',
-    projectType,
+    projectType: uiamProjectType,
     applicationRoles: roles,
     email,
     firstName: givenName,
@@ -358,7 +363,7 @@ export async function createUiamSessionTokens({
           {
             role_id: 'cloud-role-id',
             organization_id: organizationId,
-            project_type: projectType,
+            project_type: uiamProjectType,
             application_roles: roles,
             project_scope: { scope: 'all' },
           },

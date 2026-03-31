@@ -16,11 +16,20 @@ import {
   kibanaTestSuperuserServerless,
   getDockerFileMountPath,
 } from '@kbn/test';
-import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
-import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
+import {
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_UIAM_ORGANIZATION_ID,
+  MOCK_IDP_UIAM_PROJECT_ID,
+  MOCK_IDP_UIAM_SERVICE_URL,
+  MOCK_IDP_UIAM_SHARED_SECRET,
+} from '@kbn/mock-idp-utils';
 import path from 'path';
 import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
 import { services as svlServices } from './services';
+
+// Indicates whether the config is used on CI or locally.
+const isRunOnCI = process.env.CI;
 
 export default async () => {
   const packageRegistryConfig = path.join(__dirname, './common/package_registry_config.yml');
@@ -97,7 +106,7 @@ export default async () => {
       ],
       ssl: true, // SSL is required for SAML realm
     },
-
+    esServerlessOptions: { uiam: true },
     kbnTestServer: {
       buildArgs: [],
       env: {
@@ -166,9 +175,16 @@ export default async () => {
         // configure security reponse header report-to settings to mimic MKI configuration
         `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
         `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
-        // normally below is injected by control plane
-        '--xpack.cloud.id=ftr_fake_cloud_id',
-        `--xpack.cloud.serverless.project_id=fakeprojectid`,
+        // cloud.id is decoded by the security plugin to obtain the ES endpoint for UIAM API key conversion.
+        // CI:    decodes to https://es01:9220 (ES listens on port 9220 inside the Docker network)
+        // Local: decodes to https://host.docker.internal:9220 (ES is on the host, reached via Docker bridge)
+        `--xpack.cloud.id=${
+          isRunOnCI
+            ? 'ci:ZXMwMTo5MjIwJDo5MjIwJGtpYmFuYTo5MjIw'
+            : 'local-dev:ZG9ja2VyLmludGVybmFsOjkyMjAkaG9zdDo5MjIwJGtpYmFuYTo5MjIw'
+        }`,
+        `--xpack.cloud.organization_id=${MOCK_IDP_UIAM_ORGANIZATION_ID}`,
+        `--xpack.cloud.serverless.project_id=${MOCK_IDP_UIAM_PROJECT_ID}`,
         `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
         `--xpack.cloud.projects_url=/projects/`,
         `--xpack.cloud.profile_url=/user/settings/`,
@@ -176,6 +192,13 @@ export default async () => {
         `--xpack.cloud.deployments_url=/deployments`,
         `--xpack.cloud.organization_url=/account/`,
         `--xpack.cloud.users_and_roles_url=/account/members/`,
+        ...(isRunOnCI ? [] : ['--mockIdpPlugin.uiam.enabled=true']),
+        `--xpack.security.uiam.enabled=true`,
+        `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
+        `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+        `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
+        `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
+        '--xpack.security.uiam.ssl.verificationMode=none',
       ],
     },
 

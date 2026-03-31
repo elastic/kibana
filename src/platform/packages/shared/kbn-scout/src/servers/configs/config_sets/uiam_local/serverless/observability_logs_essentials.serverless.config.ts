@@ -9,7 +9,7 @@
 
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { servers as defaultConfig } from '../../default/serverless/observability_complete.serverless.config';
+import { servers as defaultConfig } from '../../default/serverless/observability_logs_essentials.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
 // We need to test certain APIs that are only exposed by the plugin contract and not through
