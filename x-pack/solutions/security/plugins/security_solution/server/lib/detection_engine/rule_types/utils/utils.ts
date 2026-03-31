@@ -7,7 +7,7 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isArray, isEmpty, merge } from 'lodash';
+import { get, invert, isArray, isEmpty, merge, sum } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
@@ -627,6 +627,7 @@ export const createSearchAfterReturnTypeFromResponse = <
           )
         );
       }),
+    alertsCandidateCount: searchResult.hits.hits.length,
   });
 };
 
@@ -636,6 +637,7 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes,
   enrichmentTimes,
   bulkCreateTimes,
+  alertsCandidateCount,
   createdSignalsCount,
   createdSignals,
   errors,
@@ -648,6 +650,7 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes?: string[] | undefined;
   enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
+  alertsCandidateCount?: number | undefined;
   createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
@@ -661,6 +664,7 @@ export const createSearchAfterReturnType = ({
     searchAfterTimes: searchAfterTimes ?? [],
     enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
+    alertsCandidateCount,
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
@@ -701,6 +705,7 @@ export const mergeReturns = (
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       enrichmentTimes: existingEnrichmentTimes,
+      alertsCandidateCount: existingAlertsCandidateCount,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
@@ -715,6 +720,7 @@ export const mergeReturns = (
       searchAfterTimes: newSearchAfterTimes,
       enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
+      alertsCandidateCount: newAlertsCandidateCount,
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
@@ -729,6 +735,7 @@ export const mergeReturns = (
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
+      alertsCandidateCount: sum([existingAlertsCandidateCount, newAlertsCandidateCount]),
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
