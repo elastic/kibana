@@ -36,6 +36,16 @@
         "tags": [
           "data views"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X GET \"${KIBANA_URL}/api/data_views\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn://api/data_views\n"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Indicates a successful call.",
@@ -100,6 +110,16 @@
         "tags": [
           "data views"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X POST \"${KIBANA_URL}/api/data_views/data_view\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"data_view\":{\"title\":\"logstash-*\",\"name\":\"My Logstash data view\"}}'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn://api/data_views/data_view\n{\"data_view\":{\"title\":\"logstash-*\",\"name\":\"My Logstash data view\"}}\n"
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -151,6 +171,16 @@
         "tags": [
           "data views"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X GET \"${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn://api/data_views/data_view/{viewId}\n"
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/view_id"
@@ -191,6 +221,16 @@
         "tags": [
           "data views"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X DELETE \"${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "DELETE kbn://api/data_views/data_view/{viewId}\n"
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -220,6 +260,16 @@
         "operationId": "updateDataViewDefault",
         "tags": [
           "data views"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X POST \"${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"data_view\":{\"name\":\"Updated data view name\"}}'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn://api/data_views/data_view/{viewId}\n{\"data_view\":{\"name\":\"Updated data view name\"}}\n"
+          }
         ],
         "parameters": [
           {
@@ -275,6 +325,16 @@
         "description": "Update fields presentation metadata such as count, customLabel, customDescription, and format.\n",
         "tags": [
           "data views"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X POST \"${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/fields\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"fields\":{\"field_name\":{\"customLabel\":\"My custom label\"}}}'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn://api/data_views/data_view/{viewId}/fields\n{\"fields\":{\"field_name\":{\"customLabel\":\"My custom label\"}}}\n"
+          }
         ],
         "parameters": [
           {
@@ -344,6 +404,16 @@
         "tags": [
           "data views"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X POST \"${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"hour_of_day\",\"runtimeField\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['\"'\"'timestamp'\"'\"'].value.getHour())\"}}}'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn://api/data_views/data_view/{viewId}/runtime_field\n{\"name\":\"hour_of_day\",\"runtimeField\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['timestamp'].value.getHour())\"}}}\n"
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -399,6 +469,16 @@
         "operationId": "createUpdateRuntimeFieldDefault",
         "tags": [
           "data views"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X PUT \"${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"name\":\"hour_of_day\",\"runtimeField\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['\"'\"'timestamp'\"'\"'].value.getHour())\"}}}'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "PUT kbn://api/data_views/data_view/{viewId}/runtime_field\n{\"name\":\"hour_of_day\",\"runtimeField\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['timestamp'].value.getHour())\"}}}\n"
+          }
         ],
         "parameters": [
           {
@@ -485,6 +565,16 @@
         "tags": [
           "data views"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X GET \"${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field/${FIELD_NAME}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn://api/data_views/data_view/{viewId}/runtime_field/{fieldName}\n"
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/field_name"
@@ -538,6 +628,16 @@
         "tags": [
           "data views"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X DELETE \"${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field/${FIELD_NAME}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "DELETE kbn://api/data_views/data_view/{viewId}/runtime_field/{fieldName}\n"
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/field_name"
@@ -567,6 +667,16 @@
         "operationId": "updateRuntimeFieldDefault",
         "tags": [
           "data views"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X POST \"${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field/${FIELD_NAME}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"runtimeField\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['\"'\"'timestamp'\"'\"'].value.getHour())\"}}}'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn://api/data_views/data_view/{viewId}/runtime_field/{fieldName}\n{\"runtimeField\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['timestamp'].value.getHour())\"}}}\n"
+          }
         ],
         "parameters": [
           {
@@ -624,6 +734,16 @@
         "tags": [
           "data views"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X GET \"${KIBANA_URL}/api/data_views/default\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn://api/data_views/default\n"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Indicates a successful call.",
@@ -662,6 +782,16 @@
         "operationId": "setDefaultDatailViewDefault",
         "tags": [
           "data views"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X POST \"${KIBANA_URL}/api/data_views/default\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"data_view_id\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"force\":true}'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn://api/data_views/default\n{\"data_view_id\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"force\":true}\n"
+          }
         ],
         "parameters": [
           {
@@ -735,6 +865,16 @@
         "tags": [
           "data views"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X POST \"${KIBANA_URL}/api/data_views/swap_references\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"fromId\":\"abcd-efg\",\"toId\":\"xyz-123\",\"delete\":true}'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn://api/data_views/swap_references\n{\"fromId\":\"abcd-efg\",\"toId\":\"xyz-123\",\"delete\":true}\n"
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -806,6 +946,16 @@
         "tags": [
           "data views"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X POST \"${KIBANA_URL}/api/data_views/swap_references/_preview\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"fromId\":\"abcd-efg\",\"toId\":\"xyz-123\"}'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn://api/data_views/swap_references/_preview\n{\"fromId\":\"abcd-efg\",\"toId\":\"xyz-123\"}\n"
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -863,6 +1013,7 @@
     "examples": {
       "get_data_views_response": {
         "summary": "The get all data views API returns a list of data views.",
+        "description": "A list of available data views including their identifiers, names, and index patterns.",
         "value": {
           "data_view": [
             {
@@ -895,6 +1046,7 @@
       },
       "create_data_view_request": {
         "summary": "Create a data view with runtime fields.",
+        "description": "Create a data view for logstash indices that includes a runtime field which extracts the shape name from a source field.",
         "value": {
           "data_view": {
             "title": "logstash-*",
@@ -912,6 +1064,7 @@
       },
       "get_data_view_response": {
         "summary": "The get data view API returns a JSON object that contains information about the data view.",
+        "description": "A complete data view object including all fields, runtime fields, and metadata.",
         "value": {
           "data_view": {
             "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
@@ -2069,6 +2222,7 @@
       },
       "update_data_view_request": {
         "summary": "Update some properties for a data view.",
+        "description": "Update the title, time field, and other properties of an existing data view.",
         "value": {
           "data_view": {
             "title": "kibana_sample_data_ecommerce",
@@ -2081,6 +2235,7 @@
       },
       "update_field_metadata_request": {
         "summary": "Update metadata for multiple fields.",
+        "description": "Update the popularity count, custom label, and custom description for specific fields in a data view.",
         "value": {
           "fields": {
             "field1": {
@@ -2096,6 +2251,7 @@
       },
       "create_runtime_field_request": {
         "summary": "Create a runtime field.",
+        "description": "Create a long-type runtime field that emits a value derived from the foo source field.",
         "value": {
           "name": "runtimeFoo",
           "runtimeField": {
@@ -2108,6 +2264,7 @@
       },
       "get_runtime_field_response": {
         "summary": "The get runtime field API returns a JSON object that contains information about the runtime field (`hour_of_day`) and the data view (`d3d7af60-4c81-11e8-b3d7-01146121b73d`).",
+        "description": "The runtime field definition along with the parent data view.",
         "value": {
           "fields": [
             {
@@ -2726,6 +2883,7 @@
       },
       "update_runtime_field_request": {
         "summary": "Update an existing runtime field on a data view.",
+        "description": "Update the script of an existing runtime field.",
         "value": {
           "runtimeField": {
             "script": {
@@ -2736,12 +2894,14 @@
       },
       "get_default_data_view_response": {
         "summary": "The get default data view API returns the default data view identifier.",
+        "description": "The identifier of the default data view for the current Kibana space.",
         "value": {
           "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
         }
       },
       "set_default_data_view_request": {
         "summary": "Set the default data view identifier.",
+        "description": "Set the default data view, using the force flag to overwrite an existing default.",
         "value": {
           "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
           "force": true
@@ -2749,6 +2909,7 @@
       },
       "swap_data_view_request": {
         "summary": "Swap references from data view ID \"abcd-efg\" to \"xyz-123\" and remove the data view that is no longer referenced.",
+        "description": "Swap all saved object references from one data view to another and delete the source data view afterward.",
         "value": {
           "fromId": "abcd-efg",
           "toId": "xyz-123",
@@ -2757,6 +2918,7 @@
       },
       "preview_swap_data_view_request": {
         "summary": "Preview swapping references from data view ID \"abcd-efg\" to \"xyz-123\".",
+        "description": "Preview the saved objects that would be affected by swapping references from one data view to another.",
         "value": {
           "fromId": "abcd-efg",
           "toId": "xyz-123"
