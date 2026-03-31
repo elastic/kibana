@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { isObjectLike, isEmpty } from 'lodash';
+import { isEmpty, isObjectLike } from 'lodash';
 import type { Agent } from 'agent-base';
 import type {
-  AxiosInstance,
-  Method,
-  AxiosResponse,
-  AxiosRequestConfig,
   AxiosHeaderValue,
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+  Method,
 } from 'axios';
 import { AxiosHeaders, isAxiosError } from 'axios';
 import type { Logger } from '@kbn/core/server';
@@ -237,3 +238,9 @@ export const createAxiosResponse = (res: Partial<AxiosResponse>): AxiosResponse 
   },
   ...res,
 });
+
+export interface AxiosErrorWithRetry {
+  config: InternalAxiosRequestConfig & { _retry?: boolean };
+  response?: { status: number };
+  message: string;
+}
