@@ -110,8 +110,7 @@ export const MemorySynthesisPrompt = createPrompt({
           properties: {
             path: {
               type: 'string' as const,
-              description:
-                'The wiki page path (e.g. "architecture/logs.otel/services/nginx")',
+              description: 'The wiki page path (e.g. "architecture/logs.otel/services/nginx")',
             },
             title: {
               type: 'string' as const,
