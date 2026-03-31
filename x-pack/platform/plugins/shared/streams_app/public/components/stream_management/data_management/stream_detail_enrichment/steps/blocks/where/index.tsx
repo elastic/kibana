@@ -246,13 +246,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                     </EuiText>
                   </EuiFlexItem>
                   {!props.readOnly && (
-                    <EuiFlexItem
-                      grow
-                      css={css`
-                        display: flex;
-                        justify-content: flex-end;
-                      `}
-                    >
+                    <EuiFlexItem grow={false}>
                       <CreateStepButton
                         parentId={step.customIdentifier}
                         branch="else"
