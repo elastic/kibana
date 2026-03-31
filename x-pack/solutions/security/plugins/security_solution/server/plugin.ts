@@ -62,6 +62,7 @@ import {
   SERVER_APP_ID,
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
+import { validateEndpointAttachmentMetadata } from './cases/attachments/endpoint_metadata_schema';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -426,6 +427,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.usageCollection = plugins.usageCollection;
     plugins.cases.attachmentFramework.registerExternalReference({
       id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+    });
+    plugins.cases.attachmentFramework.registerUnified({
+      id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+      schemaValidator: validateEndpointAttachmentMetadata,
     });
 
     const { ruleDataService } = plugins.ruleRegistry;

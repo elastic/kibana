@@ -11,8 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
-import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
-import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
+import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api/attachment/v2';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -406,15 +405,11 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.log.debug(() => `Updating cases:\n${stringify(allCases)}`);
 
-    const attachments: CaseAttachments = [
+    const attachments: BulkCreateAttachmentsRequestV2 = [
       {
-        type: AttachmentType.externalReference,
-        externalReferenceId: actionId,
-        externalReferenceStorage: {
-          type: ExternalReferenceStorageType.elasticSearchDoc,
-        },
-        externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
-        externalReferenceMetadata: {
+        type: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+        attachmentId: actionId,
+        metadata: {
           targets: hosts.map(({ hostId: endpointId, hostname }) => {
             return {
               endpointId,

@@ -241,14 +241,9 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(casesClient.attachments.bulkCreate).toHaveBeenLastCalledWith({
         attachments: [
           {
-            externalReferenceAttachmentTypeId: 'endpoint',
-            externalReferenceId: 'action-123',
-            owner: 'securitySolution',
-            externalReferenceStorage: {
-              type: 'elasticSearchDoc',
-            },
-            type: 'externalReference',
-            externalReferenceMetadata: {
+            type: 'endpoint',
+            attachmentId: 'action-123',
+            metadata: {
               command: 'isolate',
               comment: 'this is a case comment',
               targets: [
@@ -264,6 +259,7 @@ describe('ResponseActionsClientImpl base class', () => {
                 },
               ],
             },
+            owner: 'securitySolution',
           },
         ],
         caseId: 'case-3',
