@@ -84,11 +84,14 @@ export const extractExcludedMetadataValues = (
     }
 
     if (clause?.bool?.should) {
-      const shouldClauses = Array.isArray(clause.bool.should)
-        ? clause.bool.should
-        : [clause.bool.should];
-      for (const shouldClause of shouldClauses) {
-        extractFromClause(shouldClause as estypes.QueryDslQueryContainer);
+      const { minimum_should_match: msm } = clause.bool;
+      if (msm === undefined || msm === 1 || msm === '1') {
+        const shouldClauses = Array.isArray(clause.bool.should)
+          ? clause.bool.should
+          : [clause.bool.should];
+        for (const shouldClause of shouldClauses) {
+          extractFromClause(shouldClause as estypes.QueryDslQueryContainer);
+        }
       }
     }
   };

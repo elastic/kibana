@@ -72,7 +72,11 @@ export const getHosts = async ({
   const filteredHostMetrics = hostMetricsResponse.filter((host) =>
     host.metadata.every((meta) => {
       const excluded = excludedValues.get(meta.name);
-      return !excluded || meta.value === null || !excluded.has(String(meta.value));
+      if (!excluded || meta.value === null) return true;
+      if (Array.isArray(meta.value)) {
+        return meta.value.every((v) => !excluded.has(String(v)));
+      }
+      return !excluded.has(String(meta.value));
     })
   );
 

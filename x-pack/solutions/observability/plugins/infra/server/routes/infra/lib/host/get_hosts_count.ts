@@ -89,8 +89,11 @@ export async function getHostsCount({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
-          should: [...documentsFilter],
+          filter: [
+            ...termsQuery(HOST_NAME_FIELD, ...hostNames),
+            ...rangeQuery(from, to),
+            { bool: { should: [...documentsFilter] } },
+          ],
         },
       },
       aggs: {
@@ -108,7 +111,11 @@ export async function getHostsCount({
   return buckets.filter((bucket: Record<string, any>) =>
     [...excludedValues.entries()].every(([field, values]) => {
       const metaValue = bucket[field]?.latest?.top?.[0]?.metrics?.[field];
-      return metaValue == null || !values.has(String(metaValue));
+      if (metaValue == null) return true;
+      if (Array.isArray(metaValue)) {
+        return metaValue.every((v: unknown) => !values.has(String(v)));
+      }
+      return !values.has(String(metaValue));
     })
   ).length;
 }
