@@ -35,7 +35,7 @@ describe('externals configuration', () => {
     for (const moduleName of commonExternals) {
       it(`"${moduleName}" should have matching global in shared deps`, () => {
         const rspackGlobal = rspackExternals[moduleName];
-        const sharedDepsGlobal = sharedDepsExternals[moduleName];
+        const sharedDepsGlobal = (sharedDepsExternals as Record<string, string>)[moduleName];
 
         // The external should exist in shared deps
         expect(sharedDepsGlobal).toBeDefined();

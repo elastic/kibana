@@ -20,7 +20,7 @@ import {
 
 describe('shared_config', () => {
   describe('getSharedResolveConfig', () => {
-    const resolveConfig = getSharedResolveConfig(REPO_ROOT);
+    const resolveConfig = getSharedResolveConfig(REPO_ROOT)!;
 
     it('should include TypeScript extensions', () => {
       expect(resolveConfig.extensions).toContain('.ts');
@@ -48,11 +48,11 @@ describe('shared_config', () => {
     });
 
     it('should have react-dom profiling alias', () => {
-      expect(resolveConfig.alias?.['react-dom$']).toBe('react-dom/profiling');
+      expect((resolveConfig.alias as Record<string, unknown>)?.['react-dom$']).toBe('react-dom/profiling');
     });
 
     it('should have scheduler/tracing alias', () => {
-      expect(resolveConfig.alias?.['scheduler/tracing']).toBe('scheduler/tracing-profiling');
+      expect((resolveConfig.alias as Record<string, unknown>)?.['scheduler/tracing']).toBe('scheduler/tracing-profiling');
     });
 
     it('should reference tsconfig.base.json', () => {

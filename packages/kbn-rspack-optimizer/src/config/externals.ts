@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExternalItem } from '@rspack/core';
-
 /**
  * Get externals mapping for shared dependencies
  * These are provided by @kbn/ui-shared-deps-src at runtime

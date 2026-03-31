@@ -12,6 +12,26 @@ import Fs from 'fs';
 import { Jsonc } from '@kbn/repo-packages';
 import type { PluginEntry } from '../types';
 
+/**
+ * Minimal shape of a raw kibana.jsonc manifest as returned by Jsonc.parse().
+ * This is NOT the same as KibanaPackageManifest from @kbn/repo-packages, which
+ * represents the processed form where fields like testPlugin are moved to a
+ * symbol-keyed PluginCategoryInfo object.
+ */
+interface RawKibanaManifest {
+  id?: string;
+  type?: string;
+  plugin?: {
+    id: string;
+    browser?: boolean;
+    testPlugin?: boolean;
+    extraPublicDirs?: string[];
+    requiredPlugins?: string[];
+    requiredBundles?: string[];
+    ignoreMetrics?: boolean;
+  };
+}
+
 export type { PluginEntry };
 
 export interface DiscoverPluginsOptions {
@@ -115,7 +135,7 @@ function parsePlugin(
 ): PluginEntry | null {
   try {
     const manifestContent = Fs.readFileSync(manifestPath, 'utf8');
-    const manifest = Jsonc.parse(manifestContent);
+    const manifest = Jsonc.parse(manifestContent) as RawKibanaManifest;
 
     // Must be a plugin
     if (manifest.type !== 'plugin' || !manifest.plugin) {
@@ -150,7 +170,7 @@ function parsePlugin(
     }
 
     const id = manifest.plugin.id;
-    const pkgId = manifest.id;
+    const pkgId = manifest.id ?? id;
 
     return {
       id,

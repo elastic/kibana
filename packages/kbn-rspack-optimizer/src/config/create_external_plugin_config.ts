@@ -40,7 +40,7 @@ function getExternalPluginConfigHash(repoRoot: string): string {
   const hash = rspack.util.createHash('xxhash64');
   for (const file of CACHE_CONFIG_FILES) {
     try {
-      hash.update(Fs.readFileSync(Path.resolve(repoRoot, file), 'utf-8'));
+      hash.update(Fs.readFileSync(Path.resolve(repoRoot, file), 'utf-8'), 'utf-8');
     } catch {
       // File might not exist in some scenarios, skip
     }

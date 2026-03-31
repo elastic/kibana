@@ -41,6 +41,8 @@ export interface BuildResult {
   errors?: string[];
   warnings?: string[];
   duration?: number;
+  entryCount?: number;
+  totalSize?: number;
   /** Function to close the watcher (only set in watch mode) */
   close?: () => Promise<void>;
   /** True if build was interrupted by SIGINT/SIGTERM */

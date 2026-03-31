@@ -67,7 +67,7 @@ async function handleStart(options: StartMessage['options']) {
 
     if (result.success) {
       const entryLabel = result.entryCount === 1 ? 'entry' : 'entries';
-      const summary = `${result.entryCount} ${entryLabel}, ${formatSize(result.totalSize)}`;
+      const summary = `${result.entryCount} ${entryLabel}, ${formatSize(result.totalSize ?? 0)}`;
       process.send?.({ type: 'done', success: true, summary });
     } else {
       process.send?.({ type: 'done', success: false, errors: result.errors });

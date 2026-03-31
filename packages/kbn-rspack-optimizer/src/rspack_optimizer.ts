@@ -31,6 +31,7 @@ interface WorkerMessage {
   level?: 'info' | 'error' | 'warning' | 'success' | 'debug';
   message?: string;
   success?: boolean;
+  summary?: string;
   errors?: string[];
 }
 

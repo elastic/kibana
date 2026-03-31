@@ -131,7 +131,7 @@ function getConfigHash(repoRoot: string): string {
   const hash = rspack.util.createHash('xxhash64');
   for (const file of CACHE_CONFIG_FILES) {
     try {
-      hash.update(Fs.readFileSync(Path.resolve(repoRoot, file), 'utf-8'));
+      hash.update(Fs.readFileSync(Path.resolve(repoRoot, file), 'utf-8'), 'utf-8');
     } catch {
       // File might not exist in some scenarios, skip
     }
@@ -669,7 +669,7 @@ function createUnifiedEntry(
   // This allows cache reuse when the same plugins are present regardless of repo location
   const pluginListHash = rspack.util
     .createHash('xxhash64')
-    .update(`${ENTRY_VERSION}\n${pluginEntries.map((e) => `${e.id}:${Path.relative(repoRoot, e.path)}`).join('\n')}`)
+    .update(`${ENTRY_VERSION}\n${pluginEntries.map((e) => `${e.id}:${Path.relative(repoRoot, e.path)}`).join('\n')}`, 'utf-8')
     .digest('hex');
 
   // Check if file exists and has the same hash (skip regeneration)
@@ -900,7 +900,7 @@ class PluginWatchPlugin {
 
         const currentHash = rspack.util
           .createHash('xxhash64')
-          .update(pluginEntries.map((e) => `${e.id}:${e.path}`).join('\n'))
+          .update(pluginEntries.map((e) => `${e.id}:${e.path}`).join('\n'), 'utf-8')
           .digest('hex');
 
         // If plugin list changed, regenerate the unified entry
