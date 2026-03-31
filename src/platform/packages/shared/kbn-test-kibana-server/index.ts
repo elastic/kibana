@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runElasticsearch } from './run_elasticsearch';
-export { cleanupElasticsearch } from '@kbn/test-es-server';
-export * from './run_ftr';
+export { DedicatedTaskRunnerConfig } from './src/dedicated_task_runner';
+export type { KibanaTestServerLaunchConfig } from './src/kibana_test_server_launch_config';
+export type { RunKibanaServerOptions } from './src/run_kibana_server';
+export { runKibanaServer } from './src/run_kibana_server';
+export type { ArgValue, KibanaCliArg } from './src/kibana_cli_args';
 export {
   getArgValue,
   getKibanaCliArg,
   getKibanaCliLoggers,
   parseRawFlags,
   remapPluginPaths,
-  runKibanaServer,
-} from '@kbn/test-kibana-server';
-export { initLogsDir } from './logs_dir';
-export { applyFipsOverrides, fipsIsEnabled } from './fips';
+} from './src/kibana_cli_args';
