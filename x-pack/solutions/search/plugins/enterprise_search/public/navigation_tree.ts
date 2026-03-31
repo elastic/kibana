@@ -246,10 +246,6 @@ export const getNavigationTreeDefinition = ({
                             link: 'cloud_connect' as const,
                           },
                         ]),
-                    {
-                      id: 'monitoring',
-                      link: 'monitoring',
-                    },
                   ],
                   id: 'stack_management_home',
                   title: '',
@@ -263,11 +259,25 @@ export const getNavigationTreeDefinition = ({
                     { link: 'management:jobsListLink' },
                     { link: 'management:watcher' },
                     { link: 'management:maintenanceWindows' },
-                    { badgeType: 'new', link: 'management:query_activity' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.alerts', {
                     defaultMessage: 'Alerts and Insights',
                   }),
+                },
+                {
+                  children: [
+                    {
+                      id: 'monitoring',
+                      link: 'monitoring',
+                    },
+                    { badgeType: 'new', link: 'management:query_activity' },
+                  ],
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.searchNav.management.clusterPerformance',
+                    {
+                      defaultMessage: 'Cluster performance',
+                    }
+                  ),
                 },
                 {
                   children: [

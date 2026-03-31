@@ -7,6 +7,7 @@
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { i18n } from '@kbn/i18n';
 import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   SecurityPageName,
@@ -186,7 +187,6 @@ export const createNavigationTree = (
                     link: 'cloud_connect' as const,
                   },
                 ]),
-            { link: 'monitoring' },
           ],
         },
         {
@@ -199,11 +199,17 @@ export const createNavigationTree = (
             { link: 'management:jobsListLink' },
             { link: 'management:watcher' },
             { link: 'management:maintenanceWindows' },
-            { link: 'management:query_activity', badgeType: 'new' },
             {
               id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
             },
+          ],
+        },
+        {
+          title: i18nStrings.clusterPerformance.title,
+          children: [
+            { link: 'monitoring' },
+            { link: 'management:query_activity', badgeType: 'new' },
           ],
         },
         {

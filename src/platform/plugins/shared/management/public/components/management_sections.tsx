@@ -70,6 +70,11 @@ const stackTip = i18n.translate('management.sections.stackTip', {
   defaultMessage: 'Manage your license and upgrade the Stack',
 });
 
+const clusterPerformanceTitle = i18n.translate('management.sections.clusterPerformanceTitle', {
+  defaultMessage: 'Cluster performance',
+});
+
+
 export const IngestSection = {
   id: ManagementSectionId.Ingest,
   title: ingestTitle,
@@ -89,6 +94,12 @@ export const InsightsAndAlertingSection = {
   title: insightsAndAlertingTitle,
   tip: insightsAndAlertingTip,
   order: 2,
+};
+
+export const ClusterPerformanceSection = {
+  id: ManagementSectionId.ClusterPerformance,
+  title: clusterPerformanceTitle,
+  order: 2.5,
 };
 
 export const MachineLearningSection = {
@@ -134,4 +145,5 @@ export const managementSections = [
   KibanaSection,
   AISection,
   StackSection,
+  ClusterPerformanceSection,
 ];

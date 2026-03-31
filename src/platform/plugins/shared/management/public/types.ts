@@ -50,6 +50,7 @@ export interface DefinedSections {
   kibana: ManagementSection;
   stack: ManagementSection;
   ai: ManagementSection;
+  clusterPerformance: ManagementSection;
 }
 
 export interface ManagementStart {
@@ -86,6 +87,7 @@ export enum ManagementSectionId {
   Kibana = 'kibana',
   Stack = 'stack',
   AI = 'ai',
+  ClusterPerformance = 'clusterPerformance',
 }
 
 export type Unmount = () => Promise<void> | void;

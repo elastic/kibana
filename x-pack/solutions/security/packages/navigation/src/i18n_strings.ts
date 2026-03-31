@@ -77,6 +77,11 @@ export const i18nStrings = {
       ),
     },
   },
+  clusterPerformance: {
+    title: i18n.translate('securitySolutionPackages.navLinks.clusterPerformance', {
+      defaultMessage: 'Cluster performance',
+    }),
+  },
   ml: {
     title: i18n.translate('securitySolutionPackages.navLinks.ml', {
       defaultMessage: 'Machine Learning',

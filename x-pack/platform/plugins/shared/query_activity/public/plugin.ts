@@ -28,7 +28,7 @@ export class QueryActivityPlugin
     core: CoreSetup<QueryActivityStartDependencies>,
     plugins: QueryActivitySetupDependencies
   ): QueryActivityPluginSetup {
-    plugins.management.sections.section.insightsAndAlerting.registerApp({
+    plugins.management.sections.section.clusterPerformance.registerApp({
       id: 'query_activity',
       title: PLUGIN_NAME,
       order: 99,
