@@ -255,9 +255,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       },
     });
 
-    const aggs = result.aggregations as
-      | { tags?: { buckets: Array<{ key: string }> } }
-      | undefined;
+    const aggs = result.aggregations as { tags?: { buckets: Array<{ key: string }> } } | undefined;
 
     return aggs?.tags?.buckets.map((bucket) => bucket.key) ?? [];
   }
