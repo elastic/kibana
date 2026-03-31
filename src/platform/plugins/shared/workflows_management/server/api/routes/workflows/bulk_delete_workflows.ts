@@ -17,7 +17,8 @@ import { withLicenseCheck } from '../utils/with_license_check';
 
 const MAX_BULK_DELETE_BATCH_SIZE = 1000;
 
-export function registerBulkDeleteWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerBulkDeleteWorkflowsRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .delete({
       path: '/api/workflows',
@@ -38,6 +39,15 @@ export function registerBulkDeleteWorkflowsRoute({ router, api, spaces }: RouteD
         },
         validate: {
           request: {
+            query: schema.object({
+              force: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, permanently deletes the workflows (hard delete) instead of soft-deleting them. The workflow IDs become available for reuse.',
+                },
+              }),
+            }),
             body: schema.object({
               ids: schema.arrayOf(
                 schema.string({ meta: { description: 'Workflow ID to delete.' } }),
@@ -51,12 +61,20 @@ export function registerBulkDeleteWorkflowsRoute({ router, api, spaces }: RouteD
         },
       },
       withLicenseCheck(async (context, request, response) => {
+        const { force } = request.query;
         try {
           const { ids } = request.body;
           const spaceId = spaces.getSpaceId(request);
-          const result = await api.deleteWorkflows(ids, spaceId, request);
-          return response.ok({ body: result });
+          const result = await api.deleteWorkflows(ids, spaceId, request, { force });
+          const { successfulIds = [], ...responseBody } = result;
+          audit.logBulkWorkflowDeleteResults(request, {
+            successfulIds,
+            failures: result.failures,
+            force,
+          });
+          return response.ok({ body: responseBody });
         } catch (error) {
+          audit.logBulkWorkflowDeleteFailed(request, error, { force });
           return handleRouteError(response, error);
         }
       })

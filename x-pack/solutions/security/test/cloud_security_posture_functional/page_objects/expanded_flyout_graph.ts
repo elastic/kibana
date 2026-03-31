@@ -293,6 +293,12 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     }
   }
 
+  async isCalloutVisible(): Promise<boolean> {
+    return await this.testSubjects.exists(GRAPH_CALLOUT_TEST_ID, {
+      timeout: 5000,
+    });
+  }
+
   async assertCalloutVisible(): Promise<void> {
     await this.testSubjects.existOrFail(GRAPH_CALLOUT_TEST_ID, {
       timeout: 10000,
