@@ -12,5 +12,5 @@ export {
 export {
   DEFAULT_CLOSING_REASON_OPTIONS,
   getDefaultClosingReasonLabel,
+  DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
 } from './components/default_closing_reasons';
-export { CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY } from './components/default_closing_reasons';

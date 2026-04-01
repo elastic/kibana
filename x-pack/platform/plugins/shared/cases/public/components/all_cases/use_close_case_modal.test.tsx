@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { act, renderHook, screen, waitFor } from '@testing-library/react';
 
 import type { CoreStart } from '@kbn/core/public';
-import { CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY } from '@kbn/response-ops-detections-close-reason';
+import { DEFAULT_DETECTIONS_CLOSE_REASONS_KEY } from '@kbn/response-ops-detections-close-reason';
 
 import { TestProviders, renderWithTestingProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
@@ -197,7 +197,7 @@ describe('useCloseCaseModal', () => {
       const coreStartMock = createStartServicesMock();
       (coreStartMock.uiSettings.get as jest.Mock).mockImplementation(
         (key: string, defaultValue: unknown) => {
-          if (key === CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY) {
+          if (key === DEFAULT_DETECTIONS_CLOSE_REASONS_KEY) {
             return ['Custom reason 1', 'Custom reason 2'];
           }
           return defaultValue;

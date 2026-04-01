@@ -13,7 +13,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import * as i18n from '../translations';
 import {
   DEFAULT_CLOSING_REASON_OPTIONS,
-  CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY,
+  DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
 } from './default_closing_reasons';
 
 interface ClosingReasonOption {
@@ -35,7 +35,7 @@ const ClosingReasonPanelComponent: React.FC<ClosingReasonPanelProps> = ({
   } = useKibana<{ uiSettings: IUiSettingsClient }>();
 
   const customClosingReasons = useMemo(
-    () => uiSettings.get<string[]>(CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY, []),
+    () => uiSettings.get<string[]>(DEFAULT_DETECTIONS_CLOSE_REASONS_KEY, []),
     [uiSettings]
   );
 

@@ -10,8 +10,8 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
-  CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY,
   DEFAULT_CLOSING_REASON_OPTIONS,
+  DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
 } from '@kbn/response-ops-detections-close-reason';
 
 import { CloseCaseModal } from './close_case_modal';
@@ -36,7 +36,7 @@ export const useCloseCaseModal = ({
   } = useKibana<{ uiSettings: IUiSettingsClient }>();
 
   const initialCloseReasonOptions = useMemo(() => {
-    const customCloseReasons = uiSettings.get<string[]>(CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY, []);
+    const customCloseReasons = uiSettings.get<string[]>(DEFAULT_DETECTIONS_CLOSE_REASONS_KEY, []);
 
     return [
       ...DEFAULT_CLOSING_REASON_OPTIONS,
