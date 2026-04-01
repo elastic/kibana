@@ -8,6 +8,7 @@
  */
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { StepMetadataCache } from './step_metadata_cache';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -28,9 +29,14 @@ export class WorkflowExecutionState {
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
     private workflowExecutionRepository: WorkflowExecutionRepository,
-    private workflowStepExecutionRepository: StepExecutionRepository
+    private workflowStepExecutionRepository: StepExecutionRepository,
+    private readonly stepMetadataCache: StepMetadataCache
   ) {
     this.workflowExecution = initialWorkflowExecution;
+  }
+
+  public getStepMetadataCache(): StepMetadataCache {
+    return this.stepMetadataCache;
   }
 
   public async load(): Promise<void> {

@@ -18,9 +18,10 @@ import {
   type StepContext,
   type WorkflowContext,
 } from '@kbn/workflows';
-import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
+import { extractTemplateVariables, parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
+import type { StepMetadataCache } from './step_metadata_cache';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -40,6 +41,7 @@ export interface ContextManagerInit {
   fakeRequest: KibanaRequest;
   coreStart: CoreStart; // For using Kibana's internal HTTP client
   dependencies: ContextDependencies;
+  stepMetadataCache: StepMetadataCache;
 }
 
 interface ScopeEntry {
@@ -55,6 +57,7 @@ export class WorkflowContextManager {
   private fakeRequest: KibanaRequest;
   private coreStart: CoreStart;
   private dependencies: ContextDependencies;
+  private stepMetadataCache: StepMetadataCache;
 
   private stackFrames: StackFrame[];
   public readonly node: GraphNodeUnion;
@@ -73,6 +76,11 @@ export class WorkflowContextManager {
     this.stackFrames = init.stackFrames;
     this.templateEngine = init.templateEngine;
     this.dependencies = init.dependencies;
+    this.stepMetadataCache = init.stepMetadataCache;
+  }
+
+  public getStepMetadataCache(): StepMetadataCache {
+    return this.stepMetadataCache;
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
@@ -88,9 +96,48 @@ export class WorkflowContextManager {
     const currentNodeId = currentNode.id;
 
     const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
+    const predecessorStepIds = new Set(allPredecessors.map((node) => node.stepId));
     allPredecessors.forEach((node) => {
       const stepId = node.stepId;
-      const stepData = this.getStepData(stepId);
+      const stepData = this.getStepData(stepId, predecessorStepIds);
+
+      if (stepData) {
+        stepContext.steps[stepId] = {};
+        if (stepData.runStepResult) {
+          stepContext.steps[stepId] = {
+            ...stepContext.steps[stepId],
+            ...stepData.runStepResult,
+          };
+        }
+
+        if (stepData.stepState) {
+          stepContext.steps[stepId] = {
+            ...stepContext.steps[stepId],
+            ...stepData.stepState,
+          };
+        }
+      }
+    });
+
+    this.enrichStepContextAccordingToStepScope(stepContext);
+    this.enrichStepContextWithMockedData(stepContext);
+    return stepContext;
+  }
+
+  private getContextTemp(accessedStepIds: Set<string>): StepContext {
+    const stepContext: StepContext = {
+      ...this.buildWorkflowContext(),
+      steps: {},
+      variables: this.getVariables(),
+    };
+
+    const currentNode = this.node;
+    const currentNodeId = currentNode.id;
+
+    const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
+    allPredecessors.forEach((node) => {
+      const stepId = node.stepId;
+      const stepData = this.getStepData(stepId, accessedStepIds);
 
       if (stepData) {
         stepContext.steps[stepId] = {};
@@ -145,12 +192,14 @@ export class WorkflowContextManager {
    * ```
    */
   public renderValueAccordingToContext<T>(obj: T, additionalContext?: Record<string, unknown>): T {
-    const context = this.getContext();
+    const accessedStepIds = this.getStepIdsFromRenderingContext(obj);
+    const context = this.getContextTemp(accessedStepIds);
     return this.templateEngine.render(obj, { ...context, ...additionalContext });
   }
 
   public evaluateExpressionInContext(template: string): unknown {
-    const context = this.getContext();
+    const accessedStepIds = this.getStepIdsFromRenderingContext(template);
+    const context = this.getContextTemp(accessedStepIds);
     return this.templateEngine.evaluateExpression(template, context);
   }
 
@@ -477,7 +526,10 @@ export class WorkflowContextManager {
     }
   }
 
-  private getStepData(stepId: string):
+  private getStepData(
+    stepId: string,
+    accessedStepIds: Set<string>
+  ):
     | {
         runStepResult: {
           input: unknown;
@@ -487,6 +539,10 @@ export class WorkflowContextManager {
         stepState: Record<string, unknown> | undefined;
       }
     | undefined {
+    if (!accessedStepIds.has(stepId)) {
+      return;
+    }
+
     const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
     if (!latestStepExecution) {
       return;
@@ -500,5 +556,38 @@ export class WorkflowContextManager {
       },
       stepState: latestStepExecution.state,
     };
+  }
+
+  private inspectRenderingContext(renderingContext: unknown): Set<string> {
+    const accumulator = new Set<string>();
+
+    if (typeof renderingContext === 'string' && isTemplateExpression(renderingContext)) {
+      const variables = extractTemplateVariables(renderingContext);
+      variables.forEach((variable) => {
+        accumulator.add(variable);
+      });
+    } else if (typeof renderingContext === 'object' && renderingContext) {
+      Object.values(renderingContext).forEach((value) => {
+        this.inspectRenderingContext(value).forEach((entry) => {
+          accumulator.add(entry);
+        });
+      });
+    }
+
+    return accumulator;
+  }
+
+  private getStepIdsFromRenderingContext(renderingContext: unknown): Set<string> {
+    const stepIds = new Set<string>();
+    const fields = this.inspectRenderingContext(renderingContext);
+
+    fields.forEach((field) => {
+      const parsedField = parseJsPropertyAccess(field);
+      if (parsedField[0] === 'steps') {
+        stepIds.add(parsedField[1]);
+      }
+    });
+
+    return stepIds;
   }
 }

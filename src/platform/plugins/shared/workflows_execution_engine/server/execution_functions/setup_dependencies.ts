@@ -22,6 +22,7 @@ import { WorkflowExecutionRepository } from '../repositories/workflow_execution_
 import { NodesFactory } from '../step/nodes_factory';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import { StepMetadataCache } from '../workflow_context_manager/step_metadata_cache';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
@@ -49,6 +50,7 @@ export async function setupDependencies(
 
   const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
   const stepExecutionRepository = new StepExecutionRepository(internalEsClient);
+  const stepMetadataCache = new StepMetadataCache(stepExecutionRepository);
   const workflowRepository = new WorkflowRepository({
     esClient: internalEsClient,
     logger,
@@ -108,7 +110,8 @@ export async function setupDependencies(
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
     workflowExecutionRepository,
-    stepExecutionRepository
+    stepExecutionRepository,
+    stepMetadataCache
   );
 
   // Create telemetry client

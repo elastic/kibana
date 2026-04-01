@@ -11,6 +11,7 @@ import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflow
 import { ExecutionStatus } from '@kbn/workflows';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
+import type { StepMetadataCache } from '../step_metadata_cache';
 import { WorkflowExecutionState } from '../workflow_execution_state';
 
 describe('WorkflowExecutionState', () => {
@@ -18,6 +19,7 @@ describe('WorkflowExecutionState', () => {
 
   let workflowExecutionRepository: WorkflowExecutionRepository;
   let stepExecutionRepository: StepExecutionRepository;
+  let stepMetadataCache: StepMetadataCache;
 
   beforeEach(() => {
     workflowExecutionRepository = {} as unknown as WorkflowExecutionRepository;
@@ -26,6 +28,11 @@ describe('WorkflowExecutionState', () => {
     stepExecutionRepository = {} as unknown as StepExecutionRepository;
     stepExecutionRepository.bulkUpsert = jest.fn();
     stepExecutionRepository.getStepExecutionsByIds = jest.fn();
+
+    stepMetadataCache = {
+      cacheMetadata: jest.fn(),
+      getMetadataForStepExecution: jest.fn(),
+    } as unknown as StepMetadataCache;
 
     const fakeWorkflowExecution = {
       id: 'test-workflow-execution-id',
@@ -37,7 +44,8 @@ describe('WorkflowExecutionState', () => {
     underTest = new WorkflowExecutionState(
       fakeWorkflowExecution,
       workflowExecutionRepository,
-      stepExecutionRepository
+      stepExecutionRepository,
+      stepMetadataCache
     );
   });
 
@@ -119,7 +127,8 @@ describe('WorkflowExecutionState', () => {
     const stateWithTestRun = new WorkflowExecutionState(
       workflowExecutionWithTestRun,
       workflowExecutionRepository,
-      stepExecutionRepository
+      stepExecutionRepository,
+      stepMetadataCache
     );
 
     stateWithTestRun.upsertStep({

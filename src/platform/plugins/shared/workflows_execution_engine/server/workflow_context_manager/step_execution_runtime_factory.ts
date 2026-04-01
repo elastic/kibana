@@ -133,6 +133,7 @@ export class StepExecutionRuntimeFactory {
       fakeRequest: this.params.fakeRequest,
       coreStart: this.params.coreStart,
       dependencies: this.params.dependencies,
+      stepMetadataCache: this.params.workflowExecutionState.getStepMetadataCache(),
     });
     return new StepExecutionRuntime({
       stepExecutionId,

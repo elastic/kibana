@@ -20,6 +20,7 @@ import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
 import type { WorkflowTemplatingEngine } from '../../templating_engine';
+import type { StepMetadataCache } from '../step_metadata_cache';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
@@ -99,6 +100,11 @@ describe('WorkflowContextManager', () => {
       .mockReturnValue({} as EsWorkflowStepExecution);
     workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
 
+    const stepMetadataCache = {
+      cacheMetadata: jest.fn(),
+      getMetadataForStepExecution: jest.fn(),
+    } as unknown as StepMetadataCache;
+
     const underTest = new WorkflowContextManager({
       templateEngine: templatingEngineMock,
       node: fakeNode as AtomicGraphNode,
@@ -109,6 +115,7 @@ describe('WorkflowContextManager', () => {
       dependencies,
       fakeRequest: {} as KibanaRequest,
       coreStart: {} as CoreStart,
+      stepMetadataCache,
     });
 
     return {
