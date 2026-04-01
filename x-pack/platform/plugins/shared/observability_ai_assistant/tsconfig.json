@@ -65,7 +65,8 @@
     "@kbn/ai-agent-confirmation-modal",
     "@kbn/ai-assistant-management-plugin",
     "@kbn/agent-builder-plugin",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/evals-plugin"
   ],
   "exclude": ["target/**/*"]
 }

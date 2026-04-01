@@ -13,7 +13,6 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/management-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/security-authorization-core",
     "@kbn/storage-adapter",
     "@kbn/es-errors",
     "@kbn/evals-common",
@@ -21,11 +20,11 @@
     "@kbn/react-query",
     "@kbn/shared-ux-router",
     "@kbn/i18n-react",
-    "@kbn/user-profile-components",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-router-server-mocks",
     "@kbn/code-editor",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-saved-objects-api-server-mocks"
   ]
 }
