@@ -39,9 +39,7 @@ export const DeploymentDetailsEsInput: FC<{ elasticsearchUrl: string }> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiCopy textToCopy={elasticsearchUrl}>
-            {(copy) => (
-              <EuiButtonIcon onClick={copy} iconType="copyClipboard" display="base" size="m" />
-            )}
+            {(copy) => <EuiButtonIcon onClick={copy} iconType="copy" display="base" size="m" />}
           </EuiCopy>
         </EuiFlexItem>
       </EuiFlexGroup>

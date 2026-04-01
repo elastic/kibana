@@ -9,7 +9,9 @@ import { PRIVMON_PRIVILEGE_CHECK_API } from '@kbn/security-solution-plugin/commo
 import { WATCHLISTS_URL } from '@kbn/security-solution-plugin/common/entity_analytics/watchlists/constants';
 import { visit } from '../../../tasks/navigation';
 import { login } from '../../../tasks/login';
-import { ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL } from '../../../urls/navigation';
+import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../../urls/navigation';
+
+const ENTITY_ANALYTICS_WATCHLISTS_TAB_URL = `${ENTITY_ANALYTICS_MANAGEMENT_URL}/watchlists`;
 import {
   WATCHLISTS_MANAGEMENT_TABLE_EMPTY,
   WATCHLISTS_MANAGEMENT_TABLE_ERROR,
@@ -35,7 +37,7 @@ describe.skip(
   () => {
     const WATCHLISTS_LIST_URL = `${WATCHLISTS_URL}/list`;
     const visitWatchlistsPage = () => {
-      visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
+      visit(ENTITY_ANALYTICS_WATCHLISTS_TAB_URL);
     };
 
     const interceptWatchlistsList = (
@@ -98,9 +100,9 @@ describe.skip(
     });
 
     it('renders page as expected', () => {
-      visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
-      cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
-      cy.contains('h1', 'Watchlists Management', { timeout: 60000 }).should('exist');
+      visit(ENTITY_ANALYTICS_WATCHLISTS_TAB_URL);
+      cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_WATCHLISTS_TAB_URL);
+      cy.contains('h1', 'Entity Analytics Management', { timeout: 60000 }).should('exist');
     });
 
     it('shows empty state when no watchlists are returned', () => {
