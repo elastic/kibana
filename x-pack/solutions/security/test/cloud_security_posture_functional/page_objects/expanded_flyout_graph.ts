@@ -10,7 +10,7 @@ import { GenericFtrService } from '@kbn/test';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FilterBarService } from '@kbn/test-suites-src/functional/services/filter_bar';
 import type { QueryBarProvider } from '../services/query_bar_provider';
-import type { SecurityTelemetryFtrProviderContext } from '../config';
+import type { SecurityTelemetryFtrProviderContext } from '../config.base';
 import { testSubjectIds } from '../constants/test_subject_ids';
 
 const {
@@ -22,6 +22,7 @@ const {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
@@ -37,6 +38,7 @@ const {
   GRAPH_CALLOUT_TEST_ID,
   GRAPH_NODE_ENTITY_DETAILS_ID,
   GRAPH_NODE_ENTITY_TAG_TEXT_ID,
+  GRAPH_NODE_ENTITY_TAG_COUNT_ID,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TEST_ID,
@@ -52,6 +54,8 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly filterBar = this.ctx.getService('filterBar');
+  private readonly browser = this.ctx.getService('browser');
+  private readonly retry = this.ctx.getService('retry');
 
   async expandGraph(): Promise<void> {
     await this.testSubjects.click(GRAPH_PREVIEW_TITLE_LINK_TEST_ID);
@@ -62,11 +66,13 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async assertGraphNodesNumber(expected: number): Promise<void> {
-    await this.waitGraphIsLoaded();
-    const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
-    await graph.scrollIntoView();
-    const nodes = await graph.findAllByCssSelector('.react-flow__nodes .react-flow__node');
-    expect(nodes.length).to.be(expected);
+    await this.retry.try(async () => {
+      await this.waitGraphIsLoaded();
+      const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
+      await graph.scrollIntoView();
+      const nodes = await graph.findAllByCssSelector('.react-flow__nodes .react-flow__node');
+      expect(nodes.length).to.be(expected);
+    });
   }
 
   async assertGraphGroupNodesNumber(expected: number): Promise<void> {
@@ -102,24 +108,36 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     return nodes[0];
   }
 
-  async assertNodeExists(nodeId: string): Promise<void> {
+  async getNodesByIdCount(nodeId: string): Promise<number> {
     await this.waitGraphIsLoaded();
     const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
     await graph.scrollIntoView();
     const nodes = await graph.findAllByCssSelector(
       `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`
     );
-    expect(nodes.length).to.be(1);
+    return nodes.length;
+  }
+
+  async assertNodeExists(nodeId: string): Promise<void> {
+    const count = await this.getNodesByIdCount(nodeId);
+    expect(count).to.be(1);
+  }
+
+  async assertNodeDoesNotExist(nodeId: string): Promise<void> {
+    const count = await this.getNodesByIdCount(nodeId);
+    expect(count).to.be(0);
   }
 
   async clickOnNodeExpandButton(
     nodeId: string,
     popoverId: string = GRAPH_NODE_EXPAND_POPOVER_TEST_ID
   ): Promise<void> {
-    const node = await this.selectNode(nodeId);
-    const expandButton = await node.findByTestSubject(NODE_EXPAND_BUTTON_TEST_ID);
-    await expandButton.click();
-    await this.testSubjects.existOrFail(popoverId);
+    await this.retry.try(async () => {
+      const node = await this.selectNode(nodeId);
+      const expandButton = await node.findByTestSubject(NODE_EXPAND_BUTTON_TEST_ID);
+      await expandButton.click();
+      await this.testSubjects.existOrFail(popoverId);
+    });
   }
 
   async showActionsByEntity(nodeId: string): Promise<void> {
@@ -137,6 +155,11 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   async showEntityDetails(nodeId: string): Promise<void> {
     await this.clickOnNodeExpandButton(nodeId);
     await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+    await this.pageObjects.header.waitUntilLoadingHasFinished();
+  }
+  async showEntityRelationships(nodeId: string): Promise<void> {
+    await this.clickOnNodeExpandButton(nodeId);
+    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
@@ -179,18 +202,25 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async expectFilterTextEquals(filterIdx: number, expected: string): Promise<void> {
-    const filters = await this.filterBar.getFiltersLabel();
-    expect(filters.length).to.be.greaterThan(filterIdx);
-    expect(filters[filterIdx]).to.be(expected);
+    await this.retry.try(async () => {
+      const filters = await this.filterBar.getFiltersLabel();
+      expect(filters.length).to.be.greaterThan(filterIdx);
+      expect(filters[filterIdx]).to.be(expected);
+    });
   }
 
   async expectFilterPreviewEquals(filterIdx: number, expected: string): Promise<void> {
-    await this.clickEditFilter(filterIdx);
+    await this.retry.try(async () => {
+      await this.clickEditFilter(filterIdx);
 
-    const filterPreview = await this.filterBar.getFilterEditorPreview();
-    expect(filterPreview).to.be(expected);
+      const filterPreview = await this.filterBar.getFilterEditorPreview();
+      expect(filterPreview).to.be(expected);
 
-    await this.filterBar.ensureFieldEditorModalIsClosed();
+      // Close the filter editor by pressing Escape instead of using
+      // ensureFieldEditorModalIsClosed which has a bug when used inside flyouts
+      // (cancelSaveFilter exists in the DOM but is not displayed, causing a timeout)
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    });
   }
 
   async clickEditFilter(filterIdx: number): Promise<void> {
@@ -204,7 +234,9 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async addFilter(filter: Filter): Promise<void> {
+    await this.showSearchBar();
     await this.testSubjects.click(`${GRAPH_INVESTIGATION_TEST_ID} > addFilter`);
+    await this.testSubjects.existOrFail('filter-0', { timeout: 5000 });
     await this.filterBar.createFilter(filter);
     await this.testSubjects.scrollIntoView('saveFilter');
     await this.testSubjects.clickWhenNotDisabled('saveFilter');
@@ -261,6 +293,12 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     }
   }
 
+  async isCalloutVisible(): Promise<boolean> {
+    return await this.testSubjects.exists(GRAPH_CALLOUT_TEST_ID, {
+      timeout: 5000,
+    });
+  }
+
   async assertCalloutVisible(): Promise<void> {
     await this.testSubjects.existOrFail(GRAPH_CALLOUT_TEST_ID, {
       timeout: 10000,
@@ -268,37 +306,56 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async dismissCallout(): Promise<void> {
-    const callout = await this.testSubjects.find(GRAPH_CALLOUT_TEST_ID);
-    const dismissButton = await callout.findByTestSubject('euiDismissCalloutButton');
-    await dismissButton.click();
-    await this.testSubjects.missingOrFail(GRAPH_CALLOUT_TEST_ID);
+    await this.retry.try(async () => {
+      const callout = await this.testSubjects.find(GRAPH_CALLOUT_TEST_ID);
+      const dismissButton = await callout.findByTestSubject('euiDismissCalloutButton');
+      await dismissButton.click();
+      await this.testSubjects.missingOrFail(GRAPH_CALLOUT_TEST_ID);
+    });
   }
 
   async assertNodeEntityTag(nodeId: string, expectedTagValue: string): Promise<void> {
-    const node = await this.selectNode(nodeId);
-    const tagWrapper = await node.findByTestSubject(GRAPH_NODE_ENTITY_TAG_TEXT_ID);
-    const tagText = await tagWrapper.getVisibleText();
-    expect(tagText.toLowerCase()).to.contain(expectedTagValue.toLowerCase());
+    await this.retry.try(async () => {
+      const node = await this.selectNode(nodeId);
+      const tagWrapper = await node.findByTestSubject(GRAPH_NODE_ENTITY_TAG_TEXT_ID);
+      const tagText = await tagWrapper.getVisibleText();
+      expect(tagText.toLowerCase()).to.contain(expectedTagValue.toLowerCase());
+    });
+  }
+
+  async assertNodeEntityTagCount(nodeId: string, expectedCount: number): Promise<void> {
+    await this.retry.try(async () => {
+      const node = await this.selectNode(nodeId);
+      const countWrapper = await node.findByTestSubject(GRAPH_NODE_ENTITY_TAG_COUNT_ID);
+      const countText = await countWrapper.getVisibleText();
+      expect(parseInt(countText, 10)).to.be(expectedCount);
+    });
   }
 
   async assertNodeEntityDetails(nodeId: string, expectedDetails: string): Promise<void> {
-    const node = await this.selectNode(nodeId);
-    const detailsElement = await node.findByTestSubject(GRAPH_NODE_ENTITY_DETAILS_ID);
-    const fullTextElement = await detailsElement.findByTestSubject('fullText');
-    const detailsText = await fullTextElement.getVisibleText();
-    expect(detailsText).to.be(expectedDetails);
+    await this.retry.try(async () => {
+      const node = await this.selectNode(nodeId);
+      const detailsElement = await node.findByTestSubject(GRAPH_NODE_ENTITY_DETAILS_ID);
+      const fullTextElement = await detailsElement.findByTestSubject('fullText');
+      const detailsText = await fullTextElement.getVisibleText();
+      expect(detailsText).to.be(expectedDetails);
+    });
   }
 
   async assertPreviewPanelGroupedItemTitleTextNumber(expected: number): Promise<void> {
-    await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
-    const titleTextElements = await this.testSubjects.findAll(GROUPED_ITEM_TITLE_TEST_ID_TEXT);
-    expect(titleTextElements.length).to.be(expected);
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+      const titleTextElements = await this.testSubjects.findAll(GROUPED_ITEM_TITLE_TEST_ID_TEXT);
+      expect(titleTextElements.length).to.be(expected);
+    });
   }
 
   async assertPreviewPanelGroupedItemTitleLinkNumber(expected: number): Promise<void> {
-    await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
-    const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TITLE_TEST_ID_LINK);
-    expect(groupedItems.length).to.be(expected);
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+      const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TITLE_TEST_ID_LINK);
+      expect(groupedItems.length).to.be(expected);
+    });
   }
 
   async closePreviewSection(): Promise<void> {
@@ -310,29 +367,31 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     actor: string,
     target: string
   ): Promise<void> {
-    await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
-    const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TEST_ID);
-    expect(groupedItems.length).to.be.greaterThan(0);
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+      const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TEST_ID);
+      expect(groupedItems.length).to.be.greaterThan(0);
 
-    // Count how many grouped items have the specified actor and target
-    let matchingCount = 0;
-    for (const groupedItem of groupedItems) {
-      try {
-        const actorElement = await groupedItem.findByTestSubject(GROUPED_ITEM_ACTOR_TEST_ID);
-        const targetElement = await groupedItem.findByTestSubject(GROUPED_ITEM_TARGET_TEST_ID);
+      // Count how many grouped items have the specified actor and target
+      let matchingCount = 0;
+      for (const groupedItem of groupedItems) {
+        try {
+          const actorElement = await groupedItem.findByTestSubject(GROUPED_ITEM_ACTOR_TEST_ID);
+          const targetElement = await groupedItem.findByTestSubject(GROUPED_ITEM_TARGET_TEST_ID);
 
-        const actorText = await actorElement.getVisibleText();
-        const targetText = await targetElement.getVisibleText();
+          const actorText = await actorElement.getVisibleText();
+          const targetText = await targetElement.getVisibleText();
 
-        if (actorText.includes(actor) && targetText.includes(target)) {
-          matchingCount++;
+          if (actorText.includes(actor) && targetText.includes(target)) {
+            matchingCount++;
+          }
+        } catch (e) {
+          // This grouped item might not have actor/target (could be an entity), continue checking others
+          continue;
         }
-      } catch (e) {
-        // This grouped item might not have actor/target (could be an entity), continue checking others
-        continue;
       }
-    }
 
-    expect(matchingCount).to.be(expectedCount);
+      expect(matchingCount).to.be(expectedCount);
+    });
   }
 }

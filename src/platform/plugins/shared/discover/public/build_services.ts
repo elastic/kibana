@@ -63,8 +63,8 @@ import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -97,6 +97,7 @@ export interface DiscoverFeatureFlags {
 
 export interface DiscoverServices {
   aiops?: AiopsPluginStart;
+  alertingVTwo?: AlertingV2PublicStart;
   application: ApplicationStart;
   addBasePath: (path: string) => string;
   analytics: AnalyticsServiceStart;
@@ -155,7 +156,6 @@ export interface DiscoverServices {
   ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   cps?: CPSPluginStart;
   embeddableEditor: EmbeddableEditorService;
 }
@@ -192,6 +192,7 @@ export const buildServices = ({
 
   return {
     aiops: plugins.aiops,
+    alertingVTwo: plugins.alertingVTwo,
     application: core.application,
     addBasePath: core.http.basePath.prepend,
     analytics: core.analytics,
@@ -257,11 +258,7 @@ export const buildServices = ({
     ebtManager,
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
-    embeddableEnhanced: plugins.embeddableEnhanced,
     cps: plugins.cps,
-    embeddableEditor: new EmbeddableEditorService(
-      core.application,
-      plugins.embeddable.getStateTransfer()
-    ),
+    embeddableEditor: new EmbeddableEditorService(plugins.embeddable.getStateTransfer()),
   };
 };

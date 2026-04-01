@@ -28,15 +28,12 @@ import { FetchSyncJobsStatsApiLogic } from '../../api/stats/fetch_sync_jobs_stat
 import {
   getConnectedConnectorsBadgeLabel,
   getConnectedConnectorsTooltipContent,
-  getConnectedBadgeAriaLabel,
   getIncompleteConnectorsBadgeLabel,
-  getIncompleteConnectorBadgeAriaLabel,
   getIncompleteConnectorsTooltip,
   getIdleJobsLabel,
   getIdleJobsTooltip,
   getOrphanedJobsLabel,
   getOrphanedJobsTooltip,
-  getRunningJobsBadgeAriaLabel,
   getRunningJobsBadgeLabel,
   getRunningJobsLabel,
   getRunningJobsTooltip,
@@ -130,11 +127,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               anchorProps={tooltipAncherProps}
               content={getConnectedConnectorsTooltipContent(connectedCount, isCrawler)}
             >
-              <EuiBadge
-                color="success"
-                onClick={() => {}}
-                onClickAriaLabel={getConnectedBadgeAriaLabel(connectedCount)}
-              >
+              <EuiBadge color="success">
                 {getConnectedConnectorsBadgeLabel(connectedCount)}
               </EuiBadge>
             </EuiToolTip>
@@ -143,11 +136,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               anchorProps={tooltipAncherProps}
               content={getIncompleteConnectorsTooltip(incompleteCount, isCrawler)}
             >
-              <EuiBadge
-                color="warning"
-                onClick={() => {}}
-                onClickAriaLabel={getIncompleteConnectorBadgeAriaLabel(incompleteCount)}
-              >
+              <EuiBadge color="warning">
                 {getIncompleteConnectorsBadgeLabel(incompleteCount)}
               </EuiBadge>
             </EuiToolTip>
@@ -178,19 +167,12 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               anchorProps={tooltipAncherProps}
               content={getRunningJobsTooltip(inProgressCount, isCrawler)}
             >
-              <EuiBadge
-                onClick={() => {}}
-                onClickAriaLabel={getRunningJobsBadgeAriaLabel(inProgressCount, isCrawler)}
-              >
-                {getRunningJobsBadgeLabel(inProgressCount, isCrawler)}
-              </EuiBadge>
+              <EuiBadge>{getRunningJobsBadgeLabel(inProgressCount, isCrawler)}</EuiBadge>
             </EuiToolTip>
 
             {!isCrawler && (
               <EuiToolTip anchorProps={tooltipAncherProps} content={getIdleJobsTooltip(idleCount)}>
-                <EuiBadge onClick={() => {}} onClickAriaLabel={getIdleJobsLabel(idleCount)}>
-                  {getIdleJobsLabel(idleCount)}
-                </EuiBadge>
+                <EuiBadge>{getIdleJobsLabel(idleCount)}</EuiBadge>
               </EuiToolTip>
             )}
 
@@ -198,23 +180,14 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               anchorProps={tooltipAncherProps}
               content={getOrphanedJobsTooltip(orphanedCount, isCrawler)}
             >
-              <EuiBadge
-                onClick={() => {}}
-                onClickAriaLabel={getOrphanedJobsLabel(orphanedCount, isCrawler)}
-              >
-                {getOrphanedJobsLabel(orphanedCount, isCrawler)}
-              </EuiBadge>
+              <EuiBadge>{getOrphanedJobsLabel(orphanedCount, isCrawler)}</EuiBadge>
             </EuiToolTip>
 
             <EuiToolTip
               anchorProps={tooltipAncherProps}
               content={getSyncJobErrorsTooltip(errorCount, isCrawler)}
             >
-              <EuiBadge
-                onClick={() => {}}
-                onClickAriaLabel={getSyncJobErrorsLabel(errorCount, isCrawler)}
-                color={errorCount > 0 ? 'danger' : 'default'}
-              >
+              <EuiBadge color={errorCount > 0 ? 'danger' : 'default'}>
                 {getSyncJobErrorsLabel(errorCount, isCrawler)}
               </EuiBadge>
             </EuiToolTip>

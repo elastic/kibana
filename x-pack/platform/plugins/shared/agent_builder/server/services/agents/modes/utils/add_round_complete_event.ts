@@ -20,6 +20,7 @@ import type {
   ToolProgressEvent,
   ToolResultEvent,
   RuntimeAgentConfigurationOverrides,
+  CompactionStep,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
@@ -50,6 +51,7 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../default/convert_graph_events';
 import { isFinalStateEvent } from '../default/events';
+import type { CompactedConversation } from './conversation_compactor';
 
 type SourceEvents = ConvertedEvents;
 
@@ -69,6 +71,7 @@ export const addRoundCompleteEvent = ({
   stateManager,
   attachmentStateManager,
   configurationOverrides,
+  compactionResult,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -79,6 +82,8 @@ export const addRoundCompleteEvent = ({
   attachmentStateManager: AttachmentStateManager;
   endTime?: Date;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  /** Result of the compaction pipeline; used to build the compaction step and audit trail */
+  compactionResult?: CompactedConversation;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -98,6 +103,7 @@ export const addRoundCompleteEvent = ({
                 modelProvider,
                 attachmentRefs,
                 configurationOverrides,
+                compactionResult,
               })
             : createRound({
                 events,
@@ -107,6 +113,7 @@ export const addRoundCompleteEvent = ({
                 modelProvider,
                 attachmentRefs,
                 configurationOverrides,
+                compactionResult,
               });
 
           round.state = buildRoundState({ round, events, stateManager });
@@ -137,6 +144,7 @@ const resumeRound = ({
   modelProvider,
   attachmentRefs,
   configurationOverrides,
+  compactionResult,
 }: {
   pendingRound: ConversationRound;
   events: SourceEvents[];
@@ -146,6 +154,7 @@ const resumeRound = ({
   modelProvider: ModelProvider;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  compactionResult?: CompactedConversation;
 }): ConversationRound => {
   // resuming / replaying tool events for the pending step
   const lastStep = pendingRound.steps[pendingRound.steps.length - 1];
@@ -173,6 +182,7 @@ const resumeRound = ({
     modelProvider,
     attachmentRefs,
     configurationOverrides,
+    compactionResult,
   });
 
   return mergeRounds(pendingRound, followUp);
@@ -248,6 +258,7 @@ const createRound = ({
   modelProvider,
   attachmentRefs,
   configurationOverrides,
+  compactionResult,
 }: {
   events: SourceEvents[];
   input: RoundInput;
@@ -256,6 +267,7 @@ const createRound = ({
   modelProvider: ModelProvider;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  compactionResult?: CompactedConversation;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -298,6 +310,20 @@ const createRound = ({
     ? thinkingCompleteEvent.data.time_to_first_token
     : timeToLastToken;
 
+  const steps: ConversationRoundStep[] = [];
+
+  if (compactionResult?.compactionTriggered && compactionResult.summary) {
+    const compactionStep: CompactionStep = {
+      type: ConversationRoundStepType.compaction,
+      token_count_before: compactionResult.tokensBefore ?? 0,
+      token_count_after: compactionResult.tokensAfter ?? 0,
+      summarized_round_count: compactionResult.summary.summarized_round_count,
+    };
+    steps.push(compactionStep);
+  }
+
+  steps.push(...stepEvents.flatMap(eventToStep));
+
   const round: ConversationRound = {
     id: uuidv4(),
     status: promptRequest
@@ -309,7 +335,7 @@ const createRound = ({
       ...input,
       ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
     },
-    steps: stepEvents.flatMap(eventToStep),
+    steps,
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
@@ -350,6 +376,7 @@ const createToolCallStep = ({
     tool_call_id: toolCall.data.tool_call_id,
     progression: toolProgress.map(({ data: { message } }) => ({ message })),
     results: toolResult?.data.results ?? [],
+    tool_call_group_id: toolCall.data.tool_call_group_id,
   };
 };
 

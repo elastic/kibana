@@ -13,6 +13,30 @@ import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
 
+function redactHostnameSuffix(text: string, suffix: string): string {
+  const escaped = suffix.replace(/\./g, '\\.');
+  return text.replace(
+    new RegExp(
+      `(?:https?:\\/\\/)?[a-zA-Z0-9](?:[a-zA-Z0-9.-]*[a-zA-Z0-9])?\\.${escaped}(?:[^\\s]*)?`,
+      'g'
+    ),
+    () => `<redacted>.${suffix}`
+  );
+}
+
+const REDACT_HOST_SUFFIXES = ['found.no', 'elastic.co', 'qa.elastic.cloud'] as const;
+
+/**
+ * Redacts emails and sensitive hostnames (e.g. *.found.no, *.elastic.co, *.qa.elastic.cloud) from text posted to public GitHub issues.
+ */
+export function redactSensitiveGithubFailureText(text: string): string {
+  let out = text.replace(/\bconsole\.qa\.cld\.elstc\.co\b/g, '<redacted>');
+  for (const suffix of REDACT_HOST_SUFFIXES) {
+    out = redactHostnameSuffix(out, suffix);
+  }
+  return out.replace(/\S+@elastic\.co\b/g, '<redacted>@elastic.co');
+}
+
 function isScoutFailure(failure: TestFailure): failure is ScoutTestFailureExtended {
   return 'id' in failure && 'target' in failure && 'location' in failure;
 }
@@ -24,6 +48,15 @@ function truncateFailureBody(failure: string, maxCharacters: number = 8192): str
         failure.substring(0, maxCharacters),
         `[report_failure] output truncated to ${maxCharacters} characters`,
       ].join('\n');
+}
+
+function getFailureBodyFromIssueBody(body: string): string | undefined {
+  const match = body.match(/```[\r\n]+([\s\S]*?)[\r\n]+```/);
+  if (!match) {
+    return undefined;
+  }
+
+  return match[1].trim();
 }
 
 function createFTRTitle(failure: TestFailure, prependTitle: string): string {
@@ -43,7 +76,7 @@ function createFTRBody(
   branch: string,
   pipeline: string
 ): string {
-  const failureBody = truncateFailureBody(failure.failure);
+  const failureBody = redactSensitiveGithubFailureText(truncateFailureBody(failure.failure));
 
   const bodyContent = [
     'A test failed on a tracked branch',
@@ -80,7 +113,7 @@ function createScoutBody(
   branch: string,
   pipeline: string
 ): string {
-  const failureBody = truncateFailureBody(failure.failure);
+  const failureBody = redactSensitiveGithubFailureText(truncateFailureBody(failure.failure));
 
   // Create table format for Scout test details
   const scoutDetailsTable = [
@@ -186,11 +219,50 @@ function createScoutComment(
   failure: ScoutTestFailureExtended,
   buildUrl: string,
   branch: string,
-  pipeline: string
+  pipeline: string,
+  newErrorMessage?: string
 ): string {
-  return `New failure for "${failure.target}" target: [${
+  const base = `New failure for "${failure.target}" target: [${
     pipeline || 'CI Build'
   } - ${branch}](${buildUrl})`;
+  if (!newErrorMessage) {
+    /*
+     * If there's a failure with the same error message as before, just post a comment
+     * with pipeline link and failure target.
+     *
+     * Example:
+     *
+     * New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/123456)
+     */
+    return base;
+  }
+
+  /*
+   * If there's a new error message, include it in the comment. This provides more
+   * context on how the failure has changed since the issue was opened or last updated.
+   *
+   * Example:
+   *
+   * New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/123456)
+   *
+   * New error message:
+   * ```
+   * Error: expect(locator).toBeEnabled() failed
+   *
+   * Locator: locator('notExist')
+   * Expected: enabled
+   * Timeout: 10000ms
+   * Error: element(s) not found
+   *
+   * Call log:
+   *   - Expect "toBeEnabled" with timeout 10000ms
+   *   - waiting for locator('notExist')
+   * ```
+   */
+
+  return `${base}\n\nNew error message:\n\`\`\`\n${redactSensitiveGithubFailureText(
+    newErrorMessage
+  )}\n\`\`\``;
 }
 
 async function updateFTRFailureIssue(
@@ -228,7 +300,21 @@ async function updateScoutFailureIssue(
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
-  const commentText = createScoutComment(failure, buildUrl, branch, pipeline);
+  const previousFailureBody = getFailureBodyFromIssueBody(issue.github.body);
+  let newErrorMessage: string | undefined;
+  if (failure.errorMessage && previousFailureBody) {
+    const currentErrorMsg = truncateFailureBody(failure.errorMessage).trim();
+    // Current error.message from CI is raw. The issue's first code block is usually already
+    // redacted (we redact on create), but older issues may still hold raw text. Redacting
+    // previous again is idempotent.
+    const redactedPrevious = redactSensitiveGithubFailureText(previousFailureBody);
+    const redactedCurrent = redactSensitiveGithubFailureText(currentErrorMsg);
+    if (!redactedPrevious.includes(redactedCurrent)) {
+      newErrorMessage = redactedCurrent;
+    }
+  }
+
+  const commentText = createScoutComment(failure, buildUrl, branch, pipeline, newErrorMessage);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };

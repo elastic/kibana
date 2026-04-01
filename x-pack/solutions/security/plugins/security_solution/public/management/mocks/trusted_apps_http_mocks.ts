@@ -20,6 +20,7 @@ import type {
   CreateExceptionListItemSchema,
   DeleteExceptionListItemSchema,
   ExceptionListSchema,
+  ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getTrustedAppsListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
@@ -184,6 +185,33 @@ export const trustedAppsDeleteOneHttpMocks =
     },
   ]);
 
+export type TrustedAppsImportListHttpMocksInterface = ResponseProvidersInterface<{
+  trustedAppImportList: (options: HttpFetchOptionsWithPath) => ImportExceptionsResponseSchema;
+}>;
+
+/**
+ * HTTP mocks that support importing Trusted Apps list
+ */
+export const trustedAppsImportListHttpMocks =
+  httpHandlerMockFactory<TrustedAppsImportListHttpMocksInterface>([
+    {
+      id: 'trustedAppImportList',
+      path: `${EXCEPTION_LIST_URL}/_import`,
+      method: 'post',
+      handler: (): ImportExceptionsResponseSchema => {
+        return {
+          errors: [],
+          success: true,
+          success_count: 3,
+          success_exception_lists: true,
+          success_count_exception_lists: 1,
+          success_exception_list_items: true,
+          success_count_exception_list_items: 2,
+        };
+      },
+    },
+  ]);
+
 export type TrustedAppPostHttpMocksInterface = ResponseProvidersInterface<{
   trustedAppCreate: (options: HttpFetchOptionsWithPath) => ExceptionListItemSchema;
 }>;
@@ -237,6 +265,7 @@ export type TrustedAppsAllHttpMocksInterface = FleetGetEndpointPackagePolicyList
   TrustedAppsGetOneHttpMocksInterface &
   TrustedAppPutHttpMocksInterface &
   TrustedAppsDeleteOneHttpMocksInterface &
+  TrustedAppsImportListHttpMocksInterface &
   TrustedAppPostHttpMocksInterface &
   TrustedAppsPostCreateListHttpMockInterface;
 /** Use this HTTP mock when wanting to mock the API calls done by the Trusted Apps Http service */
@@ -247,6 +276,7 @@ export const trustedAppsAllHttpMocks = composeHttpHandlerMocks<TrustedAppsAllHtt
   trustedAppPostHttpMocks,
   trustedAppsPostCreateListHttpMock,
   trustedAppsDeleteOneHttpMocks,
+  trustedAppsImportListHttpMocks,
   fleetGetEndpointPackagePolicyListHttpMock,
   fleetGetAgentPolicyListHttpMock,
 ]);

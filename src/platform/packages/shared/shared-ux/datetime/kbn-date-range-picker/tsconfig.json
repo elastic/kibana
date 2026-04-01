@@ -5,7 +5,6 @@
     "types": [
       "jest",
       "react",
-      "@emotion/react/types/css-prop",
       "@testing-library/jest-dom",
       "@kbn/ambient-ui-types",
     ]
@@ -20,5 +19,6 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
   ]
 }

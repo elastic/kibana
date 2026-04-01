@@ -113,10 +113,6 @@ export const buildActionsColumn = (
     return undefined;
   }
 
-  // `ColumnBuilderContext` and `ActionBuilderContext` share the same
-  // `BuilderContext` base, so the column context is directly usable as
-  // the action context. This will need a mapping step when
-  // `ActionBuilderContext` gains action-specific fields.
   const actionContext: ActionBuilderContext = context;
 
   // Resolve each action part into an EUI action definition.

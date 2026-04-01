@@ -54,6 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await common.unsetTime();
+      await kibanaServer.uiSettings.unset('defaultIndex');
     });
 
     beforeEach(async () => {
@@ -202,8 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('can edit a session and return to the dashboard', async () => {
       await addSearchEmbeddableToDashboard('logstash hits');
       expect(await discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
-      await dashboardPanelActions.clickEdit();
-      await header.waitUntilLoadingHasFinished();
+      await discover.editEmbeddableInDiscover();
       // Run validations concurrently
       await Promise.all([
         globalNav
@@ -231,6 +231,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
       await dashboardPanelActions.clickEdit();
       await header.waitUntilLoadingHasFinished();
+
       // Run validations concurrently
       await Promise.all([
         globalNav
@@ -291,7 +292,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('resets back to a normal Discover session if navigated away from an edit session', async () => {
       await addSearchEmbeddableToDashboard();
-      await dashboardPanelActions.clickEdit();
+      await discover.editEmbeddableInDiscover();
       await header.waitUntilLoadingHasFinished();
       // Run validations concurrently
       await Promise.all([
@@ -318,6 +319,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discover
           .getSavedSearchTitle()
           .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be(undefined)),
+        testSubjects
+          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
+        discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
+      ]);
+    });
+
+    it('switches to Discover mode if search is saved as new', async () => {
+      await addSearchEmbeddableToDashboard();
+      await discover.editEmbeddableInDiscover();
+      await discover.saveAsSearch('Rendering Test: saved as search');
+      await header.waitUntilLoadingHasFinished();
+      // Run validations concurrently
+      await Promise.all([
+        globalNav
+          .getFirstBreadcrumb()
+          .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Discover')),
+        discover
+          .getSavedSearchTitle()
+          .then((lastBreadcrumb) =>
+            expect(lastBreadcrumb).to.be('Rendering Test: saved as search')
+          ),
+        testSubjects
+          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
+        discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
+      ]);
+    });
+
+    it('switches by-value to Discover mode if search is saved as new', async () => {
+      await addSearchEmbeddableToDashboard();
+      await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      expect(await testSubjects.exists('unifiedTabs_tabsBar', { timeout: 1000 })).to.be(false);
+      await discover.saveAsSearch('Rendering Test: saved as search by-value');
+      await header.waitUntilLoadingHasFinished();
+      // Run validations concurrently
+      await Promise.all([
+        globalNav
+          .getFirstBreadcrumb()
+          .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Discover')),
+        discover
+          .getSavedSearchTitle()
+          .then((lastBreadcrumb) =>
+            expect(lastBreadcrumb).to.be('Rendering Test: saved as search by-value')
+          ),
         testSubjects
           .exists('unifiedTabs_tabsBar', { timeout: 1000 })
           .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),

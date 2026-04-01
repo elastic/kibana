@@ -17,9 +17,11 @@ import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
-import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
+import { createSearchSource } from '../../../state_management/utils/create_search_source';
+import type { DiscoverInternalState } from '../../../state_management/redux';
+import { selectTab } from '../../../state_management/redux';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -38,9 +40,10 @@ const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
 const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
+  tabId: string;
+  getState: () => DiscoverInternalState;
   onFinishAction: () => void;
-  stateContainer: DiscoverStateContainer;
-}> = ({ stateContainer, discoverParams, services, onFinishAction = () => {} }) => {
+}> = ({ discoverParams, services, tabId, getState, onFinishAction = () => {} }) => {
   const {
     dataView,
     isEsqlMode,
@@ -50,8 +53,11 @@ const CreateAlertFlyout: React.FC<{
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
+
+  // Get fresh tab state when the component renders
+  const currentTab = selectTab(getState(), tabId);
   const timeField = getTimeField(dataView);
-  const { query, savedQuery: savedQueryId } = stateContainer.getCurrentTab().appState;
+  const { query, savedQuery: savedQueryId } = currentTab.appState;
 
   /**
    * Provides the default parameters used to initialize the new rule
@@ -65,14 +71,18 @@ const CreateAlertFlyout: React.FC<{
         timeField,
       };
     }
+    const searchSource = createSearchSource({
+      dataView,
+      appState: currentTab.appState,
+      globalState: currentTab.globalState,
+      services,
+    });
     return {
       searchType: 'searchSource',
-      searchConfiguration: stateContainer.savedSearchState
-        .getState()
-        .searchSource.getSerializedFields(),
+      searchConfiguration: searchSource.getSerializedFields(),
       savedQueryId,
     };
-  }, [isEsqlMode, stateContainer.savedSearchState, savedQueryId, query, timeField]);
+  }, [isEsqlMode, currentTab, dataView, services, savedQueryId, query, timeField]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({
@@ -114,11 +124,13 @@ const CreateAlertFlyout: React.FC<{
 export const getAlertsAppMenuItem = ({
   discoverParams,
   services,
-  stateContainer,
+  tabId,
+  getState,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
-  stateContainer: DiscoverStateContainer;
+  tabId: string;
+  getState: () => DiscoverInternalState;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
@@ -135,11 +147,7 @@ export const getAlertsAppMenuItem = ({
       }),
       iconType: 'tableOfContents',
       testId: 'discoverManageAlertsButton',
-      href: services.application.getUrlForApp(
-        services.application.isAppRegistered('rules')
-          ? 'rules'
-          : 'management/insightsAndAlerting/triggersActions/rules'
-      ),
+      href: getManageRulesUrl(services),
     });
 
     if (discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)) {
@@ -163,7 +171,8 @@ export const getAlertsAppMenuItem = ({
               onFinishAction={onFinishAction}
               discoverParams={discoverParams}
               services={services}
-              stateContainer={stateContainer}
+              tabId={tabId}
+              getState={getState}
             />
           );
         },
@@ -178,7 +187,7 @@ export const getAlertsAppMenuItem = ({
     }),
     testId: 'discoverAlertsButton',
     order: 4,
-    iconType: 'alert',
+    iconType: 'warning',
     popoverWidth: 250,
     items,
   };
@@ -187,4 +196,12 @@ export const getAlertsAppMenuItem = ({
 function getTimeField(dataView: DataView | undefined) {
   const dateFields = dataView?.fields.getByType('date');
   return dataView?.timeFieldName || dateFields?.[0]?.name;
+}
+
+function getManageRulesUrl(services: DiscoverServices) {
+  return services.application.getUrlForApp(
+    services.application.isAppRegistered('rules')
+      ? 'rules'
+      : 'management/insightsAndAlerting/triggersActions/rules'
+  );
 }

@@ -21,6 +21,144 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+% FEATURES, ENHANCEMENTS, FIXES
+% Paste in index.md
+
+## 9.3.2 [kibana-9.3.2-release-notes]
+
+:::{important}
+The 9.3.2 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.3.2-features-enhancements]
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Connectivity**:
+* Adds Gemini 2.5 Flash Lite, Claude 4.5 Haiku, and Claude 4.6 Sonnet models to preconfigured connectors [#253109]({{kib-pull}}253109).
+
+### Fixes [kibana-9.3.2-fixes]
+
+**Elastic Agent Builder**:
+* Fixes a bug in the `platform.core.search` tool and `index_search` tool type where nested fields were ignored when searching for matching documents [#255914]({{kib-pull}}255914).
+* Fixes MCP connectors ignoring the proxy and SSL configuration from the actions plugin (`xpack.actions` configuration property) [#255813]({{kib-pull}}255813).
+
+**Alerting**:
+* Fixes a problem generating a report with multi-page Canvas workpads [#255022]({{kib-pull}}255022).
+* Fixes a blank page appearing at the end of PDF exports when using the **Print format** option with an even number of dashboard visualizations [#254957]({{kib-pull}}254957).
+* Improves handling of `204` responses [#251090]({{kib-pull}}251090).
+
+**Dashboards and Visualizations**:
+* Fixes an issue where embedded panels in Canvas workpads could lose their saved object references, causing panels to fail to load [#252191]({{kib-pull}}252191).
+* Fixes the **Add from library** action adding incorrect embeddable state [#257261]({{kib-pull}}257261).
+* Fixes Lens transforms [#257224]({{kib-pull}}257224).
+* Fixes an issue where dashboard panels could get stuck in an infinite loading state after an error instead of showing error messages [#257188]({{kib-pull}}257188).
+* Fixes Maps failing to load when the stored time filter contained a `quick` mode value [#255178]({{kib-pull}}255178).
+
+**Data ingestion and Fleet**:
+* Fixes the unenroll task and adds an FTR test [#255726]({{kib-pull}}255726).
+* Fixes incorrect installation of assets [#254923]({{kib-pull}}254923).
+
+**Discover**:
+* Fixes glitchy rendering in the **Attributes** tab [#255173]({{kib-pull}}255173).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes the spaces list displaying **No spaces match** text on load [#255654]({{kib-pull}}255654).
+* Fixes the embeddable console auto-closing on chrome or overlay clicks [#253382]({{kib-pull}}253382).
+* Fixes an issue where the Kibana JSON logger could produce JSON objects with a large number of numbered keys [#256233]({{kib-pull}}256233).
+
+**Kibana security**:
+* Adds `waitFor` for the privilege button [#255094]({{kib-pull}}255094).
+* Fixes an issue where saving a dashboard included access control features when a user profile was not available [#255065]({{kib-pull}}255065).
+
+**Machine Learning**:
+* Fixes screen reader announcements for flyouts [#256409]({{kib-pull}}256409).
+
+**Management**:
+* Improves name announcement in the index mode modal [#256392]({{kib-pull}}256392).
+* Fixes an issue in **Dev Tools Console** where syntax highlighting broke when queries contained accented or non-ASCII characters [#255649]({{kib-pull}}255649).
+* Fixes an issue in **Dev Tools Console** where closing nested braces broke syntax highlighting for subsequent elements [#255426]({{kib-pull}}255426).
+
+**Search**:
+* Changes the **Run in Console** button type [#256455]({{kib-pull}}256455).
+* Fixes Search Playground routes to limit the maximum size of arrays [#255881]({{kib-pull}}255881).
+* Fixes focus behavior when there are errors in the connector flyout form [#255770]({{kib-pull}}255770).
+* Adds server-side API key generation [#256083]({{kib-pull}}256083).
+
+## 9.3.1 [kibana-9.3.1-release-notes]
+
+:::{important}
+The 9.3.1 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.3.1-features-enhancements]
+
+**Data ingestion and Fleet**:
+* Allows integration rollback even if all package policies are not on an upgraded version [#253646]({{kib-pull}}253646).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Machine Learning**:
+* Adds a dynamic default connector to GenAI settings [#252861]({{kib-pull}}252861).
+* Adds missing ES|QL commands and functions documentation for inference tasks [#249089]({{kib-pull}}249089).
+
+### Fixes [kibana-9.3.1-fixes]
+
+**Alerting and cases**:
+* Fixes a bug with PagerDuty where setting the **Custom details** field causes rules to fail [#253683]({{kib-pull}}253683).
+* Adds external reference IDs to the attached documents check when a case is selected [#253107]({{kib-pull}}253107).
+* Fixes rule execution failing due to null execution UUIDs [#252618]({{kib-pull}}252618).
+* Improves handling of 204 responses [#251090]({{kib-pull}}251090).
+
+**Connectivity**:
+* Fixes AI Connector form fields incorrectly resetting to default values when cleared with backspace [#251095]({{kib-pull}}251095).
+* Updates connector description terminology to reference "pre-configured AI connectors" [#250649]({{kib-pull}}250649).
+
+**Dashboards and Visualizations**:
+* Fixes layer editor scrolling in the full Lens editor [#253247]({{kib-pull}}253247).
+* Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
+
+**Data ingestion and Fleet**:
+* Fixes an issue where an agent rolled back after an upgrade could not be upgraded again in Fleet UI [#253850]({{kib-pull}}253850).
+
+**Discover**:
+* Fixes handling of missing values [#251892]({{kib-pull}}251892).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.1 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
+* Fixes Stack Monitoring breadcrumb when in solution view [#249751]({{kib-pull}}249751).
+
+**Machine Learning**:
+* Fixes "today" and "this week" filters for Log Rate and Pattern Analysis embeddables [#252925]({{kib-pull}}252925).
+* Fixes word break in Anomaly Detection page titles [#250058]({{kib-pull}}250058).
+
+**Management**:
+* Fixes autocomplete not working in embedded console [#253306]({{kib-pull}}253306).
+* Fixes an issue loading the doc count in index management when viewing larger page sizes with long index names [#252422]({{kib-pull}}252422).
+* Fixes a validation error for AI pipeline suggestions with empty grok patterns [#251113]({{kib-pull}}251113).
+
+**Search**:
+* Fixes homepage throwing errors when license level is below Enterprise [#251484]({{kib-pull}}251484).
+* Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
+* Fixes links being visible on Search homepage when the user doesn't have access [#251437]({{kib-pull}}251437).
+
+**Workflows**:
+* Adds datemath support to the KQL evaluator [#252840]({{kib-pull}}252840).
+
 ## 9.3.0 [kibana-9.3.0-release-notes]
 
 % ::::{NOTE}
@@ -332,6 +470,89 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Turns off custom suggestions on the embedded console [#241516]({{kib-pull}}241516).
 * Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings [#237509]({{kib-pull}}237509).
 
+## 9.2.7 [kibana-9.2.7-release-notes]
+
+:::{important}
+The 9.2.7 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.2.7-features-enhancements]
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.7 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+### Fixes [kibana-9.2.7-fixes]
+
+**Alerting**:
+* Fixes a blank page appearing at the end of PDF exports when using the **Print format** option with an even number of dashboard visualizations [#254957]({{kib-pull}}254957).
+* Improves handling of `204` responses [#251090]({{kib-pull}}251090).
+
+**Dashboards and Visualizations**:
+* Fixes an issue where embedded panels in Canvas workpads could lose their saved object references, causing panels to fail to load [#252191]({{kib-pull}}252191).
+* Fixes an issue where dashboard panels could get stuck in an infinite loading state after an error instead of showing error messages [#257188]({{kib-pull}}257188).
+
+**Data ingestion and Fleet**:
+* Fixes the unenroll task and adds an FTR test [#255726]({{kib-pull}}255726).
+* Fixes incorrect installation of assets [#254923]({{kib-pull}}254923).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.7 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.7 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes the spaces list displaying **No spaces match** text on load [#255654]({{kib-pull}}255654).
+* Fixes an issue where the Kibana JSON logger could produce JSON objects with a large number of numbered keys [#256233]({{kib-pull}}256233).
+
+**Kibana security**:
+* Adds `waitFor` for the privilege button [#255094]({{kib-pull}}255094).
+
+**Management**:
+* Improves name announcement in the index mode modal [#256392]({{kib-pull}}256392).
+* Fixes an issue in **Dev Tools Console** where syntax highlighting broke when queries contained accented or non-ASCII characters [#255649]({{kib-pull}}255649).
+* Fixes an issue in **Dev Tools Console** where closing nested braces broke syntax highlighting for subsequent elements [#255426]({{kib-pull}}255426).
+
+**Search**:
+* Fixes Search Playground routes to limit the maximum size of arrays [#255881]({{kib-pull}}255881).
+* Adds server-side API key generation [#256083]({{kib-pull}}256083).
+* Fixes glitchy rendering in the **Attributes** tab [#255173]({{kib-pull}}255173).
+* Fixes EQL sequence document merging to treat dot and nested notation the same [#254830]({{kib-pull}}254830).
+
+## 9.2.6 [kibana-9.2.6-release-notes]
+
+:::{important}
+The 9.2.6 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.2.6-features-enhancements]
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+
+### Fixes [kibana-9.2.6-fixes]
+
+**Alerting and cases**:
+* Fixes rule execution failing due to null execution UUIDs [#252618]({{kib-pull}}252618).
+
+**Dashboards and Visualizations**:
+* Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
+
+**Discover**:
+* Fixes handling of missing values [#251892]({{kib-pull}}251892).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.6 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
+
+**Search**:
+* Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
 
 ## 9.2.5 [kibana-9.2.5-release-notes]
 

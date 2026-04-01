@@ -26,7 +26,8 @@ import { ManageAutoUpgradeAgentsModal } from '../../agents/components/manage_aut
 
 import { useCanEnableAutomaticAgentUpgrades } from '../../../../../hooks/use_can_enable_auto_upgrades';
 
-import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
+import { AgentPolicyYamlFlyout } from '../../../components';
+
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 
@@ -213,7 +214,7 @@ export const AgentPolicyActionMenu = memo<{
             (!isFleetServerPolicy && authz.fleet.addAgents);
           const agentBasedMenuItems = [
             <EuiContextMenuItem
-              icon="plusInCircle"
+              icon="plusCircle"
               disabled={!isAuthorizedForAgentAction}
               data-test-subj="agentPolicyActionMenuAddAgentButton"
               toolTipContent={!isAuthorizedForAgentAction && agentBasedActionsDisabledTooltipText}
@@ -282,7 +283,7 @@ export const AgentPolicyActionMenu = memo<{
           ) {
             menuItems.push(
               <EuiContextMenuItem
-                icon="minusInCircle"
+                icon="minusCircle"
                 onClick={() => {
                   setIsContextMenuOpen(false);
                   setIsUninstallCommandFlyoutOpen(true);
@@ -353,7 +354,7 @@ export const AgentPolicyActionMenu = memo<{
                   fullButton
                     ? {
                         props: {
-                          iconType: 'arrowDown',
+                          iconType: 'chevronSingleDown',
                           iconSide: 'right',
                         },
                         children: (

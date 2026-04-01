@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiContextMenu,
+  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiToolTip,
@@ -27,7 +28,6 @@ import {
 import type { ApplicationStart } from '@kbn/core/public';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { isSupportedConnectorType } from '@kbn/inference-common';
-import { RobotIcon } from '@kbn/ai-assistant-icon';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { useKibana } from '../hooks/use_kibana';
@@ -77,8 +77,8 @@ export function ChatActionsMenu({
     if (!connectors.connectors) return [[], []];
 
     return connectors.connectors.reduce<ConnectorLists>(
-      ([pre, custom], { id, name, isPreconfigured }) => {
-        const item = { value: id, label: name };
+      ([pre, custom], { connectorId, name, isPreconfigured }) => {
+        const item = { value: connectorId, label: name };
         return isPreconfigured ? [[...pre, item], custom] : [pre, [...custom, item]];
       },
       [[], []]
@@ -128,7 +128,11 @@ export function ChatActionsMenu({
             defaultMessage: 'Connector',
           })}{' '}
           <strong>
-            {connectors.connectors?.find(({ id }) => id === connectors.selectedConnector)?.name}
+            {
+              connectors.connectors?.find(
+                ({ connectorId }) => connectorId === connectors.selectedConnector
+              )?.name
+            }
           </strong>
         </div>
       ),
@@ -153,7 +157,7 @@ export function ChatActionsMenu({
                     openAgentBuilderConfirmationModal();
                   }}
                 >
-                  <RobotIcon size="m" />
+                  <EuiIcon type="productAgent" size="m" />
                   {i18n.translate('xpack.aiAssistant.chatHeader.actions.agentBuilderOptInButton', {
                     defaultMessage: 'Try AI Agent',
                   })}
@@ -182,7 +186,7 @@ export function ChatActionsMenu({
             <EuiButtonIcon
               data-test-subj="observabilityAiAssistantChatActionsMenuButtonIcon"
               disabled={disabled}
-              iconType="controlsHorizontal"
+              iconType="controls"
               onClick={toggleActionsMenu}
               aria-label={i18n.translate(
                 'xpack.aiAssistant.chatActionsMenu.euiButtonIcon.menuLabel',

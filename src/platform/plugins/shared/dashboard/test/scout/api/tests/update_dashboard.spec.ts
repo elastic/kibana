@@ -20,10 +20,12 @@ import {
 
 apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
+  let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
     // returns editor role in most deployment project and deployment types
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
   });
@@ -39,9 +41,7 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title: 'Refresh Requests (Updated)',
-        },
+        title: 'Refresh Requests (Updated)',
       },
       responseType: 'json',
     });
@@ -58,9 +58,7 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title: 'Some other dashboard (updated)',
-        },
+        title: 'Some other dashboard (updated)',
       },
       responseType: 'json',
     });
@@ -68,7 +66,7 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body).toStrictEqual({
       statusCode: 404,
       error: 'Not Found',
-      message: 'A dashboard with ID not-an-id was not found.',
+      message: 'A dashboard with ID [not-an-id] was not found.',
     });
   });
 
@@ -78,15 +76,34 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
       },
+      body: {},
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      '[request body.title]: expected value of type [string] but got [undefined]'
+    );
+  });
+
+  apiTest('validation - returns error when access_control is provided', async ({ apiClient }) => {
+    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
       body: {
-        data: {},
+        title: 'Refresh Requests (Updated)',
+        access_control: {
+          access_mode: 'write_restricted',
+        },
       },
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request body.data.title]: expected value of type [string] but got [undefined]'
+      "[request body.access_control]: a value wasn't expected to be present"
     );
   });
 
@@ -97,17 +114,34 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title: 'foo',
-          panels: {},
-        },
+        title: 'foo',
+        panels: {},
       },
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request body.data.panels]: expected value of type [array] but got [Object]'
+      '[request body.panels]: expected value of type [array] but got [Object]'
     );
   });
+
+  apiTest(
+    'validation - returns error if user does not have permission to update a dashboard',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        body: {
+          title: 'Refresh Requests (Updated again)',
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to update dashboard');
+    }
+  );
 });

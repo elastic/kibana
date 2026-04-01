@@ -7,7 +7,6 @@
 
 import type { ReactNode, KeyboardEvent } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
 import { isTextInput } from '../../../lib/is_text_input';
@@ -35,12 +34,6 @@ interface Props {
 }
 
 export class FullscreenControl extends React.PureComponent<Props> {
-  static propTypes = {
-    setFullscreen: PropTypes.func.isRequired,
-    isFullscreen: PropTypes.bool.isRequired,
-    children: PropTypes.func.isRequired,
-  };
-
   /*
     We need these instance functions because ReactShortcuts bind the handlers on it's mount, 
     but then does no rebinding if it's props change. Using these instance functions will 

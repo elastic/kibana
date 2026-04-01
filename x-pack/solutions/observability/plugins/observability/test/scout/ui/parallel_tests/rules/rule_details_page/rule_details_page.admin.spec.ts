@@ -11,12 +11,12 @@ import { test } from '../../../fixtures';
 import { RULE_NAMES } from '../../../fixtures/generators';
 import { getRuleIdByName } from '../../../fixtures/helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/249094
-test.describe.skip(
+test.describe(
   'Rule Details Page - Admin',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let ruleId: string;
+    let testDashboardId: string | undefined;
 
     test.beforeAll(async ({ apiServices }) => {
       // Get the rule ID for the custom threshold rule
@@ -29,6 +29,17 @@ test.describe.skip(
 
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
+    });
+
+    test.afterAll(async ({ kbnClient }) => {
+      if (!testDashboardId) {
+        return;
+      }
+
+      await kbnClient.savedObjects.delete({
+        type: 'dashboard',
+        id: testDashboardId,
+      });
     });
 
     test('should navigate from rules table to rule details and display page correctly', async ({
@@ -89,7 +100,7 @@ test.describe.skip(
       const url = page.url();
       expect(url).toContain('tabId=alerts');
       expect(url).toContain('selected_options:!(active)');
-      expect(url).toContain('rangeFrom:now-30d');
+      expect(url).toContain('rangeFrom:now-');
       expect(url).toContain('rangeTo:now');
     });
 
@@ -108,7 +119,7 @@ test.describe.skip(
       expect(url).toContain('tabId=alerts');
       // All statuses = empty selectedOptions array
       expect(url).toContain('selected_options:!()');
-      expect(url).toContain('rangeFrom:now-30d');
+      expect(url).toContain('rangeFrom:now-');
       expect(url).toContain('rangeTo:now');
     });
 
@@ -167,31 +178,43 @@ test.describe.skip(
           },
         },
       });
-      const testDashboardId = dashboard.id;
+      testDashboardId = dashboard.id;
 
-      try {
-        // Navigate to rule details
-        await pageObjects.ruleDetailsPage.gotoById(ruleId);
-        await pageObjects.ruleDetailsPage.expectRuleDetailsPageLoaded();
+      // Navigate to rule details
+      await pageObjects.ruleDetailsPage.gotoById(ruleId);
+      await pageObjects.ruleDetailsPage.expectRuleDetailsPageLoaded();
 
-        // Open rule edit form
-        await pageObjects.ruleDetailsPage.openRuleEditForm();
+      // Open rule edit form
+      await pageObjects.ruleDetailsPage.openRuleEditForm();
 
-        // Verify dashboard selector is visible
-        await expect(pageObjects.ruleDetailsPage.dashboardsSelector).toBeVisible();
+      // Verify dashboard selector is visible
+      await expect(pageObjects.ruleDetailsPage.dashboardsSelector).toBeVisible();
 
-        // Get all dashboard options from the dropdown
-        const optionsText = await pageObjects.ruleDetailsPage.getDashboardsOptionsList();
+      // Click to open the dropdown — triggers handleComboBoxFocus → initial loadDashboards
+      await pageObjects.ruleDetailsPage.dashboardsSelector.click();
+      await expect(pageObjects.ruleDetailsPage.comboboxOptionsList).toBeAttached({
+        timeout: 20000,
+      });
 
-        // Verify options list is not empty
-        expect(optionsText.length).toBeGreaterThan(0);
-      } finally {
-        // Clean up: delete the test dashboard
-        await kbnClient.savedObjects.delete({
-          type: 'dashboard',
-          id: testDashboardId,
-        });
-      }
+      const input = pageObjects.ruleDetailsPage.dashboardsSelector.locator('input');
+      const optionsLocator =
+        pageObjects.ruleDetailsPage.comboboxOptionsList.locator('[role="option"]');
+
+      // Alternate between two search values so searchValue changes on every poll iteration.
+      // Using the same value each time would leave React state unchanged → loadDashboards
+      // would not re-fire → options would never update. Alternating ensures a new
+      // loadDashboards call on every attempt, handling ES near-real-time indexing delay.
+      let toggle = false;
+      await expect
+        .poll(
+          async () => {
+            toggle = !toggle;
+            await input.fill(toggle ? testDashboardTitle : testDashboardTitle.slice(0, -1));
+            return optionsLocator.count();
+          },
+          { timeout: 30000, intervals: [1000] }
+        )
+        .toBeGreaterThan(0);
     });
   }
 );

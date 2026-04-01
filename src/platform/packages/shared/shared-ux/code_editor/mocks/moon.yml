@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/code-editor-mock'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/code-editor-mock'
+  title: '@kbn/code-editor-mock'
   description: Moon project for @kbn/code-editor-mock
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/shared-ux/code_editor/mocks
+  sourceRoot: src/platform/packages/shared/shared-ux/code_editor/mocks
 dependsOn:
   - '@kbn/monaco'
 tags:

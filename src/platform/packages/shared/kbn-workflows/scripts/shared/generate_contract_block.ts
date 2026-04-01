@@ -10,6 +10,8 @@
 import type { ContractMeta } from './types';
 
 export function generateContractBlock(contract: ContractMeta): string {
+  const stabilityLine = contract.stability ? `\n      stability: '${contract.stability}',` : '';
+
   return `
     export const ${contract.contractName}: InternalConnectorContract = {
       type: '${contract.type}',
@@ -17,7 +19,9 @@ export function generateContractBlock(contract: ContractMeta): string {
       description: ${contract.description ? `\`${escapeString(contract.description)}\`` : 'null'},
       methods: ${JSON.stringify(contract.methods ?? [])},
       patterns: ${JSON.stringify(contract.patterns ?? [])},
-      documentation: ${contract.documentation ? `'${contract.documentation}'` : 'null'},
+      documentation: ${
+        contract.documentation ? `'${contract.documentation}'` : 'null'
+      },${stabilityLine}
       parameterTypes: {
         headerParams: ${JSON.stringify(contract.parameterTypes.headerParams ?? [])},
         pathParams: ${JSON.stringify(contract.parameterTypes.pathParams ?? [])},

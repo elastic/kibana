@@ -79,6 +79,9 @@ export const QueryFieldsPanel = ({
             <h5>{index}</h5>
           </EuiText>
         }
+        buttonProps={{
+          css: { overflow: 'hidden' },
+        }}
         initialIsOpen
         data-test-subj={`${index}-fieldsAccordion`}
       >
@@ -150,7 +153,7 @@ export const QueryFieldsPanel = ({
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiText size="s" color="subdued" data-test-subj={`${index}-skippedFields`}>
-                  <EuiIcon type="eyeClosed" />
+                  <EuiIcon type="eyeSlash" />
                   {` `}
                   <FormattedMessage
                     id="xpack.searchPlayground.viewQuery.flyout.hiddenFields"

@@ -6,10 +6,12 @@
  */
 
 import {
-  EuiAccordion,
   EuiFacetButton,
   EuiFacetGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLink,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
@@ -78,62 +80,75 @@ export interface Props {
 }
 
 const StickySidebar = styled(EuiFlexItem)`
-  position: sticky;
-  top: var(--kbn-application--sticky-headers-offset, var(--kbn-layout--header-height, '0px'));
+  @media screen and (min-width: ${(props) => props.theme.euiTheme.breakpoint.m}px) {
+    position: sticky;
+    top: var(--kbn-application--sticky-headers-offset, var(--kbn-layout--header-height, '0px'));
+    max-height: calc(100vh - var(--kbn-layout--header-height, '0px'));
+    overflow: scroll;
+  }
   padding-top: ${(props) => props.theme.euiTheme.size.m};
-  max-height: calc(100vh - var(--kbn-layout--header-height, '0px'));
-  overflow: scroll;
   padding-right: ${(props) => props.theme.euiTheme.size.l};
 `;
 
-export const Sidebar: React.FC<Props> = ({
+export interface SidebarProps extends Props {
+  CreateIntegrationCardButton?: React.ComponentType;
+  hasCreatedIntegrations?: boolean;
+  onManageIntegrationsClick?: (ev: React.MouseEvent<HTMLAnchorElement>) => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({
   isLoading,
   categories,
   selectedCategory,
   onCategoryChange,
+  CreateIntegrationCardButton,
+  hasCreatedIntegrations,
+  onManageIntegrationsClick,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <StickySidebar>
-      <EuiAccordion
-        id="categoriesUserIntegrationsAccordion"
-        buttonContent={i18n.translate('xpack.fleet.epmList.userIntegrationAccordionLabel', {
-          defaultMessage: 'Your created integrations',
-        })}
-        buttonProps={{
-          style: {
-            fontWeight: euiTheme.font.weight.bold,
-          },
-        }}
-        initialIsOpen={true}
-        paddingSize="none"
-      >
-        <EuiSpacer size="s" />
-        TODO
-      </EuiAccordion>
-      <EuiSpacer size="m" />
-      <EuiAccordion
-        id="categoriesDevelopedByElasticAccordion"
-        buttonContent={i18n.translate('xpack.fleet.epmList.filterByCategoryAccordionLabel', {
-          defaultMessage: 'Developed by Elastic',
-        })}
-        buttonProps={{
-          style: {
-            fontWeight: euiTheme.font.weight.bold,
-          },
-        }}
-        initialIsOpen={true}
-        paddingSize="none"
-      >
-        <EuiSpacer size="s" />
-        <CategoryFacets
-          isLoading={isLoading}
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onCategoryChange={onCategoryChange}
-        />
-      </EuiAccordion>
+      {CreateIntegrationCardButton && (
+        <>
+          <EuiSpacer size="s" />
+          {hasCreatedIntegrations ? (
+            <EuiLink
+              color="text"
+              onClick={onManageIntegrationsClick}
+              data-test-subj="manageCreatedIntegrationsLink"
+              css={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: euiTheme.size.s,
+                textDecoration: 'none',
+              }}
+            >
+              <EuiIcon type="gear" aria-hidden={true} />
+              <span
+                style={{
+                  color: euiTheme.colors.text,
+                  fontSize: euiTheme.size.m,
+                  fontWeight: euiTheme.font.weight.bold,
+                }}
+              >
+                {i18n.translate('xpack.fleet.epmList.manageCreatedIntegrationsLinkLabel', {
+                  defaultMessage: 'Manage my integrations',
+                })}
+              </span>
+            </EuiLink>
+          ) : (
+            <CreateIntegrationCardButton />
+          )}
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
+      <CategoryFacets
+        isLoading={isLoading}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={onCategoryChange}
+      />
     </StickySidebar>
   );
 };

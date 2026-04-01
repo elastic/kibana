@@ -8,6 +8,7 @@
  */
 
 import type { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import type { EsqlServerPluginStart } from '../types';
 import { registerGetInferenceEndpointsRoute } from './get_inference_endpoints';
 import type { ESQLExtensionsRegistry } from '../extensions_registry';
 
@@ -18,9 +19,10 @@ import { registerESQLExtensionsRoute } from './get_esql_extensions_route';
 import { registerLookupIndexRoutes } from './lookup_index';
 import { registerGetSourcesRoute } from './get_all_sources';
 import { registerGetTimeFieldRoute } from './get_timefield';
+import { registerNLtoESQLRoute } from './nl_to_esql_route';
 
 export const registerRoutes = (
-  setup: CoreSetup,
+  setup: CoreSetup<EsqlServerPluginStart>,
   extensionsRegistry: ESQLExtensionsRegistry,
   initContext: PluginInitializerContext
 ) => {
@@ -34,4 +36,5 @@ export const registerRoutes = (
   registerLookupIndexRoutes(router, initContext);
   registerGetSourcesRoute(router, initContext);
   registerGetTimeFieldRoute(router, initContext);
+  registerNLtoESQLRoute(router, setup.getStartServices, initContext);
 };

@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { getWidgetComponent } from './registry';
 import { WidgetType } from './types';
-import { addMeta, getMeta } from '../schema_connector_metadata';
+import { getMeta, addMeta } from '../schema_connector_metadata';
 import { TextWidget } from './components/text_widget';
 import { PasswordWidget } from './components/password_widget';
 import { HiddenWidget } from './components/hidden_widget';

@@ -146,6 +146,43 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/transpose-utils",
+        "id": "def-common.parseTransposeId",
+        "type": "Function",
+        "tags": [],
+        "label": "parseTransposeId",
+        "description": [],
+        "signature": [
+          "(id: string) => { id: string; values: string[]; } | undefined"
+        ],
+        "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/transpose-utils",
+            "id": "def-common.parseTransposeId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
+            "lineNumber": 38,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

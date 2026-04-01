@@ -1,7 +1,22 @@
 {
-  "lastModified": "2026-02-04T19:00:17.940Z",
-  "sha1": "528585286818b11947d9b812de02e3c479f67634",
+  "sha1": "460879019c0b5dde5d02979b14f201e0a086daab",
   "tests": [
+    {
+      "id": "30a4f04aa24f29d-b2a90d16b4f88bb",
+      "title": "Getting Started - Admin: Serverless search should show Changelog label in Kibana version on serverless",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.serverless.spec.ts",
+        "line": 21,
+        "column": 9
+      }
+    },
     {
       "id": "ace16ea93cb8904-1f34fdab863ed0b",
       "title": "Getting Started - Admin verifies page elements are rendered correctly",
@@ -30,7 +45,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 90,
+        "line": 103,
         "column": 9
       }
     },
@@ -46,7 +61,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 109,
+        "line": 122,
         "column": 9
       }
     },
@@ -62,7 +77,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 114,
+        "line": 127,
         "column": 9
       }
     },
@@ -78,7 +93,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 123,
+        "line": 136,
         "column": 9
       }
     },
@@ -94,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 139,
+        "line": 152,
         "column": 9
       }
     },
@@ -110,7 +125,39 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 161,
+        "line": 176,
+        "column": 9
+      }
+    },
+    {
+      "id": "2cdaac59f15380c-3579747f902d1e8",
+      "title": "Getting Started - Viewer: Serverless search should show Changelog label in Kibana version on serverless",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_viewer.serverless.spec.ts",
+        "line": 21,
+        "column": 9
+      }
+    },
+    {
+      "id": "af94f924c5951b5-e20ea19b94541fc",
+      "title": "Getting Started - Viewer should display kibana version badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_viewer.spec.ts",
+        "line": 21,
         "column": 9
       }
     },
@@ -126,7 +173,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_viewer.spec.ts",
-        "line": 21,
+        "line": 26,
         "column": 9
       }
     }

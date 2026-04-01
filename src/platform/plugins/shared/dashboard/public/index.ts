@@ -34,7 +34,6 @@ export {
   DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
 } from '../common/page_bundle_constants';
 export { cleanEmptyKeys, DashboardAppLocatorDefinition } from '../common/locator/locator';
-export { getDashboardLocatorParamsFromEmbeddable } from '../common/locator/get_dashboard_locator_params';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

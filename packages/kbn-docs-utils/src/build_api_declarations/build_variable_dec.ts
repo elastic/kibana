@@ -22,6 +22,7 @@ import { getArrowFunctionDec } from './build_arrow_fn_dec';
 import { buildApiDeclaration } from './build_api_declaration';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { buildCallSignatureDec } from './build_call_signature_dec';
+import { buildMultipleCallSignaturesDec } from './build_multiple_call_signatures_dec';
 import type { BuildApiDecOpts } from './types';
 import { getOptsForChild } from './utils';
 
@@ -60,12 +61,11 @@ export function buildVariableDec(
   }
 
   // Without this the test "Property on interface pointing to generic function type exported with link" will fail.
-  if (node.getType().getCallSignatures().length > 0) {
-    if (node.getType().getCallSignatures().length > 1) {
-      opts.log.warning(`Not handling more than one call signature for node ${node.getName()}`);
-    } else {
-      return buildCallSignatureDec(node, node.getType().getCallSignatures()[0], opts);
-    }
+  const callSignatures = node.getType().getCallSignatures();
+  if (callSignatures.length === 1) {
+    return buildCallSignatureDec(node, callSignatures[0], opts);
+  } else if (callSignatures.length > 1) {
+    return buildMultipleCallSignaturesDec(node, callSignatures, opts);
   }
 
   return buildBasicApiDeclaration(node, opts);

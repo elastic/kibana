@@ -27,6 +27,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
   const TASK_INTERVAL = 30000; // as set in the config
   const RETRY_DELAY = 60000; // as set in the config
   let policyId: string;
+  let secondPolicyId: string;
 
   async function waitForTask() {
     // Sleep for the duration of the task interval.
@@ -34,9 +35,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
     await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL));
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/248310
-  // Failing: See https://github.com/elastic/kibana/issues/245377
-  describe.skip('Automatic agent upgrades', () => {
+  describe('Automatic agent upgrades', () => {
     before(async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
       const { body: agentPolicyResponse } = await supertest
@@ -57,6 +56,11 @@ export default function (providerContext: FtrProviderContextWithServices) {
         .send({ agentPolicyId: policyId })
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
+      await supertest
+        .post('/api/fleet/agent_policies/delete')
+        .send({ agentPolicyId: secondPolicyId })
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
     });
 
     afterEach(async () => {
@@ -74,6 +78,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await cleanupAgentDocs(providerContext);
       await es.deleteByQuery({
         index: '.fleet-actions',
+        ignore_unavailable: true,
         query: {
           match_all: {},
         },
@@ -116,22 +121,27 @@ export default function (providerContext: FtrProviderContextWithServices) {
       expect(res.body.item.upgrade_started_at).to.be(undefined);
       expect(res.body.item.upgrade_attempts).to.be(undefined);
 
-      await es.indices.refresh({ index: '.fleet-actions' });
-      const actionRes = await es.search({
-        index: '.fleet-actions',
-        query: {
-          term: {
-            agents: 'agent1',
+      await retry.tryForTime(60000, async () => {
+        await es.indices.refresh({ index: '.fleet-actions', ignore_unavailable: true });
+        const actionRes = await es.search({
+          index: '.fleet-actions',
+          ignore_unavailable: true,
+          query: {
+            term: {
+              agents: 'agent1',
+            },
           },
-        },
+        });
+        if (!actionRes.hits.hits.length) {
+          throw new Error('.fleet-actions document for agent1 not found yet');
+        }
+        // verify that the expiration is set to 1 month
+        const expirationDate = new Date((actionRes.hits.hits[0]._source as any).expiration);
+        const expectedExpiration = moment(new Date())
+          .add(EXPIRATION_DURATION_SECONDS, 'seconds')
+          .toDate();
+        expect(expirationDate < expectedExpiration).to.be(true);
       });
-      // verify that the expiration is set to 1 month
-      expect(actionRes.hits.hits.length).to.be.greaterThan(0);
-      const expirationDate = new Date((actionRes.hits.hits[0]._source as any).expiration);
-      const expectedExpiration = moment(new Date())
-        .add(EXPIRATION_DURATION_SECONDS, 'seconds')
-        .toDate();
-      expect(expirationDate < expectedExpiration).to.be(true);
     });
 
     it('should take agents on target version into account', async () => {
@@ -334,6 +344,55 @@ export default function (providerContext: FtrProviderContextWithServices) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(res1.body.item.upgrade_started_at).to.be(undefined);
+      });
+    });
+
+    it('should not count upgrading agents from other policies toward target percentage', async () => {
+      // Scenario: policy 1 has 1 agent on 8.17.0 that should be upgraded to 8.17.1 (100% target).
+      // A second policy has an agent already upgrading to 8.17.1.
+      // Before the fix: the second policy's upgrading agent was counted in policy 1's
+      // totalOnOrUpdatingToTargetVersionAgents (the updatingToKuery had no policy_id filter),
+      // making the count = 1 - 1 = 0 → "target percentage already reached" → agent1 never upgraded.
+      // After the fix: the count query is scoped to policy_id, so policy 2's agent is not counted.
+
+      const { body: secondPolicyBody } = await supertest
+        .post('/api/fleet/agent_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ name: 'Test policy 2', namespace: 'default', force: true })
+        .expect(200);
+      secondPolicyId = secondPolicyBody.item.id;
+
+      // agent1: in policy 1, on 8.17.0 — should be upgraded.
+      await createAgentDoc(providerContext, 'agent1', policyId, '8.17.0');
+      // agent2: in policy 2, actively upgrading to 8.17.1 (non-failed state).
+      // Before the fix this agent would contaminate policy 1's upgrading-agents count.
+      await createAgentDoc(providerContext, 'agent2', secondPolicyId, '8.17.0', true, {
+        upgrade_details: {
+          target_version: '8.17.1',
+          state: 'UPG_DOWNLOADING',
+          action_id: '456',
+        },
+      });
+
+      await supertest
+        .put(`/api/fleet/agent_policies/${policyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy',
+          namespace: 'default',
+          required_versions: [{ version: '8.17.1', percentage: 100 }],
+        })
+        .expect(200);
+
+      // agent1 must be picked up for upgrade despite agent2 (from another policy) upgrading.
+      await retry.tryForTime(60000, async () => {
+        const res = await supertest
+          .get('/api/fleet/agents/agent1')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        if (!res.body.item.upgrade_started_at || res.body.item.upgrade_attempts?.length !== 1) {
+          throw new Error('agent1 has not been upgraded yet');
+        }
       });
     });
 

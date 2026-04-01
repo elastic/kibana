@@ -19,11 +19,11 @@ const approximation = {
   name: EsqlSettingNames.APPROXIMATION,
   type: ['boolean', 'map_param'],
   mapParams:
-    "{name='num_rows', values=[], description='Number of rows.', type=[integer]}, {name='confidence_level', values=[], description='Confidence level.', type=[double]}",
+    "{name='rows', values=[], description='Number of sampled rows used for approximating the query. Must be at least 10,000. Null uses the system default.', type=[integer]}, {name='confidence_level', values=[], description='Confidence level of the computed confidence intervals. Default is 0.90. Null disables computing confidence intervals.', type=[double]}",
   serverlessOnly: false,
   preview: false,
   snapshotOnly: true,
-  description: 'TODO - add description here',
+  description: 'Enables query approximation if possible for the query.',
   ignoreAsSuggestion: true,
 };
 
@@ -42,7 +42,7 @@ const timeZone = {
   name: EsqlSettingNames.TIME_ZONE,
   type: ['keyword'],
   serverlessOnly: false,
-  preview: true,
+  preview: false,
   snapshotOnly: false,
   description:
     'The default timezone to be used in the query. Defaults to UTC, and overrides the `time_zone` request parameter. See [timezones](https://www.elastic.co/docs/reference/query-languages/esql/esql-rest#esql-timezones).',
@@ -56,7 +56,7 @@ const unmappedFields = {
   preview: true,
   snapshotOnly: false,
   description:
-    'Defines how unmapped fields are treated. Possible values are: "FAIL" (default) - fails the query if unmapped fields are present; "NULLIFY" - treats unmapped fields as null values. ',
+    'Defines how unmapped fields are treated. Possible values are: "DEFAULT" (default) - standard ESQL queries fail when referencing unmapped fields, while other query types (e.g. PromQL) may treat them differently; "NULLIFY" - treats unmapped fields as null values. ',
   ignoreAsSuggestion: false,
 };
 

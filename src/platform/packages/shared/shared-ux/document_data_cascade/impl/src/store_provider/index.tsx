@@ -9,7 +9,13 @@
 
 import { once } from 'lodash';
 import { enableMapSet } from 'immer';
-import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  type PropsWithChildren,
+} from 'react';
 import { useCreateStore, type ActionsFromReducers } from './store';
 import {
   type GroupNode,
@@ -18,16 +24,32 @@ import {
   type TableState,
   createStoreReducers,
 } from './reducers';
-export type { GroupNode, LeafNode, IStoreState } from './reducers';
+export type { GroupNode, LeafNode, IStoreState, ColumnGroups } from './reducers';
 
-interface IDataCascadeProviderProps {
-  initialGroupColumn?: string[];
+export interface IDataCascadeProviderProps<G extends GroupNode> {
   cascadeGroups: string[];
+  /**
+   * The data to be displayed in the cascade. It should be an array of group nodes.
+   */
+  data: G[];
+  initialGroupColumn?: string[];
+  /**
+   * Persisted restorable state used to seed the table on mount.
+   * Only expanded and rowSelection are consumed by the provider.
+   */
+  initialState?: { expanded?: Record<string, boolean>; rowSelection?: Record<string, boolean> };
 }
 
 interface IStoreContext<G extends GroupNode, L extends LeafNode> {
   state: IStoreState<G, L>;
-  actions: ActionsFromReducers<ReturnType<typeof createStoreReducers<G, L>>>;
+  actions: Omit<
+    /**
+     * The actions from the store, the context consumers will receive excluding the _setStoreState action.
+     * The _setStoreState action resets the entire store state, it should be used sparingly.
+     */
+    ActionsFromReducers<ReturnType<typeof createStoreReducers<G, L>>>,
+    '_setStoreState'
+  >;
 }
 
 export const createStoreContext = once(<G extends GroupNode, L extends LeafNode>() => {
@@ -69,30 +91,70 @@ export function useCascadeLeafNode<G extends GroupNode, L extends LeafNode>(cach
 export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
   cascadeGroups,
   initialGroupColumn,
+  initialState,
+  data: initialGroupNodes,
   children,
-}: PropsWithChildren<IDataCascadeProviderProps>) {
-  const StoreContext = createStoreContext<G, L>();
-  const storeReducers = createStoreReducers<G, L>();
+}: PropsWithChildren<IDataCascadeProviderProps<G>>) {
+  const StoreContext = useMemo(() => createStoreContext<G, L>(), []);
+  const storeReducers = useMemo(() => createStoreReducers<G, L>(), []);
 
   const validatedInitialGroupColumn = useMemo(() => {
-    if (!initialGroupColumn) return [];
+    if (!initialGroupColumn) return [cascadeGroups[0]];
     return initialGroupColumn.filter((col) => cascadeGroups.includes(col));
   }, [initialGroupColumn, cascadeGroups]);
 
-  const { state, actions } = useCreateStore({
-    initialState: {
-      table: {} as TableState,
-      groupNodes: [] as G[],
-      leafNodes: new Map<string, L[]>(), // TODO: consider externalizing this so the consumer might provide their own external cache
+  const initialTableState = useMemo(
+    () =>
+      ({
+        expanded: initialState?.expanded,
+        rowSelection: initialState?.rowSelection,
+      } as TableState),
+    [initialState?.expanded, initialState?.rowSelection]
+  );
+
+  const initialStoreState = useMemo<IStoreState<G, L>>(
+    () => ({
+      table: initialTableState,
+      groupNodes: initialGroupNodes,
+      leafNodes: new Map<string, L[]>(),
       groupByColumns: cascadeGroups,
-      currentGroupByColumns: cascadeGroups.length
-        ? validatedInitialGroupColumn.length
-          ? validatedInitialGroupColumn
-          : [cascadeGroups[0]]
-        : [],
-    },
+      currentGroupByColumns: validatedInitialGroupColumn.length ? validatedInitialGroupColumn : [],
+    }),
+    [initialGroupNodes, initialTableState, cascadeGroups, validatedInitialGroupColumn]
+  );
+
+  const { state, actions } = useCreateStore({
+    initialState: initialStoreState,
     reducers: storeReducers,
   });
 
-  return <StoreContext.Provider value={{ state, actions }}>{children}</StoreContext.Provider>;
+  useEffect(() => {
+    const columnsChanged =
+      state.groupByColumns.length !== cascadeGroups.length ||
+      state.groupByColumns.some((column) => !cascadeGroups.includes(column));
+
+    const groupNodesChanged = state.groupNodes !== initialGroupNodes;
+
+    if (columnsChanged || groupNodesChanged) {
+      actions._setStoreState({
+        groupNodes: initialGroupNodes,
+        groupByColumns: cascadeGroups,
+        currentGroupByColumns: validatedInitialGroupColumn.length
+          ? validatedInitialGroupColumn
+          : [],
+      });
+      return;
+    }
+  }, [
+    actions,
+    cascadeGroups,
+    initialGroupNodes,
+    state.groupByColumns,
+    state.groupNodes,
+    validatedInitialGroupColumn,
+  ]);
+
+  const contextValue = useMemo(() => ({ state, actions }), [state, actions]);
+
+  return <StoreContext.Provider value={contextValue}>{children}</StoreContext.Provider>;
 }

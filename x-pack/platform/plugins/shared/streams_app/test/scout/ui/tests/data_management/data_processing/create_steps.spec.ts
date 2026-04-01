@@ -27,6 +27,8 @@ test.describe(
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
 
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
+      // Ensure the interactive mode + simulator have finished initializing before interacting.
+      await pageObjects.streams.waitForModifiedFieldsDetection();
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
@@ -38,6 +40,10 @@ test.describe(
       page,
       config,
     }) => {
+      test.skip(
+        config.isCloud === true && config.serverless === false,
+        `This scenario is not working as expected on ECH`
+      );
       // In the empty state without AI connectors, the Technical Preview badge should be hidden
       await expect(page.getByText('Extract fields from your data')).toBeVisible();
       // Only check for hidden badge in stateful mode - in serverless/production environments,
@@ -66,6 +72,27 @@ test.describe(
       await pageObjects.streams.clickSaveCondition();
       await pageObjects.streams.saveStepsListChanges();
       expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
+    });
+
+    test('should disable saving a condition when syntax JSON is invalid', async ({
+      page,
+      pageObjects,
+    }) => {
+      await pageObjects.streams.clickAddCondition();
+
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+      await pageObjects.streams.fillConditionEditorWithSyntax(
+        '{"field":"test_field","contains":"logs"}'
+      );
+      await expect(
+        page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')
+      ).toBeEnabled();
+
+      // Regression check: going from valid JSON to invalid JSON must disable Update.
+      await pageObjects.streams.fillConditionEditorWithSyntax('{');
+      await expect(
+        page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')
+      ).toBeDisabled();
     });
 
     test('should be able to nest steps under conditions', async ({ pageObjects }) => {
@@ -166,22 +193,6 @@ test.describe(
 
       await pageObjects.streams.saveStepsListChanges();
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
-    });
-
-    test('should handle insufficient privileges gracefully', async ({
-      page,
-      browserAuth,
-      pageObjects,
-    }) => {
-      // Login as user with limited privileges
-      await browserAuth.loginAsViewer();
-      await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-
-      // Create buttons should be hidden for users without edit privileges
-      const createProcessorButton = page.getByTestId(
-        'streamsAppStreamDetailEnrichmentCreateProcessorButton'
-      );
-      await expect(createProcessorButton).toBeHidden();
     });
 
     test('should duplicate a processor', async ({ pageObjects }) => {

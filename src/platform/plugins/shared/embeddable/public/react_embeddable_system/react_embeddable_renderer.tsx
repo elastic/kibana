@@ -19,6 +19,7 @@ import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
 import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import type { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
+import type { SerializedDrilldowns } from '../../server';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
@@ -100,6 +101,13 @@ export const EmbeddableRenderer = <
             finalizeApi,
             uuid,
             parentApi,
+            initializeDrilldownsManager: async (
+              embeddableUuid: string,
+              state: SerializedDrilldowns
+            ) => {
+              const { initializeDrilldownsManager } = await import('../async_module');
+              return initializeDrilldownsManager(embeddableUuid, state);
+            },
           });
 
           phaseTracker.current.trackPhaseEvents(uuid, api);
@@ -128,6 +136,7 @@ export const EmbeddableRenderer = <
           if (apiIsPresentationContainer(parentApi)) {
             errorApi.parentApi = parentApi;
           }
+          onApiAvailable?.(errorApi);
           return React.forwardRef<Api>((_, ref) => {
             // expose the dummy error api into the imperative handle
             useImperativeHandle(ref, () => errorApi, []);

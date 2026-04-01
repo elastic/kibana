@@ -63,6 +63,8 @@ import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
+import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
+import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
 
 const BUTTON_MIN_WIDTH = 108;
 
@@ -87,13 +89,9 @@ export const strings = {
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cancel', {
       defaultMessage: 'Cancel',
     }),
-  getRunQueryLabel: () =>
-    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
-      defaultMessage: 'Run query',
-    }),
-  getRunButtonLabel: () =>
-    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.runButton', {
-      defaultMessage: 'Run',
+  getSearchButtonLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchButton', {
+      defaultMessage: 'Search',
     }),
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
@@ -172,7 +170,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
-  filters: Filter[];
+  filters?: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
@@ -745,24 +743,47 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
+    const getSubmitButtonProps = () => {
+      if (isQueryLangSelected) {
+        const label = strings.getSearchButtonLabel();
+        return { icon: undefined, text: label, ariaLabel: label, color: 'primary' as const };
+      }
+
+      if (props.isDirty) {
+        return {
+          icon: 'kqlFunction' as const,
+          text: strings.getUpdateButtonLabel(),
+          ariaLabel: strings.getNeedsUpdatingLabel(),
+          color: 'success' as const,
+        };
+      }
+
+      return {
+        icon: 'refresh' as const,
+        text: strings.getRefreshButtonLabel(),
+        ariaLabel: strings.getRefreshQueryLabel(),
+        color: 'primary' as const,
+      };
+    };
+
     function renderDatePickerWithUpdateBtn() {
       if (!shouldRenderUpdateButton() && !shouldRenderDatePicker()) {
         return null;
       }
-      const iconDirty = Boolean(isQueryLangSelected) ? 'playFilled' : 'kqlFunction';
-      const labelDirty = Boolean(isQueryLangSelected)
-        ? strings.getRunQueryLabel()
-        : strings.getNeedsUpdatingLabel();
-      const buttonLabelDirty = Boolean(isQueryLangSelected)
-        ? strings.getRunButtonLabel()
-        : strings.getUpdateButtonLabel();
+
+      const {
+        icon: buttonIcon,
+        text: buttonText,
+        ariaLabel: buttonAriaLabel,
+        color: buttonColor,
+      } = getSubmitButtonProps();
 
       const updateButton = props.useBackgroundSearchButton ? (
         <SplitButton
-          aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
-          color={props.isDirty ? 'success' : 'primary'}
+          aria-label={buttonAriaLabel}
+          color={buttonColor}
           data-test-subj="querySubmitButton"
-          iconType={props.isDirty ? iconDirty : 'refresh'}
+          iconType={buttonIcon}
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
           isSecondaryButtonDisabled={!canSendToBackground}
@@ -775,28 +796,28 @@ export const QueryBarTopRow = React.memo(
           size="s"
           minWidth={BUTTON_MIN_WIDTH}
         >
-          {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
+          {buttonText}
         </SplitButton>
       ) : (
         <EuiSuperUpdateButton
-          iconType={props.isDirty ? iconDirty : 'refresh'}
+          iconType={buttonIcon}
           iconOnly={submitButtonIconOnly}
-          aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
+          aria-label={buttonAriaLabel}
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
           onClick={onClickSubmitButton}
           size="s"
-          color={props.isDirty ? 'success' : 'primary'}
+          color={buttonColor}
           fill={false}
           needsUpdate={props.isDirty}
           data-test-subj="querySubmitButton"
           toolTipProps={{
-            content: props.isDirty ? labelDirty : strings.getRefreshQueryLabel(),
+            content: buttonAriaLabel,
             delay: 'long',
             position: 'bottom',
           }}
         >
-          {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
+          {buttonText}
         </EuiSuperUpdateButton>
       );
 
@@ -862,7 +883,8 @@ export const QueryBarTopRow = React.memo(
 
     function renderAddButton() {
       return (
-        Boolean(props.showAddFilter) && (
+        Boolean(props.showAddFilter) &&
+        props.filters && (
           <EuiFlexItem grow={false}>
             <AddFilterPopover
               indexPatterns={props.indexPatterns}
@@ -882,15 +904,24 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
+    function renderFilterBarToggleButton() {
+      return <FilterBarToggleButton />;
+    }
+
     function renderFilterButtonGroup() {
       return (
         (Boolean(props.showAddFilter) || Boolean(props.prepend)) && (
           <EuiFlexItem grow={false} className="kbnQueryBar__filterButtonGroup">
-            <FilterButtonGroup
-              items={[props.prepend, renderAddButton()]}
-              attached={renderFilterMenuOnly()}
-              size="s"
-            />
+            <EuiFlexGroup gutterSize="s">
+              <FilterButtonGroup
+                items={[renderAddButton(), props.prepend]}
+                attached={renderFilterMenuOnly()}
+                size="s"
+              />
+              {Boolean(props.showAddFilter && props.filters?.length) && (
+                <FilterButtonGroup items={[renderFilterBarToggleButton()]} size="s" />
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         )
       );
@@ -1005,7 +1036,6 @@ export const QueryBarTopRow = React.memo(
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             queryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
-            openVisorOnSourceCommands
           />
         )
       );
@@ -1032,7 +1062,7 @@ export const QueryBarTopRow = React.memo(
     };
 
     return (
-      <>
+      <FilterBarContextProvider filters={props.filters} storage={storage}>
         <SharingMetaFields
           from={currentDateRange.from}
           to={currentDateRange.to}
@@ -1075,7 +1105,7 @@ export const QueryBarTopRow = React.memo(
               {renderTextLangEditor()}
             </>
           ))}
-      </>
+      </FilterBarContextProvider>
     );
   },
   ({ query: prevQuery, ...prevProps }, { query: nextQuery, ...nextProps }) => {

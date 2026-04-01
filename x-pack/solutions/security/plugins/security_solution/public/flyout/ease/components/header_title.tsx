@@ -7,17 +7,19 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RELATED_INTEGRATION } from '../../../detections/constants';
 import { IntegrationIcon } from './integration_icon';
-import { DocumentSeverity } from '../../document_details/right/components/severity';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
+import { DocumentSeverity } from '../../../flyout_v2/document/components/severity';
+import { RiskScore } from '../../../flyout_v2/document/components/risk_score';
+import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
-import { getAlertTitle, getField } from '../../document_details/shared/utils';
-import { RiskScore } from '../../document_details/right/components/risk_score';
+import { getAlertTitle } from '../../../flyout_v2/document/utils/get_header_title';
+import { getField } from '../../document_details/shared/utils';
 import { useEaseDetailsContext } from '../context';
-import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
 
 export const HEADER_TITLE_TEST_ID = 'ease-alert-flyout-header-title';
 export const HEADER_SUMMARY_TEST_ID = 'ease-alert-flyout-header-summary';
@@ -29,15 +31,16 @@ export const HEADER_INTEGRATION_TITLE_TEST_ID = 'ease-alert-flyout-header-integr
  * Header data for EASE for the alert summary flyout
  */
 export const HeaderTitle = memo(() => {
-  const { dataFormattedForFieldBrowser, getFieldsData } = useEaseDetailsContext();
+  const { dataFormattedForFieldBrowser, getFieldsData, searchHit } = useEaseDetailsContext();
   const { ruleName, timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   const integrationName = useMemo(
     () => getField(getFieldsData(RELATED_INTEGRATION)) || '',
     [getFieldsData]
   );
 
-  const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
+  const title = useMemo(() => getAlertTitle(ruleName), [ruleName]);
 
   const date = useMemo(() => new Date(timestamp), [timestamp]);
 
@@ -64,7 +67,7 @@ export const HeaderTitle = memo(() => {
                 />
               }
             >
-              <DocumentSeverity getFieldsData={getFieldsData} />
+              <DocumentSeverity hit={hit} />
             </AlertHeaderBlock>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -77,7 +80,7 @@ export const HeaderTitle = memo(() => {
                 />
               }
             >
-              <RiskScore getFieldsData={getFieldsData} />
+              <RiskScore hit={hit} />
             </AlertHeaderBlock>
           </EuiFlexItem>
           <EuiFlexItem>

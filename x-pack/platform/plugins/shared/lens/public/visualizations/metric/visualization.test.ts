@@ -29,7 +29,7 @@ import { LENS_METRIC_GROUP_ID } from '@kbn/lens-common';
 import { getMetricVisualization } from './visualization';
 import type { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
-import { getDefaultConfigForMode } from './helpers';
+import { getDefaultConfigForMode } from './palette_config';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
@@ -1177,9 +1177,14 @@ describe('metric visualization', () => {
           expect(secondaryMetricAST.secondaryColor).toEqual(undefined);
           expect(secondaryMetricAST.secondaryTrendBaseline).toEqual([0]);
           expect(secondaryMetricAST.secondaryTrendPalette).toEqual([
-            '#F6726A',
-            '#ECF1F9',
-            '#24C292',
+            euiLightVars.euiColorBackgroundLightDanger,
+            euiLightVars.euiColorBackgroundLightText,
+            euiLightVars.euiColorBackgroundLightSuccess,
+          ]);
+          expect(secondaryMetricAST.secondaryTrendTextPalette).toEqual([
+            euiLightVars.euiColorTextDanger,
+            euiLightVars.euiColorTextParagraph,
+            euiLightVars.euiColorTextSuccess,
           ]);
         } else {
           fail('AST is not an object');

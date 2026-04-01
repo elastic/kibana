@@ -112,4 +112,15 @@ export interface AlertingUsage {
   count_gaps: number;
   total_unfilled_gap_duration_ms: number;
   total_filled_gap_duration_ms: number;
+  gap_auto_fill_scheduler_runs_per_day: number;
+  gap_auto_fill_scheduler_runs_by_status_per_day: Record<string, number>;
+  gap_auto_fill_scheduler_duration_ms_per_day: {
+    min: number;
+    max: number;
+    avg: number;
+    sum: number;
+  };
+  gap_auto_fill_scheduler_unique_rule_count_per_day: number;
+  gap_auto_fill_scheduler_processed_gaps_total_per_day: number;
+  gap_auto_fill_scheduler_results_by_status_per_day: Record<string, number>;
 }

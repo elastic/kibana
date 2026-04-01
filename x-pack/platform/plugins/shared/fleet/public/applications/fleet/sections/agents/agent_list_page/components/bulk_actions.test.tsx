@@ -292,6 +292,33 @@ describe('AgentBulkActions', () => {
       expect(exportToCSVButton).toBeInTheDocument();
       expect(exportToCSVButton).toBeEnabled();
     });
+
+    it('should show only export menu item for OPAMP agents', async () => {
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [
+          { id: 'agent1', type: 'OPAMP' },
+          { id: 'agent2', type: 'PERMANENT' },
+        ] as Agent[],
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).toBeInTheDocument();
+      expect(exportToCSVButton).toBeEnabled();
+
+      // Should not show other menu items
+      expect(results.queryByText('Add / remove tags')).toBeNull();
+      expect(results.queryByText('Assign to new policy')).toBeNull();
+      expect(results.queryByText('Upgrade')).toBeNull();
+      expect(results.queryByText('Upgrade management')).toBeNull();
+      expect(results.queryByText('Maintenance and diagnostics')).toBeNull();
+      expect(results.queryByText('Security and removal')).toBeNull();
+    });
   });
 
   describe('When in query selection mode', () => {

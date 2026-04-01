@@ -85,6 +85,7 @@ export const convertTool = ({
         const props = await getDynamicProps();
         return props.getLlmDescription ? props.getLlmDescription(args) : tool.description;
       },
+      summarizeToolReturn: tool.summarizeToolReturn,
     };
   }
 

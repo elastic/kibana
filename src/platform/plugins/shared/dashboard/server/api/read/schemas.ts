@@ -15,13 +15,13 @@ import {
   resolveMetaSchema,
   updatedMetaSchema,
 } from '../meta_schemas';
+import { warningsSchema } from '../warnings_schema';
 
-export function getReadResponseBodySchema() {
+export function getReadResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
-    data: getDashboardStateSchema(),
+    data: getDashboardStateSchema(isDashboardAppRequest),
     meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, resolveMetaSchema]),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
-    warnings: schema.maybe(schema.arrayOf(schema.string())),
+    warnings: schema.maybe(warningsSchema),
   });
 }

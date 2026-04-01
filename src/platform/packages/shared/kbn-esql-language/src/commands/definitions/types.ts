@@ -9,7 +9,7 @@
 import { type EsqlFieldType, esqlFieldTypes } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLNumericLiteralType } from '../../types';
+import type { ESQLNumericLiteralType } from '@elastic/esql/types';
 import type { Location } from '../registry/types';
 import type { inlineCastsMapping } from './generated/inline_casts_mapping';
 
@@ -209,6 +209,7 @@ export enum PromQLFunctionDefinitionTypes {
   SCALAR = 'scalar',
   OPERATOR = 'operator',
   LABEL_MATCHING_OPERATOR = 'label_matching_operator',
+  SCALAR_CONVERSION = 'scalar_conversion',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
@@ -367,29 +368,15 @@ export interface ValidationErrors {
     message: string;
     type: { value: string; availableFields: string };
   };
-  promqlMissingParam: {
+  promqlInvalidParam: {
     message: string;
-    type: { param: string };
-  };
-  promqlMissingParamValue: {
-    message: string;
-    type: { param: string };
-  };
-  promqlInvalidDateParam: {
-    message: string;
-    type: { param: string };
-  };
-  promqlInvalidStepParam: {
-    message: string;
-    type: {};
+    type: {
+      reason: string;
+    };
   };
   promqlMutuallyExclusiveParams: {
     message: string;
     type: { param1: string; param2: string };
-  };
-  promqlInvalidBucketsParam: {
-    message: string;
-    type: {};
   };
   promqlMissingQuery: {
     message: string;
@@ -488,6 +475,14 @@ export interface ValidationErrors {
   invalidMapParameterValueType: {
     message: string;
     type: { paramName: string; expectedType: string; actualType: string };
+  };
+  mmrQueryVectorWrongType: {
+    message: string;
+    type: { type: string };
+  };
+  mmrOnFieldWrongType: {
+    message: string;
+    type: { type: string };
   };
 }
 

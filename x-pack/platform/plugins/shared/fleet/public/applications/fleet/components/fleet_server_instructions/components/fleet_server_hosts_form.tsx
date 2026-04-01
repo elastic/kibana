@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiIcon, EuiSpacer, EuiSuperSelect } from '@elastic/eui';
+import { EuiFormPrepend, EuiIcon, EuiSpacer, EuiSuperSelect } from '@elastic/eui';
 
 import { EuiText } from '@elastic/eui';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
@@ -68,12 +68,14 @@ export const FleetServerHostSelect: React.FunctionComponent<FleetServerHostSelec
         })}
         data-test-subj="fleetServerSetup.fleetServerHostsSelect"
         prepend={
-          <EuiText size="relative" color={''}>
-            <FormattedMessage
-              id="xpack.fleet.fleetServerSetup.fleetServerHostsLabel"
-              defaultMessage="Fleet Server Hosts"
-            />
-          </EuiText>
+          <EuiFormPrepend
+            label={
+              <FormattedMessage
+                id="xpack.fleet.fleetServerSetup.fleetServerHostsLabel"
+                defaultMessage="Fleet Server Hosts"
+              />
+            }
+          />
         }
         onChange={(fleetServerHostId) =>
           setFleetServerHost(

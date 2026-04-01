@@ -8,9 +8,11 @@
  */
 
 export { parseDuration } from './parse-duration/parse-duration';
+export { computeRetryDelayMs } from './retry_delay/retry_delay';
+export type { RetryDelayConfig } from './retry_delay/retry_delay';
 export { buildStepExecutionId } from './build_step_execution_id/build_step_execution_id';
 export { stringifyStackFrames } from './stringify_stack_frames';
 export { getKibanaUrl, buildWorkflowExecutionUrl } from './get_kibana_url';
 export { generateExecutionTaskScope } from './generate_execution_task_scope';
 export { TimeoutAbortedError, abortableTimeout } from './abortable_timeout/abortable_timeout';
-export { evaluateKql } from './eval_kql/eval_kql';
+export { isTemplateExpression } from './templates';

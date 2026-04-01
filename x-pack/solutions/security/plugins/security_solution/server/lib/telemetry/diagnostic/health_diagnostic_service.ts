@@ -20,6 +20,7 @@ import type {
   AnalyticsServiceStart,
 } from '@kbn/core/server';
 import {
+  PermissionError,
   type HealthDiagnosticQuery,
   type HealthDiagnosticQueryStats,
   type HealthDiagnosticService,
@@ -64,6 +65,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private analytics?: AnalyticsServiceStart;
   private _esClient?: ElasticsearchClient;
   private telemetryConfigProvider?: TelemetryConfigProvider;
+  private isServerless = false;
 
   constructor(logger: Logger) {
     const mdc = { task_id: TASK_ID, task_type: TASK_TYPE };
@@ -72,6 +74,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
   public setup(setup: HealthDiagnosticServiceSetup) {
     this.logger.debug('Setting up health diagnostic service');
+    this.isServerless = setup.isServerless;
 
     this.registerTask(setup.taskManager);
   }
@@ -79,7 +82,11 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   public async start(start: HealthDiagnosticServiceStart) {
     this.logger.debug('Starting health diagnostic service');
 
-    this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient, this.logger);
+    this.queryExecutor = new CircuitBreakingQueryExecutorImpl(
+      start.esClient,
+      this.isServerless,
+      this.logger
+    );
     this.analytics = start.analytics;
     this._esClient = start.esClient;
     this.telemetryConfigProvider = start.telemetryConfigProvider;
@@ -172,7 +179,11 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
                 message: error.message,
                 reason: error instanceof ValidationError ? error.result : undefined,
               };
-              this.logger.error('Error running query', withErrorMessage(error));
+              if (error instanceof PermissionError) {
+                this.logger.info('Permission error running query.', withErrorMessage(error));
+              } else {
+                this.logger.error('Error running query', withErrorMessage(error));
+              }
               resolve({
                 ...queryStats,
                 failure,
@@ -195,7 +206,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       this.logger.debug('Query executed. Sending query stats EBT', {
         queryName: query.name,
         traceId: stats.traceId,
-        statistics: stats,
       } as LogMeta);
 
       this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT, stats);
@@ -203,7 +213,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       statistics.push(stats);
     }
 
-    this.logger.debug('Finished running health diagnostic task', { statistics } as LogMeta);
+    this.logger.debug('Finished running health diagnostic task');
 
     return statistics;
   }

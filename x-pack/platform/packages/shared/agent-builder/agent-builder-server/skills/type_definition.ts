@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { SkillBoundedTool } from './tools';
 import type {
   Directory,
@@ -25,7 +25,12 @@ import type {
  */
 export type SkillsDirectoryStructure = Directory<{
   skills: Directory<{
-    platform: FileDirectory<{}>;
+    platform: FileDirectory<{
+      dashboard: FileDirectory;
+      streams: FileDirectory;
+      visualization: FileDirectory;
+      workflows: FileDirectory;
+    }>;
     observability: FileDirectory<{}>;
     security: FileDirectory<{
       alerts: FileDirectory<{
@@ -33,6 +38,7 @@ export type SkillsDirectoryStructure = Directory<{
       }>;
       entities: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
+      ml: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;
@@ -79,6 +85,11 @@ export interface SkillDefinition<
    * Max 1024 characters. Non-empty. Describes what the skill does and when to use it.
    */
   description: string;
+  /**
+   * When true, this skill is only available when experimental features are enabled.
+   * Defaults to false.
+   */
+  experimental?: boolean;
   /**
    * Content of the skill.
    */

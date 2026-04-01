@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-09T13:22:18.539Z",
-  "sha1": "3d17d3aa178a363f56054bbd375d59fb40d20a46",
+  "sha1": "8d83d8c88bcecf944225893788e68ad2edfe5c5a",
   "tests": [
     {
       "id": "98600d12651f127-aa69b48f5334963",
@@ -31,7 +30,7 @@
     {
       "id": "a2a2e384bed311a-d7e5f697c676699",
       "title": "Flights dashboard (sample data) loads dashboard and renders panels",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -830,14 +829,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/sync_colors.spec.ts",
-        "line": 119,
+        "line": 120,
         "column": 13
       }
     },
     {
       "id": "e5a1770f89d440f-79598c1004258c5",
       "title": "Sync colors should be possible to disable color sync",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -856,7 +855,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/sync_colors.spec.ts",
-        "line": 171,
+        "line": 172,
         "column": 12
       }
     }

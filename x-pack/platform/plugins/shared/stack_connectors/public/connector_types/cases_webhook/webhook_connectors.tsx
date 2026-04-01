@@ -208,7 +208,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               data-test-subj="casesWebhookNext"
               fill
               iconSide="right"
-              iconType="arrowRight"
+              iconType="chevronSingleRight"
               onClick={() => onNextStep()}
             >
               {i18n.NEXT}
@@ -220,7 +220,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
             <EuiButton
               data-test-subj="casesWebhookBack"
               iconSide="left"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               onClick={() => onNextStep((currentStep - 1) as PossibleStepNumbers)}
             >
               {i18n.PREVIOUS}

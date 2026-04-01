@@ -47,7 +47,7 @@ export const createThreatHuntingAgent = (
     avatar_icon: 'logoSecurity',
     name: 'Threat Hunting Agent',
     description:
-      'Agent specialized in security alert analysis tasks, including alert investigation and security documentation.',
+      'Agent specialized in security alert analysis and entity analysis tasks, including alert investigation, entity investigation and security documentation.',
     labels: ['security'],
     availability: {
       cacheMode: 'space',

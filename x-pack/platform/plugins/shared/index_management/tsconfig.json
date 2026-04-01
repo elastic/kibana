@@ -71,7 +71,10 @@
     "@kbn/deeplinks-management",
     "@kbn/test-eui-helpers",
     "@kbn/core-elasticsearch-server",
-    "@kbn/cloud"
+    "@kbn/cloud",
+    "@kbn/search-index-documents",
+    "@kbn/cloud-connect-plugin",
+    "@kbn/shared-ux-column-presets",
   ],
   "exclude": ["target/**/*"]
 }

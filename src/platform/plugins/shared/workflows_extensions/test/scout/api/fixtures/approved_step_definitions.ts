@@ -26,7 +26,7 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'ai.agent',
-    handlerHash: 'affaf17569853b40868f907f0d6ea4f2a13f55c1f264e29ae59244b45596af28',
+    handlerHash: '800765ba855e1e4a93d5bb7a6fce558ec5e369ed416bfb763047305c5d7f40ca',
   },
   {
     id: 'ai.classify',
@@ -41,23 +41,135 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: 'aa1db14ff6af424a3f66f5528e18c7b8d1f462ca8ba8e6feb01221e6fa1518ea',
   },
   {
+    id: 'data.aggregate',
+    handlerHash: '0223bec699354d5878732a6ebcb99a2b4b43a28b4f01da293df1ab7165c33e00',
+  },
+  {
+    id: 'data.concat',
+    handlerHash: '611abd1e703d35528dd7dae76aa178aec0b02201a3a8cb26156ee9d9f03baa13',
+  },
+  {
     id: 'data.dedupe',
     handlerHash: '16c3b3d67e68e77e66ed68869790a4388423a5b4b5aa8a194035f3ff52192836',
   },
   {
-    id: 'data.map',
-    handlerHash: '6e795a15958a869b328bc8a19836958eafaf088fad7a20a377617fff453dc513',
+    id: 'data.filter',
+    handlerHash: '829a245561a33b2f8349755a4ff6b4a2953774b6f862a7a0228b93f517742c9a',
   },
   {
-    id: 'data.regex_extract',
+    id: 'data.find',
+    handlerHash: 'b23058c153f427b8a8cb4a9ee1ed8c06881e3d2ed291ea7e78846e113aa0301d',
+  },
+  {
+    id: 'data.map',
+    handlerHash: '79ddef521ebd6ae8278e5d9034b7005687e31c2e949796add213eff2ebd21d82',
+  },
+  {
+    id: 'data.parseJson',
+    handlerHash: 'f1de4bd3d12fc65492d01d59dc63af5df68f23031376b9f78738ecda2fb2067c',
+  },
+  {
+    id: 'data.regexExtract',
     handlerHash: 'ab7b47758fa93b773f537351149845c8b60c22ae10efd0e1c592406170bb3cb6',
   },
   {
-    id: 'data.regex_replace',
+    id: 'data.regexReplace',
     handlerHash: '95c4970a0154de57472d394bc05514c6dcc483b74abb008b2950a5816398aaae',
+  },
+  {
+    id: 'data.stringifyJson',
+    handlerHash: '827bdbb31e4e493bc7746809a6e32f9d9248a05e7d1810a39c5db9a0fe1970ca',
   },
   {
     id: 'search.rerank',
     handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
+  },
+  {
+    id: 'cases.createCase',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.deleteCases',
+    handlerHash: '461013a1fb15a84b4edf75620cf377080998a35dedd39c672ddadfde4796fdda',
+  },
+  {
+    id: 'cases.updateCase',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.updateCases',
+    handlerHash: 'b858a33a3f4fa058b6b89ab5366c96f39a6a79d737d9cf7ff3c43221d640cf10',
+  },
+  {
+    id: 'cases.getCase',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.addComment',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.addAlerts',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.setCategory',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.addEvents',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.addObservables',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.addTags',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.assignCase',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.closeCase',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.createCaseFromTemplate',
+    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+  },
+  {
+    id: 'cases.findCases',
+    handlerHash: '61ec2695a6ddba397c05b3845e9dbd3c66f9b299ed8568b8f4e7f3c187ff1c73',
+  },
+  {
+    id: 'cases.findSimilarCases',
+    handlerHash: '647032606a8724390063eb7f093e84360b65ff6e44eecaa74222d7c557dfde02',
+  },
+  {
+    id: 'cases.setCustomField',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.unassignCase',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.setDescription',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.setSeverity',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.setStatus',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.setTitle',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
 ];

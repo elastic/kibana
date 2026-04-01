@@ -5,20 +5,33 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  getLatestVersion,
+  type VisualizationAttachmentData,
+} from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
-import type { VisualizationConfig } from './types';
-import { guessChartType } from './guess_chart_type';
-import { createVisualizationGraph } from './graph_lens';
-import { getSchemaForChartType } from './schemas';
+import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-genai-utils';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 
 /** Attachment type for visualization configurations */
 const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';
+
+const getExistingVisualizationConfig = (data: unknown): VisualizationConfig | null => {
+  if (!data || typeof data !== 'object') {
+    return null;
+  }
+
+  const candidate =
+    'visualization' in data
+      ? (data as VisualizationAttachmentData).visualization
+      : (data as VisualizationConfig);
+
+  return candidate && typeof candidate === 'object' ? (candidate as VisualizationConfig) : null;
+};
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
@@ -68,7 +81,9 @@ This tool will:
     availability: {
       cacheMode: 'space',
       handler: async ({ uiSettings }) => {
-        const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID);
+        const enabled = await uiSettings.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
         return { status: enabled ? 'available' : 'unavailable' };
       },
     },
@@ -87,63 +102,38 @@ This tool will:
           if (existingAttachmentRecord) {
             const latestVersion = getLatestVersion(existingAttachmentRecord);
             if (latestVersion?.data) {
-              parsedExistingConfig = latestVersion.data as VisualizationConfig;
-              existingConfig = JSON.stringify(parsedExistingConfig);
-              logger.debug(`Loaded existing visualization from attachment ${attachmentId}`);
+              parsedExistingConfig = getExistingVisualizationConfig(latestVersion.data);
+              existingConfig = parsedExistingConfig
+                ? JSON.stringify(parsedExistingConfig)
+                : undefined;
+              logger.debug(`Loaded existing visualization config from attachment ${attachmentId}`);
             }
           } else {
             logger.warn(`Attachment ${attachmentId} not found, creating new visualization`);
           }
         }
 
-        // Step 2: Determine chart type if not provided
-        let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
-
-        if (!chartType) {
-          logger.debug('Chart type not provided, using LLM to suggest one');
-          selectedChartType = await guessChartType(
-            modelProvider,
+        // Step 2: Generate visualization configuration with shared chart-type + graph flow
+        const { selectedChartType, validatedConfig, esqlQuery, timeRange } =
+          await buildVisualizationConfig({
             nlQuery,
-            parsedExistingConfig?.type
-          );
-        }
-
-        // Step 3: Generate visualization configuration using langgraph with validation retry
-        const model = await modelProvider.getDefaultModel();
-        const schema = getSchemaForChartType(selectedChartType);
-
-        // Create and invoke the validation retry graph
-        const graph = createVisualizationGraph(model, logger, events, esClient);
-
-        const finalState = await graph.invoke({
-          nlQuery,
-          index,
-          chartType: selectedChartType,
-          schema,
-          existingConfig,
-          parsedExistingConfig,
-          esqlQuery: esql || '',
-          currentAttempt: 0,
-          actions: [],
-          validatedConfig: null,
-          error: null,
-        });
-
-        const { validatedConfig, error, currentAttempt, esqlQuery } = finalState;
-
-        if (!validatedConfig) {
-          throw new Error(
-            `Failed to generate valid configuration after ${currentAttempt} attempts. Last error: ${
-              error || 'Unknown error'
-            }`
-          );
-        }
+            index,
+            chartType,
+            esql,
+            existingConfig,
+            parsedExistingConfig,
+            modelProvider,
+            logger,
+            events,
+            esClient,
+          });
 
         const visualizationData = {
           query: nlQuery,
           visualization: validatedConfig,
           chart_type: selectedChartType,
           esql: esqlQuery,
+          ...(timeRange && { time_range: timeRange }),
         };
 
         // Step 4: Try to store as attachment (optional - may fail if visualization type not registered)

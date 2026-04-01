@@ -43,6 +43,7 @@ export {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
+  apmUseUnifiedTraceWaterfall,
   enableDiagnosticMode,
 } from './ui_settings_keys';
 
@@ -87,3 +88,7 @@ export {
   OBSERVABILITY_TIERED_FEATURES,
   OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE,
 } from './product_features';
+
+// This label is used in multiple places across the observability plugins, so we export it from the common package
+// to avoid having to recreate it in multiple places and ensure consistency.
+export { NOT_AVAILABLE_LABEL } from './i18n';

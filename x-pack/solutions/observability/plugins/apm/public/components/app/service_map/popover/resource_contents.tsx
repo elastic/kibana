@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { EuiDescriptionListDescription, EuiDescriptionListTitle } from '@elastic/eui';
+import { EuiDescriptionListDescription, EuiDescriptionListTitle, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from '@emotion/styled';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { isEdge } from './utils';
 import type { ContentsProps } from './popover_content';
 import { isDependencyNodeData, type DependencyNodeData } from '../../../../../common/service_map';
 
-const ItemRow = styled.div`
+const itemRowStyles = css`
   line-height: 2;
 `;
 
-const SubduedDescriptionListTitle = styled(EuiDescriptionListTitle)`
-  &&& {
-    color: ${({ theme }) => theme.euiTheme.colors.textSubdued};
-  }
-`;
-
 export function ResourceContents({ selection }: ContentsProps) {
+  const { euiTheme } = useEuiTheme();
+
+  const subduedDescriptionListTitleStyles = css`
+    color: ${euiTheme.colors.textSubdued};
+  `;
+
   if (isEdge(selection)) {
     return null;
   }
@@ -55,10 +55,12 @@ export function ResourceContents({ selection }: ContentsProps) {
         ({ title, description }) =>
           description && (
             <div key={title}>
-              <ItemRow>
-                <SubduedDescriptionListTitle>{title}</SubduedDescriptionListTitle>
+              <div css={itemRowStyles}>
+                <EuiDescriptionListTitle css={subduedDescriptionListTitleStyles}>
+                  {title}
+                </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
-              </ItemRow>
+              </div>
             </div>
           )
       )}

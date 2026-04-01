@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
 import systemPromptTemplate from './system_prompt.text';
@@ -18,6 +18,8 @@ export const SuggestIngestPipelinePrompt = createPrompt({
     stream: Streams.all.Definition.right,
     pipeline_schema: z.string(),
     fields_schema: z.string(),
+    content_field: z.string(),
+    severity_field: z.string(),
     parsing_processor: z.string().optional(),
     initial_dataset_analysis: z.string(),
   }),

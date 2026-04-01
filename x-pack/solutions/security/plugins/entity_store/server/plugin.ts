@@ -12,20 +12,26 @@ import type {
   EntityStoreRequestHandlerContext,
   EntityStoreSetupPlugins,
   EntityStoreStartPlugins,
-  PluginStartContract,
-  PluginSetupContract,
+  EntityStoreStartContract,
+  EntityStoreSetupContract,
 } from './types';
 import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { registerUiSettings } from './infra/feature_flags/register';
-import { EngineDescriptorType } from './domain/definitions/saved_objects';
+import { EngineDescriptorType, EntityStoreGlobalStateType } from './domain/saved_objects';
+import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
+import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+import { CRUDClient } from './domain/crud';
+import { ResolutionClient } from './domain/resolution';
+import { registerTelemetry, createReportEvent } from './telemetry/events';
+import { automatedResolutionMaintainerConfig } from './maintainers/automated_resolution';
 
 export class EntityStorePlugin
   implements
     Plugin<
-      PluginSetupContract,
-      PluginStartContract,
+      EntityStoreSetupContract,
+      EntityStoreStartContract,
       EntityStoreSetupPlugins,
       EntityStoreStartPlugins
     >
@@ -38,8 +44,14 @@ export class EntityStorePlugin
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  public setup(core: EntityStoreCoreSetup, plugins: EntityStoreSetupPlugins) {
+  public setup(
+    core: EntityStoreCoreSetup,
+    plugins: EntityStoreSetupPlugins
+  ): EntityStoreSetupContract {
     plugins.taskManager.registerCanEncryptedSavedObjects(plugins.encryptedSavedObjects.canEncrypt);
+
+    this.logger.debug('Registering telemetry events');
+    registerTelemetry(core.analytics);
 
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
@@ -51,6 +63,7 @@ export class EntityStorePlugin
           logger: this.logger,
           request,
           isServerless: this.isServerless,
+          analytics: createReportEvent(core.analytics),
         })
     );
 
@@ -61,11 +74,31 @@ export class EntityStorePlugin
     this.logger.debug('Registering ui settings');
     registerUiSettings(core.uiSettings);
 
-    this.logger.debug('Registering saved objects type');
+    this.logger.debug('Registering saved objects types');
     core.savedObjects.registerType(EngineDescriptorType);
+    core.savedObjects.registerType(EntityStoreGlobalStateType);
+
+    registerEntityMaintainerTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      config: automatedResolutionMaintainerConfig,
+      core,
+      analytics: createReportEvent(core.analytics),
+    });
+
+    return {
+      registerEntityMaintainer: (config: RegisterEntityMaintainerConfig) =>
+        registerEntityMaintainerTask({
+          taskManager: plugins.taskManager,
+          logger: this.logger,
+          config,
+          core,
+          analytics: createReportEvent(core.analytics),
+        }),
+    };
   }
 
-  public start(core: CoreStart, plugins: EntityStoreStartPlugins) {
+  public start(core: CoreStart, plugins: EntityStoreStartPlugins): EntityStoreStartContract {
     this.logger.info('Initializing plugin');
 
     plugins.taskManager.registerEncryptedSavedObjectsClient(
@@ -77,6 +110,13 @@ export class EntityStorePlugin
     plugins.taskManager.registerApiKeyInvalidateFn(
       plugins.security?.authc.apiKeys.invalidateAsInternalUser
     );
+
+    const logger = this.logger;
+    return {
+      createCRUDClient: (esClient, namespace) => new CRUDClient({ logger, esClient, namespace }),
+      createResolutionClient: (esClient, namespace) =>
+        new ResolutionClient({ logger, esClient, namespace }),
+    };
   }
 
   public stop() {

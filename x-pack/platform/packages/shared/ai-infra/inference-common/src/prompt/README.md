@@ -11,7 +11,7 @@ You can use the `createPrompt` helper function (from `@kbn/inference-cli` or a s
 **Example:**
 
 ```typescript
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-cli/src/client/create_prompt'; // Adjust path as necessary
 import { ToolOptions } from '../chat_complete'; // Adjust path as necessary
 

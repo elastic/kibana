@@ -19,7 +19,7 @@ export interface Params {
   fieldName: string;
   filters?: {
     locations?: string[];
-    monitorIds?: string[];
+    monitor_ids?: string[];
     tags?: string[];
     projects?: string[];
   };
@@ -28,24 +28,36 @@ export interface Params {
 
 type ApiResponse = Record<string, Suggestion[]>;
 
+// Map field names from snake_case (form) to camelCase (API response)
+const FIELD_NAME_MAP: Record<string, string> = {
+  monitor_ids: 'monitorIds',
+  monitor_types: 'monitorTypes',
+  tags: 'tags',
+  projects: 'projects',
+  locations: 'locations',
+};
+
 export function useFetchSyntheticsSuggestions({ filters, fieldName, search }: Params) {
   const { http } = useKibana<ClientPluginsStart>().services;
-  const { locations, monitorIds, tags, projects } = filters || {};
+  const { locations, monitor_ids, tags, projects } = filters || {};
 
   const { loading, data } = useFetcher(async () => {
     return await http.get<ApiResponse>('/internal/synthetics/suggestions', {
       query: {
         locations: locations || [],
-        monitorQueryIds: monitorIds || [],
+        monitorQueryIds: monitor_ids || [],
         tags: tags || [],
         projects: projects || [],
         query: search,
       },
     });
-  }, [http, locations, monitorIds, projects, search, tags]);
+  }, [http, locations, monitor_ids, projects, search, tags]);
+
+  // Map snake_case field name to camelCase API response key
+  const apiFieldName = FIELD_NAME_MAP[fieldName] || fieldName;
 
   return {
-    suggestions: data?.[fieldName] ?? [],
+    suggestions: data?.[apiFieldName] ?? [],
     isLoading: Boolean(loading),
   };
 }

@@ -19,7 +19,7 @@
         "label": "createConfigService",
         "description": [],
         "signature": [
-          "({ server, externalUrl, csp, }?: Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; clientAuthentication: \"none\" | \"required\" | \"optional\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; }>; host: string; protocol: \"http1\" | \"http2\"; port: number; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; cdn: Readonly<{ url?: string | null | undefined; } & {}>; prototypeHardening: boolean; http2: Readonly<{} & { allowUnsecure: boolean; }>; versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; autoListen: boolean; shutdownTimeout: moment.Duration; oas: Readonly<{} & { enabled: boolean; }>; securityResponseHeaders: Readonly<{ permissionsPolicyReportOnly?: string | null | undefined; } & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
+          "({ server, externalUrl, csp, }?: Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; clientAuthentication: \"none\" | \"optional\" | \"required\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; }>; host: string; protocol: \"http1\" | \"http2\"; port: number; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; cdn: Readonly<{ url?: string | null | undefined; } & {}>; prototypeHardening: boolean; http2: Readonly<{} & { allowUnsecure: boolean; }>; versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; autoListen: boolean; shutdownTimeout: moment.Duration; oas: Readonly<{} & { enabled: boolean; }>; securityResponseHeaders: Readonly<{ permissionsPolicyReportOnly?: string | null | undefined; } & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -27,7 +27,7 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; payloadTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; rateLimiter: Readonly<{} & { enabled: boolean; term: \"long\" | \"short\" | \"medium\"; elu: number; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
+          "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; payloadTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; excludeRoutes: string[]; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; rateLimiter: Readonly<{} & { term: \"long\" | \"short\" | \"medium\"; enabled: boolean; elu: number; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; serverTiming: boolean; serverTimingElasticsearch: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
           "IExternalUrlPolicy",
           "[]; }>>; csp: Partial<Readonly<{ report_only?: Readonly<{} & { object_src: string[]; form_action: string[]; }> | undefined; } & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; object_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>) => ",
           {
@@ -39,7 +39,7 @@
           }
         ],
         "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -52,7 +52,7 @@
             "label": "{\n  server,\n  externalUrl,\n  csp,\n}",
             "description": [],
             "signature": [
-              "Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; clientAuthentication: \"none\" | \"required\" | \"optional\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; }>; host: string; protocol: \"http1\" | \"http2\"; port: number; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; cdn: Readonly<{ url?: string | null | undefined; } & {}>; prototypeHardening: boolean; http2: Readonly<{} & { allowUnsecure: boolean; }>; versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; autoListen: boolean; shutdownTimeout: moment.Duration; oas: Readonly<{} & { enabled: boolean; }>; securityResponseHeaders: Readonly<{ permissionsPolicyReportOnly?: string | null | undefined; } & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
+              "Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; clientAuthentication: \"none\" | \"optional\" | \"required\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; }>; host: string; protocol: \"http1\" | \"http2\"; port: number; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; cdn: Readonly<{ url?: string | null | undefined; } & {}>; prototypeHardening: boolean; http2: Readonly<{} & { allowUnsecure: boolean; }>; versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; autoListen: boolean; shutdownTimeout: moment.Duration; oas: Readonly<{} & { enabled: boolean; }>; securityResponseHeaders: Readonly<{ permissionsPolicyReportOnly?: string | null | undefined; } & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -60,12 +60,12 @@
                 "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
-              "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; payloadTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; rateLimiter: Readonly<{} & { enabled: boolean; term: \"long\" | \"short\" | \"medium\"; elu: number; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
+              "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; payloadTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; excludeRoutes: string[]; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; rateLimiter: Readonly<{} & { term: \"long\" | \"short\" | \"medium\"; enabled: boolean; elu: number; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; serverTiming: boolean; serverTimingElasticsearch: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
               "IExternalUrlPolicy",
               "[]; }>>; csp: Partial<Readonly<{ report_only?: Readonly<{} & { object_src: string[]; form_action: string[]; }> | undefined; } & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; object_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>"
             ],
             "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -89,7 +89,7 @@
           "CoreContext"
         ],
         "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-        "lineNumber": 127,
+        "lineNumber": 128,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -107,7 +107,7 @@
               ">"
             ],
             "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-            "lineNumber": 127,
+            "lineNumber": 128,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
@@ -131,7 +131,7 @@
           "HttpIntegrationTestService"
         ],
         "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-        "lineNumber": 166,
+        "lineNumber": 167,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -151,7 +151,7 @@
           "\nA mock of the HttpService that can be used in tests.\n"
         ],
         "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-        "lineNumber": 133,
+        "lineNumber": 134,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -167,7 +167,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-            "lineNumber": 140,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -187,7 +187,7 @@
               "<any>; server: { listener: any; }; }>"
             ],
             "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-            "lineNumber": 141,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -205,7 +205,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-            "lineNumber": 142,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -223,7 +223,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-            "lineNumber": 143,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -247,7 +247,7 @@
           "void"
         ],
         "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-        "lineNumber": 146,
+        "lineNumber": 147,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -266,7 +266,7 @@
           "<any>; server: { listener: any; }; }"
         ],
         "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-        "lineNumber": 150,
+        "lineNumber": 151,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -283,7 +283,7 @@
           "void"
         ],
         "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-        "lineNumber": 154,
+        "lineNumber": 155,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -300,7 +300,7 @@
           "void"
         ],
         "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
-        "lineNumber": 158,
+        "lineNumber": 159,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -329,7 +329,7 @@
           ">"
         ],
         "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-        "lineNumber": 45,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -376,7 +376,7 @@
           ">; }"
         ],
         "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-        "lineNumber": 49,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -403,7 +403,7 @@
           " & { basePath: BasePathMocked; staticAssets: StaticAssetsMocked; }"
         ],
         "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-        "lineNumber": 68,
+        "lineNumber": 75,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -444,7 +444,7 @@
           ", \"basePath\" | \"staticAssets\"> & { basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; }"
         ],
         "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-        "lineNumber": 46,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -458,7 +458,9 @@
         "label": "InternalHttpServiceSetupMock",
         "description": [],
         "signature": [
-          "{ server: ",
+          "{ config: ",
+          "HttpConfig",
+          "; server: ",
           "Server",
           "<",
           "ServerApplicationState",
@@ -490,7 +492,7 @@
           "OnPreResponseHandler",
           "], unknown>; getDeprecatedRoutes: jest.MockInstance<",
           "RouterDeprecatedApiDetails",
-          "[], [], unknown>; rateLimiter: Readonly<{} & { enabled: boolean; term: \"long\" | \"short\" | \"medium\"; elu: number; }>; registerOnPostValidation: jest.MockInstance<void, [cb: (req: ",
+          "[], [], unknown>; rateLimiter: Readonly<{} & { term: \"long\" | \"short\" | \"medium\"; enabled: boolean; elu: number; }>; registerOnPostValidation: jest.MockInstance<void, [cb: (req: ",
           "CoreKibanaRequest",
           "<unknown, unknown, unknown, any>, metadata: ",
           "PostValidationMetadata",
@@ -509,7 +511,7 @@
           ">; }"
         ],
         "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-        "lineNumber": 56,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -527,7 +529,9 @@
           "InternalStaticAssets",
           "; generateOas: jest.MockInstance<Promise<object>, [args: ",
           "GenerateOasArgs",
-          "], unknown>; isListening: jest.MockInstance<boolean, [], unknown>; auth: ",
+          "], unknown>; isListening: jest.MockInstance<boolean, [], unknown>; setRedactedSessionIdGetter: jest.MockInstance<void, [getter: (request: ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>) => Promise<string | undefined>], unknown>; auth: ",
           "HttpAuth",
           "; basePath: ",
           "IBasePath",
@@ -538,7 +542,7 @@
           " & { basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; }"
         ],
         "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-        "lineNumber": 72,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -739,7 +743,7 @@
                   },
                   "<",
                   "RequestLog",
-                  "> | undefined; readonly method?: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"lock\" | \"unsubscribe\" | \"subscribe\" | \"report\" | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\" | undefined; readonly mime?: string | undefined; readonly orig?: ",
+                  "> | undefined; readonly method?: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"bind\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"lock\" | \"unsubscribe\" | \"subscribe\" | \"report\" | \"acl\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\" | undefined; readonly mime?: string | undefined; readonly orig?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -939,9 +943,9 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<(method: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"lock\" | \"unsubscribe\" | \"subscribe\" | \"report\" | ",
+                  "<(method: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"bind\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"lock\" | \"unsubscribe\" | \"subscribe\" | \"report\" | ",
                   "HTTP_METHODS",
-                  " | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\") => void> | undefined; setUrl?: ",
+                  " | \"acl\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\") => void> | undefined; setUrl?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1200,7 +1204,7 @@
         "label": "httpServiceMock",
         "description": [],
         "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-        "lineNumber": 308,
+        "lineNumber": 322,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1216,7 +1220,7 @@
               "() => jest.Mocked<HttpServiceContract>"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 309,
+            "lineNumber": 323,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1234,7 +1238,7 @@
               "(serverBasePath?: string, publicBaseUrl?: string) => BasePathMocked"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 310,
+            "lineNumber": 324,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1248,7 +1252,7 @@
                 "label": "serverBasePath",
                 "description": [],
                 "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-                "lineNumber": 78,
+                "lineNumber": 85,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1261,7 +1265,7 @@
                 "label": "publicBaseUrl",
                 "description": [],
                 "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-                "lineNumber": 79,
+                "lineNumber": 86,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1279,7 +1283,7 @@
               "() => AuthMocked"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 311,
+            "lineNumber": 325,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1298,7 +1302,7 @@
               "InternalHttpServicePrebootMock"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 312,
+            "lineNumber": 326,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1315,7 +1319,7 @@
                   "CreateMockArgs"
                 ],
                 "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-                "lineNumber": 123,
+                "lineNumber": 130,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1334,7 +1338,7 @@
               "HttpServicePrebootMock"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 313,
+            "lineNumber": 327,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1353,7 +1357,7 @@
               "InternalHttpServiceSetupMock"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 314,
+            "lineNumber": 328,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1377,7 +1381,7 @@
               "<ContextType>"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 315,
+            "lineNumber": 329,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1396,7 +1400,7 @@
               "InternalHttpServiceStartMock"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 316,
+            "lineNumber": 330,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1415,7 +1419,7 @@
               "HttpServiceStartMock"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 317,
+            "lineNumber": 331,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1435,7 +1439,7 @@
               ">"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 318,
+            "lineNumber": 332,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1455,7 +1459,7 @@
               ">"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 319,
+            "lineNumber": 333,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1475,7 +1479,7 @@
               ">"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 320,
+            "lineNumber": 334,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1495,7 +1499,7 @@
               ">"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 321,
+            "lineNumber": 335,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1515,7 +1519,7 @@
               ">"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 322,
+            "lineNumber": 336,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1535,7 +1539,7 @@
               ">"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 323,
+            "lineNumber": 337,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1554,7 +1558,7 @@
               "RouterMock"
             ],
             "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
-            "lineNumber": 324,
+            "lineNumber": 338,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

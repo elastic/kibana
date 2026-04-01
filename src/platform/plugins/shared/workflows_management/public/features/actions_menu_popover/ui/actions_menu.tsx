@@ -9,6 +9,7 @@
 
 import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
 import {
+  EuiBetaBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,7 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -54,6 +55,23 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
 
   const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
+
+  useEffect(() => {
+    if (currentPath.length === 0) {
+      setOptions(defaultOptions);
+    } else {
+      let nextOptions = defaultOptions;
+      for (const id of currentPath) {
+        const next = nextOptions.find((o) => o.id === id);
+        if (next && isActionGroup(next)) {
+          nextOptions = next.options;
+        } else {
+          nextOptions = [];
+        }
+      }
+      setOptions(nextOptions);
+    }
+  }, [defaultOptions, currentPath]);
   const renderActionOption = (option: ActionOptionData, searchValue: string) => {
     const shouldUseGroupStyle = isActionGroup(option);
     return (
@@ -72,18 +90,44 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                 executionStatus={undefined}
               />
             ) : isActionGroup(option) || isActionOption(option) ? (
-              <EuiIcon type={option.iconType} size="m" color={option.iconColor} />
+              <EuiIcon
+                type={option.iconType}
+                size="m"
+                color={option.iconColor}
+                aria-hidden={true}
+              />
             ) : null}
           </span>
         </EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
-              <EuiTitle size="xxxs" css={styles.actionTitle}>
-                <h6>
-                  <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-                </h6>
-              </EuiTitle>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiTitle size="xxxs" css={styles.actionTitle}>
+                  <h6>
+                    <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+                  </h6>
+                </EuiTitle>
+                {option.stability === 'tech_preview' && (
+                  <EuiBetaBadge
+                    iconType="flask"
+                    label={i18n.translate('workflows.actionsMenu.techPreviewBadge', {
+                      defaultMessage: 'Tech preview',
+                    })}
+                    size="s"
+                    css={styles.techPreviewBadge}
+                  />
+                )}
+                {option.stability === 'beta' && (
+                  <EuiBetaBadge
+                    label={i18n.translate('workflows.actionsMenu.betaBadge', {
+                      defaultMessage: 'Beta',
+                    })}
+                    size="s"
+                    css={styles.techPreviewBadge}
+                  />
+                )}
+              </EuiFlexGroup>
               <EuiText color="subdued" size="xs">
                 {option.instancesLabel}
               </EuiText>
@@ -124,6 +168,41 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     setOptions(nextOptions);
   };
 
+  /** Lower rank = higher priority in search results (see getActionMatchRank). */
+  const MAX_ACTION_MATCH_RANK = 5;
+
+  const getActionMatchRank = (option: ActionOptionData, normalizedTerm: string): number => {
+    if (!normalizedTerm) {
+      return 0;
+    }
+    const id = option.id.toLowerCase();
+    const label = option.label.toLowerCase();
+    const description = option.description?.toLowerCase() ?? '';
+
+    if (id === normalizedTerm) {
+      return 0;
+    }
+    if (label === normalizedTerm) {
+      return 1;
+    }
+    if (description === normalizedTerm) {
+      return 2;
+    }
+    if (id.includes(normalizedTerm)) {
+      return 3;
+    }
+    if (label.includes(normalizedTerm)) {
+      return 4;
+    }
+    if (description.includes(normalizedTerm)) {
+      return 5;
+    }
+    return MAX_ACTION_MATCH_RANK + 1;
+  };
+
+  const isActionSearchMatch = (option: ActionOptionData, normalizedTerm: string) =>
+    getActionMatchRank(option, normalizedTerm) <= MAX_ACTION_MATCH_RANK;
+
   const optionMatcher = ({
     option,
     searchValue,
@@ -133,20 +212,27 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     searchValue: string;
     normalizedSearchValue: string;
   }) => {
-    return (
-      option.id.toLowerCase().includes(normalizedSearchValue) ||
-      option.label.toLowerCase().includes(normalizedSearchValue) ||
-      !!option.description?.toLowerCase().includes(normalizedSearchValue)
-    );
+    const term = searchValue.trim().toLowerCase() || normalizedSearchValue;
+    return isActionSearchMatch(option, term);
   };
 
   const handleSearchChange = (searchValue: string) => {
     setSearchTerm(searchValue);
     if (searchValue.length > 0) {
       const term = searchValue.trim().toLowerCase();
-      const matches = flatOptions.filter((option) =>
-        optionMatcher({ option, searchValue, normalizedSearchValue: term })
-      );
+      if (term.length === 0) {
+        setOptions(flatOptions);
+        return;
+      }
+      const matches = flatOptions
+        .filter((option) => isActionSearchMatch(option, term))
+        .sort((a, b) => {
+          const rankDiff = getActionMatchRank(a, term) - getActionMatchRank(b, term);
+          if (rankDiff !== 0) {
+            return rankDiff;
+          }
+          return a.label.localeCompare(b.label);
+        });
       setOptions(matches);
     } else {
       setOptions(defaultOptions);
@@ -189,7 +275,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                 ) : (
                   <EuiButtonEmpty
                     onClick={handleBack}
-                    iconType="arrowLeft"
+                    iconType="chevronSingleLeft"
                     size="xs"
                     aria-label={i18n.translate('workflows.actionsMenu.back', {
                       defaultMessage: 'Back',
@@ -267,4 +353,7 @@ const componentStyles = {
     css({
       lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
     }),
+  techPreviewBadge: css({
+    marginBottom: '-4px', // to align with the action title
+  }),
 };

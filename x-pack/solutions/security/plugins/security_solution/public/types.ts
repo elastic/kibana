@@ -69,6 +69,7 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { Logger } from '@kbn/logging';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -172,6 +173,7 @@ export interface StartPlugins {
   inference: InferencePublicStart;
   share?: SharePluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  cps?: CPSPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -239,7 +241,11 @@ export interface PluginStart {
   setSolutionNavigationTree: (navigationTree: NavigationTreeDefinition | null) => void;
 }
 
-export type InspectResponse = Inspect & { response: string[] };
+export type InspectResponse = Inspect & {
+  response: string[];
+  /** Index pattern(s) for the Inspect Statistics tab (e.g. entity store queries). */
+  indexPattern?: string[];
+};
 
 export const CASES_SUB_PLUGIN_KEY = 'cases';
 

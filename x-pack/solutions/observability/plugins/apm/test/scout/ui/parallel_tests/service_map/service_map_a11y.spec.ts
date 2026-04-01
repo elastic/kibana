@@ -8,14 +8,9 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import {
-  SERVICE_MAP_KUERY_OPBEANS_JAVA,
-  SERVICE_OPBEANS_JAVA,
-  SERVICE_OPBEANS_NODE,
-} from '../../fixtures/constants';
+import { SERVICE_OPBEANS_JAVA } from '../../fixtures/constants';
 
-// FLAKY: https://github.com/elastic/kibana/issues/253809
-test.describe.skip(
+test.describe(
   'Service map - accessibility',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -26,10 +21,7 @@ test.describe.skip(
       await serviceMapPage.dismissPopoverIfOpen();
     });
 
-    test('axe-core automated accessibility checks pass', async ({
-      page,
-      pageObjects: { serviceMapPage },
-    }) => {
+    test('axe-core automated accessibility checks pass', async ({ page }) => {
       await test.step('service map container has no accessibility violations', async () => {
         await page.testSubj.locator('serviceMapGraph').waitFor({ state: 'visible' });
         const { violations } = await page.checkA11y({
@@ -43,71 +35,6 @@ test.describe.skip(
           include: ['[data-testid="rf__controls"]'],
         });
         expect(violations).toHaveLength(0);
-      });
-
-      await test.step('service node popover has no accessibility violations', async () => {
-        // Navigate with kuery so the map loads pre-filtered (no re-fetch after opening popover)
-        await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE, {
-          kuery: SERVICE_MAP_KUERY_OPBEANS_JAVA,
-        });
-        await serviceMapPage.waitForMapToLoad();
-        await serviceMapPage.dismissPopoverIfOpen();
-        await serviceMapPage.clickFitView();
-        await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-        await serviceMapPage.clickServiceNode(SERVICE_OPBEANS_JAVA);
-        await serviceMapPage.waitForPopoverToBeVisible();
-        await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
-        const { violations } = await page.checkA11y({
-          include: ['[data-test-subj="serviceMapPopoverContent"]'],
-        });
-        expect(violations).toHaveLength(0);
-      });
-    });
-
-    test('keyboard navigation works correctly', async ({
-      page,
-      pageObjects: { serviceMapPage },
-    }) => {
-      await test.step('service map nodes are focusable with Tab key', async () => {
-        await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-        const serviceMap = page.testSubj.locator('serviceMapGraph');
-        await serviceMap.focus();
-        await page.keyboard.press('Tab');
-        const focusedElement = await page.evaluate(() => document.activeElement?.tagName);
-        expect(focusedElement).toBeTruthy();
-      });
-
-      await test.step('arrow keys navigate between nodes', async () => {
-        await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_NODE);
-        await serviceMapPage.focusServiceNodeAndWaitForFocus(SERVICE_OPBEANS_JAVA);
-        const originalFocusedId = await page.evaluate(() => {
-          const el = document.activeElement?.closest('[data-id]');
-          return el?.getAttribute('data-id');
-        });
-        await page.keyboard.press('ArrowRight');
-        const newFocusedId = await page.evaluate(() => {
-          const el = document.activeElement?.closest('[data-id]');
-          return el?.getAttribute('data-id');
-        });
-        expect(newFocusedId || originalFocusedId).toBeTruthy();
-      });
-
-      await test.step('pressing Enter on a focused node opens the popover', async () => {
-        await serviceMapPage.typeInTheSearchBar(SERVICE_MAP_KUERY_OPBEANS_JAVA);
-        await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-        await serviceMapPage.openPopoverWithKeyboardForService(SERVICE_OPBEANS_JAVA, 'Enter');
-      });
-
-      await test.step('pressing Escape closes the popover', async () => {
-        await page.keyboard.press('Escape');
-        await serviceMapPage.waitForPopoverToBeHidden();
-        await expect(serviceMapPage.serviceMapPopoverContent).toBeHidden();
-      });
-
-      await test.step('pressing Space on a focused node opens the popover', async () => {
-        await serviceMapPage.openPopoverWithKeyboardForService(SERVICE_OPBEANS_JAVA, ' ');
-        await page.keyboard.press('Escape');
-        await serviceMapPage.waitForPopoverToBeHidden();
       });
     });
 

@@ -28,14 +28,14 @@ test.describe(
 
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
       await logsSynthtraceEsClient.clean();
-      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
+      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs.otel' });
 
       llmSetup = await setupLlmProxyAndConnector(log, apiServices);
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoPartitioningTab('logs');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel');
       await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
 
       await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);

@@ -8,22 +8,27 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
-export function getCreateRequestBodySchema() {
-  return schema.object({
-    id: schema.maybe(schema.string()),
-    data: getDashboardStateSchema(),
-    spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1 })),
-  });
+export const createRequestParamsSchema = schema.maybe(
+  schema.object(
+    {
+      id: asCodeIdSchema,
+    },
+    { unknowns: 'forbid' }
+  )
+);
+
+export function getCreateRequestBodySchema(isDashboardAppRequest: boolean) {
+  return getDashboardStateSchema(isDashboardAppRequest);
 }
 
-export function getCreateResponseBodySchema() {
+export function getCreateResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
-    data: getDashboardStateSchema(),
+    data: getDashboardStateSchema(isDashboardAppRequest),
     meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
   });
 }

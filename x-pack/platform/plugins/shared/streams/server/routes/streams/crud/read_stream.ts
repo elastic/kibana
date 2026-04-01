@@ -11,6 +11,8 @@ import {
   getInheritedFieldsFromAncestors,
   getInheritedSettings,
   findInheritedFailureStore,
+  getRoot,
+  LOGS_ECS_STREAM_NAME,
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
@@ -97,7 +99,7 @@ export async function readStream({
   const privileges = await streamsClient.getPrivileges(name);
 
   // These queries are only relavant for IngestStreams
-  const [ancestors, dataStream, dataStreamSettings] = await Promise.all([
+  const [ancestors, dataStream] = await Promise.all([
     streamsClient.getAncestors(name),
     privileges.view_index_metadata
       ? streamsClient.getDataStream(name).catch((e) => {
@@ -107,26 +109,33 @@ export async function readStream({
           throw e;
         })
       : Promise.resolve(null),
-    privileges.view_index_metadata
-      ? scopedClusterClient.asCurrentUser.indices.getDataStreamSettings({ name }).catch((e) => {
-          if (isNotFoundError(e)) {
-            return null;
-          }
-          throw e;
-        })
-      : Promise.resolve(null),
   ]);
+
+  // Skip getDataStreamSettings for replicated data streams — they have no local
+  // index template and the ES API returns HTTP 400 in that case.
+  const dataStreamSettings =
+    privileges.view_index_metadata && !dataStream?.replicated
+      ? await scopedClusterClient.asCurrentUser.indices
+          .getDataStreamSettings({ name })
+          .catch((e) => {
+            if (isNotFoundError(e)) {
+              return null;
+            }
+            throw e;
+          })
+      : null;
 
   if (Streams.ClassicStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
       privileges,
       index_mode: dataStream?.index_mode,
+      replicated: dataStream?.replicated ?? false,
       elasticsearch_assets:
         dataStream && privileges.manage
           ? await getUnmanagedElasticsearchAssets({
               dataStream,
-              scopedClusterClient,
+              esClient: scopedClusterClient.asCurrentUser,
             })
           : undefined,
       data_stream_exists: !!dataStream,
@@ -141,10 +150,14 @@ export async function readStream({
     } satisfies Streams.ClassicStream.GetResponse;
   }
 
-  const inheritedFields = addAliasesForNamespacedFields(
-    streamDefinition,
-    getInheritedFieldsFromAncestors(ancestors)
-  );
+  // For OTEL-based streams (logs, logs.otel), process inherited fields to add OTEL aliases
+  // For ECS streams (logs.ecs), use inherited fields directly without OTEL-specific processing
+  const rootStream = getRoot(streamDefinition.name);
+  const isEcsStream = rootStream === LOGS_ECS_STREAM_NAME;
+
+  const inheritedFields = isEcsStream
+    ? getInheritedFieldsFromAncestors(ancestors)
+    : addAliasesForNamespacedFields(streamDefinition, getInheritedFieldsFromAncestors(ancestors));
 
   const inheritedFailureStore = findInheritedFailureStore(streamDefinition, ancestors);
 
@@ -162,6 +175,8 @@ export async function readStream({
     privileges,
     queries,
     index_mode: dataStream?.index_mode,
+    replicated: dataStream?.replicated ?? false,
+    data_stream_exists: !!dataStream,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,

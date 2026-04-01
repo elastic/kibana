@@ -39,6 +39,13 @@ test.describe('spaces feature controls', { tag: '@local-stateful-classic' }, () 
   }) => {
     await browserAuth.loginAsAdmin();
     await page.goto(kbnUrl.app('home', { space: 'custom_space' }));
+    await page.evaluate(() => {
+      localStorage.setItem('home:welcome:show', 'false');
+    });
+    await page.reload();
+    await page.testSubj.locator('homeApp').waitFor({
+      state: 'visible',
+    });
     const navLinks = await pageObjects.collapsibleNav.getNavLinks();
     expect(navLinks).toContain('Stack Management');
   });

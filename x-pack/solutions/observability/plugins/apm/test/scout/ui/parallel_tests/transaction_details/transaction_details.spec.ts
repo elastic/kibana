@@ -23,6 +23,28 @@ test.describe(
       });
     });
 
+    test('Redirects to transaction list when transactionName is missing in URL', async ({
+      page,
+      pageObjects: { transactionDetailsPage },
+    }) => {
+      // Start from transaction details (beforeEach already navigated there), then remove
+      // the transactionName param to simulate a bad link or user editing the URL.
+      await test.step('Remove transactionName from URL', async () => {
+        await transactionDetailsPage.removeTransactionNameFromUrlAndNavigate();
+      });
+
+      await test.step('Redirects to transaction list instead of showing 404 or error', async () => {
+        await expect(page).toHaveURL(
+          new RegExp(`/services/${testData.SERVICE_OPBEANS_JAVA}/transactions(?:\\?|$)`)
+        );
+        await expect(page).not.toHaveURL(/\/transactions\/view/);
+      });
+
+      await test.step('Transaction list page loads with Transactions tab and no 404', async () => {
+        await transactionDetailsPage.expectTransactionListPageLoaded(testData.SERVICE_OPBEANS_JAVA);
+      });
+    });
+
     test('Renders the page with expected content', async ({ page }) => {
       await test.step('Renders headings', async () => {
         await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
@@ -31,10 +53,6 @@ test.describe(
         await expect(
           page.getByRole('heading', { name: testData.PRODUCT_TRANSACTION_NAME, level: 2 })
         ).toBeVisible();
-      });
-
-      await test.step('Renders SLOs callout', async () => {
-        await expect(page.getByTestId('apmSloCalloutCreateSloButton')).toBeVisible();
       });
 
       await test.step('Renders transaction charts', async () => {
@@ -77,18 +95,18 @@ test.describe(
       pageObjects: { transactionDetailsPage },
     }) => {
       await test.step('Waterfall loads with data', async () => {
-        await expect(page.getByTestId('apmWaterfallButton')).toBeVisible();
+        await expect(page.getByTestId('traceWaterfallAccordionButton')).toBeVisible();
       });
 
       await test.step('Applies filter that results in no data', async () => {
         await transactionDetailsPage.fillApmUnifiedSearchBar(`_id: "123"`);
-        await expect(page.getByTestId('apmWaterfallButton')).toBeHidden();
+        await expect(page.getByTestId('traceWaterfallAccordionButton')).toBeHidden();
         await expect(page.getByTestId('apmNoTraceFound')).toBeVisible();
       });
 
       await test.step('Reloads the page and verifies waterfall is not stuck in loading state', async () => {
         await transactionDetailsPage.reload();
-        await expect(page.getByTestId('apmWaterfallButton')).toBeHidden();
+        await expect(page.getByTestId('traceWaterfallAccordionButton')).toBeHidden();
         await expect(page.getByTestId('apmNoTraceFound')).toBeVisible();
       });
     });

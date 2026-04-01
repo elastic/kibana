@@ -10,7 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import {
   ADD_PANEL_TRIGGER,
   CATEGORIZE_FIELD_TRIGGER,
-  CONTEXT_MENU_TRIGGER,
+  ON_OPEN_PANEL_MENU,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AiopsPluginStartDeps } from '../types';
 
@@ -42,7 +42,7 @@ export function registerAiopsUiActions(
     return createCategorizeFieldAction(coreStart, pluginStart);
   });
 
-  uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, 'open-change-point-in-ml-app', async () => {
+  uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'open-change-point-in-ml-app', async () => {
     const { createOpenChangePointInMlAppAction } = await import('./actions');
     const openChangePointInMlAppAction = createOpenChangePointInMlAppAction(coreStart, pluginStart);
     return openChangePointInMlAppAction;

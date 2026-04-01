@@ -51,6 +51,7 @@ import { ErrorCallout } from '../../../common/components/error_callout';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
+import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
 import type { EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
@@ -280,6 +281,16 @@ export function MonitorDetailFlyout(props: Props) {
     configId,
     monitorLocations: monitorObject?.locations,
   });
+
+  useMonitorAttachmentConfigWithMonitor(
+    monitorObject
+      ? {
+          ...monitorObject,
+          [ConfigKey.CONFIG_ID]: monitorObject[ConfigKey.CONFIG_ID] ?? configId,
+        }
+      : null,
+    isLoading
+  );
 
   const isOverlay = useIsWithinMaxBreakpoint('xl');
 

@@ -25,7 +25,7 @@ export const CreateButtonPopOver = ({ anchorPosition = 'upCenter' }: Props) => {
         <EuiButton
           fill
           data-test-subj="manageTemplateButton"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopOverOpen((prev) => !prev)}
         >
@@ -60,7 +60,7 @@ export const CreateButtonPopOver = ({ anchorPosition = 'upCenter' }: Props) => {
                     defaultMessage: 'From scratch',
                   }
                 ),
-                icon: 'plusInCircle',
+                icon: 'plusCircle',
                 onClick: () => {
                   // console.log('Create component template...');
                 },

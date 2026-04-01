@@ -20,5 +20,8 @@
       "dataViewFieldEditor",
       "visualizations",
     ],
+    "requiredBundles":[
+      "kibanaUtils"
+    ]
   }
 }

@@ -11,6 +11,7 @@ import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
 import { BehaviorSubject } from 'rxjs';
@@ -25,7 +26,7 @@ jest.mock('@kbn/presentation-publishing', () => ({
 }));
 
 jest.mock('./utils/get_esql_single_column_values', () => {
-  const getESQLSingleColumnValues = () => mockGetESQLSingleColumnValues();
+  const getESQLSingleColumnValues = async () => mockGetESQLSingleColumnValues();
   getESQLSingleColumnValues.isSuccess = () => mockIsSuccess();
   return {
     getESQLSingleColumnValues,
@@ -39,20 +40,22 @@ describe('ESQLControlApi', () => {
 
   const uuid = 'myESQLControl';
 
-  const dashboardApi = {};
+  const dashboardApi = { panelIsPinned: () => true };
   const factory = getESQLControlFactory();
   const finalizeApi = getMockedFinalizeApi(uuid, factory, dashboardApi);
 
   test('should publish ES|QL variable', async () => {
-    const initialState = {
+    const initialState: OptionsListESQLControlState = {
+      ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
       selected_options: ['option1'],
       available_options: ['option1', 'option2'],
       variable_name: 'variable1',
       variable_type: 'values',
       esql_query: 'FROM foo | WHERE column = ?variable1',
       control_type: 'STATIC_VALUES',
-    } as OptionsListESQLControlState;
+    };
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState,
       finalizeApi,
       uuid,
@@ -69,15 +72,17 @@ describe('ESQLControlApi', () => {
   });
 
   test('should serialize state', async () => {
-    const initialState = {
+    const initialState: OptionsListESQLControlState = {
+      ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
       selected_options: ['option1'],
       available_options: ['option1', 'option2'],
       variable_name: 'variable1',
       variable_type: 'values',
       esql_query: 'FROM foo | WHERE column = ?variable1',
       control_type: 'STATIC_VALUES',
-    } as OptionsListESQLControlState;
+    };
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState,
       finalizeApi,
       uuid,
@@ -88,7 +93,7 @@ describe('ESQLControlApi', () => {
       control_type: 'STATIC_VALUES',
       esql_query: 'FROM foo | WHERE column = ?variable1',
       selected_options: ['option1'],
-      title: '',
+      title: undefined,
       variable_name: 'variable1',
       variable_type: 'values',
       single_select: true,
@@ -97,15 +102,17 @@ describe('ESQLControlApi', () => {
 
   describe('values from query', () => {
     test('should update on load and fetch', async () => {
-      const initialState = {
+      const initialState: OptionsListESQLControlState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         selected_options: ['option1'],
         available_options: ['option1', 'option2'],
         variable_name: 'variable1',
         variable_type: 'values',
         esql_query: 'FROM foo | STATS BY column',
         control_type: EsqlControlType.VALUES_FROM_QUERY,
-      } as OptionsListESQLControlState;
+      };
       await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -119,14 +126,16 @@ describe('ESQLControlApi', () => {
     });
 
     test('should update when variables change for queries with dependencies', async () => {
-      const initialState = {
+      const initialState: OptionsListESQLControlState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         selected_options: ['option1'],
         variable_name: 'variable2',
         variable_type: 'values',
         esql_query: 'FROM foo | WHERE column1 == ?variable1 | STATS BY column2',
         control_type: EsqlControlType.VALUES_FROM_QUERY,
-      } as OptionsListESQLControlState;
+      };
       await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -156,15 +165,17 @@ describe('ESQLControlApi', () => {
 
   describe('changing the dropdown', () => {
     test('should publish new ES|QL variable', async () => {
-      const initialState = {
+      const initialState: OptionsListESQLControlState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         selected_options: ['option1'],
         available_options: ['option1', 'option2'],
         variable_name: 'variable1',
         variable_type: 'values',
         esql_query: 'FROM foo | WHERE column = ?variable1',
         control_type: 'STATIC_VALUES',
-      } as OptionsListESQLControlState;
+      };
       const { Component, api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState,
         finalizeApi,
         uuid,

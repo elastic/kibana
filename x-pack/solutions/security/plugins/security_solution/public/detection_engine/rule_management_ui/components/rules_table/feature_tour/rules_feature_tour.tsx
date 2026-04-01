@@ -96,7 +96,7 @@ export const RuleFeatureTour: FC = () => {
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
-                      iconType="arrowLeft"
+                      iconType="chevronSingleLeft"
                       aria-label={i18n.PREVIOUS_STEP_LABEL}
                       display="empty"
                       disabled={index === 0}
@@ -105,7 +105,7 @@ export const RuleFeatureTour: FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
-                      iconType="arrowRight"
+                      iconType="chevronSingleRight"
                       aria-label={i18n.NEXT_STEP_LABEL}
                       display="base"
                       disabled={index === tourSteps.length - 1}

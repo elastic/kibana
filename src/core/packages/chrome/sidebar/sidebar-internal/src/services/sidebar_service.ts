@@ -67,6 +67,10 @@ export class SidebarService {
     };
   }
 
+  stop() {
+    this.state.stop();
+  }
+
   @bind
   @memoize
   private getApp<TState = undefined, TActions = undefined>(

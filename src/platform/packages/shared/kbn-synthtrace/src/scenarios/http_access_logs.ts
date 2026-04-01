@@ -32,7 +32,7 @@
  */
 
 import os from 'os';
-import type { LogDocument } from '@kbn/synthtrace-client';
+import type { LogDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { log } from '@kbn/synthtrace-client';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
@@ -40,6 +40,9 @@ import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { parseHttpAccessLogsOpts } from './helpers/http_access_logs_opts_parser';
 import { getGeneratorForPattern, TrafficPattern } from './helpers/http_access_logs_data_generator';
 import { estimateDataGeneration } from './helpers/http_generation_estimator';
+import { getInfraPool } from './helpers/http_infra_pool';
+import { initSessionPool } from './helpers/http_session_pool';
+import { initRandom } from './helpers/http_random';
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   const parsedOpts = parseHttpAccessLogsOpts(runOptions.scenarioOpts);
@@ -51,6 +54,28 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     ...parsedOpts,
     scale,
   };
+
+  // Deterministic seed from run parameters so every run with the same
+  // --from / --scale / --mode produces identical data.
+  const modeHash = finalOpts.mode.split('').reduce((hash, ch) => hash * 31 + ch.charCodeAt(0), 0);
+  const seed = Math.abs(Math.floor(runOptions.from / 1000) + scale * 7919 + modeHash);
+  initRandom(seed);
+  logger.info(`Seeded PRNG with seed=${seed} for deterministic generation`);
+
+  // Deterministic provider index derived from the start time so all worker
+  // threads in a multi-worker run pick the same cloud provider.
+  const providerIndex = Math.floor(runOptions.from / 86400000) % 3;
+
+  // Initialize infrastructure pool with consistent cloud/host/pod identities
+  const infraPool = getInfraPool(scale, providerIndex);
+  logger.info(
+    `Infrastructure pool: ${infraPool.hosts.length} hosts on ${
+      infraPool.cloudConfig.name
+    } (${infraPool.cloudConfig.regions.join(', ')})`
+  );
+
+  // Initialize session pool with all regions so each gets correct geo bias
+  initSessionPool(scale, infraPool.cloudConfig.regions);
 
   // Calculate and display generation estimates
   const timeRangeMs = runOptions.to - runOptions.from;
@@ -131,7 +156,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       }
 
       // Generate traffic streams based on mode
-      const streams: any[] = [];
+      const streams: Array<SynthtraceGenerator<LogDocument>> = [];
 
       if (finalOpts.mode === 'comprehensive' || finalOpts.mode === 'mixed') {
         // Mixed mode: all traffic patterns with realistic distribution

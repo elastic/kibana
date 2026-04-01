@@ -10,17 +10,17 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
+import { EuiThemeProvider } from '@elastic/eui';
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { RenderResult } from '@testing-library/react';
 import { act, render as rtlRender, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
+import type { OptionsListComponentApi } from '../../../types';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
-import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopover } from './options_list_popover';
-import { EuiThemeProvider } from '@elastic/eui';
 
 const render = (ui: React.ReactElement) => {
   return rtlRender(ui, { wrapper: EuiThemeProvider });
@@ -298,36 +298,6 @@ describe('Options list popover', () => {
       mountComponent(contextMock);
       expect(mockedFormatter).toHaveBeenNthCalledWith(1, 1721283696000);
       expect(mockedFormatter).toHaveBeenNthCalledWith(2, 1721295533000);
-    });
-  });
-
-  describe('allow expensive queries warning', () => {
-    test('ensure warning icon does not show up when testAllowExpensiveQueries = true/undefined', async () => {
-      const contextMock = getOptionsListContextMock();
-      contextMock.testOnlyMethods.setField({
-        name: 'Test keyword field',
-        type: 'keyword',
-      } as DataViewField);
-      const popover = mountComponent(contextMock);
-      const warning = popover.queryByTestId('optionsList-allow-expensive-queries-warning');
-      expect(warning).toBeNull();
-    });
-
-    test('ensure warning icon shows up when testAllowExpensiveQueries = false', async () => {
-      const contextMock = getOptionsListContextMock();
-      contextMock.testOnlyMethods.setField({
-        name: 'Test keyword field',
-        type: 'keyword',
-      } as DataViewField);
-      const popover = mountComponent({
-        ...contextMock,
-        componentApi: {
-          ...contextMock.componentApi,
-          allowExpensiveQueries$: new BehaviorSubject<boolean>(false),
-        },
-      });
-      const warning = popover.getByTestId('optionsList-allow-expensive-queries-warning');
-      expect(warning).toBeInstanceOf(HTMLDivElement);
     });
   });
 

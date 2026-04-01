@@ -47,6 +47,7 @@ import {
   getConfigurationRequest,
   createConfiguration,
   createComment,
+  elasticUserProfileId,
 } from '../../../../../common/lib/api';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
@@ -88,8 +89,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(res.status).to.be('error');
-        expect(res.serviceMessage).to.be(
-          `Request validation failed (Field "alerts.0": Alert ID and index must be defined)`
+        expect(res.serviceMessage).to.match(
+          /^Request validation failed \([\s\S]*Alert ID and index must be defined[\s\S]*→ at alerts\[0\][\s\S]*\)$/
         );
       });
 
@@ -101,8 +102,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(res.status).to.be('error');
-        expect(res.serviceMessage).to.be(
-          'Request validation failed (Field "groupingBy": Array must contain at most 1 element(s))'
+        expect(res.serviceMessage).to.match(
+          /^Request validation failed \([\s\S]*(expected array to have <=1 items|Array must contain at most 1 element\(s\))[\s\S]*→ at groupingBy[\s\S]*\)$/
         );
       });
 
@@ -114,8 +115,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(res.status).to.be('error');
-        expect(res.serviceMessage).to.be(
-          'Request validation failed (Field "timeWindow": Not a valid time window, Not a valid time window)'
+        expect(res.serviceMessage).to.match(
+          /^Request validation failed \([\s\S]*Not a valid time window[\s\S]*→ at timeWindow[\s\S]*\)$/
         );
       });
 
@@ -127,8 +128,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(res.status).to.be('error');
-        expect(res.serviceMessage).to.be(
-          'Request validation failed (Field "timeWindow": Not a valid time window)'
+        expect(res.serviceMessage).to.match(
+          /^Request validation failed \([\s\S]*Not a valid time window[\s\S]*→ at timeWindow[\s\S]*\)$/
         );
       });
 
@@ -140,8 +141,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(res1.status).to.be('error');
-        expect(res1.serviceMessage).to.be(
-          'Request validation failed (Field "timeWindow": Not a valid time window)'
+        expect(res1.serviceMessage).to.match(
+          /^Request validation failed \([\s\S]*Not a valid time window[\s\S]*→ at timeWindow[\s\S]*\)$/
         );
 
         const res2 = await executeSystemConnector({
@@ -151,9 +152,9 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(res2.status).to.be('error');
-        expect(res2.serviceMessage).to.be(
-          'Request validation failed (Field "timeWindow": Not a valid time window, Not a valid time window)'
-        );
+        expect(res2.serviceMessage).to.contain('Request validation failed');
+        expect(res2.serviceMessage).to.contain('Not a valid time window');
+        expect(res2.serviceMessage).to.contain('→ at timeWindow');
       });
 
       it('returns 400 for timeWindow < 5m ', async () => {
@@ -163,9 +164,9 @@ export default ({ getService }: FtrProviderContext): void => {
           req: getRequest({ timeWindow: '4m' }),
         });
         expect(res.status).to.be('error');
-        expect(res.serviceMessage).to.be(
-          'Request validation failed (Field "timeWindow": Time window should be at least 5 minutes)'
-        );
+        expect(res.serviceMessage).to.contain('Request validation failed');
+        expect(res.serviceMessage).to.contain('Time window should be at least 5 minutes');
+        expect(res.serviceMessage).to.contain('→ at timeWindow');
       });
 
       it('returns 400 when maximumCasesToOpen > 20', async () => {
@@ -176,9 +177,11 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(res.status).to.be('error');
-        expect(res.serviceMessage).to.be(
-          'Request validation failed (Field "maximumCasesToOpen": Number must be less than or equal to 20)'
+        expect(res.serviceMessage).to.contain('Request validation failed');
+        expect(res.serviceMessage).to.match(
+          /(expected number to be <=20|Number must be less than or equal to 20)/
         );
+        expect(res.serviceMessage).to.contain('→ at maximumCasesToOpen');
       });
 
       it('returns 400 when maximumCasesToOpen < 1', async () => {
@@ -189,9 +192,11 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(res.status).to.be('error');
-        expect(res.serviceMessage).to.be(
-          'Request validation failed (Field "maximumCasesToOpen": Number must be greater than or equal to 1)'
+        expect(res.serviceMessage).to.contain('Request validation failed');
+        expect(res.serviceMessage).to.match(
+          /(Too small: expected number to be >=1|Number must be greater than or equal to 1)/
         );
+        expect(res.serviceMessage).to.contain('→ at maximumCasesToOpen');
       });
     });
 
@@ -335,11 +340,7 @@ export default ({ getService }: FtrProviderContext): void => {
               name: 'none',
               type: '.none',
             },
-            created_by: {
-              email: null,
-              full_name: null,
-              username: 'elastic',
-            },
+            created_by: expectedUser,
             customFields: [],
             description:
               "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id).",
@@ -358,11 +359,7 @@ export default ({ getService }: FtrProviderContext): void => {
             totalAlerts: 5,
             totalComment: 0,
             totalEvents: 0,
-            updated_by: {
-              email: null,
-              full_name: null,
-              username: 'elastic',
-            },
+            updated_by: expectedUser,
             observables: [],
             total_observables: 0,
           });
@@ -446,11 +443,7 @@ export default ({ getService }: FtrProviderContext): void => {
               name: 'Jira',
               type: '.jira',
             },
-            created_by: {
-              email: null,
-              full_name: null,
-              username: 'elastic',
-            },
+            created_by: expectedUser,
             customFields: [
               {
                 key: 'first_custom_field_key',
@@ -474,11 +467,7 @@ export default ({ getService }: FtrProviderContext): void => {
             totalAlerts: 5,
             totalComment: 0,
             totalEvents: 0,
-            updated_by: {
-              email: null,
-              full_name: null,
-              username: 'elastic',
-            },
+            updated_by: expectedUser,
             observables: [],
             total_observables: 0,
           });
@@ -825,11 +814,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'none',
                 type: '.none',
               },
-              created_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              created_by: expectedUser,
               customFields: [],
               description:
                 "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: A`.",
@@ -855,11 +840,7 @@ export default ({ getService }: FtrProviderContext): void => {
               totalAlerts: 3,
               totalComment: 0,
               totalEvents: 0,
-              updated_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              updated_by: expectedUser,
               observables: [],
               total_observables: 0,
             });
@@ -876,11 +857,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'none',
                 type: '.none',
               },
-              created_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              created_by: expectedUser,
               customFields: [],
               description:
                 "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: B`.",
@@ -906,11 +883,7 @@ export default ({ getService }: FtrProviderContext): void => {
               totalAlerts: 2,
               totalComment: 0,
               totalEvents: 0,
-              updated_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              updated_by: expectedUser,
               observables: [],
               total_observables: 0,
             });
@@ -1346,11 +1319,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'none',
                 type: '.none',
               },
-              created_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              created_by: expectedUser,
               customFields: [],
               description:
                 "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `field_name_1: field_value_1`.",
@@ -1376,11 +1345,7 @@ export default ({ getService }: FtrProviderContext): void => {
               totalEvents: 0,
               totalAlerts: 2,
               totalComment: 1,
-              updated_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              updated_by: expectedUser,
               observables: [],
               total_observables: 0,
             });
@@ -1397,11 +1362,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'none',
                 type: '.none',
               },
-              created_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              created_by: expectedUser,
               customFields: [],
               description:
                 "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `field_name_2: field_value_2`.",
@@ -1427,11 +1388,7 @@ export default ({ getService }: FtrProviderContext): void => {
               totalAlerts: 2,
               totalComment: 2,
               totalEvents: 0,
-              updated_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              updated_by: expectedUser,
               observables: [],
               total_observables: 0,
             });
@@ -1448,11 +1405,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'none',
                 type: '.none',
               },
-              created_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              created_by: expectedUser,
               customFields: [],
               description:
                 "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `field_name_1: field_value_3`.",
@@ -1478,11 +1431,7 @@ export default ({ getService }: FtrProviderContext): void => {
               totalAlerts: 1,
               totalComment: 0,
               totalEvents: 0,
-              updated_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              updated_by: expectedUser,
               observables: [],
               total_observables: 0,
             });
@@ -1906,6 +1855,13 @@ const verifyAlertsAttachedToCase = ({
   }
 };
 
+const expectedUser = {
+  username: 'elastic',
+  full_name: null,
+  email: null,
+  profile_uid: elasticUserProfileId,
+};
+
 const createCaseWithId = async ({
   kibanaServer,
   caseId,
@@ -1934,13 +1890,13 @@ const createCaseWithId = async ({
       // @ts-ignore
       status: STATUS_EXTERNAL_TO_ESMODEL[req?.status ?? CaseStatuses.open],
       // @ts-ignore
-      severity: SEVERITY_EXTERNAL_TO_ESMODEL[req?.severity ?? CaseSeverity.low],
+      severity: SEVERITY_EXTERNAL_TO_ESMODEL[req?.severity ?? CaseSeverity.LOW],
       closed_at: null,
       closed_by: null,
       updated_at: null,
       updated_by: null,
       created_at: new Date().toISOString(),
-      created_by: { username: 'elastic', full_name: null, email: null },
+      created_by: expectedUser,
       duration: 0,
       external_service: null,
       total_alerts: 0,

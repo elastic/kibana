@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowCellPrimitiveProps } from '../types';
 import {
@@ -21,8 +28,11 @@ import {
   useDataCascadeState,
   useDataCascadeActions,
 } from '../../../store_provider';
-import { useVirtualizedRowScrollState } from '../../../lib/core/virtualizer';
+import type { ChildVirtualizerController } from '../../../lib/core/virtualizer/child_virtualizer_controller';
 import { cascadeRowCellStyles } from './cascade_row_cell.styles';
+
+const NOOP_SUBSCRIBE = () => () => {};
+const ALWAYS_ACTIVE = () => true;
 
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({
   children,
@@ -58,6 +68,36 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     return leafNodes.get(leafCacheKey) ?? null;
   }, [leafCacheKey, leafNodes]);
 
+  const childController: ChildVirtualizerController | null = useMemo(
+    () => getVirtualizer().childController ?? null,
+    [getVirtualizer]
+  );
+
+  // Subscribe to the controller's activation state.
+  // This is the coordination signal — the stagger decides when heavy content should mount.
+  const isActivated = useSyncExternalStore(
+    childController ? childController.subscribe : NOOP_SUBSCRIBE,
+    childController ? () => childController.shouldActivate(row.index) : ALWAYS_ACTIVE,
+    () => false
+  );
+
+  // Defer the enqueue by one paint frame so we are never attempting to render the heavy content in the same i/o cycle that's processing leaf data
+  // this way we don't block the main thread,
+  // this however means that for all cases even when the leaf data is available the skeleton will display briefly.
+  const enqueueCleanupRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (!childController) return;
+    const rafId = requestAnimationFrame(() => {
+      enqueueCleanupRef.current = childController.enqueue(leafCacheKey, row.index);
+    });
+    return () => {
+      cancelAnimationFrame(rafId);
+      enqueueCleanupRef.current?.();
+      enqueueCleanupRef.current = null;
+    };
+  }, [childController, leafCacheKey, row.index]);
+
   const fetchGroupLeafData = useCallback(() => {
     const dataFetchFn = async () => {
       const groupLeafData = await onCascadeLeafNodeExpanded({
@@ -76,9 +116,8 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       });
     };
 
-    return dataFetchFn().catch((error) => {
-      // eslint-disable-next-line no-console -- added for debugging purposes
-      console.error('Error fetching data for leaf node', error);
+    return dataFetchFn().catch(() => {
+      // do nothing, error is expected to be handled by consumer for now
     });
   }, [actions, leafCacheKey, nodePath, nodePathMap, onCascadeLeafNodeExpanded, row]);
 
@@ -110,48 +149,9 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     [onCascadeLeafNodeCollapsed, nodePath, nodePathMap, row]
   );
 
-  const { getScrollMargin, getScrollOffset } = useVirtualizedRowScrollState({
-    getVirtualizer,
-    rowIndex: row.index,
-  });
-
-  // Keep a reference to the virtualizer for cleanup and scroll-to operations
-  const rootVirtualizer = useMemo(() => getVirtualizer(), [getVirtualizer]);
-
-  const virtualRow = useMemo(
-    () => rootVirtualizer.getVirtualItems().find((v) => v.index === row.index),
-    [rootVirtualizer, row]
-  );
-
-  const getScrollElement = useCallback(() => rootVirtualizer.scrollElement, [rootVirtualizer]);
-
-  /**
-   * Function used to signal to the parent virtualizer that this row's size changes should not be propagated to it.
-   * Returns an unregister function.
-   */
-  const preventSizeChangePropagation = useCallback(() => {
-    return rootVirtualizer.preventRowSizeChangePropagation(row.index);
-  }, [rootVirtualizer, row.index]);
-
-  useEffect(
-    () => () => {
-      // ensure that for a row that's been scrolled,
-      // if said row is technically still in view because it's cell is being rendered,
-      // when we are unmounting because the expand action from the cell's row was clicked,
-      // we want to ensure said row is the top most item in our list
-      if (
-        virtualRow?.index &&
-        !rootVirtualizer.isScrolling &&
-        getScrollOffset() > getScrollMargin()
-      ) {
-        rootVirtualizer.scrollToVirtualizedIndex(virtualRow.index, {
-          align: 'start',
-          behavior: 'auto',
-        });
-      }
-    },
-    [rootVirtualizer, virtualRow?.index, getScrollOffset, getScrollMargin]
-  );
+  const isRowReturning = childController?.isReturningCell(leafCacheKey) ?? false;
+  const isReady =
+    Boolean(leafData) && !isPendingRowLeafDataFetch && (isActivated || isRowReturning);
 
   const memoizedChild = useMemo(() => {
     return React.createElement(children, {
@@ -159,30 +159,15 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       cellId: leafCacheKey,
       key: leafCacheKey,
       nodePath,
-      getScrollElement,
-      getScrollOffset,
-      getScrollMargin,
-      preventSizeChangePropagation,
+      virtualizerController: childController!,
+      rowIndex: row.index,
     });
-  }, [
-    children,
-    leafData,
-    leafCacheKey,
-    nodePath,
-    getScrollElement,
-    getScrollOffset,
-    getScrollMargin,
-    preventSizeChangePropagation,
-  ]);
+  }, [children, leafData, leafCacheKey, nodePath, childController, row.index]);
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem css={styles.cellWrapper} tabIndex={0}>
-        <EuiSkeletonText
-          lines={3}
-          size={size === 'l' ? 'm' : size}
-          isLoading={isPendingRowLeafDataFetch || !leafData}
-        >
+        <EuiSkeletonText lines={3} size={size === 'l' ? 'm' : size} isLoading={!isReady}>
           <div css={styles.cellInner}>{memoizedChild}</div>
         </EuiSkeletonText>
       </EuiFlexItem>

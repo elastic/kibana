@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { reducer } from './state_reducer';
+import { Query } from '@elastic/eui';
+import { reducer, DEFAULT_SELECTION } from './state_reducer';
 import { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './types';
 import type { ContentListClientState, ContentListAction } from './types';
 
@@ -15,7 +16,7 @@ describe('state_reducer', () => {
   /**
    * Creates initial client state for testing.
    *
-   * Note: The reducer only manages client-controlled state (search, filters, sort, pagination).
+   * Note: The reducer only manages client-controlled state (search, filters, sort, pagination, selection).
    * Query data (items, isLoading, error) is managed by React Query directly.
    */
   const createInitialState = (
@@ -25,6 +26,7 @@ describe('state_reducer', () => {
     filters: DEFAULT_FILTERS,
     sort: { field: 'updatedAt', direction: 'desc' },
     page: { index: 0, size: 20 },
+    selection: { ...DEFAULT_SELECTION },
     ...overrides,
   });
 
@@ -55,8 +57,9 @@ describe('state_reducer', () => {
       expect(newState.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
     });
 
-    it('preserves filters when setting sort', () => {
+    it('preserves filters and search when setting sort', () => {
       const initialState = createInitialState({
+        search: { queryText: 'my query' },
         filters: { search: 'test query' },
       });
       const action: ContentListAction = {
@@ -67,6 +70,21 @@ describe('state_reducer', () => {
       const newState = reducer(initialState, action);
 
       expect(newState.filters).toEqual({ search: 'test query' });
+      expect(newState.search.queryText).toBe('my query');
+    });
+
+    it('clears selection when sort changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SORT,
+        payload: { field: 'title', direction: 'asc' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
     });
   });
 
@@ -103,6 +121,95 @@ describe('state_reducer', () => {
       const action: ContentListAction = {
         type: CONTENT_LIST_ACTIONS.SET_PAGE_INDEX,
         payload: { index: 1 },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters).toEqual({ search: 'test query' });
+      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+    });
+
+    it('clears selection when page index changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_PAGE_INDEX,
+        payload: { index: 2 },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
+  });
+
+  describe('SET_SELECTION', () => {
+    it('sets selected IDs', () => {
+      const initialState = createInitialState();
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SELECTION,
+        payload: { ids: ['1', '3'] },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual(['1', '3']);
+    });
+
+    it('replaces existing selection', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SELECTION,
+        payload: { ids: ['3'] },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual(['3']);
+    });
+
+    it('preserves sort and filters when setting selection', () => {
+      const initialState = createInitialState({
+        filters: { search: 'test query' },
+        sort: { field: 'title', direction: 'asc' },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SELECTION,
+        payload: { ids: ['1'] },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters).toEqual({ search: 'test query' });
+      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+    });
+  });
+
+  describe('CLEAR_SELECTION', () => {
+    it('clears all selected IDs', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2', '3'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.CLEAR_SELECTION,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
+
+    it('preserves sort and filters when clearing selection', () => {
+      const initialState = createInitialState({
+        filters: { search: 'test query' },
+        sort: { field: 'title', direction: 'asc' },
+        selection: { selectedIds: ['1'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.CLEAR_SELECTION,
       };
 
       const newState = reducer(initialState, action);
@@ -181,6 +288,20 @@ describe('state_reducer', () => {
       expect(newState.search.queryText).toBe('');
       expect(newState.filters).toEqual({ search: undefined });
     });
+
+    it('clears selection when search changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'dashboard', filters: { search: 'dashboard' } },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
   });
 
   describe('CLEAR_FILTERS', () => {
@@ -240,6 +361,21 @@ describe('state_reducer', () => {
       expect(newState.page.index).toBe(0);
       expect(newState.page.size).toBe(20);
     });
+
+    it('clears selection when filters are cleared', () => {
+      const initialState = createInitialState({
+        filters: { search: 'test' },
+        search: { queryText: 'test' },
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
   });
 
   describe('SET_PAGE_SIZE', () => {
@@ -282,6 +418,20 @@ describe('state_reducer', () => {
       expect(newState.filters).toEqual({ search: 'test query' });
       expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
     });
+
+    it('clears selection when page size changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_PAGE_SIZE,
+        payload: { size: 50 },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
   });
 
   describe('SET_SORT resets page index', () => {
@@ -296,6 +446,312 @@ describe('state_reducer', () => {
 
       expect(newState.page.index).toBe(0);
       expect(newState.page.size).toBe(20);
+    });
+  });
+
+  describe('TOGGLE_FILTER', () => {
+    describe('include toggle (no modifier key)', () => {
+      it('adds a value to the include filter when not already included', () => {
+        const initialState = createInitialState();
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: false,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.filters.tag).toEqual({ include: ['tag-1'], exclude: [] });
+      });
+
+      it('removes a value from the include filter when already included', () => {
+        const initialState = createInitialState({
+          filters: { tag: { include: ['tag-1'], exclude: [] } },
+        });
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: false,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.filters.tag).toBeUndefined();
+      });
+
+      it('moves a value from exclude to include', () => {
+        const initialState = createInitialState({
+          filters: { tag: { include: [], exclude: ['tag-1'] } },
+        });
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: false,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.filters.tag).toEqual({ include: ['tag-1'], exclude: [] });
+      });
+
+      it('works for non-tag filter dimensions', () => {
+        const initialState = createInitialState();
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'type',
+            valueId: 'dashboard',
+            valueName: 'Dashboard',
+            withModifierKey: false,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.filters.type).toEqual({ include: ['dashboard'], exclude: [] });
+        expect(newState.filters.tag).toBeUndefined();
+      });
+    });
+
+    describe('exclude toggle (with modifier key)', () => {
+      it('adds a value to the exclude filter when not already excluded', () => {
+        const initialState = createInitialState();
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: true,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.filters.tag).toEqual({ include: [], exclude: ['tag-1'] });
+      });
+
+      it('removes a value from the exclude filter when already excluded', () => {
+        const initialState = createInitialState({
+          filters: { tag: { include: [], exclude: ['tag-1'] } },
+        });
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: true,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.filters.tag).toBeUndefined();
+      });
+
+      it('moves a value from include to exclude', () => {
+        const initialState = createInitialState({
+          filters: { tag: { include: ['tag-1'], exclude: [] } },
+        });
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: true,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.filters.tag).toEqual({ include: [], exclude: ['tag-1'] });
+      });
+    });
+
+    describe('query text synchronization', () => {
+      it('adds value to query text when including', () => {
+        const initialState = createInitialState({ search: { queryText: 'my search' } });
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: false,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.search.queryText).toContain('production');
+      });
+
+      it('removes value from query text when de-selecting', () => {
+        const afterAdd = reducer(createInitialState(), {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: false,
+          },
+        });
+        expect(afterAdd.search.queryText).toContain('production');
+
+        const afterRemove = reducer(afterAdd, {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: false,
+          },
+        });
+
+        expect(afterRemove.search.queryText).not.toContain('production');
+        expect(afterRemove.filters.tag).toBeUndefined();
+      });
+
+      it('parses existing queryText and appends new filter values', () => {
+        const initialState = createInitialState({
+          filters: { tag: { include: ['tag-1'], exclude: [] } },
+          search: { queryText: 'tag:production' },
+        });
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-2',
+            valueName: 'staging',
+            withModifierKey: false,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.search.queryText).toContain('production');
+        expect(newState.search.queryText).toContain('staging');
+      });
+    });
+
+    describe('side effects', () => {
+      it('resets page index to 0', () => {
+        const initialState = createInitialState({ page: { index: 3, size: 20 } });
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: false,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.page.index).toBe(0);
+        expect(newState.page.size).toBe(20);
+      });
+
+      it('clears selection', () => {
+        const initialState = createInitialState({
+          selection: { selectedIds: ['item-1', 'item-2'] },
+        });
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: false,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.selection.selectedIds).toEqual([]);
+      });
+
+      it('preserves sort', () => {
+        const initialState = createInitialState({
+          sort: { field: 'title', direction: 'asc' },
+        });
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: false,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+      });
+
+      it('preserves other filter dimensions', () => {
+        const initialState = createInitialState({
+          filters: { search: 'my query', type: { include: ['dashboard'], exclude: [] } },
+        });
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: false,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.filters.search).toBe('my query');
+        expect(newState.filters.type).toEqual({ include: ['dashboard'], exclude: [] });
+      });
+    });
+
+    describe('parse failure fallback', () => {
+      it('still updates filters and preserves query text on parse error', () => {
+        const parseSpy = jest.spyOn(Query, 'parse').mockImplementation(() => {
+          throw new Error('parse error');
+        });
+
+        const initialState = createInitialState({
+          search: { queryText: 'some query' },
+        });
+        const action: ContentListAction = {
+          type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
+          payload: {
+            filterId: 'tag',
+            valueId: 'tag-1',
+            valueName: 'production',
+            withModifierKey: false,
+          },
+        };
+
+        const newState = reducer(initialState, action);
+
+        expect(newState.filters.tag).toEqual({ include: ['tag-1'], exclude: [] });
+        expect(newState.search.queryText).toBe('some query');
+
+        parseSpy.mockRestore();
+      });
     });
   });
 
@@ -327,6 +783,7 @@ describe('state_reducer', () => {
       const initialState = createInitialState();
       const originalSort = initialState.sort;
       const originalFilters = initialState.filters;
+      const originalSelection = initialState.selection;
 
       reducer(initialState, {
         type: CONTENT_LIST_ACTIONS.SET_SORT,
@@ -335,6 +792,32 @@ describe('state_reducer', () => {
 
       expect(initialState.sort).toBe(originalSort);
       expect(initialState.filters).toBe(originalFilters);
+      expect(initialState.selection).toBe(originalSelection);
+    });
+
+    it('returns a new state object for SET_SELECTION', () => {
+      const initialState = createInitialState();
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SELECTION,
+        payload: { ids: ['1'] },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState).not.toBe(initialState);
+    });
+
+    it('returns a new state object for CLEAR_SELECTION', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.CLEAR_SELECTION,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState).not.toBe(initialState);
     });
 
     it('returns a new state object for SET_SEARCH', () => {

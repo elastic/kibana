@@ -177,7 +177,7 @@
             "section": "def-common.SplitButtonProps",
             "text": "SplitButtonProps"
           },
-          " & { showNotificationIndicator?: boolean | undefined; notificationIndicatorColor?: string | undefined; notificationIndicatorSize?: \"m\" | \"original\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined; notifcationIndicatorTooltipContent?: string | undefined; notificationIndicatorPosition?: { top?: number | undefined; right?: number | undefined; left?: number | undefined; bottom?: number | undefined; } | undefined; notificationIndicatorHasStroke?: boolean | undefined; }"
+          " & { showNotificationIndicator?: boolean | undefined; notificationIndicatorColor?: string | undefined; notificationIndicatorSize?: \"m\" | \"s\" | \"original\" | \"l\" | \"xl\" | \"xxl\" | undefined; notifcationIndicatorTooltipContent?: string | undefined; notificationIndicatorPosition?: { top?: number | undefined; right?: number | undefined; left?: number | undefined; bottom?: number | undefined; } | undefined; notificationIndicatorHasStroke?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-split-button/src/split_button_with_notification.tsx",
         "lineNumber": 21,

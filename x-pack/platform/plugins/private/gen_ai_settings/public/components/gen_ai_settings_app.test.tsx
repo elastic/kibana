@@ -17,9 +17,11 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 
 // Mock the context hook
 jest.mock('../contexts/enabled_features_context');
@@ -66,6 +68,10 @@ describe('GenAiSettingsApp', () => {
       value: false,
       type: 'boolean',
     },
+    'agentBuilder:prePromptWorkflowIds': {
+      value: [],
+      type: 'array',
+    },
     [AI_CHAT_EXPERIENCE_TYPE]: {
       value: AIChatExperience.Classic,
       type: 'select',
@@ -85,6 +91,7 @@ describe('GenAiSettingsApp', () => {
     showAiBreadcrumb: true,
     showAiAssistantsVisibilitySetting: true,
     showChatExperienceSetting: true,
+    showAnonymizationProfilesSection: true,
     ...overrides,
   });
 
@@ -101,6 +108,7 @@ describe('GenAiSettingsApp', () => {
       observabilityAIAssistant: { show: true },
       securitySolutionAssistant: { 'ai-assistant': true },
       agentBuilder: { show: true },
+      anonymization: { show: true, manage: true },
     };
 
     // Mock feature flags to enable AI Agents by default
@@ -110,6 +118,12 @@ describe('GenAiSettingsApp', () => {
 
     // Mock settings client with default settings
     coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
+    coreStart.http.fetch.mockResolvedValue({
+      page: 1,
+      perPage: 20,
+      total: 0,
+      data: [],
+    });
 
     // Default mock for enabled features
     mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
@@ -119,6 +133,11 @@ describe('GenAiSettingsApp', () => {
     const services = {
       ...coreStart,
       productDocBase: mockProductDocBase,
+      agentBuilder: {
+        tools: {
+          listWorkflows: jest.fn().mockResolvedValue({ results: [] }),
+        },
+      },
       analytics: { reportEvent: jest.fn() },
       ...servicesOverrides,
     };
@@ -177,6 +196,14 @@ describe('GenAiSettingsApp', () => {
       // Feature visibility section (with default settings)
       expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();
       expect(screen.getByTestId('goToSpacesButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('agentBuilderSectionTitle')).not.toBeInTheDocument();
+
+      // Anonymization section
+      expect(screen.getByTestId('anonymizationProfilesSection')).toBeInTheDocument();
+      expect(screen.getByTestId('anonymizationProfilesActiveSpaceId')).toHaveTextContent(
+        'Space: default'
+      );
+      expect(screen.getByText('Manage')).toBeInTheDocument();
     });
 
     it('should conditionally render sections based on settings', () => {
@@ -184,9 +211,17 @@ describe('GenAiSettingsApp', () => {
         createFeatureFlagsMock({ showSpacesIntegration: false })
       );
 
-      renderComponent();
+      const firstRender = renderComponent();
       expect(screen.queryByTestId('aiFeatureVisibilitySection')).not.toBeInTheDocument();
       expect(screen.queryByTestId('goToSpacesButton')).not.toBeInTheDocument();
+      firstRender.unmount();
+
+      mockUseEnabledFeatures.mockReturnValue(
+        createFeatureFlagsMock({ showAnonymizationProfilesSection: false })
+      );
+      const secondRender = renderComponent();
+      expect(screen.queryByTestId('anonymizationProfilesSection')).not.toBeInTheDocument();
+      secondRender.unmount();
 
       mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
       coreStart.application.capabilities = {
@@ -198,9 +233,90 @@ describe('GenAiSettingsApp', () => {
         },
       };
 
-      renderComponent();
+      const thirdRender = renderComponent();
       expect(screen.queryByTestId('aiFeatureVisibilitySection')).not.toBeInTheDocument();
       expect(screen.queryByTestId('goToSpacesButton')).not.toBeInTheDocument();
+      thirdRender.unmount();
+    });
+  });
+
+  describe('Anonymization Profiles section', () => {
+    it('switches to read-only mode when manage capability is absent', async () => {
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        anonymization: { show: true, manage: false },
+      };
+
+      renderComponent();
+
+      expect(await screen.findByTestId('anonymizationProfilesSection')).toBeInTheDocument();
+      expect(screen.getByText('Read only')).toBeInTheDocument();
+      expect(screen.getByTestId('anonymizationProfilesCreateProfile')).toBeDisabled();
+    });
+
+    it('opens create profile flyout in manage mode', async () => {
+      renderComponent();
+
+      fireEvent.click(await screen.findByTestId('anonymizationProfilesCreateProfile'));
+      expect(await screen.findByTestId('anonymizationProfilesProfileFlyout')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText('Cancel'));
+      await waitFor(() => {
+        expect(screen.queryByTestId('anonymizationProfilesProfileFlyout')).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('pre-execution workflow section gating', () => {
+    it('renders pre-execution workflow section when required advanced settings are enabled', async () => {
+      jest.spyOn(coreStart.settings.client, 'get').mockImplementation((key, fallback) => {
+        if (
+          key === WORKFLOWS_UI_SETTING_ID ||
+          key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        ) {
+          return true;
+        }
+        return fallback;
+      });
+
+      renderComponent();
+
+      expect(await screen.findByTestId('agentBuilderSectionTitle')).toBeInTheDocument();
+      expect(await screen.findByTestId('genAiSettingsPrePromptWorkflowPicker')).toBeInTheDocument();
+    });
+
+    it('does not render pre-execution workflow section when workflows UI advanced setting is disabled', () => {
+      jest.spyOn(coreStart.settings.client, 'get').mockImplementation((key, fallback) => {
+        if (key === WORKFLOWS_UI_SETTING_ID) {
+          return false;
+        }
+        return fallback;
+      });
+      jest
+        .spyOn(coreStart.featureFlags, 'getBooleanValue')
+        .mockImplementation((_flagName, _fallbackValue) => true);
+
+      renderComponent();
+
+      expect(screen.queryByTestId('agentBuilderSectionTitle')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('genAiSettingsPrePromptWorkflowPicker')).not.toBeInTheDocument();
+    });
+
+    it('does not render pre-execution workflow section when experimental features setting is disabled', () => {
+      jest.spyOn(coreStart.settings.client, 'get').mockImplementation((key, fallback) => {
+        if (key === WORKFLOWS_UI_SETTING_ID) {
+          return true;
+        }
+        if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) {
+          return false;
+        }
+        return fallback;
+      });
+
+      renderComponent();
+
+      expect(screen.queryByTestId('agentBuilderSectionTitle')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('genAiSettingsPrePromptWorkflowPicker')).not.toBeInTheDocument();
     });
   });
 

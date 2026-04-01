@@ -253,6 +253,7 @@ export const createCasesClientMockArgs = () => {
     ),
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
     fileService: createFileServiceMock(),
+    config: ConfigSchema.validate({}),
   };
 };
 

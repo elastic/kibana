@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiBasicTableColumn, EuiTableSortingType, Criteria } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -21,6 +21,7 @@ import { InputTypesBadges } from './input_types_badges';
 import { Status } from './status';
 import { useUIState } from '../../../contexts';
 import { useIntegrationForm } from '../../../forms/integration_form';
+import { useTelemetry } from '../../../../telemetry_context';
 
 interface DataStreamsTableProps {
   integrationId: string;
@@ -33,19 +34,32 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
   const { reanalyzeDataStreamMutation } = useReanalyzeDataStream();
   const { openEditPipelineFlyout } = useUIState();
   const { formData } = useIntegrationForm();
+  const {
+    reportEditDataStreamFlyoutOpened,
+    reportDataStreamDeleteConfirmed,
+    reportDataStreamRefreshConfirmed,
+  } = useTelemetry();
+
+  const handleOpenEditPipelineFlyout = useCallback(
+    (item: DataStreamResponse) => {
+      openEditPipelineFlyout(item);
+      reportEditDataStreamFlyoutOpened();
+    },
+    [reportEditDataStreamFlyoutOpened, openEditPipelineFlyout]
+  );
   const [dataStreamDeleteTarget, setDataStreamDeleteTarget] = useState<DataStreamResponse | null>(
     null
   );
+  const [dataStreamReanalyzeTarget, setDataStreamReanalyzeTarget] =
+    useState<DataStreamResponse | null>(null);
   const deleteModalTitleId = useGeneratedHtmlId();
-  const [sortField, setSortField] = useState<keyof DataStreamResponse>('title');
+  const reanalyzeModalTitleId = useGeneratedHtmlId();
+  const [sortField, setSortField] = useState<keyof DataStreamResponse | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const sorting: EuiTableSortingType<DataStreamResponse> = {
-    sort: {
-      field: sortField,
-      direction: sortDirection,
-    },
-  };
+  const sorting: EuiTableSortingType<DataStreamResponse> = sortField
+    ? { sort: { field: sortField, direction: sortDirection } }
+    : { sort: undefined };
 
   const onTableChange = ({ sort }: Criteria<DataStreamResponse>) => {
     if (sort) {
@@ -55,6 +69,9 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
   };
 
   const sortedItems = useMemo(() => {
+    if (!sortField) {
+      return items;
+    }
     return [...items].sort((a, b) => {
       const aValue = a[sortField];
       const bValue = b[sortField];
@@ -72,8 +89,25 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
 
   const isDeleting = (item: DataStreamResponse) => item.status === 'deleting';
 
+  const handleReAnalyzeConfirm = () => {
+    if (!formData?.connectorId || !dataStreamReanalyzeTarget) return;
+
+    reportDataStreamRefreshConfirmed();
+    setDataStreamReanalyzeTarget(null);
+    reanalyzeDataStreamMutation.mutate({
+      integrationId,
+      dataStreamId: dataStreamReanalyzeTarget.dataStreamId,
+      connectorId: formData.connectorId,
+    });
+  };
+
+  const handleReanalyzeCancel = () => {
+    setDataStreamReanalyzeTarget(null);
+  };
+
   const handleDeleteConfirm = () => {
     if (dataStreamDeleteTarget) {
+      reportDataStreamDeleteConfirmed();
       setDataStreamDeleteTarget(null);
       deleteDataStreamMutation.mutate({
         integrationId,
@@ -100,11 +134,11 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
           {
             name: i18n.TABLE_ACTIONS.expand,
             description: i18n.TABLE_ACTIONS.expandDescription,
-            icon: 'expand',
+            icon: 'maximize',
             type: 'icon',
             'data-test-subj': 'expandDataStreamButton',
             onClick: (item: DataStreamResponse) => {
-              openEditPipelineFlyout(item);
+              handleOpenEditPipelineFlyout(item);
             },
             enabled: (item: DataStreamResponse) => item.status === 'completed' && !isDeleting(item),
           },
@@ -156,12 +190,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
             type: 'icon',
             'data-test-subj': 'refreshDataStreamButton',
             onClick: (item: DataStreamResponse) => {
-              if (!formData?.connectorId) return;
-              reanalyzeDataStreamMutation.mutate({
-                integrationId,
-                dataStreamId: item.dataStreamId,
-                connectorId: formData.connectorId,
-              });
+              setDataStreamReanalyzeTarget(item);
             },
             enabled: (item: DataStreamResponse) =>
               !!formData?.connectorId &&
@@ -185,14 +214,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         width: '80px',
       },
     ];
-  }, [
-    reanalyzingDataStreamId,
-    openEditPipelineFlyout,
-    reanalyzeDataStreamMutation,
-    integrationId,
-    formData?.connectorId,
-    euiTheme,
-  ]);
+  }, [reanalyzingDataStreamId, formData?.connectorId, euiTheme, handleOpenEditPipelineFlyout]);
 
   return (
     <>
@@ -204,6 +226,20 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         sorting={sorting}
         onChange={onTableChange}
       />
+      {dataStreamReanalyzeTarget && (
+        <EuiConfirmModal
+          aria-labelledby={reanalyzeModalTitleId}
+          title={i18n.REANALYZE_MODAL.title(dataStreamReanalyzeTarget.title)}
+          titleProps={{ id: reanalyzeModalTitleId }}
+          onCancel={handleReanalyzeCancel}
+          onConfirm={handleReAnalyzeConfirm}
+          cancelButtonText={i18n.REANALYZE_MODAL.cancelButton}
+          confirmButtonText={i18n.REANALYZE_MODAL.confirmButton}
+          defaultFocusedButton="confirm"
+        >
+          <p>{i18n.REANALYZE_MODAL.body}</p>
+        </EuiConfirmModal>
+      )}
       {dataStreamDeleteTarget && (
         <EuiConfirmModal
           aria-labelledby={deleteModalTitleId}

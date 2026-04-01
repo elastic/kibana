@@ -8,15 +8,16 @@
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { getMcpToolType, listMcpTools } from './tool_type';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { getMcpToolType, listMcpTools, getNamedMcpTools } from './tool_type';
 
-jest.mock('@n8n/json-schema-to-zod', () => ({
-  jsonSchemaToZod: jest.fn(),
+jest.mock('@kbn/zod/v4/from_json_schema', () => ({
+  fromJSONSchema: jest.fn(),
 }));
 
-import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 
-const mockJsonSchemaToZod = jsonSchemaToZod as jest.MockedFunction<typeof jsonSchemaToZod>;
+const mockFromJSONSchema = fromJSONSchema as jest.MockedFunction<typeof fromJSONSchema>;
 
 describe('MCP tool_type', () => {
   let mockActions: jest.Mocked<ActionsPluginStart>;
@@ -25,10 +26,7 @@ describe('MCP tool_type', () => {
     get: jest.Mock;
   };
   let mockRequest: KibanaRequest;
-  let mockLogger: {
-    debug: jest.Mock;
-    error: jest.Mock;
-  };
+  let mockLogger: MockedLogger;
 
   const testConfig = {
     connector_id: 'test-connector-id',
@@ -70,10 +68,7 @@ describe('MCP tool_type', () => {
 
     mockRequest = {} as KibanaRequest;
 
-    mockLogger = {
-      debug: jest.fn(),
-      error: jest.fn(),
-    };
+    mockLogger = loggerMock.create();
   });
 
   describe('listMcpTools', () => {
@@ -127,6 +122,60 @@ describe('MCP tool_type', () => {
           connectorId: 'test-connector-id',
         })
       ).rejects.toThrow('Failed to list MCP tools');
+    });
+
+    it('should prefer serviceMessage over message when both are present', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'error',
+        message: 'an error occurred while running the action',
+        serviceMessage: 'Streamable HTTP error: missing required Authorization header',
+      });
+
+      await expect(
+        listMcpTools({
+          actions: mockActions,
+          request: mockRequest,
+          connectorId: 'test-connector-id',
+        })
+      ).rejects.toThrow('Streamable HTTP error: missing required Authorization header');
+    });
+  });
+
+  describe('getNamedMcpTools', () => {
+    it('should return filtered tools matching the requested names', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: mockToolsResponse,
+      });
+
+      const result = await getNamedMcpTools({
+        actions: mockActions,
+        request: mockRequest,
+        connectorId: 'test-connector-id',
+        toolNames: ['test_tool'],
+        logger: mockLogger,
+      });
+
+      expect(result).toEqual([{ name: 'test_tool', description: 'Test tool description' }]);
+    });
+
+    it('should throw and log when the connector execution fails', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'error',
+        message: 'an error occurred while running the action',
+        serviceMessage: 'Streamable HTTP error: missing required Authorization header',
+      });
+
+      await expect(
+        getNamedMcpTools({
+          actions: mockActions,
+          request: mockRequest,
+          connectorId: 'test-connector-id',
+          toolNames: ['test_tool'],
+          logger: mockLogger,
+        })
+      ).rejects.toThrow('Streamable HTTP error: missing required Authorization header');
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
@@ -322,8 +371,8 @@ describe('MCP tool_type', () => {
           data: mockToolsResponse,
         });
 
-        const mockZodSchema = { _def: { typeName: 'ZodObject' } };
-        mockJsonSchemaToZod.mockReturnValue(mockZodSchema as any);
+        const mockZodSchema = { _zod: { typeName: 'ZodObject' } };
+        mockFromJSONSchema.mockReturnValue(mockZodSchema as any);
 
         const schema = await dynamicProps.getSchema();
 
@@ -334,7 +383,7 @@ describe('MCP tool_type', () => {
             subActionParams: {},
           },
         });
-        expect(mockJsonSchemaToZod).toHaveBeenCalledWith(mockToolsResponse.tools[0].inputSchema);
+        expect(mockFromJSONSchema).toHaveBeenCalledWith(mockToolsResponse.tools[0].inputSchema);
         expect(schema).toBe(mockZodSchema);
       });
 
@@ -352,7 +401,7 @@ describe('MCP tool_type', () => {
 
         const schema = await dynamicProps.getSchema();
         expect(schema).toBeDefined();
-        expect(mockJsonSchemaToZod).not.toHaveBeenCalled();
+        expect(mockFromJSONSchema).not.toHaveBeenCalled();
       });
 
       it('should return empty schema when tool not found in listTools response', async () => {
@@ -371,10 +420,10 @@ describe('MCP tool_type', () => {
 
         const schema = await dynamicProps.getSchema();
         expect(schema).toBeDefined();
-        expect(mockJsonSchemaToZod).not.toHaveBeenCalled();
+        expect(mockFromJSONSchema).not.toHaveBeenCalled();
       });
 
-      it('should throw error when jsonSchemaToZod fails', async () => {
+      it('should return empty schema when fromJSONSchema returns undefined', async () => {
         const toolType = getMcpToolType({ actions: mockActions });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
@@ -386,11 +435,10 @@ describe('MCP tool_type', () => {
           data: mockToolsResponse,
         });
 
-        mockJsonSchemaToZod.mockImplementation(() => {
-          throw new Error('Invalid JSON Schema');
-        });
+        mockFromJSONSchema.mockReturnValue(undefined);
 
-        await expect(dynamicProps.getSchema()).rejects.toThrow('Invalid JSON Schema');
+        const schema = await dynamicProps.getSchema();
+        expect(schema).toBeDefined();
       });
     });
 

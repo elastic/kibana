@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -25,6 +25,15 @@ import {
 } from './shared';
 import { horizontalAlignmentSchema } from '../alignments';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
+import { builderEnums } from '../enums';
+
+/**
+ * Datatable supports an additional "badge" mode (render colored values as badges),
+ * so it uses a datatable-specific schema rather than the shared applyColorToSchema.
+ */
+const applyColorToDatatableSchema = schema.oneOf([applyColorToSchema, schema.literal('badge')], {
+  meta: { description: 'Where to apply the color for datatable (value, background, or badge)' },
+});
 
 /**
  * Sorting configuration for the datatable. Only one column can be sorted at a time.
@@ -41,9 +50,7 @@ const sortingSchema = schema.oneOf(
           min: 0,
           meta: { description: 'Index of the column/row to sort by (0-based)' },
         }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
       },
       { meta: { description: 'Sort by a metric or row column' } }
     ),
@@ -65,9 +72,7 @@ const sortingSchema = schema.oneOf(
             description: 'Array of pivot values, one for each split_metrics_by column in order',
           },
         }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
       },
       {
         meta: {
@@ -183,15 +188,30 @@ const datatableStateSharedOptionsSchema = {
    * Sorting configuration
    */
   sort_by: schema.maybe(sortingSchema),
+  /**
+   * Show row numbers
+   */
+  row_numbers: schema.maybe(
+    schema.object(
+      {
+        visible: schema.boolean({ meta: { description: 'Show row numbers' } }),
+      },
+      {
+        meta: {
+          description: 'Configuration for row numbers',
+        },
+      }
+    )
+  ),
 };
 
 const datatableStateCommonOptionsSchema = {
   /**
-   * Where to apply the color (background or value)
+   * Where to apply the color (background, value or badge)
    */
-  apply_color_to: schema.maybe(applyColorToSchema),
+  apply_color_to: schema.maybe(applyColorToDatatableSchema),
   /**
-   * Whether to show the column
+   * Show the column
    */
   visible: schema.maybe(schema.boolean({ defaultValue: true })),
   /**
@@ -298,7 +318,7 @@ const datatableStateMetricsOptionsSchema = {
 };
 
 interface SortByValidationInput {
-  metrics: Array<{}>;
+  metrics?: Array<{}>;
   rows?: Array<{}>;
   split_metrics_by?: Array<{}>;
   sort_by?: {
@@ -320,9 +340,11 @@ function validateSortBy({
 
   const { column_type, index, values } = sort_by;
 
+  const numberOfMetrics = metrics?.length ?? 0;
+
   if (column_type === 'metric') {
-    if (index == null || index >= metrics.length) {
-      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
+    if (index == null || index >= numberOfMetrics) {
+      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${numberOfMetrics} item(s).`;
     }
   }
 
@@ -341,8 +363,8 @@ function validateSortBy({
       return `Cannot sort by 'pivoted_metric' when no split_metrics_by columns are defined.`;
     }
 
-    if (index == null || index >= metrics.length) {
-      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
+    if (index == null || index >= numberOfMetrics) {
+      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${numberOfMetrics} item(s).`;
     }
 
     if (values == null || values.length !== split_metrics_by.length) {
@@ -353,7 +375,7 @@ function validateSortBy({
 
 export const datatableStateSchemaNoESQL = schema.object(
   {
-    type: schema.literal('datatable'),
+    type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
@@ -398,6 +420,7 @@ export const datatableStateSchemaNoESQL = schema.object(
     validate: validateSortBy,
     meta: {
       id: 'datatableNoESQL',
+      title: 'Datatable (DSL)',
       description: 'Datatable state configuration for standard queries',
     },
   }
@@ -405,7 +428,7 @@ export const datatableStateSchemaNoESQL = schema.object(
 
 export const datatableStateSchemaESQL = schema.object(
   {
-    type: schema.literal('datatable'),
+    type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
@@ -413,21 +436,23 @@ export const datatableStateSchemaESQL = schema.object(
     /**
      * Metric columns configuration, must define operation.
      */
-    metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
-        meta: { id: 'datatableESQLMetric' },
-      }),
-      {
-        minSize: 1,
-        maxSize: 1000,
-        meta: { description: 'Array of metrics to display as columns in the datatable' },
-      }
+    metrics: schema.maybe(
+      schema.arrayOf(
+        esqlColumnWithFormatSchema.extends(datatableStateMetricsOptionsSchema, {
+          meta: { id: 'datatableESQLMetric', title: 'Datatable Metric (ES|QL)' },
+        }),
+        {
+          minSize: 1,
+          maxSize: 1000,
+          meta: { description: 'Array of metrics to display as columns in the datatable' },
+        }
+      )
     ),
     /**
      * Row configuration, optional operations.
      */
     rows: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(datatableStateRowsOptionsESQLSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(datatableStateRowsOptionsESQLSchema), {
         minSize: 1,
         maxSize: 50,
         meta: { description: 'Array of operations to split the datatable rows by' },
@@ -437,7 +462,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Split metrics by configuration, optional operations.
      */
     split_metrics_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema, {
+      schema.arrayOf(esqlColumnWithFormatSchema, {
         minSize: 1,
         maxSize: 20,
         meta: { description: 'Array of operations to split the metric columns by' },
@@ -445,9 +470,21 @@ export const datatableStateSchemaESQL = schema.object(
     ),
   },
   {
-    validate: validateSortBy,
+    validate: (arg) => {
+      const sortByError = validateSortBy(arg);
+      if (sortByError) {
+        return sortByError;
+      }
+
+      const { metrics, rows } = arg;
+
+      if (!metrics && !rows) {
+        return 'Datatable must have at least one column';
+      }
+    },
     meta: {
       id: 'datatableESQL',
+      title: 'Datatable (ES|QL)',
       description: 'Datatable state configuration for ES|QL queries',
     },
   }
@@ -457,8 +494,9 @@ export const datatableStateSchema = schema.oneOf(
   [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
   {
     meta: {
+      id: 'datatableChart',
+      title: 'Datatable',
       description: 'Datatable chart configuration: DSL or ES|QL query based',
-      id: 'datatableChartSchema',
     },
   }
 );

@@ -9,8 +9,8 @@ import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
 import type {
   Attachment,
-  AttachmentInput,
   VersionedAttachment,
+  AttachmentInput,
   AttachmentVersionRef,
 } from '../attachments';
 import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
@@ -46,6 +46,7 @@ export interface ConverseInput {
   message?: string;
   /**
    * Optional attachments to provide to the agent.
+   * Use `origin` without `data` for by-reference types that implement `resolve`.
    * @deprecated Use attachment_refs with conversation-level attachments instead
    */
   attachments?: AttachmentInput[];
@@ -73,6 +74,7 @@ export interface AssistantResponse {
 export enum ConversationRoundStepType {
   toolCall = 'tool_call',
   reasoning = 'reasoning',
+  compaction = 'compaction',
 }
 
 // tool call step
@@ -115,6 +117,10 @@ export interface ToolCallWithResult {
    * Result of the tool
    */
   results: ToolResult[];
+  /**
+   * Optional group ID shared by tool calls that were executed in parallel from the same LLM response
+   */
+  tool_call_group_id?: string;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -159,7 +165,27 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
 /**
  * Defines all possible types for round steps.
  */
-export type ConversationRoundStep = ToolCallStep | ReasoningStep;
+// compaction step
+
+export interface CompactionStepData {
+  /** Number of conversation rounds that were summarized into a compact form */
+  summarized_round_count: number;
+  /** Estimated token count of the conversation before compaction */
+  token_count_before: number;
+  /** Estimated token count of the conversation after compaction */
+  token_count_after: number;
+}
+
+export type CompactionStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.compaction,
+  CompactionStepData
+>;
+
+export const isCompactionStep = (step: ConversationRoundStep): step is CompactionStep => {
+  return step.type === ConversationRoundStepType.compaction;
+};
+
+export type ConversationRoundStep = ToolCallStep | ReasoningStep | CompactionStep;
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */
@@ -267,8 +293,63 @@ export interface ConversationInternalState {
    * These tools are persisted across rounds so they remain available.
    */
   dynamic_tool_ids?: string[];
+  /**
+   * Summary of compacted older conversation rounds.
+   * Generated when the conversation approaches the model's context window limit.
+   * Reused across rounds until regeneration is needed.
+   */
+  compaction_summary?: CompactionSummary;
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
 
 export type ConversationAction = 'regenerate';
+
+// Compaction summary types
+
+/** Compact representation of a tool call in a compaction summary */
+export interface CompactionToolCallSummary {
+  tool_id: string;
+  /** Short stringified summary of the params the tool was called with */
+  params_summary: string;
+}
+
+/** Structured entity extracted during compaction */
+export interface CompactionEntity {
+  type: string;
+  name: string;
+}
+
+/**
+ * Structured data produced by the compaction pipeline.
+ * Semantic fields (discussion_summary, user_intent, key_topics,
+ * outcomes_and_decisions, unanswered_questions, entities) are LLM-generated.
+ * Deterministic fields (tool_calls_summary, agent_actions)
+ * are extracted programmatically from the round data.
+ */
+export interface CompactionStructuredData {
+  discussion_summary: string;
+  user_intent: string;
+  key_topics: string[];
+  outcomes_and_decisions: string[];
+  agent_actions: string[];
+  entities: CompactionEntity[];
+  unanswered_questions: string[];
+  tool_calls_summary: CompactionToolCallSummary[];
+}
+
+/**
+ * Summary of compacted conversation rounds.
+ * Stored at the conversation level and reused across rounds
+ * until the context window fills up again and regeneration is needed.
+ */
+export interface CompactionSummary {
+  /** Number of rounds that were summarized */
+  summarized_round_count: number;
+  /** When the summary was generated */
+  created_at: string;
+  /** Estimated token count of the serialized summary */
+  token_count: number;
+  /** Structured summary data */
+  structured_data: CompactionStructuredData;
+}

@@ -315,7 +315,7 @@ export const AwsCredentialsFormAgentless = ({
                 data-test-subj={AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ}
                 target="_blank"
                 iconSide="left"
-                iconType="launch"
+                iconType="rocket"
                 href={cloudFormationConfig.templateUrl}
               >
                 <FormattedMessage
@@ -346,7 +346,6 @@ export const AwsCredentialsFormAgentless = ({
         <Suspense fallback={<EuiLoadingSpinner />}>
           <LazyCloudConnectorSetup
             templateName={templateName}
-            input={input}
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
@@ -354,6 +353,12 @@ export const AwsCredentialsFormAgentless = ({
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             cloud={cloud}
             cloudProvider={AWS_PROVIDER}
+            accountType={accountType}
+            iacTemplateUrl={getTemplateUrlFromPackageInfo(
+              packageInfo,
+              templateName ?? '',
+              SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
+            )}
           />
         </Suspense>
       )}
