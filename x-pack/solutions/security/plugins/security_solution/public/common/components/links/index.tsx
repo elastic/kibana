@@ -312,7 +312,15 @@ export const EntityDetailsLink = ({
       />
     );
   } else if (entityType === EntityType.user) {
-    return <UserDetailsLink {...props} userTab={tab as UsersTableType} userName={entityName} />;
+    return (
+      <UserDetailsLink
+        {...props}
+        userTab={tab as UsersTableType}
+        userName={entityName}
+        entityId={entityId}
+        identityFields={identityFields}
+      />
+    );
   } else if (entityType === EntityType.service) {
     return <ServiceDetailsLink serviceName={entityName} onClick={props.onClick} />;
   }
