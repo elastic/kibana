@@ -8,7 +8,6 @@
 import type { AnalyticsServiceSetup, CoreStart, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
-import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import type { SourceMetadata } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
 import { PostGenerateRequestBody } from '@kbn/discoveries-schemas';
 import type { PostGenerateResponse } from '@kbn/discoveries-schemas';
@@ -18,14 +17,11 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { createTracedLogger } from '@kbn/discoveries/impl/lib/create_traced_logger';
 import { validateRequest } from '@kbn/discoveries/impl/attack_discovery/generation/validate_request';
 import type { DiscoveriesPluginStartDeps } from '../../types';
+import { resolveConnectorDetails } from '../../workflows/helpers/resolve_connector_details';
 import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
 import { assertWorkflowsEnabled } from '../../lib/assert_workflows_enabled';
-import { checkManagedWorkflowIntegrity } from '../../managed_workflows/check_managed_workflow_integrity';
-import {
-  executeGenerationWorkflow,
-  getInferredPrebuiltStepTypes,
-  resolveApiConfig,
-} from './helpers';
+import type { WorkflowInitializationService } from '../../lib/workflow_initialization';
+import { executeGenerationWorkflow, getInferredPrebuiltStepTypes } from './helpers';
 
 const ROUTE_PATH = '/internal/attack_discovery/_generate';
 
@@ -37,6 +33,7 @@ export const registerGenerateRoute = (
     getEventLogIndex,
     getEventLogger,
     getStartServices,
+    workflowInitService,
     workflowsManagementApi,
   }: {
     analytics: AnalyticsServiceSetup;
@@ -46,6 +43,7 @@ export const registerGenerateRoute = (
       coreStart: CoreStart;
       pluginsStart: DiscoveriesPluginStartDeps;
     }>;
+    workflowInitService: WorkflowInitializationService;
     workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   }
 ) => {
@@ -55,7 +53,7 @@ export const registerGenerateRoute = (
       path: ROUTE_PATH,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
         },
       },
       options: {
@@ -115,26 +113,37 @@ export const registerGenerateRoute = (
           const tracedLogger = createTracedLogger(logger, executionUuid);
 
           // Resolve action_type_id from connector_id when not provided.
-          // getStartServices() is only called when a lookup is required.
-          const resolvedApiConfig = await resolveApiConfig({
-            apiConfig,
-            getStartServices,
-            logger: tracedLogger,
-            request,
-          });
+          // getStartServices() is only called when a lookup is required:
+          const resolvedApiConfig =
+            apiConfig.action_type_id != null
+              ? apiConfig
+              : await (async () => {
+                  const { pluginsStart } = await getStartServices();
+                  const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(
+                    request
+                  );
+                  const { actionTypeId } = await resolveConnectorDetails({
+                    actionsClient,
+                    connectorId: apiConfig.connector_id,
+                    inference: pluginsStart.inference,
+                    logger: tracedLogger,
+                    request,
+                  });
+                  return { ...apiConfig, action_type_id: actionTypeId };
+                })();
 
           tracedLogger.info(`Starting Attack discovery ${type} pipeline via generation workflow`);
           tracedLogger.debug(
             () =>
               `Workflow configuration: ${JSON.stringify({
-                alert_retrieval_mode: workflowConfig.alert_retrieval_mode,
                 alert_retrieval_workflow_ids: workflowConfig.alert_retrieval_workflow_ids,
                 alerts_index_pattern: alertsIndexPattern,
                 end,
-                esql_query: workflowConfig.esql_query,
                 filter,
-                start,
+                default_alert_retrieval_mode: workflowConfig.default_alert_retrieval_mode,
+                esql_query: workflowConfig.esql_query,
                 validation_workflow_id: workflowConfig.validation_workflow_id,
+                start,
               })}`
           );
 
@@ -142,18 +151,6 @@ export const registerGenerateRoute = (
             alertsIndexPattern,
             analytics,
             apiConfig: resolvedApiConfig,
-            checkIntegrity:
-              workflowsManagementApi != null
-                ? async ({ logger: checkLogger, spaceId }) => {
-                    const { pluginsStart } = await getStartServices();
-                    return checkManagedWorkflowIntegrity({
-                      analytics,
-                      logger: checkLogger,
-                      spaceId,
-                      workflowsExtensions: pluginsStart.workflowsExtensions,
-                    });
-                  }
-                : undefined,
             end,
             executionUuid,
             filter,
@@ -170,6 +167,7 @@ export const registerGenerateRoute = (
             trigger: 'manual',
             type,
             workflowConfig,
+            workflowInitService,
             workflowsManagementApi,
           }).catch((err) => {
             tracedLogger.error(`Generation workflow failed: ${err.message}`);

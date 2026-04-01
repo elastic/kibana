@@ -8,41 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 
 export interface StartupHealthCheckParams {
-  expectedWorkflowIds: readonly string[];
-  failedWorkflowIds: string[];
+  failedStepIds: string[];
   logger: Logger;
+  registeredStepCount: number;
   workflowsManagementApiAvailable: boolean;
 }
 
-/**
- * Logs a startup health check summary so operators can quickly verify
- * whether the discoveries plugin initialized correctly.
- *
- * Logs INFO when all checks pass, WARN when any issues are detected.
- */
-export const logStartupHealthCheck = ({
-  expectedWorkflowIds,
-  failedWorkflowIds,
-  logger,
-  workflowsManagementApiAvailable,
-}: StartupHealthCheckParams): void => {
-  const installedCount = expectedWorkflowIds.length - failedWorkflowIds.length;
-  const totalCount = expectedWorkflowIds.length;
-
-  const issues: string[] = [
-    ...(failedWorkflowIds.length > 0
-      ? [
-          `${failedWorkflowIds.length} managed workflow(s) not installed: ${failedWorkflowIds.join(
-            ', '
-          )}`,
-        ]
-      : []),
-    ...(!workflowsManagementApiAvailable ? ['WorkflowsManagement API is not available'] : []),
-  ];
-
-  if (issues.length === 0) {
-    logger.info(`AD 2.0 managed workflows installed: ${installedCount}/${totalCount}`);
-  } else {
-    logger.warn(`AD 2.0 managed workflows: ${issues.join('; ')}`);
-  }
-};
+// Placeholder — real implementation added in PR 4
+export const logStartupHealthCheck = (_params: StartupHealthCheckParams): void => {};

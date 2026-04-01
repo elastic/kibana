@@ -8,14 +8,23 @@
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 
 import { AttackDiscoveryError } from '../../../lib/errors/attack_discovery_error';
-
-import type { AlertRetrievalResult, AnonymizedAlert } from '../invoke_alert_retrieval_workflow';
 import type { ParsedApiConfig } from '../types';
 
-type ExtractedAlertRetrievalResult = Omit<
-  AlertRetrievalResult,
-  'workflowExecutions' | 'workflowId' | 'workflowRunId'
->;
+// Types from invoke_alert_retrieval_workflow (real impl in PR 4)
+interface AnonymizedAlert {
+  id?: string;
+  metadata: Record<string, never>;
+  page_content: string;
+}
+
+export interface ExtractedAlertRetrievalResult {
+  alerts: string[];
+  alertsContextCount: number;
+  anonymizedAlerts: AnonymizedAlert[];
+  apiConfig: ParsedApiConfig;
+  connectorName: string;
+  replacements: Record<string, string>;
+}
 
 const parseApiConfig = ({
   apiConfig,
@@ -74,7 +83,7 @@ export const extractAlertRetrievalResult = ({
   }
 
   const alertRetrievalStep = execution.stepExecutions.find(
-    (step) => step.stepType === 'security.attack-discovery.defaultAlertRetrieval'
+    (step) => step.stepType === 'attack-discovery.defaultAlertRetrieval'
   );
 
   if (!alertRetrievalStep) {
@@ -94,7 +103,6 @@ export const extractAlertRetrievalResult = ({
     });
   }
 
-  // The output is stored as JsonValue, so we need to cast it
   const output = alertRetrievalStep.output as {
     alerts?: string[];
     alerts_context_count?: number;
