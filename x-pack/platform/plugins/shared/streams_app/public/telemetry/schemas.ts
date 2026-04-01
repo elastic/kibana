@@ -493,7 +493,7 @@ const streamsInsightFeedbackSchema: RootSchema<StreamsInsightFeedbackProps> = {
   feedback: {
     type: 'keyword',
     _meta: {
-      description: 'Whether the user found the insight helpful: positive or negative',
+      description: 'Whether the user found the insight helpful or not_helpful',
     },
   },
   insight_id: {

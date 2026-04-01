@@ -8,16 +8,16 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { InsightFeedbackValue } from '../../../../../telemetry/types';
+import type { InsightUserEvaluation } from '@kbn/streams-schema';
 
 interface FeedbackButtonsProps {
-  onFeedback: (feedback: InsightFeedbackValue) => void;
+  onFeedback: (feedback: InsightUserEvaluation) => void;
 }
 
 export function FeedbackButtons({ onFeedback }: FeedbackButtonsProps) {
   const [hasReacted, setHasReacted] = React.useState(false);
 
-  const handleFeedback = (feedback: InsightFeedbackValue) => {
+  const handleFeedback = (feedback: InsightUserEvaluation) => {
     onFeedback(feedback);
     setHasReacted(true);
   };
@@ -49,7 +49,7 @@ export function FeedbackButtons({ onFeedback }: FeedbackButtonsProps) {
           })}
           color="success"
           data-test-subj="significant_events_summary_helpful_button"
-          onClick={() => handleFeedback('positive')}
+          onClick={() => handleFeedback('helpful')}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -60,7 +60,7 @@ export function FeedbackButtons({ onFeedback }: FeedbackButtonsProps) {
           })}
           color="danger"
           data-test-subj="significant_events_summary_not_helpful_button"
-          onClick={() => handleFeedback('negative')}
+          onClick={() => handleFeedback('not_helpful')}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

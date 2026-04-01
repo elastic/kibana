@@ -27,25 +27,25 @@ describe('FeedbackButtons', () => {
     expect(screen.getByTestId('significant_events_summary_not_helpful_button')).toBeInTheDocument();
   });
 
-  it('calls onFeedback with "positive" when thumbs up is clicked', () => {
+  it('calls onFeedback with "helpful" when thumbs up is clicked', () => {
     renderWithProviders(<FeedbackButtons onFeedback={onFeedback} />);
 
     fireEvent.click(screen.getByTestId('significant_events_summary_helpful_button'));
 
-    expect(onFeedback).toHaveBeenCalledWith('positive');
+    expect(onFeedback).toHaveBeenCalledWith('helpful');
     expect(onFeedback).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onFeedback with "negative" when thumbs down is clicked', () => {
+  it('calls onFeedback with "not_helpful" when thumbs down is clicked', () => {
     renderWithProviders(<FeedbackButtons onFeedback={onFeedback} />);
 
     fireEvent.click(screen.getByTestId('significant_events_summary_not_helpful_button'));
 
-    expect(onFeedback).toHaveBeenCalledWith('negative');
+    expect(onFeedback).toHaveBeenCalledWith('not_helpful');
     expect(onFeedback).toHaveBeenCalledTimes(1);
   });
 
-  it('shows "Thank you!" after clicking thumbs up', () => {
+  it('hides buttons and shows confirmation after clicking thumbs up', () => {
     renderWithProviders(<FeedbackButtons onFeedback={onFeedback} />);
 
     fireEvent.click(screen.getByTestId('significant_events_summary_helpful_button'));
@@ -56,7 +56,7 @@ describe('FeedbackButtons', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows "Thank you!" after clicking thumbs down', () => {
+  it('hides buttons and shows confirmation after clicking thumbs down', () => {
     renderWithProviders(<FeedbackButtons onFeedback={onFeedback} />);
 
     fireEvent.click(screen.getByTestId('significant_events_summary_not_helpful_button'));

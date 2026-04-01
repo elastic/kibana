@@ -28,9 +28,9 @@ describe('StreamsTelemetryClient', () => {
   });
 
   describe('trackInsightFeedback', () => {
-    it('reports a positive feedback event', () => {
+    it('reports a helpful feedback event', () => {
       client.trackInsightFeedback({
-        feedback: 'positive',
+        feedback: 'helpful',
         insight_id: 'insight-123',
         insight_title: 'High error rate in payments service',
         insight_impact: 'critical',
@@ -39,7 +39,7 @@ describe('StreamsTelemetryClient', () => {
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
         STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE,
         {
-          feedback: 'positive',
+          feedback: 'helpful',
           insight_id: 'insight-123',
           insight_title: 'High error rate in payments service',
           insight_impact: 'critical',
@@ -47,9 +47,9 @@ describe('StreamsTelemetryClient', () => {
       );
     });
 
-    it('reports a negative feedback event', () => {
+    it('reports a not_helpful feedback event', () => {
       client.trackInsightFeedback({
-        feedback: 'negative',
+        feedback: 'not_helpful',
         insight_id: 'insight-456',
         insight_title: 'Unusual latency spike detected',
         insight_impact: 'medium',
@@ -58,7 +58,7 @@ describe('StreamsTelemetryClient', () => {
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
         STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE,
         {
-          feedback: 'negative',
+          feedback: 'not_helpful',
           insight_id: 'insight-456',
           insight_title: 'Unusual latency spike detected',
           insight_impact: 'medium',

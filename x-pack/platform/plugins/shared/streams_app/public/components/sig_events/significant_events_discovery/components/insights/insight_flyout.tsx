@@ -23,10 +23,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Insight } from '@kbn/streams-schema';
+import type { Insight, InsightUserEvaluation } from '@kbn/streams-schema';
 import { InfoPanel } from '../../../../info_panel';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import type { InsightFeedbackValue } from '../../../../../telemetry/types';
 import { impactBadgeColors, impactLabels } from './insight_constants';
 import { FeedbackButtons } from './feedback_buttons';
 import { formatGeneratedAt } from './utils';
@@ -41,7 +40,7 @@ export const InsightFlyout = ({ insight, onClose }: InsightFlyoutProps) => {
     services: { telemetryClient },
   } = useKibana();
 
-  const handleFeedback = (feedback: InsightFeedbackValue) => {
+  const handleFeedback = (feedback: InsightUserEvaluation) => {
     telemetryClient.trackInsightFeedback({
       feedback,
       insight_id: insight.id,
