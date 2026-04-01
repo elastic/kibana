@@ -90,6 +90,7 @@ export class SearchSessionsService extends FtrService {
       if (await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON)) {
         await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
         await this.testSubjects.existOrFail(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
+        return;
       }
       // 3. Neither is visible so we fail to try again
       throw new Error('Background search button not found');
