@@ -48,7 +48,9 @@ const LanguageSelector: React.FC = () => {
     const selected = newOptions.find((opt) => opt.checked === 'on');
     if (selected?.key) {
       localStorage.setItem(LOCALE_STORAGE_KEY, selected.key);
-      window.location.reload();
+      // eslint-disable-next-line no-console
+      console.log(`Locale set to "${selected.key}". Please reload the page to apply the change.`);
+      setIsOpen(false);
     }
   }, []);
 
