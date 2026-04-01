@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
 import type {
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
   Logger,
-  LogMeta,
 } from '@kbn/core/server';
 import { registerOtelEbtEvents } from './lib/ebt/events';
 import { OtelTelemetryService } from './lib/services/otel_telemetry';
@@ -42,15 +40,15 @@ export class OtelTelemetryCollectionPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly config$: Observable<PluginConfig>;
+  private readonly pluginConfig: PluginConfig;
 
   private readonly otelTelemetryService: OtelTelemetryService;
   private readonly configurationService: ConfigurationService;
   private readonly telemetryConfigProvider: TelemetryConfigProvider;
 
-  constructor(context: PluginInitializerContext) {
+  constructor(context: PluginInitializerContext<PluginConfig>) {
     this.logger = context.logger.get();
-    this.config$ = context.config.create<PluginConfig>();
+    this.pluginConfig = context.config.get();
 
     this.configurationService = new ConfigurationService(this.logger);
     this.otelTelemetryService = new OtelTelemetryService(this.logger, this.configurationService);
@@ -64,41 +62,34 @@ export class OtelTelemetryCollectionPlugin
     this.otelTelemetryService.setup(plugins.taskManager);
   }
 
-  public start(core: CoreStart, plugins: OtelTelemetryCollectionPluginStartDeps) {
+  public async start(core: CoreStart, plugins: OtelTelemetryCollectionPluginStartDeps) {
     this.logger.debug('Starting OTel telemetry collection plugin');
 
     if (plugins.telemetry) {
       this.telemetryConfigProvider.start(plugins.telemetry.isOptedIn$);
     }
 
-    this.config$.subscribe(async (pluginConfig) => {
-      this.logger.debug('PluginConfig changed', { pluginConfig } as LogMeta);
+    if (!this.pluginConfig.enabled) {
+      this.logger.info('OTel telemetry collection plugin is disabled via config');
+      return;
+    }
 
-      if (pluginConfig.enabled) {
-        this.logger.info('Updating OTel telemetry collection configuration');
+    const cdnConfig = this.effectiveCdnConfig(this.pluginConfig);
+    const info = await core.elasticsearch.client.asInternalUser.info();
+    const artifactService = new ArtifactService(this.logger, info, cdnConfig);
 
-        const cdnConfig = this.effectiveCdnConfig(pluginConfig);
-        const info = await core.elasticsearch.client.asInternalUser.info();
-        const artifactService = new ArtifactService(this.logger, info, cdnConfig);
+    this.configurationService.start(
+      artifactService,
+      DEFAULT_OTEL_TELEMETRY_CONFIGURATION,
+      this.telemetryConfigProvider
+    );
 
-        this.configurationService.start(
-          artifactService,
-          DEFAULT_OTEL_TELEMETRY_CONFIGURATION,
-          this.telemetryConfigProvider
-        );
-
-        this.otelTelemetryService.start(
-          plugins.taskManager,
-          core.analytics,
-          core.elasticsearch.client.asInternalUser,
-          this.telemetryConfigProvider
-        );
-      } else {
-        this.logger.info('OTel telemetry collection plugin is disabled, stopping services');
-        this.configurationService.stop();
-        this.otelTelemetryService.stop();
-      }
-    });
+    this.otelTelemetryService.start(
+      plugins.taskManager,
+      core.analytics,
+      core.elasticsearch.client.asInternalUser,
+      this.telemetryConfigProvider
+    );
   }
 
   public stop() {

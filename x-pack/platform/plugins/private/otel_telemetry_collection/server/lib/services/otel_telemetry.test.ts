@@ -72,6 +72,7 @@ const makeBucket = (
       webengine_versions: emptyTerms,
       webengine_descriptions: emptyTerms,
       scope_names: termsBuckets(overrides.scope_names ?? []),
+      upstream_cluster: emptyTerms,
     },
     has_k8s: { doc_count: overrides.has_k8s ?? 0 },
     has_container: { doc_count: overrides.has_container ?? 0 },

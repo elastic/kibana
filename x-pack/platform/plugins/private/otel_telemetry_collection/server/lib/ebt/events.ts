@@ -77,6 +77,7 @@ export const OTEL_PER_SERVICE_EVENT: EventTypeOpts<OtelPerServicePayload> = {
           webengine_versions: keywordArraySchema('webengine.version values'),
           webengine_descriptions: keywordArraySchema('webengine.description values'),
           scope_names: keywordArraySchema('scope.name values (capped at 50)'),
+          upstream_cluster: keywordArraySchema('attributes.upstream.cluster values'),
           has_k8s: {
             type: 'boolean',
             _meta: { description: 'True if any k8s.* resource attribute is present' },

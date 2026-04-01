@@ -50,6 +50,7 @@ interface SampledAggs {
   webengine_versions: { buckets: TermsBucket[] };
   webengine_descriptions: { buckets: TermsBucket[] };
   scope_names: { buckets: TermsBucket[] };
+  upstream_cluster: { buckets: TermsBucket[] };
 }
 
 export interface CompositeBucket {
@@ -281,6 +282,9 @@ export class OtelTelemetryReceiver {
                 },
                 scope_names: {
                   terms: { field: 'scope.name', size: SCOPE_NAMES_AGG_SIZE },
+                },
+                upstream_cluster: {
+                  terms: { field: 'attributes.upstream.cluster', size: TERMS_AGG_SIZE },
                 },
               },
             },

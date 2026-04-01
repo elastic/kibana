@@ -38,6 +38,7 @@ export interface OtelPerServiceResult {
   webengine_versions: string[];
   webengine_descriptions: string[];
   scope_names: string[];
+  upstream_cluster: string[];
   has_k8s: boolean;
   has_container: boolean;
 }

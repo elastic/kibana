@@ -54,6 +54,7 @@ describe('OtelTelemetryReceiver', () => {
             webengine_versions: { buckets: [] },
             webengine_descriptions: { buckets: [] },
             scope_names: { buckets: [] },
+            upstream_cluster: { buckets: [] },
           },
           has_k8s: { doc_count: 0 },
           has_container: { doc_count: 0 },

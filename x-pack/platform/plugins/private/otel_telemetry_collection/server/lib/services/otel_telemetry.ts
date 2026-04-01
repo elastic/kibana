@@ -50,6 +50,7 @@ const TERMS_AGG_KEYS = [
   'webengine_versions',
   'webengine_descriptions',
   'scope_names',
+  'upstream_cluster',
 ] as const;
 
 type TermsAggKey = (typeof TERMS_AGG_KEYS)[number];
@@ -175,12 +176,19 @@ export class OtelTelemetryService {
 
     const signalBuckets = await this.receiver.fetchAllSignals(config);
 
-    for (const signal of ['traces', 'metrics', 'logs'] as const) {
+    const signals = ['traces', 'metrics', 'logs'] as const;
+    for (let i = 0; i < signals.length; i++) {
+      const signal = signals[i];
       const buckets = signalBuckets[signal];
 
       if (buckets.length === 0) {
         this.logger.debug(`No buckets for ${signal}, skipping`);
         continue;
+      }
+
+      // Ensure distinct timestamps between signals to avoid EBT document ID collisions
+      if (i > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 1));
       }
 
       const results = this.convertBuckets(signal, buckets);
@@ -226,6 +234,7 @@ export class OtelTelemetryService {
         webengine_versions: [],
         webengine_descriptions: [],
         scope_names: [],
+        upstream_cluster: [],
         has_k8s: bucket.has_k8s.doc_count > 0,
         has_container: bucket.has_container.doc_count > 0,
       };

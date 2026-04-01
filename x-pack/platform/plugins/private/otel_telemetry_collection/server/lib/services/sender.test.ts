@@ -42,6 +42,7 @@ const makeResult = (serviceId: string): OtelPerServiceResult => ({
   webengine_versions: [],
   webengine_descriptions: [],
   scope_names: ['io.opentelemetry.grpc-1.6'],
+  upstream_cluster: [],
   has_k8s: false,
   has_container: true,
 });
