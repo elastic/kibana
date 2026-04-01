@@ -68,6 +68,7 @@ export const EntityField = z
         owns: z.array(z.string()).optional(),
         owned_by: z.array(z.string()).optional(),
         accesses_frequently: z.array(z.string()).optional(),
+        accesses_infrequently: z.array(z.string()).optional(),
         accessed_frequently_by: z.array(z.string()).optional(),
         supervises: z.array(z.string()).optional(),
         supervised_by: z.array(z.string()).optional(),
