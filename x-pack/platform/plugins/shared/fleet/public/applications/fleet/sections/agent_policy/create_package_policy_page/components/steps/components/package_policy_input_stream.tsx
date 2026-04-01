@@ -43,8 +43,8 @@ import {
   mapPackageReleaseToIntegrationCardRelease,
   DATA_STREAM_USE_APM_VAR,
   shouldIncludeUseAPMVar,
+  hasDynamicSignalTypes,
 } from '../../../../../../../../../common/services';
-import { hasDynamicSignalTypes } from '../../../../../../../../../common/services/otelcol_helpers';
 
 import type {
   NewPackagePolicyInputStream,

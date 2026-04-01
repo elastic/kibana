@@ -39,8 +39,8 @@ import { useAgentless } from '../../../single_page_layout/hooks/setup_technology
 import {
   DATA_STREAM_USE_APM_VAR,
   shouldIncludeUseAPMVar,
+  hasDynamicSignalTypes,
 } from '../../../../../../../../../common/services';
-import { hasDynamicSignalTypes } from '../../../../../../../../../common/services/otelcol_helpers';
 import {
   DATA_STREAM_TYPE_VAR_NAME,
   USE_APM_VAR_NAME,

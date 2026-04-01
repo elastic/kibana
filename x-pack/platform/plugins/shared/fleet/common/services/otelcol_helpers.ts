@@ -7,7 +7,7 @@
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 import type { PackageInfo, PackagePolicyInput } from '../types';
 
-import { getNormalizedInputs, registryInputAllowsDynamicSignalTypes } from './policy_template';
+import { getNormalizedInputs } from './policy_template';
 
 export const OTEL_INPUTS_MINIMUM_VERSION = '9.2.0';
 
@@ -19,31 +19,6 @@ export const packageInfoHasOtelInputs = (packageInfo: PackageInfo | undefined) =
   (packageInfo?.policy_templates || []).some((template) =>
     getNormalizedInputs(template).some((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
   );
-
-/**
- * Returns true when any policy template in the package contains a registry
- * that declares dynamic signal types (dynamic_signal_types: true).
- *
- * Optionally, you can scope the query to a specific policy template and input type.
- *
- * Covers both:
- *   - Input-only packages (top-level `input` key on the policy template)
- *   - Composable integration packages (nested `inputs[]` entries)
- */
-export const hasDynamicSignalTypes = (
-  packageInfo: PackageInfo | undefined,
-  scope?: { policyTemplateName?: string; inputType?: string }
-): boolean =>
-  (packageInfo?.policy_templates ?? []).some((template) => {
-    if (scope?.policyTemplateName && template.name !== scope.policyTemplateName) {
-      return false;
-    }
-    const inputs = getNormalizedInputs(template);
-    const relevantInputs = scope?.inputType
-      ? inputs.filter((input) => input.type === scope.inputType)
-      : inputs;
-    return relevantInputs.some(registryInputAllowsDynamicSignalTypes);
-  });
 
 export const packagePolicyHasOtelInputs = (packagePolicyInputs: PackagePolicyInput[] | undefined) =>
   (packagePolicyInputs || []).some(

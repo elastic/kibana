@@ -52,6 +52,7 @@ export {
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,
   packagePolicyInputAllowsUndefinedDataStreamType,
+  hasDynamicSignalTypes,
 } from './policy_template';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
 export type {
@@ -129,7 +130,6 @@ export {
 export * from './cloud_connectors';
 
 export {
-  hasDynamicSignalTypes,
   packageInfoHasOtelInputs,
   packagePolicyHasOtelInputs,
   OTEL_INPUTS_MINIMUM_VERSION,
