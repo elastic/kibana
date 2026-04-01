@@ -39,14 +39,20 @@ export type StaticESQLControl = Extract<
   OptionsListESQLControlState,
   { control_type: 'STATIC_VALUES' }
 >;
+export const isStaticESQLControl = (
+  control?: OptionsListESQLControlState
+): control is StaticESQLControl => {
+  return control?.control_type === EsqlControlType.STATIC_VALUES;
+};
+
 export type QueryESQLControl = Extract<
   OptionsListESQLControlState,
   { control_type: 'VALUES_FROM_QUERY' }
 >;
-export const isStaticESQLControl = (
-  control: OptionsListESQLControlState
-): control is StaticESQLControl => {
-  return control.control_type === EsqlControlType.STATIC_VALUES;
+export const isQueryESQLControl = (
+  control?: OptionsListESQLControlState
+): control is QueryESQLControl => {
+  return control?.control_type === EsqlControlType.VALUES_FROM_QUERY;
 };
 
 export interface ESQLControlVariable {

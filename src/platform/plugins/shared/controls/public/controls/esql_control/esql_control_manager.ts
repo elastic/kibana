@@ -27,8 +27,13 @@ import type {
   OptionsListSelection,
 } from '@kbn/controls-schemas';
 import type { TimeRange } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-types';
-import { ESQLVariableType, isStaticESQLControl } from '@kbn/esql-types';
+import type { ESQLControlVariable, QueryESQLControl } from '@kbn/esql-types';
+import {
+  EsqlControlType,
+  ESQLVariableType,
+  isQueryESQLControl,
+  isStaticESQLControl,
+} from '@kbn/esql-types';
 import { getESQLQueryVariables, hasStartEndParams } from '@kbn/esql-utils';
 import {
   apiHasSections,
@@ -40,7 +45,7 @@ import {
 import type { OptionsListSuggestions } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
-import type { ESQLOptionsListRuntimeState, QueryESQLControl } from './types';
+import type { ESQLOptionsListRuntimeState } from './types';
 import { castESQLValue } from './utils/esql_type_utils';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
 
@@ -60,7 +65,9 @@ type ComparatorsReturnType<ControlType = ESQLOptionsListRuntimeState['control_ty
       | 'title'
       | 'available_options'
     > &
-      (ControlType extends 'STATIC_VALUES' ? {} : Pick<QueryESQLControl, 'esql_query'>)
+      (ControlType extends EsqlControlType.STATIC_VALUES
+        ? {}
+        : Pick<QueryESQLControl, 'esql_query'>)
   >;
 
 export const getSelectionComparators = <Type = ESQLOptionsListRuntimeState['control_type']>(
@@ -74,9 +81,7 @@ export const getSelectionComparators = <Type = ESQLOptionsListRuntimeState['cont
     single_select: 'referenceEquality',
     control_type: 'skip', // static
     available_options: 'deepEquality',
-    ...(controlType !== 'STATIC_VALUES' // ? { available_options: 'deepEquality' }
-      ? { esql_query: 'referenceEquality' }
-      : {}),
+    ...(controlType !== EsqlControlType.STATIC_VALUES ? { esql_query: 'referenceEquality' } : {}),
   } as ComparatorsReturnType<Type>;
 };
 
@@ -321,7 +326,7 @@ export function initializeESQLControlManager(
       previousTimeRange = undefined;
       hasInitialFetch = false;
       availableOptions$.next(lastSaved?.available_options ?? []);
-      if (lastSaved && !isStaticESQLControl(lastSaved as OptionsListESQLControlState)) {
+      if (lastSaved && isQueryESQLControl(lastSaved as OptionsListESQLControlState)) {
         esqlQuery$.next((lastSaved as unknown as QueryESQLControl).esql_query);
       }
     },
@@ -333,8 +338,11 @@ export function initializeESQLControlManager(
         variable_type: variableType$.getValue(),
         /** The control_type is static from creation */
         ...(isStaticControl
-          ? { control_type: 'STATIC_VALUES', available_options: availableOptions$.getValue() }
-          : { control_type: 'VALUES_FROM_QUERY', esql_query: esqlQuery$.getValue() }),
+          ? {
+              control_type: EsqlControlType.STATIC_VALUES,
+              available_options: availableOptions$.getValue(),
+            }
+          : { control_type: EsqlControlType.VALUES_FROM_QUERY, esql_query: esqlQuery$.getValue() }),
       };
     },
     internalApi: {

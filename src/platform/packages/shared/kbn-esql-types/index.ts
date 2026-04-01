@@ -20,6 +20,7 @@ export {
   apiPublishesESQLVariables,
   controlHasVariableName,
   isStaticESQLControl,
+  isQueryESQLControl,
 } from './src/variables_types';
 
 export {

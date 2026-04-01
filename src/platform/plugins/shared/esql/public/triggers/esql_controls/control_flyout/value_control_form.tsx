@@ -23,6 +23,7 @@ import {
   ESQLVariableType,
   EsqlControlType,
   TIMEFIELD_ROUTE,
+  isQueryESQLControl,
   type ESQLControlVariable,
 } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
@@ -115,7 +116,7 @@ export function ValueControlForm({
 
   const [valuesQuery, setValuesQuery] = useState<string>(
     variableType === ESQLVariableType.VALUES
-      ? initialState?.control_type === EsqlControlType.VALUES_FROM_QUERY
+      ? isQueryESQLControl(initialState)
         ? initialState.esql_query
         : INITIAL_EMPTY_STATE_QUERY
       : ''
@@ -242,7 +243,7 @@ export function ValueControlForm({
 
   useEffect(() => {
     if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
-      if (initialState?.control_type === EsqlControlType.VALUES_FROM_QUERY) {
+      if (isQueryESQLControl(initialState)) {
         onValuesQuerySubmit(initialState.esql_query);
       } else if (valuesRetrieval) {
         setSuggestedQuery();

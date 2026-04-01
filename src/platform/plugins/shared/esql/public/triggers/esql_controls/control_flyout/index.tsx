@@ -18,7 +18,7 @@ import {
   TelemetryControlCancelledReason,
   type ESQLControlVariable,
   type ControlTriggerSource,
-  isStaticESQLControl,
+  isQueryESQLControl,
 } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
@@ -127,7 +127,7 @@ export function ESQLControlsFlyout({
   );
 
   const areValuesValid = useMemo(() => {
-    if (!controlState || !isStaticESQLControl(controlState)) return true;
+    if (!controlState || isQueryESQLControl(controlState)) return true;
     const available = controlState.available_options;
     return variableType === ESQLVariableType.TIME_LITERAL
       ? areValuesIntervalsValid(available.map((option) => option))

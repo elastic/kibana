@@ -15,6 +15,7 @@ import {
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
+import { EsqlControlType } from '@kbn/esql-types';
 
 export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(ESQL_CONTROL, {
@@ -51,9 +52,17 @@ export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
           variable_name: variable_name ?? '',
           variable_type: variable_type as OptionsListESQLControlState['variable_type'],
         };
-        return control_type === 'STATIC_VALUES'
-          ? { ...shared, control_type: 'STATIC_VALUES', available_options: available_options ?? [] }
-          : { ...shared, control_type: 'VALUES_FROM_QUERY', esql_query: esql_query ?? '' };
+        return control_type === EsqlControlType.STATIC_VALUES
+          ? {
+              ...shared,
+              control_type: EsqlControlType.STATIC_VALUES,
+              available_options: available_options ?? [],
+            }
+          : {
+              ...shared,
+              control_type: EsqlControlType.VALUES_FROM_QUERY,
+              esql_query: esql_query ?? '',
+            };
       },
     }),
   });
