@@ -6,7 +6,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { useAlertingRulesIndex } from './use_alerting_rules_index';
+import { useAlertingRulesCache } from './use_alerting_rules_cache';
 import type { FindRulesResponse } from '@kbn/alerting-v2-plugin/public/services/rules_api';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -21,7 +21,7 @@ jest.mock('react-use/lib/useAsync', () => ({
 
 const mockHttp = httpServiceMock.createStartContract();
 
-describe('useAlertingRulesIndex', () => {
+describe('useAlertingRulesCache', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -38,13 +38,13 @@ describe('useAlertingRulesIndex', () => {
 
     const { result, rerender } = renderHook(
       ({ ruleIds }: { ruleIds: string[] } = { ruleIds: [ruleId] }) =>
-        useAlertingRulesIndex({
+        useAlertingRulesCache({
           ruleIds,
           services: { http: mockHttp },
         })
     );
 
-    await waitFor(() => expect(result.current.rulesIndex).toEqual({ [ruleId]: fetchedRule }));
+    await waitFor(() => expect(result.current.rulesCache).toEqual({ [ruleId]: fetchedRule }));
 
     rerender({ ruleIds: [ruleId] });
 
@@ -64,7 +64,7 @@ describe('useAlertingRulesIndex', () => {
     } as FindRulesResponse);
 
     const { result } = renderHook(() =>
-      useAlertingRulesIndex({
+      useAlertingRulesCache({
         ruleIds: [ruleId],
         services: { http: mockHttp },
       })
@@ -75,21 +75,21 @@ describe('useAlertingRulesIndex', () => {
         query: { ids: [ruleId] },
       })
     );
-    expect(result.current.rulesIndex).toEqual({ [ruleId]: fetchedRule });
+    expect(result.current.rulesCache).toEqual({ [ruleId]: fetchedRule });
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeUndefined();
   });
 
   it('should handle empty rule IDs array gracefully', async () => {
     const { result } = renderHook(() =>
-      useAlertingRulesIndex({
+      useAlertingRulesCache({
         ruleIds: [],
         services: { http: mockHttp },
       })
     );
 
     expect(mockHttp.get).not.toHaveBeenCalled();
-    expect(result.current.rulesIndex).toEqual({});
+    expect(result.current.rulesCache).toEqual({});
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeUndefined();
   });
