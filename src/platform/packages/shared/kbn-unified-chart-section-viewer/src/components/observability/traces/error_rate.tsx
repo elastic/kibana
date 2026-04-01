@@ -51,12 +51,12 @@ const ErrorRateChartContent = ({
             label: 'error_rate',
             compactValues: true,
             seriesColor: color,
-            ...getLensMetricFormat('percent'),
+            ...getLensMetricFormat(unit),
           },
         ],
       },
     ],
-    [seriesType, color]
+    [seriesType, color, unit]
   );
 
   return (
