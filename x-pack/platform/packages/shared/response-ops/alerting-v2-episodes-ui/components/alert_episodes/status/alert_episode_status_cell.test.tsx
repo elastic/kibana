@@ -10,13 +10,13 @@ import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AlertEpisodeStatusCell } from './alert_episode_status_cell';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('AlertEpisodeStatusCell', () => {
   it('renders status badge only when no action indicators', () => {
-    renderWithI18n(<AlertEpisodeStatusCell status="active" />);
+    renderWithI18n(<AlertEpisodeStatusCell status={ALERT_EPISODE_STATUS.ACTIVE} />);
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.getByTestId('alertEpisodeStatusCell')).toBeInTheDocument();
     expect(screen.queryByTestId('alertEpisodeStatusCellSnoozeIndicator')).not.toBeInTheDocument();
@@ -26,7 +26,7 @@ describe('AlertEpisodeStatusCell', () => {
   it('renders snoozed bellSlash badge when group action has snooze', () => {
     renderWithI18n(
       <AlertEpisodeStatusCell
-        status="active"
+        status={ALERT_EPISODE_STATUS.ACTIVE}
         groupAction={{
           groupHash: '1',
           ruleId: '1',
@@ -44,7 +44,7 @@ describe('AlertEpisodeStatusCell', () => {
     const user = userEvent.setup();
     renderWithI18n(
       <AlertEpisodeStatusCell
-        status="active"
+        status={ALERT_EPISODE_STATUS.ACTIVE}
         groupAction={{
           groupHash: '1',
           ruleId: '1',
@@ -65,7 +65,7 @@ describe('AlertEpisodeStatusCell', () => {
     const user = userEvent.setup();
     renderWithI18n(
       <AlertEpisodeStatusCell
-        status="active"
+        status={ALERT_EPISODE_STATUS.ACTIVE}
         groupAction={{
           groupHash: '1',
           ruleId: '1',
@@ -83,7 +83,7 @@ describe('AlertEpisodeStatusCell', () => {
   it('renders checkCircle badge when acknowledged via episodeAction', () => {
     renderWithI18n(
       <AlertEpisodeStatusCell
-        status="active"
+        status={ALERT_EPISODE_STATUS.ACTIVE}
         episodeAction={{
           episodeId: '1',
           ruleId: '1',
@@ -99,7 +99,7 @@ describe('AlertEpisodeStatusCell', () => {
     const user = userEvent.setup();
     renderWithI18n(
       <AlertEpisodeStatusCell
-        status="active"
+        status={ALERT_EPISODE_STATUS.ACTIVE}
         episodeAction={{
           episodeId: '1',
           ruleId: '1',
@@ -115,7 +115,7 @@ describe('AlertEpisodeStatusCell', () => {
   it('renders inactive badge when group action has deactivate', () => {
     renderWithI18n(
       <AlertEpisodeStatusCell
-        status="active"
+        status={ALERT_EPISODE_STATUS.ACTIVE}
         groupAction={{
           groupHash: '1',
           ruleId: '1',

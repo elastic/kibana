@@ -9,8 +9,11 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  ALERT_EPISODE_STATUS,
+  type AlertEpisodeStatus,
+} from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, GroupAction } from '../../../types/action';
 import { AlertEpisodeStatusBadge } from './alert_episode_status_badge';
 
@@ -40,7 +43,7 @@ export function AlertEpisodeStatusCell({
         <AlertEpisodeStatusBadge
           status={
             groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE
-              ? 'inactive'
+              ? ALERT_EPISODE_STATUS.INACTIVE
               : status
           }
         />

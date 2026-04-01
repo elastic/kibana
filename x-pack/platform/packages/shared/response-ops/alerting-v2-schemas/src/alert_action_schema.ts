@@ -7,6 +7,15 @@
 
 import { z } from '@kbn/zod/v4';
 
+export enum ALERT_EPISODE_STATUS {
+  INACTIVE = 'inactive',
+  PENDING = 'pending',
+  ACTIVE = 'active',
+  RECOVERING = 'recovering',
+}
+
+export type AlertEpisodeStatus = (typeof ALERT_EPISODE_STATUS)[keyof typeof ALERT_EPISODE_STATUS];
+
 export enum ALERT_EPISODE_ACTION_TYPE {
   ACK = 'ack',
   UNACK = 'unack',

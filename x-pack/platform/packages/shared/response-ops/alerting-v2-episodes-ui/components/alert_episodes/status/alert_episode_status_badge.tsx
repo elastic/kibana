@@ -8,7 +8,7 @@
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/datastreams/alert_events';
+import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 
 export interface AlertEpisodeStatusBadgeProps {
   status: AlertEpisodeStatus;
@@ -18,7 +18,7 @@ export interface AlertEpisodeStatusBadgeProps {
  * Renders a badge indicating the status of an alerting episode.
  */
 export const AlertEpisodeStatusBadge = ({ status }: AlertEpisodeStatusBadgeProps) => {
-  if (status === 'inactive') {
+  if (status === ALERT_EPISODE_STATUS.INACTIVE) {
     return (
       <EuiBadge color="success">
         {i18n.translate('xpack.alertingV2EpisodesUi.inactiveStatusBadgeLabel', {
@@ -27,7 +27,7 @@ export const AlertEpisodeStatusBadge = ({ status }: AlertEpisodeStatusBadgeProps
       </EuiBadge>
     );
   }
-  if (status === 'pending') {
+  if (status === ALERT_EPISODE_STATUS.PENDING) {
     return (
       <EuiBadge color="warning">
         {i18n.translate('xpack.alertingV2EpisodesUi.pendingStatusBadgeLabel', {
@@ -36,7 +36,7 @@ export const AlertEpisodeStatusBadge = ({ status }: AlertEpisodeStatusBadgeProps
       </EuiBadge>
     );
   }
-  if (status === 'active') {
+  if (status === ALERT_EPISODE_STATUS.ACTIVE) {
     return (
       <EuiBadge color="danger">
         {i18n.translate('xpack.alertingV2EpisodesUi.activeStatusBadgeLabel', {
@@ -45,7 +45,7 @@ export const AlertEpisodeStatusBadge = ({ status }: AlertEpisodeStatusBadgeProps
       </EuiBadge>
     );
   }
-  if (status === 'recovering') {
+  if (status === ALERT_EPISODE_STATUS.RECOVERING) {
     return (
       <EuiBadge color="primary">
         {i18n.translate('xpack.alertingV2EpisodesUi.recoveringStatusBadgeLabel', {

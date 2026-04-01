@@ -7,7 +7,8 @@
 
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { UserService } from '../services/user_service/user_service';
-import type { CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
+import type { BulkCreateAlertActionItemBody } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE, type CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
@@ -39,7 +40,7 @@ describe('AlertActionsClient', () => {
 
   describe('createAction', () => {
     const actionData: CreateAlertActionBody = {
-      action_type: 'ack',
+      action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
       episode_id: 'episode-1',
     };
 
@@ -60,7 +61,7 @@ describe('AlertActionsClient', () => {
       expect(docs).toHaveLength(1);
       expect(docs[0]).toMatchObject({
         group_hash: 'test-group-hash',
-        action_type: 'ack',
+        action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
         episode_id: 'episode-1',
         rule_id: 'test-rule-id',
         last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
@@ -86,7 +87,7 @@ describe('AlertActionsClient', () => {
 
     it('should handle action with episode_id', async () => {
       const actionWithEpisode: CreateAlertActionBody = {
-        action_type: 'ack',
+        action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
         episode_id: 'episode-2',
       };
 
@@ -108,7 +109,7 @@ describe('AlertActionsClient', () => {
 
     it('should handle action with tags', async () => {
       const tagAction: CreateAlertActionBody = {
-        action_type: 'tag',
+        action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
         tags: ['critical', 'network'],
       };
 
@@ -126,7 +127,7 @@ describe('AlertActionsClient', () => {
       expect(docs).toHaveLength(1);
       expect(docs[0]).toMatchObject({
         group_hash: 'test-group-hash',
-        action_type: 'tag',
+        action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
         tags: ['critical', 'network'],
         rule_id: 'test-rule-id',
         actor: 'test-uid',
@@ -158,9 +159,13 @@ describe('AlertActionsClient', () => {
 
   describe('createBulkActions', () => {
     it('should process all actions successfully', async () => {
-      const actions = [
-        { group_hash: 'group-hash-1', action_type: 'ack' as const, episode_id: 'episode-1' },
-        { group_hash: 'group-hash-2', action_type: 'snooze' as const },
+      const actions: BulkCreateAlertActionItemBody[] = [
+        {
+          group_hash: 'group-hash-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+          episode_id: 'episode-1',
+        },
+        { group_hash: 'group-hash-2', action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       ];
 
       queryServiceEsClient.esql.query.mockResolvedValueOnce(
@@ -181,9 +186,17 @@ describe('AlertActionsClient', () => {
     });
 
     it('should handle partial failures and return correct counts', async () => {
-      const actions = [
-        { group_hash: 'group-hash-1', action_type: 'ack' as const, episode_id: 'episode-1' },
-        { group_hash: 'unknown-group-hash', action_type: 'ack' as const, episode_id: 'episode-1' },
+      const actions: BulkCreateAlertActionItemBody[] = [
+        {
+          group_hash: 'group-hash-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+          episode_id: 'episode-1',
+        },
+        {
+          group_hash: 'unknown-group-hash',
+          action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+          episode_id: 'episode-1',
+        },
       ];
 
       queryServiceEsClient.esql.query.mockResolvedValueOnce(
@@ -201,9 +214,16 @@ describe('AlertActionsClient', () => {
     });
 
     it('should return processed 0 when all actions fail', async () => {
-      const actions = [
-        { group_hash: 'unknown-1', action_type: 'ack' as const, episode_id: 'episode-1' },
-        { group_hash: 'unknown-2', action_type: 'snooze' as const },
+      const actions: BulkCreateAlertActionItemBody[] = [
+        {
+          group_hash: 'unknown-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+          episode_id: 'episode-1',
+        },
+        {
+          group_hash: 'unknown-2',
+          action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+        },
       ];
 
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getBulkAlertEventsESQLResponse([]));
