@@ -71,7 +71,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     title: 'basic donut',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -330,7 +330,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     title: 'donut with multiple groups',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -594,7 +594,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     title: 'donut with multiple metrics',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -1049,7 +1049,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     title: 'donut with color mapping',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',

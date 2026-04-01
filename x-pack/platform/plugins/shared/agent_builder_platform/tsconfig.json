@@ -15,7 +15,6 @@
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-common",
     "@kbn/zod",
-    "@kbn/management-settings-ids",
     "@kbn/agent-builder-plugin",
     "@kbn/core-lifecycle-server",
     "@kbn/esql-language",
