@@ -128,7 +128,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         triggers = definition?.triggers;
       }
 
-      if (!triggers) {
+      if (!Array.isArray(triggers)) {
         return undefined;
       }
 

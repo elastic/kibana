@@ -10,11 +10,14 @@
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { v4 as generateUuid } from 'uuid';
+import YAML from 'yaml';
+import type { WorkflowYaml } from '@kbn/workflows';
 import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import {
   selectWorkflowDefinition,
   selectWorkflowGraph,
+  selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useSpaceId } from '../../../hooks/use_space_id';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
@@ -29,6 +32,7 @@ export function useContextOverrideData() {
   // Redux selectors, use only current workflow data, not execution data
   const workflowGraph = useSelector(selectWorkflowGraph);
   const workflowDefinition = useSelector(selectWorkflowDefinition);
+  const yamlString = useSelector(selectYamlString);
 
   const getContextOverrideData = useCallback(
     (stepId: string): ContextOverrideData | null => {
@@ -36,9 +40,22 @@ export function useContextOverrideData() {
         return null;
       }
 
-      const manualTrigger = workflowDefinition.triggers?.find((trigger) =>
+      let manualTrigger = workflowDefinition.triggers?.find((trigger) =>
         isManualTrigger(trigger)
       ) as ManualTrigger | undefined;
+
+      if (!manualTrigger && yamlString) {
+        try {
+          const yamlDoc = YAML.parseDocument(yamlString);
+          const parsed = yamlDoc.toJSON() as Record<string, unknown>;
+          const triggers = parsed.triggers as WorkflowYaml['triggers'] | undefined;
+          manualTrigger = triggers?.find((trigger) => isManualTrigger(trigger)) as
+            | ManualTrigger
+            | undefined;
+        } catch (error) {
+          // Ignore YAML parsing errors
+        }
+      }
 
       const stepSubGraph = workflowGraph.getStepGraph(stepId);
 
@@ -53,7 +70,7 @@ export function useContextOverrideData() {
         inputsDefinition: manualTrigger?.inputs,
       });
     },
-    [workflowGraph, workflowDefinition, spaceId]
+    [workflowGraph, workflowDefinition, spaceId, yamlString]
   );
 
   return getContextOverrideData;

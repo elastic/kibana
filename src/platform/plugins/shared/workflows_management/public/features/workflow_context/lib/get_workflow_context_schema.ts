@@ -35,7 +35,6 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
   const hasAlertTrigger = triggers.some((trigger) => trigger.type === 'alert');
   let eventSchema: z.ZodType = hasAlertTrigger
     ? z.object({
-        ...(BaseEventSchema as z.ZodObject<z.ZodRawShape>).shape,
         ...(AlertEventSchema as z.ZodObject<z.ZodRawShape>).shape,
       })
     : BaseEventSchema;

@@ -12,7 +12,7 @@ import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { TriggerSchema } from './schema/triggers';
-import { WorkflowInputSchema } from './schema/triggers/manual_trigger_schema';
+import { FlatInputSchema } from './schema/triggers/manual_trigger_schema';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -626,7 +626,7 @@ export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
 /* --- Outputs --- */
 // Outputs use the same format as inputs (name, type, required, etc.); default is ignored at runtime for outputs.
-export const WorkflowOutputSchema = WorkflowInputSchema;
+export const WorkflowOutputSchema = FlatInputSchema;
 export type WorkflowOutput = z.infer<typeof WorkflowOutputSchema>;
 
 /* --- Consts --- */
