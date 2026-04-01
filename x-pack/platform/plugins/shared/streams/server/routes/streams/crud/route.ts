@@ -22,7 +22,7 @@ import {
   createQueryStreamRequest,
   getWiredStreamResponse,
   listStreamsResponse,
-} from '../../oas_examples';
+} from '../../../oas_examples';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name} 2023-10-31',
