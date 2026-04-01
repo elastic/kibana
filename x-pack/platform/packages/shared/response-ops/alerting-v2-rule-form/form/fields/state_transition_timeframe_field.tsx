@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { MAX_DURATION, validateMaxDuration } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -42,20 +42,14 @@ export const StateTransitionTimeframeField = ({
   numberPrependLabel,
   variant = 'pending',
 }: StateTransitionTimeframeFieldProps) => {
-  const { control, getValues, setValue } = useFormContext<FormValues>();
+  const { control } = useFormContext<FormValues>();
   const fieldName = FIELD_NAMES[variant];
-
-  useEffect(() => {
-    const currentTimeframe = getValues(fieldName);
-    if (currentTimeframe == null) {
-      setValue(fieldName, '2m');
-    }
-  }, [getValues, setValue, fieldName]);
 
   return (
     <Controller
       name={fieldName}
       control={control}
+      defaultValue="2m"
       rules={{
         required: i18n.translate(
           'xpack.alertingV2.ruleForm.stateTransition.timeframeRequiredError',

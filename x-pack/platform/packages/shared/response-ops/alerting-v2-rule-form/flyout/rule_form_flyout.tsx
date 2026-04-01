@@ -84,8 +84,8 @@ export const RuleFormFlyout = ({
               data-test-subj="ruleV2FlyoutSaveButton"
             >
               <FormattedMessage
-                id="xpack.alertingV2.ruleForm.saveButtonLabel"
-                defaultMessage="Save"
+                id="xpack.alertingV2.ruleForm.createRuleButtonLabel"
+                defaultMessage="Create rule"
               />
             </EuiButton>
           </EuiFlexItem>

@@ -7,7 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "test/scout/**/*",
+    "test/scout*/**/*",
     "../../../../typings/**/*"
   ],
   "exclude": ["target/**/*"],

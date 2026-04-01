@@ -207,7 +207,7 @@ export const getNavigationTreeDefinition = ({
           ],
           footer: [
             {
-              icon: 'launch',
+              icon: 'rocket',
               id: 'search_getting_started',
               link: 'searchGettingStarted',
             },
