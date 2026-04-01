@@ -25,6 +25,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Insight } from '@kbn/streams-schema';
 import { InfoPanel } from '../../../../info_panel';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import type { InsightFeedbackValue } from '../../../../../telemetry/types';
 import { impactBadgeColors, impactLabels } from './insight_constants';
 import { FeedbackButtons } from './feedback_buttons';
 import { formatGeneratedAt } from './utils';
@@ -35,6 +37,19 @@ interface InsightFlyoutProps {
 }
 
 export const InsightFlyout = ({ insight, onClose }: InsightFlyoutProps) => {
+  const {
+    services: { telemetryClient },
+  } = useKibana();
+
+  const handleFeedback = (feedback: InsightFeedbackValue) => {
+    telemetryClient.trackInsightFeedback({
+      feedback,
+      insight_id: insight.id,
+      insight_title: insight.title,
+      insight_impact: insight.impact,
+    });
+  };
+
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'insightFlyoutTitle' });
 
   const detailItems = [
@@ -182,7 +197,7 @@ export const InsightFlyout = ({ insight, onClose }: InsightFlyoutProps) => {
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <FeedbackButtons />
+        <FeedbackButtons onFeedback={handleFeedback} />
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

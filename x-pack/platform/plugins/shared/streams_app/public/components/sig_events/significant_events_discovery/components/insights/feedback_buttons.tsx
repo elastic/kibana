@@ -8,9 +8,19 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { InsightFeedbackValue } from '../../../../../telemetry/types';
 
-export function FeedbackButtons() {
+interface FeedbackButtonsProps {
+  onFeedback: (feedback: InsightFeedbackValue) => void;
+}
+
+export function FeedbackButtons({ onFeedback }: FeedbackButtonsProps) {
   const [hasReacted, setHasReacted] = React.useState(false);
+
+  const handleFeedback = (feedback: InsightFeedbackValue) => {
+    onFeedback(feedback);
+    setHasReacted(true);
+  };
 
   if (hasReacted) {
     return (
@@ -39,7 +49,7 @@ export function FeedbackButtons() {
           })}
           color="success"
           data-test-subj="significant_events_summary_helpful_button"
-          onClick={() => setHasReacted(true)}
+          onClick={() => handleFeedback('positive')}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -50,7 +60,7 @@ export function FeedbackButtons() {
           })}
           color="danger"
           data-test-subj="significant_events_summary_not_helpful_button"
-          onClick={() => setHasReacted(true)}
+          onClick={() => handleFeedback('negative')}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

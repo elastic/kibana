@@ -143,6 +143,15 @@ interface StreamsPartitioningSamplesFetchLatencyProps {
   duration_ms: number;
 }
 
+type InsightFeedbackValue = 'positive' | 'negative';
+
+interface StreamsInsightFeedbackProps {
+  feedback: InsightFeedbackValue;
+  insight_id: string;
+  insight_title: string;
+  insight_impact: string;
+}
+
 interface StreamsTabVisitedProps {
   stream_name: string;
   stream_type: StreamType;
@@ -184,4 +193,6 @@ export {
   type StreamsProcessingSimulationSamplesFetchLatencyProps,
   type StreamsPartitioningSamplesFetchLatencyProps,
   type StreamsTabVisitedProps,
+  type InsightFeedbackValue,
+  type StreamsInsightFeedbackProps,
 };
