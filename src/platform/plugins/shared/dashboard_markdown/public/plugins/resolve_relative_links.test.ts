@@ -69,6 +69,14 @@ describe('resolveRelativeLinksPlugin', () => {
     expect(getLink(tree).url).toBe('/some/other/sibling');
   });
 
+  it('resolves the same way with or without a trailing slash on the URL', () => {
+    setLocation('http://localhost:5601/s/my-space/app/dashboards/');
+    const tree = createTree(createLinkNode('discover'));
+    resolveRelativeLinksPlugin()()(tree);
+
+    expect(getLink(tree).url).toBe('/s/my-space/app/discover');
+  });
+
   it('resolves ../ parent traversal links', () => {
     setLocation('http://localhost:5601/s/my-space/app/dashboards');
     const tree = createTree(createLinkNode('../security/account'));

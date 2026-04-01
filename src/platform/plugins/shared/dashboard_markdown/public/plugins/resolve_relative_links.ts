@@ -39,7 +39,14 @@ function isDocumentRelativeUrl(url: string): boolean {
  * a bare relatve link such as <a href="discover"> against the current page URL.
  */
 function resolveAgainstCurrentUrl(url: string): string {
-  const resolved = new URL(url, window.location.href);
+  // Strip trailing slash so that resolution is consistent regardless of
+  // whether the current page URL ends with one. Without this,
+  // "baz" on "/foo/bar/" resolves to "/foo/bar/baz"
+  // instead of the expected "/foo/baz".
+  const baseUrl = window.location.href.endsWith('/')
+    ? window.location.href.slice(0, -1)
+    : window.location.href;
+  const resolved = new URL(url, baseUrl);
   return `${resolved.pathname}${resolved.search}${resolved.hash}`;
 }
 
