@@ -103,6 +103,11 @@ export const StandaloneRuleForm = ({
       ...(initialValues?.stateTransition !== undefined
         ? { stateTransition: initialValues.stateTransition }
         : {}),
+      stateTransitionAlertDelayMode:
+        initialValues?.stateTransitionAlertDelayMode ?? queryDefaults.stateTransitionAlertDelayMode,
+      stateTransitionRecoveryDelayMode:
+        initialValues?.stateTransitionRecoveryDelayMode ??
+        queryDefaults.stateTransitionRecoveryDelayMode,
     }),
     [queryDefaults, initialValues]
   );

@@ -141,14 +141,14 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should setup risk score assets and configuration when entity store is enabled', async () => {
-        await entityStoreUtils.installEntityStoreV2();
+        await entityStoreUtils.installEntityStoreV2({ waitForEntities: false });
         await waitForMaintainerRun(maintainerRoutes);
 
         await checkAssets('default', maintainerRoutes);
       });
 
       it('should setup risk score assets and configuration in custom namespace', async () => {
-        await entityStoreUtilsCustomSpace.installEntityStoreV2();
+        await entityStoreUtilsCustomSpace.installEntityStoreV2({ waitForEntities: false });
         await waitForMaintainerRun(maintainerRoutesCustomSpace);
 
         await checkAssets(customSpaceName, maintainerRoutesCustomSpace);

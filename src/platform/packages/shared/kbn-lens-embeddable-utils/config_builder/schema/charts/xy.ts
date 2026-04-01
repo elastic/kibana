@@ -141,11 +141,13 @@ const sharedAxisSchema = {
          * - 'vertical': Labels aligned vertically
          * - 'angled': Labels at an angle
          */
-        orientation: builderEnums.orientation({
-          meta: {
-            description: 'Orientation of the axis labels',
-          },
-        }),
+        orientation: schema.maybe(
+          builderEnums.orientation({
+            meta: {
+              description: 'Orientation of the axis labels',
+            },
+          })
+        ),
       },
       { meta: { description: 'Label configuration' } }
     )
