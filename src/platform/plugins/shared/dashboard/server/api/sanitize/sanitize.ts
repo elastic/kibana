@@ -29,7 +29,12 @@ export async function sanitize(
      * state in the editor format. Once we the Lens embeddable supports the API format we can remove the
      * transformDashboardIn and transformDashboardOut calls.
      */
-    const { attributes: storedDashboardState, references } = transformDashboardIn(dashboardState);
+    const {
+      attributes: storedDashboardState,
+      references,
+      error,
+    } = transformDashboardIn(dashboardState);
+    if (error) throw error;
     const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
       transformDashboardOut(storedDashboardState ?? {}, references ?? []);
 
