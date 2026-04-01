@@ -111,7 +111,7 @@ export const WorkflowSelector = () => {
           fullWidth
           isInvalid={!!error}
           error={error?.message}
-          helpText={
+          labelAppend={
             <EuiLink
               href={createWorkflowUrl}
               target="_blank"
