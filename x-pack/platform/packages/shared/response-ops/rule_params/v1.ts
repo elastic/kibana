@@ -89,34 +89,6 @@ const ruleParamsSchemasWithRuleTypeId: Record<string, Type<unknown>> = {
   'slo.rules.burnRate': sloBurnRateParamsSchemaV1,
 };
 
-export const ruleParamsSchemaDiscriminatedUnion = (key: string = RULE_TYPE_ID) => {
-  const variants = Object.entries(ruleParamsSchemasWithRuleTypeId).map(
-    ([ruleTypeId, paramsSchema]) => {
-      const desc = paramsSchema.getSchema().describe();
-      const title = (desc.metas as Array<Record<string, unknown>> | undefined)?.[0]?.title as
-        | string
-        | undefined;
-      const description = (desc.flags as Record<string, unknown> | undefined)?.description as
-        | string
-        | undefined;
-
-      if (paramsSchema instanceof ObjectType) {
-        return paramsSchema.extends(
-          { [key]: schema.literal(ruleTypeId) },
-          { meta: { id: `${toSchemaId(ruleTypeId)}-rule-params-alerting`, title, description } }
-        );
-      }
-      return schema.object(
-        { [key]: schema.literal(ruleTypeId), params: paramsSchema },
-        { meta: { id: `${toSchemaId(ruleTypeId)}-rule-params-alerting`, title, description } }
-      );
-    }
-  );
-  return schema.discriminatedUnion(key, variants as unknown as [ReturnType<typeof schema.object>]);
-};
-
-const ruleParamsSchemaInstance = ruleParamsSchemaDiscriminatedUnion();
-
 const variantsWithoutRuleTypeId = Object.values(ruleParamsSchemasWithRuleTypeId) as unknown as [
   Type<Record<string, unknown>>
 ];
@@ -134,7 +106,25 @@ export const ruleParamsSchemaWithDefaultValue = schema.recordOf(
   }
 );
 
-export const ruleParamsSchemaWithRuleTypeId = () => ruleParamsSchemaInstance;
+export const createRuleBodyVariants = (
+  baseFields: Record<string, Type<unknown>>
+): Array<ObjectType<any>> => {
+  return Object.entries(ruleParamsSchemasWithRuleTypeId).map(([ruleTypeId, paramsSchema]) => {
+    return schema.object(
+      {
+        ...baseFields,
+        rule_type_id: schema.literal(ruleTypeId),
+        params: paramsSchema,
+      },
+      {
+        meta: {
+          id: `${toSchemaId(ruleTypeId)}-create-rule-body-alerting`,
+        },
+      }
+    );
+  });
+};
+
 export const ruleParamsSchemaForUpdate = schema.oneOf(variantsWithoutRuleTypeId, {
   meta: { description: 'The parameters for the rule.' },
 });
@@ -144,5 +134,4 @@ export const createRuleParamsExamples = () =>
 
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
 export type RuleParamsWithDefaultValue = TypeOf<typeof ruleParamsSchemaWithDefaultValue>;
-export type RuleParamsWithRuleTypeId = TypeOf<ReturnType<typeof ruleParamsSchemaWithRuleTypeId>>;
 export type RuleParamsForUpdate = TypeOf<typeof ruleParamsSchemaForUpdate>;
