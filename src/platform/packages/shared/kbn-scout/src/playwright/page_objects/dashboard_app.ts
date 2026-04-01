@@ -129,10 +129,7 @@ export class DashboardApp {
 
   async goto() {
     await this.page.gotoApp('dashboards');
-    // The dashboard listing performs an initial fetch and can take longer than Scout's default action timeout in CI.
-    await expect(this.page.testSubj.locator('dashboardLandingPage')).toBeVisible({
-      timeout: 30_000,
-    });
+    await expect(this.page.testSubj.locator('dashboardLandingPage')).toBeVisible();
   }
 
   async openDashboardWithId(id: string) {
@@ -143,10 +140,10 @@ export class DashboardApp {
   /** Clicks "Create new dashboard" on the listing page and waits for the editor toolbar to load. */
   async openNewDashboard() {
     const newItemButton = this.page.testSubj.locator('newItemButton');
-    await expect(newItemButton).toBeVisible({ timeout: 30_000 });
-    await expect(newItemButton).toBeEnabled({ timeout: 30_000 });
+    await expect(newItemButton).toBeVisible();
+    await expect(newItemButton).toBeEnabled();
     await newItemButton.click({ noWaitAfter: true });
-    await expect(this.addTopNavButton).toBeVisible({ timeout: 30_000 });
+    await expect(this.addTopNavButton).toBeVisible();
   }
 
   private getSettingsFlyout() {
