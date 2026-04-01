@@ -84,6 +84,22 @@ describe('utils', () => {
       });
       expect(result.get('cloud.provider')).toEqual(new Set(['gcp', 'aws']));
     });
+
+    test('skips bool.should when must/filter are present (msm defaults to 0)', () => {
+      const result = extractExcludedMetadataValues({
+        bool: {
+          must_not: [
+            {
+              bool: {
+                must: [{ exists: { field: 'host.name' } }],
+                should: [{ match_phrase: { 'host.os.name': 'Windows' } }],
+              },
+            },
+          ],
+        },
+      });
+      expect(result.size).toBe(0);
+    });
   });
 
   describe('assertQueryStructure', () => {

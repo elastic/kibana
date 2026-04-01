@@ -84,8 +84,14 @@ export const extractExcludedMetadataValues = (
     }
 
     if (clause?.bool?.should) {
-      const { minimum_should_match: msm } = clause.bool;
-      if (msm === undefined || msm === 1 || msm === '1') {
+      const { minimum_should_match: msm, must, filter } = clause.bool;
+      const hasMustOrFilter =
+        (Array.isArray(must) ? must.length > 0 : !!must) ||
+        (Array.isArray(filter) ? filter.length > 0 : !!filter);
+      // ES defaults minimum_should_match to 0 when must/filter are present,
+      // making should clauses optional. Only extract when should is required.
+      const shouldIsRequired = msm === 1 || msm === '1' || (msm === undefined && !hasMustOrFilter);
+      if (shouldIsRequired) {
         const shouldClauses = Array.isArray(clause.bool.should)
           ? clause.bool.should
           : [clause.bool.should];
