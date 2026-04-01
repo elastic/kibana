@@ -37,11 +37,9 @@ export class SearchHomepagePlugin
   implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
 {
   private readonly kibanaVersion: string;
-  private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
-    this.isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -53,7 +51,6 @@ export class SearchHomepagePlugin
     };
 
     const kibanaVersion = this.kibanaVersion;
-    const isServerless = this.isServerless;
 
     core.application.register({
       id: PLUGIN_ID,
@@ -70,7 +67,7 @@ export class SearchHomepagePlugin
           history,
         };
 
-        return renderApp(coreStart, startDeps, element, queryClient, kibanaVersion, isServerless);
+        return renderApp(coreStart, startDeps, element, queryClient, kibanaVersion);
       },
       order: 0,
       visibleIn: ['globalSearch', 'sideNav'],
