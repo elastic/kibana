@@ -41,6 +41,7 @@ export interface StreamsServer {
   actions: ActionsPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   inference: InferenceServerStart;
+  licensing: LicensingPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
 }

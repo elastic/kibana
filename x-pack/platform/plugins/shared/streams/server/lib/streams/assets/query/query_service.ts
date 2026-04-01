@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
@@ -37,21 +42,14 @@ export class QueryService {
     private readonly logger: Logger
   ) {
     this.resolveInference = createInferenceResolver(logger);
-
-    // Eagerly warm the inference cache so the first getClient() call
-    // (e.g. during a tool-availability check with a tight timeout)
-    // hits the cache instead of blocking on the probe.
-    void coreSetup.getStartServices().then(([core]) => {
-      this.resolveInference(core.elasticsearch.client.asInternalUser).catch((error) => {
-        this.logger.error('Error warming up inference cache', error);
-      });
-    });
   }
 
   async getClient({
+    esClient,
     soClient,
     rulesClient,
   }: {
+    esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
     rulesClient: RulesClient;
   }): Promise<QueryClient> {
@@ -61,7 +59,6 @@ export class QueryService {
     const isSignificantEventsEnabled =
       (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
 
-    const esClient = core.elasticsearch.client.asInternalUser;
     const { inferenceId, available: inferenceAvailable } = await this.resolveInference(esClient);
 
     const settings = getQueryStorageSettings(inferenceId);
