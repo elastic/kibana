@@ -223,7 +223,7 @@ export const fieldSpecSchemaFields = {
     schema.boolean({
       meta: {
         description:
-          'When `true`, shorten long field names using dot notation, for example `a.b.c.d` becomes `a.b...d`.',
+          'Indicates whether short dot notation is enabled. When enabled, long field names such as `a.b.c.d` are displayed as `a.b...d`. This is a read-only value derived from the Kibana `shortDots:enable` setting.',
       },
     })
   ),

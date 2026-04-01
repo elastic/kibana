@@ -161,7 +161,7 @@ const manageDefaultIndexPatternRoutesFactory =
                   defaultValue: false,
                   meta: {
                     description:
-                      'When `true`, sets the default data view even if the data view does not exist.',
+                      'When `true`, sets the default data view even if a default is already configured.',
                   },
                 }),
               }),

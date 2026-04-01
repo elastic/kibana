@@ -83,7 +83,7 @@ const registerCreateDataViewRouteFactory =
                     defaultValue: false,
                     meta: {
                       description:
-                        'When `true`, overwrites an existing data view if a data view with the same ID already exists.',
+                        'When `true`, overwrites an existing data view if a data view with the same name or ID already exists.',
                     },
                   })
                 ),

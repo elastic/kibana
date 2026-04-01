@@ -70,7 +70,7 @@ export const dataViewSpecSchema = schema.object({
       {
         meta: {
           description:
-            'An array of field patterns that filter which fields are returned from `_source`. Use source filters to limit the fields returned in document results.',
+            'An array of field patterns to exclude from `_source` in document results.',
         },
       }
     )

@@ -105,7 +105,7 @@ const updateRuntimeFieldRouteFactory =
                 name: schema.string({
                   minLength: 1,
                   maxLength: 1_000,
-                  meta: { description: 'The name of the runtime field to retrieve.' },
+                  meta: { description: 'The name of the runtime field to update.' },
                 }),
               }),
               body: schema.object({
