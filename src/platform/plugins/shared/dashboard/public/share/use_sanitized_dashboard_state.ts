@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { DashboardState } from '../../server';
 import { sanitizeDashboard } from './sanitize_dashboard';
-import type { ExportJsonLoadState } from './export_json_types';
+import type { ExportJsonSanitizedState, ExportJsonStatus } from './types';
+
+export type UseSanitizedDashboardStateResult = ExportJsonSanitizedState & { retry: () => void };
 
 export function useSanitizedDashboardState({
   dashboardState,
@@ -18,9 +20,9 @@ export function useSanitizedDashboardState({
 }: {
   dashboardState: DashboardState;
   onLoadStart?: () => void;
-}): { loadState: ExportJsonLoadState; retry: () => void } {
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
+}): UseSanitizedDashboardStateResult {
+  const [status, setStatus] = useState<ExportJsonStatus>('loading');
+  const [error, setError] = useState<Error | undefined>(undefined);
   const [data, setData] = useState<DashboardState | undefined>(undefined);
   const [warnings, setWarnings] = useState<string[]>([]);
   // reloadCount is used to trigger a reload of the dashboard state when retry is called
@@ -33,8 +35,8 @@ export function useSanitizedDashboardState({
   useEffect(() => {
     let isMounted = true;
 
-    setIsLoading(true);
-    setErrorMessage(undefined);
+    setStatus('loading');
+    setError(undefined);
     setData(undefined);
     setWarnings([]);
     onLoadStart?.();
@@ -44,12 +46,12 @@ export function useSanitizedDashboardState({
         if (!isMounted) return;
         setWarnings(responseWarnings.map(({ message }) => message));
         setData(responseData);
-        setIsLoading(false);
+        setStatus('success');
       })
       .catch((e) => {
         if (!isMounted) return;
-        setErrorMessage(e instanceof Error ? e.message : String(e));
-        setIsLoading(false);
+        setError(e instanceof Error ? e : new Error(String(e)));
+        setStatus('error');
       });
 
     return () => {
@@ -57,12 +59,5 @@ export function useSanitizedDashboardState({
     };
   }, [dashboardState, reloadCount, onLoadStart]);
 
-  const loadState = useMemo<ExportJsonLoadState>(() => {
-    if (isLoading) return { status: 'loading' };
-    if (errorMessage !== undefined) return { status: 'error', errorMessage };
-    if (data === undefined) return { status: 'error', errorMessage: 'Unknown error' };
-    return { status: 'success', data, warnings };
-  }, [data, errorMessage, isLoading, warnings]);
-
-  return { loadState, retry };
+  return { status, data, warnings, error, retry };
 }

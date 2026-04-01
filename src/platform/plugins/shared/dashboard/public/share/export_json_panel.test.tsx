@@ -14,7 +14,7 @@ import type { DashboardState } from '../../server';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import { ExportJsonPanel } from './export_json_panel';
 import { userEvent } from '@testing-library/user-event';
-import type { ExportJsonLoadState } from './export_json_types';
+import type { ExportJsonSanitizedState } from './types';
 
 describe('ExportJsonPanel', () => {
   const dashboardState: DashboardState = {
@@ -29,20 +29,26 @@ describe('ExportJsonPanel', () => {
   });
 
   it('shows a loading indicator while loading', async () => {
-    const loadState: ExportJsonLoadState = { status: 'loading' };
-    render(<ExportJsonPanel loadState={loadState} onRetry={jest.fn()} />);
+    const sanitizedState: ExportJsonSanitizedState = {
+      status: 'loading',
+      data: undefined,
+      warnings: [],
+      error: undefined,
+    };
+    render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />);
     expect(screen.getByTestId('dashboardExportSourceLoading')).toBeInTheDocument();
   });
 
   it('renders warnings when the server reports unsupported panels', async () => {
     const user = userEvent.setup();
-    const loadState: ExportJsonLoadState = {
+    const sanitizedState: ExportJsonSanitizedState = {
       status: 'success',
       data: dashboardState,
       warnings: ['Dropped panel panel1, panel schema not available for panel type: foo.'],
+      error: undefined,
     };
 
-    render(<ExportJsonPanel loadState={loadState} onRetry={jest.fn()} />);
+    render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />);
 
     expect(screen.getByTestId('dashboardExportSourceWarnings')).toBeInTheDocument();
 
@@ -58,8 +64,13 @@ describe('ExportJsonPanel', () => {
   });
 
   it('renders an error prompt and hides sanitized JSON', async () => {
-    const loadState: ExportJsonLoadState = { status: 'error', errorMessage: 'boom' };
-    render(<ExportJsonPanel loadState={loadState} onRetry={jest.fn()} />);
+    const sanitizedState: ExportJsonSanitizedState = {
+      status: 'error',
+      data: undefined,
+      warnings: [],
+      error: new Error('boom'),
+    };
+    render(<ExportJsonPanel {...sanitizedState} onRetry={jest.fn()} />);
 
     expect(screen.getByTestId('dashboardExportSourceSanitizeErrorPrompt')).toBeInTheDocument();
 
@@ -70,9 +81,14 @@ describe('ExportJsonPanel', () => {
   it('calls onRetry when the user clicks Retry', async () => {
     const user = userEvent.setup();
     const onRetry = jest.fn();
-    const loadState: ExportJsonLoadState = { status: 'error', errorMessage: 'boom' };
+    const sanitizedState: ExportJsonSanitizedState = {
+      status: 'error',
+      data: undefined,
+      warnings: [],
+      error: new Error('boom'),
+    };
 
-    render(<ExportJsonPanel loadState={loadState} onRetry={onRetry} />);
+    render(<ExportJsonPanel {...sanitizedState} onRetry={onRetry} />);
 
     await user.click(screen.getByTestId('dashboardExportSourceRetryButton'));
     expect(onRetry).toHaveBeenCalledTimes(1);

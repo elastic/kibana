@@ -9,7 +9,11 @@
 
 import type { DashboardState } from '../../server';
 
-export type ExportJsonLoadState =
-  | { status: 'loading' }
-  | { status: 'success'; data: DashboardState; warnings: string[] }
-  | { status: 'error'; errorMessage: string };
+export type ExportJsonStatus = 'loading' | 'success' | 'error';
+
+export interface ExportJsonSanitizedState {
+  status: ExportJsonStatus;
+  data: DashboardState | undefined;
+  warnings: string[];
+  error: Error | undefined;
+}

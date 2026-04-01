@@ -29,14 +29,11 @@ import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { compressToEncodedURIComponent } from 'lz-string';
 import { CodeEditor } from '@kbn/code-editor';
-import type { ExportJsonLoadState } from './export_json_types';
+import type { ExportJsonSanitizedState } from './types';
 import { buildCreateDashboardRequestForConsole } from './export_json_share_utils';
 import { coreServices, shareService } from '../services/kibana_services';
 
-export interface ExportJsonPanelProps {
-  loadState: ExportJsonLoadState;
-  onRetry: () => void;
-}
+export type ExportJsonPanelProps = ExportJsonSanitizedState & { onRetry: () => void };
 
 function WarningsCallout({
   warnings,
@@ -260,7 +257,8 @@ function SuccessState({
   );
 }
 
-function ErrorState({ errorMessage, onRetry }: { errorMessage: string; onRetry: () => void }) {
+function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry: () => void }) {
+  const errorMessage = error?.message ?? 'Unknown error';
   return (
     <EuiFlexGroup
       direction="column"
@@ -315,21 +313,26 @@ function ErrorState({ errorMessage, onRetry }: { errorMessage: string; onRetry: 
   );
 }
 
-export const ExportJsonPanel = ({ loadState, onRetry }: ExportJsonPanelProps) => {
+export const ExportJsonPanel = ({
+  status,
+  data,
+  warnings,
+  error,
+  onRetry,
+}: ExportJsonPanelProps) => {
   const warningsAccordionId = useGeneratedHtmlId({ prefix: 'dashboardExportSourceWarnings' });
   const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
   const [showWarningsCallout, setShowWarningsCallout] = useState(true);
 
   useEffect(() => {
-    if (loadState.status !== 'loading') return;
+    if (status !== 'loading') return;
     setIsWarningsExpanded(false);
     setShowWarningsCallout(true);
-  }, [loadState.status]);
+  }, [status]);
 
-  const warnings = loadState.status === 'success' ? loadState.warnings : [];
   const jsonValue = useMemo(
-    () => (loadState.status === 'success' ? JSON.stringify(loadState.data, null, 2) : ''),
-    [loadState]
+    () => (status === 'success' && data !== undefined ? JSON.stringify(data, null, 2) : ''),
+    [data, status]
   );
 
   const openInConsoleRequest = useMemo(
@@ -353,12 +356,12 @@ export const ExportJsonPanel = ({ loadState, onRetry }: ExportJsonPanelProps) =>
         />
 
         <EuiFlexItem grow css={{ minHeight: 0 }}>
-          {loadState.status === 'loading' ? (
+          {status === 'loading' ? (
             <LoadingState />
-          ) : loadState.status === 'success' ? (
+          ) : status === 'success' ? (
             <SuccessState openInConsoleRequest={openInConsoleRequest} jsonValue={jsonValue} />
           ) : (
-            <ErrorState errorMessage={loadState.errorMessage} onRetry={onRetry} />
+            <ErrorState error={error} onRetry={onRetry} />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -54,16 +54,18 @@ export const ExportJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void }) =
   const { title, exportJson } = typedSharingData;
 
   const dashboardState = useMemo(() => exportJson(), [exportJson]);
-  const { loadState, retry } = useSanitizedDashboardState({ dashboardState });
+  const { status, data, warnings, error, retry } = useSanitizedDashboardState({
+    dashboardState,
+  });
 
   const onDownload = useCallback(async () => {
-    if (loadState.status !== 'success') return;
+    if (status !== 'success' || data === undefined) return;
 
     const filename = buildExportJsonFilename(title, '.json');
-    const content = JSON.stringify(loadState.data, null, 2);
+    const content = JSON.stringify(data, null, 2);
     await downloadFileAs(filename, { content, type: 'application/json' });
     closeFlyout();
-  }, [closeFlyout, loadState, title]);
+  }, [closeFlyout, data, status, title]);
 
   return (
     <React.Fragment>
@@ -98,7 +100,13 @@ export const ExportJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void }) =
 
       <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody" css={flyoutBodyCss}>
         <EuiFlexGroup css={{ height: '100%' }} direction="column">
-          <ExportJsonPanel loadState={loadState} onRetry={retry} />
+          <ExportJsonPanel
+            status={status}
+            data={data}
+            warnings={warnings}
+            error={error}
+            onRetry={retry}
+          />
         </EuiFlexGroup>
       </EuiFlyoutBody>
 
@@ -117,7 +125,7 @@ export const ExportJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void }) =
               fill
               onClick={onDownload}
               data-test-subj="generateReportButton"
-              disabled={loadState.status !== 'success'}
+              disabled={status !== 'success' || data === undefined}
             >
               {i18n.translate('dashboard.exportJson.downloadButtonLabel', {
                 defaultMessage: 'Download JSON',

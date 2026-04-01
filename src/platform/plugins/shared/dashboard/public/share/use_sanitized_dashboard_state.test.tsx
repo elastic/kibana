@@ -36,10 +36,10 @@ describe('useSanitizedDashboardState', () => {
     });
 
     const { result } = renderHook(() => useSanitizedDashboardState({ dashboardState }));
-    expect(result.current.loadState.status).toBe('loading');
+    expect(result.current.status).toBe('loading');
 
     await waitFor(() => {
-      expect(result.current.loadState.status).toBe('success');
+      expect(result.current.status).toBe('success');
     });
 
     expect(sanitizeDashboard).toHaveBeenCalledTimes(1);
@@ -56,7 +56,7 @@ describe('useSanitizedDashboardState', () => {
     const { result } = renderHook(() => useSanitizedDashboardState({ dashboardState }));
 
     await waitFor(() => {
-      expect(result.current.loadState.status).toBe('error');
+      expect(result.current.status).toBe('error');
     });
 
     act(() => {
@@ -65,7 +65,7 @@ describe('useSanitizedDashboardState', () => {
 
     await waitFor(() => {
       expect(sanitizeDashboard).toHaveBeenCalledTimes(2);
-      expect(result.current.loadState.status).toBe('success');
+      expect(result.current.status).toBe('success');
     });
   });
 });
