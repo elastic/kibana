@@ -10,6 +10,11 @@
 import type { Node } from 'unist';
 import type { Link, Parent } from 'mdast';
 
+/**
+ * TODO: This logic has been submitted as a pull request to EUI. If https://github.com/elastic/eui/pull/9554 merges,
+ * this file and its enclosing folder can be removed
+ */
+
 function isParent(node: Node): node is Parent {
   return 'children' in node;
 }
