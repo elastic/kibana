@@ -165,9 +165,9 @@ export const parseAgentSelection = async (
             results: res.agents.map((agent) => agent.id),
             total: res.total,
             searchAfter:
-                res.agents.length > 0 && res.agents[res.agents.length - 1].sort
-                  ? res.agents[res.agents.length - 1].sort
-                  : undefined,   
+              res.agents.length > 0 && res.agents[res.agents.length - 1].sort
+                ? res.agents[res.agents.length - 1].sort
+                : undefined,
           };
         },
         esClient,
