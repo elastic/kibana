@@ -18,15 +18,18 @@ import {
   invokeValidationWorkflow,
   type ValidationResult,
 } from '../../../invoke_validation_workflow';
-import type { AttackDiscoverySource } from '../../../../persistence/event_logging';
 import type { WorkflowConfig } from '../../../types';
 
-export interface ManualOrchestrationOutcome {
-  alertRetrievalResult: AlertRetrievalResult;
-  generationResult: GenerationWorkflowResult;
-  outcome: 'validation_succeeded';
-  validationResult: ValidationResult;
-}
+export type ManualOrchestrationOutcome =
+  | {
+      outcome: 'validation_failed';
+    }
+  | {
+      alertRetrievalResult: AlertRetrievalResult;
+      generationResult: GenerationWorkflowResult;
+      outcome: 'validation_succeeded';
+      validationResult: ValidationResult;
+    };
 
 export interface ValidationStepParams {
   alertRetrievalResult: AlertRetrievalResult;
@@ -38,8 +41,8 @@ export interface ValidationStepParams {
   logger: Logger;
   generationResult: GenerationWorkflowResult;
   maxWaitMs?: number;
+  persist?: boolean;
   request: KibanaRequest;
-  source?: AttackDiscoverySource;
   spaceId: string;
   workflowConfig: WorkflowConfig;
   workflowsManagementApi: WorkflowsManagementApi;
@@ -55,8 +58,8 @@ export const runValidationStep = async ({
   logger,
   generationResult,
   maxWaitMs,
+  persist,
   request,
-  source,
   spaceId,
   workflowConfig,
   workflowsManagementApi,
@@ -64,6 +67,7 @@ export const runValidationStep = async ({
   logHealthCheck(logger, 'validation', {
     defaultValidationWorkflowId,
     discoveryCount: generationResult.attackDiscoveries.length,
+    persist,
     validationWorkflowId: workflowConfig.validation_workflow_id,
   });
 
@@ -79,8 +83,8 @@ export const runValidationStep = async ({
       logger,
       generationResult,
       maxWaitMs,
+      persist,
       request,
-      source,
       spaceId,
       withReplacements: true,
       workflowConfig,
@@ -101,6 +105,6 @@ export const runValidationStep = async ({
     const validationErrorMessage =
       validationError instanceof Error ? validationError.message : String(validationError);
     logger.error(`Validation workflow failed: ${validationErrorMessage}`);
-    throw validationError;
+    return { outcome: 'validation_failed' };
   }
 };

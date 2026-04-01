@@ -27,7 +27,7 @@ describe('extractAlertRetrievalResult', () => {
           connector_name: 'Test Connector',
           replacements: { u1: 'REDACTED_U1' },
         },
-        stepType: 'security.attack-discovery.defaultAlertRetrieval',
+        stepType: 'attack-discovery.defaultAlertRetrieval',
       },
     ],
     status: 'completed',
@@ -81,7 +81,7 @@ describe('extractAlertRetrievalResult', () => {
   it('throws when alert retrieval step has no output', () => {
     const execution = {
       ...baseExecution,
-      stepExecutions: [{ stepType: 'security.attack-discovery.defaultAlertRetrieval' }],
+      stepExecutions: [{ stepType: 'attack-discovery.defaultAlertRetrieval' }],
     } as unknown as WorkflowExecutionDto;
 
     expect(() => extractAlertRetrievalResult({ apiConfig, execution })).toThrow(
@@ -141,7 +141,7 @@ describe('extractAlertRetrievalResult', () => {
       stepExecutions: [
         {
           output: {},
-          stepType: 'security.attack-discovery.defaultAlertRetrieval',
+          stepType: 'attack-discovery.defaultAlertRetrieval',
         },
       ],
     } as unknown as WorkflowExecutionDto;

@@ -11,7 +11,6 @@ import type { ErrorCategory } from '@kbn/discoveries-schemas';
 import {
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED,
   writeAttackDiscoveryEvent,
-  type AttackDiscoverySource,
 } from '../../persistence/event_logging';
 import { getDurationNanoseconds } from '../../../lib/persistence';
 
@@ -28,7 +27,6 @@ export const writeAlertRetrievalFailedEvent = async ({
   executionUuid,
   failedWorkflowId,
   logger,
-  source,
   spaceId,
   startTime,
   workflowExecutions,
@@ -45,7 +43,6 @@ export const writeAlertRetrievalFailedEvent = async ({
   executionUuid: string;
   failedWorkflowId?: string;
   logger: Logger;
-  source?: AttackDiscoverySource;
   spaceId: string;
   startTime: Date;
   workflowExecutions: WorkflowExecutionsTracking;
@@ -68,7 +65,6 @@ export const writeAlertRetrievalFailedEvent = async ({
       message: `Attack discovery alert retrieval ${executionUuid} failed`,
       outcome: 'failure',
       reason: errorMessage,
-      source,
       spaceId,
       workflowExecutions,
       workflowId,

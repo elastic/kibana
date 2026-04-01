@@ -9,14 +9,6 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 import { logStartupHealthCheck } from '.';
 
-const EXPECTED_WORKFLOW_IDS = [
-  'system-attack-discovery-alert-retrieval',
-  'system-attack-discovery-generate',
-  'system-attack-discovery-validate',
-  'system-attack-discovery-run-example',
-  'system-attack-discovery-custom-validation-example',
-];
-
 describe('logStartupHealthCheck', () => {
   let mockLogger: MockedLogger;
 
@@ -26,36 +18,36 @@ describe('logStartupHealthCheck', () => {
 
   it('logs INFO when all checks pass', () => {
     logStartupHealthCheck({
-      expectedWorkflowIds: EXPECTED_WORKFLOW_IDS,
-      failedWorkflowIds: [],
+      failedStepIds: [],
       logger: mockLogger,
+      registeredStepCount: 6,
       workflowsManagementApiAvailable: true,
     });
 
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('AD 2.0 managed workflows installed')
+      expect.stringContaining('Startup health check passed')
     );
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
-  it('reports installed count as N/N in the success message', () => {
+  it('includes registered step count in the success message', () => {
     logStartupHealthCheck({
-      expectedWorkflowIds: EXPECTED_WORKFLOW_IDS,
-      failedWorkflowIds: [],
+      failedStepIds: [],
       logger: mockLogger,
+      registeredStepCount: 6,
       workflowsManagementApiAvailable: true,
     });
 
     expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining(`${EXPECTED_WORKFLOW_IDS.length}/${EXPECTED_WORKFLOW_IDS.length}`)
+      expect.stringContaining('6 workflow step(s) registered')
     );
   });
 
   it('logs WARN when WorkflowsManagement API is not available', () => {
     logStartupHealthCheck({
-      expectedWorkflowIds: EXPECTED_WORKFLOW_IDS,
-      failedWorkflowIds: [],
+      failedStepIds: [],
       logger: mockLogger,
+      registeredStepCount: 6,
       workflowsManagementApiAvailable: false,
     });
 
@@ -65,38 +57,35 @@ describe('logStartupHealthCheck', () => {
     expect(mockLogger.info).not.toHaveBeenCalled();
   });
 
-  it('logs WARN when some managed workflows failed to install', () => {
+  it('logs WARN when some workflow steps failed to register', () => {
     logStartupHealthCheck({
-      expectedWorkflowIds: EXPECTED_WORKFLOW_IDS,
-      failedWorkflowIds: [
-        'system-attack-discovery-generate',
-        'system-attack-discovery-alert-retrieval',
-      ],
+      failedStepIds: ['attack-discovery.generate', 'attack-discovery.run'],
       logger: mockLogger,
+      registeredStepCount: 4,
       workflowsManagementApiAvailable: true,
     });
 
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('2 managed workflow(s) not installed')
+      expect.stringContaining('2 workflow step(s) failed to register')
     );
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('system-attack-discovery-generate')
+      expect.stringContaining('attack-discovery.generate')
     );
     expect(mockLogger.info).not.toHaveBeenCalled();
   });
 
   it('logs WARN with all issues when multiple checks fail', () => {
     logStartupHealthCheck({
-      expectedWorkflowIds: EXPECTED_WORKFLOW_IDS,
-      failedWorkflowIds: ['system-attack-discovery-generate'],
+      failedStepIds: ['attack-discovery.generate'],
       logger: mockLogger,
+      registeredStepCount: 5,
       workflowsManagementApiAvailable: false,
     });
 
     const warnCall = mockLogger.warn.mock.calls[0]?.[0] as string;
 
     expect(warnCall).toContain('WorkflowsManagement API is not available');
-    expect(warnCall).toContain('managed workflow(s) not installed');
+    expect(warnCall).toContain('workflow step(s) failed to register');
     expect(mockLogger.info).not.toHaveBeenCalled();
   });
 });

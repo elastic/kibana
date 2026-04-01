@@ -56,7 +56,6 @@ describe('invokeGenerationWorkflow', () => {
     getWorkflow: jest.fn(),
     getWorkflowExecution: jest.fn(),
     runWorkflow: jest.fn(),
-    scheduleWorkflow: jest.fn(),
   };
 
   const mockAlertRetrievalResult: AlertRetrievalResult = {
@@ -107,7 +106,7 @@ describe('invokeGenerationWorkflow', () => {
     workflowId,
     workflowConfig: {
       alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
-      alert_retrieval_mode: 'custom_query' as const,
+      default_alert_retrieval_mode: 'custom_query' as const,
       validation_workflow_id: 'attack-discovery-validation',
     },
     workflowsManagementApi: mockWorkflowsManagementApi,
@@ -161,7 +160,7 @@ describe('invokeGenerationWorkflow', () => {
         status: ExecutionStatus.COMPLETED,
         stepExecutionIndex: 0,
         stepId: 'generate_discoveries',
-        stepType: 'security.attack-discovery.generate',
+        stepType: 'attack-discovery.generate',
         topologicalIndex: 0,
         workflowId,
         workflowRunId: 'workflow-run-id',
@@ -191,9 +190,7 @@ describe('invokeGenerationWorkflow', () => {
   describe('when workflow executes successfully', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockCompletedExecution
       );
@@ -265,21 +262,20 @@ describe('invokeGenerationWorkflow', () => {
     it('passes additional_alerts in workflow inputs', async () => {
       await invokeGenerationWorkflow(defaultProps);
 
-      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+      expect(mockWorkflowsManagementApi.runWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({ id: workflowId }),
         'default',
         expect.objectContaining({
           additional_alerts: ['alert-1-content', 'alert-2-content'], // array, not stringified
         }),
-        mockRequest,
-        'attack-discovery-pipeline'
+        mockRequest
       );
     });
 
     it('passes api_config in workflow inputs', async () => {
       await invokeGenerationWorkflow(defaultProps);
 
-      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+      expect(mockWorkflowsManagementApi.runWorkflow).toHaveBeenCalledWith(
         expect.anything(),
         'default',
         expect.objectContaining({
@@ -289,38 +285,35 @@ describe('invokeGenerationWorkflow', () => {
             model: 'gpt-4',
           },
         }),
-        mockRequest,
-        'attack-discovery-pipeline'
+        mockRequest
       );
     });
 
     it('passes workflowConfig params in workflow inputs', async () => {
       await invokeGenerationWorkflow(defaultProps);
 
-      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+      expect(mockWorkflowsManagementApi.runWorkflow).toHaveBeenCalledWith(
         expect.anything(),
         'default',
         expect.objectContaining({
           alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
-          alert_retrieval_mode: 'custom_query' as const,
+          default_alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'attack-discovery-validation',
         }),
-        mockRequest,
-        'attack-discovery-pipeline'
+        mockRequest
       );
     });
 
     it('passes replacements from alert retrieval in workflow inputs', async () => {
       await invokeGenerationWorkflow(defaultProps);
 
-      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+      expect(mockWorkflowsManagementApi.runWorkflow).toHaveBeenCalledWith(
         expect.anything(),
         'default',
         expect.objectContaining({
           replacements: { 'user-1': 'REDACTED_USER_1' },
         }),
-        mockRequest,
-        'attack-discovery-pipeline'
+        mockRequest
       );
     });
 
@@ -335,21 +328,20 @@ describe('invokeGenerationWorkflow', () => {
 
       await invokeGenerationWorkflow(propsWithContext);
 
-      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+      expect(mockWorkflowsManagementApi.runWorkflow).toHaveBeenCalledWith(
         expect.anything(),
         'default',
         expect.objectContaining({
           additional_context: 'Focus on lateral movement',
         }),
-        mockRequest,
-        'attack-discovery-pipeline'
+        mockRequest
       );
     });
 
     it('does NOT include additional_context in workflow inputs when not in workflowConfig', async () => {
       await invokeGenerationWorkflow(defaultProps);
 
-      const workflowInputs = (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mock
+      const workflowInputs = (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mock
         .calls[0][2] as Record<string, unknown>;
 
       expect(workflowInputs).not.toHaveProperty('additional_context');
@@ -377,12 +369,6 @@ describe('invokeGenerationWorkflow', () => {
       expect(generationSucceededCall).toBeDefined();
       expect(generationSucceededCall![0]).not.toHaveProperty('newAlerts');
     });
-
-    it('returns workflowName in workflowExecution', async () => {
-      const result = await invokeGenerationWorkflow(defaultProps);
-
-      expect(result.workflowExecution?.workflowName).toBe('Attack discovery generation');
-    });
   });
 
   describe('when workflow is not found', () => {
@@ -407,16 +393,6 @@ describe('invokeGenerationWorkflow', () => {
       await expect(invokeGenerationWorkflow(defaultProps)).rejects.toThrow(
         `Generation workflow (id: ${workflowId}) not found. It may have been deleted. Reconfigure the generation workflow in Attack Discovery settings.`
       );
-    });
-
-    it('does NOT include workflowName in the generate-step-failed event workflowExecutions', async () => {
-      await expect(invokeGenerationWorkflow(defaultProps)).rejects.toThrow();
-
-      const failedCall = mockWriteAttackDiscoveryEvent.mock.calls.find(
-        (call: unknown[]) => (call[0] as Record<string, unknown>)?.action === 'generate-step-failed'
-      );
-
-      expect(failedCall![0].workflowExecutions.generation).not.toHaveProperty('workflowName');
     });
   });
 
@@ -513,9 +489,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockFailedExecution
       );
@@ -549,9 +523,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockSkippedExecution
       );
@@ -590,9 +562,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockCancelledExecution
       );
@@ -626,9 +596,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockTimedOutExecution
       );
@@ -657,9 +625,7 @@ describe('invokeGenerationWorkflow', () => {
   describe('when execution is not found during polling', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(null);
     });
 
@@ -678,9 +644,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockExecutionWithoutStep
       );
@@ -734,9 +698,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockExecutionWithNoOutput
       );
@@ -761,10 +723,10 @@ describe('invokeGenerationWorkflow', () => {
     });
   });
 
-  describe('when scheduleWorkflow throws', () => {
+  describe('when runWorkflow throws', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockRejectedValue(
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockRejectedValue(
         new Error('Failed to run workflow')
       );
     });
@@ -780,20 +742,6 @@ describe('invokeGenerationWorkflow', () => {
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Generation workflow failed: Failed to run workflow'
-      );
-    });
-
-    it('includes workflowName in the generate-step-failed event workflowExecutions', async () => {
-      await expect(invokeGenerationWorkflow(defaultProps)).rejects.toThrow();
-
-      const failedCall = mockWriteAttackDiscoveryEvent.mock.calls.find(
-        (call: unknown[]) => (call[0] as Record<string, unknown>)?.action === 'generate-step-failed'
-      );
-
-      expect(failedCall![0].workflowExecutions.generation).toEqual(
-        expect.objectContaining({
-          workflowName: 'Attack discovery generation',
-        })
       );
     });
   });
@@ -816,9 +764,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockExecutionWithStringReplacements
       );
@@ -844,9 +790,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockExecutionWithEmptyOutput
       );
@@ -885,9 +829,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock)
         .mockResolvedValueOnce(mockRunningExecution)
         .mockResolvedValue(mockCompletedExecution);
@@ -928,9 +870,7 @@ describe('invokeGenerationWorkflow', () => {
   describe('when writeAttackDiscoveryEvent fails for succeeded event', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockCompletedExecution
       );
@@ -954,7 +894,7 @@ describe('invokeGenerationWorkflow', () => {
   describe('when writeAttackDiscoveryEvent fails for failed event', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockRejectedValue(
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockRejectedValue(
         new Error('Workflow error')
       );
       mockWriteAttackDiscoveryEvent.mockRejectedValue(new Error('Event logging failed'));
@@ -992,7 +932,6 @@ describe('invokeGenerationWorkflow', () => {
         getWorkflow: jest.fn().mockResolvedValue(mockWorkflow),
         getWorkflowExecution: jest.fn().mockResolvedValue(mockPendingExecution),
         runWorkflow: jest.fn().mockResolvedValue('workflow-run-id'),
-        scheduleWorkflow: jest.fn().mockResolvedValue('workflow-run-id'),
       };
 
       // Verify the API would return non-terminal status
@@ -1023,9 +962,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockExecutionWithInvalidReplacements
       );
@@ -1041,9 +978,7 @@ describe('invokeGenerationWorkflow', () => {
   describe('when filter is not provided', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockCompletedExecution
       );
@@ -1054,14 +989,13 @@ describe('invokeGenerationWorkflow', () => {
 
       await invokeGenerationWorkflow(propsWithoutFilter);
 
-      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+      expect(mockWorkflowsManagementApi.runWorkflow).toHaveBeenCalledWith(
         expect.anything(),
         'default',
         expect.objectContaining({
           filter: undefined,
         }),
-        mockRequest,
-        'attack-discovery-pipeline'
+        mockRequest
       );
     });
   });
@@ -1069,9 +1003,7 @@ describe('invokeGenerationWorkflow', () => {
   describe('when end and start are not provided', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockCompletedExecution
       );
@@ -1082,15 +1014,14 @@ describe('invokeGenerationWorkflow', () => {
 
       await invokeGenerationWorkflow(propsWithoutDates);
 
-      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+      expect(mockWorkflowsManagementApi.runWorkflow).toHaveBeenCalledWith(
         expect.anything(),
         'default',
         expect.objectContaining({
           end: undefined,
           start: undefined,
         }),
-        mockRequest,
-        'attack-discovery-pipeline'
+        mockRequest
       );
     });
   });
@@ -1104,9 +1035,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
         mockFailedExecutionNoMessage
       );
@@ -1116,44 +1045,6 @@ describe('invokeGenerationWorkflow', () => {
       await expect(invokeGenerationWorkflow(defaultProps)).rejects.toThrow(
         'Generation workflow failed: Unknown error'
       );
-    });
-  });
-
-  describe('when scheduleWorkflow is used to acquire execution ID before the workflow runs', () => {
-    beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
-        'scheduled-run-id'
-      );
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
-        mockCompletedExecution
-      );
-    });
-
-    it('uses scheduleWorkflow instead of runWorkflow to acquire the execution ID', async () => {
-      await invokeGenerationWorkflow(defaultProps);
-
-      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ id: workflowId }),
-        'default',
-        expect.objectContaining({ additional_alerts: expect.any(Array) }),
-        mockRequest,
-        'attack-discovery-pipeline'
-      );
-      expect(mockWorkflowsManagementApi.runWorkflow).not.toHaveBeenCalled();
-    });
-
-    it('writes generate-step-started event with the execution ID from scheduleWorkflow', async () => {
-      await invokeGenerationWorkflow(defaultProps);
-
-      const startedCall = mockWriteAttackDiscoveryEvent.mock.calls.find(
-        (call: unknown[]) =>
-          (call[0] as Record<string, unknown>)?.action === 'generate-step-started'
-      );
-
-      expect(startedCall).toBeDefined();
-      expect(startedCall![0].workflowRunId).toBe('scheduled-run-id');
-      expect(startedCall![0].workflowExecutions.generation.workflowRunId).toBe('scheduled-run-id');
     });
   });
 });

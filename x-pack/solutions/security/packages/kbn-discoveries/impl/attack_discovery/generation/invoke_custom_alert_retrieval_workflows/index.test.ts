@@ -46,7 +46,6 @@ const createMockWorkflowsApi = (): jest.Mocked<WorkflowsManagementApi> => ({
   getWorkflow: jest.fn(),
   getWorkflowExecution: jest.fn(),
   runWorkflow: jest.fn(),
-  scheduleWorkflow: jest.fn(),
 });
 
 describe('invokeCustomAlertRetrievalWorkflows', () => {
