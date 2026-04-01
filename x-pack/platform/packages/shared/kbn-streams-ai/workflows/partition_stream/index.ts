@@ -9,7 +9,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Feature, Streams } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
 import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
@@ -204,8 +203,13 @@ export async function partitionStream({
   const proposedPartitions = (response?.toolCalls
     ?.flatMap((toolCall) => toolCall.function.arguments.partitions ?? [])
     .map(({ name, condition }) => {
+      // Strip the parent stream prefix if the LLM echoed it back (e.g. "logs.otel.foo" → "foo")
+      const baseName = name.startsWith(`${definition.name}.`)
+        ? name.slice(definition.name.length + 1)
+        : name;
+
       // Sanitize name to be alphanumeric with dashes only, lowercase
-      const sanitizedName = name
+      const sanitizedName = baseName
         .toLowerCase()
         .replace(/[^a-z0-9-]/g, '-')
         .replace(/-+/g, '-')
@@ -230,10 +234,8 @@ export async function partitionStream({
     .filter(Boolean) ?? []) as Array<{ name: string; condition: Condition }>;
 
   const partitions = proposedPartitions.filter(
-    ({ condition }) =>
-      strictConditionSchema.safeParse(condition).success && !isEqual(condition, { always: {} })
+    ({ condition }) => strictConditionSchema.safeParse(condition).success
   );
-
   return {
     partitions,
     reason: partitions.length === 0 ? 'no_clusters' : undefined,

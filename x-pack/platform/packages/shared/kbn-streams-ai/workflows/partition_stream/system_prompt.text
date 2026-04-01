@@ -181,10 +181,11 @@ You now submit a more detailed and complete set of partitions.
 
 ### **Tips & Hints**
 
-*   Partition names must be alphanumeric with dashes (e.g., `my-cool-service-prod`). No underscores or dots.
+*   Partition names must be **short identifiers only** — alphanumeric with dashes (e.g., `my-cool-service-prod`). No underscores or dots. Do **not** include the parent stream name as a prefix (e.g., use `thunderbird`, not `logs-otel-thunderbird` or `logs.otel.thunderbird`).
 *   Partitions are evaluated top-to-bottom. Place more specific rules first. A catch-all rule like `{ "always": {} }` should always be last.
 *   Use the `exists` condition to find logs that have a uniquely identifying field.
 *   The goal is **one cluster per partition** and an **empty unmatched bucket**.
+*   **Do not create `always` conditions by default.** Catch-all partitions hide unmatched logs and make it harder to identify gaps in coverage. Only add an `always` partition when the user explicitly requests it — either directly (e.g., "add a catch-all") or implied by their intent (e.g., "make sure every log is routed somewhere", "route everything else to a default stream").
 
 ### **User Guidance & Refinement**
 
@@ -201,10 +202,12 @@ When user guidance is provided, you MUST first check the **refinement history** 
 
 3.  **With refinement history (subsequent refinements):**
     The user has already guided the partitioning at least once. Their current message builds on that context. Determine their intent:
-    *   **Clean slate** — The user explicitly wants to start over. Signaled by phrases like "partition by Y only", "start over with Y", "forget everything, use Y". Discard all current partitions and build fresh with the new field.
+    *   **Clean slate** — The user explicitly wants to start over. Signaled by phrases like "partition by Y only", "start over with Y", "forget everything, use Y", "ignore previous suggestions". Discard all current partitions and build fresh with the new field.
     *   **Add a condition to existing partitions** — The user wants to refine the current partitions by adding an extra condition. Signaled by phrases like "also check process.name", "add a process name verification", "make sure they also match on host". Keep the current partitions but add the requested condition to their rules.
     *   **Add new partitions** — The user wants to keep the current partitions and add more alongside them. Signaled by phrases like "add partitions by Z", "also partition by hostname", "include service name partitions too". Keep all current partitions and create additional ones based on the new field.
     *   **Corrections** — The user wants to fix specific partitions or conditions. Signaled by phrases like "use exists instead of eq", "remove the apache ones", "merge namespace-3 and namespace-6". Apply the change to the targeted partitions, keep the rest intact.
+
+    **Default: preserve existing partitions.** Unless the user explicitly signals a clean slate, you MUST keep all current partitions and only make the changes they asked for. Do not remove partitions the user did not explicitly asked as the user can reject suggestions manually. Unsolicited changes are disruptive and discard work the user has already reviewed.
 
 4.  **Without user guidance**, treat current partitions as a starting point for refinement based on clustering data.
 
