@@ -65,7 +65,10 @@ export const createDashboardAttachmentMountSync$ = ({
               (ref.attachment_id === attachment.id &&
                 ref.operation === ATTACHMENT_REF_OPERATION.updated) ||
               ref.operation === ATTACHMENT_REF_OPERATION.created
-          ) === true
+ref.attachment_id === attachment.id &&
+(ref.operation === ATTACHMENT_REF_OPERATION.updated) ||
+ref.operation === ATTACHMENT_REF_OPERATION.created
+) === true
       );
 
       if (!updatedVersionedAttachment) {
