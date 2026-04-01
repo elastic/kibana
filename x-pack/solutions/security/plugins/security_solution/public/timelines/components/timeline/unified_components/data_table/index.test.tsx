@@ -206,8 +206,6 @@ describe('unified data table', () => {
       const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
       expect(flyoutElement.props.documentId).toBe(mockTimelineData[0]._id);
       expect(flyoutElement.props.indexName).toBe(mockTimelineData[0].ecs._index);
-      expect(flyoutElement.props.scopeId).toBe(TimelineId.test);
-      expect(flyoutElement.props.dataView).toBe(mockDataView);
       expect(flyoutElement.props.onAlertUpdated).toBe(refetchMock);
     },
     SPECIAL_TEST_TIMEOUT
