@@ -165,6 +165,21 @@ describe('kiSelectStreamsStep handler', () => {
     expect(output.scheduled).toEqual([]);
   });
 
+  it('treats BeingCanceled tasks as already running', async () => {
+    mockStreamsClient.listStreams.mockResolvedValue([makeStream('canceling-stream')]);
+    mockTaskClient.findByType.mockResolvedValue([
+      makeTask('canceling-stream', {
+        status: TaskStatus.BeingCanceled,
+        created_at: new Date().toISOString(),
+      }),
+    ]);
+
+    const { output } = await handler(makeContext());
+
+    expect(output.alreadyRunning).toHaveLength(1);
+    expect(output.scheduled).toEqual([]);
+  });
+
   it('skips stale in-progress tasks (task manager handles them)', async () => {
     isStale.mockReturnValue(true);
     mockStreamsClient.listStreams.mockResolvedValue([makeStream('stale-stream')]);

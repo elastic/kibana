@@ -91,9 +91,8 @@ const classifyStreams = ({
     if (!eligibleNames.has(streamName)) continue;
     streamsWithTask.add(streamName);
 
-    if (task.status === TaskStatus.InProgress) {
-      if (isStale(task.created_at)) {
-        // Stale tasks are left for the task manager to handle; skip them entirely.
+    if (task.status === TaskStatus.InProgress || task.status === TaskStatus.BeingCanceled) {
+      if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
         continue;
       }
       alreadyRunning.push({ streamName, scheduledAt: task.created_at || null });
