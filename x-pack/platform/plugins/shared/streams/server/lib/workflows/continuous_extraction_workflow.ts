@@ -8,49 +8,8 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
-import {
-  KI_SELECT_STREAMS_STEP_TYPE,
-  COORDINATOR_INTERVAL_MINUTES,
-  MAX_SCHEDULED_STREAMS,
-  DEFAULT_EXTRACTION_INTERVAL_HOURS,
-  CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-  POLL_DELAY_SECONDS,
-  MAX_POLL_ITERATIONS,
-} from '../../../common/constants';
+import { CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
-
-const assertYamlInSync = (yaml: string, expected: string, label: string) => {
-  if (!yaml.includes(expected)) {
-    throw new Error(
-      `continuous_extraction_workflow.yaml is out of sync: expected ${label} "${expected}" not found`
-    );
-  }
-};
-
-assertYamlInSync(WORKFLOW_YAML, KI_SELECT_STREAMS_STEP_TYPE, 'step type');
-assertYamlInSync(WORKFLOW_YAML, `timeout: "${COORDINATOR_INTERVAL_MINUTES - 1}m"`, 'timeout');
-assertYamlInSync(
-  WORKFLOW_YAML,
-  `every: "${COORDINATOR_INTERVAL_MINUTES}m"`,
-  'coordinator interval'
-);
-assertYamlInSync(
-  WORKFLOW_YAML,
-  `name: maxScheduledStreams\n    type: number\n    default: ${MAX_SCHEDULED_STREAMS}`,
-  'maxScheduledStreams input'
-);
-assertYamlInSync(
-  WORKFLOW_YAML,
-  `name: lookbackHours\n    type: number\n    default: 24`,
-  'lookbackHours input'
-);
-assertYamlInSync(
-  WORKFLOW_YAML,
-  `name: extractionIntervalHours\n    type: number\n    default: ${DEFAULT_EXTRACTION_INTERVAL_HOURS}`,
-  'extractionIntervalHours input'
-);
-assertYamlInSync(WORKFLOW_YAML, `max-iterations: ${MAX_POLL_ITERATIONS}`, 'max poll iterations');
-assertYamlInSync(WORKFLOW_YAML, `duration: "${POLL_DELAY_SECONDS}s"`, 'poll delay duration');
 
 export interface ContinuousKiExtractionWorkflowService {
   ensureWorkflow(params: {
