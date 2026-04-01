@@ -14,7 +14,7 @@ import { useEsqlGlobalFilterQuery } from '../../../../../../../common/hooks/esql
 import { esqlResponseToRecords } from '../../../../../../../common/utils/esql';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../../../common/hooks/use_error_toast';
-import type { AnomalyBand } from '../pad_anomaly_bands';
+import type { AnomalyBand } from '../../../../../recent_anomalies';
 import {
   usePadAnomalyDataEsqlSource,
   usePadTopAnomalousUsersEsqlSource,
@@ -29,7 +29,7 @@ interface ESQLRawAnomalyRecord extends Record<string, string | number> {
 /**
  * An Anomaly record that ensures consistent timestamps as milliseconds since Epoch time.
  */
-export interface ESQLAnomalyRecord {
+export interface ESQLAnomalyRecord extends Record<string, unknown> {
   '@timestamp': number;
   record_score: number;
   'user.name': string;
