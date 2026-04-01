@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
@@ -49,43 +49,6 @@ const FETCH_ERROR = i18n.translate(
   }
 );
 
-const DocumentFlyoutErrorState = ({
-  title,
-  testSubject,
-}: {
-  title: string;
-  testSubject: string;
-}) => (
-  <EuiCallOut
-    announceOnMount
-    color="danger"
-    iconType="warning"
-    title={title}
-    data-test-subj={testSubject}
-  />
-);
-
-const getErrorStateProps = (requestState: ElasticRequestState) => {
-  if (requestState === ElasticRequestState.NotFound) {
-    return {
-      title: DOCUMENT_NOT_FOUND,
-      testSubject: 'document-overview-wrapper-not-found',
-    };
-  }
-
-  if (requestState === ElasticRequestState.Error) {
-    return {
-      title: FETCH_ERROR,
-      testSubject: 'document-overview-fetch-error',
-    };
-  }
-
-  return {
-    title: SOMETHING_WENT_WRONG,
-    testSubject: 'document-overview-something-went-wrong',
-  };
-};
-
 export interface DocumentFlyoutWrapperProps {
   /**
    * The ID of the document to display. This is required to fetch the document details.
@@ -118,7 +81,8 @@ export const DocumentFlyoutWrapper = memo(
     const isDataViewInvalid =
       status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices());
 
-    const shouldSkipSearch = isDataViewLoading || isDataViewInvalid || !documentId || !indexName;
+    const shouldSkipSearch =
+      isDataViewLoading || isDataViewInvalid || !documentId || !indexName || !dataView;
 
     const [requestState, hit, refetchDocument] = useEsDocSearch({
       id: documentId ?? '',
@@ -131,14 +95,19 @@ export const DocumentFlyoutWrapper = memo(
       refetchDocument();
     }, [onAlertUpdated, refetchDocument]);
 
-    const isAlert = hit && (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal;
+    const isAlert = useMemo(
+      () => hit && (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      [hit]
+    );
 
     const { hasAlertsRead, loading: isAlertsPrivilegesLoading } = useAlertsPrivileges();
     const missingAlertsPrivilege = isAlert && !isAlertsPrivilegesLoading && !hasAlertsRead;
-    const isFlyoutLoading =
-      isDataViewLoading || (!shouldSkipSearch && requestState === ElasticRequestState.Loading);
 
-    if (isFlyoutLoading || (isAlert && isAlertsPrivilegesLoading)) {
+    if (
+      isDataViewLoading ||
+      (isAlert && isAlertsPrivilegesLoading) ||
+      requestState === ElasticRequestState.Loading
+    ) {
       return <FlyoutLoading data-test-subj="document-overview-wrapper-loading" />;
     }
 
@@ -148,9 +117,12 @@ export const DocumentFlyoutWrapper = memo(
 
     if (isDataViewInvalid) {
       return (
-        <DocumentFlyoutErrorState
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
           title={DATA_VIEW_ERROR}
-          testSubject="document-overview-wrapper-data-view-error"
+          data-test-subj="document-overview-wrapper-data-view-error"
         />
       );
     }
@@ -165,7 +137,39 @@ export const DocumentFlyoutWrapper = memo(
       );
     }
 
-    return <DocumentFlyoutErrorState {...getErrorStateProps(requestState)} />;
+    if (requestState === ElasticRequestState.NotFound) {
+      return (
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          title={DOCUMENT_NOT_FOUND}
+          data-test-subj="document-overview-wrapper-not-found"
+        />
+      );
+    }
+
+    if (requestState === ElasticRequestState.Error) {
+      return (
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          title={FETCH_ERROR}
+          data-test-subj="document-overview-fetch-error"
+        />
+      );
+    }
+
+    return (
+      <EuiCallOut
+        announceOnMount
+        color="danger"
+        iconType="warning"
+        title={SOMETHING_WENT_WRONG}
+        data-test-subj="document-overview-something-went-wrong"
+      />
+    );
   }
 );
 

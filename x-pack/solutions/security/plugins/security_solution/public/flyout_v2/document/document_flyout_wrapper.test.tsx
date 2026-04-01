@@ -174,6 +174,7 @@ describe('DocumentFlyoutWrapper', () => {
         hasMatchedIndices: () => false,
       },
     });
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.NotFound, null, jest.fn()]);
 
     const { getByTestId } = renderDocumentFlyoutWrapper();
 
