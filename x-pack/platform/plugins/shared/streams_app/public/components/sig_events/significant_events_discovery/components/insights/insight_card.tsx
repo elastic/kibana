@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MouseEvent } from 'react';
 import React from 'react';
 import {
   EuiAccordion,
@@ -77,7 +78,7 @@ export function InsightCard({ insight, index }: InsightCardProps) {
               aria-label={addToDatasetAriaLabel}
               iconType="beaker"
               color="text"
-              onClick={(e) => {
+              onClick={(e: MouseEvent) => {
                 e.stopPropagation();
                 openAddToDatasetFlyout({
                   title: addToDatasetTitle,
