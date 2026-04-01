@@ -44,7 +44,11 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
     rulesResponse.items.forEach((rule) => {
       rulesCache[rule.id] = rule;
     });
-    setRulesCache({ ...rulesCache });
+setRulesCache((prev) => {
+  const next = { ...prev };
+  rulesResponse.items.forEach((rule) => { next[rule.id] = rule; });
+  return next;
+});
   }, [ruleIds, services.http]);
 
   return {
