@@ -38,6 +38,13 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         response: {
           200: {
             body: () => readResponseBodySchema,
+            description: 'Indicates that the markdown panel is retrieved successfully.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates that the markdown panel with the given ID is not found.',
           },
         },
       },
@@ -58,10 +65,10 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         }
 
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: { message: e.message } });
         }
 
-        return res.badRequest({ body: e.message });
+        return res.badRequest({ body: { message: e.message } });
       }
     }
   );
