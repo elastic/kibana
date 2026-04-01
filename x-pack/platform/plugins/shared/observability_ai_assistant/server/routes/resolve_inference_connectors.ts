@@ -10,7 +10,7 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import { isInferenceError } from '@kbn/inference-common';
 import type { ResolvedInferenceEndpoints } from '@kbn/search-inference-endpoints/server';
 import { MODEL_SETTINGS_FEATURE_FLAG_ID } from '@kbn/search-inference-endpoints/common/constants';
-import { OBSERVABILITY_AI_ASSISTANT_MODEL_SETTINGS_FEATURE_ID } from '../../common/feature';
+import { OBSERVABILITY_AI_ASSISTANT_INFERENCE_SUBFEATURE_ID } from '../../common/feature';
 import type { ObservabilityAIAssistantRouteHandlerResources } from './types';
 
 type ResolveArgs = Pick<
@@ -117,7 +117,7 @@ async function loadEndpoints({
 
   try {
     const result = await siepStart.endpoints.getForFeature(
-      OBSERVABILITY_AI_ASSISTANT_MODEL_SETTINGS_FEATURE_ID,
+      OBSERVABILITY_AI_ASSISTANT_INFERENCE_SUBFEATURE_ID,
       request
     );
     result.warnings.forEach((w) => logger.warn(w));

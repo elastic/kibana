@@ -7,12 +7,29 @@
 
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { InferenceFeatureConfig } from '@kbn/search-inference-endpoints/server';
-import { OBSERVABILITY_AI_ASSISTANT_MODEL_SETTINGS_FEATURE_ID } from '../common/feature';
+import {
+  OBSERVABILITY_AI_ASSISTANT_INFERENCE_FEATURE_ID,
+  OBSERVABILITY_AI_ASSISTANT_INFERENCE_SUBFEATURE_ID,
+} from '../common/feature';
 
-export const observabilityAIAssistantInferenceFeature: InferenceFeatureConfig = {
-  featureId: OBSERVABILITY_AI_ASSISTANT_MODEL_SETTINGS_FEATURE_ID,
+const observabilityAIAssistantParentFeature: InferenceFeatureConfig = {
+  featureId: OBSERVABILITY_AI_ASSISTANT_INFERENCE_FEATURE_ID,
   featureName: 'Observability AI Assistant',
-  featureDescription: 'Observability AI Assistant inference endpoint configuration',
+  featureDescription: 'Parent feature for Observability AI Assistant',
   taskType: 'chat_completion',
   recommendedEndpoints: [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION],
 };
+
+const observabilityAIAssistantChatCompletionFeature: InferenceFeatureConfig = {
+  featureId: OBSERVABILITY_AI_ASSISTANT_INFERENCE_SUBFEATURE_ID,
+  parentFeatureId: OBSERVABILITY_AI_ASSISTANT_INFERENCE_FEATURE_ID,
+  featureName: 'Observability AI Assistant',
+  featureDescription: 'Observability AI Assistant inference endpoint configuration',
+  taskType: 'chat_completion',
+  recommendedEndpoints: [],
+};
+
+export const observabilityAIAssistantInferenceFeatures: InferenceFeatureConfig[] = [
+  observabilityAIAssistantParentFeature,
+  observabilityAIAssistantChatCompletionFeature,
+];

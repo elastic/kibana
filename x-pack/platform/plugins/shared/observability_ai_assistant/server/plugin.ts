@@ -29,7 +29,7 @@ import { registerUsageCollector } from './collectors/usage';
 import { toolCallEvent } from './analytics/tool_call';
 import { conversationDeleteEvent } from './analytics/conversation_delete';
 import { conversationDuplicateEvent } from './analytics/conversation_duplicate';
-import { observabilityAIAssistantInferenceFeature } from './inference_feature';
+import { observabilityAIAssistantInferenceFeatures } from './inference_feature';
 export class ObservabilityAIAssistantPlugin
   implements
     Plugin<
@@ -93,15 +93,21 @@ export class ObservabilityAIAssistantPlugin
       },
     });
 
-    const featureRegistrationResult = plugins.searchInferenceEndpoints?.features.register(
-      observabilityAIAssistantInferenceFeature
-    );
-    if (featureRegistrationResult && !featureRegistrationResult.ok) {
+    const failures: string[] = [];
+    for (const feature of observabilityAIAssistantInferenceFeatures) {
+      const result = plugins.searchInferenceEndpoints?.features.register(feature);
+      if (result && !result.ok) {
+        failures.push(`${feature.featureId}: ${result.error}`);
+      }
+    }
+    if (failures.length) {
       this.logger.warn(
-        `Failed to register inference feature for Observability AI Assistant: ${featureRegistrationResult.error}`
+        `Failed to register inference feature for Observability AI Assistant: ${failures.join(
+          '; '
+        )}`
       );
-    } else if (featureRegistrationResult) {
-      this.logger.debug('Registered Observability AI Assistant inference feature');
+    } else if (plugins.searchInferenceEndpoints) {
+      this.logger.debug('Registered Observability AI Assistant inference features');
     }
 
     const routeHandlerPlugins = mapValues(plugins, (value, key) => {
