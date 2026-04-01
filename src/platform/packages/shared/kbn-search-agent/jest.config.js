@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LOGSTASH } from './constants';
-export { setupFlyoutStability, teardownFlyoutStability } from './setup';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-search-agent'],
+};
