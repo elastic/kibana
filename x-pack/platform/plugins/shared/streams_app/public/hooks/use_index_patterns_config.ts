@@ -12,7 +12,6 @@ import { useKibana } from './use_kibana';
 
 /**
  * Hook to get configured index patterns and utilities.
- * Reads from the uiSettings store (per-space, hidden from Advanced Settings).
  */
 export function useIndexPatternsConfig() {
   const { core } = useKibana();
@@ -44,7 +43,5 @@ export function useIndexPatternsConfig() {
   return {
     indexPatterns,
     filterStreamsByIndexPatterns,
-    isLoading: false,
-    error: undefined,
   };
 }
