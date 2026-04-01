@@ -1,0 +1,70 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import Boom from '@hapi/boom';
+import { Request, Response, type RouteHandler } from '@kbn/core-di-server';
+import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { inject, injectable } from 'inversify';
+import {
+  bulkCreateAlertActionBodySchema,
+  type BulkCreateAlertActionBody,
+} from '@kbn/alerting-v2-schemas';
+import { AlertActionsClient } from '../../lib/alert_actions_client';
+import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
+import { ALERTING_V2_ALERT_API_PATH } from '../constants';
+
+@injectable()
+export class BulkCreateAlertActionRoute implements RouteHandler {
+  static method = 'post' as const;
+  static path = `${ALERTING_V2_ALERT_API_PATH}/action/_bulk`;
+  static security: RouteSecurity = {
+    authz: {
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
+    },
+  };
+  static options = {
+    access: 'public',
+    summary: 'Bulk create alert actions',
+    description: 'Create actions for multiple alert groups in a single request.',
+    tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
+  } as const;
+  static validate = {
+    request: {
+      body: buildRouteValidationWithZod(bulkCreateAlertActionBodySchema),
+    },
+  } as const;
+
+  constructor(
+    @inject(Request)
+    private readonly request: KibanaRequest<unknown, unknown, BulkCreateAlertActionBody>,
+    @inject(Response) private readonly response: KibanaResponseFactory,
+    @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
+  ) {}
+
+  async handle() {
+    try {
+      const { processed, total } = await this.alertActionsClient.createBulkActions(
+        this.request.body
+      );
+
+      return this.response.ok({
+        body: {
+          processed,
+          total,
+        },
+      });
+    } catch (e) {
+      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
+      return this.response.customError({
+        statusCode: boom.output.statusCode,
+        body: boom.output.payload,
+      });
+    }
+  }
+}

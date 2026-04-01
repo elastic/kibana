@@ -18,7 +18,11 @@ import type {
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
-import { getDeleteTaskRunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import {
+  getDeleteTaskRunResult,
+  TaskCost,
+  TaskPriority,
+} from '@kbn/task-manager-plugin/server/task';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
@@ -251,6 +255,26 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleRecurringTaskTimingOutWithError: {
+        title: 'Sample Recurring Task that Times Out and Throws an Error',
+        description: 'A sample task that times out each run and throws an error.',
+        maxAttempts: 3,
+        timeout: '1s',
+        createTaskRunner: () => {
+          let isCancelled: boolean = false;
+          return {
+            async run() {
+              await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds
+              if (isCancelled) {
+                throw new Error('The task was cancelled and there was an error!');
+              }
+            },
+            async cancel() {
+              isCancelled = true;
+            },
+          };
+        },
+      },
       sampleRecurringTaskThatDeletesItself: {
         title: 'Sample Recurring Task that Times Out',
         description: 'A sample task that requests deletion.',
@@ -362,6 +386,35 @@ export class SampleTaskManagerFixturePlugin
         paramsSchema: schema.object({}),
         createTaskRunner: () => ({
           async run() {},
+        }),
+      },
+      extraLargeCostTask: {
+        title: 'Task used for testing task cost',
+        cost: TaskCost.ExtraLarge,
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state, schedule } = taskInstance;
+            const prevState = state || { count: 0 };
+            const count = (prevState.count || 0) + 1;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              body: {
+                type: 'task',
+                taskType: 'extraLargeCostTask',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: { count },
+              schedule,
+            };
+          },
         }),
       },
       lowPriorityTask: {

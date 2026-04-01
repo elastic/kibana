@@ -238,6 +238,7 @@ const UnifiedHistoryTableComponent = () => {
     data: historyData,
     isLoading,
     isFetching,
+    isPlaceholderData,
     refetch,
   } = useUnifiedHistory({
     pageSize,
@@ -668,7 +669,7 @@ const UnifiedHistoryTableComponent = () => {
     []
   );
 
-  const hasMore = historyData?.hasMore ?? false;
+  const hasMore = (historyData?.hasMore ?? false) && !isPlaceholderData;
 
   // pageCount drives the navigation arrows: when hasMore is true we advertise
   // one extra page so the forward arrow stays enabled.
