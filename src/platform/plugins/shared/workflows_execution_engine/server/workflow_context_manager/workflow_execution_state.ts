@@ -184,6 +184,36 @@ export class WorkflowExecutionState {
     });
   }
 
+  /**
+   * Nullifies `output` and `input` on non-latest in-memory step executions
+   * for the given step IDs, reducing memory pressure after a loop completes.
+   *
+   * Preserves:
+   * - The latest execution per stepId (needed by getContext → getLatestStepExecution)
+   * - All data.set step outputs (needed by getVariables which reads all executions)
+   * - All metadata fields (needed by telemetry at terminal state)
+   *
+   * Does NOT touch ES-persisted documents — this is in-memory only.
+   */
+  public evictStaleLoopOutputs(innerStepIds: Iterable<string>): void {
+    for (const stepId of innerStepIds) {
+      const executionIds = this.stepIdExecutionIdIndex.get(stepId);
+      if (executionIds && executionIds.length > 1) {
+        const staleIds = executionIds.slice(0, -1);
+        for (const execId of staleIds) {
+          const stepExec = this.stepExecutions.get(execId);
+          if (stepExec && stepExec.stepType !== 'data.set') {
+            this.stepExecutions.set(execId, {
+              ...stepExec,
+              output: undefined,
+              input: undefined,
+            });
+          }
+        }
+      }
+    }
+  }
+
   private buildStepIdExecutionIdIndex(): void {
     this.stepIdExecutionIdIndex.clear();
     for (const step of this.stepExecutions.values()) {
