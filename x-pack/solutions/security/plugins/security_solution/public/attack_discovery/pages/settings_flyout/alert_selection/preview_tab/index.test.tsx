@@ -168,4 +168,39 @@ describe('PreviewTab', () => {
       type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
     });
   });
+
+  it('passes esqlQuery to getPreviewEsqlQuery when provided', () => {
+    const userEsqlQuery =
+      'FROM .alerts-security.alerts-default | WHERE kibana.alert.severity == "critical" | LIMIT 50';
+
+    render(
+      <TestProviders>
+        <PreviewTab
+          {...defaultProps}
+          esqlQuery={userEsqlQuery}
+          tableStackBy0="kibana.alert.rule.name"
+        />
+      </TestProviders>
+    );
+
+    expect(defaultProps.getPreviewEsqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlQuery: userEsqlQuery,
+      })
+    );
+  });
+
+  it('passes undefined esqlQuery to getPreviewEsqlQuery when not provided', () => {
+    render(
+      <TestProviders>
+        <PreviewTab {...defaultProps} tableStackBy0="kibana.alert.rule.name" />
+      </TestProviders>
+    );
+
+    expect(defaultProps.getPreviewEsqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlQuery: undefined,
+      })
+    );
+  });
 });

@@ -12,9 +12,11 @@ import { useTabsView } from './use_tabs_view';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useFindAttackDiscoverySchedules } from '../schedule/logic/use_find_schedules';
 import { mockFindAttackDiscoverySchedules } from '../../mock/mock_find_attack_discovery_schedules';
+import { useMonitoringView } from './use_monitoring_view';
 import { useSettingsView } from './use_settings_view';
 import { useScheduleView } from './use_schedule_view';
 import type { AlertsSelectionSettings } from '../types';
+import { SETTINGS_TAB_ID } from '../constants';
 
 jest.mock('react-router', () => ({
   ...jest.requireActual('react-router'),
@@ -22,10 +24,12 @@ jest.mock('react-router', () => ({
     search: '',
   }),
 }));
+jest.mock('./use_monitoring_view');
 jest.mock('./use_settings_view');
 jest.mock('./use_schedule_view');
 jest.mock('../schedule/logic/use_find_schedules');
 
+const mockUseMonitoringView = useMonitoringView as jest.Mock;
 const mockUseSettingsView = useSettingsView as jest.Mock;
 const mockUseScheduleView = useScheduleView as jest.Mock;
 const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as jest.MockedFunction<
@@ -53,6 +57,11 @@ describe('useTabsView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockUseMonitoringView.mockReturnValue({
+      monitoringView: <div data-test-subj="mockMonitoringView" />,
+      actionButtons: null,
+    });
+
     mockUseSettingsView.mockReturnValue({
       settingsView: <div data-test-subj="mockSettingsView" />,
       actionButtons: (
@@ -74,12 +83,12 @@ describe('useTabsView', () => {
     } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
   });
 
-  it('renders the settings view by default', () => {
+  it('renders the monitoring view by default', () => {
     const { result } = renderHook(() => useTabsView(defaultProps), { wrapper: TestProviders });
 
     render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
 
-    expect(screen.getByTestId('mockSettingsView')).toBeInTheDocument();
+    expect(screen.getByTestId('mockMonitoringView')).toBeInTheDocument();
   });
 
   it('renders the schedule view when schedule tab is clicked', async () => {
@@ -105,7 +114,10 @@ describe('useTabsView', () => {
   });
 
   it('returns settings action buttons when settings tab is selected', () => {
-    const { result } = renderHook(() => useTabsView(defaultProps), { wrapper: TestProviders });
+    const { result } = renderHook(
+      () => useTabsView({ ...defaultProps, defaultSelectedTabId: SETTINGS_TAB_ID }),
+      { wrapper: TestProviders }
+    );
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 

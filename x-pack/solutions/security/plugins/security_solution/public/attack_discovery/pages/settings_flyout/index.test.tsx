@@ -49,6 +49,7 @@ const mockFilter = {
 
 const createMockProps = (overrides = {}) => ({
   connectorId: 'test-connector-id',
+  defaultSelectedTabId: SETTINGS_TAB_ID,
   end: undefined,
   filters: undefined,
   localStorageAttackDiscoveryMaxAlerts: undefined,
@@ -73,9 +74,13 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const setupMocks = (overrides = {}) => {
   mockUseKibana.mockReturnValue({
     services: {
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(false),
+      },
       lens: {
         EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
       },
+      telemetry: { reportEvent: jest.fn() },
       uiSettings: {
         get: jest.fn(),
       },

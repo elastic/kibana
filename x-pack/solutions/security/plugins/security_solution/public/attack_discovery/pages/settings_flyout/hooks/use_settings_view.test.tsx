@@ -71,6 +71,10 @@ jest.mock('react-router', () => ({
   withRouter: jest.fn(),
 }));
 
+jest.mock('./use_workflow_health_check', () => ({
+  useWorkflowHealthCheck: jest.fn().mockReturnValue([]),
+}));
+
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../../common/hooks/use_space_id', () => {
@@ -78,6 +82,88 @@ jest.mock('../../../../common/hooks/use_space_id', () => {
     useSpaceId: jest.fn().mockReturnValue('default'),
   };
 });
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
+jest.mock('../workflow_configuration', () => ({
+  AlertRetrievalStep: ({
+    children,
+    hasError,
+  }: {
+    children: React.ReactNode;
+    hasError?: boolean;
+  }) => (
+    <div data-test-subj="alertRetrievalStep" data-has-error={String(hasError ?? false)}>
+      {children}
+    </div>
+  ),
+  GenerationStep: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="generationStep">{children}</div>
+  ),
+  DefaultAlertRetrievalAccordion: ({ children }: { children: React.ReactNode }) => (
+    <div data-test-subj="defaultAlertRetrievalAccordion">{children}</div>
+  ),
+  PipelineIndicator: () => <div data-test-subj="pipelineIndicator" />,
+  QueryModeSelector: () => <div data-test-subj="queryModeSelector" />,
+  ValidationPanel: () => <div data-test-subj="validationPanel" />,
+  ValidationStep: ({ children, hasError }: { children: React.ReactNode; hasError?: boolean }) => (
+    <div data-test-subj="validationStep" data-has-error={String(hasError ?? false)}>
+      {children}
+    </div>
+  ),
+  RetrievalMethodSelector: () => <div data-test-subj="retrievalMethodSelector" />,
+  WorkflowConfigurationPanel: ({
+    onChange,
+  }: {
+    onChange: (config: {
+      alertRetrievalWorkflowIds: string[];
+      defaultAlertRetrievalMode: string;
+      esqlQuery?: string;
+      validationWorkflowId: string;
+    }) => void;
+  }) => (
+    <div data-test-subj="workflowConfigurationPanel">
+      <button
+        data-test-subj="simulateWorkflowConfigChange"
+        onClick={() =>
+          onChange({
+            alertRetrievalWorkflowIds: [],
+            defaultAlertRetrievalMode: 'custom_query',
+            esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 200',
+            validationWorkflowId: 'default',
+          })
+        }
+        type="button"
+      />
+    </div>
+  ),
+  useFetchDefaultEsqlQuery: jest.fn().mockReturnValue({
+    defaultEsqlQuery: undefined,
+    fetchDefaultEsqlQuery: jest.fn().mockResolvedValue(undefined),
+    isError: false,
+    isLoading: false,
+  }),
+  useWorkflowConfiguration: jest.fn().mockReturnValue({
+    clearSettings: jest.fn(),
+    isLoading: false,
+    updateSettings: jest.fn(),
+    workflowConfiguration: {
+      alertRetrievalWorkflowIds: [],
+      defaultAlertRetrievalMode: 'custom_query',
+      validationWorkflowId: 'default',
+    },
+  }),
+}));
+
+jest.mock('../alert_selection/alert_selection_fields', () => ({
+  AlertSelectionFields: () => <div data-test-subj="alertSelectionFields" />,
+}));
+
+jest.mock('../alert_selection/alert_preview_tabs', () => ({
+  AlertPreviewTabs: () => <div data-test-subj="alertPreviewTabs" />,
+}));
 
 jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: jest.fn().mockReturnValue({
@@ -150,9 +236,13 @@ describe('useSettingsView', () => {
             filterManager: mockFilterManager,
           },
         },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(false),
+        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
+        telemetry: { reportEvent: jest.fn() },
         uiSettings: {
           get: jest.fn(),
         },
@@ -178,10 +268,51 @@ describe('useSettingsView', () => {
     newConnectorId: string
   ) {
     let handleLocalConnectorIdChange: ((id: string) => void) | undefined;
+
+    // Find the AlertSelection component which might be nested
+    const findAlertSelectionProps = (
+      element: React.ReactElement
+    ): { onConnectorIdSelected?: (id: string) => void } | null => {
+      const type = element.type as {
+        displayName?: string;
+        type?: { displayName?: string };
+      };
+
+      // Check for displayName on the type or its type (for memo components)
+      const displayName = type?.displayName || type?.type?.displayName;
+
+      if (displayName === 'AlertSelection') {
+        return element.props as { onConnectorIdSelected?: (id: string) => void };
+      }
+
+      // Check if this element has onConnectorIdSelected prop (direct match)
+      if (element.props?.onConnectorIdSelected) {
+        return element.props as { onConnectorIdSelected?: (id: string) => void };
+      }
+
+      if (element.props && element.props.children) {
+        const children = React.Children.toArray(element.props.children);
+        for (const child of children) {
+          if (React.isValidElement(child)) {
+            const found = findAlertSelectionProps(child);
+            if (found) {
+              return found;
+            }
+          }
+        }
+      }
+      return null;
+    };
+
     if (React.isValidElement(result.current.settingsView)) {
-      handleLocalConnectorIdChange = (result.current.settingsView as React.ReactElement).props
-        .onConnectorIdSelected;
+      const alertSelectionProps = findAlertSelectionProps(
+        result.current.settingsView as React.ReactElement
+      );
+      if (alertSelectionProps) {
+        handleLocalConnectorIdChange = alertSelectionProps.onConnectorIdSelected;
+      }
     }
+
     act(() => {
       handleLocalConnectorIdChange?.(newConnectorId);
     });
@@ -191,6 +322,61 @@ describe('useSettingsView', () => {
     fireEvent.click(screen.getByTestId('save'));
   }
 
+  it('returns alertsPreviewStackBy0 with the default value', () => {
+    const { result } = renderHook(() => useSettingsView(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.alertsPreviewStackBy0).toBe('kibana.alert.rule.name');
+  });
+
+  it('returns alertSummaryStackBy0 with the default value', () => {
+    const { result } = renderHook(() => useSettingsView(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.alertSummaryStackBy0).toBe('kibana.alert.rule.name');
+  });
+
+  it('returns fetchDefaultEsqlQueryResult', () => {
+    const { result } = renderHook(() => useSettingsView(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.fetchDefaultEsqlQueryResult).toEqual(
+      expect.objectContaining({
+        defaultEsqlQuery: undefined,
+        fetchDefaultEsqlQuery: expect.any(Function),
+        isError: false,
+        isLoading: false,
+      })
+    );
+  });
+
+  it('returns filterManager as a FilterManager instance', () => {
+    const { result } = renderHook(() => useSettingsView(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.filterManager).toBe(mockFilterManager);
+  });
+
+  it('returns setAlertsPreviewStackBy0 as a function', () => {
+    const { result } = renderHook(() => useSettingsView(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(typeof result.current.setAlertsPreviewStackBy0).toBe('function');
+  });
+
+  it('returns setAlertSummaryStackBy0 as a function', () => {
+    const { result } = renderHook(() => useSettingsView(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(typeof result.current.setAlertSummaryStackBy0).toBe('function');
+  });
+
   it('should return the alert selection component with `AlertSelectionQuery` as settings view', () => {
     const { result } = renderHook(() => useSettingsView(defaultProps), {
       wrapper: TestProviders,
@@ -198,7 +384,7 @@ describe('useSettingsView', () => {
 
     render(<TestProviders>{result.current.settingsView}</TestProviders>);
 
-    expect(screen.getByTestId('customizeAlerts')).toBeInTheDocument();
+    expect(screen.getByTestId('connectorFieldDescription')).toBeInTheDocument();
   });
 
   it('should return the alert selection component with `AlertSelectionRange` as settings view', () => {
@@ -436,7 +622,9 @@ describe('useSettingsView', () => {
       });
 
       it('calls onConnectorIdSelected', () => {
-        const { result } = renderHook(() => useSettingsView(props));
+        const { result } = renderHook(() => useSettingsView(props), {
+          wrapper: TestProviders,
+        });
 
         simulateConnectorChangeAndSave(result as { current: UseSettingsView }, 'new-connector');
 
@@ -444,11 +632,679 @@ describe('useSettingsView', () => {
       });
 
       it('calls onSettingsSave', () => {
-        const { result } = renderHook(() => useSettingsView(props));
+        const { result } = renderHook(() => useSettingsView(props), {
+          wrapper: TestProviders,
+        });
 
         simulateConnectorChangeAndSave(result as { current: UseSettingsView }, 'new-connector');
 
         expect(props.onSettingsSave).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('when workflow feature flag is enabled', () => {
+    beforeEach(() => {
+      const { useIsExperimentalFeatureEnabled } = jest.requireMock(
+        '../../../../common/hooks/use_experimental_features'
+      );
+      useIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      // Mock the feature flag to return true
+      mockUseKibana.mockReturnValue({
+        services: {
+          data: {
+            query: {
+              filterManager: mockFilterManager,
+            },
+          },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(true),
+          },
+          lens: {
+            EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
+          },
+          telemetry: { reportEvent: jest.fn() },
+          uiSettings: {
+            get: jest.fn(),
+          },
+          unifiedSearch: {
+            ui: {
+              SearchBar: (props: { onQuerySubmit: jest.Mock }) => {
+                if (props.onQuerySubmit) {
+                  mockOnQuerySubmit.mockImplementation(props.onQuerySubmit);
+                }
+                return <div data-test-subj="alertSelectionSearchBar" />;
+              },
+            },
+          },
+        },
+      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    });
+
+    it('renders the alert selection fields when default alert retrieval is enabled', async () => {
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      // Wait for the feature flag to be loaded
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.settingsView}</TestProviders>);
+
+      await screen.findByTestId('alertSelectionFields');
+      expect(screen.getByTestId('alertSelectionFields')).toBeInTheDocument();
+    });
+
+    it('renders the validation panel', async () => {
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      // Wait for the feature flag to be loaded
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.settingsView}</TestProviders>);
+
+      await screen.findByTestId('validationPanel');
+      expect(screen.getByTestId('validationPanel')).toBeInTheDocument();
+    });
+
+    it('calls clearWorkflowSettings when reset is clicked', async () => {
+      const clearSettings = jest.fn();
+      const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+      useWorkflowConfiguration.mockReturnValue({
+        clearSettings,
+        isLoading: false,
+        updateSettings: jest.fn(),
+        workflowConfiguration: {
+          alertRetrievalWorkflowIds: [],
+          defaultAlertRetrievalMode: 'custom_query',
+          validationWorkflowId: 'default',
+        },
+      });
+
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      // Wait for the feature flag to be loaded
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.actionButtons}</TestProviders>);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('reset'));
+      });
+
+      expect(clearSettings).toHaveBeenCalled();
+    });
+
+    it('calls resetCache on the default ES|QL query hook when reset is clicked', async () => {
+      const resetCache = jest.fn();
+      const { useFetchDefaultEsqlQuery: mockUseFetchDefaultEsqlQuery, useWorkflowConfiguration } =
+        jest.requireMock('../workflow_configuration');
+      mockUseFetchDefaultEsqlQuery.mockReturnValue({
+        defaultEsqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 100',
+        fetchDefaultEsqlQuery: jest.fn().mockResolvedValue(undefined),
+        isError: false,
+        isLoading: false,
+        resetCache,
+      });
+      useWorkflowConfiguration.mockReturnValue({
+        clearSettings: jest.fn(),
+        isLoading: false,
+        updateSettings: jest.fn(),
+        workflowConfiguration: {
+          alertRetrievalWorkflowIds: [],
+          defaultAlertRetrievalMode: 'custom_query',
+          validationWorkflowId: 'default',
+        },
+      });
+
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.actionButtons}</TestProviders>);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('reset'));
+      });
+
+      expect(resetCache).toHaveBeenCalled();
+    });
+
+    describe('alertRetrievalHasError', () => {
+      it('returns true when default is disabled and no workflow IDs are selected', async () => {
+        const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+        useWorkflowConfiguration.mockReturnValue({
+          clearSettings: jest.fn(),
+          isLoading: false,
+          updateSettings: jest.fn(),
+          workflowConfiguration: {
+            alertRetrievalWorkflowIds: [],
+            defaultAlertRetrievalMode: 'disabled',
+            validationWorkflowId: 'default',
+          },
+        });
+
+        const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+          wrapper: TestProviders,
+        });
+
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        rerender();
+
+        expect(result.current.alertRetrievalHasError).toBe(true);
+      });
+
+      it('returns false when default alert retrieval is enabled', async () => {
+        const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+        useWorkflowConfiguration.mockReturnValue({
+          clearSettings: jest.fn(),
+          isLoading: false,
+          updateSettings: jest.fn(),
+          workflowConfiguration: {
+            alertRetrievalWorkflowIds: [],
+            defaultAlertRetrievalMode: 'custom_query',
+            validationWorkflowId: 'default',
+          },
+        });
+
+        const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+          wrapper: TestProviders,
+        });
+
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        rerender();
+
+        expect(result.current.alertRetrievalHasError).toBe(false);
+      });
+
+      it('returns false when alert retrieval workflow IDs are selected', async () => {
+        const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+        useWorkflowConfiguration.mockReturnValue({
+          clearSettings: jest.fn(),
+          isLoading: false,
+          updateSettings: jest.fn(),
+          workflowConfiguration: {
+            alertRetrievalWorkflowIds: ['workflow-1'],
+            defaultAlertRetrievalMode: 'disabled',
+            validationWorkflowId: 'default',
+          },
+        });
+
+        const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+          wrapper: TestProviders,
+        });
+
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        rerender();
+
+        expect(result.current.alertRetrievalHasError).toBe(false);
+      });
+
+      it('returns false when workflows feature is disabled', () => {
+        const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+        useWorkflowConfiguration.mockReturnValue({
+          clearSettings: jest.fn(),
+          isLoading: false,
+          updateSettings: jest.fn(),
+          workflowConfiguration: {
+            alertRetrievalWorkflowIds: [],
+            defaultAlertRetrievalMode: 'disabled',
+            validationWorkflowId: '',
+          },
+        });
+
+        // Feature flag is false by default in beforeEach
+        const { result } = renderHook(() => useSettingsView(defaultProps), {
+          wrapper: TestProviders,
+        });
+
+        expect(result.current.alertRetrievalHasError).toBe(false);
+      });
+    });
+
+    describe('validationHasError', () => {
+      it('returns true when validation workflow is empty', async () => {
+        const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+        useWorkflowConfiguration.mockReturnValue({
+          clearSettings: jest.fn(),
+          isLoading: false,
+          updateSettings: jest.fn(),
+          workflowConfiguration: {
+            alertRetrievalWorkflowIds: [],
+            defaultAlertRetrievalMode: 'custom_query',
+            validationWorkflowId: '',
+          },
+        });
+
+        const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+          wrapper: TestProviders,
+        });
+
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        rerender();
+
+        expect(result.current.validationHasError).toBe(true);
+      });
+
+      it('returns false when validation workflow is selected', async () => {
+        const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+        useWorkflowConfiguration.mockReturnValue({
+          clearSettings: jest.fn(),
+          isLoading: false,
+          updateSettings: jest.fn(),
+          workflowConfiguration: {
+            alertRetrievalWorkflowIds: [],
+            defaultAlertRetrievalMode: 'custom_query',
+            validationWorkflowId: 'default',
+          },
+        });
+
+        const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+          wrapper: TestProviders,
+        });
+
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        rerender();
+
+        expect(result.current.validationHasError).toBe(false);
+      });
+
+      it('returns false when workflows feature is disabled', () => {
+        const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+        useWorkflowConfiguration.mockReturnValue({
+          clearSettings: jest.fn(),
+          isLoading: false,
+          updateSettings: jest.fn(),
+          workflowConfiguration: {
+            alertRetrievalWorkflowIds: [],
+            defaultAlertRetrievalMode: 'custom_query',
+            validationWorkflowId: '',
+          },
+        });
+
+        // Feature flag is false by default in beforeEach
+        const { result } = renderHook(() => useSettingsView(defaultProps), {
+          wrapper: TestProviders,
+        });
+
+        expect(result.current.validationHasError).toBe(false);
+      });
+    });
+
+    it('disables save button when workflow configuration is invalid', async () => {
+      const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+      useWorkflowConfiguration.mockReturnValue({
+        clearSettings: jest.fn(),
+        isLoading: false,
+        updateSettings: jest.fn(),
+        workflowConfiguration: {
+          alertRetrievalWorkflowIds: [],
+          defaultAlertRetrievalMode: 'disabled', // Invalid: no alert retrieval method enabled
+          validationWorkflowId: 'default',
+        },
+      });
+
+      const props = { ...defaultProps, connectorId: 'test-connector' };
+      const { result, rerender } = renderHook(() => useSettingsView(props), {
+        wrapper: TestProviders,
+      });
+
+      // Wait for the feature flag to be loaded
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.actionButtons}</TestProviders>);
+
+      expect(screen.getByTestId('save')).toBeDisabled();
+      expect(screen.getByTestId('saveAndRun')).toBeDisabled();
+    });
+
+    it('enables save button when workflow configuration is valid', () => {
+      const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+      useWorkflowConfiguration.mockReturnValue({
+        clearSettings: jest.fn(),
+        isLoading: false,
+        updateSettings: jest.fn(),
+        workflowConfiguration: {
+          alertRetrievalWorkflowIds: ['workflow-1'],
+          defaultAlertRetrievalMode: 'disabled',
+          validationWorkflowId: 'default',
+        },
+      });
+
+      const props = { ...defaultProps, connectorId: 'test-connector' };
+      const { result } = renderHook(() => useSettingsView(props), {
+        wrapper: TestProviders,
+      });
+
+      render(<TestProviders>{result.current.actionButtons}</TestProviders>);
+
+      expect(screen.getByTestId('save')).not.toBeDisabled();
+      expect(screen.getByTestId('saveAndRun')).not.toBeDisabled();
+    });
+
+    it('shows validation callout when no alert retrieval method is selected', async () => {
+      const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+      useWorkflowConfiguration.mockReturnValue({
+        clearSettings: jest.fn(),
+        isLoading: false,
+        updateSettings: jest.fn(),
+        workflowConfiguration: {
+          alertRetrievalWorkflowIds: [],
+          defaultAlertRetrievalMode: 'disabled',
+          validationWorkflowId: 'default',
+        },
+      });
+
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.settingsView}</TestProviders>);
+
+      expect(screen.getByTestId('workflowValidationErrorsCallout')).toBeInTheDocument();
+    });
+
+    it('does not show validation callout when default workflow is enabled', async () => {
+      const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+      useWorkflowConfiguration.mockReturnValue({
+        clearSettings: jest.fn(),
+        isLoading: false,
+        updateSettings: jest.fn(),
+        workflowConfiguration: {
+          alertRetrievalWorkflowIds: [],
+          defaultAlertRetrievalMode: 'custom_query',
+          validationWorkflowId: 'default',
+        },
+      });
+
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.settingsView}</TestProviders>);
+
+      expect(screen.queryByTestId('workflowValidationErrorsCallout')).not.toBeInTheDocument();
+    });
+
+    it('does not show validation callout when alternative workflow is selected', async () => {
+      const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+      useWorkflowConfiguration.mockReturnValue({
+        clearSettings: jest.fn(),
+        isLoading: false,
+        updateSettings: jest.fn(),
+        workflowConfiguration: {
+          alertRetrievalWorkflowIds: ['workflow-1'],
+          defaultAlertRetrievalMode: 'disabled',
+          validationWorkflowId: 'default',
+        },
+      });
+
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.settingsView}</TestProviders>);
+
+      expect(screen.queryByTestId('workflowValidationErrorsCallout')).not.toBeInTheDocument();
+    });
+
+    it('renders workflow configuration panel', async () => {
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.settingsView}</TestProviders>);
+
+      await screen.findByTestId('workflowConfigurationPanel');
+      expect(screen.getByTestId('workflowConfigurationPanel')).toBeInTheDocument();
+    });
+
+    it('shows validation callout when validation workflow is not selected', async () => {
+      const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+      useWorkflowConfiguration.mockReturnValue({
+        clearSettings: jest.fn(),
+        isLoading: false,
+        updateSettings: jest.fn(),
+        workflowConfiguration: {
+          alertRetrievalWorkflowIds: [],
+          defaultAlertRetrievalMode: 'custom_query',
+          validationWorkflowId: '', // Empty validation workflow
+        },
+      });
+
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.settingsView}</TestProviders>);
+
+      expect(screen.getByTestId('workflowValidationErrorsCallout')).toBeInTheDocument();
+    });
+
+    it('shows validation callout with multiple errors when both alert retrieval and validation workflow are missing', async () => {
+      const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+      useWorkflowConfiguration.mockReturnValue({
+        clearSettings: jest.fn(),
+        isLoading: false,
+        updateSettings: jest.fn(),
+        workflowConfiguration: {
+          alertRetrievalWorkflowIds: [],
+          defaultAlertRetrievalMode: 'disabled',
+          validationWorkflowId: '',
+        },
+      });
+
+      const { result, rerender } = renderHook(() => useSettingsView(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.settingsView}</TestProviders>);
+
+      const callout = screen.getByTestId('workflowValidationErrorsCallout');
+      expect(callout).toBeInTheDocument();
+
+      // Should show both errors in a list
+      const listItems = callout.querySelectorAll('li');
+      expect(listItems).toHaveLength(2);
+    });
+
+    it('disables save buttons when validation workflow is not selected', async () => {
+      const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+      useWorkflowConfiguration.mockReturnValue({
+        clearSettings: jest.fn(),
+        isLoading: false,
+        updateSettings: jest.fn(),
+        workflowConfiguration: {
+          alertRetrievalWorkflowIds: [],
+          defaultAlertRetrievalMode: 'custom_query',
+          validationWorkflowId: '',
+        },
+      });
+
+      const props = { ...defaultProps, connectorId: 'test-connector' };
+      const { result, rerender } = renderHook(() => useSettingsView(props), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      rerender();
+
+      render(<TestProviders>{result.current.actionButtons}</TestProviders>);
+
+      expect(screen.getByTestId('save')).toBeDisabled();
+      expect(screen.getByTestId('saveAndRun')).toBeDisabled();
+    });
+
+    describe('workflow configuration draft state (cancel behavior)', () => {
+      it('does not persist workflow configuration changes to local storage when configuration changes', async () => {
+        const updateSettingsMock = jest.fn();
+        const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+        useWorkflowConfiguration.mockReturnValue({
+          clearSettings: jest.fn(),
+          isLoading: false,
+          updateSettings: updateSettingsMock,
+          workflowConfiguration: {
+            alertRetrievalWorkflowIds: [],
+            defaultAlertRetrievalMode: 'custom_query',
+            validationWorkflowId: 'default',
+          },
+        });
+
+        const props = {
+          ...defaultProps,
+          connectorId: 'test-connector',
+          isWorkflowsEnabledOverride: true,
+        };
+        const { result } = renderHook(() => useSettingsView(props), {
+          wrapper: TestProviders,
+        });
+
+        render(
+          <TestProviders>
+            {result.current.settingsView}
+            {result.current.actionButtons}
+          </TestProviders>
+        );
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('simulateWorkflowConfigChange'));
+        });
+
+        expect(updateSettingsMock).not.toHaveBeenCalled();
+      });
+
+      it('persists the draft workflow configuration to local storage when save is clicked', async () => {
+        const updateSettingsMock = jest.fn().mockReturnValue(true);
+        const { useWorkflowConfiguration } = jest.requireMock('../workflow_configuration');
+        useWorkflowConfiguration.mockReturnValue({
+          clearSettings: jest.fn(),
+          isLoading: false,
+          updateSettings: updateSettingsMock,
+          workflowConfiguration: {
+            alertRetrievalWorkflowIds: [],
+            defaultAlertRetrievalMode: 'custom_query',
+            validationWorkflowId: 'default',
+          },
+        });
+
+        const props = {
+          ...defaultProps,
+          connectorId: 'test-connector',
+          isWorkflowsEnabledOverride: true,
+        };
+
+        const Wrapper = () => {
+          const { actionButtons, settingsView } = useSettingsView(props);
+          return (
+            <>
+              {settingsView}
+              {actionButtons}
+            </>
+          );
+        };
+
+        render(
+          <TestProviders>
+            <Wrapper />
+          </TestProviders>
+        );
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('simulateWorkflowConfigChange'));
+        });
+
+        updateSettingsMock.mockClear();
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('save'));
+        });
+
+        expect(updateSettingsMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 200',
+          })
+        );
       });
     });
   });
