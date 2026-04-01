@@ -41,7 +41,7 @@ export const ControlClone = ({
     <EuiFlexItem css={[styles.container, widthStyle]}>
       <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="grabHorizontal" css={styles.grabIcon} />
+          <EuiIcon type="grabHorizontal" css={styles.grabIcon} aria-hidden={true} />
         </EuiFlexItem>
         {cloneTitle?.length && (
           <EuiFlexItem>
