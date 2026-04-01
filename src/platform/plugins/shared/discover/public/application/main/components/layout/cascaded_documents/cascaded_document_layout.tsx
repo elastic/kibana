@@ -161,7 +161,7 @@ const ESQLDataCascade = React.memo(
       <DataCascade<ESQLDataGroupNode>
         ref={setDataCascadeRef}
         size="s"
-        overscan={15}
+        overscan={2}
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
