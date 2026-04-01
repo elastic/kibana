@@ -47,7 +47,8 @@ export async function searchKnowledgeIndicatorsToolHandler({
       return result.hits;
     },
     getQueries: async (streamNames, search_text) => {
-      // TODO: add support for semantic search
+      // findQueries uses the default search mode (hybrid when ELSER is available,
+      // keyword otherwise), giving the agent the best-available ranking.
       const links = search_text
         ? await queryClient.findQueries(streamNames, search_text)
         : await queryClient.getQueryLinks(streamNames);

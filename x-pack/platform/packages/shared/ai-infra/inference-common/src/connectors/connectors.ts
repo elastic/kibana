@@ -42,11 +42,15 @@ export interface InferenceConnector {
    */
   isInferenceEndpoint: boolean;
   /**
-   * When true, this connector is preconfigured (i.e. managed by Elastic).
-   * For native inference endpoints this is determined by the presence of
-   * `metadata.display.name` on the underlying ES inference endpoint.
+   * When true, this connector is preconfigured via kibana.yml or populated through EIS
+   * Determined by the presence of `metadata.display.name` on the underlying
+   * ES inference endpoint.
    */
   isPreconfigured: boolean;
+  /**
+   * When true, this connector represents an Elastic-managed inference endpoint (EIS).
+   */
+  isEis?: boolean;
   /** Present when sourced from a stack connector that exposes deprecation state. */
   isDeprecated?: boolean;
   /** Present when sourced from a stack connector that exposes connector-type deprecation. */
@@ -73,6 +77,7 @@ export interface RawConnector {
   name: string;
   config?: Record<string, any>;
   isPreconfigured?: boolean;
+  isEis?: boolean;
   isDeprecated?: boolean;
   isConnectorTypeDeprecated?: boolean;
   isMissingSecrets?: boolean;
@@ -84,6 +89,7 @@ export interface RawInferenceConnector {
   name: string;
   config?: Record<string, any>;
   isPreconfigured?: boolean;
+  isEis?: boolean;
   isDeprecated?: boolean;
   isConnectorTypeDeprecated?: boolean;
   isMissingSecrets?: boolean;
