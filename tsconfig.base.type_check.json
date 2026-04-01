@@ -243,6 +243,12 @@
       "@kbn/alerting-types/*": [
         "src/platform/packages/shared/kbn-alerting-types/*"
       ],
+      "@kbn/alerting-v2-constants": [
+        "x-pack/platform/packages/shared/response-ops/alerting-v2-constants"
+      ],
+      "@kbn/alerting-v2-constants/*": [
+        "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/*"
+      ],
       "@kbn/alerting-v2-episodes-ui": [
         "x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui"
       ],
@@ -3074,12 +3080,6 @@
       ],
       "@kbn/discoveries/*": [
         "x-pack/solutions/security/packages/kbn-discoveries/*"
-      ],
-      "@kbn/discoveries-plugin": [
-        "x-pack/solutions/security/plugins/discoveries"
-      ],
-      "@kbn/discoveries-plugin/*": [
-        "x-pack/solutions/security/plugins/discoveries/*"
       ],
       "@kbn/discoveries-schemas": [
         "x-pack/solutions/security/packages/kbn-discoveries-schemas"
