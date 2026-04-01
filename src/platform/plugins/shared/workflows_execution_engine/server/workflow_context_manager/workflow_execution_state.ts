@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import {
+  isTerminalStatus,
+  type EsWorkflowExecution,
+  type EsWorkflowStepExecution,
+} from '@kbn/workflows';
 import type { StepMetadataCache } from './step_metadata_cache';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -139,6 +143,34 @@ export class WorkflowExecutionState {
 
     this.stepDocumentsChanges.clear();
     await this.workflowStepExecutionRepository.bulkUpsert(stepDocumentsChanges);
+    this.evictFlushedStepPayloadsFromLocalState(stepDocumentsChanges);
+  }
+
+  /**
+   * After step documents are persisted, clears input/output/error on matching in-memory
+   * step executions to reduce retained context size (payloads remain on ES / metadata cache).
+   */
+  private evictFlushedStepPayloadsFromLocalState(
+    flushedSteps: Array<Partial<EsWorkflowStepExecution>>
+  ): void {
+    flushedSteps.forEach((step) => {
+      if (!step.id) {
+        return;
+      }
+
+      const existingStep = this.stepExecutions.get(step.id);
+
+      if (!existingStep || !existingStep.status || isTerminalStatus(existingStep.status)) {
+        return;
+      }
+
+      this.stepExecutions.set(step.id, {
+        ...existingStep,
+        output: undefined,
+        error: undefined,
+        input: undefined,
+      } as EsWorkflowStepExecution);
+    });
   }
 
   public async flush(): Promise<void> {

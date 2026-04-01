@@ -20,7 +20,7 @@ interface CacheEntry {
 export class StepMetadataCache {
   private readonly cache = new LRUCache<string, CacheEntry>({
     max: 1000,
-    ttl: 1000 * 10, // 10 seconds
+    ttl: 1000 * 5, // 10 seconds
   });
 
   constructor(private readonly stepExecutionRepository: StepExecutionRepository) {}

@@ -124,7 +124,7 @@ export class WorkflowContextManager {
     return stepContext;
   }
 
-  private getContextTemp(accessedStepIds: Set<string>): StepContext {
+  private async getContextTempAsync(accessedStepIds: Set<string>): Promise<StepContext> {
     const stepContext: StepContext = {
       ...this.buildWorkflowContext(),
       steps: {},
@@ -135,10 +135,14 @@ export class WorkflowContextManager {
     const currentNodeId = currentNode.id;
 
     const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
-    allPredecessors.forEach((node) => {
-      const stepId = node.stepId;
-      const stepData = this.getStepData(stepId, accessedStepIds);
 
+    const filtered = allPredecessors
+      .map((x) => x.stepId)
+      .filter((stepId) => accessedStepIds.has(stepId));
+
+    const stepResults = await this.getStepsDataAsync(filtered);
+
+    for (const [stepId, stepData] of Object.entries(stepResults)) {
       if (stepData) {
         stepContext.steps[stepId] = {};
         if (stepData.runStepResult) {
@@ -155,7 +159,7 @@ export class WorkflowContextManager {
           };
         }
       }
-    });
+    }
 
     this.enrichStepContextAccordingToStepScope(stepContext);
     this.enrichStepContextWithMockedData(stepContext);
@@ -173,10 +177,6 @@ export class WorkflowContextManager {
     const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(this.node.id);
     const predecessorStepIds = new Set(allPredecessors.map((node) => node.stepId));
     return this.getContextTempAsync(predecessorStepIds);
-  }
-
-  private async getContextTempAsync(accessedStepIds: Set<string>): Promise<StepContext> {
-    return this.getContextTemp(accessedStepIds);
   }
 
   /**
@@ -303,14 +303,12 @@ export class WorkflowContextManager {
    * ```
    */
   public renderValueAccordingToContext<T>(obj: T, additionalContext?: Record<string, unknown>): T {
-    const accessedStepIds = this.getStepIdsFromRenderingContext(obj);
-    const context = this.getContextTemp(accessedStepIds);
+    const context = this.getContext();
     return this.templateEngine.render(obj, { ...context, ...additionalContext });
   }
 
   public evaluateExpressionInContext(template: string): unknown {
-    const accessedStepIds = this.getStepIdsFromRenderingContext(template);
-    const context = this.getContextTemp(accessedStepIds);
+    const context = this.getContext();
     return this.templateEngine.evaluateExpression(template, context);
   }
 
@@ -667,6 +665,60 @@ export class WorkflowContextManager {
       },
       stepState: latestStepExecution.state,
     };
+  }
+
+  private async getStepsDataAsync(stepIds: string[]): Promise<
+    Record<
+      string,
+      {
+        runStepResult: {
+          input: unknown;
+          output: unknown;
+          error: SerializedError | undefined;
+        };
+        stepState: Record<string, unknown> | undefined;
+      }
+    >
+  > {
+    const latest = stepIds
+      .map((stepId) => this.workflowExecutionState.getLatestStepExecution(stepId))
+      .filter((stepExecution) => !!stepExecution)
+      .map((stepExecution) => ({
+        stepId: stepExecution?.stepId,
+        stepExecutionId: stepExecution?.id,
+        stepState: stepExecution?.state,
+      }));
+
+    const cached = await this.stepMetadataCache.getMetadataForStepExecution(
+      latest.map((x) => x.stepExecutionId)
+    );
+    const result: Record<
+      string,
+      {
+        stepId: string;
+        stepExecutionId: string;
+        runStepResult: {
+          input: unknown;
+          output: unknown;
+          error: SerializedError | undefined;
+        };
+        stepState: Record<string, unknown> | undefined;
+      }
+    > = {};
+
+    for (const xxx of latest) {
+      const cachedStepMetadata = cached[xxx.stepExecutionId];
+      result[xxx.stepId] = {
+        runStepResult: {
+          input: cachedStepMetadata?.input,
+          output: cachedStepMetadata?.output,
+          error: cachedStepMetadata?.error,
+        },
+        stepState: xxx.stepState,
+      };
+    }
+
+    return result;
   }
 
   private inspectRenderingContext(renderingContext: unknown): Set<string> {
