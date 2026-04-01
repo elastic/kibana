@@ -41,6 +41,10 @@ jest.mock('../../hooks/use_fetch_rules', () => ({
   useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
 }));
 
+jest.mock('../../hooks/use_fetch_rule_tags', () => ({
+  useFetchRuleTags: () => ({ data: ['prod'], isLoading: false, isError: false }),
+}));
+
 const mockDeleteMutate = jest.fn();
 const mockUseDeleteRule = jest.fn();
 jest.mock('../../hooks/use_delete_rule', () => ({
