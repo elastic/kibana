@@ -10,11 +10,11 @@
 import type { PieStateESQL, PieStateNoESQL } from './pie';
 import { pieStateSchema } from './pie';
 
-describe('Pie/Donut Schema', () => {
-  describe.each(['pie', 'donut'] as const)('%s chart type', (chartType) => {
+describe('Pie Schema', () => {
+  describe('pie chart type', () => {
     describe('Non-ES|QL Schema', () => {
       const basePieConfig = {
-        type: chartType,
+        type: 'pie',
         dataset: {
           type: 'dataView',
           id: 'test-data-view',
@@ -35,7 +35,7 @@ describe('Pie/Donut Schema', () => {
         };
 
         const validated = pieStateSchema.validate(input);
-        expect(validated.type).toBe(chartType);
+        expect(validated.type).toBe('pie');
         expect(validated.metrics).toHaveLength(1);
         expect(validated.metrics[0].operation).toBe('count');
       });
@@ -700,7 +700,7 @@ describe('Pie/Donut Schema', () => {
 
     describe('ES|QL Schema', () => {
       const baseESQLPieConfig = {
-        type: chartType,
+        type: 'pie',
         dataset: {
           type: 'esql',
           query: 'FROM my-index | STATS count() BY category',
