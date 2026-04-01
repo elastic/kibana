@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type { Streams } from '@kbn/streams-schema';
+import { getStreamNameFromViewName, type Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EditQueryStreamFlyout } from './edit_query_stream_flyout';
@@ -81,8 +81,8 @@ export function StreamConfigurationPanel({
             <p>
               {i18n.translate('xpack.streams.streamConfigurationPanel.accessHint', {
                 defaultMessage:
-                  'To query this stream directly in ES|QL, use {viewName}. This data is not included in the parent stream.',
-                values: { viewName },
+                  'To query this stream directly in ES|QL, use the query stream "{streamName}". This data is not included in the parent stream.',
+                values: { streamName: getStreamNameFromViewName(viewName) },
               })}
             </p>
           </EuiText>
