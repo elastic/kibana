@@ -37,7 +37,6 @@ export const ArtifactImportConfirmModal: React.FC<ArtifactImportConfirmModalProp
 
   return (
     <EuiModal onClose={onCancel} aria-labelledby={modalTitleId} data-test-subj={getTestId()}>
-      {' '}
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.securitySolution.artifactListPage.importConfirmModal.title', {

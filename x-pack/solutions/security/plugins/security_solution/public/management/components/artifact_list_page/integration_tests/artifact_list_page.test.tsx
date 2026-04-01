@@ -236,6 +236,7 @@ describe('When using the ArtifactListPage component', () => {
         const currentApiCallCount = mockedApi.responseProvider.trustedAppsList.mock.calls.length;
 
         await userEvent.click(importFlyoutUi.getImportButton());
+        await userEvent.click(importFlyoutUi.getConfirmModalConfirmButton());
 
         await waitFor(() => {
           expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledTimes(

@@ -47,6 +47,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       apiClient,
       onCancel: jest.fn(),
       onSuccess: jest.fn(),
+      onShowErrors: jest.fn(),
     };
 
     render = async () => {
@@ -136,8 +137,10 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     await userEvent.click(ui.getImportButton());
     await userEvent.click(ui.getConfirmModalConfirmButton());
 
-    expect(ui.getImportButton()).toBeDisabled();
-    expect(ui.getConfirmModalConfirmButton()).toBeDisabled();
+    await waitFor(() => {
+      expect(ui.getImportButton()).toBeDisabled();
+      expect(ui.getConfirmModalConfirmButton()).toBeDisabled();
+    });
   });
 
   describe('when handling server response', () => {
@@ -230,11 +233,10 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith({
         title: 'Import completed with errors',
         toastLifeTimeMs: 60_000,
+        text: expect.any(Function),
       });
       expect(props.onSuccess).toHaveBeenCalled();
     });
-
-    it('should call `showErrorList` when the `View errors` button is pressed in the warning toast', async () => {});
 
     it('should show a danger toast when none of the items were imported', async () => {
       mockedTrustedAppApi.responseProvider.trustedAppImportList.mockImplementation(() => ({
@@ -256,25 +258,22 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
         title: "Artifacts weren't imported",
         toastLifeTimeMs: 60_000,
+        text: expect.any(Function),
       });
       expect(props.onSuccess).toHaveBeenCalled();
     });
 
-    it('should call `showErrorList` when the `View errors` button is pressed in the error toast', async () => {});
-
-    it('should show an error toast and close the modal if another list is being imported', async () => {
+    it('should show an danger toast and close the modal if another list is being imported', async () => {
       await render();
 
       await ui.uploadFile(['some-other-list-id']);
       await userEvent.click(ui.getImportButton());
       await userEvent.click(ui.getConfirmModalConfirmButton());
 
-      expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
-        expect.objectContaining(
-          new Error(artifactListPageLabels.pageImportOnlyCurrentArtifactCanBeImportedError)
-        ),
-        { title: artifactListPageLabels.pageImportErrorToastTitle }
-      );
+      expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: artifactListPageLabels.pageImportErrorToastTitle,
+        text: artifactListPageLabels.pageImportOnlyCurrentArtifactCanBeImportedError,
+      });
       expect(ui.queryConfirmModal()).not.toBeInTheDocument();
     });
 
@@ -285,12 +284,10 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       await userEvent.click(ui.getImportButton());
       await userEvent.click(ui.getConfirmModalConfirmButton());
 
-      expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
-        expect.objectContaining(
-          new Error(artifactListPageLabels.pageImportOnlyCurrentArtifactCanBeImportedError)
-        ),
-        { title: artifactListPageLabels.pageImportErrorToastTitle }
-      );
+      expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: artifactListPageLabels.pageImportErrorToastTitle,
+        text: artifactListPageLabels.pageImportOnlyCurrentArtifactCanBeImportedError,
+      });
       expect(ui.queryConfirmModal()).not.toBeInTheDocument();
     });
 

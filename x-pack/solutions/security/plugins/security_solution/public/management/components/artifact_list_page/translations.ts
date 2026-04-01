@@ -65,6 +65,31 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Import completed with errors',
     }
   ),
+  getPageImportCompletedWithErrorsToastText: (
+    importedCount: number,
+    failedCount: number
+  ): string => {
+    return i18n.translate(
+      'xpack.securitySolution.artifactListPage.importCompletedWithErrorsToastText',
+      {
+        defaultMessage:
+          '{importedCount} imported, {failedCount} failed. Review the errors for details.',
+        values: { importedCount, failedCount },
+      }
+    );
+  },
+  pageImportAllItemsFailedToastText: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importAllItemsFailedToastText',
+    {
+      defaultMessage: "The artifacts couldn't be imported. Review the errors and try again.",
+    }
+  ),
+  pageImportViewErrorsButton: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importViewErrorsButton',
+    {
+      defaultMessage: 'View errors',
+    }
+  ),
   pageImportErrorToastTitle: i18n.translate(
     'xpack.securitySolution.artifactListPage.importErrorToastTitle',
     {
