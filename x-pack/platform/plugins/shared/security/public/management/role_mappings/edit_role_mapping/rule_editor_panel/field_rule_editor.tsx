@@ -158,7 +158,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
           {this.props.readOnly === false && renderAddValueButton ? (
             <EuiButtonIcon
               iconSize="s"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={this.onAddAlternateValue}
               color="primary"
               data-test-subj="addAlternateValueButton"
