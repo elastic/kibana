@@ -68,7 +68,7 @@ describe('useWithScriptLibraryData', () => {
     });
 
     defaultGetEndpointScriptsListResponse = {
-      data: [] as unknown as EndpointScriptListApiResponse,
+      data: createMockScriptListResponse(0),
       isFetching: false,
       isFetched: true,
       error: null,
