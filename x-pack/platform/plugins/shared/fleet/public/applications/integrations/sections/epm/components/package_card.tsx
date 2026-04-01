@@ -223,6 +223,8 @@ export function PackageCard({
     isActive: hasDataStreams,
   });
 
+  const displayTitle = wrapTitleWithDeprecated({ title, deprecated: isDeprecated });
+
   const testid = `integration-card:${id}`;
   return (
     <TrackApplicationView viewId={testid}>
@@ -265,17 +267,11 @@ export function PackageCard({
         layout="horizontal"
         title={
           titleLineClamp ? (
-            <EuiToolTip content={title} position="top" display="block">
-              <CardTitle
-                title={wrapTitleWithDeprecated({ title, deprecated: isDeprecated })}
-                titleBadge={titleBadge}
-              />
+            <EuiToolTip content={displayTitle} position="top" display="block">
+              <CardTitle title={displayTitle} titleBadge={titleBadge} />
             </EuiToolTip>
           ) : (
-            <CardTitle
-              title={wrapTitleWithDeprecated({ title, deprecated: isDeprecated })}
-              titleBadge={titleBadge}
-            />
+            <CardTitle title={displayTitle} titleBadge={titleBadge} />
           )
         }
         titleSize={titleSize}
