@@ -225,6 +225,7 @@ const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => 
   return {
     ...previous,
     ...next,
+    message: next.message || previous.message,
     ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
   };
 };

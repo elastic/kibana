@@ -703,4 +703,59 @@ describe('groupToolCallSteps', () => {
     const groups = groupToolCallSteps(steps);
     expect(groups).toHaveLength(0);
   });
+
+  it('keeps tool calls in the same group when reasoning steps appear between them', () => {
+    const steps: ConversationRoundStep[] = [
+      makeReasoningStep('reasoning for c1'),
+      makeStep('c1', 'get_index_mapping', 'g1'),
+      makeReasoningStep('reasoning for c2'),
+      makeStep('c2', 'get_index_mapping', 'g1'),
+    ];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toHaveLength(2);
+    expect(groups[0][0].tool_call_id).toBe('c1');
+    expect(groups[0][1].tool_call_id).toBe('c2');
+  });
+
+  it('keeps tool calls in the same group with multiple interleaved reasoning steps', () => {
+    const steps: ConversationRoundStep[] = [
+      makeReasoningStep('reasoning for c1'),
+      makeStep('c1', 'search', 'g1'),
+      makeReasoningStep('reasoning for c2'),
+      makeStep('c2', 'lookup', 'g1'),
+      makeReasoningStep('reasoning for c3'),
+      makeStep('c3', 'fetch', 'g1'),
+    ];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toHaveLength(3);
+  });
+
+  it('breaks group on reasoning steps between tool calls without group id', () => {
+    const steps: ConversationRoundStep[] = [
+      makeStep('c1', 'search'),
+      makeReasoningStep('thinking...'),
+      makeStep('c2', 'lookup'),
+    ];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(2);
+    expect(groups[0]).toHaveLength(1);
+    expect(groups[1]).toHaveLength(1);
+  });
+
+  it('handles reasoning steps between different group ids', () => {
+    const steps: ConversationRoundStep[] = [
+      makeStep('c1', 'search', 'g1'),
+      makeStep('c2', 'lookup', 'g1'),
+      makeReasoningStep('new cycle'),
+      makeStep('c3', 'search', 'g2'),
+      makeReasoningStep('reasoning for c4'),
+      makeStep('c4', 'lookup', 'g2'),
+    ];
+    const groups = groupToolCallSteps(steps);
+    expect(groups).toHaveLength(2);
+    expect(groups[0]).toHaveLength(2);
+    expect(groups[1]).toHaveLength(2);
+  });
 });
