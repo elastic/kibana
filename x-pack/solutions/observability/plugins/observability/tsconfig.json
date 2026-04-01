@@ -157,6 +157,7 @@
     "@kbn/alerting-v2-plugin",
     "@kbn/alerting-v2-episodes-ui",
     "@kbn/expressions-plugin",
+    "@kbn/ingest-hub-plugin",
   ],
   "exclude": ["target/**/*"]
 }

@@ -419,19 +419,32 @@
             },
             "relationships": {
               "properties": {
-                "Accesses_frequently": {
+                "accesses_frequently": {
                   "type": "keyword"
                 },
-                "Communicates_with": {
+                "accesses_infrequently": {
                   "type": "keyword"
                 },
-                "Depends_on": {
+                "communicates_with": {
                   "type": "keyword"
                 },
-                "Owns": {
+                "depends_on": {
                   "type": "keyword"
                 },
-                "Supervises": {
+                "owns": {
+                  "type": "keyword"
+                },
+                "owns_inferred": {
+                  "type": "keyword"
+                },
+                "resolution": {
+                  "properties": {
+                    "resolved_to": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "supervises": {
                   "type": "keyword"
                 }
               }

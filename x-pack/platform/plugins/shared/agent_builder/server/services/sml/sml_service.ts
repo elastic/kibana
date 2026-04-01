@@ -91,9 +91,9 @@ class SmlServiceImpl implements SmlServiceInstance {
           logger,
         });
       },
-      checkItemsAccess: async ({ items, spaceId, esClient, request }) => {
+      checkItemsAccess: async ({ ids, spaceId, esClient, request }) => {
         return checkItemsAccess({
-          items,
+          ids,
           spaceId,
           esClient,
           request,
@@ -209,14 +209,14 @@ const filterResultsByPermissions = async ({
  * Looks up each item's permissions from the index and batch-checks them.
  */
 const checkItemsAccess = async ({
-  items,
+  ids,
   spaceId,
   esClient,
   request,
   securityAuthz,
   logger,
 }: {
-  items: Array<{ id: string; type: string }>;
+  ids: string[];
   spaceId: string;
   esClient: ElasticsearchClient;
   request: KibanaRequest;
@@ -227,13 +227,11 @@ const checkItemsAccess = async ({
 
   // When the security plugin is absent, grant access to all items.
   if (!securityAuthz) {
-    for (const item of items) {
-      accessMap.set(item.id, true);
+    for (const id of ids) {
+      accessMap.set(id, true);
     }
     return accessMap;
   }
-
-  const ids = items.map((item) => item.id);
 
   let docPermissions: Map<string, string[]>;
   try {
@@ -268,14 +266,14 @@ const checkItemsAccess = async ({
     );
   } catch (error) {
     if (isNotFoundError(error)) {
-      for (const item of items) {
-        accessMap.set(item.id, false);
+      for (const id of ids) {
+        accessMap.set(id, false);
       }
       return accessMap;
     }
     logger.warn(`SML items access check failed: ${(error as Error).message}`);
-    for (const item of items) {
-      accessMap.set(item.id, false);
+    for (const id of ids) {
+      accessMap.set(id, false);
     }
     return accessMap;
   }
@@ -289,18 +287,18 @@ const checkItemsAccess = async ({
     logger,
   });
 
-  for (const item of items) {
-    const perms = docPermissions.get(item.id);
+  for (const id of ids) {
+    const perms = docPermissions.get(id);
     if (!perms) {
-      accessMap.set(item.id, false);
+      accessMap.set(id, false);
       continue;
     }
     if (perms.length === 0) {
-      accessMap.set(item.id, true);
+      accessMap.set(id, true);
       continue;
     }
     accessMap.set(
-      item.id,
+      id,
       perms.every((p) => authorizedPerms.has(p))
     );
   }
