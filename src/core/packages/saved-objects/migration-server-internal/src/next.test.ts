@@ -8,7 +8,6 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { waitGroup } from './kibana_migrator_utils';
 import { next } from './next';
 import type { State } from './state';
 
@@ -19,9 +18,6 @@ describe('migrations v2 next', () => {
     const action = next(
       {} as ElasticsearchClient,
       (() => {}) as any,
-      waitGroup(),
-      waitGroup(),
-      waitGroup(),
       []
     )(state);
     expect(action).toEqual(null);
@@ -31,9 +27,6 @@ describe('migrations v2 next', () => {
     const action = next(
       {} as ElasticsearchClient,
       (() => {}) as any,
-      waitGroup(),
-      waitGroup(),
-      waitGroup(),
       []
     )(state);
     expect(action).toEqual(null);

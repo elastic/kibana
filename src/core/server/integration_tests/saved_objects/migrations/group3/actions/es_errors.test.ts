@@ -21,7 +21,6 @@ import {
   isWriteBlockException,
   isClusterShardLimitExceeded,
   createIndex,
-  setWriteBlock,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
 const { startES } = createTestServers({
@@ -53,7 +52,7 @@ describe('Elasticsearch Errors', () => {
       mappings: { properties: {} },
       esCapabilities: elasticsearchServiceMock.createCapabilities(),
     })();
-    await setWriteBlock({ client, index: 'existing_index_with_write_block' })();
+    await client.indices.addBlock({ index: 'existing_index_with_write_block', block: 'write' });
   });
 
   afterAll(async () => {

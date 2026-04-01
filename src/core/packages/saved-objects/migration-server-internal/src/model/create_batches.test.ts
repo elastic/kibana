@@ -9,7 +9,7 @@
 
 import * as Either from 'fp-ts/Either';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import { buildTempIndexMap, createBatches } from './create_batches';
+import { createBatches } from './create_batches';
 
 describe('createBatches', () => {
   const documentToOperation = (document: SavedObjectsRawDoc) => [
@@ -19,7 +19,7 @@ describe('createBatches', () => {
 
   const DOCUMENT_SIZE_BYTES = 77; // 76 + \n
 
-  describe('when indexTypesMap and kibanaVersion are not provided', () => {
+  describe('when maxBatchSizeBytes is provided', () => {
     it('returns right one batch if all documents fit in maxBatchSizeBytes', () => {
       const documents = [
         { _id: '', _source: { type: 'dashboard', title: 'my saved object title ¹' } },
@@ -78,85 +78,6 @@ describe('createBatches', () => {
           type: 'document_exceeds_batch_size_bytes',
           documentId: documents[1]._id,
         })
-      );
-    });
-  });
-
-  describe('when a type index map is provided', () => {
-    it('creates batches that contain the target index information for each type', () => {
-      const documents = [
-        { _id: '', _source: { type: 'dashboard', title: 'my saved object title ¹' } },
-        { _id: '', _source: { type: 'dashboard', title: 'my saved object title ²' } },
-        { _id: '', _source: { type: 'cases', title: 'a case' } },
-        { _id: '', _source: { type: 'cases-comments', title: 'a case comment #1' } },
-        { _id: '', _source: { type: 'cases-user-actions', title: 'a case user action' } },
-      ];
-      expect(
-        createBatches({
-          documents,
-          maxBatchSizeBytes: (DOCUMENT_SIZE_BYTES + 49) * 2, // add extra length for 'index' property
-          typeIndexMap: buildTempIndexMap(
-            {
-              '.kibana': ['dashboard'],
-              '.kibana_cases': ['cases', 'cases-comments', 'cases-user-actions'],
-            },
-            '8.8.0'
-          ),
-        })
-      ).toEqual(
-        Either.right([
-          [
-            [
-              {
-                index: {
-                  _id: '',
-                  _index: '.kibana_8.8.0_reindex_temp_alias',
-                },
-              },
-              { type: 'dashboard', title: 'my saved object title ¹' },
-            ],
-            [
-              {
-                index: {
-                  _id: '',
-                  _index: '.kibana_8.8.0_reindex_temp_alias',
-                },
-              },
-              { type: 'dashboard', title: 'my saved object title ²' },
-            ],
-          ],
-          [
-            [
-              {
-                index: {
-                  _id: '',
-                  _index: '.kibana_cases_8.8.0_reindex_temp_alias',
-                },
-              },
-              { type: 'cases', title: 'a case' },
-            ],
-            [
-              {
-                index: {
-                  _id: '',
-                  _index: '.kibana_cases_8.8.0_reindex_temp_alias',
-                },
-              },
-              { type: 'cases-comments', title: 'a case comment #1' },
-            ],
-          ],
-          [
-            [
-              {
-                index: {
-                  _id: '',
-                  _index: '.kibana_cases_8.8.0_reindex_temp_alias',
-                },
-              },
-              { type: 'cases-user-actions', title: 'a case user action' },
-            ],
-          ],
-        ])
       );
     });
   });

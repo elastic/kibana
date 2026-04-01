@@ -16,7 +16,6 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
-  IndexTypesMap,
   VirtualVersionMap,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
@@ -30,25 +29,10 @@ import type { Aliases } from './model/helpers';
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
   readonly indexPrefix: string;
-  /**
-   * The name of the concrete legacy index (if it exists) e.g. `.kibana` for <
-   * 6.5 or `.kibana_task_manager` for < 7.4
-   */
-  readonly legacyIndex: string;
   /** Kibana version number */
   readonly kibanaVersion: string;
   /** The mappings to apply to the target index */
   readonly targetIndexMappings: IndexMapping;
-  /**
-   * Special mappings set when creating the temp index into which we reindex.
-   * These mappings have `dynamic: false` to allow for any kind of outdated
-   * document to be written to the index, but still define mappings for the
-   * `migrationVersion` and `type` fields so that we can search for and
-   * transform outdated documents.
-   */
-  readonly tempIndexMappings: IndexMapping;
-  /** Script to apply to a legacy index before it can be used as a migration source */
-  readonly preMigrationScript: Option.Option<string>;
   readonly outdatedDocumentsQuery: QueryDslQueryContainer;
   readonly retryCount: number;
   readonly skipRetryReset: boolean;
@@ -139,17 +123,6 @@ export interface BaseState extends ControlState {
    */
   readonly versionIndex: string;
   /**
-   * A temporary index used as part of an "reindex block" that
-   * prevents lost deletes e.g. `.kibana_7.11.0_reindex`.
-   */
-  readonly tempIndex: string;
-  /**
-   * An alias to the tempIndex used to prevent ES from auto-creating the temp
-   * index if one node deletes it while another writes to it
-   * e.g. `.kibana_7.11.0_reindex_temp_alias`.
-   */
-  readonly tempIndexAlias: string;
-  /**
    * When upgrading to a more recent kibana version, some saved object types
    * might be conflicting or no longer used.
    * When reindexing, we use a source query to exclude types which are:
@@ -188,21 +161,6 @@ export interface BaseState extends ControlState {
    */
   readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
   readonly waitForMigrationCompletion: boolean;
-  /**
-   * This flag tells the migrator that SO documents must be redistributed,
-   * i.e. stored in different system indices, compared to where they are currently stored.
-   * This requires reindexing documents.
-   */
-  readonly mustRelocateDocuments: boolean;
-  /**
-   * This object holds a relation of all the types that are stored in each index, e.g.:
-   * {
-   *  '.kibana': [ 'type_1', 'type_2', ... 'type_N' ],
-   *  '.kibana_cases': [ 'type_N+1', 'type_N+2', ... 'type_N+M' ],
-   *  ...
-   * }
-   */
-  readonly indexTypesMap: IndexTypesMap;
   /** Capabilities of the ES cluster we're using */
   readonly esCapabilities: ElasticsearchCapabilities;
 }
@@ -297,20 +255,6 @@ export interface UpdateSourceMappingsPropertiesState extends SourceExistsState {
   readonly controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES';
 }
 
-export interface CheckUnknownDocumentsState extends SourceExistsState {
-  /** Check if any unknown document is present in the source index */
-  readonly controlState: 'CHECK_UNKNOWN_DOCUMENTS';
-}
-
-export interface SetSourceWriteBlockState extends SourceExistsState {
-  /** Set a write block on the source index to prevent any further writes */
-  readonly controlState: 'SET_SOURCE_WRITE_BLOCK';
-}
-
-export interface CalculateExcludeFiltersState extends SourceExistsState {
-  readonly controlState: 'CALCULATE_EXCLUDE_FILTERS';
-}
-
 export interface CreateIndexCheckClusterRoutingAllocationState extends PostInitState {
   readonly controlState: 'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION';
   readonly sourceIndex: Option.None;
@@ -322,82 +266,6 @@ export interface CreateNewTargetState extends PostInitState {
   readonly controlState: 'CREATE_NEW_TARGET';
   readonly sourceIndex: Option.None;
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
-}
-
-export interface RelocateCheckClusterRoutingAllocationState extends PostInitState {
-  readonly controlState: 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION';
-}
-
-export interface CreateReindexTempState extends PostInitState {
-  /**
-   * Create a target index with mappings from the source index and registered
-   * plugins
-   */
-  readonly controlState: 'CREATE_REINDEX_TEMP';
-}
-
-export interface ReadyToReindexSyncState extends PostInitState {
-  /** Open PIT to the source index */
-  readonly controlState: 'READY_TO_REINDEX_SYNC';
-}
-
-export interface ReindexSourceToTempOpenPit extends SourceExistsState {
-  /** Open PIT to the source index */
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT';
-}
-
-interface ReindexSourceToTempBatch extends SourceExistsState {
-  readonly sourceIndexPitId: string;
-  readonly lastHitSortValue: number[] | undefined;
-  readonly corruptDocumentIds: string[];
-  readonly transformErrors: TransformErrorObjects[];
-  readonly progress: Progress;
-}
-
-export interface ReindexSourceToTempRead extends ReindexSourceToTempBatch {
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
-}
-
-export interface ReindexSourceToTempClosePit extends SourceExistsState {
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT';
-  readonly sourceIndexPitId: string;
-}
-
-export interface ReindexSourceToTempTransform extends ReindexSourceToTempBatch {
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM';
-  readonly outdatedDocuments: SavedObjectsRawDoc[];
-}
-
-export interface ReindexSourceToTempIndexBulk extends ReindexSourceToTempBatch {
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK';
-  readonly bulkOperationBatches: BulkOperation[][];
-  readonly currentBatch: number;
-}
-
-export interface DoneReindexingSyncState extends PostInitState {
-  /** Open PIT to the source index */
-  readonly controlState: 'DONE_REINDEXING_SYNC';
-}
-
-export interface SetTempWriteBlock extends PostInitState {
-  readonly controlState: 'SET_TEMP_WRITE_BLOCK';
-}
-
-export interface CloneTempToTarget extends PostInitState {
-  /**
-   * Clone the temporary reindex index into
-   */
-  readonly controlState: 'CLONE_TEMP_TO_TARGET';
-}
-
-export interface RefreshTarget extends PostInitState {
-  /** Refresh temp index before searching for outdated docs */
-  readonly controlState: 'REFRESH_TARGET';
-  readonly targetIndex: string;
-}
-
-export interface ReindexCheckClusterRoutingAllocationState extends SourceExistsState {
-  readonly controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION';
 }
 
 export interface CheckTargetTypesMappingsState extends PostInitState {
@@ -494,14 +362,6 @@ export interface MarkVersionIndexReady extends PostInitState {
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 }
 
-export interface MarkVersionIndexReadySync extends PostInitState {
-  /** Single "client.indices.updateAliases" operation
-   * to update multiple indices' aliases simultaneously
-   * */
-  readonly controlState: 'MARK_VERSION_INDEX_READY_SYNC';
-  readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
-}
-
 export interface MarkVersionIndexReadyConflict extends PostInitState {
   /**
    * If the MARK_VERSION_INDEX_READY step fails another instance was
@@ -519,78 +379,17 @@ export interface MarkVersionIndexReadyConflict extends PostInitState {
   readonly controlState: 'MARK_VERSION_INDEX_READY_CONFLICT';
 }
 
-/**
- * If we're migrating from a legacy index we need to perform some additional
- * steps to prepare this index so that it can be used as a migration 'source'.
- */
-export interface LegacyBaseState extends SourceExistsState {
-  readonly legacyPreMigrationDoneActions: AliasAction[];
-}
-
-export interface LegacyCheckClusterRoutingAllocationState extends LegacyBaseState {
-  readonly controlState: 'LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION';
-}
-
-export interface LegacySetWriteBlockState extends LegacyBaseState {
-  /** Set a write block on the legacy index to prevent any further writes */
-  readonly controlState: 'LEGACY_SET_WRITE_BLOCK';
-}
-
-export interface LegacyCreateReindexTargetState extends LegacyBaseState {
-  /**
-   * Create a new index into which we can reindex the legacy index. This
-   * index will have the same mappings as the legacy index. Once the legacy
-   * pre-migration is complete, this index will be used a migration 'source'.
-   */
-  readonly controlState: 'LEGACY_CREATE_REINDEX_TARGET';
-}
-
-export interface LegacyReindexState extends LegacyBaseState {
-  /**
-   * Reindex the legacy index into the new index created in the
-   * LEGACY_CREATE_REINDEX_TARGET step (and apply the preMigration script).
-   */
-  readonly controlState: 'LEGACY_REINDEX';
-}
-
-export interface LegacyReindexWaitForTaskState extends LegacyBaseState {
-  /** Wait for the reindex operation to complete */
-  readonly controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK';
-  readonly legacyReindexTaskId: string;
-}
-
-export interface LegacyDeleteState extends LegacyBaseState {
-  /**
-   * After reindexed has completed, delete the legacy index so that it won't
-   * conflict with the `currentAlias` that we want to create in a later step
-   * e.g. `.kibana`.
-   */
-  readonly controlState: 'LEGACY_DELETE';
-}
-
 export type State = Readonly<
-  | CalculateExcludeFiltersState
   | CheckTargetTypesMappingsState
-  | CheckUnknownDocumentsState
   | CheckVersionIndexReadyActions
   | CleanupUnknownAndExcluded
   | CleanupUnknownAndExcludedWaitForTaskState
-  | CloneTempToTarget
   | CreateIndexCheckClusterRoutingAllocationState
   | CreateNewTargetState
-  | CreateReindexTempState
-  | DoneReindexingSyncState
   | DoneState
   | FatalState
   | InitState
-  | LegacyCheckClusterRoutingAllocationState
-  | LegacyCreateReindexTargetState
-  | LegacyDeleteState
-  | LegacyReindexState
-  | LegacyReindexWaitForTaskState
-  | LegacySetWriteBlockState
   | MarkVersionIndexReady
-  | MarkVersionIndexReadySync
   | MarkVersionIndexReadyConflict
   | OutdatedDocumentsRefresh
   | OutdatedDocumentsSearchClosePit
@@ -598,18 +397,7 @@ export type State = Readonly<
   | OutdatedDocumentsSearchRead
   | OutdatedDocumentsTransform
   | PrepareCompatibleMigration
-  | ReadyToReindexSyncState
   | RefreshSource
-  | RefreshTarget
-  | ReindexCheckClusterRoutingAllocationState
-  | ReindexSourceToTempClosePit
-  | ReindexSourceToTempIndexBulk
-  | ReindexSourceToTempOpenPit
-  | ReindexSourceToTempRead
-  | ReindexSourceToTempTransform
-  | RelocateCheckClusterRoutingAllocationState
-  | SetSourceWriteBlockState
-  | SetTempWriteBlock
   | TransformedDocumentsBulkIndex
   | UpdateSourceMappingsPropertiesState
   | UpdateTargetMappingsMeta

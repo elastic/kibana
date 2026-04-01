@@ -25,7 +25,7 @@ import {
   SavedObjectTypeRegistry,
   type IKibanaMigrator,
   type MigrationResult,
-  type IndexTypesMap,
+
   type ISavedObjectTypeRegistryInternal,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
@@ -84,7 +84,6 @@ export interface KibanaMigratorTestKitParams {
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
   removedTypes?: string[];
-  defaultIndexTypesMap?: IndexTypesMap;
   hashToVersionMap?: Record<string, string>;
   logFilePath?: string;
   clientWrapperFactory?: ElasticsearchClientWrapperFactory;
@@ -146,7 +145,6 @@ export const getEsClient = async ({
 export const getKibanaMigratorTestKit = async ({
   settings = {},
   kibanaIndex = defaultKibanaIndex,
-  defaultIndexTypesMap = {}, // do NOT assume any types are stored in any index by default
   hashToVersionMap = {}, // allows testing the md5 => modelVersion transition
   kibanaVersion = currentVersion,
   kibanaBranch = currentBranch,
@@ -181,7 +179,6 @@ export const getKibanaMigratorTestKit = async ({
     typeRegistry,
     loggerFactory,
     kibanaIndex,
-    defaultIndexTypesMap,
     hashToVersionMap,
     kibanaVersion,
     kibanaBranch,
@@ -308,7 +305,6 @@ interface GetMigratorParams {
   client: ElasticsearchClient;
   kibanaIndex: string;
   typeRegistry: ISavedObjectTypeRegistryInternal;
-  defaultIndexTypesMap: IndexTypesMap;
   hashToVersionMap: Record<string, string>;
   loggerFactory: LoggerFactory;
   kibanaVersion: string;
@@ -323,7 +319,6 @@ const getMigrator = async ({
   client,
   kibanaIndex,
   typeRegistry,
-  defaultIndexTypesMap,
   hashToVersionMap,
   loggerFactory,
   kibanaVersion,
@@ -351,7 +346,6 @@ const getMigrator = async ({
     client,
     kibanaIndex,
     typeRegistry,
-    defaultIndexTypesMap,
     hashToVersionMap,
     soMigrationsConfig: soConfig.migration,
     kibanaVersion,

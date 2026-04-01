@@ -28,17 +28,8 @@ export { checkClusterRoutingAllocationEnabled } from './check_cluster_routing_al
 export type { FetchIndexResponse, FetchIndicesParams } from './fetch_indices';
 export { fetchIndices } from './fetch_indices';
 
-export type { SafeWriteBlockParams } from './safe_write_block';
-export { safeWriteBlock } from './safe_write_block';
-
-export type { SetWriteBlockParams } from './set_write_block';
-export { setWriteBlock } from './set_write_block';
-
 export type { RemoveWriteBlockParams } from './remove_write_block';
 export { removeWriteBlock } from './remove_write_block';
-
-export type { CloneIndexResponse, CloneIndexParams } from './clone_index';
-export { cloneIndex } from './clone_index';
 
 export type {
   WaitForIndexStatusParams,
@@ -73,14 +64,8 @@ export { transformDocs } from './transform_docs';
 export type { RefreshIndexParams } from './refresh_index';
 export { refreshIndex } from './refresh_index';
 
-export type { ReindexResponse, ReindexParams } from './reindex';
-export { reindex } from './reindex';
-
-import type { IncompatibleMappingException } from './wait_for_reindex_task';
-
-export { waitForReindexTask } from './wait_for_reindex_task';
-
 import type { AliasNotFound, RemoveIndexNotAConcreteIndex } from './update_aliases';
+import type { IncompatibleMappingException } from './update_mappings';
 
 export type { AliasAction, UpdateAliasesParams } from './update_aliases';
 export { updateAliases } from './update_aliases';
@@ -90,8 +75,6 @@ export { cleanupUnknownAndExcluded } from './cleanup_unknown_and_excluded';
 export { waitForDeleteByQueryTask } from './wait_for_delete_by_query_task';
 
 export type { CreateIndexParams, ClusterShardLimitExceeded } from './create_index';
-
-export { synchronizeMigrators } from './synchronize_migrators';
 
 export { createIndex } from './create_index';
 
@@ -115,7 +98,6 @@ export {
 import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './check_cluster_routing_allocation';
 import type { ClusterShardLimitExceeded } from './create_index';
-import type { SynchronizationFailed } from './synchronize_migrators';
 import type { IndexMappingsIncomplete, TypesAdded, TypesChanged } from './check_target_mappings';
 
 export type {
@@ -147,10 +129,6 @@ export interface IndexNotFound {
 export interface OperationNotSupported {
   type: 'operation_not_supported';
   operationName: string;
-}
-
-export interface WaitForReindexTaskFailure {
-  readonly cause: { type: string; reason: string };
 }
 
 export interface TargetIndexHadWriteBlock {
@@ -200,7 +178,6 @@ export interface ActionErrorTypeMap {
   index_not_yellow_timeout: IndexNotYellowTimeout;
   cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
   es_response_too_large: EsResponseTooLargeError;
-  synchronization_failed: SynchronizationFailed;
   index_mappings_incomplete: IndexMappingsIncomplete;
   types_changed: TypesChanged;
   types_added: TypesAdded;

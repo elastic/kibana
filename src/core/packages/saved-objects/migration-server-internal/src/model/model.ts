@@ -33,9 +33,6 @@ import {
 } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
-  addExcludedTypesToBoolQuery,
-  addMustClausesToBoolQuery,
-  addMustNotClausesToBoolQuery,
   getAliases,
   getMigrationType,
   indexBelongsToLaterVersion,
@@ -48,10 +45,9 @@ import {
   increaseBatchSize,
   hasLaterVersionAlias,
   aliasVersion,
-  REINDEX_TEMP_SUFFIX,
   getPrepareCompatibleMigrationStateProperties,
 } from './helpers';
-import { buildTempIndexMap, createBatches } from './create_batches';
+import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
 import {
   CLUSTER_SHARD_LIMIT_EXCEEDED_REASON,
@@ -69,7 +65,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   let stateP: State = currentState;
   let logs: MigrationLog[] = stateP.logs;
-  let excludeOnUpgradeQuery = stateP.excludeOnUpgradeQuery;
 
   // Handle retryable_es_client_errors. Other left values need to be handled
   // by the control state specific code below.
@@ -198,75 +193,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         sourceIndexMappings: postInitState.sourceIndexMappings as Option.Some<IndexMapping>,
         targetIndex: postInitState.sourceIndex.value, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
       };
-    } else if (indices[stateP.legacyIndex] != null) {
-      // Migrate from a legacy index
-
-      // If the user used default index names we can narrow the version
-      // number we use when creating a backup index. This is purely to help
-      // users more easily identify how "old" and index is so that they can
-      // decide if it's safe to delete these rollback backups. Because
-      // backups are kept for rollback, a version number is more useful than
-      // a date.
-      let legacyVersion = '';
-      if (stateP.indexPrefix === '.kibana') {
-        legacyVersion = 'pre6.5.0';
-      } else if (stateP.indexPrefix === '.kibana_task_manager') {
-        legacyVersion = 'pre7.4.0';
-      } else {
-        legacyVersion = 'pre' + stateP.kibanaVersion;
-      }
-
-      const legacyReindexTarget = `${stateP.indexPrefix}_${legacyVersion}_001`;
-
-      return {
-        ...stateP,
-        ...postInitState,
-        controlState: 'LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION',
-        sourceIndex: Option.some(legacyReindexTarget) as Option.Some<string>,
-        sourceIndexMappings: Option.some(
-          indices[stateP.legacyIndex].mappings
-        ) as Option.Some<IndexMapping>,
-        targetIndex: newVersionTarget,
-        legacyPreMigrationDoneActions: [
-          { remove_index: { index: stateP.legacyIndex } },
-          {
-            add: {
-              index: legacyReindexTarget,
-              alias: stateP.currentAlias,
-            },
-          },
-        ],
-        versionIndexReadyActions: Option.some<AliasAction[]>([
-          {
-            remove: {
-              index: legacyReindexTarget,
-              alias: stateP.currentAlias,
-              must_exist: true,
-            },
-          },
-          { add: { index: newVersionTarget, alias: stateP.currentAlias } },
-          { add: { index: newVersionTarget, alias: stateP.versionAlias } },
-          { remove_index: { index: stateP.tempIndex } },
-        ]),
-      };
-    } else if (
-      // if we must relocate documents to this migrator's index, but the index does NOT yet exist:
-      // this migrator must create a temporary index and synchronize with other migrators
-      // this is a similar flow to the reindex one, but this migrator will not reindexing anything
-      stateP.mustRelocateDocuments
-    ) {
-      return {
-        ...stateP,
-        ...postInitState,
-        controlState: 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION',
-        sourceIndex: Option.none as Option.None,
-        targetIndex: newVersionTarget,
-        versionIndexReadyActions: Option.some([
-          { add: { index: newVersionTarget, alias: stateP.currentAlias } },
-          { add: { index: newVersionTarget, alias: stateP.versionAlias } },
-          { remove_index: { index: stateP.tempIndex } },
-        ]),
-      };
     } else {
       // no need to copy anything over from other indices, we can start with a clean, empty index
       return {
@@ -287,22 +213,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         controlState: 'CREATE_NEW_TARGET',
-      };
-    } else {
-      const left = res.left;
-      if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
-        const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
-        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    }
-  } else if (stateP.controlState === 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'CREATE_REINDEX_TEMP',
       };
     } else {
       const left = res.left;
@@ -349,182 +259,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ],
       };
     }
-  } else if (stateP.controlState === 'LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'LEGACY_SET_WRITE_BLOCK',
-      };
-    } else {
-      const left = res.left;
-      if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
-        const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
-        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    }
-  } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    // If the write block is successfully in place
-    if (Either.isRight(res)) {
-      return { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
-    } else if (Either.isLeft(res)) {
-      // If the write block failed because the index doesn't exist, it means
-      // another instance already completed the legacy pre-migration. Proceed
-      // to the next step.
-      const left = res.left;
-      if (isTypeof(left, 'index_not_found_exception')) {
-        return { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    } else {
-      throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'LEGACY_CREATE_REINDEX_TARGET') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isLeft(res)) {
-      const left = res.left;
-      if (isTypeof(left, 'index_not_green_timeout')) {
-        // `index_not_green_timeout` for the LEGACY_CREATE_REINDEX_TARGET source index:
-        // A yellow status timeout could theoretically be temporary for a busy cluster
-        // that takes a long time to allocate the primary and we retry the action to see if
-        // we get a response.
-        // If the cluster hit the low watermark for disk usage the LEGACY_CREATE_REINDEX_TARGET action will
-        // continue to timeout and eventually lead to a failed migration.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
-        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
-      } else if (isTypeof(left, 'cluster_shard_limit_exceeded')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
-        };
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    } else if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'LEGACY_REINDEX',
-      };
-    } else {
-      // If the createIndex action receives an 'resource_already_exists_exception'
-      // it will wait until the index status turns green so we don't have any
-      // left responses to handle here.
-      throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'LEGACY_REINDEX') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK',
-        legacyReindexTaskId: res.right.taskId,
-      };
-    } else {
-      throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'LEGACY_REINDEX_WAIT_FOR_TASK') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'LEGACY_DELETE',
-      };
-    } else {
-      const left = res.left;
-      if (
-        (isTypeof(left, 'index_not_found_exception') && left.index === stateP.legacyIndex) ||
-        isTypeof(left, 'target_index_had_write_block')
-      ) {
-        // index_not_found_exception for the LEGACY_REINDEX source index:
-        // another instance already complete the LEGACY_DELETE step.
-        //
-        // target_index_had_write_block: another instance already completed the
-        // SET_SOURCE_WRITE_BLOCK step.
-        //
-        // If we detect that another instance has already completed a step, we
-        // can technically skip ahead in the process until after the completed
-        // step. However, by not skipping ahead we limit branches in the
-        // control state progression and simplify the implementation.
-        return { ...stateP, controlState: 'LEGACY_DELETE' };
-      } else if (isTypeof(left, 'wait_for_task_completion_timeout')) {
-        // After waiting for the specified timeout, the task has not yet
-        // completed. Retry this step to see if the task has completed after an
-        // exponential delay. We will basically keep polling forever until the
-        // Elasticsearch task succeeds or fails.
-        return delayRetryState(stateP, left.message, Number.MAX_SAFE_INTEGER);
-      } else if (
-        isTypeof(left, 'index_not_found_exception') ||
-        isTypeof(left, 'incompatible_mapping_exception')
-      ) {
-        // We don't handle the following errors as the algorithm will never
-        // run into these during the LEGACY_REINDEX_WAIT_FOR_TASK step:
-        //  - index_not_found_exception for the LEGACY_REINDEX target index
-        //  - incompatible_mapping_exception
-        throwBadResponse(stateP, left as never);
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    }
-  } else if (stateP.controlState === 'LEGACY_DELETE') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
-    } else if (Either.isLeft(res)) {
-      const left = res.left;
-      if (
-        isTypeof(left, 'remove_index_not_a_concrete_index') ||
-        (isTypeof(left, 'index_not_found_exception') && left.index === stateP.legacyIndex)
-      ) {
-        // index_not_found_exception, another Kibana instance already
-        // deleted the legacy index
-        //
-        // remove_index_not_a_concrete_index, another Kibana instance already
-        // deleted the legacy index and created a .kibana alias
-        //
-        // If we detect that another instance has already completed a step, we
-        // can technically skip ahead in the process until after the completed
-        // step. However, by not skipping ahead we limit branches in the
-        // control state progression and simplify the implementation.
-        return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
-      } else if (
-        isTypeof(left, 'index_not_found_exception') ||
-        isTypeof(left, 'alias_not_found_exception')
-      ) {
-        // We don't handle the following errors as the migration algorithm
-        // will never cause them to occur:
-        // - alias_not_found_exception we're not using must_exist
-        // - index_not_found_exception for source index into which we reindex
-        //   the legacy index
-        throwBadResponse(stateP, left as never);
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    } else {
-      throwBadResponse(stateP, res);
-    }
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (stateP.mustRelocateDocuments) {
-        // this migrator's index must dispatch documents to other indices,
-        // and/or it must receive documents from other indices
-        // we must reindex and synchronize with other migrators
-        return {
-          ...stateP,
-          controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
-        };
-      } else {
-        // this migrator is not involved in a relocation, we can proceed with the standard flow
-        return {
-          ...stateP,
-          controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
-        };
-      }
+      return {
+        ...stateP,
+        controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+      };
     } else if (Either.isLeft(res)) {
       const left = res.left;
       if (isTypeof(left, 'index_not_yellow_timeout')) {
@@ -561,7 +302,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       case MigrationType.Incompatible:
         return {
           ...stateP,
-          controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
+          controlState: 'FATAL',
+          reason:
+            'Incompatible mappings detected. This code path should be unreachable in a supported upgrade path. Please contact Elastic Support.',
         };
       case MigrationType.Unnecessary:
         return {
@@ -730,562 +473,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
     }
   } else if (stateP.controlState === 'REFRESH_SOURCE') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-      };
-    } else {
-      throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-      };
-    } else {
-      const left = res.left;
-      if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
-        const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
-        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    }
-  } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-
-    if (isTypeof(res.right, 'unknown_docs_found')) {
-      if (!stateP.discardUnknownObjects) {
-        const reason = extractUnknownDocFailureReason(
-          stateP.migrationDocLinks.resolveMigrationFailures,
-          res.right.unknownDocs
-        );
-
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason,
-          logs: [
-            ...logs,
-            {
-              level: 'error',
-              message: reason,
-            },
-          ],
-        };
-      }
-
-      // at this point, users have configured kibana to discard unknown objects
-      // thus, we can ignore unknown documents and proceed with the migration
-      logs = [
-        ...stateP.logs,
-        { level: 'warning', message: extractDiscardedUnknownDocs(res.right.unknownDocs) },
-      ];
-
-      const unknownTypes = [...new Set(res.right.unknownDocs.map(({ type }) => type))];
-
-      excludeOnUpgradeQuery = addExcludedTypesToBoolQuery(
-        unknownTypes,
-        stateP.excludeOnUpgradeQuery?.bool
-      );
-
-      excludeOnUpgradeQuery = addMustClausesToBoolQuery(
-        [{ exists: { field: 'type' } }],
-        excludeOnUpgradeQuery?.bool
-      );
-    }
-
-    const source = stateP.sourceIndex;
-    const target = stateP.versionIndex;
-    return {
-      ...stateP,
-      controlState: 'SET_SOURCE_WRITE_BLOCK',
-      logs,
-      excludeOnUpgradeQuery,
-      sourceIndex: source,
-      targetIndex: target,
-      versionIndexReadyActions: Option.some<AliasAction[]>([
-        { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
-        { add: { index: target, alias: stateP.currentAlias } },
-        { add: { index: target, alias: stateP.versionAlias } },
-        { remove_index: { index: stateP.tempIndex } },
-      ]),
-    };
-  } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      // If the write block is successfully in place, proceed to the next step.
-      return {
-        ...stateP,
-        controlState: 'CALCULATE_EXCLUDE_FILTERS',
-      };
-    } else if (isTypeof(res.left, 'source_equals_target')) {
-      // As part of a reindex-migration, we wanted to block the source index to prevent updates
-      // However, this migrator's source index matches the target index.
-      // Thus, another instance's migrator is ahead of us. We skip the clone steps and continue the flow
-      return {
-        ...stateP,
-        controlState: 'REFRESH_TARGET',
-      };
-    } else if (isTypeof(res.left, 'index_not_found_exception')) {
-      // We don't handle the following errors as the migration algorithm
-      // will never cause them to occur:
-      // - index_not_found_exception
-      throwBadResponse(stateP, res.left as never);
-    } else {
-      throwBadResponse(stateP, res.left);
-    }
-  } else if (stateP.controlState === 'CALCULATE_EXCLUDE_FILTERS') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-
-    if (Either.isRight(res)) {
-      excludeOnUpgradeQuery = addMustNotClausesToBoolQuery(
-        res.right.filterClauses,
-        stateP.excludeOnUpgradeQuery?.bool
-      );
-
-      return {
-        ...stateP,
-        controlState: 'CREATE_REINDEX_TEMP',
-        excludeOnUpgradeQuery,
-        logs: [
-          ...stateP.logs,
-          ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({
-            level: 'warning' as const,
-            message: `Ignoring excludeOnUpgrade hook on type [${soType}] that failed with error: "${error.toString()}"`,
-          })),
-        ],
-      };
-    } else {
-      throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'CREATE_REINDEX_TEMP') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      if (stateP.mustRelocateDocuments) {
-        // we are reindexing, and this migrator's index is involved in document relocations
-        return { ...stateP, controlState: 'READY_TO_REINDEX_SYNC' };
-      } else {
-        // we are reindexing but this migrator's index is not involved in any document relocation
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT',
-          sourceIndex: stateP.sourceIndex as Option.Some<string>,
-          sourceIndexMappings: stateP.sourceIndexMappings as Option.Some<IndexMapping>,
-        };
-      }
-    } else if (Either.isLeft(res)) {
-      const left = res.left;
-      if (isTypeof(left, 'index_not_green_timeout')) {
-        // `index_not_green_timeout` for the CREATE_REINDEX_TEMP target temp index:
-        // The index status did not go green within the specified timeout period.
-        // A green status timeout could theoretically be temporary for a busy cluster.
-        //
-        // If there is a problem CREATE_REINDEX_TEMP action will
-        // continue to timeout and eventually lead to a failed migration.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
-        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
-      } else if (isTypeof(left, 'cluster_shard_limit_exceeded')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
-        };
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    } else {
-      // If the createIndex action receives an 'resource_already_exists_exception'
-      // it will wait until the index status turns green so we don't have any
-      // left responses to handle here.
-      throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'READY_TO_REINDEX_SYNC') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      if (Option.isSome(stateP.sourceIndex) && Option.isSome(stateP.sourceIndexMappings)) {
-        // this migrator's source index exist, reindex its entries
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT',
-          sourceIndex: stateP.sourceIndex as Option.Some<string>,
-          sourceIndexMappings: stateP.sourceIndexMappings as Option.Some<IndexMapping>,
-        };
-      } else {
-        // this migrator's source index did NOT exist
-        // this migrator does not need to reindex anything (others might need to)
-        return { ...stateP, controlState: 'DONE_REINDEXING_SYNC' };
-      }
-    } else if (Either.isLeft(res)) {
-      const left = res.left;
-
-      if (isTypeof(left, 'synchronization_failed')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: 'An error occurred whilst waiting for other migrators to get to this step.',
-          throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
-        };
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    } else {
-      throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-        sourceIndexPitId: res.right.pitId,
-        lastHitSortValue: undefined,
-        // placeholders to collect document transform problems
-        corruptDocumentIds: [],
-        transformErrors: [],
-        progress: createInitialProgress(),
-        logs: [
-          ...logs,
-          {
-            level: 'info',
-            message: `REINDEX_SOURCE_TO_TEMP_OPEN_PIT PitId:${res.right.pitId}`,
-          },
-        ],
-      };
-    } else {
-      throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_READ') {
-    // we carry through any failures we've seen with transforming documents on state
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      const sourceIndexPitId = res.right.pitId;
-      const progress = setProgressTotal(stateP.progress, res.right.totalHits);
-      logs = logProgress(stateP.logs, progress);
-      if (res.right.outdatedDocuments.length > 0) {
-        return {
-          ...stateP,
-          sourceIndexPitId,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM',
-          outdatedDocuments: res.right.outdatedDocuments,
-          lastHitSortValue: res.right.lastHitSortValue,
-          progress,
-          logs,
-          // We succeeded in reading this batch, so increase the batch size for the next request.
-          batchSize: increaseBatchSize(stateP),
-        };
-      } else {
-        // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
-        if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
-          if (!stateP.discardCorruptObjects) {
-            const transformFailureReason = extractTransformFailuresReason(
-              stateP.migrationDocLinks.resolveMigrationFailures,
-              stateP.corruptDocumentIds,
-              stateP.transformErrors
-            );
-            return {
-              ...stateP,
-              controlState: 'FATAL',
-              reason: transformFailureReason,
-            };
-          }
-
-          // at this point, users have configured kibana to discard corrupt objects
-          // thus, we can ignore corrupt documents and transform errors and proceed with the migration
-          logs = [
-            ...stateP.logs,
-            {
-              level: 'warning',
-              message: extractDiscardedCorruptDocs(
-                stateP.corruptDocumentIds,
-                stateP.transformErrors
-              ),
-            },
-          ];
-        }
-
-        // we don't have any more outdated documents and either
-        //   we haven't encountered any document transformation issues.
-        //   or the user chose to ignore them
-        // Close the PIT search and carry on with the happy path.
-        return {
-          ...stateP,
-          sourceIndexPitId,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
-          logs,
-        };
-      }
-    } else {
-      const left = res.left;
-      if (isTypeof(left, 'es_response_too_large')) {
-        if (stateP.batchSize === 1) {
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: `After reducing the read batch size to a single document, the Elasticsearch response content length was ${left.contentLength}bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again.`,
-          };
-        } else {
-          const batchSize = Math.max(Math.floor(stateP.batchSize / 2), 1);
-          return {
-            ...stateP,
-            batchSize,
-            controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-            logs: [
-              ...stateP.logs,
-              {
-                level: 'warning',
-                message: `Read a batch with a response content length of ${left.contentLength} bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to ${batchSize}.`,
-              },
-            ],
-          };
-        }
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      const { sourceIndexPitId, ...state } = stateP;
-
-      if (stateP.mustRelocateDocuments) {
-        return {
-          ...state,
-          controlState: 'DONE_REINDEXING_SYNC',
-        };
-      } else {
-        return {
-          ...stateP,
-          controlState: 'SET_TEMP_WRITE_BLOCK',
-          sourceIndex: stateP.sourceIndex as Option.Some<string>,
-          sourceIndexMappings: Option.none,
-        };
-      }
-    } else {
-      throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'DONE_REINDEXING_SYNC') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'SET_TEMP_WRITE_BLOCK',
-        sourceIndex: stateP.sourceIndex as Option.Some<string>,
-        sourceIndexMappings: Option.none,
-      };
-    } else if (Either.isLeft(res)) {
-      const left = res.left;
-
-      if (isTypeof(left, 'synchronization_failed')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: 'An error occurred whilst waiting for other migrators to get to this step.',
-          throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
-        };
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    } else {
-      throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_TRANSFORM') {
-    // We follow a similar control flow as for
-    // outdated document search -> outdated document transform -> transform documents bulk index
-    // collecting issues along the way rather than failing
-    // REINDEX_SOURCE_TO_TEMP_TRANSFORM handles the document transforms
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-
-    // Increment the processed documents, no matter what the results are.
-    // Otherwise the progress might look off when there are errors.
-    const progress = incrementProcessedProgress(stateP.progress, stateP.outdatedDocuments.length);
-
-    if (
-      Either.isRight(res) ||
-      (isTypeof(res.left, 'documents_transform_failed') && stateP.discardCorruptObjects)
-    ) {
-      if (
-        (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) ||
-        stateP.discardCorruptObjects
-      ) {
-        const documents = Either.isRight(res) ? res.right.processedDocs : res.left.processedDocs;
-        const batches = createBatches({
-          documents,
-          maxBatchSizeBytes: stateP.maxBatchSizeBytes,
-          typeIndexMap: buildTempIndexMap(stateP.indexTypesMap, stateP.kibanaVersion),
-        });
-        if (Either.isRight(batches)) {
-          let corruptDocumentIds = stateP.corruptDocumentIds;
-          let transformErrors = stateP.transformErrors;
-
-          if (Either.isLeft(res)) {
-            corruptDocumentIds = [...stateP.corruptDocumentIds, ...res.left.corruptDocumentIds];
-            transformErrors = [...stateP.transformErrors, ...res.left.transformErrors];
-          }
-
-          return {
-            ...stateP,
-            corruptDocumentIds,
-            transformErrors,
-            controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK', // handles the actual bulk indexing into temp index
-            bulkOperationBatches: batches.right,
-            currentBatch: 0,
-            progress,
-          };
-        } else {
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
-              _id: batches.left.documentId,
-              docSizeBytes: batches.left.docSizeBytes,
-              maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
-            }),
-          };
-        }
-      } else {
-        // we don't have any transform issues with the current batch of outdated docs but
-        // we have carried through previous transformation issues.
-        // The migration will ultimately fail but before we do that, continue to
-        // search through remaining docs for more issues and pass the previous failures along on state
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-          progress,
-        };
-      }
-    } else {
-      // we have failures from the current batch of documents and add them to the lists
-      const left = res.left;
-      if (isTypeof(left, 'documents_transform_failed')) {
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-          corruptDocumentIds: [...stateP.corruptDocumentIds, ...left.corruptDocumentIds],
-          transformErrors: [...stateP.transformErrors, ...left.transformErrors],
-          progress,
-        };
-      } else {
-        // should never happen
-        throwBadResponse(stateP, left);
-      }
-    }
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      if (stateP.currentBatch + 1 < stateP.bulkOperationBatches.length) {
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
-          currentBatch: stateP.currentBatch + 1,
-        };
-      } else {
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-        };
-      }
-    } else {
-      if (
-        isTypeof(res.left, 'target_index_had_write_block') ||
-        isTypeof(res.left, 'index_not_found_exception')
-      ) {
-        // When the temp index has a write block or has been deleted another
-        // instance already completed this step. Close the PIT search and carry
-        // on with the happy path.
-        return {
-          ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
-        };
-      } else if (isTypeof(res.left, 'request_entity_too_large_exception')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
-        };
-      } else if (isTypeof(res.left, 'unavailable_shards_exception')) {
-        // Not all shard copies are active. Retry indefinitely with exponential
-        // backoff until shards become available, matching wait_for_task_completion_timeout.
-        return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
-      }
-      throwBadResponse(stateP, res.left);
-    }
-  } else if (stateP.controlState === 'SET_TEMP_WRITE_BLOCK') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'CLONE_TEMP_TO_TARGET',
-      };
-    } else {
-      const left = res.left;
-      if (isTypeof(left, 'index_not_found_exception')) {
-        // index_not_found_exception:
-        //   another instance completed the MARK_VERSION_INDEX_READY and
-        //   removed the temp index.
-        //
-        // For simplicity we continue linearly through the next steps even if
-        // we know another instance already completed these.
-        return {
-          ...stateP,
-          controlState: 'CLONE_TEMP_TO_TARGET',
-        };
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    }
-  } else if (stateP.controlState === 'CLONE_TEMP_TO_TARGET') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'REFRESH_TARGET',
-      };
-    } else {
-      const left = res.left;
-      if (isTypeof(left, 'index_not_found_exception')) {
-        // index_not_found_exception means another instance already completed
-        // the MARK_VERSION_INDEX_READY step and removed the temp index
-        // We still perform the REFRESH_TARGET, OUTDATED_DOCUMENTS_* and
-        // UPDATE_TARGET_MAPPINGS_PROPERTIES steps since we might have plugins enabled
-        // which the other instances don't.
-        return {
-          ...stateP,
-          controlState: 'REFRESH_TARGET',
-        };
-      } else if (isTypeof(left, 'index_not_green_timeout')) {
-        // `index_not_green_timeout` for the CLONE_TEMP_TO_TARGET source -> target index:
-        // The target index status did not go green within the specified timeout period.
-        // The cluster could just be busy and we retry the action.
-
-        // Once we run out of retries, the migration fails.
-        // Identifying the cause requires inspecting the ouput of the
-        // `_cluster/allocation/explain?index=${targetIndex}` API.
-        // Unless the root cause is identified and addressed, the request will
-        // continue to timeout and eventually lead to a failed migration.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
-        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
-      } else if (isTypeof(left, 'cluster_shard_limit_exceeded')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
-        };
-      } else if (isTypeof(left, 'operation_not_supported')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: `Action failed due to unsupported operation: ${left.operationName}`,
-        };
-      } else {
-        throwBadResponse(stateP, left);
-      }
-    }
-  } else if (stateP.controlState === 'REFRESH_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
@@ -1655,9 +842,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // index.
       return {
         ...stateP,
-        controlState: stateP.mustRelocateDocuments
-          ? 'MARK_VERSION_INDEX_READY_SYNC'
-          : 'MARK_VERSION_INDEX_READY',
+        controlState: 'MARK_VERSION_INDEX_READY',
         versionIndexReadyActions: stateP.versionIndexReadyActions,
       };
     } else {
@@ -1712,10 +897,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // left responses to handle here.
       throwBadResponse(stateP, res);
     }
-  } else if (
-    stateP.controlState === 'MARK_VERSION_INDEX_READY' ||
-    stateP.controlState === 'MARK_VERSION_INDEX_READY_SYNC'
-  ) {
+  } else if (stateP.controlState === 'MARK_VERSION_INDEX_READY') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return { ...stateP, controlState: 'DONE' };
@@ -1728,30 +910,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // migration from the same source.
         return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
       } else if (isTypeof(left, 'index_not_found_exception')) {
-        if (left.index.endsWith(REINDEX_TEMP_SUFFIX)) {
-          // another instance has already completed the migration and deleted
-          // the temporary index
-          return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
-        } else if (isTypeof(left, 'index_not_found_exception')) {
-          // The migration algorithm will never cause a
-          // index_not_found_exception for an index other than the temporary
-          // index handled above.
-          throwBadResponse(stateP, left as never);
-        } else {
-          throwBadResponse(stateP, left);
-        }
+        // The migration algorithm will never cause an index_not_found_exception here.
+        throwBadResponse(stateP, left as never);
       } else if (isTypeof(left, 'remove_index_not_a_concrete_index')) {
         // We don't handle this error as the migration algorithm will never
         // cause it to occur (this error is only relevant to the LEGACY_DELETE
         // step).
         throwBadResponse(stateP, left as never);
-      } else if (isTypeof(left, 'synchronization_failed')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: 'An error occurred whilst waiting for other migrators to get to this step.',
-          throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
-        };
       } else {
         throwBadResponse(stateP, left);
       }
