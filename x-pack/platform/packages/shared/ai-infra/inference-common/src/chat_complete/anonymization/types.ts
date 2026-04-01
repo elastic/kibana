@@ -73,7 +73,6 @@ export interface AnonymizationOutput {
   messages: Message[];
   anonymizations: Anonymization[];
   system?: string;
-  replacementsId?: string;
 }
 
 export interface DeanonymizationOutput {
@@ -81,15 +80,6 @@ export interface DeanonymizationOutput {
 }
 
 export type DeanonymizedMessage = Message & { deanonymizations: Deanonymization[] };
-
-/**
- * Anonymization metadata attached to inference responses and events.
- */
-export interface AnonymizationResponseMetadata {
-  anonymization?: {
-    replacementsId?: string;
-  };
-}
 
 /**
  * Deanonymization data for a single message, pairing the deanonymized message

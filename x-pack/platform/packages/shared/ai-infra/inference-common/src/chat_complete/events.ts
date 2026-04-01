@@ -6,7 +6,7 @@
  */
 
 import type { InferenceTaskEventBase } from '../inference_task';
-import type { AnonymizationResponseMetadata, DeanonymizedMessageData } from './anonymization';
+import type { DeanonymizedMessageData } from './anonymization';
 import type { ToolOptions } from './tools';
 import type { ToolCallOfToolOptions } from './tools_of';
 
@@ -43,10 +43,6 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        * Optional deanonymized output metadata
        */
       deanonymized_output?: DeanonymizedMessageData;
-      /**
-       * Optional metadata attached by inference runtime.
-       */
-      metadata?: AnonymizationResponseMetadata;
       /**
        * Tool calls from the LLM
        */
@@ -107,10 +103,6 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      * Optional deanonymized output metadata
      */
     deanonymized_output?: DeanonymizedMessageData;
-    /**
-     * Optional metadata attached by inference runtime.
-     */
-    metadata?: AnonymizationResponseMetadata;
   }
 >;
 

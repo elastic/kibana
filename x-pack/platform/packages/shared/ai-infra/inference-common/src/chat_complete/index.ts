@@ -62,12 +62,7 @@ export type {
   ToolCallsOfToolOptions,
 } from './tools_of';
 
-export type {
-  ChatCompleteMetadata,
-  ConnectorTelemetryMetadata,
-  ChatCompleteAnonymizationMetadata,
-  ChatCompleteAnonymizationTarget,
-} from './metadata';
+export type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from './metadata';
 export {
   isChatCompletionChunkEvent,
   isChatCompletionEvent,
@@ -98,9 +93,12 @@ export type {
   RegexAnonymizationRule,
   NamedEntityRecognitionRule,
   AnonymizationSettings,
-  AnonymizationResponseMetadata,
   DeanonymizedMessageData,
+  EffectiveFieldPolicy,
+  EffectivePolicy,
 } from './anonymization';
+
+export { NER_MODEL_ID } from './anonymization';
 
 export type {
   InferenceCallbacks,

@@ -17,6 +17,9 @@ export type {
   NamedEntityRecognitionRule,
   AnonymizationSettings,
   AnonymizationEntityClass,
-  AnonymizationResponseMetadata,
   DeanonymizedMessageData,
 } from './types';
+
+export type { EffectiveFieldPolicy, EffectivePolicy } from './effective_policy_types';
+
+export { NER_MODEL_ID } from './constants';
