@@ -36,7 +36,9 @@ export const useUpdateCases = () => {
       queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
 
       const customToast = getUpdateSuccessToast?.({
-        patchCaseStats: data?.map((updatedCase) => updatedCase.patchCaseStats),
+        patchCaseStats: data
+          ?.map((updatedCase) => updatedCase.patchCaseStats)
+          .filter((stats): stats is PatchCaseStats => stats !== undefined),
       });
 
       if (customToast) {
