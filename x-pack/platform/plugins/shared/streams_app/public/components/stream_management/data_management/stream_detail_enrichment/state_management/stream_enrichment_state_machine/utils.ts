@@ -345,10 +345,23 @@ export function reorderStepsByDragDrop(
   // Calculate insert position
   let insertIndex: number;
 
-  if (operation === 'inside' || operation === 'inside-else') {
-    // Insert as first child of target
-    // Find where target's children start (right after target)
+  if (operation === 'inside') {
+    // Insert as first child of target (if branch)
     insertIndex = targetIndexInFiltered + 1;
+  } else if (operation === 'inside-else') {
+    // Insert into the else branch - after all existing if-branch descendants
+    const filteredSteps = withoutSource.map((ref) => ref.getSnapshot().context.step);
+    const directChildren = filteredSteps.filter((s) => s.parentId === targetStepId);
+    const lastIfChild = [...directChildren].reverse().find((s) => s.branch !== 'else');
+    if (lastIfChild) {
+      const descendants = collectDescendantStepIds(filteredSteps, lastIfChild.customIdentifier);
+      const lastDescId = Array.from(descendants).at(-1) ?? lastIfChild.customIdentifier;
+      const idx = withoutSource.findIndex((ref) => ref.id === lastDescId);
+      insertIndex = idx + 1;
+    } else {
+      // No if-branch children, insert right after parent
+      insertIndex = targetIndexInFiltered + 1;
+    }
   } else if (operation === 'before') {
     // Insert before target
     insertIndex = targetIndexInFiltered;
