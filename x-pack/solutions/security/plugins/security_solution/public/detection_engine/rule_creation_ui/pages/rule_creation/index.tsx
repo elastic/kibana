@@ -212,9 +212,6 @@ const CreateRulePageComponent: React.FC<{
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
-  const togglePanelFnRef = useRef<
-    ((panelId: string, options: { direction: 'left' | 'right' }) => void) | undefined
-  >();
   const [prevRuleType, setPrevRuleType] = useState<string>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
 
@@ -913,11 +910,6 @@ const CreateRulePageComponent: React.FC<{
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
             collapseFn.current = () => togglePanel?.('preview', { direction: 'left' });
-            if (togglePanel) {
-              togglePanelFnRef.current = (id: string, options: { direction: 'left' | 'right' }) => {
-                togglePanel(id, options);
-              };
-            }
             return (
               <>
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
