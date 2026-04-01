@@ -174,29 +174,12 @@ export const DashboardUnsavedListing = ({
     const existingDashboardsWithUnsavedChanges = unsavedDashboardIds.filter(
       (id) => id !== DASHBOARD_PANELS_UNSAVED_ID
     );
-<<<<<<< HEAD
     getDashboardContentManagementService()
       .findDashboards.findByIds(existingDashboardsWithUnsavedChanges)
       .then((results) => {
         const dashboardMap = {};
         if (canceled) {
           return;
-=======
-    findService.findByIds(existingDashboardsWithUnsavedChanges).then((results) => {
-      const dashboardMap = {};
-      if (canceled) {
-        return;
-      }
-      let hasError = false;
-      const newItems = results.reduce((map, result) => {
-        if (result.status === 'error') {
-          hasError = true;
-          if (result.error && result.notFound) {
-            // Save object not found error
-            getDashboardBackupService().clearState(result.id);
-          }
-          return map;
->>>>>>> 523f0637b949 ([Dashboards] Fix backups service (#257762))
         }
         let hasError = false;
         const newItems = results.reduce((map, result) => {
@@ -204,7 +187,7 @@ export const DashboardUnsavedListing = ({
             hasError = true;
             if (result.error.statusCode === 404) {
               // Save object not found error
-              dashboardBackupService.clearState(result.id);
+              getDashboardBackupService().clearState(result.id);
             }
             return map;
           }
