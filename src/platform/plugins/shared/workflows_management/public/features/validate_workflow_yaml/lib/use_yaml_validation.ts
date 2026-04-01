@@ -122,7 +122,7 @@ export function useYamlValidation(
       // so that connector-id, step-name, liquid-template, custom-property, and
       // workflow-inputs validation still provide feedback.
       const results: YamlValidationResult[] = [
-        ...validateStepNameUniqueness(yamlDocument),
+        ...(lineCounter ? validateStepNameUniqueness(yamlDocument, lineCounter) : []),
         ...validateLiquidTemplate(model.getValue(), yamlDocument),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
