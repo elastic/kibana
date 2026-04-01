@@ -12,7 +12,8 @@ import {
   formatLeadForResponse,
   type FormattedLead,
 } from '../services/lead_generation_service';
-import { entityRecordToLeadEntity } from '../entity_conversion';
+import { entityRecordToLeadEntity, fetchAllLeadEntities } from '../entity_conversion';
+import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { Lead } from '../types';
 
 const createMockLead = (overrides: Partial<Lead> = {}): Lead => ({
@@ -137,7 +138,7 @@ describe('lead generation helpers', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: { bool: { must_not: [{ term: { executionId: 'exec-1' } }] } },
+          query: { bool: { must_not: [{ term: { 'execution_uuid.keyword': 'exec-1' } }] } },
           refresh: true,
           conflicts: 'proceed',
           ignore_unavailable: true,
@@ -215,7 +216,23 @@ describe('lead generation helpers', () => {
   });
 
   describe('entityRecordToLeadEntity', () => {
-    it('prefers entity.type and uses entity.name', () => {
+    it('prefers EngineMetadata.Type over entity.type', () => {
+      const record = {
+        entity: {
+          id: 'euid-1',
+          name: 'alice',
+          type: 'user',
+          EngineMetadata: { Type: 'host' },
+        },
+      } as never;
+      const result = entityRecordToLeadEntity(record);
+
+      expect(result.type).toBe('host');
+      expect(result.name).toBe('alice');
+      expect(result.record).toBe(record);
+    });
+
+    it('falls back to entity.type when EngineMetadata.Type is absent', () => {
       const record = {
         entity: {
           id: 'euid-1',
@@ -227,7 +244,6 @@ describe('lead generation helpers', () => {
 
       expect(result.type).toBe('user');
       expect(result.name).toBe('alice');
-      expect(result.record).toBe(record);
     });
 
     it('falls back to entity.id for name when entity.name is missing', () => {
@@ -246,6 +262,76 @@ describe('lead generation helpers', () => {
 
       expect(result.type).toBe('unknown');
       expect(result.name).toBe('unknown');
+    });
+  });
+
+  describe('fetchAllLeadEntities', () => {
+    const makeEntity = (name: string) =>
+      ({ entity: { name, type: 'user', id: `euid-${name}` } } as never);
+
+    const createMockCRUDClient = (
+      pages: Array<{
+        entities: ReturnType<typeof makeEntity>[];
+        nextSearchAfter?: Array<string | number>;
+      }>
+    ): EntityStoreCRUDClient => {
+      let callIdx = 0;
+      return {
+        listEntities: jest.fn().mockImplementation(() => {
+          const page = pages[callIdx] ?? { entities: [], nextSearchAfter: undefined };
+          callIdx++;
+          return Promise.resolve(page);
+        }),
+      } as unknown as EntityStoreCRUDClient;
+    };
+
+    it('returns empty when no entities exist', async () => {
+      const client = createMockCRUDClient([{ entities: [] }]);
+      const result = await fetchAllLeadEntities(client);
+
+      expect(result).toEqual([]);
+      expect(client.listEntities).toHaveBeenCalledTimes(1);
+    });
+
+    it('fetches a single page of entities', async () => {
+      const client = createMockCRUDClient([{ entities: [makeEntity('alice'), makeEntity('bob')] }]);
+      const result = await fetchAllLeadEntities(client);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].name).toBe('alice');
+      expect(result[1].name).toBe('bob');
+    });
+
+    it('paginates through multiple pages using searchAfter', async () => {
+      const client = createMockCRUDClient([
+        { entities: [makeEntity('alice')], nextSearchAfter: ['cursor-1'] },
+        { entities: [makeEntity('bob')], nextSearchAfter: ['cursor-2'] },
+        { entities: [makeEntity('carol')] },
+      ]);
+      const result = await fetchAllLeadEntities(client);
+
+      expect(result).toHaveLength(3);
+      expect(result.map((e) => e.name)).toEqual(['alice', 'bob', 'carol']);
+      expect(client.listEntities).toHaveBeenCalledTimes(3);
+      expect(client.listEntities).toHaveBeenNthCalledWith(2, {
+        size: 1000,
+        searchAfter: ['cursor-1'],
+      });
+      expect(client.listEntities).toHaveBeenNthCalledWith(3, {
+        size: 1000,
+        searchAfter: ['cursor-2'],
+      });
+    });
+
+    it('converts entities to LeadEntity format', async () => {
+      const client = createMockCRUDClient([{ entities: [makeEntity('alice')] }]);
+      const result = await fetchAllLeadEntities(client);
+
+      expect(result[0]).toEqual({
+        record: expect.any(Object),
+        type: 'user',
+        name: 'alice',
+      });
     });
   });
 });

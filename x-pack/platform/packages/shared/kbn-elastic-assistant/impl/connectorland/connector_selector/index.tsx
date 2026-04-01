@@ -56,6 +56,8 @@ interface Props {
 export type AIConnector = ActionConnector & {
   // related to OpenAI connectors, ex: Azure OpenAI, OpenAI
   apiProvider?: OpenAiProviderType;
+  /** When true, this connector represents an Elastic-managed inference endpoint (EIS). */
+  isEis?: boolean;
 };
 
 interface GroupedConnectors {
@@ -63,10 +65,13 @@ interface GroupedConnectors {
   preConfiguredConnectors: ConnectorSelectableComponentProps['preConfiguredConnectors'];
 }
 
-const groupConnectors = (connectors: ActionConnector[] | undefined): GroupedConnectors =>
+const groupConnectors = (connectors: AIConnector[] | undefined): GroupedConnectors =>
   (connectors ?? []).reduce<GroupedConnectors>(
     (acc, connector) => {
-      const target = connector.isPreconfigured ? acc.preConfiguredConnectors : acc.customConnectors;
+      const target =
+        connector.isEis || connector.isPreconfigured
+          ? acc.preConfiguredConnectors
+          : acc.customConnectors;
       target.push({ label: connector.name, value: connector.id });
       return acc;
     },
