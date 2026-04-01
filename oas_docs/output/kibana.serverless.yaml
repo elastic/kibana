@@ -295,8 +295,19 @@ tags:
       description: Space overview
   - name: streams
     description: |
-      Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
+      Streams provide a unified data management layer for ingestion, routing, and processing. There are three stream types:
+      * **Wired** streams are managed by Kibana. They route documents to child streams based on
+        field conditions and support custom field mappings and processing steps.
+
+      * **Classic** streams map to existing Elasticsearch data streams. You can add processing
+        steps to classic streams without changing their underlying index template.
+
+      * **Query** streams are virtual aggregations backed by an ES|QL expression. They aggregate
+        data from multiple streams into a single logical view without duplicating documents.
     x-displayName: Streams
+    externalDocs:
+      description: Streams documentation
+      url: https://www.elastic.co/docs/solutions/observability/streams
   - name: system
     x-displayName: System
     description: |
@@ -60311,7 +60322,95 @@ paths:
                   properties: {}
                 - nullable: true
                 - {}
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listStreams:
+                  value:
+                    streams:
+                      - description: Root logs stream
+                        ingest:
+                          failure_store:
+                            inherit: {}
+                          lifecycle:
+                            inherit: {}
+                          processing:
+                            steps: []
+                            updated_at: '2025-01-10T08:00:00.000Z'
+                          settings: {}
+                          wired:
+                            fields:
+                              '@timestamp':
+                                type: date
+                              log.level:
+                                type: keyword
+                              message:
+                                type: match_only_text
+                            routing:
+                              - destination: logs.nginx
+                                status: enabled
+                                where:
+                                  eq: nginx
+                                  field: host.name
+                        name: logs
+                        type: wired
+                        updated_at: '2025-01-10T08:00:00.000Z'
+                      - description: Web server access logs, routed by severity
+                        ingest:
+                          failure_store:
+                            inherit: {}
+                          lifecycle:
+                            inherit: {}
+                          processing:
+                            steps: []
+                            updated_at: '2025-01-15T10:30:00.000Z'
+                          settings: {}
+                          wired:
+                            fields:
+                              host.name:
+                                type: keyword
+                              http.response.status_code:
+                                type: long
+                              message:
+                                type: match_only_text
+                            routing:
+                              - destination: logs.nginx.errors
+                                status: enabled
+                                where:
+                                  field: http.response.status_code
+                                  gte: 500
+                        name: logs.nginx
+                        type: wired
+                        updated_at: '2025-01-15T10:30:00.000Z'
+                      - description: Legacy application logs
+                        ingest:
+                          classic: {}
+                          failure_store:
+                            disabled: {}
+                          lifecycle:
+                            dsl:
+                              data_retention: 30d
+                          processing:
+                            steps:
+                              - action: grok
+                                from: message
+                                ignore_missing: true
+                                patterns:
+                                  - '%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message}'
+                            updated_at: '2024-12-01T09:00:00.000Z'
+                          settings: {}
+                        name: logs-myapp-default
+                        type: classic
+                        updated_at: '2024-12-01T09:00:00.000Z'
+                      - description: All error-level logs across every stream
+                        name: logs.errors
+                        query:
+                          esql: FROM logs* | WHERE log.level == "error"
+                          view: logs.errors-view
+                        type: query
+                        updated_at: '2025-01-20T14:00:00.000Z'
       summary: Get stream list
       tags:
         - streams
@@ -60498,7 +60597,70 @@ paths:
                   properties: {}
                 - nullable: true
                 - {}
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getWiredStream:
+                  value:
+                    dashboards: []
+                    data_stream_exists: true
+                    effective_failure_store:
+                      disabled: {}
+                      from: logs
+                    effective_lifecycle:
+                      dsl:
+                        data_retention: 7d
+                      from: logs
+                    effective_settings: {}
+                    inherited_fields:
+                      '@timestamp':
+                        from: logs
+                        type: date
+                      log.level:
+                        from: logs
+                        type: keyword
+                    privileges:
+                      create_snapshot_repository: false
+                      lifecycle: true
+                      manage: true
+                      manage_failure_store: true
+                      monitor: true
+                      read_failure_store: true
+                      simulate: true
+                      text_structure: true
+                      view_index_metadata: true
+                    queries: []
+                    rules: []
+                    stream:
+                      description: Web server access logs, routed by severity
+                      ingest:
+                        failure_store:
+                          inherit: {}
+                        lifecycle:
+                          inherit: {}
+                        processing:
+                          steps: []
+                          updated_at: '2025-01-15T10:30:00.000Z'
+                        settings: {}
+                        wired:
+                          fields:
+                            host.name:
+                              type: keyword
+                            http.response.status_code:
+                              type: long
+                            message:
+                              type: match_only_text
+                          routing:
+                            - destination: logs.nginx.errors
+                              status: enabled
+                              where:
+                                field: http.response.status_code
+                                gte: 500
+                      name: logs.nginx
+                      type: wired
+                      updated_at: '2025-01-15T10:30:00.000Z'
       summary: Get a stream
       tags:
         - streams
@@ -60532,6 +60694,71 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createQueryStream:
+                value:
+                  dashboards: []
+                  queries: []
+                  rules: []
+                  stream:
+                    description: All error-level logs across every stream
+                    query:
+                      esql: FROM logs* | WHERE log.level == "error"
+                      view: logs.errors-view
+                    type: query
+              createWiredStream:
+                value:
+                  dashboards: []
+                  queries: []
+                  rules: []
+                  stream:
+                    description: Web server access logs, routed by severity
+                    ingest:
+                      failure_store:
+                        inherit: {}
+                      lifecycle:
+                        inherit: {}
+                      processing:
+                        steps: []
+                      settings: {}
+                      wired:
+                        fields:
+                          host.name:
+                            type: keyword
+                          http.response.status_code:
+                            type: long
+                          message:
+                            type: match_only_text
+                        routing:
+                          - destination: logs.nginx.errors
+                            status: enabled
+                            where:
+                              field: http.response.status_code
+                              gte: 500
+                    type: wired
+              updateClassicStream:
+                value:
+                  dashboards: []
+                  queries: []
+                  rules: []
+                  stream:
+                    description: Legacy application logs managed as a classic data stream
+                    ingest:
+                      classic: {}
+                      failure_store:
+                        disabled: {}
+                      lifecycle:
+                        dsl:
+                          data_retention: 30d
+                      processing:
+                        steps:
+                          - action: grok
+                            from: message
+                            ignore_missing: true
+                            patterns:
+                              - '%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message}'
+                      settings: {}
+                    type: classic
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamUpsertRequest'
       responses: {}
@@ -60569,6 +60796,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              forkStream:
+                value:
+                  status: enabled
+                  stream:
+                    name: logs.nginx.errors
+                  where:
+                    eq: '500'
+                    field: http.response.status_code
             schema:
               additionalProperties: false
               type: object
@@ -60626,7 +60862,45 @@ paths:
                   properties: {}
                 - nullable: true
                 - {}
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getWiredIngest:
+                  value:
+                    ingest:
+                      failure_store:
+                        inherit: {}
+                      lifecycle:
+                        inherit: {}
+                      processing:
+                        steps:
+                          - action: grok
+                            from: message
+                            ignore_missing: false
+                            patterns:
+                              - '%{IPORHOST:client.ip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:@timestamp}\] "%{WORD:http.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}" %{NUMBER:http.response.status_code:int} (?:%{NUMBER:http.response.body.bytes:int}|-)'
+                        updated_at: '2025-01-15T10:30:00.000Z'
+                      settings: {}
+                      wired:
+                        fields:
+                          client.ip:
+                            type: ip
+                          http.method:
+                            type: keyword
+                          http.response.body.bytes:
+                            type: long
+                          http.response.status_code:
+                            type: long
+                          url.original:
+                            type: wildcard
+                        routing:
+                          - destination: logs.nginx.errors
+                            status: enabled
+                            where:
+                              field: http.response.status_code
+                              gte: 500
       summary: Get ingest stream settings
       tags:
         - streams
@@ -60660,6 +60934,40 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              upsertWiredIngest:
+                value:
+                  ingest:
+                    failure_store:
+                      inherit: {}
+                    lifecycle:
+                      inherit: {}
+                    processing:
+                      steps:
+                        - action: grok
+                          from: message
+                          ignore_missing: false
+                          patterns:
+                            - '%{IPORHOST:client.ip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:@timestamp}\] "%{WORD:http.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}" %{NUMBER:http.response.status_code:int} (?:%{NUMBER:http.response.body.bytes:int}|-)'
+                    settings: {}
+                    wired:
+                      fields:
+                        client.ip:
+                          type: ip
+                        http.method:
+                          type: keyword
+                        http.response.body.bytes:
+                          type: long
+                        http.response.status_code:
+                          type: long
+                        url.original:
+                          type: wildcard
+                      routing:
+                        - destination: logs.nginx.errors
+                          status: enabled
+                          where:
+                            eq: '500'
+                            field: http.response.status_code
             schema:
               additionalProperties: false
               type: object
@@ -60883,6 +61191,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              upsertQueryStream:
+                value:
+                  query:
+                    esql: FROM logs* | WHERE log.level == "error" | KEEP @timestamp, message, host.name, log.level
             schema:
               additionalProperties: false
               type: object
