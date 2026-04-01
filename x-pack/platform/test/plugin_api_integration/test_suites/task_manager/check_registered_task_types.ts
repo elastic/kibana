@@ -193,6 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_store:v2:extract_entity_task:service',
         'entity_store:v2:extract_entity_task:user',
         'entity_store:v2:history_snapshot_task',
+        'entity_store:v2:status_report_task',
         'fleet:agent-status-change-task',
         'fleet:agentless-deployment-sync-task',
         'fleet:auto-install-content-packages-task',
