@@ -33,7 +33,10 @@ apiTest.describe(
 
     apiTest('returns warning header for system indices requests', async ({ apiClient }) => {
       const response = await apiClient.post(PROXY_PATH, {
-        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+        headers: {
+          ...COMMON_HEADERS,
+          ...credentials.apiKeyHeader,
+        },
       });
 
       expect(response.headers.warning).toBeDefined();
