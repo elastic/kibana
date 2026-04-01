@@ -109,6 +109,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows'
+  - '@kbn/streams-ai'
   - '@kbn/cps'
 tags:
   - plugin

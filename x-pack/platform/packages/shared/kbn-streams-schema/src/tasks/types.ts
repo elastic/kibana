@@ -30,4 +30,5 @@ export type TaskResult<TPayload> =
         | TaskStatus.Canceled;
     }
   | ({ status: TaskStatus.Failed; error: string } & Partial<TPayload>)
-  | ({ status: TaskStatus.Completed | TaskStatus.Acknowledged } & TPayload);
+  | ({ status: TaskStatus.Completed } & TPayload)
+  | ({ status: TaskStatus.Acknowledged } & TPayload);
