@@ -39,8 +39,8 @@ import { KnowledgeIndicatorsStatusFilter } from './knowledge_indicators_status_f
 import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filter';
 import { RulesTable } from './rules_table';
 import { LoadingPanel } from '../../loading_panel';
-import { PromotionCallout } from './promotion_callout';
-import { SuggestedRulesFlyout } from './suggested_rules_flyout';
+import { PromotionCallout } from './promotion_callout/promotion_callout';
+import { SuggestedRulesFlyout } from './suggested_rules_flyout/suggested_rules_flyout';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -88,7 +88,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       completedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Completed }>
     ) => {
       const queriesTaskResult = completedTaskState.queriesTaskResult;
-      const generatedKnowledgeIndicatorsCount =
+      const featuresTaskResult = completedTaskState.featuresTaskResult;
+      const generatedFeaturesCount =
+        featuresTaskResult?.status === TaskStatus.Completed
+          ? featuresTaskResult.features.length
+          : 0;
+      const generatedQueriesCount =
         queriesTaskResult?.status === TaskStatus.Completed ? queriesTaskResult.queries.length : 0;
 
       toasts.addSuccess({
@@ -98,7 +103,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             defaultMessage:
               '{count, plural, one {Generated # knowledge indicator} other {Generated # knowledge indicators}}',
             values: {
-              count: generatedKnowledgeIndicatorsCount,
+              count: generatedFeaturesCount + generatedQueriesCount,
             },
           }
         ),

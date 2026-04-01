@@ -30,13 +30,13 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50] as const;
 import {
   DISCOVERY_QUERIES_QUERY_KEY,
   type SignificantEventQueryRow,
-} from '../../../hooks/sig_events/use_fetch_discovery_queries';
-import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../hooks/sig_events/use_unbacked_queries_count';
-import { usePromotableQueries } from '../../../hooks/sig_events/use_promotable_queries';
-import { useQueriesApi } from '../../../hooks/sig_events/use_queries_api';
-import { getFormattedError } from '../../../util/errors';
-import { useKibana } from '../../../hooks/use_kibana';
-import { SeverityBadge } from '../significant_events_discovery/components/severity_badge/severity_badge';
+} from '../../../../hooks/sig_events/use_fetch_discovery_queries';
+import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../hooks/sig_events/use_unbacked_queries_count';
+import { usePromotableQueries } from '../../../../hooks/sig_events/use_promotable_queries';
+import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
+import { getFormattedError } from '../../../../util/errors';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { SeverityBadge } from '../../significant_events_discovery/components/severity_badge/severity_badge';
 
 interface SuggestedRulesFlyoutProps {
   streamName: string;
@@ -175,7 +175,7 @@ export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyo
     <EuiFlyout
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
-      type="push"
+      type="overlay"
       ownFocus={false}
       size="m"
       data-test-subj="streamsAppSuggestedRulesFlyout"

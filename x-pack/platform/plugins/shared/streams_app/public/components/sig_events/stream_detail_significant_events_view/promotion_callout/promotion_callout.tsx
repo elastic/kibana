@@ -19,13 +19,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import React from 'react';
-import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/sig_events/use_fetch_discovery_queries';
-import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../hooks/sig_events/use_unbacked_queries_count';
-import { useQueriesApi } from '../../../hooks/sig_events/use_queries_api';
-import { usePromotableQueries } from '../../../hooks/sig_events/use_promotable_queries';
-import { getFormattedError } from '../../../util/errors';
-import { useKibana } from '../../../hooks/use_kibana';
-import { AssetImage } from '../../asset_image';
+import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
+import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../hooks/sig_events/use_unbacked_queries_count';
+import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
+import { usePromotableQueries } from '../../../../hooks/sig_events/use_promotable_queries';
+import { getFormattedError } from '../../../../util/errors';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { AssetImage } from '../../../asset_image';
 
 interface PromotionCalloutProps {
   streamName: string;
