@@ -28,6 +28,7 @@ import {
   getSharedIgnoreWarnings,
 } from './shared_config';
 import type { ThemeTag } from '../types';
+import { XPackBannerPlugin } from '../plugins/xpack_banner_plugin';
 
 /**
  * Plugin to emit stats.json file for bundle analysis.
@@ -572,6 +573,9 @@ export async function createSingleCompileConfig(
         // HMR SSE server port - injected at build time for the HMR client
         ...(hmr && hmrPort ? { __KBN_HMR_PORT__: JSON.stringify(hmrPort) } : {}),
       }),
+
+      // Elastic License 2.0 banner for x-pack plugin chunks
+      new XPackBannerPlugin(repoRoot, plugins),
 
       // HMR plugins -- enabled in watch dev mode
       ...(hmr
