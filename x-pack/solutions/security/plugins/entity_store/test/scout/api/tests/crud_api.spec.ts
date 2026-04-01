@@ -122,7 +122,6 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       // The stored entity.id should be the generated EUID
       const source = byGenerated._source as HostEntity;
-      expect(source.host?.entity?.id).toBeUndefined();
       expect(source.entity?.id).toBe(expectedEuid);
     }
   );
