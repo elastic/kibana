@@ -5,10 +5,19 @@
  * 2.0.
  */
 import { getFlattenedObject } from '@kbn/std';
-import type { SampleDocument } from '@kbn/streams-schema';
-import { fieldDefinitionConfigSchema, isDescendantOf, Streams } from '@kbn/streams-schema';
+import type {
+  FieldDefinitionType,
+  NamedFieldDefinitionConfig,
+  SampleDocument,
+} from '@kbn/streams-schema';
+import {
+  FIELD_DEFINITION_TYPES,
+  namedFieldDefinitionConfigSchema,
+  isDescendantOf,
+  Streams,
+  LOGS_ROOT_STREAM_NAME,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
-import { LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
@@ -25,11 +34,27 @@ import {
   buildGeoPointExistsQuery,
   normalizeGeoPointsInObject,
   rebuildGeoPointsFromFlattened,
-  collectFieldsWithGeoPoints,
 } from '../../../../lib/streams/helpers/normalize_geo_points';
-
-const UNMAPPED_SAMPLE_SIZE = 500;
+import {
+  getUnmappedFields,
+  UNMAPPED_SAMPLE_SIZE,
+} from '../../../../lib/streams/helpers/unmapped_fields';
 const FIELD_SIMULATION_TIMEOUT = '1s';
+
+const isFieldDefinitionType = (value: unknown): value is FieldDefinitionType =>
+  typeof value === 'string' && (FIELD_DEFINITION_TYPES as readonly string[]).includes(value);
+
+const isSimulatableFieldDefinition = (
+  field: NamedFieldDefinitionConfig
+): field is NamedFieldDefinitionConfig & { type: FieldDefinitionType } =>
+  isFieldDefinitionType(field.type);
+
+const getSimulatableFieldDefinitions = (fields: NamedFieldDefinitionConfig[]) =>
+  fields.filter(isSimulatableFieldDefinition);
+
+export const __test__ = {
+  getSimulatableFieldDefinitions,
+};
 
 interface SimulateIngestDoc {
   _source: SampleDocument;
@@ -66,71 +91,17 @@ export const unmappedFieldsRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }): Promise<{ unmappedFields: string[] }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
-    const searchBody = {
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc' as const,
-          },
-        },
-      ],
-      size: UNMAPPED_SAMPLE_SIZE,
-    };
-
-    const [streamDefinition, ancestors, results] = await Promise.all([
+    const [definition, ancestors, sampleDocs] = await Promise.all([
       streamsClient.getStream(params.path.name),
       streamsClient.getAncestors(params.path.name),
       scopedClusterClient.asCurrentUser.search({
         index: params.path.name,
-        ...searchBody,
+        sort: [{ '@timestamp': { order: 'desc' as const } }],
+        size: UNMAPPED_SAMPLE_SIZE,
       }),
     ]);
 
-    const sourceFields = new Set<string>();
-
-    results.hits.hits.forEach((hit) => {
-      Object.keys(getFlattenedObject(hit._source as Record<string, unknown>)).forEach((field) => {
-        sourceFields.add(field);
-      });
-    });
-
-    // Mapped fields from the stream's definition and inherited from ancestors
-    const mappedFields = new Set<string>();
-    const geoPointFields = new Set<string>();
-
-    if (Streams.ClassicStream.Definition.is(streamDefinition)) {
-      collectFieldsWithGeoPoints(
-        streamDefinition.ingest.classic.field_overrides || {},
-        mappedFields,
-        geoPointFields
-      );
-    }
-
-    if (Streams.WiredStream.Definition.is(streamDefinition)) {
-      collectFieldsWithGeoPoints(
-        streamDefinition.ingest.wired.fields,
-        mappedFields,
-        geoPointFields
-      );
-    }
-
-    for (const ancestor of ancestors) {
-      collectFieldsWithGeoPoints(ancestor.ingest.wired.fields, mappedFields, geoPointFields);
-    }
-
-    const unmappedFields = Array.from(sourceFields)
-      .filter((field) => {
-        if (mappedFields.has(field)) return false;
-
-        const latMatch = field.match(/^(.+)\.lat$/);
-        const lonMatch = field.match(/^(.+)\.lon$/);
-
-        if (latMatch && geoPointFields.has(latMatch[1])) return false;
-        if (lonMatch && geoPointFields.has(lonMatch[1])) return false;
-
-        return true;
-      })
-      .sort();
+    const unmappedFields = getUnmappedFields({ definition, ancestors, sampleDocs });
 
     return { unmappedFields };
   },
@@ -151,9 +122,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     body: z.object({
-      field_definitions: z.array(
-        z.intersection(fieldDefinitionConfigSchema, z.object({ name: z.string() }))
-      ),
+      field_definitions: z.array(namedFieldDefinitionConfigSchema),
     }),
   }),
   handler: async ({
@@ -165,9 +134,15 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     simulationError: string | null;
     documentsWithRuntimeFieldsApplied: DocumentWithIgnoredFields[] | null;
   }> => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
+    });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
@@ -175,13 +150,16 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
     const streamDefinition = await streamsClient.getStream(params.path.name);
 
-    const userFieldDefinitions = params.body.field_definitions.flatMap((field) => {
-      // filter out potential system fields since we can't simulate them anyway
-      if (field.type === 'system') {
-        return [];
-      }
-      return [field];
-    });
+    // Only simulate mapping-affecting definitions; ignore doc-only overrides (`{ description }`)
+    // and system fields.
+    const userFieldDefinitions = getSimulatableFieldDefinitions(params.body.field_definitions);
+    if (userFieldDefinitions.length === 0) {
+      return {
+        status: 'success',
+        simulationError: null,
+        documentsWithRuntimeFieldsApplied: null,
+      };
+    }
 
     const propertiesForSample: Record<string, { type: 'keyword' }> = {};
     userFieldDefinitions.forEach((field) => {
@@ -231,8 +209,8 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       };
     }
 
-    const propertiesForSimulation = Object.fromEntries(
-      userFieldDefinitions.map(({ name, ...field }) => [name, field])
+    const propertiesForSimulation: StreamsMappingProperties = Object.fromEntries(
+      userFieldDefinitions.map(({ name, description: _description, ...field }) => [name, field])
     );
 
     const fieldDefinitionKeys = Object.keys(propertiesForSimulation);
@@ -320,15 +298,19 @@ export const schemaFieldsConflictsRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     body: z.object({
-      field_definitions: z.array(
-        z.intersection(fieldDefinitionConfigSchema, z.object({ name: z.string() }))
-      ),
+      field_definitions: z.array(namedFieldDefinitionConfigSchema),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
+    });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
@@ -342,8 +324,10 @@ export const schemaFieldsConflictsRoute = createServerRoute({
       return { conflicts: [] };
     }
 
+    // Only check conflicts for fields that affect ES mappings
+    // Skip system fields and doc-only overrides (no type)
     const userFieldDefinitions = params.body.field_definitions.filter(
-      (field) => field.type !== 'system'
+      (field): field is typeof field & { type: string } => !!field.type && field.type !== 'system'
     );
 
     if (userFieldDefinitions.length === 0) {
@@ -368,8 +352,8 @@ export const schemaFieldsConflictsRoute = createServerRoute({
       const fields = stream.ingest.wired.fields;
 
       for (const [fieldName, config] of Object.entries(fields)) {
-        // Skip system fields
-        if (config.type === 'system') {
+        // Skip system fields and doc-only overrides (no type)
+        if (!config.type || config.type === 'system') {
           continue;
         }
 

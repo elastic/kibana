@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { entityMaintainersRegistry } from '../../../../tasks/entity_maintainers/entity_maintainers_registry';
 
 function validateMaintainerIdExists(data: { id: string }, ctx: z.RefinementCtx): void {
@@ -23,3 +23,10 @@ export const maintainerIdParamsSchema = z
     id: z.string().min(1, 'id is required'),
   })
   .superRefine(validateMaintainerIdExists);
+
+export const maintainerIdsQuerySchema = z.object({
+  ids: z
+    .union([z.string().min(1), z.array(z.string().min(1))])
+    .transform((value) => (Array.isArray(value) ? value : [value]))
+    .optional(),
+});

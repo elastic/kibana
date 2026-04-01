@@ -9,11 +9,13 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { throttle } from 'lodash';
+import { isEqual, throttle } from 'lodash';
 import { from, type Observable } from 'rxjs';
 import {
+  type ImmutableStateInvariantMiddlewareOptions,
   type PayloadAction,
   type PayloadActionCreator,
+  type SerializableStateInvariantMiddlewareOptions,
   type ThunkAction,
   type ThunkDispatch,
   type TypedStartListening,
@@ -38,13 +40,23 @@ import {
   selectTabRuntimeState,
 } from './runtime_state';
 import {
+  DEFAULT_PROFILE_STATE_FIELDS,
   TabsBarVisibility,
+  type DefaultProfileStateField,
   type DiscoverInternalState,
+  type ProfileStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
   TabInitializationStatus,
+  HEAVY_STATE_KEYS,
 } from './types';
-import { loadDataViewList, initializeTabs, initializeSingleTab } from './actions';
+import {
+  loadDataViewList,
+  initializeTabs,
+  initializeSingleTab,
+  type RawAppStatePayload,
+} from './actions';
+import { DEFAULT_EXPANDED_DOC_OWNER } from './constants';
 import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
@@ -77,9 +89,9 @@ const initialState: DiscoverInternalState = {
   },
 };
 
-export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
+export type TabActionPayload<T extends object = object> = { tabId: string } & T;
 
-type TabAction<T extends { [key: string]: unknown } = {}> = PayloadAction<TabActionPayload<T>>;
+type TabAction<T extends object = object> = PayloadAction<TabActionPayload<T>>;
 
 const withTab = <TPayload extends TabActionPayload>(
   state: DiscoverInternalState,
@@ -91,6 +103,45 @@ const withTab = <TPayload extends TabActionPayload>(
   if (tab) {
     fn(tab);
   }
+};
+
+const normalizeVisiblePanelsState = (appState: TabState['appState']) => {
+  if (appState.hideChart && appState.hideTable) {
+    return {
+      ...appState,
+      hideTable: false,
+    };
+  }
+
+  return appState;
+};
+
+const setProfileStateSnapshotField = <TField extends DefaultProfileStateField>(
+  snapshot: ProfileStateSnapshot,
+  field: TField,
+  value: TabState['appState'][TField]
+) => {
+  snapshot[field] = value;
+};
+
+const syncProfileStateSnapshot = (
+  tab: TabState,
+  profileId: string,
+  nextAppState?: TabState['appState']
+) => {
+  const profileStateSnapshots = tab.defaultProfileState.snapshotsByProfileId;
+  const profileStateSnapshot = profileStateSnapshots[profileId] ?? {};
+  const snapshotAppState = nextAppState ?? tab.appState;
+
+  for (const field of DEFAULT_PROFILE_STATE_FIELDS) {
+    // If no nextAppState was passed, we're syncing the current app state (e.g. on profile init).
+    // If nextAppState was passed, we're syncing only the changed fields (e.g. on user action).
+    if (!nextAppState || !isEqual(tab.appState[field], nextAppState[field])) {
+      setProfileStateSnapshotField(profileStateSnapshot, field, snapshotAppState[field]);
+    }
+  }
+
+  profileStateSnapshots[profileId] = profileStateSnapshot;
 };
 
 export const internalStateSlice = createSlice({
@@ -182,18 +233,28 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
+        expandedDocOwner?: string;
         initialDocViewerTabId?: string;
         initialDocViewerTabState?: object;
       }>
     ) => {
       withTab(state, action.payload, (tab) => {
+        const nextExpandedDocOwner = action.payload.expandedDoc
+          ? action.payload.expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER
+          : undefined;
+
         if (tab.expandedDoc?.id !== action.payload.expandedDoc?.id) {
           // Reset the initialDocViewerTabId and docViewer when changing expandedDoc to a different document
           tab.initialDocViewerTabId = undefined;
           tab.uiState.docViewer = {};
         }
 
+        if (!action.payload.expandedDoc || tab.expandedDocOwner !== nextExpandedDocOwner) {
+          tab.renderDocumentViewMeta = undefined;
+        }
+
         tab.expandedDoc = action.payload.expandedDoc;
+        tab.expandedDocOwner = nextExpandedDocOwner;
         tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
 
         if (action.payload.initialDocViewerTabId && action.payload.initialDocViewerTabState) {
@@ -205,6 +266,15 @@ export const internalStateSlice = createSlice({
             },
           };
         }
+      });
+    },
+
+    setRenderDocumentViewMeta: (
+      state,
+      action: TabAction<Pick<TabState, 'renderDocumentViewMeta'>>
+    ) => {
+      withTab(state, action.payload, (tab) => {
+        tab.renderDocumentViewMeta = action.payload.renderDocumentViewMeta;
       });
     },
 
@@ -235,17 +305,29 @@ export const internalStateSlice = createSlice({
     /**
      * Set the tab app state, overwriting existing state and pushing to URL history
      */
-    setAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
+    setAppState: (state, action: TabAction<RawAppStatePayload & { profileId: string }>) =>
       withTab(state, action.payload, (tab) => {
-        let appState = action.payload.appState;
+        let appState = normalizeVisiblePanelsState(action.payload.appState);
 
         // When updating to an ES|QL query, sync the data source
         if (isOfAggregateQueryType(appState.query)) {
           appState = { ...appState, dataSource: createEsqlDataSource() };
         }
 
+        if (!action.payload.isSystemTriggered) {
+          syncProfileStateSnapshot(tab, action.payload.profileId, appState);
+        }
+
         tab.previousAppState = tab.appState;
         tab.appState = appState;
+      }),
+
+    syncProfileStateSnapshot: (
+      state,
+      action: TabAction<{ profileId: string; appState?: TabState['appState'] }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        syncProfileStateSnapshot(tab, action.payload.profileId, action.payload.appState);
       }),
 
     /**
@@ -302,23 +384,29 @@ export const internalStateSlice = createSlice({
       state.isESQLToDataViewTransitionModalVisible = action.payload;
     },
 
-    setResetDefaultProfileState: {
+    setProfileStateFieldsToReset: {
       prepare: (
-        payload: TabActionPayload<{
-          resetDefaultProfileState: Omit<TabState['resetDefaultProfileState'], 'resetId'>;
-        }>
+        payload: TabActionPayload<Pick<TabState['defaultProfileState'], 'fieldsToReset'>>
       ) => ({
         payload: {
           ...payload,
-          resetDefaultProfileState: {
-            ...payload.resetDefaultProfileState,
+          fieldsToReset: {
+            fieldsToReset: payload.fieldsToReset,
             resetId: uuidv4(),
           },
         },
       }),
-      reducer: (state, action: TabAction<Pick<TabState, 'resetDefaultProfileState'>>) =>
+      reducer: (
+        state,
+        action: TabAction<{
+          fieldsToReset: Pick<TabState['defaultProfileState'], 'fieldsToReset' | 'resetId'>;
+        }>
+      ) =>
         withTab(state, action.payload, (tab) => {
-          tab.resetDefaultProfileState = action.payload.resetDefaultProfileState;
+          tab.defaultProfileState = {
+            ...tab.defaultProfileState,
+            ...action.payload.fieldsToReset,
+          };
         }),
     },
 
@@ -326,6 +414,8 @@ export const internalStateSlice = createSlice({
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
         tab.expandedDoc = undefined;
+        tab.expandedDocOwner = undefined;
+        tab.renderDocumentViewMeta = undefined;
         tab.initialDocViewerTabId = undefined;
         tab.uiState.docViewer = {};
       }),
@@ -495,7 +585,11 @@ const createMiddleware = (options: InternalStateDependencies) => {
           action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         const getTabInternalState = (tabId: string) =>
-          selectTabRuntimeInternalState(runtimeStateManager, tabId, services);
+          selectTabRuntimeInternalState({
+            runtimeStateManager,
+            tabState: selectTab(listenerApi.getState(), tabId),
+            services,
+          });
         void tabsStorageManager.persistLocally(
           action.payload,
           getTabInternalState,
@@ -514,7 +608,11 @@ const createMiddleware = (options: InternalStateDependencies) => {
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
-            internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id, services),
+            internalState: selectTabRuntimeInternalState({
+              runtimeStateManager,
+              tabState: tab,
+              services,
+            }),
             attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
@@ -560,10 +658,10 @@ const createMiddleware = (options: InternalStateDependencies) => {
     effect: (action, listenerApi) => {
       const { runtimeStateManager } = listenerApi.extra;
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, action.payload.tabId);
-      const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+      const dataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
 
-      if (tabStateContainer?.dataState.cleanupEsql) {
-        tabStateContainer.dataState.cleanupEsql();
+      if (dataStateContainer?.cleanupEsql) {
+        dataStateContainer.cleanupEsql();
       }
     },
   });
@@ -583,6 +681,21 @@ export interface InternalStateDependencies {
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
+const DEFAULT_SERIALIZABLE_IGNORED_ACTION_PATHS = ['meta.arg', 'meta.baseQueryMeta'];
+const HEAVY_STATE_PATHS = HEAVY_STATE_KEYS.map((key) => new RegExp(`(^|\\.)${key}(\\.|$)`));
+
+const immutableCheckOptions: ImmutableStateInvariantMiddlewareOptions = {
+  ignoredPaths: HEAVY_STATE_PATHS,
+};
+
+const serializableCheckOptions: SerializableStateInvariantMiddlewareOptions = {
+  // Skipped values from HEAVY_STATE_KEYS still go through RTK's isNestedFrozen
+  // cache eligibility check unless disableCache is set, which can cause noticeable
+  // rendering delays when using Discover in dev builds
+  disableCache: true,
+  ignoredActionPaths: [...DEFAULT_SERIALIZABLE_IGNORED_ACTION_PATHS, ...HEAVY_STATE_PATHS],
+  ignoredPaths: HEAVY_STATE_PATHS,
+};
 
 export const createInternalStateStore = (
   options: Omit<InternalStateDependencies, 'getInternalState$' | 'getCascadedDocumentsStateManager'>
@@ -603,7 +716,8 @@ export const createInternalStateStore = (
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         thunk: { extraArgument: optionsWithStore },
-        serializableCheck: !IS_JEST_ENVIRONMENT,
+        immutableCheck: immutableCheckOptions,
+        serializableCheck: IS_JEST_ENVIRONMENT ? false : serializableCheckOptions,
       }).prepend(createMiddleware(optionsWithStore)),
     devTools: {
       name: 'DiscoverInternalState',

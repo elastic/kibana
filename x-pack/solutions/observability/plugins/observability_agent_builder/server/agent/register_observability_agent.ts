@@ -11,10 +11,12 @@ import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../types';
-import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../tools';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { OBSERVABILITY_AGENT_ID } from '../../common/constants';
+import { OBSERVABILITY_TOOL_IDS, PLATFORM_TOOL_IDS } from '../tools/register_tools';
+
+const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
 
 export async function registerObservabilityAgent({
   core,
@@ -43,6 +45,7 @@ export async function registerObservabilityAgent({
         instructions:
           dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
 
+        ${getTimeRangeInstructions()}
         ${getInvestigationInstructions()}
         ${getReasoningInstructions()}
         ${getTraceMetricFormatInstructions()}
@@ -56,6 +59,16 @@ export async function registerObservabilityAgent({
   });
 
   logger.debug('Successfully registered observability agent in agent-builder');
+}
+
+function getTimeRangeInstructions() {
+  return dedent(`
+    <time_range>
+    ### Time Range
+    The screen context attachment contains the user's currently selected time range (e.g. "Time range: now-15m to now").
+    When a time range is available from screen context or the user's explicit request, always pass it as the \`start\` and \`end\` parameters to tool calls — do not rely on tool defaults when explicit time context is available.
+    </time_range>
+  `);
 }
 
 function getInvestigationInstructions() {
@@ -95,7 +108,7 @@ function getFieldDiscoveryInstructions() {
   `);
 }
 
-function getKqlInstructions() {
+export function getKqlInstructions() {
   return dedent(`
     <kql_syntax>
     ### KQL (Kibana Query Language)
@@ -103,9 +116,10 @@ function getKqlInstructions() {
     - Match: \`field: value\`, \`field: (a OR b OR c)\`
     - Range: \`field > 100\`, \`field >= 10 AND field <= 20\`
     - Wildcards: \`field: prefix*\` (trailing only)
-    - Negation: \`NOT field: value\`
+    - Negation: \`NOT field: value\`, \`NOT message: "noisy string"\`
     - Logical operators: Combine with \`AND\`/\`OR\`, \`(field: value OR field: value) AND field: value\`, use parentheses for precedence
-    - Use quotes for exact phrases in text fields: \`message: "connection refused"\`
+    - Exists: \`field: *\` (field has any value)
+    - Phrases: \`message: "connection refused"\` (exact phrase in text)
     </kql_syntax>
   `);
 }
@@ -143,8 +157,8 @@ export function getEntityLinkingInstructions({ urlPrefix }: { urlPrefix: string 
   | Service Map | [Service Map](${urlPrefix}/app/apm/services/<serviceName>/service-map) | "Check the [Service Map](${urlPrefix}/app/apm/services/payments/service-map) to see dependencies." |
   | Dependencies | [Dependencies](${urlPrefix}/app/apm/services/<serviceName>/dependencies) | "View [Dependencies](${urlPrefix}/app/apm/services/catalog-api/dependencies) to identify upstream issues." |
   | Alert | [<alertId>](${urlPrefix}/app/observability/alerts/<alertId>) | "Alert [alert-uuid-123](${urlPrefix}/app/observability/alerts/alert-uuid-123) was triggered." |
-  | Alert Rules | [<alertRuleId>](${urlPrefix}/app/observability/alerts/rules/<alertRuleId>) | "Alert Rule [alert-uuid-123](${urlPrefix}/app/observability/alerts/rules/alert-uuid-123)." |
-  | Logs Explorer | [Logs](${urlPrefix}/app/logs) | "View [Logs](${urlPrefix}/app/logs) to investigate the issue further." |
+  | Alert Rules | [<alertRuleId>](${urlPrefix}/app/rules/rule/<alertRuleId>) | "Alert Rule [alert-uuid-123](${urlPrefix}/app/rules/rule/alert-uuid-123)." |
+  | Discover | [Discover](${urlPrefix}/app/discover) | "Go to [Discover](${urlPrefix}/app/discover) to investigate the issue further." |
   </entity_linking>
 `);
 }

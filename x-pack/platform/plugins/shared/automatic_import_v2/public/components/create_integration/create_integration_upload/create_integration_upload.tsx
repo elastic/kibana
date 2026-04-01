@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiCallOut,
   EuiFilePicker,
@@ -15,6 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { MINIMUM_LICENSE_TYPE } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { ButtonsFooter } from '../../../common/components/button_footer';
 import {
@@ -22,28 +24,44 @@ import {
   runInstallPackage,
   type RequestDeps,
 } from '../../../common';
+import { PAGE_RESTRICT_WIDTH } from '../../integration_management/constants';
+import { LicensePaywallCard } from '../../license_paywall/license_paywall_card';
+import { useTelemetry } from '../../telemetry_context';
 import { DocsLinkSubtitle } from './docs_link_subtitle';
 import * as i18n from './translations';
 
 export const CreateIntegrationUpload = React.memo(() => {
-  const { http, application } = useKibana().services;
+  const services = useKibana().services;
+  const { http, application } = services;
+  const license = useObservable(services.licensing.license$);
+  const hasEnterpriseLicense = useMemo(
+    () =>
+      Boolean(
+        license?.isAvailable && license?.isActive && license?.hasAtLeast(MINIMUM_LICENSE_TYPE)
+      ),
+    [license]
+  );
+  const { reportCancelButtonClicked } = useTelemetry();
+
   const [file, setFile] = useState<Blob>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>();
   const [integrationName, setIntegrationName] = useState<string>();
 
-  const createHref = useMemo(
-    () => application.getUrlForApp('integrations', { path: '/create' }),
-    [application]
-  );
+  const integrationsHref = useMemo(() => application.getUrlForApp('integrations'), [application]);
 
   const onBack = useCallback(() => {
-    application.navigateToUrl(createHref);
-  }, [application, createHref]);
+    application.navigateToUrl(integrationsHref);
+  }, [application, integrationsHref]);
+
+  const handlePaywallCancel = useCallback(() => {
+    reportCancelButtonClicked();
+    application.navigateToUrl(integrationsHref);
+  }, [application, integrationsHref, reportCancelButtonClicked]);
 
   const onClose = useCallback(() => {
-    application.navigateToUrl(createHref);
-  }, [application, createHref]);
+    application.navigateToUrl(integrationsHref);
+  }, [application, integrationsHref]);
 
   const onChangeFile = useCallback((files: FileList | null) => {
     setFile(files?.[0]);
@@ -77,6 +95,23 @@ export const CreateIntegrationUpload = React.memo(() => {
       }
     })();
   }, [file, http]);
+
+  if (!hasEnterpriseLicense) {
+    return (
+      <>
+        <KibanaPageTemplate restrictWidth={PAGE_RESTRICT_WIDTH}>
+          <KibanaPageTemplate.Header
+            pageTitle={i18n.UPLOAD_TITLE}
+            description={<DocsLinkSubtitle />}
+          />
+          <KibanaPageTemplate.Section grow>
+            <LicensePaywallCard />
+          </KibanaPageTemplate.Section>
+        </KibanaPageTemplate>
+        <ButtonsFooter hideActionButton onCancel={handlePaywallCancel} />
+      </>
+    );
+  }
 
   return (
     <>

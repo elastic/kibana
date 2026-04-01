@@ -61,15 +61,21 @@ export const DASHBOARD_API_TYPE = 'dashboard';
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
+export type DashboardInitializationState = Partial<
+  DashboardState & { references?: Reference[]; viewMode?: ViewMode }
+>;
+
 /**
  * Options for creating a dashboard.
  * These options control how the dashboard is initialized and integrates with various Kibana features.
  */
 export interface DashboardCreationOptions {
-  /** Returns the initial dashboard state and view mode. */
-  getInitialInput?: () => Partial<
-    DashboardState & { references?: Reference[]; viewMode?: ViewMode }
-  >;
+  /**
+   * Returns a partial initial dashboard state and view mode. Keys provided here
+   * will act as overrides that replace all other sources of state for that key
+   * e.g. default state, saved object state, session backup state.
+   */
+  getInitialInput?: () => DashboardInitializationState;
 
   /** Returns context to pass through to child embeddables. */
   getPassThroughContext?: PassThroughContext['getPassThroughContext'];
@@ -196,6 +202,7 @@ export type DashboardApi = CanExpandPanels &
     setSettings: (settings: DashboardSettings) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
+    setState: (state: DashboardState) => void;
 
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;

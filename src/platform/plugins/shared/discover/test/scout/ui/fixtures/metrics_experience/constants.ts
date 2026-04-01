@@ -8,13 +8,46 @@
  */
 
 import { tags } from '@kbn/scout';
+import type { KibanaRole } from '@kbn/scout';
 
 export const METRICS_TEST_INDEX_NAME = 'test-metrics-experience';
+export const METRICS_TEST_INDEX_PATTERN = 'test-metrics-*';
+
+// The Security serverless viewer role only grants read access to `metrics-endpoint.metadata_current_*`.
+// Our test index doesn't match that pattern. Instead of renaming the index to fit, we prefer a custom role that explicitly grants read access.
+const METRICS_ES_INDEX_PRIVILEGES = [
+  {
+    names: [METRICS_TEST_INDEX_NAME, METRICS_TEST_INDEX_PATTERN],
+    privileges: ['read', 'view_index_metadata'],
+  },
+];
+
+export const METRICS_EXPERIENCE_VIEWER_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: METRICS_ES_INDEX_PRIVILEGES },
+  kibana: [{ base: ['read'], feature: {}, spaces: ['*'] }],
+};
+
+export const METRICS_EXPERIENCE_PRIVILEGED_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: METRICS_ES_INDEX_PRIVILEGES },
+  kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+};
+
+export const METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ =
+  'metricsExperienceFlyoutOverviewTabDimensionItem';
 
 export const ESQL_QUERIES = {
   TS: `TS ${METRICS_TEST_INDEX_NAME}`,
+  TS_WILDCARD: `TS ${METRICS_TEST_INDEX_PATTERN}`,
   FROM: `FROM ${METRICS_TEST_INDEX_NAME}`,
 };
+
+export const RECOMMENDED_QUERY_LABELS = {
+  SEARCH_ALL_METRICS: 'Search all metrics',
+} as const;
+
+export const METRICS_DIMENSION_FIELDS = {
+  DEFAULT_BREAKDOWN: 'dimension_0',
+} as const;
 
 export const DATA_VIEW_NAME = METRICS_TEST_INDEX_NAME;
 
@@ -23,5 +56,13 @@ export const KBN_ARCHIVE =
 
 export const METRICS_EXPERIENCE_TAGS = [
   ...tags.stateful.all,
+  ...tags.serverless.observability.complete,
+  ...tags.serverless.security.complete,
+];
+
+export const RECOMMENDED_QUERY_TAGS = [
+  ...tags.stateful.search,
+  ...tags.stateful.observability,
+  ...tags.stateful.security,
   ...tags.serverless.observability.complete,
 ];

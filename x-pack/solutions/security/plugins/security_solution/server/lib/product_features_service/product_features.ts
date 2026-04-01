@@ -15,6 +15,8 @@ import type {
   ProductFeatureParams,
   ProductFeatureGroup,
   ProductFeatureKeyType,
+  ProductFeatureParamsKey,
+  ProductFeatureParamsSubFeatureId,
   ProductFeaturesConfiguratorExtensions,
   ProductFeatureKibanaConfig,
 } from '@kbn/security-solution-features';
@@ -31,7 +33,12 @@ export class ProductFeatures {
     this.registeredActions = new Set();
   }
 
-  public create(featureGroup: ProductFeatureGroup, versions: ProductFeatureParams[]) {
+  public create<
+    P extends ProductFeatureParams<
+      ProductFeatureParamsKey<P> & ProductFeatureKeyType,
+      ProductFeatureParamsSubFeatureId<P>
+    >
+  >(featureGroup: ProductFeatureGroup, versions: P[]) {
     this.groupVersions.set(featureGroup, versions);
   }
 
@@ -56,7 +63,7 @@ export class ProductFeatures {
       for (const featureVersion of featureGroupVersions) {
         const versionExtensions = versionsExtensions[featureVersion.baseKibanaFeature.id] ?? {};
 
-        const extendedConfig = extendProductFeatureConfigs<ProductFeatureKeyType, string>(
+        const extendedConfig = extendProductFeatureConfigs(
           featureVersion.productFeatureConfig ?? {},
           allVersionsExtensions,
           versionExtensions

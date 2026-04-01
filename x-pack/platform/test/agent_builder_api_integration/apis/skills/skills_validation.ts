@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
             content: 'Second content.',
             tool_ids: [],
           })
-          .expect(400);
+          .expect(409);
       });
     });
 

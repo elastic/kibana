@@ -22,6 +22,7 @@ const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
   appendEvents: jest.fn(),
   peek: jest.fn(),
   readEvents: jest.fn(),
+  find: jest.fn().mockResolvedValue([]),
 };
 
 jest.mock('./persistence', () => ({
@@ -47,9 +48,6 @@ jest.mock('./task/abort_monitor', () => ({
 }));
 
 const mockTaskManagerSchedule = jest.fn();
-const mockUiSettingsGet = jest.fn();
-const mockGetScopedClient = jest.fn();
-const mockAsScopedToClient = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
 
@@ -61,11 +59,11 @@ describe('AgentExecutionService', () => {
   } as any;
 
   const uiSettings = {
-    asScopedToClient: mockAsScopedToClient,
+    asScopedToClient: jest.fn(),
   } as any;
 
   const savedObjects = {
-    getScopedClient: mockGetScopedClient,
+    getScopedClient: jest.fn(),
   } as any;
 
   const meteringService = {
@@ -104,10 +102,6 @@ describe('AgentExecutionService', () => {
       eventCount: 0,
       events: [],
     });
-    // Default: UI setting returns false (run locally)
-    mockGetScopedClient.mockReturnValue({});
-    mockAsScopedToClient.mockReturnValue({ get: mockUiSettingsGet });
-    mockUiSettingsGet.mockResolvedValue(false);
   });
 
   describe('executeAgent (TM mode)', () => {
@@ -241,6 +235,7 @@ describe('AgentExecutionService', () => {
       const { events$ } = await service.executeAgent({
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: false,
       });
 
       const receivedEvents: ChatEvent[] = [];
@@ -279,13 +274,10 @@ describe('AgentExecutionService', () => {
         result.executionId,
         ExecutionStatus.running
       );
-      // Should NOT have checked UI settings
-      expect(mockGetScopedClient).not.toHaveBeenCalled();
     });
 
-    it('should run on TM when UI setting is true', async () => {
+    it('should run on TM by default for a regular request', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockUiSettingsGet.mockResolvedValue(true);
 
       const result = await service.executeAgent({
         request,
@@ -298,26 +290,6 @@ describe('AgentExecutionService', () => {
       expect(mockTaskManagerSchedule).toHaveBeenCalled();
       // Should NOT have called handleAgentExecution (remote path)
       expect(mockHandleAgentExecution).not.toHaveBeenCalled();
-    });
-
-    it('should run locally when UI setting is false', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      mockUiSettingsGet.mockResolvedValue(false);
-
-      mockHandleAgentExecution.mockResolvedValue(of());
-      mockCollectAndWriteEvents.mockResolvedValue(undefined);
-
-      const result = await service.executeAgent({
-        request,
-        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
-        // useTaskManager NOT provided -> auto-detect
-      });
-
-      expect(result.executionId).toBeDefined();
-      // Should NOT schedule a TM task
-      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
-      // Should have run locally
-      expect(mockHandleAgentExecution).toHaveBeenCalled();
     });
 
     it('should honour explicit useTaskManager=true even when isFakeRequest is true', async () => {
@@ -335,9 +307,8 @@ describe('AgentExecutionService', () => {
       expect(mockTaskManagerSchedule).toHaveBeenCalled();
     });
 
-    it('should honour explicit useTaskManager=false even when UI setting is true', async () => {
+    it('should honour explicit useTaskManager=false for a regular request', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockUiSettingsGet.mockResolvedValue(true);
 
       mockHandleAgentExecution.mockResolvedValue(of());
       mockCollectAndWriteEvents.mockResolvedValue(undefined);
@@ -353,8 +324,6 @@ describe('AgentExecutionService', () => {
       expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
       // Should have run locally
       expect(mockHandleAgentExecution).toHaveBeenCalled();
-      // Should NOT have checked UI settings
-      expect(mockGetScopedClient).not.toHaveBeenCalled();
     });
   });
 
@@ -431,6 +400,117 @@ describe('AgentExecutionService', () => {
         },
         complete: () => done.fail('Expected an error, not completion'),
       });
+    });
+  });
+
+  describe('executeAgent with metadata', () => {
+    it('should pass metadata to executionClient.create', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const metadata = { source: 'test', username: 'user1' };
+
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+
+      await service.executeAgent({
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: false,
+        metadata,
+      });
+
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ metadata })
+      );
+    });
+
+    it('should pass undefined metadata when not provided (backward compat)', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+
+      await service.executeAgent({
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: false,
+      });
+
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ metadata: undefined })
+      );
+    });
+  });
+
+  describe('findExecutions', () => {
+    it('should delegate to executionClient.find with auto-injected spaceId', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockExecutionClient.find.mockResolvedValue([]);
+
+      await service.findExecutions(request, {
+        filter: { metadata: { source: 'test' } },
+      });
+
+      expect(mockExecutionClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          spaceId: 'default',
+          filter: { metadata: { source: 'test' } },
+        })
+      );
+    });
+
+    it('should use explicit spaceId when provided, overriding the default', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockExecutionClient.find.mockResolvedValue([]);
+
+      await service.findExecutions(request, {
+        spaceId: 'my-space',
+        filter: { status: [ExecutionStatus.running] },
+      });
+
+      expect(mockExecutionClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'my-space' })
+      );
+    });
+
+    it('should use default spaceId when spaceId is undefined in options', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockExecutionClient.find.mockResolvedValue([]);
+
+      await service.findExecutions(request, { spaceId: undefined });
+
+      expect(mockExecutionClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'default' })
+      );
+    });
+
+    it('should use defaults when no options provided', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockExecutionClient.find.mockResolvedValue([]);
+
+      await service.findExecutions(request);
+
+      expect(mockExecutionClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'default' })
+      );
+    });
+
+    it('should return results from executionClient.find', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const fakeExecution = {
+        executionId: 'exec-1',
+        '@timestamp': new Date().toISOString(),
+        status: ExecutionStatus.running,
+        agentId: 'agent-1',
+        spaceId: 'default',
+        agentParams: { nextInput: { message: 'hello' } },
+        eventCount: 0,
+        events: [],
+        metadata: { source: 'test' },
+      };
+      mockExecutionClient.find.mockResolvedValue([fakeExecution]);
+
+      const results = await service.findExecutions(request);
+      expect(results).toEqual([fakeExecution]);
     });
   });
 });

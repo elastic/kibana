@@ -19,6 +19,7 @@ describe('convertPersistedSkill', () => {
     tool_ids: [],
     created_at: '2025-01-01T00:00:00.000Z',
     updated_at: '2025-01-02T00:00:00.000Z',
+    referenced_content_count: 0,
     ...overrides,
   });
 
@@ -32,11 +33,20 @@ describe('convertPersistedSkill', () => {
     expect(result.content).toBe('Instructions content');
   });
 
-  it('sets readonly to false', () => {
+  it('sets readonly to false for user-created skills', () => {
     const skill = createMockPersistedSkill();
     const result = convertPersistedSkill(skill);
 
     expect(result.readonly).toBe(false);
+    expect(result.plugin_id).toBeUndefined();
+  });
+
+  it('sets readonly to true for plugin-managed skills', () => {
+    const skill = createMockPersistedSkill({ plugin_id: 'my-plugin' });
+    const result = convertPersistedSkill(skill);
+
+    expect(result.readonly).toBe(true);
+    expect(result.plugin_id).toBe('my-plugin');
   });
 
   it('set a default basepath', () => {
@@ -87,5 +97,19 @@ describe('convertPersistedSkill', () => {
     const result = convertPersistedSkill(skill);
 
     expect(result.referencedContent).toBeUndefined();
+  });
+
+  it('always sets experimental to false', () => {
+    const skill = createMockPersistedSkill();
+    const result = convertPersistedSkill(skill);
+
+    expect(result.experimental).toBe(false);
+  });
+
+  it('sets experimental to false even for plugin-managed skills', () => {
+    const skill = createMockPersistedSkill({ plugin_id: 'my-plugin' });
+    const result = convertPersistedSkill(skill);
+
+    expect(result.experimental).toBe(false);
   });
 });

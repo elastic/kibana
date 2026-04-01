@@ -11,19 +11,6 @@ import { schema } from '@kbn/config-schema';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
-export const createRequestParamsSchema = schema.maybe(
-  schema.object(
-    {
-      id: schema.maybe(
-        schema.string({
-          meta: { description: 'A unique identifier for the dashboard.' },
-        })
-      ),
-    },
-    { unknowns: 'forbid' }
-  )
-);
-
 export function getCreateRequestBodySchema(isDashboardAppRequest: boolean) {
   return getDashboardStateSchema(isDashboardAppRequest);
 }
@@ -33,6 +20,5 @@ export function getCreateResponseBodySchema(isDashboardAppRequest: boolean) {
     id: schema.string(),
     data: getDashboardStateSchema(isDashboardAppRequest),
     meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
   });
 }

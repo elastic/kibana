@@ -12,6 +12,7 @@ import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { DataStreams } from './data_streams';
 import { UIStateProvider } from '../../contexts';
 import { useGetIntegrationById } from '../../../../common';
+import { useIntegrationForm } from '../../forms/integration_form';
 
 jest.mock('../../../../common', () => ({
   useGetIntegrationById: jest.fn(),
@@ -24,6 +25,18 @@ jest.mock('../../../../common', () => ({
   })),
 }));
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
+
+jest.mock('../../forms/integration_form', () => ({
+  useIntegrationForm: jest.fn(),
+}));
+const mockUseIntegrationForm = useIntegrationForm as jest.Mock;
+
+const mockReportDataStreamFlyoutOpened = jest.fn();
+jest.mock('../../../telemetry_context', () => ({
+  useTelemetry: () => ({
+    reportDataStreamFlyoutOpened: mockReportDataStreamFlyoutOpened,
+  }),
+}));
 
 jest.mock('./create_data_stream_flyout', () => ({
   CreateDataStreamFlyout: jest.fn(({ onClose }) => (
@@ -66,6 +79,9 @@ describe('DataStreams', () => {
       isError: false,
       error: null,
       refetch: jest.fn(),
+    });
+    mockUseIntegrationForm.mockReturnValue({
+      formData: { title: 'Integration title', description: 'Integration description' },
     });
   });
 
@@ -157,6 +173,43 @@ describe('DataStreams', () => {
     });
   });
 
+  describe('telemetry', () => {
+    it('should call reportDataStreamFlyoutOpened when add data stream button is clicked', () => {
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: undefined,
+        isLoading: false,
+      });
+
+      const { getByTestId } = renderDataStreams('test-id');
+
+      fireEvent.click(getByTestId('addDataStreamButton'));
+
+      expect(mockReportDataStreamFlyoutOpened).toHaveBeenCalledWith(
+        expect.objectContaining({ isFirstDataStream: true })
+      );
+    });
+
+    it('should report isFirstDataStream as false when integration already has data streams', () => {
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: {
+          title: 'My Integration',
+          dataStreams: [{ dataStreamId: 'ds-1', title: 'Existing' }],
+        },
+        isLoading: false,
+      });
+
+      const { getByTestId } = renderDataStreams('test-id');
+
+      fireEvent.click(getByTestId('addDataStreamButton'));
+
+      expect(mockReportDataStreamFlyoutOpened).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isFirstDataStream: false,
+        })
+      );
+    });
+  });
+
   describe('with existing data streams', () => {
     it('should render with data streams count for header button', () => {
       mockUseGetIntegrationById.mockReturnValue({
@@ -173,6 +226,63 @@ describe('DataStreams', () => {
 
       // Zero-state description should NOT be visible
       expect(queryByText(/No data streams have been configured/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('create integration page', () => {
+    it('disables add data stream when integration name is empty', () => {
+      mockUseIntegrationForm.mockReturnValue({
+        formData: { title: '', description: 'Has description' },
+      });
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: undefined,
+        isLoading: false,
+      });
+
+      const { getByTestId } = renderDataStreams();
+      expect(getByTestId('addDataStreamButton')).toBeDisabled();
+    });
+
+    it('disables add data stream when description is empty', () => {
+      mockUseIntegrationForm.mockReturnValue({
+        formData: { title: 'Has title', description: '   ' },
+      });
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: undefined,
+        isLoading: false,
+      });
+
+      const { getByTestId } = renderDataStreams();
+      expect(getByTestId('addDataStreamButton')).toBeDisabled();
+    });
+
+    it('enables add data stream when name and description are set', () => {
+      mockUseIntegrationForm.mockReturnValue({
+        formData: { title: 'My integration', description: 'A description' },
+      });
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: undefined,
+        isLoading: false,
+      });
+
+      const { getByTestId } = renderDataStreams();
+      expect(getByTestId('addDataStreamButton')).not.toBeDisabled();
+    });
+
+    it('does not open flyout when add button is disabled on create page', () => {
+      mockUseIntegrationForm.mockReturnValue({
+        formData: { title: '', description: '' },
+      });
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: undefined,
+        isLoading: false,
+      });
+
+      const { getByTestId, queryByTestId } = renderDataStreams();
+
+      fireEvent.click(getByTestId('addDataStreamButton'));
+      expect(queryByTestId('createDataStreamFlyoutMock')).not.toBeInTheDocument();
+      expect(mockReportDataStreamFlyoutOpened).not.toHaveBeenCalled();
     });
   });
 });

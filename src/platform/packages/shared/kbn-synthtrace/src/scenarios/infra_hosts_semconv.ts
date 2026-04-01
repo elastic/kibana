@@ -10,6 +10,7 @@
 import { Serializable } from '@kbn/synthtrace-client';
 import { times } from 'lodash';
 import type { Scenario } from '../cli/scenario';
+import { getNumberOpt } from './helpers/scenario_opts_helpers';
 import { withClient } from '../lib/utils/with_client';
 
 /**
@@ -19,8 +20,11 @@ import { withClient } from '../lib/utils/with_client';
  * OTel hostmetricsreceiver emits metrics with a `state` dimension for CPU/memory,
  * and a `direction` dimension for network I/O. This scenario replicates that structure.
  */
-const scenario: Scenario<any> = async ({ logger, scenarioOpts = { numHosts: 2 } }) => {
-  const { numHosts } = scenarioOpts;
+const scenario: Scenario<import('@kbn/synthtrace-client').Fields> = async ({
+  logger,
+  scenarioOpts,
+}) => {
+  const numHosts = getNumberOpt(scenarioOpts, 'numHosts', 2);
 
   return {
     generate: ({ range, clients: { infraEsClient } }) => {
@@ -42,6 +46,7 @@ const scenario: Scenario<any> = async ({ logger, scenarioOpts = { numHosts: 2 } 
               'host.ip': '122.122.122.122',
               'resource.attributes.host.name': hostName,
               'resource.attributes.os.type': 'linux',
+              'os.type': 'linux',
               // This is the key: dataset that matches inventory model expectation
               'data_stream.dataset': 'hostmetricsreceiver.otel',
               'data_stream.type': 'metrics',
@@ -125,9 +130,11 @@ const scenario: Scenario<any> = async ({ logger, scenarioOpts = { numHosts: 2 } 
                 direction: 'receive',
                 'system.network.io': Math.floor(Math.random() * 1000000000), // bytes received
               },
-            ].map((net) => ({
+            ].map(({ 'system.network.io': netIo, ...net }) => ({
               ...base,
               ...net,
+              'system.network.io': netIo,
+              'metrics.system.network.io': netIo,
               'metricset.name': 'network',
               'device.keyword': 'eth0',
             }));

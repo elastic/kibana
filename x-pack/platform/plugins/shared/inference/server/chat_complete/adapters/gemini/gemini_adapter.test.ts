@@ -33,6 +33,8 @@ describe('geminiAdapter', () => {
       connectorId: 'test-connector-id',
       config: {},
       capabilities: {},
+      isInferenceEndpoint: false,
+      isPreconfigured: false,
     });
     processVertexStreamMock.mockReset().mockImplementation(() => tap(noop));
     processVertexResponseMock.mockReset().mockImplementation(() => tap(noop));

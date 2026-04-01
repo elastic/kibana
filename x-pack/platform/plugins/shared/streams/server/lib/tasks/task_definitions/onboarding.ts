@@ -19,9 +19,11 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
+import { STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import type { StreamsTaskType, TaskContext } from '.';
-import { getErrorMessage } from '../../streams/errors/parse_error';
+import { parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
+import { resolveConnectorIdAndCheckAllowlist } from '../../../routes/utils/resolve_connector_id_and_check_allowlist';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
@@ -32,14 +34,13 @@ import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
   getFeaturesIdentificationTaskId,
 } from './features_identification';
-import type { SignificantEventsQueriesGenerationTaskParams } from './significant_events_queries_generation';
+import type { SignificantEventsQueriesGenerationTaskParams } from '../../sig_events/tasks/significant_events_queries_generation';
 import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
-} from './significant_events_queries_generation';
+} from '../../sig_events/tasks/significant_events_queries_generation';
 
 export interface OnboardingTaskParams {
-  connectorId: string;
   streamName: string;
   from: number;
   to: number;
@@ -66,13 +67,19 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, streamName, from, to, steps, saveQueries, _task } = runContext
-                .taskInstance.params as TaskParams<OnboardingTaskParams>;
+              const { streamName, from, to, steps, saveQueries, _task } = runContext.taskInstance
+                .params as TaskParams<OnboardingTaskParams>;
 
-              const { taskClient, inferenceClient, queryClient, streamsClient } =
-                await taskContext.getScopedClients({
-                  request: runContext.fakeRequest,
-                });
+              const {
+                taskClient,
+                inferenceClient,
+                queryClient,
+                streamsClient,
+                modelSettingsClient,
+                uiSettingsClient,
+              } = await taskContext.getScopedClients({
+                request: runContext.fakeRequest,
+              });
 
               try {
                 let featuresTaskResult: TaskResult<IdentifyFeaturesResult> | undefined;
@@ -82,10 +89,11 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 for (const step of steps) {
                   switch (step) {
-                    case OnboardingStep.FeaturesIdentification:
-                      const featuresTaskId = await scheduleFeaturesIdentificationTask(
+                    case OnboardingStep.FeaturesIdentification: {
+                      const featuresTaskId = getFeaturesIdentificationTaskId(streamName);
+
+                      await scheduleFeaturesIdentificationTask(
                         {
-                          connectorId,
                           start: from,
                           end: to,
                           streamName,
@@ -103,11 +111,11 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                         return;
                       }
                       break;
+                    }
 
                     case OnboardingStep.QueriesGeneration:
                       const queriesTaskId = await scheduleQueriesGenerationTask(
                         {
-                          connectorId,
                           start: from,
                           end: to,
                           streamName,
@@ -140,16 +148,33 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 await taskClient.complete<OnboardingTaskParams, OnboardingResult>(
                   _task,
-                  { connectorId, streamName, from, to, steps, saveQueries },
+                  { streamName, from, to, steps, saveQueries },
                   { featuresTaskResult, queriesTaskResult }
                 );
               } catch (error) {
-                // Get connector info for error enrichment
-                const connector = await inferenceClient.getConnectorById(connectorId);
-
-                const errorMessage = isInferenceProviderError(error)
-                  ? formatInferenceProviderError(error, connector)
-                  : getErrorMessage(error);
+                // Get connector info for error enrichment (use rule generation connector; fallback to default)
+                let errorMessage = parseError(error).message;
+                try {
+                  const onboardingLogger = taskContext.logger.get('onboarding');
+                  const settings = await modelSettingsClient.getSettings();
+                  const connectorIdForError = await resolveConnectorIdAndCheckAllowlist({
+                    connectorId: settings.connectorIdRuleGeneration,
+                    uiSettingsClient,
+                    logger: onboardingLogger,
+                    featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+                    searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                    request: runContext.fakeRequest,
+                  });
+                  onboardingLogger.debug(
+                    `Using connector ${connectorIdForError} for rule generation (error enrichment)`
+                  );
+                  const connector = await inferenceClient.getConnectorById(connectorIdForError);
+                  if (isInferenceProviderError(error)) {
+                    errorMessage = formatInferenceProviderError(error, connector);
+                  }
+                } catch {
+                  // Use generic error message if we cannot resolve the connector
+                }
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
@@ -166,7 +191,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 await taskClient.fail<OnboardingTaskParams>(
                   _task,
                   {
-                    connectorId,
                     streamName,
                     from,
                     to,
@@ -280,6 +304,7 @@ export async function persistQueries(
         id: v4(),
         esql: query.esql,
         title: query.title,
+        description: query.description,
         severity_score: query.severity_score,
         evidence: query.evidence,
       },

@@ -7,24 +7,42 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
-import { scheduleEntityMaintainerTask, registerEntityMaintainerTask } from '.';
+import {
+  DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
+  registerEntityMaintainerTask,
+  scheduleEntityMaintainerTask,
+} from '.';
 import type { RegisterEntityMaintainerConfig } from './types';
+import { EntityMaintainerTaskStatus } from './types';
 
 const mockEnsureScheduled = jest.fn();
 const mockRegisterTaskDefinitions = jest.fn();
 const mockCreateInternalRepository = jest.fn();
 const mockGetStartServices = jest.fn();
+const mockLicenseCheck = jest.fn();
+const mockGetLicense = jest.fn();
 
 jest.mock('./entity_maintainers_registry', () => ({
   entityMaintainersRegistry: {
     getAll: jest.fn(),
     register: jest.fn(),
-    update: jest.fn(),
     hasId: jest.fn(),
   },
 }));
 
+const registryMock = jest.requireMock('./entity_maintainers_registry')
+  .entityMaintainersRegistry as {
+  register: jest.Mock;
+  getAll: jest.Mock;
+  hasId: jest.Mock;
+};
+
 function createMockDeps() {
+  mockLicenseCheck.mockReturnValue({ state: 'valid' });
+  mockGetLicense.mockResolvedValue({
+    check: mockLicenseCheck,
+    type: 'platinum',
+  });
   const logger = loggerMock.create();
   (logger.get as jest.Mock) = jest.fn().mockReturnValue(logger);
   const request = { headers: {} } as KibanaRequest;
@@ -35,7 +53,7 @@ function createMockDeps() {
     registerTaskDefinitions: mockRegisterTaskDefinitions.mockImplementation((defs) => defs),
   };
   const mockEsClient = {};
-  const start = {
+  const coreStart = {
     savedObjects: {
       createInternalRepository: mockCreateInternalRepository.mockReturnValue({}),
     },
@@ -45,15 +63,23 @@ function createMockDeps() {
       },
     },
   };
-  const core = {
-    getStartServices: mockGetStartServices.mockResolvedValue([start]),
+  const plugins = {
+    licensing: {
+      getLicense: mockGetLicense,
+    },
   };
+  const startContract = { createCRUDClient: jest.fn() };
+  const core = {
+    getStartServices: mockGetStartServices.mockResolvedValue([coreStart, plugins, startContract]),
+  };
+  const analytics = { reportEvent: jest.fn() };
   return {
     logger,
     request,
     taskManagerStart,
     taskManagerSetup,
     core,
+    analytics,
   };
 }
 
@@ -96,7 +122,10 @@ describe('entity_maintainer task', () => {
           id: 'maintainer-a:default',
           taskType: 'entity_store:v2:entity_maintainer_task:maintainer-a',
           schedule: { interval: '1m' },
-          state: { namespace: 'default' },
+          state: {
+            namespace: 'default',
+            taskStatus: EntityMaintainerTaskStatus.STARTED,
+          },
           params: {},
         },
         { request }
@@ -130,7 +159,10 @@ describe('entity_maintainer task', () => {
           id: 'maintainer-a:default',
           taskType: 'entity_store:v2:entity_maintainer_task:maintainer-a',
           schedule: { interval: '1m' },
-          state: { namespace: 'default' },
+          state: {
+            namespace: 'default',
+            taskStatus: EntityMaintainerTaskStatus.STARTED,
+          },
           params: {},
         },
         { request }
@@ -141,7 +173,10 @@ describe('entity_maintainer task', () => {
           id: 'maintainer-b:default',
           taskType: 'entity_store:v2:entity_maintainer_task:maintainer-b',
           schedule: { interval: '5m' },
-          state: { namespace: 'default' },
+          state: {
+            namespace: 'default',
+            taskStatus: EntityMaintainerTaskStatus.STARTED,
+          },
           params: {},
         },
         { request }
@@ -151,7 +186,7 @@ describe('entity_maintainer task', () => {
 
   describe('registerEntityMaintainerTask', () => {
     it('should register task definition with expected type and title', async () => {
-      const { logger, taskManagerSetup, core } = createMockDeps();
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
       const config = createMockConfig();
 
       registerEntityMaintainerTask({
@@ -159,6 +194,7 @@ describe('entity_maintainer task', () => {
         logger,
         config,
         core: core as any,
+        analytics,
       });
       await core.getStartServices();
 
@@ -168,20 +204,34 @@ describe('entity_maintainer task', () => {
       expect(defs[taskType]).toBeDefined();
       expect(defs[taskType].title).toBe('Entity Store - Entity Maintainer Task');
       expect(defs[taskType].description).toBe('Test maintainer');
+      expect(registryMock.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-maintainer',
+          minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
+        })
+      );
     });
 
     it('should trigger the correct run method upon registration and scheduling', async () => {
-      const { logger, taskManagerSetup, core } = createMockDeps();
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
       const run = jest.fn().mockResolvedValue({ key: 'value' });
-      const config = createMockConfig({ run });
+      const config = createMockConfig({ run, minLicense: 'enterprise' });
 
       registerEntityMaintainerTask({
         taskManager: taskManagerSetup as any,
         logger,
         config,
         core: core as any,
+        analytics,
       });
       await core.getStartServices();
+
+      expect(registryMock.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-maintainer',
+          minLicense: 'enterprise',
+        })
+      );
 
       const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
       const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
@@ -197,6 +247,8 @@ describe('entity_maintainer task', () => {
 
       await runner.run();
 
+      expect(mockGetLicense).toHaveBeenCalled();
+      expect(mockLicenseCheck).toHaveBeenCalledWith('entityStore', 'enterprise');
       expect(run).toHaveBeenCalledTimes(1);
       expect(run).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -211,8 +263,53 @@ describe('entity_maintainer task', () => {
       );
     });
 
+    it('should not call run when license check is not valid', async () => {
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
+      const run = jest.fn().mockResolvedValue({ key: 'value' });
+      const config = createMockConfig({ run });
+
+      registerEntityMaintainerTask({
+        taskManager: taskManagerSetup as any,
+        logger,
+        config,
+        core: core as any,
+        analytics,
+      });
+      await core.getStartServices();
+
+      mockLicenseCheck.mockReturnValueOnce({
+        state: 'invalid',
+        message: 'License does not support this feature',
+      });
+
+      const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
+      const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
+      const createTaskRunner = defs[taskType].createTaskRunner;
+      const taskState = {
+        namespace: 'default',
+        taskStatus: EntityMaintainerTaskStatus.STARTED,
+        metadata: { runs: 0 },
+      };
+      const runner = createTaskRunner({
+        taskInstance: {
+          id: 'test-maintainer:default',
+          state: taskState,
+        },
+        abortController: new AbortController(),
+        fakeRequest: { headers: {} } as KibanaRequest,
+      });
+
+      const result = await runner.run();
+
+      expect(run).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('skipped: insufficient or inactive license')
+      );
+      expect(result.state).toEqual(taskState);
+    });
+
     it('should trigger all run methods when multiple registrations occur with single scheduling', async () => {
-      const { logger, taskManagerSetup, core } = createMockDeps();
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
       const runA = jest.fn().mockResolvedValue({ from: 'a' });
       const runB = jest.fn().mockResolvedValue({ from: 'b' });
 
@@ -221,6 +318,7 @@ describe('entity_maintainer task', () => {
         logger,
         config: createMockConfig({ id: 'maintainer-a', run: runA }),
         core: core as any,
+        analytics,
       });
       await core.getStartServices();
       registerEntityMaintainerTask({
@@ -228,6 +326,7 @@ describe('entity_maintainer task', () => {
         logger,
         config: createMockConfig({ id: 'maintainer-b', run: runB }),
         core: core as any,
+        analytics,
       });
       await core.getStartServices();
 
@@ -257,7 +356,7 @@ describe('entity_maintainer task', () => {
     });
 
     it('should execute setup method only once', async () => {
-      const { logger, taskManagerSetup, core } = createMockDeps();
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
       const setup = jest.fn().mockResolvedValue({ initialized: true });
       const run = jest.fn().mockResolvedValue({ synced: true });
       const config = createMockConfig({ setup, run });
@@ -267,6 +366,7 @@ describe('entity_maintainer task', () => {
         logger,
         config,
         core: core as any,
+        analytics,
       });
       await core.getStartServices();
 
@@ -305,7 +405,7 @@ describe('entity_maintainer task', () => {
     });
 
     it('should change state across lifecycle as run or setup change it', async () => {
-      const { logger, taskManagerSetup, core } = createMockDeps();
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
       const setup = jest.fn().mockResolvedValue({ setupState: 1 });
       const run = jest.fn().mockImplementation(({ status }) => {
         const prev = status.state.runState ?? status.state.setupState ?? 0;
@@ -318,6 +418,7 @@ describe('entity_maintainer task', () => {
         logger,
         config,
         core: core as any,
+        analytics,
       });
       await core.getStartServices();
 
@@ -348,7 +449,7 @@ describe('entity_maintainer task', () => {
     });
 
     it('should populate lastErrorTimestamp when run throws', async () => {
-      const { logger, taskManagerSetup, core } = createMockDeps();
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
       const run = jest.fn().mockRejectedValue(new Error('run failed'));
       const config = createMockConfig({ run });
 
@@ -357,6 +458,7 @@ describe('entity_maintainer task', () => {
         logger,
         config,
         core: core as any,
+        analytics,
       });
       await core.getStartServices();
 
@@ -377,7 +479,7 @@ describe('entity_maintainer task', () => {
     });
 
     it('should set status.metadata lastSuccessTimestamp and runs correctly', async () => {
-      const { logger, taskManagerSetup, core } = createMockDeps();
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
       const run = jest.fn().mockResolvedValue({ done: true });
       const config = createMockConfig({ run });
 
@@ -386,6 +488,7 @@ describe('entity_maintainer task', () => {
         logger,
         config,
         core: core as any,
+        analytics,
       });
       await core.getStartServices();
 
@@ -407,7 +510,7 @@ describe('entity_maintainer task', () => {
     });
 
     it('should return current state without calling run when fakeRequest is missing', async () => {
-      const { logger, taskManagerSetup, core } = createMockDeps();
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
       const run = jest.fn();
       const config = createMockConfig({ run });
 
@@ -416,6 +519,7 @@ describe('entity_maintainer task', () => {
         logger,
         config,
         core: core as any,
+        analytics,
       });
       await core.getStartServices();
 

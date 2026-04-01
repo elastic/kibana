@@ -12,28 +12,16 @@ import { isLegacyHistogram } from './legacy_histogram';
 
 describe('isLegacyHistogram', () => {
   it('returns true when type and instrument are both histogram', () => {
-    expect(isLegacyHistogram({ type: ES_FIELD_TYPES.HISTOGRAM, instrument: 'histogram' })).toBe(
-      true
-    );
+    expect(isLegacyHistogram(ES_FIELD_TYPES.HISTOGRAM, 'histogram')).toBe(true);
   });
 
   it('returns false when type is histogram but instrument is not', () => {
-    expect(isLegacyHistogram({ type: ES_FIELD_TYPES.HISTOGRAM, instrument: 'gauge' })).toBe(false);
-    expect(isLegacyHistogram({ type: ES_FIELD_TYPES.HISTOGRAM, instrument: 'counter' })).toBe(
-      false
-    );
-  });
-
-  it('returns false when type is histogram and instrument is undefined', () => {
-    expect(isLegacyHistogram({ type: ES_FIELD_TYPES.HISTOGRAM, instrument: undefined })).toBe(
-      false
-    );
+    expect(isLegacyHistogram(ES_FIELD_TYPES.HISTOGRAM, 'gauge')).toBe(false);
+    expect(isLegacyHistogram(ES_FIELD_TYPES.HISTOGRAM, 'counter')).toBe(false);
   });
 
   it('returns false when type is not histogram', () => {
-    expect(isLegacyHistogram({ type: ES_FIELD_TYPES.LONG, instrument: 'histogram' })).toBe(false);
-    expect(
-      isLegacyHistogram({ type: ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM, instrument: 'histogram' })
-    ).toBe(false);
+    expect(isLegacyHistogram(ES_FIELD_TYPES.LONG, 'histogram')).toBe(false);
+    expect(isLegacyHistogram(ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM, 'histogram')).toBe(false);
   });
 });

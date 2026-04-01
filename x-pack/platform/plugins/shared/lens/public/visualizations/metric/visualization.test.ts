@@ -25,11 +25,11 @@ import type {
   Visualization,
   MetricVisualizationState,
 } from '@kbn/lens-common';
-import { LENS_METRIC_GROUP_ID } from '@kbn/lens-common';
+import { LENS_METRIC_GROUP_ID, LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR } from '@kbn/lens-common';
 import { getMetricVisualization } from './visualization';
 import type { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
-import { getDefaultConfigForMode } from './helpers';
+import { getDefaultConfigForMode } from './palette_config';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
@@ -1177,9 +1177,14 @@ describe('metric visualization', () => {
           expect(secondaryMetricAST.secondaryColor).toEqual(undefined);
           expect(secondaryMetricAST.secondaryTrendBaseline).toEqual([0]);
           expect(secondaryMetricAST.secondaryTrendPalette).toEqual([
-            '#F6726A',
-            '#ECF1F9',
-            '#24C292',
+            euiLightVars.euiColorBackgroundLightDanger,
+            euiLightVars.euiColorBackgroundLightText,
+            euiLightVars.euiColorBackgroundLightSuccess,
+          ]);
+          expect(secondaryMetricAST.secondaryTrendTextPalette).toEqual([
+            euiLightVars.euiColorTextDanger,
+            euiLightVars.euiColorTextParagraph,
+            euiLightVars.euiColorTextSuccess,
           ]);
         } else {
           fail('AST is not an object');
@@ -1644,6 +1649,116 @@ describe('metric visualization', () => {
     expect(visualization.getDisplayOptions!()).toEqual({
       noPanelTitle: false,
       noPadding: true,
+    });
+  });
+
+  describe('#onDatasourceUpdate', () => {
+    function createOperationByType(type: DataType) {
+      return {
+        dataType: type,
+        hasTimeShift: false,
+        label: 'label',
+        isBucketed: false,
+        hasReducedTimeRange: false,
+      };
+    }
+
+    const createFrame = (
+      operationFn: (id: string) => ReturnType<typeof createOperationByType>
+    ): FrameMock => {
+      return createMockFramePublicAPI({
+        datasourceLayers: {
+          [fullState.layerId]: createMockDatasource('formBased', {
+            getOperationForColumnId: jest.fn(operationFn),
+          }).publicAPIMock,
+        },
+      });
+    };
+
+    it('returns state unchanged when both metrics are numeric', () => {
+      const frame = createFrame(() => createOperationByType('number'));
+      const result = visualization.onDatasourceUpdate!(fullState, frame);
+      expect(result).toBe(fullState);
+    });
+
+    it('clears palette when primary metric becomes non-numeric', () => {
+      const frame = createFrame((id) =>
+        createOperationByType(id === fullState.metricAccessor ? 'string' : 'number')
+      );
+      const result = visualization.onDatasourceUpdate!({ ...fullState, palette }, frame);
+      expect(result).toHaveProperty('palette', undefined);
+    });
+
+    it('does not clear palette when primary metric is numeric', () => {
+      const frame = createFrame(() => createOperationByType('number'));
+      const result = visualization.onDatasourceUpdate!({ ...fullState, palette }, frame);
+      expect(result.palette).toEqual(palette);
+    });
+
+    it('resets secondary trend when secondary metric becomes non-numeric and trend was dynamic', () => {
+      const frame = createFrame((id) =>
+        createOperationByType(id === fullState.secondaryMetricAccessor ? 'string' : 'number')
+      );
+      const stateWithDynamicTrend: MetricVisualizationState = {
+        ...fullState,
+        secondaryTrend: {
+          type: 'dynamic',
+          visuals: 'both',
+          reversed: false,
+          paletteId: 'compare_to',
+          baselineValue: 0,
+        },
+      };
+      const result = visualization.onDatasourceUpdate!(stateWithDynamicTrend, frame);
+      expect(result).toEqual(
+        expect.objectContaining({
+          secondaryTrend: {
+            type: 'static',
+            color: LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
+          },
+          secondaryLabel: undefined,
+          secondaryLabelPosition: 'before',
+        })
+      );
+    });
+
+    it('resets secondary trend when baseline is "primary" but primary becomes non-numeric', () => {
+      const frame = createFrame((id) =>
+        createOperationByType(id === fullState.metricAccessor ? 'string' : 'number')
+      );
+      const stateWithPrimaryBaseline: MetricVisualizationState = {
+        ...fullState,
+        palette,
+        secondaryTrend: {
+          type: 'dynamic',
+          visuals: 'both',
+          reversed: false,
+          paletteId: 'compare_to',
+          baselineValue: 'primary',
+        },
+      };
+      const result = visualization.onDatasourceUpdate!(stateWithPrimaryBaseline, frame);
+      // palette cleared because primary is non-numeric
+      expect(result).toHaveProperty('palette', undefined);
+      // secondary trend reset because baseline='primary' with non-numeric primary
+      expect(result).toEqual(
+        expect.objectContaining({
+          secondaryTrend: {
+            type: 'dynamic',
+            visuals: 'both',
+            reversed: false,
+            paletteId: 'compare_to',
+            baselineValue: 0,
+          },
+          secondaryLabel: undefined,
+          secondaryLabelPosition: 'before',
+        })
+      );
+    });
+
+    it('returns state unchanged when frame is undefined', () => {
+      const result = visualization.onDatasourceUpdate!(fullState, undefined);
+      expect(result).toBe(fullState);
     });
   });
 

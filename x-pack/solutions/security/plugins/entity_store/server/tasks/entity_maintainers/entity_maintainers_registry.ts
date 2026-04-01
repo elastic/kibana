@@ -6,7 +6,6 @@
  */
 
 import type { EntityMaintainerRegistryData, EntityMaintainerTaskEntry } from './types';
-import { EntityMaintainerTaskStatus } from './types';
 
 export class EntityMaintainersRegistry {
   private readonly tasks = new Map<string, EntityMaintainerRegistryData>();
@@ -23,21 +22,12 @@ export class EntityMaintainersRegistry {
     return { id, ...config };
   }
 
-  register({ id, interval, description }: Omit<EntityMaintainerTaskEntry, 'taskStatus'>): void {
+  register({ id, interval, description, minLicense }: EntityMaintainerTaskEntry): void {
     this.tasks.set(id, {
       interval,
-      taskStatus: EntityMaintainerTaskStatus.NEVER_STARTED,
       description,
+      minLicense,
     });
-  }
-
-  update(id: string, overrides: Partial<EntityMaintainerRegistryData>): boolean {
-    const existing = this.tasks.get(id);
-    if (!existing) {
-      return false;
-    }
-    this.tasks.set(id, { ...existing, ...overrides });
-    return true;
   }
 
   getAll(): EntityMaintainerTaskEntry[] {

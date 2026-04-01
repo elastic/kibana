@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/logs-shared-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-exploration-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/logs-shared-plugin'
+  title: '@kbn/logs-shared-plugin'
   description: Moon project for @kbn/logs-shared-plugin
   channel: ''
   owner: '@elastic/obs-exploration-team'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/logs_shared
+  sourceRoot: x-pack/platform/plugins/shared/logs_shared
 dependsOn:
   - '@kbn/core'
   - '@kbn/i18n'
@@ -76,16 +75,6 @@ fileGroups:
     - server/**/*
     - types/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -22,7 +22,6 @@ import { withinQuotes } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { getOverlapRange, isRestartingExpression } from '../../definitions/utils/shared';
-import { esqlCommandRegistry } from '../../../..';
 import {
   getIndicesBrowserSuggestion,
   shouldSuggestIndicesBrowserAfterComma,
@@ -174,7 +173,8 @@ async function suggestAdditionalSources(
   const lastIndex = indexes[indexes.length - 1];
   const isTypingIndexName = lastIndex?.name && innerText.endsWith(lastIndex.name);
 
-  // Check for METADATA overlap (only when not typing index name)
+  // Only use overlap here to decide when to show `METADATA`.
+  // The replacement range is still handled centrally.
   if (!isTypingIndexName && getOverlapRange(innerText, METADATA_KEYWORD)) {
     return [metadataSuggestion];
   }
@@ -206,10 +206,5 @@ async function suggestAdditionalSources(
 }
 
 function shouldSuggestSubquery(context: ICommandContext | undefined): boolean {
-  if (context?.isCursorInSubquery) {
-    return false;
-  }
-
-  const fromCommand = esqlCommandRegistry.getCommandByName('from');
-  return fromCommand?.metadata?.subquerySupport ?? true;
+  return !context?.isCursorInSubquery;
 }

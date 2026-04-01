@@ -12,9 +12,9 @@ import type { ExpressionValueVisDimension, LegendSize } from '@kbn/chart-express
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { Position } from '@elastic/charts';
 import type { LensLayerType } from '../types';
-import type { HEATMAP_LEGEND_NAME, HEATMAP_GRID_NAME } from './constants';
+import type { HEATMAP_LEGEND_NAME, HEATMAP_GRID_NAME, HEATMAP_NAME } from './constants';
 
-export type HeatmapChartShapes = 'heatmap';
+export type HeatmapChartShapes = typeof HEATMAP_NAME;
 
 export interface HeatmapLegendConfigResult {
   /**
@@ -34,7 +34,7 @@ export interface HeatmapLegendConfigResult {
    */
   shouldTruncate?: boolean;
   /**
-   * Exact legend width (vertical) or height (horizontal)
+   * Legend size, either width (vertical) or height (horizontal)
    * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
    */
   legendSize?: LegendSize;

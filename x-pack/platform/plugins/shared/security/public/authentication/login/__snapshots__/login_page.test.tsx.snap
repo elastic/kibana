@@ -15,6 +15,7 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
         class="loginWelcome__logo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -60,7 +61,7 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
               Open in new window
               <span
                 color="inherit"
-                data-euiicon-type="popout"
+                data-euiicon-type="external"
               />
             </span>
           </a>
@@ -86,6 +87,7 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
         class="loginWelcome__logo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -131,7 +133,7 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
               Open in new window
               <span
                 color="inherit"
-                data-euiicon-type="popout"
+                data-euiicon-type="external"
               />
             </span>
           </a>
@@ -157,6 +159,7 @@ exports[`LoginPage disabled form states renders as expected when a connection to
         class="loginWelcome__logo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -218,6 +221,7 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
         class="loginWelcome__logo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -279,6 +283,7 @@ exports[`LoginPage disabled form states renders as expected when login is not en
         class="loginWelcome__logo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -340,6 +345,7 @@ exports[`LoginPage disabled form states renders as expected when secure connecti
         class="loginWelcome__logo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -401,6 +407,7 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
         class="loginWelcome__logo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -462,6 +469,7 @@ exports[`LoginPage disabled form states renders warning when cookies are disable
         class="loginWelcome__logo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -523,6 +531,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
         class="loginWelcome__logo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -702,6 +711,7 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
         class="loginWelcome__logo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -900,6 +910,7 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
         class="loginWelcome__logo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -1093,6 +1104,7 @@ exports[`LoginPage page renders as expected 1`] = `
         class="loginWelcome__logo"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>

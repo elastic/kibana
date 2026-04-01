@@ -7,12 +7,13 @@
 
 import type {
   PublicSkillDefinition,
+  PublicSkillSummary,
   PersistedSkillCreateRequest,
   PersistedSkillUpdateRequest,
 } from '@kbn/agent-builder-common';
 
 export interface ListSkillsResponse {
-  results: PublicSkillDefinition[];
+  results: PublicSkillSummary[];
 }
 
 export type GetSkillResponse = PublicSkillDefinition;

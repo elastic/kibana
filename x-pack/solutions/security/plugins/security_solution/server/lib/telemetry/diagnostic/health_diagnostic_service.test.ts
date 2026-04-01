@@ -10,6 +10,7 @@ import type { ElasticsearchClient, AnalyticsServiceStart, Logger } from '@kbn/co
 import { HealthDiagnosticServiceImpl } from './health_diagnostic_service';
 import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
 import { ValidationError } from './health_diagnostic_circuit_breakers.types';
+import { PermissionError } from './health_diagnostic_service.types';
 import { artifactService } from '../artifact';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
@@ -204,6 +205,31 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
             },
           },
         });
+      });
+
+      test('should log info (not error) for PermissionError', async () => {
+        await startService();
+
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        const permissionError = new PermissionError('Missing read privileges');
+        mockQueryExecutor.search.mockReturnValue(throwError(() => permissionError));
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+          name: 'test-query',
+          passed: false,
+          failure: {
+            message: 'Missing read privileges',
+            reason: undefined,
+          },
+        });
+        expect(mockLogger.info).toHaveBeenCalledWith(
+          'Permission error running query.',
+          expect.objectContaining({ error: permissionError })
+        );
+        expect(mockLogger.error).not.toHaveBeenCalled();
       });
 
       test('should handle artifact service errors gracefully', async () => {

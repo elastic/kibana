@@ -283,7 +283,8 @@ const startFleetServerWithDocker = async ({
     `Starting a new fleet server using Docker\n    Agent version: ${agentVersion}\n    Server URL: ${fleetServerUrl}`
   );
 
-  let retryAttempt = isServerless ? 0 : 1;
+  let retryAttempt = 0;
+  const maxRetries = isServerless ? 1 : 2;
   const attemptServerlessFleetServerSetup = async (): Promise<StartedServer> => {
     fleetServerVersionInfo = '';
 
@@ -359,7 +360,19 @@ const startFleetServerWithDocker = async ({
           }
         } else {
           log.info(`Waiting for Fleet Server [${hostname}] to enroll with Fleet`);
-          await waitForHostToEnroll(kbnClient, log, hostname, 120000);
+          try {
+            await waitForHostToEnroll(kbnClient, log, hostname, 240000);
+          } catch (enrollErr) {
+            log.warning(
+              `Agent enrollment lookup timed out for [${hostname}], falling back to fleet server status check`
+            );
+            if (!(await isFleetServerRunning(kbnClient, log))) {
+              throw enrollErr;
+            }
+            log.info(
+              `Fleet server at [${fleetServerUrl}] is responding — proceeding despite enrollment lookup timeout`
+            );
+          }
         }
 
         fleetServerVersionInfo = isServerless
@@ -390,9 +403,22 @@ const startFleetServerWithDocker = async ({
               })
             ).stdout;
       } catch (error) {
-        if (retryAttempt < 1) {
+        // Capture Docker container logs for diagnostics before retrying or throwing
+        try {
+          const dockerLogs = await execa('docker', ['logs', '--tail', '40', containerName]);
+          log.error(`Docker container [${containerName}] logs:\n${dockerLogs.stdout}`);
+          if (dockerLogs.stderr) {
+            log.error(`Docker container [${containerName}] stderr:\n${dockerLogs.stderr}`);
+          }
+        } catch (logError) {
+          log.verbose(`Failed to retrieve Docker logs for [${containerName}]: ${logError.message}`);
+        }
+
+        if (retryAttempt < maxRetries) {
           retryAttempt++;
-          log.error(`Failed to start fleet server, retrying. Error: ${error.message}`);
+          log.error(
+            `Failed to start fleet server (attempt ${retryAttempt}/${maxRetries}), retrying. Error: ${error.message}`
+          );
           log.verbose(dump(error));
           return attemptServerlessFleetServerSetup();
         }
