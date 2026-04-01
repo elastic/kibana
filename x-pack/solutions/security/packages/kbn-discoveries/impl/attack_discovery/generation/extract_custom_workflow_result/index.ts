@@ -9,14 +9,6 @@ import type { WorkflowExecutionDto } from '@kbn/workflows';
 
 import { normalizeLastStepOutput } from '../normalize_last_step_output';
 
-/**
- * Result extracted from a custom alert retrieval workflow.
- *
- * Custom workflows (e.g., ES|QL-based) produce raw (non-anonymized) alerts.
- * The alerts are CSV-formatted strings (one field per line, sorted
- * alphabetically) suitable for passing to the generation step alongside
- * (or instead of) legacy anonymized alerts.
- */
 export interface CustomWorkflowAlertResult {
   /** CSV-formatted alert strings (one field per line: `fieldName,value1,value2,...`) */
   alerts: string[];
@@ -28,10 +20,6 @@ export interface CustomWorkflowAlertResult {
   workflowRunId: string;
 }
 
-/**
- * Returns the last non-trigger step execution that has output,
- * or `undefined` if none exists.
- */
 const findLastStepWithOutput = (
   stepExecutions: WorkflowExecutionDto['stepExecutions']
 ): WorkflowExecutionDto['stepExecutions'][number] | undefined => {
@@ -46,14 +34,6 @@ const findLastStepWithOutput = (
   return undefined;
 };
 
-/**
- * Extracts alert data from a custom workflow execution.
- *
- * Finds the last completed non-trigger step with output and normalizes
- * its output into an array of alert strings using `normalizeLastStepOutput`.
- *
- * Throws if the workflow execution failed, was cancelled, or timed out.
- */
 export const extractCustomWorkflowResult = ({
   execution,
   workflowId,
