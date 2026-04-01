@@ -289,6 +289,7 @@ dependsOn:
   - '@kbn/anonymization-common'
   - '@kbn/controls-schemas'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/shared-ux-column-presets'
 tags:
   - plugin
   - prod

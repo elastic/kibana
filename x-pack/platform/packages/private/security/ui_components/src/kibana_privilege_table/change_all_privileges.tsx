@@ -41,7 +41,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
     switch (privilege) {
       case 'all':
         return {
-          icon: 'documentEdit',
+          icon: 'pencil',
           label: i18n.translate(
             'xpack.security.management.editRole.changeAllPrivileges.allSelectionLabel',
             {
@@ -51,7 +51,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
         };
       case 'read':
         return {
-          icon: 'glasses',
+          icon: 'readOnly',
           label: i18n.translate(
             'xpack.security.management.editRole.changeAllPrivileges.readSelectionLabel',
             {
@@ -88,7 +88,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
             id="xpack.security.management.editRole.changeAllPrivilegesLink"
             defaultMessage="Bulk actions"
           />{' '}
-          <EuiIcon size="s" type="arrowDown" />
+          <EuiIcon size="s" type="chevronSingleDown" />
         </EuiText>
       </EuiLink>
     );
