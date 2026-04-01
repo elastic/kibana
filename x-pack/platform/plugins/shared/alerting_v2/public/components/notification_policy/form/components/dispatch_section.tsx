@@ -126,7 +126,7 @@ export const DispatchSection: React.FC = () => {
                 data-test-subj="groupByInput"
                 placeholder={i18n.translate(
                   'xpack.alertingV2.notificationPolicy.form.groupBy.placeholder',
-                  { defaultMessage: 'Add field…' }
+                  { defaultMessage: 'Add field...' }
                 )}
                 selectedOptions={field.value.map((g: string) => ({ label: g }))}
                 options={groupByOptions}

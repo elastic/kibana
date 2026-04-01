@@ -102,6 +102,9 @@ test.describe(
       await pageObjects.integrationManagement
         .getDataStreamTitleInput()
         .fill('Audit Logs Data Stream');
+      await pageObjects.integrationManagement
+        .getDataStreamDescriptionInput()
+        .fill('Audit log events from security appliances');
 
       const comboInput = pageObjects.integrationManagement
         .getDataCollectionMethodSelect()
@@ -164,6 +167,9 @@ test.describe(
       const flyout = pageObjects.integrationManagement.getCreateDataStreamFlyout();
 
       await pageObjects.integrationManagement.getDataStreamTitleInput().fill('Audit Logs');
+      await pageObjects.integrationManagement
+        .getDataStreamDescriptionInput()
+        .fill('Audit log sample stream');
 
       const comboInput = pageObjects.integrationManagement
         .getDataCollectionMethodSelect()

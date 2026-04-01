@@ -73,7 +73,7 @@ export const AGGREGATE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: 
     value: 'time_interval',
     text: i18n.translate(
       'xpack.alertingV2.notificationPolicy.form.dispatch.strategy.timeInterval',
-      { defaultMessage: 'At most once every…' }
+      { defaultMessage: 'At most once every...' }
     ),
   },
   {
