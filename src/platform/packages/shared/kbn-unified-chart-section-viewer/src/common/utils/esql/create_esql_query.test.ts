@@ -341,20 +341,11 @@ TS metrics-*
     );
   });
 
-  describe('time range aware bucketing', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date('2026-03-31T12:00:00Z'));
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    it('should reduce bucket count for a 15-minute time range', () => {
+  describe('custom targetBuckets', () => {
+    it('should use the provided targetBuckets value', () => {
       const query = createESQLQuery({
         metricItem: mockMetric,
-        timeRange: { from: 'now-15m', to: 'now' },
+        targetBuckets: 15,
       });
       expect(query).toBe(
         `
@@ -364,20 +355,7 @@ TS metrics-*
       );
     });
 
-    it('should keep 100 buckets for time ranges longer than 100 minutes', () => {
-      const query = createESQLQuery({
-        metricItem: mockMetric,
-        timeRange: { from: 'now-24h', to: 'now' },
-      });
-      expect(query).toBe(
-        `
-TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
-`.trim()
-      );
-    });
-
-    it('should use 100 buckets when timeRange is not provided', () => {
+    it('should default to 100 buckets when targetBuckets is not provided', () => {
       const query = createESQLQuery({ metricItem: mockMetric });
       expect(query).toBe(
         `

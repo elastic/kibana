@@ -13,6 +13,7 @@ import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
@@ -20,7 +21,7 @@ import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
-import { createESQLQuery, firstNonNullable } from '../../../common/utils';
+import { createESQLQuery, computeTargetBuckets, firstNonNullable } from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 
@@ -79,6 +80,7 @@ export const MetricsGrid = ({
 
   const handleViewDetails = useCallback(
     (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
       setExpandedMetric({ index, metricItem, esqlQuery });
     },
     []
@@ -222,7 +224,7 @@ const ChartItem = React.memo(
       [euiTheme.colors.vis]
     );
 
-    const { timeRange } = fetchParams;
+    const targetBuckets = computeTargetBuckets(fetchParams.timeRange);
 
     const esqlQuery = useMemo(() => {
       const fieldType = firstNonNullable(metricItem.fieldTypes);
@@ -232,13 +234,13 @@ const ChartItem = React.memo(
             metricItem,
             splitAccessors: dimensions.map((dim) => dim.name),
             whereStatements,
-            timeRange,
+            targetBuckets,
           })
         : '';
-    }, [metricItem, dimensions, whereStatements, timeRange]);
+    }, [metricItem, dimensions, whereStatements, targetBuckets]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
-    const chartLayers = useChartLayers({ dimensions, metricItem, color, timeRange });
+    const chartLayers = useChartLayers({ dimensions, metricItem, color, targetBuckets });
     const handleViewDetailsCallback = useCallback(
       () => onViewDetails(index, esqlQuery, metricItem),
       [index, esqlQuery, metricItem, onViewDetails]

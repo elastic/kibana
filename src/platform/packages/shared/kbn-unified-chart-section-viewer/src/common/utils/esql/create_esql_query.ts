@@ -8,13 +8,8 @@
  */
 
 import { esql } from '@elastic/esql';
-import type { TimeRange } from '@kbn/es-query';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import {
-  createMetricAggregation,
-  createTimeBucketAggregation,
-  computeTargetBuckets,
-} from './create_aggregation';
+import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 import { firstNonNullable } from '../first_null_nullable';
 import type { ParsedMetricItem } from '../../../types';
 
@@ -30,7 +25,7 @@ interface CreateESQLQueryParams {
   metricItem: ParsedMetricItem;
   splitAccessors?: string[];
   whereStatements?: string[];
-  timeRange?: TimeRange;
+  targetBuckets?: number;
 }
 
 /**
@@ -41,14 +36,14 @@ interface CreateESQLQueryParams {
  * @param metric - The full metric field object, including dimension type information.
  * @param splitAccessors - An array of field names to use as split accessors in the BY clause.
  * @param whereStatements - Optional WHERE clause statements.
- * @param timeRange - Optional time range used to compute an appropriate bucket count.
+ * @param targetBuckets - Pre-computed number of time buckets for the BUCKET function.
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({
   metricItem,
   splitAccessors = [],
   whereStatements = [],
-  timeRange,
+  targetBuckets,
 }: CreateESQLQueryParams) {
   const { metricName, metricTypes, fieldTypes, dataStream } = metricItem;
   const index = dataStream;
@@ -61,7 +56,6 @@ export function createESQLQuery({
     metricName,
     placeholderName: 'metricName',
   });
-  const targetBuckets = computeTargetBuckets(timeRange);
   const timeBucketAggregation = createTimeBucketAggregation({ targetBuckets });
   const splitAccessorsClause =
     splitAccessors.length > 0
