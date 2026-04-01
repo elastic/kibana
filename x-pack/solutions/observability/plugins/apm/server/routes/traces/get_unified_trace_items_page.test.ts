@@ -247,20 +247,26 @@ describe('getUnifiedTraceItemsPaginated', () => {
       expect(callArgs.fields).toContain(KIND);
     });
 
-    it('passes skipProcessorEventFilter only when ecsOnly=false', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(
+    it('passes skipProcessorEventFilter=false when ecsOnly=true', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1')], 1)
       );
 
       await getUnifiedTraceItemsPaginated({ ...defaultParams, ecsOnly: true });
-      const ecsOnlyOptions = (mockApmEventClient.search as jest.Mock).mock.calls[0][2];
-      expect(ecsOnlyOptions?.skipProcessorEventFilter).toBeUndefined();
 
-      jest.clearAllMocks();
+      const options = (mockApmEventClient.search as jest.Mock).mock.calls[0][2];
+      expect(options?.skipProcessorEventFilter).toBe(false);
+    });
+
+    it('passes skipProcessorEventFilter=true when ecsOnly=false', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+        makeSearchResponse([makeHit('span-1')], 1)
+      );
 
       await getUnifiedTraceItemsPaginated({ ...defaultParams, ecsOnly: false });
-      const unifiedOptions = (mockApmEventClient.search as jest.Mock).mock.calls[0][2];
-      expect(unifiedOptions?.skipProcessorEventFilter).toBe(true);
+
+      const options = (mockApmEventClient.search as jest.Mock).mock.calls[0][2];
+      expect(options?.skipProcessorEventFilter).toBe(true);
     });
   });
 });
