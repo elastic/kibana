@@ -14,6 +14,7 @@ import type { OpenAPIV3 } from 'openapi-types';
 import type { ConvertOptions, KnownParameters } from '../../type';
 import { getXState } from '../../util';
 import { validatePathParameters } from '../common';
+import { collapseArrayUnion } from '../collapse_array_union';
 
 // Adapted from from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1
 
@@ -233,11 +234,15 @@ const convertObjectMembersToParameterObjects = (
       openApiSchemaObject.default = defaultValue;
     }
 
+    const finalSchema = !isPathParameter
+      ? collapseArrayUnion(openApiSchemaObject)
+      : openApiSchemaObject;
+
     return {
       name: shapeKey,
       in: isPathParameter ? 'path' : 'query',
       required: isPathParameter ? !knownParameters[shapeKey]?.optional : !isOptional,
-      schema: openApiSchemaObject,
+      schema: finalSchema,
       description: outerDescription || schemaDescription,
     };
   });
