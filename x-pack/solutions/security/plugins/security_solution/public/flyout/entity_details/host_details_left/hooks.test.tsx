@@ -20,6 +20,10 @@ jest.mock('@kbn/expandable-flyout', () => ({
   })),
 }));
 
+jest.mock('../../../common/hooks/use_has_entity_resolution_license', () => ({
+  useHasEntityResolutionLicense: jest.fn(() => false),
+}));
+
 const defaultParams: HostDetailsPanelProps = {
   isRiskScoreExist: true,
   hostName: 'testHost',
