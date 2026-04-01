@@ -55,9 +55,12 @@ export class LensClient {
       data,
       meta,
       id: responseId,
-    } = await this.http.get<LensGetResponseBody>(`${LENS_INTERNAL_VIS_API_PATH}/${id}`, {
-      version: LENS_INTERNAL_API_VERSION,
-    });
+    } = await this.http.get<LensGetResponseBody>(
+      buildPath(`${LENS_INTERNAL_VIS_API_PATH}/{id}`, { id }),
+      {
+        version: LENS_INTERNAL_API_VERSION,
+      }
+    );
 
     const chartType = this.builder?.getType(data);
 
@@ -182,7 +185,7 @@ export class LensClient {
           };
 
     const { data, meta, ...rest } = await this.http.put<LensUpdateResponseBody>(
-      `${LENS_INTERNAL_VIS_API_PATH}/${id}`,
+      buildPath(`${LENS_INTERNAL_VIS_API_PATH}/{id}`, { id }),
       {
         body: JSON.stringify(body),
         query: options,
