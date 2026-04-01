@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -46,6 +46,12 @@ import {
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
 import { getWatchlistName } from '../../../common/entity_analytics/watchlists/constants';
+import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
+import { ThreatHuntingLeadsFlyout } from '../components/threat_hunting/top_threat_hunting_leads/threat_hunting_leads_flyout';
+import { LeadProvenanceFlyout } from '../components/threat_hunting/top_threat_hunting_leads/lead_provenance_flyout';
+import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
+import { useLeadAttachment } from '../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment';
+import type { HuntingLead } from '../components/threat_hunting/top_threat_hunting_leads/types';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
   query,
@@ -61,7 +67,20 @@ export const EntityAnalyticsHomePage = () => {
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const leadDetailsEnabled = useIsExperimentalFeatureEnabled('leadGenerationDetailsEnabled');
   const { dataView, status } = useDataView(PageScope.explore);
+
+  const {
+    leads,
+    totalCount,
+    isLoading: isLeadsLoading,
+    isGenerating,
+    generate,
+  } = useHuntingLeads();
+  const openAgentBuilderWithLead = useLeadAttachment();
+
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [provenanceLead, setProvenanceLead] = useState<HuntingLead | null>(null);
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
@@ -96,6 +115,35 @@ export const EntityAnalyticsHomePage = () => {
 
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const showEmptyPrompt = !indicesExist;
+
+  const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
+  const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+
+  const handleLeadClick = useCallback(
+    (lead: HuntingLead) => openAgentBuilderWithLead(lead),
+    [openAgentBuilderWithLead]
+  );
+
+  const handleLeadInfoClick = useCallback((lead: HuntingLead) => setProvenanceLead(lead), []);
+
+  const handleCloseProvenance = useCallback(() => setProvenanceLead(null), []);
+
+  const handleHuntInChat = useCallback(() => {
+    const firstLead = leads[0];
+    if (firstLead) {
+      openAgentBuilderWithLead(firstLead);
+    }
+  }, [leads, openAgentBuilderWithLead]);
+
+  const handleSelectLeadInFlyout = useCallback(
+    (lead: HuntingLead) => openAgentBuilderWithLead(lead),
+    [openAgentBuilderWithLead]
+  );
+
+  const handleInvestigateInChat = useCallback(
+    (lead: HuntingLead) => openAgentBuilderWithLead(lead),
+    [openAgentBuilderWithLead]
+  );
 
   if (newDataViewPickerEnabled && status === 'pristine') {
     return <PageLoader />;
@@ -136,6 +184,20 @@ export const EntityAnalyticsHomePage = () => {
         ) : (
           <EuiFlexGroup direction="column" gutterSize="l">
             <EuiFlexItem>
+              <TopThreatHuntingLeads
+                leads={leads}
+                totalCount={totalCount}
+                isLoading={isLeadsLoading}
+                isGenerating={isGenerating}
+                onSeeAll={handleOpenFlyout}
+                onLeadClick={handleLeadClick}
+                onHuntInChat={handleHuntInChat}
+                onLeadInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
+                onGenerate={generate}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem>
               <EuiFlexGroup
                 direction={isXlScreen ? 'row' : 'column'}
                 responsive={false}
@@ -160,6 +222,22 @@ export const EntityAnalyticsHomePage = () => {
           </EuiFlexGroup>
         )}
       </SecuritySolutionPageWrapper>
+
+      {isFlyoutOpen && (
+        <ThreatHuntingLeadsFlyout
+          onClose={handleCloseFlyout}
+          onSelectLead={handleSelectLeadInFlyout}
+          onInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
+        />
+      )}
+
+      {provenanceLead && (
+        <LeadProvenanceFlyout
+          lead={provenanceLead}
+          onClose={handleCloseProvenance}
+          onInvestigateInChat={handleInvestigateInChat}
+        />
+      )}
 
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>

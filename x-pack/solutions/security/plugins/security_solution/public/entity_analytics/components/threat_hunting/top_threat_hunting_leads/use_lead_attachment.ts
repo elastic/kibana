@@ -6,11 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import {
-  SecurityAgentBuilderAttachments,
-  THREAT_HUNTING_AGENT_ID,
-} from '../../../../../common/constants';
+import { THREAT_HUNTING_AGENT_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { LEAD_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
@@ -44,6 +40,11 @@ ${lead.tags.join(', ')}
 ${recommendations}`;
 };
 
+const buildLeadPrompt = (lead: HuntingLead): string => {
+  const leadMarkdown = formatLeadAsMarkdown(lead);
+  return `${LEAD_ATTACHMENT_PROMPT}\n\n---\n\n${leadMarkdown}`;
+};
+
 export const useLeadAttachment = () => {
   const { agentBuilder } = useKibana().services;
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
@@ -54,22 +55,10 @@ export const useLeadAttachment = () => {
         return;
       }
 
-      const leadMarkdown = formatLeadAsMarkdown(lead);
-
-      const attachment: AttachmentInput = {
-        id: `${SecurityAgentBuilderAttachments.lead}-${Date.now()}`,
-        type: SecurityAgentBuilderAttachments.lead,
-        data: {
-          lead: leadMarkdown,
-          attachmentLabel: lead.title,
-        },
-      };
-
       agentBuilder.openChat({
         autoSendInitialMessage: false,
         newConversation: true,
-        initialMessage: LEAD_ATTACHMENT_PROMPT,
-        attachments: [attachment],
+        initialMessage: buildLeadPrompt(lead),
         sessionTag: 'security',
         agentId: THREAT_HUNTING_AGENT_ID,
       });

@@ -46,13 +46,6 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
     }),
     icon: 'document',
   },
-  {
-    type: SecurityAgentBuilderAttachments.lead,
-    label: i18n.translate('xpack.securitySolution.agentBuilder.attachments.lead.label', {
-      defaultMessage: 'Hunting Lead',
-    }),
-    icon: 'sparkles',
-  },
 ];
 
 const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
