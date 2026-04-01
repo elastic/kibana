@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { resolveConnectorList, resolveConnectorById } from '../resolve_inference_endpoints';
+import { resolveConnectorList, resolveConnectorById } from '../resolve_inference_connectors';
 
 const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/connectors',

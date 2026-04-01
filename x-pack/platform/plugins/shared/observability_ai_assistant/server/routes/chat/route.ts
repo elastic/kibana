@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { boomify, notImplemented } from '@hapi/boom';
-import { isInferenceError } from '@kbn/inference-common';
+import { notImplemented } from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import type { Observable } from 'rxjs';
@@ -22,7 +21,7 @@ import { observableIntoStream } from '../../service/util/observable_into_stream'
 import { withAssistantSpan } from '../../service/util/with_assistant_span';
 import { recallAndScore } from '../../functions/context/utils/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { resolveConnectorById } from '../resolve_inference_endpoints';
+import { resolveConnectorById } from '../resolve_inference_connectors';
 import type { Instruction } from '../../../common/types';
 import {
   assistantScopeType,
@@ -97,16 +96,9 @@ async function initializeChatRequest({
 }) {
   const { cloud } = plugins;
 
-  try {
-    await withAssistantSpan('guard_against_invalid_connector', () =>
-      resolveConnectorById({ context, plugins, request, logger, connectorId })
-    );
-  } catch (error) {
-    if (isInferenceError(error) && error.status) {
-      throw boomify(error, { statusCode: error.status });
-    }
-    throw error;
-  }
+  await withAssistantSpan('guard_against_invalid_connector', () =>
+    resolveConnectorById({ context, plugins, request, logger, connectorId })
+  );
 
   const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
     service.getClient({ request, scopes }),
