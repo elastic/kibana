@@ -125,6 +125,7 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       source: `${prefix}.relationships.communicates_with`,
       destination: 'entity.relationships.communicates_with',
       mapping: { type: 'keyword' },
+      fieldHistoryLength: 50,
       allowAPIUpdate: true,
     }),
     collectValues({

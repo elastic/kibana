@@ -133,6 +133,8 @@ import {
   registerEntityStoreSnapshotTask,
   registerEntityStoreHealthTask,
 } from './lib/entity_analytics/entity_store/tasks';
+import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers/accesses';
+import { communicatesWithMaintainer } from './lib/entity_analytics/maintainers/communicates_with';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   allRiskScoreIndexPattern,
@@ -144,6 +146,7 @@ import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../common/siem_migrations/constants';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/search_strategy';
@@ -350,11 +353,15 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger: this.logger,
       auditLogger: plugins.security?.audit.withoutRequest,
       kibanaVersion: pluginContext.env.packageInfo.version,
+      experimentalFeatures,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
 
     if (!experimentalFeatures.entityStoreDisabled) {
+      plugins.entityStore?.registerEntityMaintainer(accessesFrequentlyMaintainer);
+      plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
+
       registerEntityStoreFieldRetentionEnrichTask({
         getStartServices: core.getStartServices,
         logger: this.logger,
@@ -427,11 +434,31 @@ export class Plugin implements ISecuritySolutionPlugin {
         recommendedEndpoints: [],
       });
 
+      if (!experimentalFeatures.siemMigrationsDisabled) {
+        plugins.searchInferenceEndpoints.features.register({
+          parentFeatureId: 'security_search_inference_parent',
+          featureId: SIEM_MIGRATION_INFERENCE_FEATURE_ID,
+          featureName: 'Automatic migration',
+          featureDescription: 'Automatic migration inference endpoint configuration',
+          taskType: 'chat_completion',
+          recommendedEndpoints: [],
+        });
+      }
+
       plugins.searchInferenceEndpoints.features.register({
         parentFeatureId: 'security_search_inference_parent',
         featureId: 'defend_insights',
         featureName: 'Automatic Troubleshooting',
         featureDescription: 'Automatic Troubleshooting inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: 'security_search_inference_parent',
+        featureId: 'attack_discovery',
+        featureName: 'Attack Discovery',
+        featureDescription: 'Attack Discovery inference endpoint configuration',
         taskType: 'chat_completion',
         recommendedEndpoints: [],
       });

@@ -48,7 +48,6 @@ import { LoadingPanel } from '../../../../loading_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { SeverityBadge } from '../severity_badge/severity_badge';
-import { useFetchStreams } from '../../hooks/use_fetch_streams';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { buildDiscoverParams } from '../../utils/discover_helpers';
 import {
@@ -96,7 +95,7 @@ export function QueriesTable() {
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
-      start: { unifiedSearch, share },
+      start: { share },
     },
     core: {
       notifications: { toasts },
@@ -126,11 +125,7 @@ export function QueriesTable() {
     status: ['active', 'draft'],
   });
   const { data: occurrencesData } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
-  const {
-    data: streamsData,
-    isLoading: streamsLoading,
-    isError: hasStreamsError,
-  } = useFetchStreams();
+
   const { count: unbackedCount } = useUnbackedQueriesCount();
   const queryClient = useQueryClient();
   const { promoteAll, upsertQuery, removeQuery } = useQueriesApi();
@@ -213,7 +208,6 @@ export function QueriesTable() {
   const tableItems = queriesData?.queries ?? [];
 
   const columns: Array<EuiBasicTableColumn<SignificantEventQueryRow>> = useMemo(() => {
-    const streamDefinitions = streamsData?.streams ?? [];
     const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
     return [
@@ -314,18 +308,8 @@ export function QueriesTable() {
             icon: 'discoverApp',
             description: OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
             enabled: () => discoverLocator !== undefined,
-            onClick: (item) => {
-              const definition = streamDefinitions.find(
-                (streamItem) => streamItem.stream.name === item.stream_name
-              );
-
-              if (!definition) {
-                return;
-              }
-
-              discoverLocator?.navigate(
-                buildDiscoverParams(item.query, definition.stream, timeState)
-              );
+            onClick: (item: SignificantEventQueryRow) => {
+              discoverLocator?.navigate(buildDiscoverParams(item.query, timeState));
             },
             isPrimary: true,
             'data-test-subj': 'significant_events_table_open_in_discover_action',
@@ -342,14 +326,14 @@ export function QueriesTable() {
         ],
       },
     ];
-  }, [share.url.locators, streamsData, timeState, selectedQuery, handleSelectQuery]);
+  }, [share.url.locators, timeState, selectedQuery, handleSelectQuery]);
 
-  const isLoading = queriesLoading || streamsLoading;
+  const isLoading = queriesLoading;
   if (isLoading) {
     return <LoadingPanel size="l" />;
   }
 
-  const hasError = hasQueriesError || hasStreamsError;
+  const hasError = hasQueriesError;
   if (hasError) {
     return (
       <EuiEmptyPrompt
@@ -384,33 +368,21 @@ export function QueriesTable() {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem>
-            <unifiedSearch.ui.SearchBar
-              appName="streamsApp"
-              showFilterBar={false}
-              showQueryMenu={false}
-              showQueryInput
-              showDatePicker={false}
-              submitButtonStyle="iconOnly"
-              displayStyle="inPage"
-              disableQueryLanguageSwitcher
-              onQuerySubmit={(queryPayload) => {
-                setSearchQuery(String(queryPayload.query?.query ?? ''));
-                setPagination((currentPagination) => ({ index: 0, size: currentPagination.size }));
-              }}
-              query={{
-                query: searchQuery,
-                language: 'text',
-              }}
-              isLoading={queriesLoading}
-              placeholder={SEARCH_PLACEHOLDER}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar showDatePicker />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <StreamsAppSearchBar
+          isLoading={queriesLoading}
+          onQuerySubmit={(queryPayload) => {
+            setSearchQuery(String(queryPayload.query?.query ?? ''));
+            setPagination((currentPagination) => ({ index: 0, size: currentPagination.size }));
+          }}
+          placeholder={SEARCH_PLACEHOLDER}
+          query={{
+            query: searchQuery,
+            language: 'text',
+          }}
+          showDatePicker
+          showQueryInput
+          submitButtonStyle="iconOnly"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder hasShadow={false}>
@@ -450,8 +422,8 @@ export function QueriesTable() {
           rowProps={(item: SignificantEventQueryRow) => ({
             isSelected: selectedQuery?.query.id === item.query.id,
           })}
-          loading={queriesLoading || streamsLoading}
-          noItemsMessage={!queriesLoading && !streamsLoading ? NO_ITEMS_MESSAGE : ''}
+          loading={queriesLoading}
+          noItemsMessage={!queriesLoading ? NO_ITEMS_MESSAGE : ''}
           pagination={{
             pageIndex: pagination.index,
             pageSize: pagination.size,

@@ -20,6 +20,7 @@ import {
 } from '../shared';
 import { datasetEsqlTableSchema, datasetSchema } from '../dataset';
 import {
+  legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
   mergeAllMetricsWithChartDimensionSchemaWithStaticOps,
@@ -139,11 +140,13 @@ const sharedAxisSchema = {
          * - 'vertical': Labels aligned vertically
          * - 'angled': Labels at an angle
          */
-        orientation: builderEnums.orientation({
-          meta: {
-            description: 'Orientation of the axis labels',
-          },
-        }),
+        orientation: schema.maybe(
+          builderEnums.orientation({
+            meta: {
+              description: 'Orientation of the axis labels',
+            },
+          })
+        ),
       },
       { meta: { description: 'Label configuration' } }
     )
@@ -315,14 +318,7 @@ const xySharedSettings = {
             placement: schema.maybe(schema.literal('outside')),
             layout: schema.maybe(gridLayout),
             position: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
-            size: schema.maybe(
-              schema.oneOf([
-                schema.literal('small'),
-                schema.literal('medium'),
-                schema.literal('large'),
-                schema.literal('xlarge'),
-              ])
-            ),
+            size: legendSizeSchema,
           },
           {
             meta: {

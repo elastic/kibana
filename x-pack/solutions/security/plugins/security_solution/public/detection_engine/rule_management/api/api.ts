@@ -198,6 +198,7 @@ export const fetchRules = async ({
     perPage: 20,
   },
   signal,
+  schedulerId,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const kql = convertRulesFilterToKQL(filterOptions);
 
@@ -216,6 +217,7 @@ export const fetchRules = async ({
       ? { gaps_range_start: defaultGapsRange.start, gaps_range_end: defaultGapsRange.end }
       : {}),
     ...(kql !== '' ? { filter: kql } : {}),
+    ...(schedulerId ? { gap_auto_fill_scheduler_id: schedulerId } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {
@@ -365,6 +367,7 @@ export type QueryOrIds =
       ids?: undefined;
       gapRange?: { start: string; end: string };
       gapFillStatuses?: GapFillStatus[];
+      schedulerId?: string;
     }
   | { query?: undefined; ids: string[] };
 
@@ -439,6 +442,7 @@ export async function performBulkAction({
         : undefined,
     fill_gaps:
       bulkAction.type === BulkActionTypeEnum.fill_gaps ? bulkAction.fillGapsPayload : undefined,
+    gap_auto_fill_scheduler_id: 'schedulerId' in bulkAction ? bulkAction.schedulerId : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
