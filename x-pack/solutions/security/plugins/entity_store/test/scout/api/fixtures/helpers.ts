@@ -6,9 +6,28 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
+import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
-import { hashEuid } from '../../../../server/domain/crud/utils';
-import { ENTITY_STORE_ROUTES, LATEST_INDEX, UPDATES_INDEX } from './constants';
+
+import {
+  ENTITY_STORE_ROUTES,
+  HISTORY_INDEX_PATTERN,
+  LATEST_INDEX,
+  UPDATES_INDEX,
+} from './constants';
+
+/**
+ * Deletes all Entity Store data indices: latest, updates, and history snapshots.
+ * Call in afterAll / afterEach to prevent stale data from leaking between
+ * sequential test-target runs that share the same ES cluster.
+ */
+export const clearEntityStoreIndices = async (esClient: EsClient) => {
+  const resolved = await esClient.indices.resolveIndex({ name: HISTORY_INDEX_PATTERN });
+  const historyIndices = resolved.indices.map((i) => i.name);
+
+  const toDelete = [LATEST_INDEX, UPDATES_INDEX, ...historyIndices];
+  await esClient.indices.delete({ index: toDelete, ignore_unavailable: true }, { ignore: [404] });
+};
 
 /**
  * API client shape required by forceUserExtraction.
@@ -173,23 +192,40 @@ export const assertNotResolved = async (
 /**
  * Triggers a maintainer run by calling the async `run/{id}` endpoint.
  * The route calls `taskManager.runSoon()` — it does NOT wait for completion.
+ *
+ * Retries on 500 errors, which happen when the scheduler fires an automatic
+ * run that overlaps with the manual trigger. Kibana wraps the actual
+ * "currently running" error in a generic 500 body, so we retry on any 500.
  */
 export const triggerMaintainerRun = async (
   apiClient: ForceLogExtractionApiClient,
   headers: Record<string, string>,
-  maintainerId = 'automated-resolution'
+  maintainerId = 'automated-resolution',
+  { maxRetries = 5, retryDelayMs = 2000 } = {}
 ) => {
-  const response = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_RUN(maintainerId), {
-    headers,
-    responseType: 'json',
-    body: {},
-  });
-  if (response.statusCode !== 200) {
-    throw new Error(
-      `Failed to trigger maintainer run '${maintainerId}': ${JSON.stringify(response.body)}`
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const response = await apiClient.post(
+      ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_RUN(maintainerId),
+      {
+        headers,
+        responseType: 'json',
+        body: {},
+      }
     );
+
+    if (response.statusCode === 200) {
+      return response;
+    }
+
+    const body = JSON.stringify(response.body);
+
+    if (response.statusCode === 500 && attempt < maxRetries) {
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+      continue;
+    }
+
+    throw new Error(`Failed to trigger maintainer run '${maintainerId}': ${body}`);
   }
-  return response;
 };
 
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {

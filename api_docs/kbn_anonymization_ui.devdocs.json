@@ -929,7 +929,7 @@
             "label": "fieldRules",
             "description": [],
             "signature": [
-              "z.infer<any>[]"
+              "{ field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
             "lineNumber": 25,
@@ -945,7 +945,7 @@
             "label": "regexRules",
             "description": [],
             "signature": [
-              "z.infer<any>[]"
+              "{ id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
             "lineNumber": 26,
@@ -961,7 +961,7 @@
             "label": "nerRules",
             "description": [],
             "signature": [
-              "z.infer<any>[]"
+              "{ id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
             "lineNumber": 27,
@@ -1299,7 +1299,7 @@
             "label": "onFieldRulesChange",
             "description": [],
             "signature": [
-              "(rules: z.infer<any>[]) => void"
+              "(rules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]) => void"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
             "lineNumber": 42,
@@ -1315,7 +1315,7 @@
                 "label": "rules",
                 "description": [],
                 "signature": [
-                  "z.infer<any>[]"
+                  "{ field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
                 "lineNumber": 42,
@@ -1335,7 +1335,7 @@
             "label": "onRegexRulesChange",
             "description": [],
             "signature": [
-              "(rules: z.infer<any>[]) => void"
+              "(rules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]) => void"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
             "lineNumber": 43,
@@ -1351,7 +1351,7 @@
                 "label": "rules",
                 "description": [],
                 "signature": [
-                  "z.infer<any>[]"
+                  "{ id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
                 "lineNumber": 43,
@@ -1371,7 +1371,7 @@
             "label": "onNerRulesChange",
             "description": [],
             "signature": [
-              "(rules: z.infer<any>[]) => void"
+              "(rules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]) => void"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
             "lineNumber": 44,
@@ -1387,7 +1387,7 @@
                 "label": "rules",
                 "description": [],
                 "signature": [
-                  "z.infer<any>[]"
+                  "{ id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
                 "lineNumber": 44,

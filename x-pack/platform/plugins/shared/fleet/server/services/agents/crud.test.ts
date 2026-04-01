@@ -13,6 +13,7 @@ import { isSpaceAwarenessEnabled as _isSpaceAwarenessEnabled } from '../spaces/h
 
 import { AgentNotFoundError } from '../..';
 
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { AGENTS_INDEX } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
@@ -29,6 +30,7 @@ import {
   updateAgent,
   _joinFilters,
   getByIds,
+  getAgentsById,
   fetchAllAgentsByKuery,
 } from './crud';
 
@@ -666,6 +668,47 @@ describe('Agents CRUD test', () => {
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: `User closing point in time query [pitId=test-pit]`,
       });
+    });
+  });
+
+  describe('getAgentsById()', () => {
+    beforeEach(() => {
+      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('foo');
+    });
+
+    it('chunks requests so each search stays within max_result_window (10k)', async () => {
+      const overflow = 400;
+      const firstBatch = Array.from({ length: SO_SEARCH_LIMIT }, (_, i) => `agent-${i}`);
+      const secondBatch = Array.from(
+        { length: overflow },
+        (_, i) => `agent-${SO_SEARCH_LIMIT + i}`
+      );
+      const agentIds = [...firstBatch, ...secondBatch];
+
+      searchMock
+        .mockResolvedValueOnce(
+          getEsResponse(firstBatch, firstBatch.length, 'online', (id) => ({
+            id,
+            namespaces: ['foo'],
+          }))
+        )
+        .mockResolvedValueOnce(
+          getEsResponse(secondBatch, secondBatch.length, 'online', (id) => ({
+            id,
+            namespaces: ['foo'],
+          }))
+        );
+
+      const result = await getAgentsById(esClientMock, soClientMock, agentIds);
+
+      expect(searchMock).toHaveBeenCalledTimes(2);
+      expect(searchMock.mock.calls[0][0].size).toBe(SO_SEARCH_LIMIT);
+      expect(searchMock.mock.calls[1][0].size).toBe(overflow);
+      expect(result).toHaveLength(agentIds.length);
+      expect(result[0]).toEqual(expect.objectContaining({ id: 'agent-0' }));
+      expect(result[SO_SEARCH_LIMIT]).toEqual(
+        expect.objectContaining({ id: `agent-${SO_SEARCH_LIMIT}` })
+      );
     });
   });
 

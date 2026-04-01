@@ -12,6 +12,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import type { AppPluginStartDependencies } from './types';
+import { ElasticInferenceService } from './components/elastic_inference_service';
+import { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
 
 export const renderElasticInferenceServiceApp = async (
   core: CoreStart,
@@ -22,9 +24,11 @@ export const renderElasticInferenceServiceApp = async (
     core.rendering.addContext(
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
-          <Router history={services.history}>
-            <div>TODO</div>
-          </Router>
+          <InferenceEndpointsProvider>
+            <Router history={services.history}>
+              <ElasticInferenceService />
+            </Router>
+          </InferenceEndpointsProvider>
         </I18nProvider>
       </KibanaContextProvider>
     ),

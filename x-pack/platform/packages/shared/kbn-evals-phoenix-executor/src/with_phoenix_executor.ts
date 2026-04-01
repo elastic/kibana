@@ -26,6 +26,7 @@ function buildModelFromConnector(connectorWithId: AvailableConnectorWithId): Mod
     connectorId: connectorWithId.id,
     name: connectorWithId.name,
     capabilities: { contextWindowSize: 32000 },
+    isPreconfigured: false,
     isInferenceEndpoint: false,
   };
 

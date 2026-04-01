@@ -33,11 +33,11 @@ import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
   getFeaturesIdentificationTaskId,
 } from './features_identification';
-import type { SignificantEventsQueriesGenerationTaskParams } from './significant_events_queries_generation';
+import type { SignificantEventsQueriesGenerationTaskParams } from '../../sig_events/tasks/significant_events_queries_generation';
 import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
-} from './significant_events_queries_generation';
+} from '../../sig_events/tasks/significant_events_queries_generation';
 
 export interface OnboardingTaskParams {
   streamName: string;
@@ -88,8 +88,10 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 for (const step of steps) {
                   switch (step) {
-                    case OnboardingStep.FeaturesIdentification:
-                      const featuresTaskId = await scheduleFeaturesIdentificationTask(
+                    case OnboardingStep.FeaturesIdentification: {
+                      const featuresTaskId = getFeaturesIdentificationTaskId(streamName);
+
+                      await scheduleFeaturesIdentificationTask(
                         {
                           start: from,
                           end: to,
@@ -108,6 +110,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                         return;
                       }
                       break;
+                    }
 
                     case OnboardingStep.QueriesGeneration:
                       const queriesTaskId = await scheduleQueriesGenerationTask(

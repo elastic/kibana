@@ -113,9 +113,15 @@ describe('tab mapping utils', () => {
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
           },
+          "defaultProfileState": Object {
+            "fieldsToReset": "none",
+            "resetId": "",
+            "snapshotsByProfileId": Object {},
+          },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
+          "expandedDocOwner": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -144,13 +150,7 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
-          "resetDefaultProfileState": Object {
-            "breakdownField": false,
-            "columns": false,
-            "hideChart": false,
-            "resetId": "",
-            "rowHeight": false,
-          },
+          "renderDocumentViewMeta": undefined,
           "uiState": Object {},
         }
       `);
@@ -206,9 +206,15 @@ describe('tab mapping utils', () => {
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
           },
+          "defaultProfileState": Object {
+            "fieldsToReset": "none",
+            "resetId": "",
+            "snapshotsByProfileId": Object {},
+          },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
+          "expandedDocOwner": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -237,13 +243,7 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
-          "resetDefaultProfileState": Object {
-            "breakdownField": false,
-            "columns": false,
-            "hideChart": false,
-            "resetId": "",
-            "rowHeight": false,
-          },
+          "renderDocumentViewMeta": undefined,
           "uiState": Object {},
         }
       `);

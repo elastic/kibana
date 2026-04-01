@@ -82,7 +82,7 @@ const getActionsColumn = (openUserFlyout: (userName: string) => void) => ({
   render: (record: { 'user.name': string }) => {
     return (
       <EuiButtonIcon
-        iconType="expand"
+        iconType="maximize"
         onClick={() => {
           openUserFlyout(record['user.name']);
         }}
@@ -207,7 +207,7 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
     query: getAlertsByStatusQuery({
       from,
       to,
-      entityFilter: { field: 'user.name', value: userName },
+      identityFields: { 'user.name': userName },
     }),
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.BY_STATUS,
@@ -217,7 +217,7 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
       getAlertsByStatusQuery({
         from,
         to,
-        entityFilter: { field: 'user.name', value: userName },
+        identityFields: { 'user.name': userName },
       })
     );
   }, [setAlertsQuery, from, to, userName]);
