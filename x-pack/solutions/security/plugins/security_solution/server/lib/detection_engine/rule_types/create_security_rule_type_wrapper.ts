@@ -108,6 +108,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     eventsTelemetry,
     licensing,
     scheduleNotificationResponseActionsService,
+    endpointAppContextService,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -343,7 +344,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               client: exceptionsClient,
               lists: params.exceptionsList,
               shouldFilterOutEndpointExceptions:
-                experimentalFeatures.endpointExceptionsMovedUnderManagement,
+                await endpointAppContextService.isEndpointExceptionsPerPolicyEnabled(),
             });
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
@@ -427,6 +428,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   enrichmentTimes: result.enrichmentTimes.concat(runResult.enrichmentTimes),
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
+                  alertsCandidateCount: runResult.alertsCandidateCount,
                   suppressedAlertsCount: runResult.suppressedAlertsCount,
                   totalEventsFound:
                     (result.totalEventsFound ?? 0) + (runResult.totalEventsFound ?? 0),
@@ -476,6 +478,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   ? Math.round(sum(result.enrichmentTimes.map(Number)))
                   : undefined,
               frozen_indices_queried_count: frozenIndicesQueriedCount,
+              alerts_candidate_count: result.alertsCandidateCount,
               alerts_suppressed_count: suppressedAlertsCount,
               gap_duration_s:
                 gap && remainingGap ? Math.round(remainingGap.asSeconds()) : undefined,
