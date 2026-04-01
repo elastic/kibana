@@ -23,7 +23,11 @@ import type { ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { getEsqlQuery } from './utils/get_esql_query';
 import { PAGE_SIZE } from '../../../common/constants';
 import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
-import { LEGACY_HISTOGRAM_USER_MESSAGES } from '../../../common/utils/user_messages';
+import {
+  LEGACY_HISTOGRAM_USER_MESSAGES,
+  COUNTER_SHORT_RANGE_USER_MESSAGES,
+  isShortTimeRangeForRate,
+} from '../../../common/utils/user_messages';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from '../../pagination';
 import { usePagination } from './hooks';
@@ -79,14 +83,19 @@ export const MetricsExperienceGridContent = ({
   );
 
   const getUserMessages = useCallback(
-    (metricItem: ParsedMetricItem) =>
-      isLegacyHistogram(
-        firstNonNullable(metricItem.fieldTypes),
-        firstNonNullable(metricItem.metricTypes)
-      )
-        ? LEGACY_HISTOGRAM_USER_MESSAGES
-        : undefined,
-    []
+    (metricItem: ParsedMetricItem) => {
+      const fieldType = firstNonNullable(metricItem.fieldTypes);
+      const instrument = firstNonNullable(metricItem.metricTypes);
+
+      if (isLegacyHistogram(fieldType, instrument)) {
+        return LEGACY_HISTOGRAM_USER_MESSAGES;
+      }
+      if (instrument === 'counter' && isShortTimeRangeForRate(fetchParams.timeRange)) {
+        return COUNTER_SHORT_RANGE_USER_MESSAGES;
+      }
+      return undefined;
+    },
+    [fetchParams.timeRange]
   );
 
   return (

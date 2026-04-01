@@ -25,8 +25,10 @@ import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('./hooks');
+
+const ChartMock = jest.fn(() => <div data-test-subj="metric-chart" />);
 jest.mock('../../chart', () => ({
-  Chart: jest.fn(() => <div data-test-subj="metric-chart" />),
+  Chart: (props: any) => ChartMock(props),
 }));
 
 /**
@@ -215,5 +217,102 @@ describe('MetricsExperienceGridContent', () => {
     );
 
     expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
+  });
+
+  it('passes counter short range warning to counter metrics when time range is short', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-03-31T12:00:00Z'));
+
+    const shortRangeFetchParams = getFetchParamsMock({
+      dataView: { getIndexPattern: () => 'metrics-*', isTimeBased: () => true } as any,
+      filters: [],
+      query: { esql: 'FROM metrics-*' },
+      esqlVariables: [],
+      relativeTimeRange: { from: 'now-15m', to: 'now' },
+      timeRange: { from: 'now-15m', to: 'now' },
+    });
+
+    const counterMetric: ParsedMetricItem = {
+      metricName: 'system.cpu.time',
+      dataStream: 'metrics-*',
+      units: ['ms'],
+      metricTypes: ['counter'],
+      fieldTypes: [ES_FIELD_TYPES.LONG],
+      dimensionFields: [],
+    };
+
+    usePaginationMock.mockReturnValue({
+      currentPageItems: [counterMetric],
+      totalPages: 1,
+      totalCount: 1,
+    });
+
+    render(
+      <MetricsExperienceGridContent
+        {...defaultProps}
+        metricItems={[counterMetric]}
+        fetchParams={shortRangeFetchParams}
+      />,
+      { wrapper: IntlProvider }
+    );
+
+    expect(ChartMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userMessages: expect.arrayContaining([
+          expect.objectContaining({
+            uniqueId: 'metrics-experience-counter-short-range-warning',
+            severity: 'warning',
+          }),
+        ]),
+      })
+    );
+
+    jest.useRealTimers();
+  });
+
+  it('does not pass counter warning when time range is long', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-03-31T12:00:00Z'));
+
+    const longRangeFetchParams = getFetchParamsMock({
+      dataView: { getIndexPattern: () => 'metrics-*', isTimeBased: () => true } as any,
+      filters: [],
+      query: { esql: 'FROM metrics-*' },
+      esqlVariables: [],
+      relativeTimeRange: { from: 'now-24h', to: 'now' },
+      timeRange: { from: 'now-24h', to: 'now' },
+    });
+
+    const counterMetric: ParsedMetricItem = {
+      metricName: 'system.cpu.time',
+      dataStream: 'metrics-*',
+      units: ['ms'],
+      metricTypes: ['counter'],
+      fieldTypes: [ES_FIELD_TYPES.LONG],
+      dimensionFields: [],
+    };
+
+    usePaginationMock.mockReturnValue({
+      currentPageItems: [counterMetric],
+      totalPages: 1,
+      totalCount: 1,
+    });
+
+    render(
+      <MetricsExperienceGridContent
+        {...defaultProps}
+        metricItems={[counterMetric]}
+        fetchParams={longRangeFetchParams}
+      />,
+      { wrapper: IntlProvider }
+    );
+
+    expect(ChartMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userMessages: undefined,
+      })
+    );
+
+    jest.useRealTimers();
   });
 });
