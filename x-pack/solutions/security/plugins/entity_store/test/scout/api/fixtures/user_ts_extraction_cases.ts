@@ -426,7 +426,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       entityName: 'no.module.user',
     },
   },
-  // --- Non-IDP local namespace (whenConditionTrueSetFieldsPreAgg + local euid branch) ---
+  // --- Non-IDP local namespace (fieldEvaluations local + after-stats confidence) ---
   {
     id: 'non-idp-local-user-host',
     query: {

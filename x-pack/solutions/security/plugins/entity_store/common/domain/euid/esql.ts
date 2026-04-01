@@ -142,7 +142,7 @@ function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): str
  *
  * - Source values: each source is read with MV_FIRST so multi-value fields are supported; firstChunkOfField sources use SPLIT then MV_FIRST.
  * - Multiple sources: each is assigned to a variable (_src_<dest>0, _src_<dest>1, ...), then an effective source is the first non-null, non-empty variable (CASE).
- * - Destination: effective source is then mapped with CASE: if null/empty → fallbackValue; else if it matches a whenClause → clause's then; else → effective source as-is.
+ * - Destination: one CASE over `whenClauses` in order (sourceMatch arms, then condition arms), then null/empty → fallbackValue, else effective source.
  *
  * Returns a comma-separated list of EVAL assignments (one or more lines).
  */
@@ -153,16 +153,26 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const effectiveSourceName = sourceVariablesBaseName;
   const fallbackExpression =
     fallbackValue === null ? 'NULL' : `"${escapeEsqlString(fallbackValue)}"`;
-  const destinationCaseParts: string[] = [
-    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), ${fallbackExpression}`,
-  ];
+
+  const destinationCaseParts: string[] = [];
   for (const clause of whenClauses) {
-    const conditions = clause.sourceMatchesAny
-      .map((v) => `${effectiveSourceName} == "${escapeEsqlString(v)}"`)
-      .join(' OR ');
-    destinationCaseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
+    if ('sourceMatchesAny' in clause) {
+      const conditions = clause.sourceMatchesAny
+        .map((v) => `${effectiveSourceName} == "${escapeEsqlString(v)}"`)
+        .join(' OR ');
+      destinationCaseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
+    } else {
+      destinationCaseParts.push(
+        `(${conditionToESQL(clause.condition)}), "${escapeEsqlString(clause.then)}"`
+      );
+    }
   }
+  destinationCaseParts.push(
+    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), ${fallbackExpression}`
+  );
   destinationCaseParts.push(effectiveSourceName);
+
+  const destinationCaseExpr = `CASE(${destinationCaseParts.join(', ')})`;
 
   const assignments: string[] = [];
 
@@ -180,7 +190,8 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
     assignments.push(`${effectiveSourceName} = CASE(${sourceVarCaseParts.join(', ')})`);
   }
 
-  assignments.push(`${destination} = CASE(${destinationCaseParts.join(', ')})`);
+  assignments.push(`${destination} = ${destinationCaseExpr}`);
+
   return assignments.join(',\n ');
 }
 
@@ -189,6 +200,10 @@ function escapeEsqlString(s: string): string {
 }
 
 function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpec): string {
+  if (spec.type === 'condition') {
+    return `(${conditionToESQL(spec.condition)})`;
+  }
+
   const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
   const allSourceFields = [...exactMatchFields, ...prefixMatchFields];
 

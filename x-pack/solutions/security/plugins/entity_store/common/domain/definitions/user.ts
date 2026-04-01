@@ -62,8 +62,6 @@ const idpPostAggFilter: EntityDefinitionWithoutId['postAggFilter'] = {
   ],
 };
 
-const idpEventTypeCondition = idpPostAggFilter;
-
 const nonIdpDocumentFilter: Condition = {
   and: [
     isNotEmptyCondition('user.name'),
@@ -91,6 +89,10 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
           { sourceMatchesAny: ['azure', 'entityanalytics_entra_id'], then: 'entra_id' },
           { sourceMatchesAny: ['o365', 'o365_metrics'], then: 'microsoft_365' },
           { sourceMatchesAny: ['entityanalytics_ad'], then: 'active_directory' },
+          {
+            condition: nonIdpDocumentFilter,
+            then: USER_ENTITY_NAMESPACE.Local,
+          },
         ],
       },
     ],
@@ -144,17 +146,10 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   indexPatterns: [],
   /** Post-aggregation filter (after LOOKUP JOIN): keep row when entity.id exists (shared) OR IDP OR non-IDP. Logical field names; main logs ESQL maps STATS destinations to `recent.*`. */
   postAggFilter: { or: [entityIdExistsAfterLookup, idpPostAggFilter, nonIdpPostAggFilter] },
-  /** Pre-agg: non-IDP local path sets entity.namespace + Medium confidence (before STATS / EU ID). */
-  whenConditionTrueSetFieldsPreAgg: [
-    {
-      condition: { and: [{ not: idpEventTypeCondition }, nonIdpDocumentFilter] },
-      fields: {
-        'entity.namespace': USER_ENTITY_NAMESPACE.Local,
-        'entity.confidence': ENTITY_CONFIDENCE.Medium,
-      },
-    },
-  ],
-  /** Post-STATS: entity.name (local: user.name@host.name when host.name present, else user.name) and High confidence when not local (logs ESQL only). */
+  /**
+   * Post-STATS: entity.name for local vs non-local; entity.confidence from namespace (local → medium,
+   * else → high). Logs ESQL maps to `recent.*` after STATS.
+   */
   whenConditionTrueSetFieldsAfterStats: [
     {
       condition: {
@@ -183,6 +178,12 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
       fields: {
         'entity.name': { source: 'user.name' },
         'entity.confidence': ENTITY_CONFIDENCE.High,
+      },
+    },
+    {
+      condition: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+      fields: {
+        'entity.confidence': ENTITY_CONFIDENCE.Medium,
       },
     },
   ],

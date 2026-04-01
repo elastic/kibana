@@ -137,7 +137,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     // it's deterministic because of the SHA-256 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedUserEntities);
-    // All user entities must have entity.namespace (from fieldEvaluations) and entity.confidence (from whenConditionTrueSetFieldsPreAgg)
+    // All user entities must have entity.namespace (from fieldEvaluations) and entity.confidence (from whenConditionTrueSetFieldsAfterStats)
     for (const hit of entities.hits.hits) {
       const source = hit._source as Record<string, unknown>;
       expect(source.entity).toBeDefined();
@@ -634,7 +634,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     'Should set entity.namespace to local and entity.name to user.name@host.name for non-IDP documents',
     async ({ apiClient, esClient }) => {
       // Non-IDP: user.name + host.id present, user.name not in excluded list.
-      // Event must NOT be asset/iam so whenConditionTrueSetFieldsPreAgg sets entity.namespace = 'local'.
+      // Event must NOT be asset/iam so identity fieldEvaluations (condition whenClause) set entity.namespace = 'local'.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T10:00:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
