@@ -16,10 +16,6 @@ test.describe('Flyout System - EuiFlyout component', { tag: ['@local-stateful-cl
     await page.gotoApp('flyoutSystemExamples');
   });
 
-  test.afterAll(() => {
-    throw new Error(`Test error to verify CI run`);
-  });
-
   test('Session J: open main flyout, open child flyout A, both remain visible', async ({
     page,
   }) => {
