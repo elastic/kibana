@@ -129,62 +129,6 @@ describe('registerCreateScheduleRoute', () => {
     expect(response.ok).not.toHaveBeenCalled();
   });
 
-  it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', () => {
-    const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
-
-    registerCreateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
-
-    expect(router.versioned.post).toHaveBeenCalledWith(
-      expect.objectContaining({
-        security: expect.objectContaining({
-          authz: expect.objectContaining({
-            requiredPrivileges: expect.arrayContaining(['securitySolution-attackDiscoveryAll']),
-          }),
-        }),
-      })
-    );
-  });
-
-  it('registers the route with ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE in requiredPrivileges', () => {
-    const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
-
-    registerCreateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
-
-    expect(router.versioned.post).toHaveBeenCalledWith(
-      expect.objectContaining({
-        security: expect.objectContaining({
-          authz: expect.objectContaining({
-            requiredPrivileges: expect.arrayContaining([
-              'securitySolution-updateAttackDiscoverySchedule',
-            ]),
-          }),
-        }),
-      })
-    );
-  });
-
-  it('registers the route with ALERTS_API_READ in requiredPrivileges', () => {
-    const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
-
-    registerCreateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
-
-    expect(router.versioned.post).toHaveBeenCalledWith(
-      expect.objectContaining({
-        security: expect.objectContaining({
-          authz: expect.objectContaining({
-            requiredPrivileges: expect.arrayContaining(['alerts-read']),
-          }),
-        }),
-      })
-    );
-  });
-
   it('returns a custom error when the data client throws', async () => {
     const router = httpServiceMock.createRouter();
     const addVersionMock = jest.fn();

@@ -13,7 +13,11 @@ import { isEmpty } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
-import { getIndexedDocumentIds, hasNonIdempotentBulkIndexErrors } from './bulk_response_helpers';
+import {
+  getCreatedDocumentIds,
+  getVersionConflictDocumentIds,
+  hasNonIdempotentBulkErrors,
+} from './bulk_response_helpers';
 import { getIdsQuery } from './get_ids_query';
 import { transformToAlertDocuments } from './transform_to_alert_documents';
 import { transformSearchResponseToAlerts } from './transform_search_response_to_alerts';
@@ -79,7 +83,9 @@ export const validateAttackDiscoveries = async ({
         )}`
     );
 
-    // Step 2: Count pre-existing documents (for duplicates_dropped_count reporting).
+    // Step 2: Pre-deduplicate by finding which documents already exist (idempotency).
+    // This matches the intent of the elastic_assistant generation flow, which de-duplicates
+    // discoveries before attempting to create alert documents.
     const existingIds = new Set<string>();
     if (!isEmpty(desiredDocumentIds)) {
       const existingResponse = await readDataClient.search({
@@ -95,15 +101,17 @@ export const validateAttackDiscoveries = async ({
     }
 
     const duplicatesDroppedCount = existingIds.size;
+    const documentsToCreate = alertDocuments.filter((doc) => {
+      const id = doc[ALERT_UUID];
+      return typeof id === 'string' ? !existingIds.has(id) : true;
+    });
 
-    // Step 3: Upsert all documents using index semantics so that custom validation
-    // workflow transformations (e.g. field enrichment via data.map) always overwrite
-    // previously-persisted discoveries with the latest transformed content.
+    // Step 3: Bulk insert only documents that don't exist yet
     let bulkResponse: BulkResponse | undefined;
-    if (!isEmpty(alertDocuments)) {
-      const body = alertDocuments.flatMap((alertDocument) => [
+    if (!isEmpty(documentsToCreate)) {
+      const body = documentsToCreate.flatMap((alertDocument) => [
         {
-          index: {
+          create: {
             _id: (alertDocument[ALERT_UUID] as string) ?? uuidv4(),
           },
         },
@@ -126,27 +134,32 @@ export const validateAttackDiscoveries = async ({
       }
     }
 
-    // Step 4: Check for bulk errors
-    if (bulkResponse && bulkResponse.errors && hasNonIdempotentBulkIndexErrors(bulkResponse)) {
+    const createdDocumentIds = bulkResponse ? getCreatedDocumentIds(bulkResponse) : [];
+    const versionConflictDocumentIds = bulkResponse
+      ? getVersionConflictDocumentIds(bulkResponse)
+      : [];
+
+    // Step 4: Check for errors (ignore version conflicts for idempotency)
+    if (bulkResponse && bulkResponse.errors && hasNonIdempotentBulkErrors(bulkResponse)) {
       const errorDetails = bulkResponse.items.flatMap((item) => {
-        const error = item.index?.error;
+        const error = item.create?.error;
 
         if (error == null) {
           return [];
         }
 
-        const id = item.index?._id != null ? ` id: ${item.index._id}` : '';
-        const details = `\nError bulk indexing attack discovery alert${id} ${error.reason}`;
+        const id = item.create?._id != null ? ` id: ${item.create._id}` : '';
+        const details = `\nError bulk inserting attack discovery alert${id} ${error.reason}`;
         return [details];
       });
 
       const allErrorDetails = errorDetails.join(', ');
-      throw new Error(`Failed to bulk index Attack discovery alerts ${allErrorDetails}`);
+      throw new Error(`Failed to bulk insert Attack discovery alerts ${allErrorDetails}`);
     }
 
-    const indexedDocumentIds = bulkResponse ? getIndexedDocumentIds(bulkResponse) : [];
-
-    const idsToFetch = Array.from(new Set([...existingIds, ...indexedDocumentIds]));
+    const idsToFetch = Array.from(
+      new Set([...existingIds, ...createdDocumentIds, ...versionConflictDocumentIds])
+    );
 
     logger.debug(
       () =>

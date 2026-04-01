@@ -106,42 +106,6 @@ describe('registerGetScheduleRoute', () => {
     expect(response.ok).not.toHaveBeenCalled();
   });
 
-  it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', () => {
-    const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
-
-    registerGetScheduleRoute(router, logger, { getStartServices });
-
-    expect(router.versioned.get).toHaveBeenCalledWith(
-      expect.objectContaining({
-        security: expect.objectContaining({
-          authz: expect.objectContaining({
-            requiredPrivileges: expect.arrayContaining(['securitySolution-attackDiscoveryAll']),
-          }),
-        }),
-      })
-    );
-  });
-
-  it('registers the route with ALERTS_API_READ in requiredPrivileges', () => {
-    const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
-
-    registerGetScheduleRoute(router, logger, { getStartServices });
-
-    expect(router.versioned.get).toHaveBeenCalledWith(
-      expect.objectContaining({
-        security: expect.objectContaining({
-          authz: expect.objectContaining({
-            requiredPrivileges: expect.arrayContaining(['alerts-read']),
-          }),
-        }),
-      })
-    );
-  });
-
   it('returns a custom error when the schedule is not found', async () => {
     const router = httpServiceMock.createRouter();
     const addVersionMock = jest.fn();

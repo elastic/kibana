@@ -11,7 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
 import { assertWorkflowsEnabled } from '../../lib/assert_workflows_enabled';
-import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
+import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../..';
 import { registerGenerateRoute } from './post_generate';
 
 jest.mock('../../lib/assert_workflows_enabled', () => ({
@@ -30,12 +30,21 @@ jest.mock('uuid', () => ({
 }));
 
 const mockExecuteGenerationWorkflow = jest.fn().mockResolvedValue(undefined);
-const mockResolveApiConfig = jest.fn();
 
 jest.mock('./helpers', () => ({
   executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
-  resolveApiConfig: (...args: unknown[]) => mockResolveApiConfig(...args),
 }));
+
+const mockResolveConnectorDetails = jest.fn();
+
+jest.mock('../../workflows/helpers/resolve_connector_details', () => ({
+  resolveConnectorDetails: (...args: unknown[]) => mockResolveConnectorDetails(...args),
+}));
+
+const mockWorkflowInitService = {
+  ensureWorkflowsForSpace: jest.fn().mockResolvedValue(null),
+  verifyAndRepairWorkflows: jest.fn(),
+};
 
 describe('registerGenerateRoute', () => {
   let mockRouter: jest.Mocked<IRouter>;
@@ -58,10 +67,10 @@ describe('registerGenerateRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockResolveApiConfig.mockImplementation(
-      ({ apiConfig }: { apiConfig: Record<string, unknown> }) =>
-        Promise.resolve({ ...apiConfig, action_type_id: apiConfig.action_type_id || '.gen-ai' })
-    );
+    mockResolveConnectorDetails.mockResolvedValue({
+      actionTypeId: '.gen-ai',
+      connectorName: 'Test Connector',
+    });
 
     mockRouter = {
       versioned: {
@@ -126,6 +135,7 @@ describe('registerGenerateRoute', () => {
       getEventLogIndex: mockGetEventLogIndex,
       getEventLogger: mockGetEventLogger,
       getStartServices: mockGetStartServices,
+      workflowInitService: mockWorkflowInitService,
     });
 
     expect(mockRouter.versioned.post).toHaveBeenCalledWith({
@@ -133,7 +143,7 @@ describe('registerGenerateRoute', () => {
       path: '/internal/attack_discovery/_generate',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution-attackDiscoveryAll', 'alerts-read'],
+          requiredPrivileges: ['securitySolution-attackDiscoveryAll'],
         },
       },
       options: {
@@ -142,25 +152,6 @@ describe('registerGenerateRoute', () => {
         },
       },
     });
-  });
-
-  it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', () => {
-    registerGenerateRoute(mockRouter, mockLogger, {
-      analytics: mockAnalytics,
-      getEventLogIndex: mockGetEventLogIndex,
-      getEventLogger: mockGetEventLogger,
-      getStartServices: mockGetStartServices,
-    });
-
-    expect(mockRouter.versioned.post).toHaveBeenCalledWith(
-      expect.objectContaining({
-        security: expect.objectContaining({
-          authz: expect.objectContaining({
-            requiredPrivileges: expect.arrayContaining(['securitySolution-attackDiscoveryAll']),
-          }),
-        }),
-      })
-    );
   });
 
   it('returns 404 when workflows feature flag is disabled', async () => {
@@ -196,6 +187,7 @@ describe('registerGenerateRoute', () => {
       getEventLogIndex: mockGetEventLogIndex,
       getEventLogger: mockGetEventLogger,
       getStartServices: mockGetStartServices,
+      workflowInitService: mockWorkflowInitService,
     });
 
     const handler = getVersionHandler(versionHandler);
@@ -240,6 +232,7 @@ describe('registerGenerateRoute', () => {
       getEventLogIndex: mockGetEventLogIndex,
       getEventLogger: mockGetEventLogger,
       getStartServices: mockGetStartServices,
+      workflowInitService: mockWorkflowInitService,
     });
 
     const handler = getVersionHandler(versionHandler);
@@ -287,6 +280,7 @@ describe('registerGenerateRoute', () => {
       getEventLogIndex: mockGetEventLogIndex,
       getEventLogger: mockGetEventLogger,
       getStartServices: mockGetStartServices,
+      workflowInitService: mockWorkflowInitService,
     });
 
     const handler = getVersionHandler(versionHandler);
@@ -330,6 +324,7 @@ describe('registerGenerateRoute', () => {
       getEventLogIndex: mockGetEventLogIndex,
       getEventLogger: mockGetEventLogger,
       getStartServices: mockGetStartServices,
+      workflowInitService: mockWorkflowInitService,
     });
 
     const handler = getVersionHandler(versionHandler);
@@ -353,7 +348,7 @@ describe('registerGenerateRoute', () => {
         type: 'attack_discovery',
         workflow_config: {
           alert_retrieval_workflow_ids: [],
-          alert_retrieval_mode: 'custom_only' as const,
+          default_alert_retrieval_mode: 'disabled' as const,
           validation_workflow_id: 'default',
         },
       };
@@ -383,6 +378,7 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
+        workflowInitService: mockWorkflowInitService,
       });
 
       const handler = getVersionHandler(versionHandler);
@@ -391,7 +387,7 @@ describe('registerGenerateRoute', () => {
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: {
           message:
-            'At least one alert retrieval method must be specified: either set alert_retrieval_mode to a value other than "custom_only", or provide alert_retrieval_workflow_ids',
+            'At least one alert retrieval method must be specified: either set default_alert_retrieval_mode to a value other than "disabled", or provide alert_retrieval_workflow_ids',
         },
       });
     });
@@ -406,7 +402,7 @@ describe('registerGenerateRoute', () => {
         type: 'attack_discovery',
         workflow_config: {
           alert_retrieval_workflow_ids: [],
-          alert_retrieval_mode: 'custom_query' as const,
+          default_alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'default',
         },
       };
@@ -436,6 +432,7 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
+        workflowInitService: mockWorkflowInitService,
       });
 
       const handler = getVersionHandler(versionHandler);
@@ -458,7 +455,7 @@ describe('registerGenerateRoute', () => {
         type: 'attack_discovery',
         workflow_config: {
           alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
-          alert_retrieval_mode: 'custom_only' as const,
+          default_alert_retrieval_mode: 'disabled' as const,
           validation_workflow_id: 'custom-validation',
         },
       };
@@ -488,6 +485,7 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
+        workflowInitService: mockWorkflowInitService,
       });
 
       const handler = getVersionHandler(versionHandler);
@@ -510,7 +508,7 @@ describe('registerGenerateRoute', () => {
         type: 'attack_discovery',
         workflow_config: {
           alert_retrieval_workflow_ids: ['workflow-1'],
-          alert_retrieval_mode: 'custom_query' as const,
+          default_alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'custom-validation',
         },
       };
@@ -540,6 +538,7 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
+        workflowInitService: mockWorkflowInitService,
       });
 
       const handler = getVersionHandler(versionHandler);
@@ -588,6 +587,7 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
+        workflowInitService: mockWorkflowInitService,
       });
 
       const handler = getVersionHandler(versionHandler);
@@ -614,7 +614,7 @@ describe('registerGenerateRoute', () => {
       return () => getVersionHandler(versionHandler);
     };
 
-    it('calls resolveApiConfig with the request api_config, getStartServices, logger, and request', async () => {
+    it('resolves action_type_id from connector_id when action_type_id is not provided', async () => {
       mockRequest.body = {
         alerts_index_pattern: '.alerts-security.alerts-default',
         api_config: {
@@ -641,67 +641,65 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
+        workflowInitService: mockWorkflowInitService,
       });
 
       await getHandler()(mockContext, mockRequest, mockResponse);
 
-      expect(mockResolveApiConfig).toHaveBeenCalledWith(
+      expect(mockResolveConnectorDetails).toHaveBeenCalledWith(
         expect.objectContaining({
-          apiConfig: expect.objectContaining({
-            connector_id: 'test-connector',
-          }),
-          getStartServices: mockGetStartServices,
+          connectorId: 'test-connector',
         })
       );
-    });
-
-    it('passes the resolved api_config from resolveApiConfig to executeGenerationWorkflow', async () => {
-      const resolvedConfig = {
-        action_type_id: '.gen-ai',
-        connector_id: 'test-connector',
-      };
-
-      mockResolveApiConfig.mockResolvedValue(resolvedConfig);
-
-      mockRequest.body = {
-        alerts_index_pattern: '.alerts-security.alerts-default',
-        api_config: {
-          connector_id: 'test-connector',
-        },
-        type: 'attack_discovery',
-      };
-
-      const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        ok: jest.fn((obj) => obj),
-      };
-
-      const mockContext = {
-        core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
-        }),
-      };
-      const getHandler = setVersionHandler();
-
-      registerGenerateRoute(mockRouter, mockLogger, {
-        analytics: mockAnalytics,
-        getEventLogIndex: mockGetEventLogIndex,
-        getEventLogger: mockGetEventLogger,
-        getStartServices: mockGetStartServices,
-      });
-
-      await getHandler()(mockContext, mockRequest, mockResponse);
 
       expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
-          apiConfig: resolvedConfig,
+          apiConfig: expect.objectContaining({
+            action_type_id: '.gen-ai',
+            connector_id: 'test-connector',
+          }),
         })
       );
     });
 
-    it('returns an error when resolveApiConfig fails', async () => {
-      mockResolveApiConfig.mockRejectedValue(
+    it('does not resolve action_type_id when it is already provided', async () => {
+      mockRequest.body = {
+        alerts_index_pattern: '.alerts-security.alerts-default',
+        api_config: {
+          action_type_id: '.bedrock',
+          connector_id: 'test-connector',
+        },
+        type: 'attack_discovery',
+      };
+
+      const mockResponse = {
+        badRequest: jest.fn(),
+        customError: jest.fn(),
+        ok: jest.fn((obj) => obj),
+      };
+
+      const mockContext = {
+        core: Promise.resolve({
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        }),
+      };
+      const getHandler = setVersionHandler();
+
+      registerGenerateRoute(mockRouter, mockLogger, {
+        analytics: mockAnalytics,
+        getEventLogIndex: mockGetEventLogIndex,
+        getEventLogger: mockGetEventLogger,
+        getStartServices: mockGetStartServices,
+        workflowInitService: mockWorkflowInitService,
+      });
+
+      await getHandler()(mockContext, mockRequest, mockResponse);
+
+      expect(mockResolveConnectorDetails).not.toHaveBeenCalled();
+    });
+
+    it('returns an error when connector resolution fails', async () => {
+      mockResolveConnectorDetails.mockRejectedValue(
         new Error('Failed to resolve connector details for test-connector: Not found')
       );
 
@@ -731,6 +729,7 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
+        workflowInitService: mockWorkflowInitService,
       });
 
       await getHandler()(mockContext, mockRequest, mockResponse);
@@ -786,6 +785,7 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
+        workflowInitService: mockWorkflowInitService,
       });
 
       await getHandler()(mockContext, mockRequest, mockResponse);
@@ -825,6 +825,7 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
+        workflowInitService: mockWorkflowInitService,
       });
 
       await getHandler()(mockContext, mockRequest, mockResponse);
@@ -836,7 +837,7 @@ describe('registerGenerateRoute', () => {
           type: 'attack_discovery',
           workflowConfig: {
             alert_retrieval_workflow_ids: [],
-            alert_retrieval_mode: 'custom_query' as const,
+            default_alert_retrieval_mode: 'custom_query' as const,
             validation_workflow_id: 'default',
           },
         })
@@ -871,6 +872,7 @@ describe('registerGenerateRoute', () => {
         getEventLogIndex: mockGetEventLogIndex,
         getEventLogger: mockGetEventLogger,
         getStartServices: mockGetStartServices,
+        workflowInitService: mockWorkflowInitService,
       });
 
       await getHandler()(mockContext, mockRequest, mockResponse);

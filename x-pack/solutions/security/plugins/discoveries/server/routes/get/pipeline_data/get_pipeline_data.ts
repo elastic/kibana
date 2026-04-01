@@ -9,7 +9,6 @@ import { z } from '@kbn/zod/v4';
 import type { CoreStart, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
-import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import type { AttackDiscoveryApiAlert } from '@kbn/discoveries-schemas';
 import type {
   DiagnosticsContext,
@@ -20,6 +19,7 @@ import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 import type { WorkflowsManagementApi } from '@kbn/discoveries/impl/attack_discovery/generation/types';
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
+import type { WorkflowInitializationService } from '../../../lib/workflow_initialization';
 import { computeCombinedAlerts, type CombinedAlerts } from './helpers/compute_combined_alerts';
 import {
   extractPipelineAlertData,
@@ -38,13 +38,6 @@ const ROUTE_PATH = '/internal/attack_discovery/workflow/{workflow_id}/execution/
 export const GetPipelineDataRequestParams = z.object({
   execution_id: z.string(),
   workflow_id: z.string(),
-});
-
-/** Zod schema for validating optional query parameters */
-export const GetPipelineDataRequestQuery = z.object({
-  /** Fallback generation workflow run ID — used by the client when the event
-   *  log hasn't been indexed yet (provided mode / early polling). */
-  generation_workflow_run_id: z.string().optional(),
 });
 
 /** snake_case response shape for a single workflow execution tracking entry */
@@ -116,6 +109,7 @@ export const registerGetPipelineDataRoute = (
   {
     getEventLogIndex,
     getStartServices,
+    workflowInitService,
     workflowsManagementApi,
   }: {
     getEventLogIndex: () => Promise<string>;
@@ -123,6 +117,7 @@ export const registerGetPipelineDataRoute = (
       coreStart: CoreStart;
       pluginsStart: DiscoveriesPluginStartDeps;
     }>;
+    workflowInitService: WorkflowInitializationService;
     workflowsManagementApi?: WorkflowsManagementApi;
   }
 ) => {
@@ -132,7 +127,7 @@ export const registerGetPipelineDataRoute = (
       path: ROUTE_PATH,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
         },
       },
     })
@@ -142,7 +137,6 @@ export const registerGetPipelineDataRoute = (
         validate: {
           request: {
             params: GetPipelineDataRequestParams,
-            query: GetPipelineDataRequestQuery,
           },
         },
       },
@@ -154,7 +148,6 @@ export const registerGetPipelineDataRoute = (
 
         try {
           const { execution_id: executionId } = request.params;
-          const { generation_workflow_run_id: clientGenerationWorkflowRunId } = request.query;
 
           const { coreStart, pluginsStart } = await getStartServices();
           const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
@@ -163,6 +156,13 @@ export const registerGetPipelineDataRoute = (
           const spaceId = getSpaceId({
             request,
             spaces: pluginsStart.spaces?.spacesService,
+          });
+
+          workflowInitService.ensureWorkflowsForSpace({ logger, request, spaceId }).catch((err) => {
+            logger.debug(
+              () =>
+                `Background workflow initialization failed for space '${spaceId}': ${err.message}`
+            );
           });
 
           // Step 1: Reconstruct WorkflowExecutionsTracking from event log
@@ -228,68 +228,20 @@ export const registerGetPipelineDataRoute = (
           const nonNullEntries = alertRetrievalEntries?.filter(
             (e): e is AlertRetrievalPipelineDataResponse => e !== null
           );
-          let alertRetrievalData: AlertRetrievalPipelineDataResponse[] | null =
+          const alertRetrievalData =
             nonNullEntries != null && nonNullEntries.length > 0 ? nonNullEntries : null;
 
-          // Step 3: Extract generation data from generation workflow.
-          // When alert_retrieval_mode is 'provided', also fetch the generation step's
-          // input so Step 2.5 can reconstruct the alert retrieval data from the
-          // pre-provided alerts.
-          //
-          // Fallback: When the event log hasn't been indexed yet (early polling), the
-          // client can pass the generation workflow run ID as a query parameter.
-          const generationTracking =
-            tracking.generation ??
-            (clientGenerationWorkflowRunId != null
-              ? {
-                  workflowId: clientGenerationWorkflowRunId,
-                  workflowRunId: clientGenerationWorkflowRunId,
-                }
-              : null);
-          const isProvidedMode =
-            tracking.diagnosticsContext?.config?.alertRetrievalMode === 'provided';
-
-          // When in provided mode, fetch step inputs so we can extract the pre-provided
-          // alerts from the 'generate_discoveries' step's input.alerts field.
-          // Note: includeInput controls _step execution_ inputs, not workflow-level input.
-          let generationStepAlerts: string[] | null = null;
+          // Step 3: Extract generation data from generation workflow
+          const generationTracking = tracking.generation;
           const generationData: PipelineGenerationData | null =
             generationTracking != null
               ? await workflowsManagementApi
                   .getWorkflowExecution(generationTracking.workflowRunId, spaceId, {
-                    includeInput: isProvidedMode,
                     includeOutput: true,
                   })
-                  .then((generationExecution) => {
-                    if (isProvidedMode && generationExecution != null) {
-                      // Find the 'generate_discoveries' step execution and extract alerts
-                      // from its input. The generation workflow YAML maps
-                      // `inputs.additional_alerts` → step `with.alerts`, so the step
-                      // execution's input contains `alerts: string[]`.
-                      //
-                      // Note: the execution engine wraps every step in a `step_level_timeout`
-                      // scope that shares the same `stepId` but has no `input` field.
-                      // We must skip that wrapper and find the inner step that actually
-                      // carries the resolved inputs.
-                      const generateStep = generationExecution.stepExecutions?.find(
-                        (step) => step.stepId === 'generate_discoveries' && step.input != null
-                      );
-                      const stepInput = generateStep?.input as Record<string, unknown> | undefined;
-                      const alerts = stepInput?.alerts;
-
-                      if (Array.isArray(alerts) && alerts.length > 0) {
-                        generationStepAlerts = alerts as string[];
-                      }
-
-                      logger.debug(
-                        () =>
-                          `Step 2.5: found generate_discoveries step=${
-                            generateStep != null
-                          }, alertsCount=${Array.isArray(alerts) ? alerts.length : 'N/A'}`
-                      );
-                    }
-                    return extractPipelineGenerationData({ generationExecution });
-                  })
+                  .then((generationExecution) =>
+                    extractPipelineGenerationData({ generationExecution })
+                  )
                   .catch((generationError) => {
                     logger.warn(
                       `Failed to extract generation data from generation workflow ${
@@ -304,45 +256,12 @@ export const registerGetPipelineDataRoute = (
                   })
               : null;
 
-          // Step 2.5: For 'provided' mode, reconstruct alert retrieval data from either:
-          // (a) the generation step's input (available after the step completes), or
-          // (b) the event log tracking data written at generate-step-started time
-          //     (available immediately during the running state, before step.input is populated).
-          // This surfaces the provided alerts in the Alert Retrieval section of the flyout
-          // both while the generation is running AND after it completes.
-          const effectiveProvidedAlerts: string[] | null =
-            generationStepAlerts ?? tracking.providedAlerts ?? null;
-
-          if (
-            alertRetrievalData == null &&
-            isProvidedMode &&
-            Array.isArray(effectiveProvidedAlerts) &&
-            effectiveProvidedAlerts.length > 0
-          ) {
-            // Assign to a const to satisfy TS narrowing — `let` variables
-            // mutated in closures are widened back to `T | null`.
-            const providedAlerts: string[] = effectiveProvidedAlerts;
-
-            alertRetrievalData = [
-              {
-                alerts: providedAlerts,
-                alerts_context_count: providedAlerts.length,
-                extraction_strategy: 'provided',
-                workflow_id: 'provided',
-                workflow_run_id: 'provided',
-              },
-            ];
-          }
-
           // Step 4: Extract validation data
-          // includeInput: true is required so getScheduledInputDiscoveries can
-          // read the persist step's input.attack_discoveries in scheduled mode.
           const validationTracking = tracking.validation;
           const validationData: AttackDiscoveryApiAlert[] | null =
             validationTracking != null
               ? await workflowsManagementApi
                   .getWorkflowExecution(validationTracking.workflowRunId, spaceId, {
-                    includeInput: true,
                     includeOutput: true,
                   })
                   .then((validationExecution) =>

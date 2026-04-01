@@ -8,7 +8,6 @@
 import type { CoreStart, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
-import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import { buildDefaultEsqlQuery } from '@kbn/discoveries/impl/lib/build_default_esql_query';
 import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
@@ -68,7 +67,7 @@ export const registerGetDefaultEsqlQueryRoute = (
       path: ROUTE_PATH,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
         },
       },
     })

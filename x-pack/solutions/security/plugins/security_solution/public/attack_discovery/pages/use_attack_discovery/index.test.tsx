@@ -231,7 +231,7 @@ describe('useAttackDiscovery', () => {
 
       expect(requestBody.workflow_config).toEqual({
         alert_retrieval_workflow_ids: [],
-        alert_retrieval_mode: 'custom_query',
+        default_alert_retrieval_mode: 'custom_query',
         validation_workflow_id: 'default',
       });
     });

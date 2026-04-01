@@ -7,8 +7,6 @@
 
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 
-import { GenerateStepTypeId } from '../../../../../../common/step_types/generate_step';
-
 /**
  * Represents a single attack discovery output from the generation step.
  * All fields are snake_case (Elasticsearch API convention).
@@ -44,6 +42,9 @@ export interface PipelineGenerationData {
   /** Map of anonymized values to original values */
   replacements: Record<string, string>;
 }
+
+/** Step type identifier for the attack discovery generation step */
+const GENERATE_STEP_TYPE = 'attack-discovery.generate';
 
 /**
  * Shape of the raw output stored in the generate step's `output` field.
@@ -102,7 +103,7 @@ export const extractPipelineGenerationData = ({
   }
 
   const generateStep = generationExecution.stepExecutions.find(
-    (step) => step.stepType === GenerateStepTypeId
+    (step) => step.stepType === GENERATE_STEP_TYPE
   );
 
   if (generateStep == null || generateStep.output == null) {

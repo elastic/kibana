@@ -62,7 +62,7 @@ describe('validateAttackDiscoveries', () => {
 
     const bulkResponse = {
       errors: false,
-      items: [{ index: { _id: 'doc-1', result: 'created' } }],
+      items: [{ create: { _id: 'doc-1', result: 'created' } }],
     };
 
     const writeDataClient = {
@@ -118,12 +118,12 @@ describe('validateAttackDiscoveries', () => {
 
     expect((await dataClient.getWriter({ namespace: 'default' })).bulk).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: [{ index: { _id: 'generated-uuid' } }, {}],
+        body: [{ create: { _id: 'generated-uuid' } }, {}],
       })
     );
   });
 
-  it('upserts and counts duplicates_dropped_count when the document already exists', async () => {
+  it('does not bulk insert when the document already exists', async () => {
     (transformToAlertDocuments as jest.Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
     (transformSearchResponseToAlerts as jest.Mock).mockReturnValue([]);
 
@@ -137,10 +137,6 @@ describe('validateAttackDiscoveries', () => {
       // Fetch: return anything (we mock transformSearchResponseToAlerts)
       .mockResolvedValueOnce({ hits: { hits: [] } });
 
-    writeDataClient.bulk = jest.fn().mockResolvedValue({
-      body: { errors: false, items: [{ index: { _id: 'uuid-1', result: 'updated' } }] },
-    });
-
     const result = await validateAttackDiscoveries({
       adhocAttackDiscoveryDataClient: dataClient,
       authenticatedUser,
@@ -153,7 +149,7 @@ describe('validateAttackDiscoveries', () => {
       duplicates_dropped_count: 1,
       validated_discoveries: [],
     });
-    expect(writeDataClient.bulk).toHaveBeenCalled();
+    expect(writeDataClient.bulk).not.toHaveBeenCalled();
   });
 
   it('returns an empty validated_discoveries array when bulk returns an undefined body', async () => {
@@ -185,7 +181,7 @@ describe('validateAttackDiscoveries', () => {
     (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
       body: {
         errors: false,
-        items: [{ index: { result: 'created' } }],
+        items: [{ create: { result: 'created' } }],
       },
     });
 
@@ -212,8 +208,8 @@ describe('validateAttackDiscoveries', () => {
         errors: true,
         // Include one item without an error to cover the `error == null` branch in the errorDetails builder.
         items: [
-          { index: { _id: 'doc-1', error: { reason: 'boom', type: 'error' } } },
-          { index: { _id: 'doc-2', result: 'created' } },
+          { create: { _id: 'doc-1', error: { reason: 'boom', type: 'error' } } },
+          { create: { _id: 'doc-2', result: 'created' } },
         ],
       },
     });
@@ -226,7 +222,7 @@ describe('validateAttackDiscoveries', () => {
         validateRequestBody,
         spaceId: 'default',
       })
-    ).rejects.toThrow('Failed to bulk index Attack discovery alerts');
+    ).rejects.toThrow('Failed to bulk insert Attack discovery alerts');
   });
 
   it('throws when bulk errors are true and the item error has no id', async () => {
@@ -236,7 +232,7 @@ describe('validateAttackDiscoveries', () => {
     (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
       body: {
         errors: true,
-        items: [{ index: { error: { reason: 'boom', type: 'error' } } }],
+        items: [{ create: { error: { reason: 'boom', type: 'error' } } }],
       },
     });
 
@@ -248,7 +244,7 @@ describe('validateAttackDiscoveries', () => {
         validateRequestBody,
         spaceId: 'default',
       })
-    ).rejects.toThrow('Failed to bulk index Attack discovery alerts');
+    ).rejects.toThrow('Failed to bulk insert Attack discovery alerts');
   });
 
   it('returns an empty validated_discoveries array when bulk errors are true but there are no item errors', async () => {
@@ -259,7 +255,7 @@ describe('validateAttackDiscoveries', () => {
     (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
       body: {
         errors: true,
-        items: [{ index: { _id: 'doc-1', result: 'created' } }],
+        items: [{ create: { _id: 'doc-1', result: 'created' } }],
       },
     });
 
@@ -282,7 +278,7 @@ describe('validateAttackDiscoveries', () => {
 
     const { dataClient } = createAdhocAttackDiscoveryDataClient();
     (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
-      body: { errors: false, items: [{ index: { _id: 'doc-1', result: 'noop' } }] },
+      body: { errors: false, items: [{ create: { _id: 'doc-1', result: 'noop' } }] },
     });
 
     const result = await validateAttackDiscoveries({

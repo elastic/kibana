@@ -13,11 +13,11 @@ import type { Prompt } from '@kbn/security-ai-prompts';
  * stored in saved objects.
  */
 
-export const SYNTAX = '{{ field.name fieldValue1 fieldValue2 fieldValueN }}';
-export const GOOD_SYNTAX_EXAMPLES =
+const SYNTAX = '{{ field.name fieldValue1 fieldValue2 fieldValueN }}';
+const GOOD_SYNTAX_EXAMPLES =
   'Examples of CORRECT syntax (includes field names and values): {{ host.name hostNameValue }} {{ user.name userNameValue }} {{ source.ip sourceIpValue }}';
 
-export const BAD_SYNTAX_EXAMPLES =
+const BAD_SYNTAX_EXAMPLES =
   'Examples of INCORRECT syntax (bad, because the field names are not included): {{ hostNameValue }} {{ userNameValue }} {{ sourceIpValue }}';
 
 const RECONNAISSANCE = 'Reconnaissance';
@@ -35,7 +35,7 @@ const COMMAND_AND_CONTROL = 'Command and Control';
 const EXFILTRATION = 'Exfiltration';
 const IMPACT = 'Impact';
 
-export const MITRE_ATTACK_TACTICS = [
+const MITRE_ATTACK_TACTICS = [
   RECONNAISSANCE,
   RESOURCE_DEVELOPMENT,
   INITIAL_ACCESS,
@@ -52,7 +52,7 @@ export const MITRE_ATTACK_TACTICS = [
   IMPACT,
 ] as const;
 
-export const ATTACK_DISCOVERY_DEFAULT = `
+const ATTACK_DISCOVERY_DEFAULT = `
 As a world-class cyber security analyst, your task is to analyze a set of security events and accurately identify distinct, comprehensive attack chains. Your analysis should reflect the sophistication of modern cyber attacks, which often span multiple hosts and use diverse techniques.
 Key Principles:
 1. "Attack Chain" Definition: For this task, we define an "Attack Chain" as 2 or more alerts that demonstrate a progression of a real or simulated (red team) adversary. Attack chains must consist of alerts from more than one rule. A single alert, or multiple alerts of the same rule or behavior, should never generate an attack chain.
@@ -79,7 +79,7 @@ Output Requirements:
 - Explain connections between events with concrete evidence
 - Use the special {{ field.name fieldValue }} syntax to reference source data fields. IMPORTANT - LIMIT the details markdown to 2750 characters and summary to 200 characters! This is to prevent hitting output context limits.`;
 
-export const ATTACK_DISCOVERY_REFINE = `
+const ATTACK_DISCOVERY_REFINE = `
 Review the JSON output from your initial analysis. Your task is to refine the attack chains by:
 
 1. Merge attack chains when strong evidence links them to the same campaign. Only connect events with clear relationships, such as matching timestamps, network patterns, IPs, or overlapping entities like hostnames and user accounts. Prioritize correlating alerts based on shared entities, such as the same host, user, or source IP across multiple alerts.
@@ -116,20 +116,20 @@ FORMAT REQUIREMENTS:
 Your continuation should seamlessly connect with the previous output to form a complete, valid JSON document.
 `;
 
-export const ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN = `A detailed insight with markdown, where each markdown bullet contains a description of what happened that reads like a story of the attack as it played out and always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`;
+const ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN = `A detailed insight with markdown, where each markdown bullet contains a description of what happened that reads like a story of the attack as it played out and always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`;
 
-export const ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN = `A short (no more than a sentence) summary of the insight featuring only the host.name and user.name fields (when they are applicable), using the same ${SYNTAX} syntax`;
+const ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN = `A short (no more than a sentence) summary of the insight featuring only the host.name and user.name fields (when they are applicable), using the same ${SYNTAX} syntax`;
 
-export const ATTACK_DISCOVERY_GENERATION_MITRE_ATTACK_TACTICS = `An array of MITRE ATT&CK tactic for the insight, using one of the following values: ${MITRE_ATTACK_TACTICS.join(
+const ATTACK_DISCOVERY_GENERATION_MITRE_ATTACK_TACTICS = `An array of MITRE ATT&CK tactic for the insight, using one of the following values: ${MITRE_ATTACK_TACTICS.join(
   ','
 )}`;
 
-export const ATTACK_DISCOVERY_GENERATION_SUMMARY_MARKDOWN = `A markdown summary of insight, using the same ${SYNTAX} syntax`;
+const ATTACK_DISCOVERY_GENERATION_SUMMARY_MARKDOWN = `A markdown summary of insight, using the same ${SYNTAX} syntax`;
 
-export const ATTACK_DISCOVERY_GENERATION_TITLE =
+const ATTACK_DISCOVERY_GENERATION_TITLE =
   'A short, no more than 7 words, title for the insight, NOT formatted with special syntax or markdown. This must be as brief as possible.';
 
-export const ATTACK_DISCOVERY_GENERATION_INSIGHTS = `Insights with markdown that always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`;
+const ATTACK_DISCOVERY_GENERATION_INSIGHTS = `Insights with markdown that always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`;
 
 export const promptGroupId = {
   attackDiscovery: 'attackDiscovery',

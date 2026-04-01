@@ -26,7 +26,7 @@ export const getInferredPrebuiltStepTypes = ({
 
   return [
     GenerateStepTypeId,
-    ...(workflowConfig.alert_retrieval_mode !== 'custom_only'
+    ...(workflowConfig.default_alert_retrieval_mode !== 'disabled'
       ? [DefaultAlertRetrievalStepTypeId]
       : []),
     ...(usesDefaultValidation ? [DefaultValidationStepTypeId, PersistDiscoveriesStepTypeId] : []),

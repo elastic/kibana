@@ -142,52 +142,6 @@ describe('getExecutionTracking response transformation', () => {
 });
 
 describe('registerGetExecutionTrackingRoute feature flag', () => {
-  it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', async () => {
-    const { registerGetExecutionTrackingRoute } = await import('./get_execution_tracking');
-
-    const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
-
-    registerGetExecutionTrackingRoute(router, {} as never, {
-      getEventLogIndex: jest.fn().mockResolvedValue('.kibana-event-log-test'),
-      getStartServices: jest.fn().mockResolvedValue({ coreStart: {}, pluginsStart: {} }),
-    });
-
-    expect(router.versioned.get).toHaveBeenCalledWith(
-      expect.objectContaining({
-        security: expect.objectContaining({
-          authz: expect.objectContaining({
-            requiredPrivileges: expect.arrayContaining(['securitySolution-attackDiscoveryAll']),
-          }),
-        }),
-      })
-    );
-  });
-
-  it('registers the route with ALERTS_API_READ in requiredPrivileges', async () => {
-    const { registerGetExecutionTrackingRoute } = await import('./get_execution_tracking');
-
-    const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
-
-    registerGetExecutionTrackingRoute(router, {} as never, {
-      getEventLogIndex: jest.fn().mockResolvedValue('.kibana-event-log-test'),
-      getStartServices: jest.fn().mockResolvedValue({ coreStart: {}, pluginsStart: {} }),
-    });
-
-    expect(router.versioned.get).toHaveBeenCalledWith(
-      expect.objectContaining({
-        security: expect.objectContaining({
-          authz: expect.objectContaining({
-            requiredPrivileges: expect.arrayContaining(['alerts-read']),
-          }),
-        }),
-      })
-    );
-  });
-
   it('returns 404 when the feature flag is disabled', async () => {
     const mockNotFoundResponse = { statusCode: 404 };
     (assertWorkflowsEnabled as jest.Mock).mockResolvedValueOnce(mockNotFoundResponse);

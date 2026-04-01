@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import type { WorkflowsManagementApi } from '@kbn/discoveries/impl/attack_discovery/generation/types';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 
 // Placeholder — real implementation added in PR 9
 export interface WorkflowInitializationService {
@@ -23,14 +22,3 @@ export interface WorkflowInitializationService {
     spaceId: string;
   }): Promise<unknown>;
 }
-
-export const createWorkflowInitializationService = (_params: {
-  analytics: AnalyticsServiceSetup;
-  workflowsManagementApi?: WorkflowsManagementApi;
-}): WorkflowInitializationService => {
-  // Placeholder — real implementation added in PR 9
-  return {
-    ensureWorkflowsForSpace: async () => null,
-    verifyAndRepairWorkflows: async () => undefined,
-  };
-};
