@@ -154,6 +154,7 @@ export const applicationUsageSchema = {
   metrics: commonSchema,
   fleet: commonSchema,
   integrations: commonSchema,
+  ingestHub: commonSchema,
   ingestManager: commonSchema,
   lens: commonSchema,
   maps: commonSchema,

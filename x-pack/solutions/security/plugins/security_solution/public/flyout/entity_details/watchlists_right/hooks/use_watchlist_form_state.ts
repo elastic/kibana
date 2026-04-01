@@ -18,6 +18,7 @@ export interface UseWatchlistFormStateParams {
 export interface WatchlistFormState {
   watchlist: CreateWatchlistRequestBodyInput;
   normalizedWatchlistId?: string;
+  entitySourceId?: string;
   isEditMode: boolean;
   isDisabled: boolean;
   isNameInvalid: boolean;

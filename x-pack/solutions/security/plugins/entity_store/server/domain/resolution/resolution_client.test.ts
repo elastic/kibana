@@ -111,6 +111,44 @@ describe('ResolutionClient', () => {
       );
     });
 
+    it('should pass nested doc payloads to ES bulk (not flat dotted keys)', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const entity1Doc = createEntityDoc('entity-1');
+      const entity2Doc = createEntityDoc('entity-2');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, entity1Doc, entity2Doc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.linkEntities('target-1', ['entity-1', 'entity-2']);
+
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
+      const bulkPayload = mockEsClient.bulk.mock.calls[0][0];
+      const { operations } = bulkPayload;
+      if (!operations) {
+        throw new Error('expected bulk operations');
+      }
+      const docOperations = operations.filter(
+        (op: unknown): op is { doc: unknown } =>
+          op !== null && typeof op === 'object' && 'doc' in op
+      );
+      expect(docOperations).toHaveLength(2);
+      const nestedDoc = {
+        entity: {
+          relationships: {
+            resolution: {
+              resolved_to: 'target-1',
+            },
+          },
+        },
+      };
+      for (const { doc } of docOperations) {
+        expect(doc).toEqual(nestedDoc);
+      }
+    });
+
     it('should skip entities already linked to the same target', async () => {
       const targetDoc = createEntityDoc('target-1');
       const alreadyLinkedDoc = createEntityDoc('entity-1', 'user', 'target-1');
@@ -313,7 +351,15 @@ describe('ResolutionClient', () => {
           refresh: true,
           operations: expect.arrayContaining([
             expect.objectContaining({
-              doc: { 'entity.relationships.resolution.resolved_to': null },
+              doc: {
+                entity: {
+                  relationships: {
+                    resolution: {
+                      resolved_to: null,
+                    },
+                  },
+                },
+              },
             }),
           ]),
         })

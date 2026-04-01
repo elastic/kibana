@@ -30,7 +30,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -71,7 +71,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     title: 'basic donut',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -82,7 +82,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -110,7 +110,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       visible: true,
       mode: 'percentage',
     },
-    donut_hole: 'medium',
+    donut_hole: 'm',
     labels: {
       visible: true,
       position: 'outside',
@@ -135,7 +135,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -181,7 +181,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -229,7 +229,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -276,7 +276,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -294,7 +294,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -330,7 +330,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     title: 'donut with multiple groups',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -341,7 +341,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -359,7 +359,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -382,7 +382,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       visible: true,
       mode: 'percentage',
     },
-    donut_hole: 'medium',
+    donut_hole: 'm',
     labels: {
       visible: true,
       position: 'outside',
@@ -407,7 +407,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -425,7 +425,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -466,7 +466,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -486,7 +486,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -540,7 +540,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -558,7 +558,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -594,7 +594,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     title: 'donut with multiple metrics',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -617,7 +617,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -635,7 +635,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -657,7 +657,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     values: {
       mode: 'percentage',
     },
-    donut_hole: 'medium',
+    donut_hole: 'm',
     labels: {
       visible: true,
       position: 'outside',
@@ -694,7 +694,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -741,7 +741,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -755,7 +755,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -801,7 +801,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -819,7 +819,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -832,7 +832,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['clientip'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -878,7 +878,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -929,7 +929,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -942,7 +942,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['clientip'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -988,7 +988,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1001,7 +1001,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1014,7 +1014,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['clientip'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1049,7 +1049,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     title: 'donut with color mapping',
     sampling: 1,
     ignore_global_filters: false,
-    type: 'donut',
+    type: 'pie',
     metrics: [
       {
         operation: 'count',
@@ -1060,7 +1060,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1111,7 +1111,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1124,7 +1124,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['clientip'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1146,7 +1146,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     values: {
       mode: 'percentage',
     },
-    donut_hole: 'medium',
+    donut_hole: 'm',
     labels: {
       visible: true,
       position: 'outside',
@@ -1171,7 +1171,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1222,7 +1222,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1263,7 +1263,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1316,7 +1316,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1359,7 +1359,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1543,7 +1543,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1557,7 +1557,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
