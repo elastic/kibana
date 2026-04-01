@@ -31,6 +31,8 @@ function mockRuleSearchResponse({
   countWithRecoveryPolicy = 3,
   recoveryPolicyTypeBuckets = [{ key: 'auto', doc_count: 3 }],
   countWithRecoveryQueryCondition = 1,
+  avgPendingCount = 3.0,
+  avgRecoveringCount = 2.0,
   pendingTimeframeBuckets = [{ key: '5m', doc_count: 8 }],
   recoveringTimeframeBuckets = [{ key: '10m', doc_count: 6 }],
   countWithGrouping = 4,
@@ -52,6 +54,8 @@ function mockRuleSearchResponse({
   countWithRecoveryPolicy?: number;
   recoveryPolicyTypeBuckets?: Array<{ key: string; doc_count: number }>;
   countWithRecoveryQueryCondition?: number;
+  avgPendingCount?: number | null;
+  avgRecoveringCount?: number | null;
   pendingTimeframeBuckets?: Array<{ key: string; doc_count: number }>;
   recoveringTimeframeBuckets?: Array<{ key: string; doc_count: number }>;
   countWithGrouping?: number;
@@ -75,6 +79,8 @@ function mockRuleSearchResponse({
       count_with_recovery_policy: { doc_count: countWithRecoveryPolicy },
       count_by_recovery_policy_type: { buckets: recoveryPolicyTypeBuckets },
       count_with_recovery_query_condition: { doc_count: countWithRecoveryQueryCondition },
+      avg_pending_count: { value: avgPendingCount },
+      avg_recovering_count: { value: avgRecoveringCount },
       count_by_pending_timeframe: { buckets: pendingTimeframeBuckets },
       count_by_recovering_timeframe: { buckets: recoveringTimeframeBuckets },
       count_with_grouping: { doc_count: countWithGrouping },
@@ -111,6 +117,8 @@ describe('getRuleStats', () => {
       count_with_recovery_policy: 3,
       count_by_recovery_policy_type: { auto: 3 },
       count_with_recovery_query_condition: 1,
+      avg_pending_count: 3.0,
+      avg_recovering_count: 2.0,
       count_by_pending_timeframe: { '5m': 8 },
       count_by_recovering_timeframe: { '10m': 6 },
       count_with_grouping: 4,
@@ -144,6 +152,8 @@ describe('getRuleStats', () => {
       countWithRecoveryPolicy: 0,
       recoveryPolicyTypeBuckets: [],
       countWithRecoveryQueryCondition: 0,
+      avgPendingCount: null,
+      avgRecoveringCount: null,
       pendingTimeframeBuckets: [],
       recoveringTimeframeBuckets: [],
       countWithGrouping: 0,
@@ -167,6 +177,8 @@ describe('getRuleStats', () => {
       count_with_recovery_policy: 0,
       count_by_recovery_policy_type: {},
       count_with_recovery_query_condition: 0,
+      avg_pending_count: null,
+      avg_recovering_count: null,
       count_by_pending_timeframe: {},
       count_by_recovering_timeframe: {},
       count_with_grouping: 0,
@@ -200,6 +212,8 @@ describe('getRuleStats', () => {
       count_with_recovery_policy: 0,
       count_by_recovery_policy_type: {},
       count_with_recovery_query_condition: 0,
+      avg_pending_count: null,
+      avg_recovering_count: null,
       count_by_pending_timeframe: {},
       count_by_recovering_timeframe: {},
       count_with_grouping: 0,
@@ -227,6 +241,8 @@ describe('getRuleStats', () => {
         count_with_recovery_policy: { doc_count: 0 },
         count_by_recovery_policy_type: { buckets: [] },
         count_with_recovery_query_condition: { doc_count: 0 },
+        avg_pending_count: { value: null },
+        avg_recovering_count: { value: null },
         count_by_pending_timeframe: { buckets: [] },
         count_by_recovering_timeframe: { buckets: [] },
         count_with_grouping: { doc_count: 0 },

@@ -31,6 +31,8 @@ const stateSchemaV1 = schema.object({
   count_with_recovery_policy: schema.maybe(schema.number()),
   count_by_recovery_policy_type: schema.maybe(schema.recordOf(schema.string(), schema.number())),
   count_with_recovery_query_condition: schema.maybe(schema.number()),
+  avg_pending_count: schema.maybe(schema.nullable(schema.number())),
+  avg_recovering_count: schema.maybe(schema.nullable(schema.number())),
   count_by_pending_timeframe: schema.maybe(schema.recordOf(schema.string(), schema.number())),
   count_by_recovering_timeframe: schema.maybe(schema.recordOf(schema.string(), schema.number())),
   count_with_grouping: schema.maybe(schema.number()),
@@ -40,6 +42,15 @@ const stateSchemaV1 = schema.object({
   count_by_no_data_timeframe: schema.maybe(schema.recordOf(schema.string(), schema.number())),
   count_notification_policies: schema.maybe(schema.number()),
   min_created_at: schema.maybe(schema.nullable(schema.string())),
+
+  // execution stats
+  executions_count_24hr: schema.maybe(schema.number()),
+  executions_count_by_status_24hr: schema.maybe(schema.recordOf(schema.string(), schema.number())),
+  executions_delay_p50_ms: schema.maybe(schema.nullable(schema.number())),
+  executions_delay_p75_ms: schema.maybe(schema.nullable(schema.number())),
+  executions_delay_p95_ms: schema.maybe(schema.nullable(schema.number())),
+  executions_delay_p99_ms: schema.maybe(schema.nullable(schema.number())),
+  dispatcher_executions_count_24hr: schema.maybe(schema.number()),
 
   // notification policy stats
   notification_policies_count: schema.maybe(schema.number()),
@@ -76,6 +87,8 @@ export const stateSchemaByVersion = {
       count_with_recovery_policy: state.count_with_recovery_policy || undefined,
       count_by_recovery_policy_type: state.count_by_recovery_policy_type || undefined,
       count_with_recovery_query_condition: state.count_with_recovery_query_condition || undefined,
+      avg_pending_count: state.avg_pending_count || undefined,
+      avg_recovering_count: state.avg_recovering_count || undefined,
       count_by_pending_timeframe: state.count_by_pending_timeframe || undefined,
       count_by_recovering_timeframe: state.count_by_recovering_timeframe || undefined,
       count_with_grouping: state.count_with_grouping || undefined,
@@ -85,6 +98,13 @@ export const stateSchemaByVersion = {
       count_by_no_data_timeframe: state.count_by_no_data_timeframe || undefined,
       count_notification_policies: state.count_notification_policies || undefined,
       min_created_at: state.min_created_at || undefined,
+      executions_count_24hr: state.executions_count_24hr || undefined,
+      executions_count_by_status_24hr: state.executions_count_by_status_24hr || undefined,
+      executions_delay_p50_ms: state.executions_delay_p50_ms || undefined,
+      executions_delay_p75_ms: state.executions_delay_p75_ms || undefined,
+      executions_delay_p95_ms: state.executions_delay_p95_ms || undefined,
+      executions_delay_p99_ms: state.executions_delay_p99_ms || undefined,
+      dispatcher_executions_count_24hr: state.dispatcher_executions_count_24hr || undefined,
       notification_policies_count: state.notification_policies_count || undefined,
       notification_policies_unique_workflow_count:
         state.notification_policies_unique_workflow_count || undefined,

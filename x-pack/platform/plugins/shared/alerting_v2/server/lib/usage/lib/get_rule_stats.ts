@@ -71,6 +71,36 @@ async function fetchRuleAggregations(
           `,
         },
       },
+      rule_pending_count: {
+        type: 'long',
+        script: {
+          source: `
+            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
+            if (rule != null) {
+              def st = rule['state_transition'];
+              if (st != null) {
+                def v = st['pending_count'];
+                if (v != null) emit((long) v);
+              }
+            }
+          `,
+        },
+      },
+      rule_recovering_count: {
+        type: 'long',
+        script: {
+          source: `
+            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
+            if (rule != null) {
+              def st = rule['state_transition'];
+              if (st != null) {
+                def v = st['recovering_count'];
+                if (v != null) emit((long) v);
+              }
+            }
+          `,
+        },
+      },
       rule_pending_timeframe: {
         type: 'keyword',
         script: {
@@ -174,6 +204,12 @@ async function fetchRuleAggregations(
       count_with_recovery_query_condition: {
         filter: { term: { rule_has_recovery_query_condition: true } },
       },
+      avg_pending_count: {
+        avg: { field: 'rule_pending_count' },
+      },
+      avg_recovering_count: {
+        avg: { field: 'rule_recovering_count' },
+      },
       count_by_pending_timeframe: {
         terms: { field: 'rule_pending_timeframe', size: TERMS_SIZE },
       },
@@ -216,6 +252,8 @@ async function fetchRuleAggregations(
     count_with_recovery_policy: aggs?.count_with_recovery_policy.doc_count ?? 0,
     count_by_recovery_policy_type: bucketsToRecord(aggs?.count_by_recovery_policy_type.buckets),
     count_with_recovery_query_condition: aggs?.count_with_recovery_query_condition.doc_count ?? 0,
+    avg_pending_count: aggs?.avg_pending_count.value ?? null,
+    avg_recovering_count: aggs?.avg_recovering_count.value ?? null,
     count_by_pending_timeframe: bucketsToRecord(aggs?.count_by_pending_timeframe.buckets),
     count_by_recovering_timeframe: bucketsToRecord(aggs?.count_by_recovering_timeframe.buckets),
     count_with_grouping: aggs?.count_with_grouping.doc_count ?? 0,

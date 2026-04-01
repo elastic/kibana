@@ -58,6 +58,16 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     type: 'long',
     _meta: { description: 'Number of rules with a recovery query condition.' },
   },
+  avg_pending_count: {
+    type: 'float',
+    _meta: { description: 'Average configured pending count across rules with state transitions.' },
+  },
+  avg_recovering_count: {
+    type: 'float',
+    _meta: {
+      description: 'Average configured recovering count across rules with state transitions.',
+    },
+  },
   count_by_pending_timeframe: {
     DYNAMIC_KEY: {
       type: 'long',
@@ -101,6 +111,37 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
   min_created_at: {
     type: 'date',
     _meta: { description: 'Earliest rule creation date.' },
+  },
+
+  executions_count_24hr: {
+    type: 'long',
+    _meta: { description: 'Total rule executor executions in the last 24 hours.' },
+  },
+  executions_count_by_status_24hr: {
+    DYNAMIC_KEY: {
+      type: 'long',
+      _meta: { description: 'Rule executor executions by outcome status in the last 24 hours.' },
+    },
+  },
+  executions_delay_p50_ms: {
+    type: 'float',
+    _meta: { description: 'P50 schedule delay in milliseconds over the last 24 hours.' },
+  },
+  executions_delay_p75_ms: {
+    type: 'float',
+    _meta: { description: 'P75 schedule delay in milliseconds over the last 24 hours.' },
+  },
+  executions_delay_p95_ms: {
+    type: 'float',
+    _meta: { description: 'P95 schedule delay in milliseconds over the last 24 hours.' },
+  },
+  executions_delay_p99_ms: {
+    type: 'float',
+    _meta: { description: 'P99 schedule delay in milliseconds over the last 24 hours.' },
+  },
+  dispatcher_executions_count_24hr: {
+    type: 'long',
+    _meta: { description: 'Total dispatcher executions in the last 24 hours.' },
   },
 
   notification_policies_count: {

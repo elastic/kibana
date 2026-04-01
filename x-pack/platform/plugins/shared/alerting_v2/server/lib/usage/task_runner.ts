@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RunContext, IntervalSchedule } from '@kbn/task-manager-plugin/server';
 import { emptyState, type LatestTaskStateSchema } from './task_state';
 import { getRuleStats } from './lib/get_rule_stats';
+import { getExecutionStats } from './lib/get_execution_stats';
 import { getNotificationPolicyStats } from './lib/get_notification_policy_stats';
 import { getAlertStats } from './lib/get_alert_stats';
 
@@ -24,8 +25,9 @@ export function telemetryTaskRunner(
       async run() {
         try {
           const esClient = getEsClient();
-          const [stats, notificationPolicyStats, alertStats] = await Promise.all([
+          const [stats, executionStats, notificationPolicyStats, alertStats] = await Promise.all([
             getRuleStats(esClient),
+            getExecutionStats(esClient),
             getNotificationPolicyStats(esClient),
             getAlertStats(esClient),
           ]);
@@ -35,6 +37,7 @@ export function telemetryTaskRunner(
             error_messages: undefined,
             runs: (state.runs ?? 0) + 1,
             ...stats,
+            ...executionStats,
             ...notificationPolicyStats,
             ...alertStats,
           };

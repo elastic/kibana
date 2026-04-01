@@ -179,6 +179,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(parsedState.count_notification_policies).to.be(2);
         expect(parsedState.min_created_at).to.be.a('string');
 
+        // Execution stats
+        expect(parsedState.executions_count_24hr).to.be.a('number');
+        expect(parsedState.executions_count_by_status_24hr).to.be.an('object');
+        expect(parsedState.executions_delay_p50_ms).to.not.be(undefined);
+        expect(parsedState.executions_delay_p75_ms).to.not.be(undefined);
+        expect(parsedState.executions_delay_p95_ms).to.not.be(undefined);
+        expect(parsedState.executions_delay_p99_ms).to.not.be(undefined);
+        expect(parsedState.dispatcher_executions_count_24hr).to.be.a('number');
+
         // Notification policy stats
         expect(parsedState.notification_policies_count).to.be(2);
         expect(parsedState.notification_policies_unique_workflow_count).to.be(2);

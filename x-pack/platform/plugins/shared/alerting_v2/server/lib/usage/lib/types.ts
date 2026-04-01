@@ -47,6 +47,21 @@ export type NotificationPolicyStatsResults = Pick<
   | 'notification_policies_count_by_throttle_interval'
 >;
 
+export interface ExecutionStatsAggregations {
+  count_by_status: { buckets: TermsBucket[] };
+  delay_percentiles: { values: Record<string, number | null> };
+}
+export type ExecutionStatsResults = Pick<
+  LatestTaskStateSchema,
+  | 'executions_count_24hr'
+  | 'executions_count_by_status_24hr'
+  | 'executions_delay_p50_ms'
+  | 'executions_delay_p75_ms'
+  | 'executions_delay_p95_ms'
+  | 'executions_delay_p99_ms'
+  | 'dispatcher_executions_count_24hr'
+>;
+
 export interface RuleStatsAggregations {
   count_enabled: { doc_count: number };
   count_by_kind: { buckets: TermsBucket[] };
@@ -56,6 +71,8 @@ export interface RuleStatsAggregations {
   count_with_recovery_policy: { doc_count: number };
   count_by_recovery_policy_type: { buckets: TermsBucket[] };
   count_with_recovery_query_condition: { doc_count: number };
+  avg_pending_count: { value: number | null };
+  avg_recovering_count: { value: number | null };
   count_by_pending_timeframe: { buckets: TermsBucket[] };
   count_by_recovering_timeframe: { buckets: TermsBucket[] };
   count_with_grouping: { doc_count: number };
@@ -76,6 +93,8 @@ export type RuleStatsResults = Pick<
   | 'count_with_recovery_policy'
   | 'count_by_recovery_policy_type'
   | 'count_with_recovery_query_condition'
+  | 'avg_pending_count'
+  | 'avg_recovering_count'
   | 'count_by_pending_timeframe'
   | 'count_by_recovering_timeframe'
   | 'count_with_grouping'
