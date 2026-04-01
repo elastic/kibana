@@ -8,7 +8,12 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import {
+  transpileIngestPipeline,
+  transpileEsql,
+  addDeterministicCustomIdentifiers,
+  stripCustomIdentifiers,
+} from '@kbn/streamlang';
 import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
@@ -17,7 +22,7 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
-      'should produce same results for else branch in both ESQL and Ingest Pipeline',
+      'should execute if-branch when condition matches and else-branch when it does not',
       async ({ testBed, esql }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
@@ -50,19 +55,15 @@ apiTest.describe(
         const mappingDoc = { attributes: { status: 'null', outcome: 'null' } };
         const docs = [{ attributes: { status: 'active' } }, { attributes: { status: 'inactive' } }];
 
-        // Test ingest pipeline
         await testBed.ingest('ingest-else', docs, processors);
         const ingestResult = await testBed.getDocsOrdered('ingest-else');
 
-        // Test ESQL
         await testBed.ingest('esql-else', [mappingDoc, ...docs]);
         const esqlResult = await esql.queryOnIndex('esql-else', query);
 
-        // Verify ingest pipeline results
         expect(asDoc(asDoc(ingestResult[0])?.attributes)?.outcome).toBe('success');
         expect(asDoc(asDoc(ingestResult[1])?.attributes)?.outcome).toBe('failure');
 
-        // Verify ESQL results match
         expect(esqlResult.documentsOrdered[1]).toStrictEqual(
           expect.objectContaining({
             'attributes.status': 'active',
@@ -75,6 +76,134 @@ apiTest.describe(
             'attributes.outcome': 'failure',
           })
         );
+      }
+    );
+
+    apiTest(
+      'should execute multiple steps in else branch',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              condition: {
+                field: 'attributes.status',
+                eq: 'active',
+                steps: [
+                  {
+                    action: 'set',
+                    to: 'attributes.outcome',
+                    value: 'success',
+                  } as SetProcessor,
+                ],
+                else: [
+                  {
+                    action: 'set',
+                    to: 'attributes.outcome',
+                    value: 'failure',
+                  } as SetProcessor,
+                  {
+                    action: 'set',
+                    to: 'attributes.reason',
+                    value: 'not_active',
+                  } as SetProcessor,
+                ],
+              },
+            },
+          ],
+        };
+
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
+
+        const mappingDoc = {
+          attributes: { status: 'null', outcome: 'null', reason: 'null' },
+        };
+        const docs = [{ attributes: { status: 'active' } }, { attributes: { status: 'inactive' } }];
+
+        await testBed.ingest('ingest-else-multi', docs, processors);
+        const ingestResult = await testBed.getDocsOrdered('ingest-else-multi');
+
+        await testBed.ingest('esql-else-multi', [mappingDoc, ...docs]);
+        const esqlResult = await esql.queryOnIndex('esql-else-multi', query);
+
+        // Active doc: only outcome set
+        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.outcome).toBe('success');
+        expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+          expect.objectContaining({ 'attributes.outcome': 'success' })
+        );
+
+        // Inactive doc: both outcome and reason set by else branch
+        expect(asDoc(asDoc(ingestResult[1])?.attributes)?.outcome).toBe('failure');
+        expect(asDoc(asDoc(ingestResult[1])?.attributes)?.reason).toBe('not_active');
+        expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+          expect.objectContaining({
+            'attributes.outcome': 'failure',
+            'attributes.reason': 'not_active',
+          })
+        );
+      }
+    );
+
+    apiTest(
+      'should produce same results after round-tripping through identifier utilities',
+      async ({ testBed, esql }) => {
+        const originalDSL: StreamlangDSL = {
+          steps: [
+            {
+              condition: {
+                field: 'attributes.status',
+                eq: 'active',
+                steps: [
+                  {
+                    action: 'set',
+                    to: 'attributes.outcome',
+                    value: 'success',
+                  } as SetProcessor,
+                ],
+                else: [
+                  {
+                    action: 'set',
+                    to: 'attributes.outcome',
+                    value: 'failure',
+                  } as SetProcessor,
+                ],
+              },
+            },
+          ],
+        };
+
+        const withIds = addDeterministicCustomIdentifiers(originalDSL);
+        const stripped = stripCustomIdentifiers(withIds);
+
+        const { processors: origProcessors } = await transpileIngestPipeline(originalDSL);
+        const { processors: rtProcessors } = await transpileIngestPipeline(stripped);
+        const { query: originalQuery } = await transpileEsql(originalDSL);
+        const { query: roundTrippedQuery } = await transpileEsql(stripped);
+
+        const mappingDoc = { attributes: { status: 'null', outcome: 'null' } };
+        const docs = [{ attributes: { status: 'active' } }, { attributes: { status: 'inactive' } }];
+
+        await testBed.ingest('ingest-else-rt-orig', docs, origProcessors);
+        await testBed.ingest('ingest-else-rt-rt', docs, rtProcessors);
+        const origIngest = await testBed.getDocsOrdered('ingest-else-rt-orig');
+        const rtIngest = await testBed.getDocsOrdered('ingest-else-rt-rt');
+
+        await testBed.ingest('esql-else-rt-orig', [mappingDoc, ...docs]);
+        await testBed.ingest('esql-else-rt-rt', [mappingDoc, ...docs]);
+        const origEsql = await esql.queryOnIndex('esql-else-rt-orig', originalQuery);
+        const rtEsql = await esql.queryOnIndex('esql-else-rt-rt', roundTrippedQuery);
+
+        // Ingest results should match after round-trip
+        expect(asDoc(asDoc(origIngest[0])?.attributes)?.outcome).toBe(
+          asDoc(asDoc(rtIngest[0])?.attributes)?.outcome
+        );
+        expect(asDoc(asDoc(origIngest[1])?.attributes)?.outcome).toBe(
+          asDoc(asDoc(rtIngest[1])?.attributes)?.outcome
+        );
+
+        // ESQL results should match after round-trip
+        expect(origEsql.documentsOrdered[1]).toStrictEqual(rtEsql.documentsOrdered[1]);
+        expect(origEsql.documentsOrdered[2]).toStrictEqual(rtEsql.documentsOrdered[2]);
       }
     );
   }
