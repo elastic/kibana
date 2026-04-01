@@ -14,10 +14,10 @@ export function getMeta(savedObject: SavedObject | SavedObjectsUpdateResponse): 
   return {
     ...(savedObject.created_at && { created_at: savedObject.created_at }),
     ...(savedObject.created_by && { created_by: savedObject.created_by }),
-    managed: savedObject.managed,
-    owner: savedObject.accessControl?.owner,
-    updated_at: savedObject.updated_at,
-    updated_by: savedObject.updated_by,
-    version: savedObject.version ?? '',
+    managed: savedObject.managed ?? false,
+    ...(savedObject.accessControl?.owner && { owner: savedObject.accessControl.owner }),
+    ...(savedObject.updated_at && { updated_at: savedObject.updated_at }),
+    ...(savedObject.updated_by && { updated_by: savedObject.updated_by }),
+    ...(savedObject.version && { version: savedObject.version }),
   };
 }
