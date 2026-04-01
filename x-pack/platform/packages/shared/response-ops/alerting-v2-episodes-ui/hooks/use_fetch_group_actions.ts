@@ -11,41 +11,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { GroupAction } from '../types/action';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { queryKeys } from '../query_keys';
-
-const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
-
-const escapeEsqlString = (value: string): string =>
-  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-
-const tagsFromRow = (value: unknown): string[] => {
-  if (value == null) {
-    return [];
-  }
-  if (typeof value === 'string') {
-    return [value];
-  }
-  if (Array.isArray(value)) {
-    return value as string[];
-  }
-  return [];
-};
-
-const buildGroupActionsQuery = (groupHashes: string[]): string => {
-  const escaped = groupHashes.map((h) => `"${escapeEsqlString(h)}"`).join(', ');
-
-  return `
-    FROM ${ALERT_ACTIONS_DATA_STREAM}
-    | WHERE group_hash IN (${escaped})
-    | WHERE action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag")
-    | STATS
-        tags = LAST(tags, @timestamp) WHERE action_type IN ("tag"),
-        last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-        last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
-        snooze_expiry = LAST(expiry, @timestamp) WHERE action_type IN ("snooze")
-      BY group_hash, rule_id
-    | KEEP group_hash, rule_id, last_deactivate_action, last_snooze_action, snooze_expiry, tags
-  `;
-};
+import { buildGroupActionsQuery, tagsFromRow } from '../utils/queries/build_group_actions_query';
 
 export interface UseFetchGroupActionsOptions {
   groupHashes: string[];

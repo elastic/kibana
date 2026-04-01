@@ -11,25 +11,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { EpisodeAction } from '../types/action';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { queryKeys } from '../query_keys';
-
-const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
-
-const escapeEsqlString = (value: string): string =>
-  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-
-const buildEpisodeActionsQuery = (episodeIds: string[]): string => {
-  const escapedIds = episodeIds.map((id) => `"${escapeEsqlString(id)}"`).join(', ');
-
-  return `
-    FROM ${ALERT_ACTIONS_DATA_STREAM}
-    | WHERE episode_id IN (${escapedIds})
-    | WHERE action_type IN ("ack", "unack")
-    | STATS
-        last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack")
-      BY episode_id, rule_id, group_hash
-    | KEEP episode_id, rule_id, group_hash, last_ack_action
-  `;
-};
+import { buildEpisodeActionsQuery } from '../utils/queries/build_episode_actions_query';
 
 export interface UseFetchEpisodeActionsOptions {
   episodeIds: string[];

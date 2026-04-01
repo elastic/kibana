@@ -7,15 +7,15 @@
 
 import { z } from '@kbn/zod/v4';
 
-export const ALERT_EPISODE_ACTION_TYPE = {
-  ACK: 'ack',
-  UNACK: 'unack',
-  TAG: 'tag',
-  SNOOZE: 'snooze',
-  UNSNOOZE: 'unsnooze',
-  ACTIVATE: 'activate',
-  DEACTIVATE: 'deactivate',
-} as const;
+export enum ALERT_EPISODE_ACTION_TYPE {
+  ACK = 'ack',
+  UNACK = 'unack',
+  TAG = 'tag',
+  SNOOZE = 'snooze',
+  UNSNOOZE = 'unsnooze',
+  ACTIVATE = 'activate',
+  DEACTIVATE = 'deactivate',
+}
 
 export type AlertEpisodeActionType =
   (typeof ALERT_EPISODE_ACTION_TYPE)[keyof typeof ALERT_EPISODE_ACTION_TYPE];
