@@ -54,30 +54,6 @@ export function getOnboardingTaskId(streamName: string, saveQueries: boolean = t
   return saveQueries ? base : `${base}_no_save_queries`;
 }
 
-const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
-async function areFeaturesUpToDate({
-  taskClient,
-  featuresTaskId,
-}: {
-  taskClient: TaskClient<StreamsTaskType>;
-  featuresTaskId: string;
-}) {
-  const featuresTask = await taskClient.get<
-    FeaturesIdentificationTaskParams,
-    IdentifyFeaturesResult
-  >(featuresTaskId);
-
-  if (featuresTask.status !== TaskStatus.Completed) {
-    return false;
-  }
-
-  return (
-    featuresTask.last_completed_at &&
-    Date.now() - new Date(featuresTask.last_completed_at).getTime() <
-      FEATURES_IDENTIFICATION_RECENCY_MS
-  );
-}
-
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
   return {
     [STREAMS_ONBOARDING_TASK_TYPE]: {
@@ -115,32 +91,20 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     case OnboardingStep.FeaturesIdentification: {
                       const featuresTaskId = getFeaturesIdentificationTaskId(streamName);
 
-                      if (
-                        await areFeaturesUpToDate({
-                          taskClient,
-                          featuresTaskId,
-                        })
-                      ) {
-                        featuresTaskResult = await taskClient.getStatus<
-                          FeaturesIdentificationTaskParams,
-                          IdentifyFeaturesResult
-                        >(featuresTaskId);
-                      } else {
-                        await scheduleFeaturesIdentificationTask(
-                          {
-                            start: from,
-                            end: to,
-                            streamName,
-                          },
-                          taskClient,
-                          runContext.fakeRequest
-                        );
+                      await scheduleFeaturesIdentificationTask(
+                        {
+                          start: from,
+                          end: to,
+                          streamName,
+                        },
+                        taskClient,
+                        runContext.fakeRequest
+                      );
 
-                        featuresTaskResult = await waitForSubtask<
-                          FeaturesIdentificationTaskParams,
-                          IdentifyFeaturesResult
-                        >(featuresTaskId, runContext.taskInstance.id, taskClient);
-                      }
+                      featuresTaskResult = await waitForSubtask<
+                        FeaturesIdentificationTaskParams,
+                        IdentifyFeaturesResult
+                      >(featuresTaskId, runContext.taskInstance.id, taskClient);
 
                       if (featuresTaskResult.status !== TaskStatus.Completed) {
                         return;
