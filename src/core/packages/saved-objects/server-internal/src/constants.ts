@@ -60,4 +60,6 @@ export const REMOVED_TYPES: string[] = [
   // Removed in 9.1 https://github.com/elastic/kibana/pull/231084
   'guided-onboarding-guide-state',
   'guided-onboarding-plugin-state',
+  // Anonymization platform ESO type removed (was behind xpack.anonymization.active)
+  'anonymization-salt',
 ].sort();
