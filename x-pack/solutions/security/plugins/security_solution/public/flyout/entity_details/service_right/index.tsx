@@ -51,8 +51,13 @@ const FIRST_RECORD_PAGINATION = {
 
 export const ServicePanel = ({ contextID, scopeId, entityId, serviceName }: ServicePanelProps) => {
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const serviceStoreIdentityFields = useMemo(
+    () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
+    [entityId, serviceName]
+  );
   const entityFromStoreResult = useEntityFromStore({
     entityId,
+    identityFields: serviceStoreIdentityFields,
     entityType: 'service',
     skip: !entityStoreV2Enabled,
   });
