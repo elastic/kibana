@@ -15,6 +15,7 @@ export const dashboardManagementSkill = defineSkillType({
   id: 'dashboard-management',
   name: 'dashboard-management',
   basePath: 'skills/platform/dashboard',
+  experimental: true,
   description:
     'Compose and update in-memory Kibana dashboards using ordered operations, visualization attachments, and inline visualization editing.',
   content: `## When to Use This Skill

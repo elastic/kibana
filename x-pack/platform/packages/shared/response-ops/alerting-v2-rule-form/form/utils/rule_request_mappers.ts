@@ -11,7 +11,7 @@ import type {
   CreateRuleData,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
-import type { FormValues } from '../types';
+import type { FormValues, StateTransition } from '../types';
 
 const RUNBOOK_ARTIFACT_TYPE = 'runbook';
 const createRunbookArtifactId = () =>
@@ -89,33 +89,67 @@ const mapRecoveryPolicy = (
   };
 };
 
-const mapStateTransition = (
-  kind: FormValues['kind'],
-  stateTransition: FormValues['stateTransition']
-) => {
+/** Derives alert-delay mode from persisted `state_transition` (same rules as `AlertDelayField`). */
+export const deriveAlertDelayModeFromStateTransition = (
+  stateTransition?: StateTransition | null
+): FormValues['stateTransitionAlertDelayMode'] => {
+  if (stateTransition?.pendingTimeframe != null) return 'duration';
+  if (stateTransition?.pendingCount != null) return 'breaches';
+  return 'immediate';
+};
+
+/** Derives recovery-delay mode from persisted `state_transition` (same rules as `RecoveryDelayField`). */
+export const deriveRecoveryDelayModeFromStateTransition = (
+  stateTransition?: StateTransition | null
+): FormValues['stateTransitionRecoveryDelayMode'] => {
+  if (stateTransition?.recoveringTimeframe != null) return 'duration';
+  if (stateTransition?.recoveringCount != null) return 'breaches';
+  return 'immediate';
+};
+
+const mapStateTransition = (formValues: FormValues) => {
+  const { kind, stateTransition } = formValues;
   if (kind !== 'alert' || stateTransition == null) return undefined;
 
-  const hasPending =
-    stateTransition.pendingCount != null || stateTransition.pendingTimeframe != null;
-  const hasRecovering =
-    stateTransition.recoveringCount != null || stateTransition.recoveringTimeframe != null;
+  const alertMode =
+    formValues.stateTransitionAlertDelayMode ??
+    deriveAlertDelayModeFromStateTransition(stateTransition);
+  const recoveryMode =
+    formValues.stateTransitionRecoveryDelayMode ??
+    deriveRecoveryDelayModeFromStateTransition(stateTransition);
 
-  if (!hasPending && !hasRecovering) return undefined;
+  const out: NonNullable<RuleRequestCommon['state_transition']> = {};
 
-  return {
-    ...(stateTransition.pendingCount != null
-      ? { pending_count: stateTransition.pendingCount }
-      : {}),
-    ...(stateTransition.pendingTimeframe != null
-      ? { pending_timeframe: stateTransition.pendingTimeframe }
-      : {}),
-    ...(stateTransition.recoveringCount != null
-      ? { recovering_count: stateTransition.recoveringCount }
-      : {}),
-    ...(stateTransition.recoveringTimeframe != null
-      ? { recovering_timeframe: stateTransition.recoveringTimeframe }
-      : {}),
-  };
+  if (alertMode !== 'immediate') {
+    if (alertMode === 'breaches' && stateTransition.pendingCount != null) {
+      out.pending_count = stateTransition.pendingCount;
+    }
+    if (alertMode === 'duration') {
+      if (stateTransition.pendingTimeframe != null) {
+        out.pending_timeframe = stateTransition.pendingTimeframe;
+      }
+      if (stateTransition.pendingCount != null) {
+        out.pending_count = stateTransition.pendingCount;
+      }
+    }
+  }
+
+  if (recoveryMode !== 'immediate') {
+    if (recoveryMode === 'breaches' && stateTransition.recoveringCount != null) {
+      out.recovering_count = stateTransition.recoveringCount;
+    }
+    if (recoveryMode === 'duration') {
+      if (stateTransition.recoveringTimeframe != null) {
+        out.recovering_timeframe = stateTransition.recoveringTimeframe;
+      }
+      if (stateTransition.recoveringCount != null) {
+        out.recovering_count = stateTransition.recoveringCount;
+      }
+    }
+  }
+
+  if (Object.keys(out).length === 0) return undefined;
+  return out;
 };
 
 /**
@@ -173,17 +207,8 @@ const mapArtifacts = (artifacts: FormValues['artifacts']): RuleRequestCommon['ar
  * both create and update endpoints. Does not include `kind`.
  */
 export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestCommon => {
-  const {
-    metadata,
-    timeField,
-    schedule,
-    evaluation,
-    grouping,
-    recoveryPolicy,
-    stateTransition,
-    artifacts,
-    kind,
-  } = formValues;
+  const { metadata, timeField, schedule, evaluation, grouping, recoveryPolicy, artifacts } =
+    formValues;
   const mappedArtifacts = mapArtifacts(artifacts);
 
   return {
@@ -193,7 +218,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     evaluation: mapEvaluation(evaluation),
     grouping: mapGrouping(grouping),
     recovery_policy: mapRecoveryPolicy(recoveryPolicy, evaluation),
-    state_transition: mapStateTransition(kind, stateTransition),
+    state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
   };
 };
@@ -235,51 +260,53 @@ export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRule
  * Only fields present in the response are included so the form defaults fill in the rest.
  * Use this when populating the edit form with an existing rule's data.
  */
-export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormValues> => ({
-  kind: rule.kind,
-  metadata: {
-    name: rule.metadata.name,
-    description: rule.metadata.description,
-    enabled: rule.enabled,
-    owner: rule.metadata.owner,
-    labels: rule.metadata.labels,
-  },
-  timeField: rule.time_field,
-  schedule: {
-    every: rule.schedule.every,
-    lookback: rule.schedule.lookback ?? '1m',
-  },
-  evaluation: {
-    query: {
-      base: rule.evaluation.query.base,
-      condition: rule.evaluation.query.condition,
+export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormValues> => {
+  const stateTransition: StateTransition = {
+    pendingCount: rule.state_transition?.pending_count ?? null,
+    pendingTimeframe: rule.state_transition?.pending_timeframe ?? null,
+    recoveringCount: rule.state_transition?.recovering_count ?? null,
+    recoveringTimeframe: rule.state_transition?.recovering_timeframe ?? null,
+  };
+
+  return {
+    kind: rule.kind,
+    metadata: {
+      name: rule.metadata.name,
+      description: rule.metadata.description,
+      enabled: rule.enabled,
+      owner: rule.metadata.owner,
+      labels: rule.metadata.labels,
     },
-  },
-  ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
-  ...(rule.recovery_policy
-    ? {
-        recoveryPolicy: {
-          type: rule.recovery_policy.type,
-          ...(rule.recovery_policy.query
-            ? {
-                query: {
-                  base: rule.recovery_policy.query.base,
-                  condition: rule.recovery_policy.query.condition,
-                },
-              }
-            : {}),
-        },
-      }
-    : {}),
-  ...(rule.state_transition
-    ? {
-        stateTransition: {
-          pendingCount: rule.state_transition.pending_count,
-          pendingTimeframe: rule.state_transition.pending_timeframe,
-          recoveringCount: rule.state_transition.recovering_count,
-          recoveringTimeframe: rule.state_transition.recovering_timeframe,
-        },
-      }
-    : {}),
-  ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
-});
+    timeField: rule.time_field,
+    schedule: {
+      every: rule.schedule.every,
+      lookback: rule.schedule.lookback ?? '1m',
+    },
+    evaluation: {
+      query: {
+        base: rule.evaluation.query.base,
+        condition: rule.evaluation.query.condition,
+      },
+    },
+    ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
+    ...(rule.recovery_policy
+      ? {
+          recoveryPolicy: {
+            type: rule.recovery_policy.type,
+            ...(rule.recovery_policy.query
+              ? {
+                  query: {
+                    base: rule.recovery_policy.query.base,
+                    condition: rule.recovery_policy.query.condition,
+                  },
+                }
+              : {}),
+          },
+        }
+      : {}),
+    stateTransition,
+    stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
+    stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),
+    ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
+  };
+};
