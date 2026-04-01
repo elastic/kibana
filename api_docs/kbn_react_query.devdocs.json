@@ -13974,10 +13974,6 @@
                 "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/servicenow/use_get_choices.tsx"
               },
               {
-                "plugin": "@kbn/anonymization-ui",
-                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/hooks/use_preview_document_loader.ts"
-              },
-              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_live_query_details.ts"
               },

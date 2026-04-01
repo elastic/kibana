@@ -16236,18 +16236,6 @@
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/search.ts"
               },
               {
-                "plugin": "anonymization",
-                "path": "x-pack/platform/plugins/shared/anonymization/server/routes/profiles.ts"
-              },
-              {
-                "plugin": "anonymization",
-                "path": "x-pack/platform/plugins/shared/anonymization/server/routes/profiles.ts"
-              },
-              {
-                "plugin": "inference",
-                "path": "x-pack/platform/plugins/shared/inference/server/chat_complete/anonymization/replacements/replacements_routes.ts"
-              },
-              {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
               },
@@ -17819,10 +17807,6 @@
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/update.ts"
               },
               {
-                "plugin": "anonymization",
-                "path": "x-pack/platform/plugins/shared/anonymization/server/routes/profiles.ts"
-              },
-              {
                 "plugin": "telemetry",
                 "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
               },
@@ -18308,14 +18292,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/create.ts"
-              },
-              {
-                "plugin": "anonymization",
-                "path": "x-pack/platform/plugins/shared/anonymization/server/routes/profiles.ts"
-              },
-              {
-                "plugin": "inference",
-                "path": "x-pack/platform/plugins/shared/inference/server/chat_complete/anonymization/replacements/replacements_routes.ts"
               },
               {
                 "plugin": "maps",
@@ -19970,10 +19946,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/delete.ts"
-              },
-              {
-                "plugin": "anonymization",
-                "path": "x-pack/platform/plugins/shared/anonymization/server/routes/profiles.ts"
               },
               {
                 "plugin": "maps",
