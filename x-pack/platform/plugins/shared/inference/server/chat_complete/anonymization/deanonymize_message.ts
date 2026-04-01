@@ -10,7 +10,7 @@ import { MessageRole } from '@kbn/inference-common';
 import type { ChatCompletionChunkEvent } from '@kbn/inference-common/src/chat_complete/events';
 import { ChatCompletionEventType } from '@kbn/inference-common/src/chat_complete/events';
 import type { OperatorFunction } from 'rxjs';
-import { mergeMap, filter, of, identity, map } from 'rxjs';
+import { mergeMap, filter, of, identity } from 'rxjs';
 import { deanonymize } from './deanonymize';
 
 export function deanonymizeMessage<T extends ChatCompletionEvent>(
@@ -21,53 +21,17 @@ export function deanonymizeMessage(
   anonymization: AnonymizationOutput
 ): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> {
   if (!anonymization.anonymizations.length) {
-    if (!anonymization.replacementsId) {
-      return identity;
-    }
-
-    return (source$) =>
-      source$.pipe(
-        map((event) => {
-          if (
-            event.type !== ChatCompletionEventType.ChatCompletionChunk &&
-            event.type !== ChatCompletionEventType.ChatCompletionMessage
-          ) {
-            return event;
-          }
-
-          return {
-            ...event,
-            metadata: {
-              ...event.metadata,
-              anonymization: {
-                ...event.metadata?.anonymization,
-                replacementsId: anonymization.replacementsId,
-              },
-            },
-          };
-        })
-      );
+    return identity;
   }
-
-  const metadata = anonymization.replacementsId
-    ? {
-        anonymization: {
-          replacementsId: anonymization.replacementsId,
-        },
-      }
-    : undefined;
 
   return (source$) => {
     return source$.pipe(
-      // Filter out original chunk events (we recreate a single deanonymized chunk later)
       filter(
         (event): event is Exclude<ChatCompletionEvent, ChatCompletionChunkEvent> =>
           event.type !== ChatCompletionEventType.ChatCompletionChunk
       ),
-      // Process message events and create a new chunk plus the message
       mergeMap((event) => {
         if (event.type === ChatCompletionEventType.ChatCompletionMessage) {
-          // Create assistant message structure for deanonymization
           const message = {
             content: event.content,
             toolCalls: event.toolCalls,
@@ -79,7 +43,6 @@ export function deanonymizeMessage(
             deanonymizations,
           } = deanonymize(message, anonymization.anonymizations);
 
-          // Create deanonymized input messages metadata
           const deanonymizedInput = anonymization.messages.map((msg) => {
             const deanonymization = deanonymize(msg, anonymization.anonymizations);
             return {
@@ -88,7 +51,6 @@ export function deanonymizeMessage(
             };
           });
 
-          // Create deanonymized output metadata
           const deanonymizedOutput = {
             message: {
               content: deanonymizedContent,
@@ -98,7 +60,6 @@ export function deanonymizeMessage(
             deanonymizations,
           };
 
-          // Create a new chunk with the complete deanonymized content
           const completeChunk: ChatCompletionChunkEvent = {
             type: ChatCompletionEventType.ChatCompletionChunk,
             content: deanonymizedContent,
@@ -120,24 +81,19 @@ export function deanonymizeMessage(
             }),
             deanonymized_input: deanonymizedInput,
             deanonymized_output: deanonymizedOutput,
-            metadata,
           };
 
-          // Create deanonymized message event
           const deanonymizedMsg = {
             ...event,
             content: deanonymizedContent,
             toolCalls: deanonymizedToolCalls,
             deanonymized_input: deanonymizedInput,
             deanonymized_output: deanonymizedOutput,
-            metadata,
           };
 
-          // Emit new chunk first, then message
           return of(completeChunk, deanonymizedMsg);
         }
 
-        // Pass through other events unchanged
         return of(event);
       })
     );

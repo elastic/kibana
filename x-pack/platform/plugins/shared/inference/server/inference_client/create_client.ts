@@ -21,7 +21,6 @@ import type { ActionsClientProvider } from '../types';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
-import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 interface CreateClientOptions {
@@ -32,10 +31,8 @@ interface CreateClientOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
-  replacementsEsClient?: ElasticsearchClient;
   endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
-  anonymization?: InferenceAnonymizationOptions;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -55,10 +52,8 @@ export function createClient(
     anonymizationRulesPromise,
     esClient,
     regexWorker,
-    replacementsEsClient,
     endpointIdCache,
     callbacks,
-    anonymization,
   } = options;
   const client = createInferenceClient({
     request,
@@ -68,10 +63,8 @@ export function createClient(
     anonymizationRulesPromise,
     regexWorker,
     esClient,
-    replacementsEsClient,
     endpointIdCache,
     callbacks,
-    anonymization,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);
@@ -103,8 +96,6 @@ export const createClientWithoutRequest = ({
   esClient,
   endpointIdCache,
 }: CreateClientWithoutRequestOptions): InferenceClient => {
-  // Wrap the pre-scoped actionsClient so that any internal code calling
-  // actions.getActionsClientWithRequest() receives this client directly.
   const actions: ActionsClientProvider = {
     getActionsClientWithRequest: () => Promise.resolve(actionsClient),
   };

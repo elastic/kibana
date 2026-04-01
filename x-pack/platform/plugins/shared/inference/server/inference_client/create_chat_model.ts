@@ -14,7 +14,6 @@ import type { ActionsClientProvider } from '../types';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { createClient } from './create_client';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
-import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 export interface CreateChatModelOptions {
@@ -26,10 +25,8 @@ export interface CreateChatModelOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
-  replacementsEsClient?: ElasticsearchClient;
   endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
-  anonymization?: InferenceAnonymizationOptions;
 }
 
 export const createChatModel = async ({
@@ -41,10 +38,8 @@ export const createChatModel = async ({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
-  replacementsEsClient,
   endpointIdCache,
   callbacks,
-  anonymization,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
   const client = createClient({
     actions,
@@ -52,11 +47,9 @@ export const createChatModel = async ({
     anonymizationRulesPromise,
     regexWorker,
     esClient,
-    ...(replacementsEsClient ? { replacementsEsClient } : {}),
     endpointIdCache,
     logger,
     callbacks,
-    anonymization,
   });
   const connector = await getConnectorById({ connectorId, actions, request, esClient, logger });
   return new InferenceChatModel({

@@ -6,7 +6,7 @@
  */
 
 import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/inference-common';
-import type { EffectiveFieldPolicy, EffectivePolicy } from '@kbn/anonymization-common';
+import type { EffectiveFieldPolicy, EffectivePolicy } from '@kbn/inference-common';
 import dedent from 'dedent';
 
 /**
