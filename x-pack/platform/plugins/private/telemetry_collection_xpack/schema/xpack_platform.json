@@ -9972,7 +9972,7 @@
             }
           }
         },
-        "customRules": {
+        "custom_rules": {
           "properties": {
             "total_count": {
               "type": "long",
@@ -10062,7 +10062,7 @@
             }
           }
         },
-        "filterLists": {
+        "filter_lists": {
           "properties": {
             "total_filter_list_count": {
               "type": "long",

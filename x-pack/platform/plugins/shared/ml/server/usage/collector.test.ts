@@ -50,7 +50,12 @@ describe('ML usage collector', () => {
       .mockResolvedValueOnce(emptyHitsResponse);
 
     Object.defineProperty(fetchContextMock.esClient, 'ml', {
-      value: { getJobs: getJobsMock },
+      value: {
+        getJobs: getJobsMock,
+        getCalendars: jest.fn().mockResolvedValue({ calendars: [] }),
+        getCalendarEvents: jest.fn().mockResolvedValue({ events: [] }),
+        getFilters: jest.fn().mockResolvedValue({ filters: [] }),
+      },
       writable: true,
       configurable: true,
     });
@@ -63,12 +68,12 @@ describe('ML usage collector', () => {
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('ml');
   });
 
-  it('returns empty customRules when getJobs returns no jobs', async () => {
+  it('returns empty custom_rules when getJobs returns no jobs', async () => {
     registerCollector(usageCollectionMock, getIndexForType);
     const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
     const data = await collector.fetch(fetchContextMock);
 
-    expect(data.customRules).toEqual(emptyCustomRulesUsage());
+    expect(data.custom_rules).toEqual(emptyCustomRulesUsage());
     expect(data.alertRules[ML_ALERT_TYPES.AD_JOBS_HEALTH].count_by_check_type).toEqual({
       datafeed: 0,
       mml: 0,
@@ -77,7 +82,7 @@ describe('ML usage collector', () => {
     });
   });
 
-  it('aggregates customRules from getJobs response', async () => {
+  it('aggregates custom_rules from getJobs response', async () => {
     getJobsMock.mockResolvedValue({
       jobs: [
         {
@@ -101,7 +106,7 @@ describe('ML usage collector', () => {
     const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
     const data = await collector.fetch(fetchContextMock);
 
-    expect(data.customRules).toEqual({
+    expect(data.custom_rules).toEqual({
       total_count: 1,
       jobs_with_rules_count: 1,
       detectors_with_rules_count: 1,
@@ -111,15 +116,15 @@ describe('ML usage collector', () => {
     });
   });
 
-  it('returns zero customRules when getJobs throws but still returns alertRules', async () => {
+  it('returns zero custom_rules when getJobs throws but still returns alertRules', async () => {
     getJobsMock.mockRejectedValue(new Error('ML unavailable'));
 
     registerCollector(usageCollectionMock, getIndexForType);
     const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
     const data = await collector.fetch(fetchContextMock);
 
-    expect(data.customRules.total_count).toBe(0);
-    expect(data.customRules.jobs_with_rules_count).toBe(0);
+    expect(data.custom_rules.total_count).toBe(0);
+    expect(data.custom_rules.jobs_with_rules_count).toBe(0);
     expect(data.alertRules).toBeDefined();
     expect(data.alertRules[ML_ALERT_TYPES.AD_JOBS_HEALTH]).toBeDefined();
   });

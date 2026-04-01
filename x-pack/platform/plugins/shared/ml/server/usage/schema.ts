@@ -74,7 +74,7 @@ export const mlUsageCollectorSchema: MakeSchemaFrom<MlUsageData> = {
       },
     },
   },
-  customRules: {
+  custom_rules: {
     total_count: {
       type: 'long',
       _meta: { description: 'Total number of custom rules across all detectors in all jobs' },
@@ -145,7 +145,7 @@ export const mlUsageCollectorSchema: MakeSchemaFrom<MlUsageData> = {
       },
     },
   },
-  filterLists: {
+  filter_lists: {
     total_filter_list_count: {
       type: 'long',
       _meta: { description: 'Total number of ML filter lists' },
