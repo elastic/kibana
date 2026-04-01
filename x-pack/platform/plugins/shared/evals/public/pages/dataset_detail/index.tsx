@@ -522,6 +522,7 @@ export const DatasetDetailPage: React.FC = () => {
 
   return (
     <>
+      <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="l">

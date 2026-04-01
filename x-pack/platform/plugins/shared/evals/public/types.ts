@@ -10,8 +10,45 @@ import type { ManagementSetup } from '@kbn/management-plugin/public';
 
 export type EvalsPublicSetup = Record<string, never>;
 
+export interface AddToDatasetInitialExample {
+  input?: Record<string, unknown>;
+  output?: Record<string, unknown>;
+  metadata?: Record<string, unknown> | null;
+}
+
+export interface AddToDatasetInitialSelectableExample extends AddToDatasetInitialExample {
+  /**
+   * Human-readable label shown in the selection list.
+   */
+  label: string;
+  /**
+   * Whether the example should be selected by default.
+   *
+   * Defaults to true.
+   */
+  selected?: boolean;
+}
+
+export interface AddToDatasetFlyoutOpenOptions {
+  /**
+   * The example JSON shown to the user for editing before submission.
+   *
+   * NOTE: This is intentionally generic to support multiple product surfaces.
+   */
+  initialExample?: AddToDatasetInitialExample;
+  /**
+   * When provided, the flyout lets the user select and submit multiple examples in one go.
+   */
+  initialExamples?: AddToDatasetInitialSelectableExample[];
+  /**
+   * Optional title shown in the flyout header.
+   */
+  title?: string;
+}
+
 export interface EvalsPublicStart {
   TraceWaterfall: ComponentType<{ traceId: string }>;
+  openAddToDatasetFlyout: (options: AddToDatasetFlyoutOpenOptions) => void;
 }
 
 export interface EvalsSetupDependencies {

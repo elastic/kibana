@@ -37,6 +37,13 @@ const viewTraceButtonLabel = i18n.translate('xpack.agentBuilder.conversation.vie
   defaultMessage: 'View Trace',
 });
 
+const addToDatasetButtonLabel = i18n.translate(
+  'xpack.agentBuilder.conversation.addToDatasetButton',
+  {
+    defaultMessage: 'Add to dataset',
+  }
+);
+
 const closePanelLabel = i18n.translate('xpack.agentBuilder.conversation.closePanel', {
   defaultMessage: 'Close panel',
 });
@@ -64,6 +71,7 @@ export const RoundThinkingPanel = ({
   const [showTraceFlyout, setShowTraceFlyout] = useState(false);
 
   const TraceWaterfallComponent = services.plugins.evals?.TraceWaterfall;
+  const openAddToDatasetFlyout = services.plugins.evals?.openAddToDatasetFlyout;
   const isExperimentalEnabled = useExperimentalFeatures();
 
   const traceId = useMemo(() => {
@@ -73,17 +81,37 @@ export const RoundThinkingPanel = ({
   }, [rawRound.trace_id]);
 
   const showTraceButton = isExperimentalEnabled && !!TraceWaterfallComponent && !!traceId;
+  const showAddToDatasetButton = isExperimentalEnabled && !!openAddToDatasetFlyout;
 
+  const shadowStyles = useEuiShadow('l');
   const containerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
     ${borderRadiusXlStyles}
     border: ${isLoading ? `1px solid ${euiTheme.colors.borderStrongPrimary}` : 'none'};
     padding: ${euiTheme.size.base};
-    ${useEuiShadow('l')};
+    ${shadowStyles};
   `;
 
   const toggleFlyout = () => {
     setShowFlyout(!showFlyout);
+  };
+
+  const onAddToDataset = () => {
+    openAddToDatasetFlyout?.({
+      title: addToDatasetButtonLabel,
+      initialExample: {
+        input: {
+          round: rawRound,
+        },
+        output: {
+          steps,
+        },
+        metadata: {
+          source: 'agent_builder',
+          trace_id: traceId ?? null,
+        },
+      },
+    });
   };
 
   return (
@@ -127,6 +155,18 @@ export const RoundThinkingPanel = ({
                 <InputOutputTokensDisplay modelUsage={rawRound.model_usage} />
               </EuiFlexGroup>
               <EuiFlexGroup responsive={false} gutterSize="s" justifyContent="flexEnd">
+                {showAddToDatasetButton && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      iconType="beaker"
+                      color="text"
+                      iconSide="left"
+                      onClick={onAddToDataset}
+                    >
+                      {addToDatasetButtonLabel}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
                 {showTraceButton && (
                   <EuiFlexItem grow={false}>
                     <EuiButton

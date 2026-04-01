@@ -13,6 +13,8 @@ import {
   type AttackDiscoveryAlert,
 } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useInvalidateFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import type { inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
@@ -39,6 +41,11 @@ interface AttacksGroupTakeActionItemsProps {
   telemetrySource: AttacksActionTelemetrySource;
 }
 
+const ADD_TO_DATASET = i18n.translate(
+  'xpack.securitySolution.attacks.table.takeAction.addToDatasetButtonLabel',
+  { defaultMessage: 'Add to dataset' }
+);
+
 export function AttacksGroupTakeActionItems({
   attack,
   closePopover,
@@ -46,6 +53,10 @@ export function AttacksGroupTakeActionItems({
   size,
   telemetrySource,
 }: AttacksGroupTakeActionItemsProps) {
+  const {
+    services: { evals },
+  } = useKibana();
+  const openAddToDatasetFlyout = evals?.openAddToDatasetFlyout;
   const invalidateAttackDiscoveriesCache = useInvalidateFindAttackDiscoveries();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
   const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
@@ -143,6 +154,47 @@ export function AttacksGroupTakeActionItems({
     telemetrySource,
   });
 
+  const onAddToDataset = useCallback(() => {
+    closePopover?.();
+    openAddToDatasetFlyout?.({
+      title: ADD_TO_DATASET,
+      initialExample: {
+        input: {
+          attackDiscovery: {
+            id: attack.id,
+            title: attack.title,
+            alertIds: attack.alertIds,
+            detailsMarkdown: attack.detailsMarkdown,
+            summaryMarkdown: attack.summaryMarkdown,
+            replacements: attack.replacements,
+          },
+        },
+        output: {
+          title: attack.title,
+        },
+        metadata: {
+          source: 'security_attack_discovery',
+          attack_discovery_id: attack.id,
+        },
+      },
+    });
+  }, [closePopover, openAddToDatasetFlyout, attack]);
+
+  const datasetItems = useMemo(
+    () =>
+      openAddToDatasetFlyout != null
+        ? [
+            {
+              'data-test-subj': 'addToDataset',
+              key: 'addToDataset',
+              name: ADD_TO_DATASET,
+              onClick: onAddToDataset,
+            },
+          ]
+        : [],
+    [openAddToDatasetFlyout, onAddToDataset]
+  );
+
   const defaultPanel: EuiContextMenuPanelDescriptor = useMemo(
     () => ({
       id: 0,
@@ -154,6 +206,7 @@ export function AttacksGroupTakeActionItems({
         ...investigateInTimelineItems,
         ...casesItems,
         ...viewInAiAssistantItems,
+        ...datasetItems,
       ],
     }),
     [
@@ -164,6 +217,7 @@ export function AttacksGroupTakeActionItems({
       investigateInTimelineItems,
       casesItems,
       viewInAiAssistantItems,
+      datasetItems,
     ]
   );
 

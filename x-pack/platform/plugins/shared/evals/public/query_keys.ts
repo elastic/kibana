@@ -12,6 +12,10 @@ export const queryKeys = {
       ['evals', 'datasets', 'list', filters] as const,
     detail: (datasetId: string) => ['evals', 'datasets', 'detail', datasetId] as const,
   },
+  remotes: {
+    all: ['evals', 'remotes'] as const,
+    list: () => ['evals', 'remotes', 'list'] as const,
+  },
   runs: {
     all: ['evals', 'runs'] as const,
     list: (filters?: {

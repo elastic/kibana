@@ -9,6 +9,8 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
   API_VERSIONS,
   EVALS_DATASETS_URL,
@@ -34,16 +36,19 @@ const buildRouteSetup = ({
   method,
   path,
 }: {
-  registerRoute: (deps: {
-    router: ReturnType<typeof httpServiceMock.createRouter>;
-    logger: any;
-  }) => void;
+  registerRoute: (deps: any) => void;
   method: 'get' | 'post' | 'put' | 'delete';
   path: string;
 }) => {
   const router = httpServiceMock.createRouter();
   const logger = loggingSystemMock.createLogger();
-  registerRoute({ router, logger });
+  registerRoute({
+    router,
+    logger,
+    canEncrypt: true,
+    getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+    getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+  });
 
   const versionedRouter = router.versioned as MockedVersionedRouter;
   const { handler } = versionedRouter.getRoute(method, path).versions[API_VERSIONS.internal.v1];

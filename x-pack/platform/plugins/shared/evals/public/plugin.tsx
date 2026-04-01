@@ -7,9 +7,13 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { TraceWaterfall } from './components/trace_waterfall';
+import { AddToDatasetFlyout } from './components/add_to_dataset_flyout';
 import type {
+  AddToDatasetFlyoutOpenOptions,
   EvalsPublicSetup,
   EvalsPublicStart,
   EvalsSetupDependencies,
@@ -43,8 +47,28 @@ export class EvalsPublicPlugin
     return {};
   }
 
-  start(_core: CoreStart, _plugins: EvalsStartDependencies): EvalsPublicStart {
-    return { TraceWaterfall };
+  start(core: CoreStart, _plugins: EvalsStartDependencies): EvalsPublicStart {
+    const openAddToDatasetFlyout = (options: AddToDatasetFlyoutOpenOptions) => {
+      const overlayRef = core.overlays.openFlyout(
+        toMountPoint(
+          <AddToDatasetFlyout
+            coreStart={core}
+            options={options}
+            onClose={() => overlayRef.close()}
+          />,
+          core
+        ),
+        {
+          ownFocus: true,
+          size: 'm',
+          resizable: true,
+          minWidth: 480,
+          maxWidth: 920,
+        }
+      );
+    };
+
+    return { TraceWaterfall, openAddToDatasetFlyout };
   }
 
   stop() {}

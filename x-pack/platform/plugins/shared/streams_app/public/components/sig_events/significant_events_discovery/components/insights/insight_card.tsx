@@ -9,6 +9,7 @@ import React from 'react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -20,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import type { Insight, InsightImpactLevel } from '@kbn/streams-schema';
+import { useKibana } from '../../../../../hooks/use_kibana';
 
 const impactColors: Record<InsightImpactLevel, 'danger' | 'warning' | 'primary' | 'hollow'> = {
   critical: 'danger',
@@ -43,6 +45,14 @@ const impactLabels: Record<InsightImpactLevel, string> = {
   }),
 };
 
+const addToDatasetAriaLabel = i18n.translate('xpack.streams.insights.addToDatasetAriaLabel', {
+  defaultMessage: 'Add insight to dataset',
+});
+
+const addToDatasetTitle = i18n.translate('xpack.streams.insights.addToDatasetTitle', {
+  defaultMessage: 'Add to dataset',
+});
+
 interface InsightCardProps {
   insight: Insight;
   index: number;
@@ -51,6 +61,8 @@ interface InsightCardProps {
 export function InsightCard({ insight, index }: InsightCardProps) {
   const [isOpen, toggleIsOpen] = useToggle(index === 0);
   const accordionId = useGeneratedHtmlId({ prefix: 'insightAccordion' });
+  const { dependencies } = useKibana();
+  const openAddToDatasetFlyout = dependencies.start.evals?.openAddToDatasetFlyout;
 
   return (
     <EuiPanel hasBorder paddingSize="m">
@@ -59,6 +71,34 @@ export function InsightCard({ insight, index }: InsightCardProps) {
         data-test-subj="streamsInsightCardAccordion"
         forceState={isOpen ? 'open' : 'closed'}
         onToggle={toggleIsOpen}
+        extraAction={
+          openAddToDatasetFlyout ? (
+            <EuiButtonIcon
+              aria-label={addToDatasetAriaLabel}
+              iconType="beaker"
+              color="text"
+              onClick={(e) => {
+                e.stopPropagation();
+                openAddToDatasetFlyout({
+                  title: addToDatasetTitle,
+                  initialExample: {
+                    input: { insight },
+                    output: {
+                      title: insight.title,
+                      description: insight.description,
+                      impact: insight.impact,
+                      recommendations: insight.recommendations,
+                    },
+                    metadata: {
+                      source: 'streams_app',
+                    },
+                  },
+                });
+              }}
+              data-test-subj="streamsInsightAddToDatasetButton"
+            />
+          ) : null
+        }
         buttonContent={
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
