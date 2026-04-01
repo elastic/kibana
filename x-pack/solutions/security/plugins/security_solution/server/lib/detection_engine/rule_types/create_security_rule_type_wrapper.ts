@@ -108,6 +108,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     eventsTelemetry,
     licensing,
     scheduleNotificationResponseActionsService,
+    endpointAppContextService,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -343,7 +344,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               client: exceptionsClient,
               lists: params.exceptionsList,
               shouldFilterOutEndpointExceptions:
-                experimentalFeatures.endpointExceptionsMovedUnderManagement,
+                await endpointAppContextService.isEndpointExceptionsPerPolicyEnabled(),
             });
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
