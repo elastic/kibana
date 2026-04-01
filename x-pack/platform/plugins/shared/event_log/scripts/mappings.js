@@ -246,9 +246,6 @@ exports.EcsCustomPropertyMappings = {
                       matched_indices_count: {
                         type: 'long',
                       },
-                      matched_indicator_indices_count: {
-                        type: 'long',
-                      },
                       frozen_indices_queried_count: {
                         type: 'long',
                       },

@@ -458,7 +458,6 @@ export interface ConsumerExecutionMetrics {
   gap_duration_s: number;
   gap_range: { lte: string; gte: string };
   matched_indices_count: number;
-  matched_indicator_indices_count: number;
   alerts_candidate_count: number;
   alerts_suppressed_count: number;
   frozen_indices_queried_count: number;
