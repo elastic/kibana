@@ -158,8 +158,11 @@ export class TimePickerPageObject extends FtrService {
       // date format from the legacy "MMM D, YYYY @ HH:mm:ss.SSS to …" text), so XPath
       // text matching would fail. Re-apply the range by typing it directly into the
       // input instead — the parser accepts the legacy date format.
-      const [from, to] = option.split(' to ');
-      await this.setAbsoluteRangeNewPicker(from.trim(), to.trim());
+      const parts = option.split(' to ');
+      if (parts.length !== 2) {
+        throw new Error(`setRecentlyUsedTime: expected "from to to" format, got: "${option}"`);
+      }
+      await this.setAbsoluteRangeNewPicker(parts[0].trim(), parts[1].trim());
     } else {
       await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
       await this.testSubjects.click('superDatePickerToggleQuickMenuButton');
