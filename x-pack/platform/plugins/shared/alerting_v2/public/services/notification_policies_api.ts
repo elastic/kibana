@@ -114,4 +114,10 @@ export class NotificationPoliciesApi {
       { body: JSON.stringify(body) }
     );
   }
+
+  public async fetchDataFields() {
+    return this.http.get<string[]>(
+      `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/suggestions/data_fields`
+    );
+  }
 }
