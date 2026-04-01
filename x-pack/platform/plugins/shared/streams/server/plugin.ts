@@ -163,7 +163,7 @@ export class StreamsPlugin
           insightService.getInternalClient(),
           contentService.getClient(),
           queryService.getClient({
-            esClient: scopedClusterClient.asCurrentUser,
+            esClient: coreStart.elasticsearch.client.asInternalUser,
             soClient,
             rulesClient: await pluginsStart.alerting.getRulesClientWithRequestInSpace(
               request,
