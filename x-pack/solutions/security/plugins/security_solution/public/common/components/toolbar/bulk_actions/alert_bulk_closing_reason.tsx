@@ -6,14 +6,14 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiButton, EuiSelectable } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { DEFAULT_ALERT_CLOSE_REASONS_KEY } from '../../../../../common/constants';
+import { DEFAULT_DETECTIONS_CLOSE_REASONS_KEY } from '../../../../../common/constants';
 import * as i18n from './translations';
-import { AlertDefaultClosingReasonValues } from '../../../../../common/types';
 import type { AlertClosingReason } from '../../../../../common/types';
+import { AlertDefaultClosingReasonValues } from '../../../../../common/types';
 
 export const defaultClosingReasons: EuiSelectableOption<{
   key?: AlertClosingReason;
@@ -57,7 +57,7 @@ const BulkAlertClosingReasonComponent: React.FC<BulkAlertClosingReasonComponentP
     services: { uiSettings },
   } = useKibana<{ uiSettings: IUiSettingsClient }>();
 
-  const customClosingReasons = uiSettings.get<string[]>(DEFAULT_ALERT_CLOSE_REASONS_KEY);
+  const customClosingReasons = uiSettings.get<string[]>(DEFAULT_DETECTIONS_CLOSE_REASONS_KEY);
   const [options, setOptions] = useState<
     EuiSelectableOption<{
       key?: AlertClosingReason;

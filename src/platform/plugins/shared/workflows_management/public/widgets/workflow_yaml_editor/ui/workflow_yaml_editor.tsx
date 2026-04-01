@@ -665,7 +665,7 @@ export const WorkflowYAMLEditor = ({
       <ActionsMenuPopover
         anchorPosition="upCenter"
         offset={32}
-        button={<EuiButton iconType="plusInCircle" css={{ display: 'none' }} />}
+        button={<EuiButton iconType="plusCircle" css={{ display: 'none' }} />}
         container={containerRef.current ?? undefined}
         closePopover={closeActionsPopover}
         onActionSelected={onActionSelected}

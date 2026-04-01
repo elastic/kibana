@@ -15,7 +15,8 @@ import { WORKFLOW_CREATE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerCloneWorkflowRoute({ router, api, spaces }: RouteDependencies) {
+export function registerCloneWorkflowRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/workflow/{id}/clone',
@@ -49,8 +50,16 @@ export function registerCloneWorkflowRoute({ router, api, spaces }: RouteDepende
             return response.notFound();
           }
           const createdWorkflow = await api.cloneWorkflow(workflow, spaceId, request);
+          audit.logWorkflowCloned(request, {
+            sourceId: id,
+            newId: createdWorkflow.id,
+          });
           return response.ok({ body: createdWorkflow });
         } catch (error) {
+          audit.logWorkflowCloned(request, {
+            sourceId: request.params.id,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

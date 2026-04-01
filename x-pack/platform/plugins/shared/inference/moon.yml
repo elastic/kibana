@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/anonymization-plugin'
   - '@kbn/anonymization-common'
+  - '@kbn/utility-types'
 tags:
   - plugin
   - prod

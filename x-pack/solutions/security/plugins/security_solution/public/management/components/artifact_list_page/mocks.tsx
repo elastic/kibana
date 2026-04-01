@@ -150,14 +150,13 @@ export const getArtifactImportExportUiMocks = (
   renderResult: ReturnType<AppContextTestRender['render']>,
   dataTestSubj: string = 'testPage'
 ) => {
-  const getMenuButton = () =>
-    renderResult.getByTestId(`${dataTestSubj}-exportImportMenuButtonIcon`);
+  const getMenuButton = () => renderResult.getByTestId(`${dataTestSubj}-overflowMenuButtonIcon`);
   const queryMenuButton = () =>
-    renderResult.queryByTestId(`${dataTestSubj}-exportImportMenuButtonIcon`);
+    renderResult.queryByTestId(`${dataTestSubj}-overflowMenuButtonIcon`);
   const getExportButton = () =>
-    renderResult.getByTestId(`${dataTestSubj}-exportImportMenuActionItemExportButton`);
+    renderResult.getByTestId(`${dataTestSubj}-overflowMenuActionItemExportButton`);
   const getImportButton = () =>
-    renderResult.getByTestId(`${dataTestSubj}-exportImportMenuActionItemImportButton`);
+    renderResult.getByTestId(`${dataTestSubj}-overflowMenuActionItemImportButton`);
 
   return { getExportButton, getImportButton, getMenuButton, queryMenuButton };
 };
