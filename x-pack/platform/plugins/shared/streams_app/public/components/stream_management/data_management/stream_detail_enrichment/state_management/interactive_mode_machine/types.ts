@@ -109,7 +109,7 @@ export type InteractiveModeEvent =
       type: 'step.reorderByDragDrop';
       sourceStepId: string;
       targetStepId: string;
-      operation: 'before' | 'after' | 'inside';
+      operation: 'before' | 'after' | 'inside' | 'inside-else';
     }
   | {
       type: 'step.addProcessor';

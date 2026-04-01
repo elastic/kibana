@@ -34,6 +34,7 @@ import type { StepConfigurationProps } from '../../steps_list';
 import { StepsListItem } from '../../steps_list';
 import { BlockDisableOverlay } from '../block_disable_overlay';
 import { CreateStepButton } from '../../../create_step_button';
+import { EmptyBranchDropTarget } from '../../empty_branch_drop_target';
 import { WhereBlockConfiguration } from './configuration';
 import { ConnectedNodesList } from './connected_nodes_list';
 import { NestedChildrenProcessingSummary } from './nested_children_processing_summary';
@@ -69,7 +70,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
   const elseBranchSteps = childSteps.filter(
     (ref) => ref.getSnapshot().context.step.branch === 'else'
   );
-  const { filterSimulationByCondition, clearSimulationConditionFilter } =
+  const { filterSimulationByCondition, clearSimulationConditionFilter, reorderStepByDragDrop } =
     useStreamEnrichmentEvents();
   const hasChildren = childSteps.length > 0;
   const hasElseBranch = elseBranchSteps.length > 0;
@@ -268,7 +269,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                     <EuiHorizontalRule margin="none" />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                {hasElseBranch && (
+                {hasElseBranch ? (
                   <>
                     <EuiSpacer size="s" />
                     <ConnectedNodesList>
@@ -288,6 +289,17 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                       ))}
                     </ConnectedNodesList>
                   </>
+                ) : (
+                  !props.readOnly && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EmptyBranchDropTarget
+                        parentId={step.customIdentifier}
+                        branch="else"
+                        onDrop={reorderStepByDragDrop}
+                      />
+                    </>
+                  )
                 )}
               </>
             )}

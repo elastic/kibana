@@ -92,7 +92,7 @@ export const useStreamEnrichmentEvents = () => {
       reorderStepByDragDrop: (
         sourceStepId: string,
         targetStepId: string,
-        operation: 'before' | 'after' | 'inside'
+        operation: 'before' | 'after' | 'inside' | 'inside-else'
       ) => {
         service.send({ type: 'step.reorderByDragDrop', sourceStepId, targetStepId, operation });
       },

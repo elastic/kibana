@@ -269,7 +269,7 @@ export const interactiveModeMachine = setup({
         params: {
           sourceStepId: string;
           targetStepId: string;
-          operation: 'before' | 'after' | 'inside';
+          operation: 'before' | 'after' | 'inside' | 'inside-else';
         }
       ) => {
         const steps = context.stepRefs.map((ref) => ref.getSnapshot().context.step);
@@ -287,6 +287,9 @@ export const interactiveModeMachine = setup({
         if (params.operation === 'inside') {
           newParentId = params.targetStepId;
           newBranch = 'if';
+        } else if (params.operation === 'inside-else') {
+          newParentId = params.targetStepId;
+          newBranch = 'else';
         } else {
           // Use sibling's parentId and branch
           newParentId = targetStep.parentId ?? null;

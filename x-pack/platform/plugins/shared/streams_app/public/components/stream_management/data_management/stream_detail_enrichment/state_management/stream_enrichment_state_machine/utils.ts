@@ -305,7 +305,7 @@ export function reorderStepsByDragDrop(
   stepRefs: StepActorRef[],
   sourceStepId: string,
   targetStepId: string,
-  operation: 'before' | 'after' | 'inside'
+  operation: 'before' | 'after' | 'inside' | 'inside-else'
 ): StepActorRef[] {
   const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
 
@@ -345,7 +345,7 @@ export function reorderStepsByDragDrop(
   // Calculate insert position
   let insertIndex: number;
 
-  if (operation === 'inside') {
+  if (operation === 'inside' || operation === 'inside-else') {
     // Insert as first child of target
     // Find where target's children start (right after target)
     insertIndex = targetIndexInFiltered + 1;
