@@ -6,16 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { minimatch } from 'minimatch';
-
-export const parseExcludePatterns = (raw: string | undefined): string[] =>
-  (raw ?? '')
-    .split(',')
-    .map((p) => p.trim())
-    .filter(Boolean);
-
-export const matchesExcludePatterns = (name: string, patterns: string[]): boolean =>
-  patterns.some((pattern) => minimatch(name, pattern));
 
 export const streamCandidateSchema = z.object({
   streamName: z.string(),

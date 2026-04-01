@@ -10,6 +10,7 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import { StepCategory } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import { Streams, TaskStatus } from '@kbn/streams-schema';
+import { minimatch } from 'minimatch';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { GetScopedClients } from '../../routes/types';
 import {
@@ -28,12 +29,19 @@ import {
   MAX_SCHEDULED_STREAMS,
 } from '../../../common/constants';
 import {
-  parseExcludePatterns,
-  matchesExcludePatterns,
   type streamCandidateSchema,
   kiSelectStreamsInputSchema,
   kiSelectStreamsOutputSchema,
 } from '../../../common/continuous_extraction_schemas';
+
+const parseExcludePatterns = (raw: string | undefined): string[] =>
+  (raw ?? '')
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+const matchesExcludePatterns = (name: string, patterns: string[]): boolean =>
+  patterns.some((pattern) => minimatch(name, pattern));
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
