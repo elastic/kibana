@@ -99,7 +99,7 @@ export function initializeESQLControlManager(
   const isEsqlQueryControl = !isStaticControl;
 
   const availableOptions$ = new BehaviorSubject<string[]>(
-    isStaticControl ? initialState.available_options : []
+    isStaticControl ? initialState.available_options ?? [] : []
   );
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selected_options);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
