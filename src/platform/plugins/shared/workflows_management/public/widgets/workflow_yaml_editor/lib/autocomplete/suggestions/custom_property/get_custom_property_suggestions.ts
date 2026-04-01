@@ -91,12 +91,7 @@ export async function getCustomPropertySuggestions(
     propertyKey: composedKey,
     values: buildStepSelectionValues(focusedStepInfo),
   };
-  let options;
-  try {
-    options = await propertyHandler.selection.search(input, context);
-  } catch {
-    return [];
-  }
+  const options = await propertyHandler.selection.search(input, context);
 
   cacheSearchOptions(focusedStepInfo.stepType, context.scope, composedKey, options);
 

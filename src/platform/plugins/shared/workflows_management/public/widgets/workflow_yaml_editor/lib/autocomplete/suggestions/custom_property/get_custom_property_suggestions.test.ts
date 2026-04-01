@@ -474,14 +474,14 @@ describe('getCustomPropertySuggestions', () => {
       expect(suggestions[0].label).toBe('async-option');
     });
 
-    it('should return empty array when search function rejects', async () => {
+    it('should handle rejected promises from search function', async () => {
       const searchMock = jest.fn().mockRejectedValue(new Error('Search failed'));
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(searchMock);
 
-      const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
-
-      expect(suggestions).toEqual([]);
+      await expect(getCustomPropertySuggestions(context, getPropertyHandler)).rejects.toThrow(
+        'Search failed'
+      );
     });
   });
 
