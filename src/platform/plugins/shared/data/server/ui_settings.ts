@@ -496,7 +496,7 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.timepicker.useDateRangePickerTitle', {
         defaultMessage: 'New date range picker',
       }),
-      value: true,
+      value: false,
       description: i18n.translate('data.advancedSettings.timepicker.useDateRangePickerText', {
         defaultMessage:
           'Use the new picker for time filtering in Discover and Dashboards. When disabled, the legacy picker is used instead.',
