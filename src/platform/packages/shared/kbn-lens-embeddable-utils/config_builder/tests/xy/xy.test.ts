@@ -14,6 +14,7 @@ import { validateAPIConverter, validateConverter } from '../validate';
 import {
   apiXYWithNoTitleAndCustomOutsideLegend,
   apiXYWithNoYTitleAndInsideLegend,
+  apiXYWithTopListWithTruncationLegend,
   barWithTwoLayersAttributes,
   breakdownXY,
   fullBasicXY,
@@ -520,6 +521,10 @@ describe('XY', () => {
 
     it('should correctly transform no title and inside legend - bug 248611', () => {
       validateAPIConverter(apiXYWithNoYTitleAndInsideLegend, xyStateSchema);
+    });
+
+    it('should correctly transform top list layout with pixel truncation', () => {
+      validateAPIConverter(apiXYWithTopListWithTruncationLegend, xyStateSchema);
     });
 
     it('should correctly transform with custom position legend - bug 248611', () => {

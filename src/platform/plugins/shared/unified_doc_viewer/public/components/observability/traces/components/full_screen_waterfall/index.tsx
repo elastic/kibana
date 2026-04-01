@@ -15,6 +15,7 @@ import {
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
@@ -44,8 +45,8 @@ export interface FullScreenWaterfallProps {
   skipOpenAnimation?: boolean;
   onNodeClick: (nodeSpanId: string) => void;
   onErrorClick: FullTraceWaterfallOnErrorClick;
-  onCloseFlyout: () => void;
-  onExitFullScreen: () => void;
+  onCloseFlyout: EuiFlyoutProps['onClose'];
+  onExitFullScreen: EuiFlyoutProps['onClose'];
   skipNextEventReport?: boolean;
 }
 
@@ -252,9 +253,9 @@ export const FullScreenWaterfall = ({
           traceId={traceId}
           dataView={dataView}
           dataTestSubj="traceWaterfallDocumentFlyout"
-          onCloseFlyout={() => {
+          onCloseFlyout={(event) => {
             setHighlightedSpanId(undefined);
-            onCloseFlyout();
+            onCloseFlyout(event);
           }}
           activeSection={activeSection}
           skipNextEventReport={skipNextEventReport}
