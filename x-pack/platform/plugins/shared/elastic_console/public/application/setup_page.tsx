@@ -7,6 +7,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiCallOut,
   EuiCodeBlock,
@@ -53,7 +54,10 @@ export const SetupPage: React.FC = () => {
 
   return (
     <EuiPageTemplate>
-      <EuiPageTemplate.Header pageTitle="Elastic Console Setup" />
+      <EuiPageTemplate.Header
+        pageTitle="SRE Agent Setup"
+        rightSideItems={[<EuiBetaBadge label="Experimental" color="hollow" />]}
+      />
       <EuiPageTemplate.Section>
         <EuiText>
           <p>

@@ -1,4 +1,6 @@
-# Elastic Console Plugin
+# SRE Agent (Elastic Console Plugin)
+
+> **Experimental** — this feature is under active development and may change without notice.
 
 An OpenAI-compatible proxy that routes requests through Kibana-configured AI connectors. External tools (coding agents, CLI tools, IDE extensions) can talk to any Elasticsearch AI connector using the standard OpenAI chat completions API.
 
@@ -11,7 +13,7 @@ The plugin is gated behind **both** a feature flag and an advanced setting:
    feature_flags.overrides:
      elasticConsole.enabled: true
    ```
-2. **Advanced setting**: Go to **Stack Management > Advanced Settings**, search for **Elastic Console**, and toggle `elasticConsole:enabled` to `true`.
+2. **Advanced setting**: Go to **Stack Management > Advanced Settings**, search for **SRE Agent**, and toggle `elasticConsole:enabled` to `true`.
 
 Until both are enabled, every route returns `404`.
 
