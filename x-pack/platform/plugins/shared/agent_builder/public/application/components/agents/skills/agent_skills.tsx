@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,39 +13,38 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiIcon,
   EuiTitle,
 } from '@elastic/eui';
-import type { PublicSkillDefinition, PublicSkillSummary } from '@kbn/agent-builder-common';
-import { useMutation, useQueryClient } from '@kbn/react-query';
-import { labels } from '../../../utils/i18n';
-import { appPaths } from '../../../utils/app_paths';
-import { useNavigation } from '../../../hooks/use_navigation';
-import { useSkillsService } from '../../../hooks/skills/use_skills';
+import type { PublicSkillSummary } from '@kbn/agent-builder-common';
+import { useQueryClient } from '@kbn/react-query';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
-import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { useToasts } from '../../../hooks/use_toasts';
-import { queryKeys } from '../../../query_keys';
+import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { useFlyoutState } from '../../../hooks/use_flyout_state';
-import { SkillLibraryPanel } from './skill_library_panel';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { queryKeys } from '../../../query_keys';
+import { appPaths } from '../../../utils/app_paths';
+import { labels } from '../../../utils/i18n';
+import { ICON_DIMENSIONS } from '../common/constants';
+import { PageWrapper } from '../common/page_wrapper';
+import { useListDetailPageStyles } from '../common/styles';
 import { ActiveSkillRow } from './active_skill_row';
+import { SkillCreateFlyout } from './skill_create_flyout';
 import { SkillDetailPanel } from './skill_detail_panel';
 import { SkillEditFlyout } from './skill_edit_flyout';
-import { SkillCreateFlyout } from './skill_create_flyout';
-import { PageWrapper } from '../common/page_wrapper';
-import { ICON_DIMENSIONS } from '../common/constants';
-import { useListDetailPageStyles } from '../common/styles';
+import { SkillLibraryPanel } from './skill_library_panel';
+import { useSkillsMutation } from './use_skills_mutation';
 
 export const AgentSkills: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const styles = useListDetailPageStyles();
   const { createAgentBuilderUrl } = useNavigation();
-  const { agentService } = useAgentBuilderServices();
-  const { addSuccessToast, addErrorToast } = useToasts();
   const queryClient = useQueryClient();
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
@@ -60,6 +57,15 @@ export const AgentSkills: React.FC = () => {
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const [mutatingSkillId, setMutatingSkillId] = useState<string | null>(null);
+  const { handleAddSkill, handleRemoveSkill } = useSkillsMutation({
+    agent,
+    onMutate: (skillId) => {
+      setMutatingSkillId(skillId);
+    },
+    onSettled: () => {
+      setMutatingSkillId(null);
+    },
+  });
   const {
     isOpen: isLibraryOpen,
     openFlyout: openLibrary,
@@ -103,24 +109,28 @@ export const AgentSkills: React.FC = () => {
   }, [allSkills, agentSkillIdSet, enableElasticCapabilities, builtinSkills]);
 
   useEffect(() => {
-    if (pendingSelectSkillIdRef.current) {
-      const pendingInActive = activeSkills.some((s) => s.id === pendingSelectSkillIdRef.current);
-      if (pendingInActive) {
-        setSelectedSkillId(pendingSelectSkillIdRef.current);
-        pendingSelectSkillIdRef.current = null;
-        return;
-      }
+    // When a newly added skill is pending to be selected. Once it is active, select it.
+    const isPendingSkillActive =
+      pendingSelectSkillIdRef.current &&
+      activeSkills.some((s) => s.id === pendingSelectSkillIdRef.current);
+    if (isPendingSkillActive) {
+      setSelectedSkillId(pendingSelectSkillIdRef.current);
+      pendingSelectSkillIdRef.current = null;
+      return;
     }
 
+    // Select first skill when no skill is currently selected, like on first render
     if (!selectedSkillId) {
       if (activeSkills.length > 0) {
         setSelectedSkillId(activeSkills[0].id);
       }
-    } else {
-      const stillActive = activeSkills.some((s) => s.id === selectedSkillId);
-      if (!stillActive) {
-        setSelectedSkillId(activeSkills[0]?.id ?? null);
-      }
+      return;
+    }
+
+    // Selected skill is no longer active, for example after deleting a skill
+    const selectedSkillNotActive = activeSkills.every((s) => s.id !== selectedSkillId);
+    if (selectedSkillNotActive) {
+      setSelectedSkillId(activeSkills[0]?.id ?? null);
     }
   }, [activeSkills, selectedSkillId]);
 
@@ -131,50 +141,6 @@ export const AgentSkills: React.FC = () => {
       (s) => s.name.toLowerCase().includes(lower) || s.description.toLowerCase().includes(lower)
     );
   }, [activeSkills, searchQuery]);
-
-  const updateSkillsMutation = useMutation({
-    mutationFn: (newSkillIds: string[]) => {
-      return agentService.update(agentId!, { configuration: { skill_ids: newSkillIds } });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId) });
-    },
-    onError: () => {
-      addErrorToast({ title: labels.agentSkills.updateSkillsErrorToast });
-    },
-  });
-
-  const handleAddSkill = (
-    skill: PublicSkillSummary | PublicSkillDefinition,
-    { selectOnSuccess = false }: { selectOnSuccess?: boolean } = {}
-  ) => {
-    const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
-    if (currentIds.includes(skill.id)) return;
-    const newIds = [...currentIds, skill.id];
-    setMutatingSkillId(skill.id);
-    updateSkillsMutation.mutate(newIds, {
-      onSuccess: () => {
-        if (selectOnSuccess) {
-          pendingSelectSkillIdRef.current = skill.id;
-        }
-        addSuccessToast({ title: labels.agentSkills.addSkillSuccessToast(skill.name) });
-      },
-      onSettled: () => setMutatingSkillId(null),
-    });
-  };
-
-  const handleRemoveSkill = (skill: PublicSkillSummary) => {
-    const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
-    const newIds = currentIds.filter((id) => id !== skill.id);
-    setMutatingSkillId(skill.id);
-    updateSkillsMutation.mutate(newIds, {
-      onSuccess: () => {
-        setSelectedSkillId(null);
-        addSuccessToast({ title: labels.agentSkills.removeSkillSuccessToast(skill.name) });
-      },
-      onSettled: () => setMutatingSkillId(null),
-    });
-  };
 
   const handleToggleSkill = (skill: PublicSkillSummary, isActive: boolean) => {
     if (enableElasticCapabilities && skill.readonly) return;
@@ -369,7 +335,13 @@ export const AgentSkills: React.FC = () => {
       {isCreateFlyoutOpen && (
         <SkillCreateFlyout
           onClose={() => setIsCreateFlyoutOpen(false)}
-          onSkillCreated={(skill) => handleAddSkill(skill, { selectOnSuccess: true })}
+          onSkillCreated={(skill) =>
+            handleAddSkill(skill, {
+              onSuccess: () => {
+                pendingSelectSkillIdRef.current = skill.id;
+              },
+            })
+          }
         />
       )}
     </PageWrapper>
