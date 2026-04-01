@@ -63,6 +63,19 @@ describe('registerAlertingV2UsageCollector', () => {
             _meta: { description: 'Average number of grouping fields per rule.' },
             type: 'float',
           },
+          avg_pending_count: {
+            _meta: {
+              description: 'Average configured pending count across rules with state transitions.',
+            },
+            type: 'float',
+          },
+          avg_recovering_count: {
+            _meta: {
+              description:
+                'Average configured recovering count across rules with state transitions.',
+            },
+            type: 'float',
+          },
           count_by_kind: {
             DYNAMIC_KEY: { _meta: { description: 'Number of rules by kind.' }, type: 'long' },
           },
@@ -140,7 +153,39 @@ describe('registerAlertingV2UsageCollector', () => {
             _meta: { description: 'Number of rules with a recovery query condition.' },
             type: 'long',
           },
+          dispatcher_executions_count_24hr: {
+            _meta: { description: 'Total dispatcher executions in the last 24 hours.' },
+            type: 'long',
+          },
           error_messages: { items: { type: 'keyword' }, type: 'array' },
+          executions_count_24hr: {
+            _meta: { description: 'Total rule executor executions in the last 24 hours.' },
+            type: 'long',
+          },
+          executions_count_by_status_24hr: {
+            DYNAMIC_KEY: {
+              _meta: {
+                description: 'Rule executor executions by outcome status in the last 24 hours.',
+              },
+              type: 'long',
+            },
+          },
+          executions_delay_p50_ms: {
+            _meta: { description: 'P50 schedule delay in milliseconds over the last 24 hours.' },
+            type: 'float',
+          },
+          executions_delay_p75_ms: {
+            _meta: { description: 'P75 schedule delay in milliseconds over the last 24 hours.' },
+            type: 'float',
+          },
+          executions_delay_p95_ms: {
+            _meta: { description: 'P95 schedule delay in milliseconds over the last 24 hours.' },
+            type: 'float',
+          },
+          executions_delay_p99_ms: {
+            _meta: { description: 'P99 schedule delay in milliseconds over the last 24 hours.' },
+            type: 'float',
+          },
           has_errors: {
             _meta: {
               description: 'Whether the telemetry task encountered errors during collection.',
