@@ -41,14 +41,13 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
         query: { ids: uncachedIds },
       }
     );
-    rulesResponse.items.forEach((rule) => {
-      rulesCache[rule.id] = rule;
+    setRulesCache((prev) => {
+      const next = { ...prev };
+      rulesResponse.items.forEach((rule) => {
+        next[rule.id] = rule;
+      });
+      return next;
     });
-setRulesCache((prev) => {
-  const next = { ...prev };
-  rulesResponse.items.forEach((rule) => { next[rule.id] = rule; });
-  return next;
-});
   }, [ruleIds, services.http]);
 
   return {
