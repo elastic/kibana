@@ -232,8 +232,9 @@ const HistoryComponent: React.FC<Props> = ({
       <Generations
         aiConnectors={aiConnectors}
         data={generationsData}
-        refetchGenerations={refetchGenerations}
         localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+        onRefresh={onRefresh}
+        refetchGenerations={refetchGenerations}
       />
 
       <EuiSpacer size="m" />

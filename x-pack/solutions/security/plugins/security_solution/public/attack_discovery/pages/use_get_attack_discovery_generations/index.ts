@@ -54,16 +54,21 @@ export const useGetAttackDiscoveryGenerations = ({
   }, []);
 
   const queryFn = useCallback(async () => {
-    return http.fetch<GetAttackDiscoveryGenerationsResponse>(ATTACK_DISCOVERY_GENERATIONS, {
-      method: 'GET',
-      version: API_VERSIONS.public.v1,
-      query: {
-        end,
-        size,
-        start,
-      },
-      signal: abortController.current.signal,
-    });
+    const response = await http.fetch<GetAttackDiscoveryGenerationsResponse>(
+      ATTACK_DISCOVERY_GENERATIONS,
+      {
+        method: 'GET',
+        version: API_VERSIONS.public.v1,
+        query: {
+          end,
+          size,
+          start,
+        },
+        signal: abortController.current.signal,
+      }
+    );
+
+    return response;
   }, [end, http, size, start]);
 
   const { data, error, isLoading, refetch, status } = useQuery(

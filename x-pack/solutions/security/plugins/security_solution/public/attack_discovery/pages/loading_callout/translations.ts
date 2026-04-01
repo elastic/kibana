@@ -84,6 +84,13 @@ export const CLOSE = i18n.translate(
   }
 );
 
+export const DETAILS = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.loadingCallout.detailsButtonLabel',
+  {
+    defaultMessage: 'Details',
+  }
+);
+
 export const INFORMATION = i18n.translate(
   'xpack.securitySolution.attackDiscovery.pages.loadingCallout.informationButtonLabel',
   {
@@ -138,6 +145,37 @@ export const RAN_SUCCESSFULLY_VIA_WITH_DISCOVERIES_COUNT = ({
       defaultMessage:
         'Attack discovery ran successfully{connectorName, select, undefined {} other { via {connectorName}}}{formattedGenerationEndTime, select, undefined {} other { at {formattedGenerationEndTime}}}{discoveries, plural, =0 { and 0 new attacks were discovered.} =1 { and 1 new attack was discovered. Refresh to view the results.} other { and {discoveries} new attacks were discovered. Refresh to view the results.}}',
       values: { connectorName, discoveries, formattedGenerationEndTime },
+    }
+  );
+
+export const RAN_SUCCESSFULLY_VIA_WITH_SUMMARY = ({
+  connectorName,
+  duplicatesDroppedCount,
+  formattedGenerationEndTime,
+  generatedCount,
+  hallucinationsFilteredCount,
+  persistedCount,
+}: {
+  connectorName?: string;
+  duplicatesDroppedCount: number;
+  formattedGenerationEndTime?: string;
+  generatedCount: number;
+  hallucinationsFilteredCount?: number;
+  persistedCount: number;
+}) =>
+  i18n.translate(
+    'xpack.securitySolution.attackDiscovery.pages.loadingCallout.ranSuccessfullyWithSummaryLabel',
+    {
+      defaultMessage:
+        'Attack discovery ran successfully{connectorName, select, undefined {} other { via {connectorName}}}{formattedGenerationEndTime, select, undefined {} other { at {formattedGenerationEndTime}}}. {persistedCount, plural, =1 {1 new attack was discovered} other {{persistedCount} new attacks were discovered}} ({generatedCount} generated{duplicatesDroppedCount, select, 0 {} other {, {duplicatesDroppedCount} duplicates filtered}}{hallucinationsFilteredCount, select, undefined {} 0 {} other {, {hallucinationsFilteredCount} hallucinations filtered}}). Refresh to view the results.',
+      values: {
+        connectorName,
+        duplicatesDroppedCount,
+        formattedGenerationEndTime,
+        generatedCount,
+        hallucinationsFilteredCount,
+        persistedCount,
+      },
     }
   );
 
