@@ -198,7 +198,7 @@ export const GetStartedWithElasticsearch = () => {
           onClick={onCreateIndex}
           color="text"
           size="s"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="createIndexButton"
         >
           {i18n.translate('xpack.searchHomepage.createIndexButton', {
