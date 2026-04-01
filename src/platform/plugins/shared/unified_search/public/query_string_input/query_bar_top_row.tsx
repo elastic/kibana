@@ -781,7 +781,6 @@ export const QueryBarTopRow = React.memo(
               <span data-test-subj="kbnQueryBar-datePicker-disabled" style={{ display: 'none' }} />
             )}
             <DateRangePicker
-              data-test-subj={`${props.dataTestSubj}-dateRangePicker`}
               className="kbnQueryBar__datePicker"
               value={
                 noTimeFieldNameDisabled ? strings.getDisabledDatePickerLabel() : dateRangeValue
