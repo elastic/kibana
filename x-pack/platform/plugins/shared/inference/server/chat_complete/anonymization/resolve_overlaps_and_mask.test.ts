@@ -95,7 +95,6 @@ describe('processMatches', () => {
     const expectedMask = getEntityMask({
       value: 'carlos@test.com',
       class_name: 'EMAIL',
-      field: 'content',
     });
     expect(result.records[0].content).toBe(`Email ${expectedMask} for help`);
     expect(result.anonymizations).toHaveLength(1);
@@ -121,12 +120,10 @@ describe('processMatches', () => {
     const emailMask = getEntityMask({
       value: 'carlos@test.com',
       class_name: 'EMAIL',
-      field: 'content',
     });
     const phoneMask = getEntityMask({
       value: '555-123-4567',
       class_name: 'MISC',
-      field: 'content',
     });
     expect(result.records[0].content).toBe(`Email ${emailMask} or call ${phoneMask}`);
     expect(result.anonymizations).toHaveLength(2);
@@ -160,13 +157,11 @@ describe('processMatches', () => {
     const emailMask = getEntityMask({
       value: 'maria@test.com',
       class_name: 'EMAIL',
-      field: 'content',
     });
-    const phoneMask = getEntityMask({ value: '555-1234', class_name: 'MISC', field: 'data' });
+    const phoneMask = getEntityMask({ value: '555-1234', class_name: 'MISC' });
     const emailMask2 = getEntityMask({
       value: 'diego@example.org',
       class_name: 'EMAIL',
-      field: 'content',
     });
     expect(result.records[0].content).toBe(`Email: ${emailMask}`);
     expect(result.records[0].data).toBe(`Phone: ${phoneMask}`);
@@ -202,7 +197,6 @@ describe('processMatches', () => {
     const emailMask = getEntityMask({
       value: 'sofia@example.com',
       class_name: 'EMAIL',
-      field: 'content',
     });
     expect(result.records[0].content).toBe(`Contact ${emailMask} today`);
     expect(result.anonymizations).toHaveLength(1);
@@ -232,12 +226,10 @@ describe('processMatches', () => {
     const domainMask = getEntityMask({
       value: 'example.com',
       class_name: 'HOST_NAME',
-      field: 'content',
     });
     const emailMask = getEntityMask({
       value: 'admin@example.com',
       class_name: 'EMAIL',
-      field: 'content',
     });
     expect(result.records[0].content).toBe(`Visit ${domainMask} or email ${emailMask} today`);
     expect(result.anonymizations).toHaveLength(2);
@@ -273,7 +265,6 @@ describe('processMatches', () => {
     const emailMask = getEntityMask({
       value: 'luis@test.com',
       class_name: 'EMAIL',
-      field: 'content',
     });
     expect(result.anonymizations[1]).toEqual({
       rule: { type: 'RegExp' },

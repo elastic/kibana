@@ -83,12 +83,10 @@ export async function executeNerRule({
   state,
   rule,
   esClient,
-  salt,
 }: {
   state: AnonymizationState;
   rule: NamedEntityRecognitionRule;
   esClient: ElasticsearchClient;
-  salt?: string;
 }): Promise<AnonymizationState> {
   const modelId = rule.modelId ?? NER_MODEL_ID;
 
@@ -217,10 +215,10 @@ export async function executeNerRule({
 
             const entityText = anonymizedValue.slice(from, to);
 
-            const mask = getEntityMask(
-              { class_name: entity.class_name, value: entityText, field: key },
-              salt
-            );
+            const mask = getEntityMask({
+              class_name: entity.class_name,
+              value: entityText,
+            });
 
             anonymizedValue = before + mask + after;
             offset += mask.length - entityText.length;
