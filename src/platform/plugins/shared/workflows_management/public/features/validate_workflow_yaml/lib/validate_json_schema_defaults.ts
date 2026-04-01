@@ -305,7 +305,7 @@ export function validateJsonSchemaDefaults(
       }
 
       // Get the path to this default value
-      // slice [triggers, 0] so the path starts from inputs
+      // slice [triggers, {trigger_index}] so the path starts from inputs
       const path = getPathFromAncestors(ancestors, node).slice(2);
 
       // Check if this is within inputs (either properties/definitions format or legacy array format)
