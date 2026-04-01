@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueriesBulkDelete } from '../hooks/use_queries_bulk_delete';
 import { RuleActionsCell } from './rule_actions_cell';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
@@ -70,6 +70,20 @@ export function RulesTable({
       return title.includes(normalizedSearchTerm);
     });
   }, [rules, searchTerm]);
+
+  useEffect(() => {
+    setPagination((currentPagination) => {
+      if (currentPagination.pageIndex === 0) {
+        return currentPagination;
+      }
+
+      return {
+        ...currentPagination,
+        pageIndex: 0,
+      };
+    });
+  }, [searchTerm]);
+
   const isSelectionActionsDisabled = selectedRules.length === 0;
 
   const handleTableChange = useCallback(({ page }: CriteriaWithPagination<KnowledgeIndicator>) => {

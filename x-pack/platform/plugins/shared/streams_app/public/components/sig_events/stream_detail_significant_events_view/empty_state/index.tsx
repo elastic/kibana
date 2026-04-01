@@ -17,12 +17,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import React from 'react';
-import { useGenAIConnectors } from '../../../../hooks/use_genai_connectors';
 import { useKibana } from '../../../../hooks/use_kibana';
 import noSigEventsImage from './no_sig_events.svg';
 
-const GEN_AI_SETTINGS_PATH = '/ai/genAiSettings';
+const ML_MODEL_SETTINGS_PATH = '/ml/model_settings';
+const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export function EmptyState({
   isGenerating,
@@ -37,21 +38,13 @@ export function EmptyState({
   onCancelGenerationClick: () => void;
   onGenerateSuggestionsClick: () => void;
 }) {
-  const {
-    core,
-    dependencies: {
-      start: { streams },
-    },
-  } = useKibana();
-  const genAiConnectors = useGenAIConnectors({
-    streamsRepositoryClient: streams.streamsRepositoryClient,
-    uiSettings: core.uiSettings,
-  });
+  const { core } = useKibana();
+  const defaultConnector = core.uiSettings.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
 
   const isDefaultAiConnectorMissing =
-    !genAiConnectors.loading && !Boolean(genAiConnectors.defaultConnector);
+    !defaultConnector || defaultConnector === NO_DEFAULT_CONNECTOR;
   const genAiSettingsUrl = core.application.getUrlForApp('management', {
-    path: GEN_AI_SETTINGS_PATH,
+    path: ML_MODEL_SETTINGS_PATH,
   });
 
   return (
@@ -180,13 +173,13 @@ const NO_DEFAULT_CONNECTOR_CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEvents.emptyState.noDefaultConnectorCalloutDescription',
   {
     defaultMessage:
-      'Generating significant events requires a default AI connector. Open GenAI Settings to configure one.',
+      'Generating significant events requires a default AI connector. Open Model Settings to configure one.',
   }
 );
 
 const NO_DEFAULT_CONNECTOR_CALLOUT_LINK_LABEL = i18n.translate(
   'xpack.streams.significantEvents.emptyState.noDefaultConnectorCalloutLinkLabel',
   {
-    defaultMessage: 'Open GenAI Settings',
+    defaultMessage: 'Open Model Settings',
   }
 );
