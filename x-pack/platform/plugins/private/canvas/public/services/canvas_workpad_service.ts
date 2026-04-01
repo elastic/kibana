@@ -70,7 +70,7 @@ class CanvasWorkpadService {
   private apiPath = `${API_ROUTE_WORKPAD}`;
 
   public async get(id: string): Promise<CanvasWorkpad> {
-      const workpad = await coreServices.http.get<any>(buildPath(`${this.apiPath}/{id}`, { id }), {
+    const workpad = await coreServices.http.get<any>(buildPath(`${this.apiPath}/{id}`, { id }), {
       version: '1',
     });
 
@@ -159,7 +159,9 @@ class CanvasWorkpadService {
   }
 
   public async remove(id: string) {
-    return await coreServices.http.delete(buildPath(`${this.apiPath}/{id}`, { id }), { version: '1' });
+    return await coreServices.http.delete(buildPath(`${this.apiPath}/{id}`, { id }), {
+      version: '1',
+    });
   }
 
   public async update(id: string, workpad: CanvasWorkpad) {
