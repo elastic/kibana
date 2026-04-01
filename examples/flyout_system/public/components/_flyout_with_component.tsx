@@ -34,6 +34,7 @@ import {
 } from '../utils';
 
 interface SessionFlyoutProps {
+  historyKey: symbol;
   title: string;
   mainSize: 's' | 'm' | 'l' | 'fill';
   mainMaxWidth?: number;
@@ -41,8 +42,12 @@ interface SessionFlyoutProps {
   childMaxWidth?: number;
 }
 
+interface FlyoutFromComponentsProps {
+  historyKey: symbol;
+}
+
 const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
-  const { title, mainSize, childSize, mainMaxWidth, childMaxWidth } = props;
+  const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, historyKey } = props;
 
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
   const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
@@ -154,6 +159,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         <EuiFlyout
           id={`mainFlyout-${title}`}
           session="start"
+          historyKey={historyKey}
           aria-labelledby="sessionFlyoutTitle"
           size={mainSize}
           maxWidth={mainMaxWidth}
@@ -261,6 +267,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         <EuiFlyout
           id={`childFlyout-${title}-a`}
           session="inherit"
+          historyKey={historyKey}
           aria-labelledby="childFlyoutATitle"
           size={childSize}
           hasChildBackground={true}
@@ -308,6 +315,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         <EuiFlyout
           id={`childFlyout-${title}-b`}
           session="inherit"
+          historyKey={historyKey}
           aria-labelledby="childFlyoutBTitle"
           size={childSize}
           hasChildBackground={true}
@@ -357,93 +365,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
 
 SessionFlyout.displayName = 'SessionFlyoutFromComponents';
 
-const GlobalFlyout: React.FC = React.memo(() => {
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-
-  // Refs for manual focus management
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  const handleOpenFlyout = () => {
-    setIsFlyoutVisible(true);
-  };
-
-  // BUG: EuiFlyout does not call onActive when session={false}
-  const flyoutOnActive = useCallback(() => {
-    console.log('activate non-session flyout'); // eslint-disable-line no-console
-  }, []);
-
-  const flyoutOnClose = useCallback(() => {
-    console.log('close non-session flyout'); // eslint-disable-line no-console
-    setIsFlyoutVisible(false);
-
-    // Return focus to trigger button after closing flyout
-    setTimeout(() => {
-      triggerRef.current?.focus();
-    }, 100);
-  }, []);
-
-  return (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <EuiButton
-              buttonRef={triggerRef}
-              disabled={isFlyoutVisible}
-              onClick={handleOpenFlyout}
-              data-test-subj="openNonSessionFlyoutComponentButton"
-            >
-              Open Global Flyout
-            </EuiButton>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {isFlyoutVisible && (
-        <EuiFlyout
-          aria-labelledby="nonSessionFlyoutTitle"
-          onActive={flyoutOnActive}
-          onClose={flyoutOnClose}
-          type="overlay"
-          container={null}
-          size="m"
-          ownFocus={true}
-          session="never"
-        >
-          <EuiFlyoutHeader hasBorder>
-            <EuiText>
-              <h2 id="nonSessionFlyoutTitle">Global flyout</h2>
-            </EuiText>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiText>
-              <p>
-                This flyout is rendered using <EuiCode>EuiFlyout</EuiCode> directly without session
-                management.
-              </p>
-            </EuiText>
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={flyoutOnClose}
-                  aria-label="Close"
-                  data-test-subj="closeNonSessionFlyoutComponentButton"
-                >
-                  Close
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
-      )}
-    </>
-  );
-});
-
-GlobalFlyout.displayName = 'GlobalFlyoutFromComponents';
-
-export const FlyoutWithComponent: React.FC = () => (
+export const FlyoutWithComponent: React.FC<FlyoutFromComponentsProps> = ({ historyKey }) => (
   <>
     <EuiTitle>
       <h2>
@@ -463,33 +385,26 @@ export const FlyoutWithComponent: React.FC = () => (
         listItems={[
           {
             title: 'Session J: main size = s, child size = s',
-            description: <SessionFlyout title="Session J" mainSize="s" childSize="s" />,
+            description: (
+              <SessionFlyout title="Session J" mainSize="s" childSize="s" historyKey={historyKey} />
+            ),
           },
           {
             title: 'Session K: main size = m, child size = s',
-            description: <SessionFlyout title="Session K" mainSize="m" childSize="s" />,
+            description: (
+              <SessionFlyout title="Session K" mainSize="m" childSize="s" historyKey={historyKey} />
+            ),
           },
           {
             title: 'Session L: main size = m, child size = fill',
-            description: <SessionFlyout title="Session L" mainSize="m" childSize="fill" />,
-          },
-        ]}
-      />
-
-      <EuiSpacer size="m" />
-
-      <EuiTitle size="s">
-        <h3>
-          With <EuiCode>{'session="never"'}</EuiCode>
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiDescriptionList
-        type="column"
-        listItems={[
-          {
-            title: 'Global flyout: size = m',
-            description: <GlobalFlyout />,
+            description: (
+              <SessionFlyout
+                title="Session L"
+                mainSize="m"
+                childSize="fill"
+                historyKey={historyKey}
+              />
+            ),
           },
         ]}
       />
