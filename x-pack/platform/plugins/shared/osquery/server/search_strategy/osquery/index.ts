@@ -98,7 +98,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             mergeMap((legacyIndexResponse) => {
               if (
                 request.factoryQueryType === OsqueryQueries.actionResults &&
-                newDataStreamIndexExists
+                (newDataStreamIndexExists || ccsEnabled)
               ) {
                 const dataStreamDsl = queryFactory.buildDsl({
                   ...strictRequest,
