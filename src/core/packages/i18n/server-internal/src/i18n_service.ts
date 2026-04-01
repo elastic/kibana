@@ -19,13 +19,9 @@ import type {
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
-import { i18nLoader } from '@kbn/i18n';
 import type { I18nConfigType } from './i18n_config';
 import { config as i18nConfigDef } from './i18n_config';
-import {
-  getKibanaTranslationFiles,
-  getAllKibanaTranslationFiles,
-} from './get_kibana_translation_files';
+import { getAllKibanaTranslationFiles } from './get_kibana_translation_files';
 import { initTranslations } from './init_translations';
 import { registerRoutes } from './routes';
 import { supportedLocales } from './constants';
@@ -87,19 +83,16 @@ export class I18nService {
     const locale = i18nConfig.locale;
     this.log.debug(`Using locale: ${locale}`);
 
-    const translationFiles = await getKibanaTranslationFiles(locale, pluginPaths);
-
-    this.log.debug(`Using translation files: [${translationFiles.join(', ')}]`);
-    await initTranslations(locale, translationFiles);
-
-    // Register translation files for all supported locales so they can be served on demand.
-    // This only stores file paths — no disk I/O occurs until a locale is first requested.
+    // Register translation files for all supported locales upfront. Only the default
+    // locale is loaded from disk immediately; others are lazily loaded on first request.
     const allTranslationFiles = await getAllKibanaTranslationFiles(pluginPaths);
-    i18nLoader.registerTranslationFiles(allTranslationFiles);
+
+    this.log.debug(`Using translation files: [${allTranslationFiles.join(', ')}]`);
+    await initTranslations(locale, allTranslationFiles);
 
     const translationHash = getTranslationHash(i18n.getTranslation());
 
-    return { locale, translationFiles, translationHash };
+    return { locale, translationFiles: allTranslationFiles, translationHash };
   }
 }
 
