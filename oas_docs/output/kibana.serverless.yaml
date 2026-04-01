@@ -8724,11 +8724,9 @@ paths:
           name: search_fields
           required: false
           schema:
-            anyOf:
-              - items:
-                  type: string
-                type: array
-              - type: string
+            items:
+              type: string
+            type: array
         - description: Determines which field is used to sort the results. The field must exist in the `attributes` key of the response.
           in: query
           name: sort_field
@@ -8765,11 +8763,9 @@ paths:
           name: fields
           required: false
           schema:
-            anyOf:
-              - items:
-                  type: string
-                type: array
-              - type: string
+            items:
+              type: string
+            type: array
         - description: 'A KQL string that you filter with an attribute from your saved object. It should look like `savedObjectType.attributes.title: "myTitle"`. However, if you used a direct attribute of a saved object, such as `updatedAt`, you must define your filter, for example, `savedObjectType.updatedAt > 2018-12-22`.'
           in: query
           name: filter
@@ -31153,12 +31149,10 @@ paths:
           name: policyIds
           required: false
           schema:
-            anyOf:
-              - items:
-                  type: string
-                maxItems: 1000
-                type: array
-              - type: string
+            items:
+              type: string
+            maxItems: 1000
+            type: array
         - in: query
           name: kuery
           required: false
@@ -31263,12 +31257,10 @@ paths:
           name: agentsIds
           required: true
           schema:
-            anyOf:
-              - items:
-                  type: string
-                maxItems: 10000
-                type: array
-              - type: string
+            items:
+              type: string
+            maxItems: 10000
+            type: array
         - in: query
           name: pkgName
           required: false
@@ -55327,23 +55319,15 @@ paths:
           name: status
           required: false
           schema:
-            anyOf:
-              - enum:
-                  - running
-                  - finished
-                  - upcoming
-                  - archived
-                  - disabled
-                type: string
-              - items:
-                  enum:
-                    - running
-                    - finished
-                    - upcoming
-                    - archived
-                    - disabled
-                  type: string
-                type: array
+            items:
+              enum:
+                - running
+                - finished
+                - upcoming
+                - archived
+                - disabled
+              type: string
+            type: array
         - description: The page number to return.
           in: query
           name: page
@@ -61788,29 +61772,21 @@ paths:
           name: attachmentTypes
           required: false
           schema:
-            anyOf:
-              - enum:
-                  - dashboard
-                  - rule
-                  - slo
-                type: string
-              - items:
-                  enum:
-                    - dashboard
-                    - rule
-                    - slo
-                  type: string
-                type: array
+            items:
+              enum:
+                - dashboard
+                - rule
+                - slo
+              type: string
+            type: array
         - description: Filter by tags (single value or array)
           in: query
           name: tags
           required: false
           schema:
-            anyOf:
-              - type: string
-              - items:
-                  type: string
-                type: array
+            items:
+              type: string
+            type: array
       requestBody:
         content:
           application/json:
@@ -63028,34 +63004,28 @@ paths:
           name: enabled
           required: false
           schema:
-            anyOf:
-              - type: boolean
-              - items:
-                  type: boolean
-                maxItems: 2
-                type: array
+            items:
+              type: boolean
+            maxItems: 2
+            type: array
         - description: Filter by creator.
           in: query
           name: createdBy
           required: false
           schema:
-            anyOf:
-              - type: string
-              - items:
-                  type: string
-                maxItems: 1000
-                type: array
+            items:
+              type: string
+            maxItems: 1000
+            type: array
         - description: Filter by tags.
           in: query
           name: tags
           required: false
           schema:
-            anyOf:
-              - type: string
-              - items:
-                  type: string
-                maxItems: 1000
-                type: array
+            items:
+              type: string
+            maxItems: 1000
+            type: array
       responses:
         '200':
           content:
@@ -64975,60 +64945,41 @@ paths:
           name: statuses
           required: false
           schema:
-            anyOf:
-              - enum:
-                  - pending
-                  - waiting
-                  - waiting_for_input
-                  - running
-                  - completed
-                  - failed
-                  - cancelled
-                  - timed_out
-                  - skipped
-                type: string
-              - items:
-                  enum:
-                    - pending
-                    - waiting
-                    - waiting_for_input
-                    - running
-                    - completed
-                    - failed
-                    - cancelled
-                    - timed_out
-                    - skipped
-                  type: string
-                maxItems: 9
-                type: array
+            items:
+              enum:
+                - pending
+                - waiting
+                - waiting_for_input
+                - running
+                - completed
+                - failed
+                - cancelled
+                - timed_out
+                - skipped
+              type: string
+            maxItems: 9
+            type: array
         - description: Filter by execution type.
           in: query
           name: executionTypes
           required: false
           schema:
-            anyOf:
-              - enum:
-                  - test
-                  - production
-                type: string
-              - items:
-                  enum:
-                    - test
-                    - production
-                  type: string
-                maxItems: 2
-                type: array
+            items:
+              enum:
+                - test
+                - production
+              type: string
+            maxItems: 2
+            type: array
         - description: Filter by the user who triggered the execution.
           in: query
           name: executedBy
           required: false
           schema:
-            anyOf:
-              - type: string
-              - items:
-                  type: string
-                maxItems: 100
-                type: array
+            items:
+              type: string
+            maxItems: 100
+            type: array
         - description: Whether to exclude step-level execution data.
           in: query
           name: omitStepRuns

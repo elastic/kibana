@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { baseMetaSchema, updatedMetaSchema } from '../meta_schemas';
+import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
 export function getUpdateRequestBodySchema(isDashboardAppRequest: boolean) {
   // changing access control is not allowed through update endpoint
@@ -20,6 +20,6 @@ export function getUpdateResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
     data: getDashboardStateSchema(isDashboardAppRequest),
-    meta: schema.allOf([baseMetaSchema, updatedMetaSchema]),
+    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
   });
 }
