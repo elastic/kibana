@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { getAgentPolicyAdvancedSettings } from './agent_policy_settings';
+export {
+  SavedObjectsTracker,
+  cleanupDownloadedFile,
+  installLogsSampleData,
+  removeLogsSampleData,
+} from './sample_data_lifecycle';
