@@ -17,3 +17,5 @@ export {
 } from './absolute_timing_to_relative_timing';
 
 export { getDefaultRepository } from './get_default_repository';
+
+export { getPhaseEnabled } from './get_phase_enabled';

@@ -6,6 +6,7 @@
  */
 
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { runWithSpan } from '../../telemetry/traces';
 import type { EntityStoreRequestHandlerContext } from '../../types';
 import { featureFlagEnabledMiddleware } from './feature_flag_enabled';
 
@@ -22,19 +23,35 @@ const REGISTERED_MIDDLEWARES: readonly Middleware[] = [featureFlagEnabledMiddlew
 
 export function wrapMiddlewares<P, Q, B>(
   handler: ReqHandler<P, Q, B>,
-  middlewares: readonly Middleware[] = REGISTERED_MIDDLEWARES
+  middlewares: readonly Middleware[] = []
 ) {
+  const pipeline: readonly Middleware[] = [...REGISTERED_MIDDLEWARES, ...middlewares];
+
   return async (
     ctx: EntityStoreRequestHandlerContext,
     req: KibanaRequest<P, Q, B>,
     res: KibanaResponseFactory
   ) => {
-    for (const middleware of middlewares) {
-      const middlewareRes = await middleware(ctx, req, res);
-      if (middlewareRes) {
-        return middlewareRes;
-      }
-    }
-    return handler(ctx, req, res);
+    const entityStoreCtx = await ctx.entityStore;
+    const path = req.route.path;
+    const method = req.route.method.toLowerCase();
+
+    return runWithSpan({
+      name: 'entityStore.api',
+      namespace: entityStoreCtx.namespace,
+      attributes: {
+        'entity_store.api.method': method,
+        'entity_store.api.path': path,
+      },
+      cb: async () => {
+        for (const middleware of pipeline) {
+          const middlewareRes = await middleware(ctx, req, res);
+          if (middlewareRes) {
+            return middlewareRes;
+          }
+        }
+        return handler(ctx, req, res);
+      },
+    });
   };
 }

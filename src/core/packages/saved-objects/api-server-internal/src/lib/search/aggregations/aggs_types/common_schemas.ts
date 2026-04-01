@@ -27,4 +27,7 @@ const fieldSortSchema = s.object({
 });
 const sortContainerSchema = s.recordOf(s.string(), s.oneOf([sortOrderSchema, fieldSortSchema]));
 const sortCombinationsSchema = s.oneOf([fieldSchema, sortContainerSchema]);
-export const sortSchema = s.oneOf([sortCombinationsSchema, s.arrayOf(sortCombinationsSchema)]);
+export const sortSchema = s.oneOf([
+  sortCombinationsSchema,
+  s.arrayOf(sortCombinationsSchema, { maxSize: 100 }),
+]);

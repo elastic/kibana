@@ -11,7 +11,7 @@
     "configPath": ["xpack", "agentBuilderPlatform"],
     "requiredPlugins": ["agentBuilder", "share"],
     "requiredBundles": [],
-    "optionalPlugins": ["cases", "llmTasks", "workflowsManagement"],
+    "optionalPlugins": ["cases", "esql", "llmTasks", "workflowsManagement"],
     "extraPublicDirs": []
   }
 }

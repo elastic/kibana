@@ -6,7 +6,7 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { WrongStreamTypeError } from '../../../../lib/streams/errors/wrong_stream_type_error';
 import {
@@ -31,9 +31,15 @@ export const unmanagedAssetsRoute = createServerRoute({
     path: z.object({ name: z.string() }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
+    });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
@@ -51,12 +57,12 @@ export const unmanagedAssetsRoute = createServerRoute({
 
     const assets = await getUnmanagedElasticsearchAssets({
       dataStream,
-      scopedClusterClient,
+      esClient: scopedClusterClient.asCurrentUser,
     });
 
     return getUnmanagedElasticsearchAssetDetails({
       assets,
-      scopedClusterClient,
+      esClient: scopedClusterClient.asCurrentUser,
     });
   },
 });

@@ -8,6 +8,10 @@
 // Observability-specific test framework
 export { test, apiTest, spaceTest } from './src/playwright';
 
+// Worker fixtures for observability tests (e.g. sloData for API tests)
+export { sloDataFixture } from './src/playwright/fixtures/worker';
+export type { SloDataFixture } from './src/playwright/fixtures/worker';
+
 // re-exported test framework from @kbn/scout
 export { lighthouseTest, tags } from '@kbn/scout';
 
@@ -18,7 +22,6 @@ export { globalSetupHook } from './src/playwright/global_hook';
 export {
   browserAuthFixture,
   apiServicesFixture,
-  synthtraceFixture,
   createPlaywrightConfig,
   createLazyPageObject,
 } from '@kbn/scout';
@@ -60,12 +63,8 @@ export type {
 } from '@kbn/scout';
 
 // Re-exported fixture types
-export type {
-  ApiServicesFixture,
-  BrowserAuthFixture,
-  SamlAuth,
-  SynthtraceFixture,
-} from '@kbn/scout';
+export type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout';
+export type { ApiClientFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker/api_client';
 
 // Re-exported service & configuration types
 export type {
@@ -80,10 +79,7 @@ export type {
 } from '@kbn/scout';
 
 // Re-exported authentication types
-export type { RoleApiCredentials } from '@kbn/scout';
+export type { RoleApiCredentials, RequestAuthFixture } from '@kbn/scout';
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from '@kbn/scout';
-
-// Re-exported utility for overriding synthtrace clients
-export { getSynthtraceClient } from '@kbn/scout';

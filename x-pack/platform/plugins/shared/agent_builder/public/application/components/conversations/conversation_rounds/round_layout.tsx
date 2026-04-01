@@ -10,7 +10,10 @@ import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
@@ -28,6 +31,8 @@ interface RoundLayoutProps {
   rawRound: ConversationRound;
   conversationAttachments?: VersionedAttachment[];
   conversationId?: string;
+  allRounds: ConversationRound[];
+  roundIndex: number;
 }
 
 const labels = {
@@ -36,12 +41,40 @@ const labels = {
   }),
 };
 
+/**
+ * Computes cumulative attachment refs from all rounds up to and including the given index.
+ * Returns the highest version seen for each attachment.
+ */
+const computeCumulativeRefs = (
+  rounds: ConversationRound[],
+  upToIndex: number
+): AttachmentVersionRef[] | undefined => {
+  const highestVersionByAttachment = new Map<string, AttachmentVersionRef>();
+
+  for (let i = 0; i <= upToIndex; i++) {
+    const roundRefs = rounds[i]?.input.attachment_refs;
+    if (roundRefs) {
+      for (const ref of roundRefs) {
+        const existing = highestVersionByAttachment.get(ref.attachment_id);
+        if (!existing || ref.version > existing.version) {
+          highestVersionByAttachment.set(ref.attachment_id, ref);
+        }
+      }
+    }
+  }
+
+  const values = Array.from(highestVersionByAttachment.values());
+  return values.length > 0 ? values : undefined;
+};
+
 export const RoundLayout: React.FC<RoundLayoutProps> = ({
   isCurrentRound,
   scrollContainerHeight,
   rawRound,
   conversationAttachments,
   conversationId,
+  allRounds,
+  roundIndex,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
@@ -66,6 +99,11 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     pendingPrompts &&
     pendingPrompts.length > 0 &&
     !isResuming;
+
+  const cumulativeAttachmentRefs = useMemo(() => {
+    if (!response?.message) return undefined;
+    return computeCumulativeRefs(allRounds, roundIndex);
+  }, [allRounds, roundIndex, response?.message]);
 
   const confirmationPrompts = useMemo(
     () => (pendingPrompts ?? []).filter(isConfirmationPrompt),
@@ -172,7 +210,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               isLoading={isLoadingCurrentRound}
               isLastRound={isCurrentRound}
               conversationAttachments={conversationAttachments}
-              attachmentRefs={input.attachment_refs}
+              attachmentRefs={cumulativeAttachmentRefs}
               conversationId={conversationId}
             />
           </EuiFlexItem>

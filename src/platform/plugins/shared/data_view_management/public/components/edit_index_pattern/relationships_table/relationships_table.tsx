@@ -31,7 +31,7 @@ import type {
 
 import type { SearchFilterConfig } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
-import { IPM_APP_ID } from '../../../plugin';
+import { IPM_APP_ID } from '../../../constants';
 import {
   typeFieldName,
   typeFieldDescription,

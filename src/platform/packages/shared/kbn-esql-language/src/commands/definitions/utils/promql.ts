@@ -6,17 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import type { ESQLAstPromqlCommand, ESQLMapEntry } from '@elastic/esql/types';
+import { isIdentifier, isList, isSource } from '@elastic/esql';
+import { EDITOR_MARKER } from '../constants';
+import { promqlFunctionDefinitions } from '../generated/promql_functions';
+import { promqlOperatorDefinitions } from '../generated/promql_operators';
 import {
   PromQLFunctionDefinitionTypes,
   type PromQLFunctionDefinition,
   type PromQLFunctionParamType,
 } from '../types';
-import { promqlFunctionDefinitions } from '../generated/promql_functions';
-import { promqlOperatorDefinitions } from '../generated/promql_operators';
-import type { ESQLAstPromqlCommand, ESQLMapEntry } from '../../../types';
-import { EDITOR_MARKER } from '../constants';
-import { isIdentifier, isList, isSource } from '../../../ast/is';
 
 /* Returns the PromQL function definition matching the provided name. */
 export const getPromqlFunctionDefinition = (

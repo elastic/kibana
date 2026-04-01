@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
@@ -46,9 +47,11 @@ interface Props {
 
 export function MobileServiceTemplate(props: Props) {
   return (
-    <ApmServiceContextProvider>
-      <TemplateWithContext {...props} />
-    </ApmServiceContextProvider>
+    <ApmIndexSettingsContextProvider>
+      <ApmServiceContextProvider>
+        <TemplateWithContext {...props} />
+      </ApmServiceContextProvider>
+    </ApmIndexSettingsContextProvider>
   );
 }
 
@@ -102,6 +105,7 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
 
   return (
     <ApmMainTemplate
+      searchBar={<MobileSearchBar {...searchBarOptions} />}
       pageHeader={{
         tabs,
         pageTitle: (
@@ -131,7 +135,6 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
         ),
       }}
     >
-      <MobileSearchBar {...searchBarOptions} />
       <ServiceAnomalyTimeseriesContextProvider>{children}</ServiceAnomalyTimeseriesContextProvider>
     </ApmMainTemplate>
   );
@@ -211,7 +214,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append: <TechnicalPreviewBadge icon="flask" />,
     },
     {
       key: 'alerts',
@@ -230,7 +233,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append: <TechnicalPreviewBadge icon="flask" />,
       label: i18n.translate('xpack.apm.mobileServiceDetails.dashboardsTabLabel', {
         defaultMessage: 'Dashboards',
       }),

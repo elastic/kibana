@@ -61,7 +61,8 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
     <EuiToolTip delay="long" content={strings.getAddFilterButtonLabel()} disableScreenReaderOutput>
       <EuiButtonIcon
         display="base"
-        iconType="plusInCircleFilled"
+        iconType="plus"
+        color="text"
         aria-label={strings.getAddFilterButtonLabel()}
         data-test-subj="addFilter"
         onClick={() => setShowAddFilterPopover((isOpen) => !isOpen)}
@@ -92,6 +93,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         initialFocus=".filterEditor__hiddenItem"
         ownFocus
         repositionOnScroll
+        aria-label={strings.getAddFilterButtonLabel()}
       >
         <FilterEditorWrapper
           indexPatterns={indexPatterns}

@@ -44,8 +44,6 @@ import {
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
-import { CanvasProvider } from './attachments/canvas_context';
-import { CanvasFlyout } from './attachments/canvas_flyout';
 import { ExternalLinkModal } from './external_link_modal';
 
 interface Props {
@@ -154,26 +152,35 @@ export function ChatMessageText({
       },
       table: (props) => (
         <>
-          <EuiTable
-            {...props}
-            className={css`
-              .euiTableCellContent__text {
-                white-space: normal;
-              }
-            `}
-          />
+          <EuiTable {...props} tableLayout="auto" scrollableInline responsiveBreakpoint={false} />
           <EuiSpacer size="m" />
         </>
       ),
       th: (props) => {
         const { children, ...rest } = props;
-        return <EuiTableHeaderCell {...rest}>{children}</EuiTableHeaderCell>;
+        return (
+          <EuiTableHeaderCell
+            minWidth="10em"
+            // This is just a recommendation and will be ignored if there aren't
+            // enough columns to fill the entire container's width.
+            maxWidth="30em"
+            {...rest}
+          >
+            {children}
+          </EuiTableHeaderCell>
+        );
       },
       tr: (props) => <EuiTableRow {...props} />,
       td: (props) => {
         const { children, ...rest } = props;
         return (
-          <EuiTableRowCell truncateText={true} {...rest}>
+          <EuiTableRowCell
+            minWidth="10em"
+            // This is just a recommendation and will be ignored if there aren't
+            // enough columns to fill the entire container's width.
+            maxWidth="30em"
+            {...rest}
+          >
             {children}
           </EuiTableRowCell>
         );
@@ -215,7 +222,7 @@ export function ChatMessageText({
   ]);
 
   return (
-    <CanvasProvider>
+    <>
       <EuiText size="m" className={containerClassName}>
         <EuiMarkdownFormat
           textSize="m"
@@ -225,8 +232,7 @@ export function ChatMessageText({
           {content}
         </EuiMarkdownFormat>
       </EuiText>
-      <CanvasFlyout attachmentsService={attachmentsService} />
       <ExternalLinkModal url={pendingExternalUrl} onClose={() => setPendingExternalUrl(null)} />
-    </CanvasProvider>
+    </>
   );
 }

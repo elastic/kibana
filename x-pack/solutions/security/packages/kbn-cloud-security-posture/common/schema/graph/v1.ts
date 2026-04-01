@@ -75,7 +75,12 @@ export const entitySchema = schema.object({
     })
   ),
   availableInEntityStore: schema.maybe(schema.boolean()),
-  ecsParentField: schema.maybe(schema.string()),
+  sourceFields: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+    )
+  ),
 });
 
 export const nodeDocumentDataSchema = schema.object({

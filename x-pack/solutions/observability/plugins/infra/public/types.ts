@@ -52,6 +52,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type { InventoryViewsServiceStart } from './services/inventory_views';
 import type { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
@@ -85,6 +86,7 @@ export interface InfraClientSetupDeps {
 }
 
 export interface InfraClientStartDeps {
+  agentBuilder?: AgentBuilderPluginStart;
   cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;

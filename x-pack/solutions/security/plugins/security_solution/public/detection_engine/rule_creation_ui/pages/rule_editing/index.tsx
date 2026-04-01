@@ -23,7 +23,11 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
+import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
@@ -75,16 +79,20 @@ import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/comp
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
+  const { application, triggersActionsUi, cps } = useKibana().services;
+  const { navigateToApp } = application;
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
-  const { application, triggersActionsUi } = useKibana().services;
-  const { navigateToApp } = application;
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
   const canEditRule = isRulesCustomizationEnabled || !rule.immutable;
@@ -498,10 +506,44 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     ),
   });
 
+  const addToChatButton = useMemo(
+    () =>
+      isAgentChatExperienceEnabled ? (
+        <AddRuleAttachmentToChatButton
+          defineStepData={defineStepData}
+          aboutStepData={aboutStepData}
+          scheduleStepData={scheduleStepData}
+          actionsStepData={actionsStepData}
+          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+          pathway="rule_editing"
+        />
+      ) : null,
+    [
+      isAgentChatExperienceEnabled,
+      defineStepData,
+      aboutStepData,
+      scheduleStepData,
+      actionsStepData,
+      triggersActionsUi.actionTypeRegistry,
+    ]
+  );
+
   const verifyRuleDefinitionForPreview = useCallback(
     () => defineStepForm.validate(),
     [defineStepForm]
   );
+
+  const isEndpointExceptionListLinked: boolean = useMemo(
+    () =>
+      rule?.exceptions_list?.some(
+        (list) => list.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+      ) ?? false,
+    [rule]
+  );
+
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
+  const shouldShowEndpointExceptionsCannotBeAddedToRuleCallout =
+    endpointPerPolicyOptIn?.status === true && endpointPerPolicyOptIn.reason === 'userOptedIn';
 
   if (
     redirectToDetections(
@@ -536,6 +578,23 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
+                      {shouldShowEndpointExceptionsCannotBeAddedToRuleCallout &&
+                        isEndpointExceptionListLinked && (
+                          <EndpointExceptionsMovedCallout
+                            id="ruleEdit-whenEndpointExceptionListLinked"
+                            dismissable
+                            title="noLongerEvaluatedOnRules"
+                          />
+                        )}
+                      {shouldShowEndpointExceptionsCannotBeAddedToRuleCallout &&
+                        !isEndpointExceptionListLinked && (
+                          <EndpointExceptionsMovedCallout
+                            id="ruleEdit-whenEndpointExceptionListNotLinked"
+                            dismissable
+                            title="cannotBeAddedToRules"
+                          />
+                        )}
+
                       <CustomHeaderPageMemo
                         backOptions={backOptions}
                         isLoading={isLoading}
@@ -543,6 +602,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         isRulePreviewVisible={isRulePreviewVisible}
                         setIsRulePreviewVisible={setIsRulePreviewVisible}
                         togglePanel={togglePanel}
+                        addToChatButton={addToChatButton}
                       />
                       {isRulesCustomizationEnabled && upgradeCallout}
                       {invalidSteps.length > 0 && (

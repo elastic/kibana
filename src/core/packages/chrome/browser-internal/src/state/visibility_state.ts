@@ -59,14 +59,16 @@ export const createVisibilityState = ({ application }: VisibilityStateDeps): Vis
     )
   );
 
+  const isVisible$ = combineLatest([appHidden$, forceHidden.$, isPrinting$]).pipe(
+    map(([appHidden, forceHiddenValue, isPrinting]) => {
+      return !appHidden && !forceHiddenValue && !isPrinting;
+    }),
+    distinctUntilChanged(),
+    shareReplay(1)
+  );
+
   return {
-    isVisible$: combineLatest([appHidden$, forceHidden.$, isPrinting$]).pipe(
-      map(([appHidden, forceHiddenValue, isPrinting]) => {
-        return !appHidden && !forceHiddenValue && !isPrinting;
-      }),
-      distinctUntilChanged(),
-      shareReplay(1)
-    ),
+    isVisible$,
     setIsVisible: (isVisible: boolean) => forceHidden.set(!isVisible),
   };
 };

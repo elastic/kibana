@@ -91,12 +91,11 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp, rendering }:
                     </EuiLink>
                     <EuiButtonIcon
                       iconType="popout"
+                      aria-label="Open in new tab"
                       onClick={() =>
                         window.open(getUrlForApp(def.appId), '_blank', 'noopener, noreferrer')
                       }
-                    >
-                      Open in new tab
-                    </EuiButtonIcon>
+                    />
                   </React.Fragment>
                 }
                 image={def.image}

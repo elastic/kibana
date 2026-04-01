@@ -292,6 +292,20 @@
   ]
  },
  {
+  "description": "SLO Overview embeddable schema",
+  "discriminator": {
+   "propertyName": "overview_mode"
+  },
+  "oneOf": [
+   {
+    "$ref": "#/components/schemas/slo-single-overview-embeddable"
+   },
+   {
+    "$ref": "#/components/schemas/slo-group-overview-embeddable"
+   }
+  ]
+ },
+ {
   "type": "object",
   "description": "Synthetics stats overview embeddable schema",
   "properties": {

@@ -10,11 +10,8 @@
 import type { IconType, UseEuiTheme } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
-import { isDynamicConnector } from '@kbn/workflows';
-import type {
-  ActionsMenuGroup,
-  WorkflowsExtensionsPublicPluginStart,
-} from '@kbn/workflows-extensions/public';
+import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn/workflows';
+import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import { triggerSchemas } from '../../../trigger_schemas';
@@ -33,7 +30,7 @@ export function getActionOptions(
         defaultMessage: 'Manual',
       }),
       description: i18n.translate('workflows.actionsMenu.manualDescription', {
-        defaultMessage: 'Manually start from the UI',
+        defaultMessage: 'Trigger - Manually start from the UI',
       }),
       iconType: 'play',
       iconColor: 'success',
@@ -44,7 +41,7 @@ export function getActionOptions(
         defaultMessage: 'Alert',
       }),
       description: i18n.translate('workflows.actionsMenu.alertDescription', {
-        defaultMessage: 'When an alert from rule is created',
+        defaultMessage: 'Trigger - When an alert from rule is created',
       }),
       iconType: 'bell',
       iconColor: euiTheme.colors.vis.euiColorVis6,
@@ -55,7 +52,7 @@ export function getActionOptions(
         defaultMessage: 'Schedule',
       }),
       description: i18n.translate('workflows.actionsMenu.scheduleDescription', {
-        defaultMessage: 'On a schedule (e.g. every 10 minutes)',
+        defaultMessage: 'Trigger - On a schedule (e.g. every 10 minutes)',
       }),
       iconType: 'clock',
       iconColor: euiTheme.colors.textParagraph,
@@ -69,6 +66,7 @@ export function getActionOptions(
       description: t.description ?? t.id,
       iconType: (t.icon != null ? t.icon : 'bolt') as IconType,
       iconColor: euiTheme.colors.vis.euiColorVis6,
+      stability: 'tech_preview',
     }));
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
@@ -93,17 +91,6 @@ export function getActionOptions(
       defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
     options: [],
-  };
-  const httpRequest: ActionOptionData = {
-    iconType: 'globe',
-    iconColor: euiTheme.colors.vis.euiColorVis0,
-    id: 'http',
-    label: i18n.translate('workflows.actionsMenu.http', {
-      defaultMessage: 'HTTP',
-    }),
-    description: i18n.translate('workflows.actionsMenu.httpDescription', {
-      defaultMessage: 'Make an generic HTTP request',
-    }),
   };
   const externalGroup: ActionOptionData = {
     iconType: 'plugs',
@@ -147,7 +134,7 @@ export function getActionOptions(
         description: i18n.translate('workflows.actionsMenu.dataSetDescription', {
           defaultMessage: 'Define or compute variables to use in your workflow',
         }),
-        iconType: 'tableOfContents',
+        iconType: 'database',
       },
     ],
   };
@@ -174,12 +161,34 @@ export function getActionOptions(
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
       {
+        id: 'switch',
+        label: i18n.translate('workflows.actionsMenu.switch', {
+          defaultMessage: 'Switch',
+        }),
+        description: i18n.translate('workflows.actionsMenu.switchDescription', {
+          defaultMessage: 'Multi-way branching based on expression value matching',
+        }),
+        iconType: 'productStreamsWired',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
         id: 'foreach',
         label: i18n.translate('workflows.actionsMenu.foreach', {
           defaultMessage: 'Loop (foreach)',
         }),
         description: i18n.translate('workflows.actionsMenu.loopDescription', {
           defaultMessage: 'Iterate the action over a specified list',
+        }),
+        iconType: 'refresh',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
+        id: 'while',
+        label: i18n.translate('workflows.actionsMenu.while', {
+          defaultMessage: 'While Loop',
+        }),
+        description: i18n.translate('workflows.actionsMenu.whileDescription', {
+          defaultMessage: 'Repeat steps while a condition is true',
         }),
         iconType: 'refresh',
         iconColor: euiTheme.colors.vis.euiColorVis0,
@@ -195,6 +204,17 @@ export function getActionOptions(
         iconType: 'clock',
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
+      ...(['workflow.execute', 'workflow.executeAsync'] as const)
+        .map((stepId) => getBuiltInStepDefinition(stepId))
+        .filter((def): def is NonNullable<typeof def> => def !== undefined)
+        .map((def) => ({
+          id: def.id,
+          label: def.label,
+          description: def.description,
+          iconType: 'nested' as const,
+          iconColor: euiTheme.colors.vis.euiColorVis0,
+          stability: def.stability,
+        })),
     ],
   };
   const elasticSearchGroup: ActionOptionData = {
@@ -209,12 +229,13 @@ export function getActionOptions(
     options: [],
   };
 
-  const stepGroups: Record<ActionsMenuGroup, ActionGroup> = {
-    elasticsearch: elasticSearchGroup,
-    external: externalGroup,
-    ai: aiGroup,
-    kibana: kibanaGroup,
-    data: dataTransformationGroup,
+  const stepGroups: Record<StepCategory, ActionGroup> = {
+    [StepCategory.Elasticsearch]: elasticSearchGroup,
+    [StepCategory.External]: externalGroup,
+    [StepCategory.Ai]: aiGroup,
+    [StepCategory.Kibana]: kibanaGroup,
+    [StepCategory.Data]: dataTransformationGroup,
+    [StepCategory.FlowControl]: flowControlGroup,
   };
 
   const baseTypeInstancesCount: Record<string, number> = {};
@@ -222,7 +243,7 @@ export function getActionOptions(
   for (const connector of connectors) {
     const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
     if (customStepDefinition) {
-      const group = stepGroups[customStepDefinition.actionsMenuGroup ?? 'kibana'];
+      const group = stepGroups[customStepDefinition.category];
       group.options.push({
         id: customStepDefinition.id,
         label: customStepDefinition.label,
@@ -295,7 +316,6 @@ export function getActionOptions(
     aiGroup,
     dataTransformationGroup,
     externalGroup,
-    httpRequest,
     flowControlGroup,
   ];
 }

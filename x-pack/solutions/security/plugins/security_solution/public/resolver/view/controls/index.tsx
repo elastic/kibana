@@ -35,8 +35,7 @@ export const GraphControls = React.memo(
   ({
     id,
     className,
-    isSplitPanel,
-    showPanelOnClick,
+    onShowPanel,
   }: {
     /**
      * Id that identify the scope of analyzer
@@ -47,13 +46,9 @@ export const GraphControls = React.memo(
      */
     className?: string;
     /**
-     * Indicate if the panel is displayed separately
+     * Callback for showing the analyzer details panel
      */
-    isSplitPanel?: boolean;
-    /**
-     * Callback for showing the panel when isSplitPanel is true
-     */
-    showPanelOnClick?: () => void;
+    onShowPanel: () => void;
   }) => {
     const dispatch = useDispatch();
     const scalingFactor = useSelector((state: State) =>
@@ -151,9 +146,7 @@ export const GraphControls = React.memo(
             isOpen={activePopover === 'datePicker'}
             setActivePopover={setActivePopover}
           />
-          {isSplitPanel && showPanelOnClick && (
-            <ShowPanelButton showPanelOnClick={showPanelOnClick} />
-          )}
+          <ShowPanelButton onClick={onShowPanel} />
         </StyledGraphControlsColumn>
         <StyledGraphControlsColumn>
           <EuiPanel className="panning-controls" paddingSize="none" hasBorder>
@@ -166,7 +159,7 @@ export const GraphControls = React.memo(
                 })}
                 onClick={handleNorth}
               >
-                <EuiIcon type="arrowUp" />
+                <EuiIcon type="chevronSingleUp" />
               </button>
             </div>
             <div className="panning-controls-middle">
@@ -178,7 +171,7 @@ export const GraphControls = React.memo(
                 })}
                 onClick={handleWest}
               >
-                <EuiIcon type="arrowLeft" />
+                <EuiIcon type="chevronSingleLeft" />
               </button>
               <button
                 className="center-button"
@@ -198,7 +191,7 @@ export const GraphControls = React.memo(
                 })}
                 onClick={handleEast}
               >
-                <EuiIcon type="arrowRight" />
+                <EuiIcon type="chevronSingleRight" />
               </button>
             </div>
             <div className="panning-controls-bottom">
@@ -210,7 +203,7 @@ export const GraphControls = React.memo(
                 })}
                 onClick={handleSouth}
               >
-                <EuiIcon type="arrowDown" />
+                <EuiIcon type="chevronSingleDown" />
               </button>
             </div>
           </EuiPanel>
@@ -222,7 +215,7 @@ export const GraphControls = React.memo(
               data-test-subj="resolver:graph-controls:zoom-in"
               onClick={handleZoomInClick}
             >
-              <EuiIcon type="plusInCircle" />
+              <EuiIcon type="plusCircle" />
             </button>
             <StyledEuiRange
               className="zoom-slider"
@@ -240,7 +233,7 @@ export const GraphControls = React.memo(
               data-test-subj="resolver:graph-controls:zoom-out"
               onClick={handleZoomOutClick}
             >
-              <EuiIcon type="minusInCircle" />
+              <EuiIcon type="minusCircle" />
             </button>
           </EuiPanel>
         </StyledGraphControlsColumn>

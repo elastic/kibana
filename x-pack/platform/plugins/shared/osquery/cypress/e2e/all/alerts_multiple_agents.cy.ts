@@ -18,7 +18,7 @@ import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 describe(
   'Alert Event Details - dynamic params',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     let ruleId: string;

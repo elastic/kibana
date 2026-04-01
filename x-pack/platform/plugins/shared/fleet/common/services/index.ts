@@ -45,6 +45,10 @@ export {
   getNormalizedInputs,
   getNormalizedDataStreams,
   filterPolicyTemplatesTiles,
+  hasMultipleEnabledPolicyTemplates,
+  getPolicyTemplateInputDefinition,
+  registryInputAllowsDynamicSignalTypes,
+  packagePolicyInputAllowsUndefinedDataStreamType,
 } from './policy_template';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
 export type {

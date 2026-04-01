@@ -162,6 +162,114 @@ describe('useInstalledIntegrations', () => {
     );
   });
 
+  it('should compute pending_upgrade_review status when keep_policies_up_to_date is true', () => {
+    jest.mocked(useGetPackagesQuery).mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'system',
+            name: 'system',
+            status: 'installed',
+            version: '2.0.0',
+            installationInfo: {
+              version: '1.0.0',
+              keep_policies_up_to_date: true,
+              pending_upgrade_review: {
+                target_version: '2.0.0',
+                reason: 'deprecated',
+                created_at: '2025-01-01T00:00:00Z',
+                action: 'pending',
+              },
+            },
+          },
+        ],
+      },
+    } as any);
+
+    const { result } = renderHook(() =>
+      useInstalledIntegrations({}, { currentPage: 1, pageSize: 10 })
+    );
+
+    expect(result.current.installedPackages).toEqual([
+      expect.objectContaining({
+        id: 'system',
+        ui: { installation_status: 'pending_upgrade_review' },
+      }),
+    ]);
+  });
+
+  it('should compute declined_review status when keep_policies_up_to_date is true', () => {
+    jest.mocked(useGetPackagesQuery).mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'system',
+            name: 'system',
+            status: 'installed',
+            version: '2.0.0',
+            installationInfo: {
+              version: '1.0.0',
+              keep_policies_up_to_date: true,
+              pending_upgrade_review: {
+                target_version: '2.0.0',
+                reason: 'deprecated',
+                created_at: '2025-01-01T00:00:00Z',
+                action: 'declined',
+              },
+            },
+          },
+        ],
+      },
+    } as any);
+
+    const { result } = renderHook(() =>
+      useInstalledIntegrations({}, { currentPage: 1, pageSize: 10 })
+    );
+
+    expect(result.current.installedPackages).toEqual([
+      expect.objectContaining({
+        id: 'system',
+        ui: { installation_status: 'declined_review' },
+      }),
+    ]);
+  });
+
+  it('should not show review statuses when keep_policies_up_to_date is false', () => {
+    jest.mocked(useGetPackagesQuery).mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'system',
+            name: 'system',
+            status: 'installed',
+            version: '2.0.0',
+            installationInfo: {
+              version: '1.0.0',
+              keep_policies_up_to_date: false,
+              pending_upgrade_review: {
+                target_version: '2.0.0',
+                reason: 'deprecated',
+                created_at: '2025-01-01T00:00:00Z',
+                action: 'pending',
+              },
+            },
+          },
+        ],
+      },
+    } as any);
+
+    const { result } = renderHook(() =>
+      useInstalledIntegrations({}, { currentPage: 1, pageSize: 10 })
+    );
+
+    expect(result.current.installedPackages).toEqual([
+      expect.objectContaining({
+        id: 'system',
+        ui: { installation_status: 'upgrade_available' },
+      }),
+    ]);
+  });
+
   it('should support pagination', () => {
     const filters = {};
     const { result, rerender } = renderHook(

@@ -8,10 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
-  DeserializerOrUndefined,
   MetaOrUndefined,
   RefreshWithWaitFor,
-  SerializerOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -19,8 +17,6 @@ import { transformListItemToElasticQuery } from '../utils';
 import type { CreateEsBulkTypeSchema, IndexEsListItemSchema } from '../../schemas/elastic_query';
 
 export interface CreateListItemsBulkOptions {
-  deserializer: DeserializerOrUndefined;
-  serializer: SerializerOrUndefined;
   listId: string;
   type: Type;
   value: string[];
@@ -36,8 +32,6 @@ export interface CreateListItemsBulkOptions {
 export const createListItemsBulk = async ({
   listId,
   type,
-  deserializer,
-  serializer,
   value,
   esClient,
   listItemIndex,
@@ -57,7 +51,6 @@ export const createListItemsBulk = async ({
       const tieBreakerId =
         tieBreaker != null && tieBreaker[index] != null ? tieBreaker[index] : uuidv4();
       const elasticQuery = transformListItemToElasticQuery({
-        serializer,
         type,
         value: singleValue,
       });
@@ -66,10 +59,8 @@ export const createListItemsBulk = async ({
           '@timestamp': createdAt,
           created_at: createdAt,
           created_by: user,
-          deserializer,
           list_id: listId,
           meta,
-          serializer,
           tie_breaker_id: tieBreakerId,
           updated_at: createdAt,
           updated_by: user,

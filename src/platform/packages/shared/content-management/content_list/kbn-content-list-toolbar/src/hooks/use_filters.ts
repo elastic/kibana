@@ -11,13 +11,16 @@ import { Children, Fragment, isValidElement, useMemo } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
 import type { ParsedPart } from '@kbn/content-list-assembly';
-import { useContentListSort } from '@kbn/content-list-provider';
+import { useContentListSort, useFilterDisplay } from '@kbn/content-list-provider';
 import { filter } from '../filters/part';
 import { Filters, type FiltersProps } from '../filters/filters';
 import type { FilterContext } from '../filters/part';
 
-/** Default filter when no children are provided. */
+// Default order: starred toggle → tag facet → sort. Each resolves to undefined when its
+// corresponding service/feature is absent, so unused entries are silently dropped.
 const DEFAULT_PARTS: ParsedPart[] = [
+  { type: 'part', part: 'filter', preset: 'starred', instanceId: 'starred', attributes: {} },
+  { type: 'part', part: 'filter', preset: 'tags', instanceId: 'tags', attributes: {} },
   { type: 'part', part: 'filter', preset: 'sort', instanceId: 'sort', attributes: {} },
 ];
 
@@ -56,7 +59,9 @@ const extractFilterChildren = (children: ReactNode): ReactNode[] => {
  */
 const parseFilterParts = (children: ReactNode): ParsedPart[] => {
   const filterChildren = extractFilterChildren(children);
-  if (filterChildren.length === 0) return DEFAULT_PARTS;
+  if (filterChildren.length === 0) {
+    return DEFAULT_PARTS;
+  }
 
   const parts = filterChildren.flatMap((child) => filter.parseChildren(child));
   return parts.length > 0 ? parts : DEFAULT_PARTS;
@@ -69,13 +74,14 @@ const parseFilterParts = (children: ReactNode): ParsedPart[] => {
  * 1. Extract `<Filters>` children from the toolbar's children.
  * 2. Parse declarative `Filter` presets via `filter.parseChildren`.
  * 3. Resolve `SearchFilterConfig` objects via `filter.resolve`.
- * 4. Fall back to default sort filter if none are found.
+ * 4. Fall back to default filters (tags + sort) if none are found.
  *
  * @param children - React children from the toolbar component.
  * @returns Array of EUI search filter configs ready for `EuiSearchBar`.
  */
 export const useFilters = (children: ReactNode): SearchFilterConfig[] => {
   const { isSupported: hasSorting } = useContentListSort();
+  const { hasTags, hasStarred } = useFilterDisplay();
 
   // Note: `children` is used as a memo dependency. React children are often
   // unstable references (new JSX objects each render), so this memo may
@@ -84,10 +90,10 @@ export const useFilters = (children: ReactNode): SearchFilterConfig[] => {
   // consider keying on a more stable signal.
   return useMemo(() => {
     const parts = parseFilterParts(children);
-    const context: FilterContext = { hasSorting };
+    const context: FilterContext = { hasSorting, hasTags, hasStarred };
 
     return parts
       .map((part) => filter.resolve(part, context))
       .filter((f): f is SearchFilterConfig => f !== undefined);
-  }, [children, hasSorting]);
+  }, [children, hasSorting, hasTags, hasStarred]);
 };

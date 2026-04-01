@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import type { FunctionParameterContext } from '../../definitions/utils/autocomplete/expressions/types';
-import { isAssignment, isColumn } from '../../../ast/is';
-import type { ICommandCallbacks } from '../types';
-import { Location } from '../types';
+import { isAssignment, isColumn, within } from '@elastic/esql';
 import type {
   ESQLCommandOption,
   ESQLColumn,
@@ -19,7 +16,10 @@ import type {
   ESQLSingleAstItem,
   ESQLAstAllCommands,
   ESQLAstQueryExpression,
-} from '../../../types';
+} from '@elastic/esql/types';
+import type { FunctionParameterContext } from '../../definitions/utils/autocomplete/expressions/types';
+import type { ICommandCallbacks } from '../types';
+import { Location } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import {
   pipeCompleteItem,
@@ -28,6 +28,7 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   getDateHistogramCompletionItem,
+  getTimeseriesDateHistogramCompletionItem,
 } from '../complete_items';
 import { columnExists as _columnExists } from '../../definitions/utils/autocomplete/helpers';
 import { suggestForExpression } from '../../definitions/utils';
@@ -41,7 +42,6 @@ import { FunctionDefinitionTypes } from '../../definitions/types';
 import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
 import { isMarkerNode, findAstPosition } from '../../definitions/utils/ast';
 import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
-import { within } from '../../../ast/location';
 import { inOperators, nullCheckOperators } from '../../definitions/all_operators';
 import { buildExpressionFunctionParameterContext } from '../../definitions/utils';
 
@@ -56,6 +56,7 @@ export async function autocomplete(
     return [];
   }
   const isInlineStats = command.name === 'inline stats';
+  const isTimeseriesSource = query.trimStart().toLowerCase().startsWith('ts ');
 
   const columnExists = (name: string) => _columnExists(name, context);
 
@@ -75,7 +76,6 @@ export async function autocomplete(
 
     if (filteringContext) {
       const isInBy = isNodeWithinByClause(foundFunction, command);
-      const isTimeseriesSource = query.trimStart().toLowerCase().startsWith('ts ');
 
       let location: Location;
 
@@ -227,7 +227,11 @@ export async function autocomplete(
         location: Location.STATS_BY,
         context,
         callbacks,
-        emptySuggestions: [getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0)],
+        emptySuggestions: [
+          (isTimeseriesSource
+            ? getTimeseriesDateHistogramCompletionItem
+            : getDateHistogramCompletionItem)(context?.histogramBarTarget ?? 0),
+        ],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
         addSpaceAfterFirstField: false,
         ignoredColumns,
@@ -259,7 +263,9 @@ export async function autocomplete(
         callbacks,
         emptySuggestions: [
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
-          getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0),
+          (isTimeseriesSource
+            ? getTimeseriesDateHistogramCompletionItem
+            : getDateHistogramCompletionItem)(context?.histogramBarTarget ?? 0),
         ],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
         addSpaceAfterFirstField: false,

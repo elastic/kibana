@@ -41,11 +41,8 @@ export interface CustomFieldFactoryFilterOption {
   value: boolean | null;
 }
 
-export type CustomFieldEuiTableColumn = Pick<
-  EuiTableComputedColumnType<CaseUI>,
-  'name' | 'width' | 'data-test-subj'
-> & {
-  render: (customField: CaseCustomField) => React.ReactNode;
+export type CustomFieldEuiTableColumn = Omit<EuiTableComputedColumnType<CaseUI>, 'render'> & {
+  render: EuiTableComputedColumnType<CaseCustomField>['render'];
 };
 
 export type CustomFieldFactory<T extends CaseUICustomField> = () => {

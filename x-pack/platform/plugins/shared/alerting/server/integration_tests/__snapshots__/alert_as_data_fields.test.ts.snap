@@ -137,6 +137,18 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: apm.anomaly 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "agent.name": Object {
       "required": false,
@@ -235,6 +247,18 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: apm.error_rate 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "agent.name": Object {
       "required": false,
@@ -333,6 +357,18 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: apm.transaction_duration 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "agent.name": Object {
       "required": false,
@@ -431,6 +467,18 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: apm.transaction_error_rate 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "agent.name": Object {
       "required": false,

@@ -8,30 +8,65 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import {
-  INVESTIGATION_GUIDE_TEST_ID,
   INVESTIGATION_SECTION_CONTENT_TEST_ID,
   INVESTIGATION_SECTION_HEADER_TEST_ID,
 } from './test_ids';
+import { INVESTIGATION_GUIDE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
 import { DocumentDetailsContext } from '../../shared/context';
 import { InvestigationSection } from './investigation_section';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
-import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
 import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
-import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
+import { useHighlightedFieldsPrivilege } from '../../../../flyout_v2/document/hooks/use_highlighted_fields_privilege';
+import type { UseBasicDataFromDetailsDataResult } from '../../shared/hooks/use_basic_data_from_details_data';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...actual,
+    useUiSetting: jest.fn(),
+  };
+});
+
+jest.mock('@kbn/entity-store/public', () => {
+  const actual = jest.requireActual('@kbn/entity-store/public');
+  const { euid } = jest.requireActual('@kbn/entity-store/common/euid_helpers');
+  return {
+    ...actual,
+    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+  };
+});
+
+jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');
 
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
-jest.mock('../../shared/hooks/use_highlighted_fields');
+jest.mock('../../../../flyout_v2/document/hooks/use_highlighted_fields');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../rule_details/hooks/use_rule_details');
-jest.mock('../../shared/hooks/use_highlighted_fields_privilege');
-jest.mock('../../shared/hooks/use_investigation_guide');
+jest.mock('../../../../flyout_v2/document/hooks/use_highlighted_fields_privilege');
+jest.mock('../../shared/hooks/use_basic_data_from_details_data');
+jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
+jest.mock('../../shared/hooks/use_navigate_to_left_panel', () => ({
+  useNavigateToLeftPanel: () => jest.fn(),
+}));
+
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+    useUiSetting: jest.fn().mockReturnValue(false),
+  };
+});
 
 const mockAddSuccess = jest.fn();
 jest.mock('../../../../common/hooks/use_app_toasts', () => ({
@@ -47,6 +82,21 @@ const panelContextValue = {
   ),
 };
 
+const mockBasicAlertData: UseBasicDataFromDetailsDataResult = {
+  agentId: '',
+  alertId: '',
+  alertUrl: '',
+  data: null,
+  hostName: '',
+  indexName: '',
+  isAlert: true,
+  ruleDescription: '',
+  ruleId: 'ruleId',
+  ruleName: '',
+  timestamp: '',
+  userName: '',
+};
+
 const renderInvestigationSection = (contextValue = panelContextValue) =>
   render(
     <TestProvider>
@@ -58,10 +108,23 @@ const renderInvestigationSection = (contextValue = panelContextValue) =>
 
 describe('<InvestigationSection />', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
+  const mockUseUiSetting = useUiSetting as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseUiSetting.mockReturnValue(false);
+    mockUseEntityFromStore.mockReturnValue({
+      entityRecord: null,
+      entity: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
     mockUseExpandSection.mockReturnValue(true);
+    (useExpandSection as jest.Mock).mockReturnValue(true);
     (useHighlightedFields as jest.Mock).mockReturnValue([]);
     (useRuleDetails as jest.Mock).mockReturnValue({
       rule: { id: '123' } as RuleResponse,
@@ -72,7 +135,12 @@ describe('<InvestigationSection />', () => {
       isDisabled: false,
       tooltipContent: 'tooltip content',
     });
-    (useInvestigationGuide as jest.Mock).mockReturnValue({});
+    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue(mockBasicAlertData);
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      rule: { note: 'test note' },
+    });
   });
 
   it('should render investigation component top level items', async () => {

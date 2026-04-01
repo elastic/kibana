@@ -72,7 +72,6 @@
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
-    "@kbn/visualizations-plugin",
     "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-error-boundary",
     "@kbn/shared-ux-markdown",
@@ -80,7 +79,9 @@
     "@kbn/deeplinks-analytics",
     "@kbn/core-saved-objects-api-server",
     "@kbn/visualizations-common",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/saved-search-plugin",
+    "@kbn/lens-common"
   ],
   "exclude": ["target/**/*"]
 }

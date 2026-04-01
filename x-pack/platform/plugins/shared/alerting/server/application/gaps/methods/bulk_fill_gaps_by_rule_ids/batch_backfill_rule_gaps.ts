@@ -47,18 +47,28 @@ export const batchBackfillRuleGaps = async (
         gapsBatch: Gap[],
         processingLimitsByRuleId: Record<string, number>
       ) => {
-        const { processedGapsCount, hasErrors, results } = await processGapsBatch(context, {
-          range,
-          gapsBatch,
-          maxGapsCountToProcess: processingLimitsByRuleId[rule.id],
-          initiator: backfillInitiator.USER,
-        });
+        const { processedGapsCount, hasErrors, results, truncatedRuleIds } = await processGapsBatch(
+          context,
+          {
+            range,
+            gapsBatch,
+            maxGapsCountToProcess: processingLimitsByRuleId[rule.id],
+            initiator: backfillInitiator.USER,
+          }
+        );
         if (processedGapsCount > 0) {
           hasBeenBackfilled = true;
         }
         if (hasErrors) {
           const errorMessage = results[0]?.error;
           throw new Error(errorMessage ?? "Can't schedule gap fill");
+        }
+
+        // When the schedule entry cap was hit, report the full limit so
+        // processAllRuleGaps stops paginating -- the remaining gaps will
+        // be picked up on the next user-triggered run.
+        if (truncatedRuleIds.length > 0) {
+          return { [rule.id]: maxGapCountPerRule };
         }
 
         return { [rule.id]: processedGapsCount };

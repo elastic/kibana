@@ -209,9 +209,12 @@ export type MockedICommandCallbacks = {
 };
 
 export const getMockCallbacks = (): MockedICommandCallbacks => {
-  const expectedFields = getFieldNamesByType('any');
   return {
     getByType: jest.fn().mockImplementation(async (types, ignoredColumns = []) => {
+      const requestedTypes = Array.isArray(types) ? types : [types];
+      const normalizedRequestedTypes = requestedTypes.length > 0 ? requestedTypes : ['any'];
+      const expectedFields = getFieldNamesByType(normalizedRequestedTypes);
+
       return (
         expectedFields
           // Exclude columns already used (e.g., used in STATS BY or parent function scope)

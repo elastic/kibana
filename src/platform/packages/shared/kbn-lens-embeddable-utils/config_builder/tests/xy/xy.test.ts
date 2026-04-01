@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState as XYLensState } from '@kbn/lens-common';
+import type { XYVisualizationState } from '@kbn/lens-common';
 import { xyStateSchema } from '../../schema/charts/xy';
 import type { LensAttributes } from '../../types';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
   apiXYWithNoTitleAndCustomOutsideLegend,
   apiXYWithNoYTitleAndInsideLegend,
+  apiXYWithTopListWithTruncationLegend,
   barWithTwoLayersAttributes,
   breakdownXY,
   fullBasicXY,
@@ -23,7 +24,7 @@ import {
   xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes,
 } from './basicXY.mock';
 import { dualReferenceLineXY, referenceLineXY } from './referenceLines.mock';
-import { annotationXY } from './annotations.mock';
+import { annotationXY, byRefAnnotationXY } from './annotations.mock';
 import {
   esqlChart,
   esqlChartWithBreakdownColorMapping,
@@ -36,8 +37,8 @@ function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 
     state: {
       ...attributes.state,
       visualization: {
-        ...(attributes.state.visualization as XYLensState),
-        layers: (attributes.state.visualization as XYLensState).layers.map((layer) => {
+        ...(attributes.state.visualization as XYVisualizationState),
+        layers: (attributes.state.visualization as XYVisualizationState).layers.map((layer) => {
           if (!layer.layerType || layer.layerType === 'data') {
             return {
               ...layer,
@@ -110,6 +111,12 @@ describe('XY', () => {
           validateConverter(setSeriesType(annotationXY, type), xyStateSchema);
         });
       }
+
+      for (const type of ['bar', 'line', 'area'] as const) {
+        it(`should work for a by-reference annotation with a ${type} chart`, () => {
+          validateConverter(setSeriesType(byRefAnnotationXY, type), xyStateSchema);
+        });
+      }
     });
 
     describe('ES|QL panels', () => {
@@ -124,6 +131,128 @@ describe('XY', () => {
           validateConverter(setSeriesType(esqlChartWithBreakdownColorMapping, type), xyStateSchema);
         });
       }
+
+      describe('X-axis scale detection', () => {
+        it('should detect temporal scale for ES|QL chart with date column', () => {
+          const esqlChartWithDateColumn: LensAttributes = {
+            title: 'ES|QL Chart with Date X-Axis',
+            references: [],
+            visualizationType: 'lnsXY',
+            state: {
+              datasourceStates: {
+                textBased: {
+                  layers: {
+                    layer1: {
+                      index: 'test-index',
+                      query: {
+                        esql: 'FROM logs | STATS count = COUNT(*) BY timestamp',
+                      },
+                      columns: [
+                        {
+                          columnId: 'timestamp',
+                          fieldName: 'timestamp',
+                          meta: {
+                            type: 'date',
+                            esType: 'date',
+                          },
+                        },
+                        {
+                          columnId: 'count',
+                          fieldName: 'count',
+                          meta: {
+                            type: 'number',
+                            esType: 'long',
+                          },
+                          inMetricDimension: true,
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              visualization: {
+                legend: { isVisible: true, position: 'right' },
+                preferredSeriesType: 'bar',
+                layers: [
+                  {
+                    layerId: 'layer1',
+                    seriesType: 'bar',
+                    xAccessor: 'timestamp',
+                    accessors: ['count'],
+                    layerType: 'data',
+                  },
+                ],
+              },
+              query: { esql: 'FROM logs | STATS count = COUNT(*) BY timestamp' },
+              filters: [],
+            },
+          };
+
+          validateConverter(esqlChartWithDateColumn, xyStateSchema);
+        });
+
+        it('should detect linear scale for ES|QL chart with numeric column', () => {
+          const esqlChartWithNumericColumn: LensAttributes = {
+            title: 'ES|QL Chart with Numeric X-Axis',
+            references: [],
+            visualizationType: 'lnsXY',
+            state: {
+              datasourceStates: {
+                textBased: {
+                  layers: {
+                    layer1: {
+                      index: 'test-index',
+                      query: {
+                        esql: 'FROM logs | STATS count = COUNT(*) BY bytes',
+                      },
+                      columns: [
+                        {
+                          columnId: 'bytes',
+                          fieldName: 'bytes',
+                          meta: {
+                            type: 'number',
+                            esType: 'long',
+                          },
+                        },
+                        {
+                          columnId: 'count',
+                          fieldName: 'count',
+                          meta: {
+                            type: 'number',
+                            esType: 'long',
+                          },
+                          inMetricDimension: true,
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              visualization: {
+                legend: { isVisible: true, position: 'right' },
+                preferredSeriesType: 'line',
+                layers: [
+                  {
+                    layerId: 'layer1',
+                    seriesType: 'line',
+                    xAccessor: 'bytes',
+                    accessors: ['count'],
+                    layerType: 'data',
+                  },
+                ],
+              },
+              query: { esql: 'FROM logs | STATS count = COUNT(*) BY bytes' },
+              filters: [],
+            },
+          };
+
+          validateConverter(esqlChartWithNumericColumn, xyStateSchema);
+        });
+
+        it('should default to ordinal scale for form-based chart', () => {
+          validateConverter(minimalAttributesXY, xyStateSchema);
+        });
+      });
     });
   });
   describe('API => Lens State SO format', () => {
@@ -242,7 +371,7 @@ describe('XY', () => {
                     mapping: [
                       {
                         values: ['Clothing'],
-                        color: { type: 'colorCode', value: '#ff0000' },
+                        color: { type: 'color_code', value: '#ff0000' },
                       },
                     ],
                   },
@@ -282,7 +411,7 @@ describe('XY', () => {
                 breakdown_by: {
                   operation: 'terms',
                   fields: ['product', 'category'],
-                  size: 5,
+                  limit: 5,
                   rank_by: {
                     direction: 'desc',
                     metric: 0,
@@ -313,7 +442,7 @@ describe('XY', () => {
                     field: 'price',
                     label: 'Median Price',
                     color: { type: 'static', color: 'red' },
-                    text: 'label',
+                    text: { visible: true },
                     axis: 'left',
                   },
                   {
@@ -321,7 +450,7 @@ describe('XY', () => {
                     field: 'price',
                     label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
-                    text: 'none',
+                    text: { visible: false },
                     axis: 'left',
                   },
                 ],
@@ -338,7 +467,7 @@ describe('XY', () => {
                     type: 'point',
                     label: 'New Year',
                     timestamp: '2023-01-01T00:00:00Z',
-                    text: 'label',
+                    text: { visible: true },
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -348,7 +477,7 @@ describe('XY', () => {
                     type: 'point',
                     label: 'Christmas',
                     timestamp: '2023-12-25T00:00:00Z',
-                    text: 'label',
+                    text: { visible: true },
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -372,7 +501,10 @@ describe('XY', () => {
                     label: 'Bingo!',
                     query: { language: 'kuery', query: 'order_amount > 1000' },
                     time_field: 'order_date',
-                    text: { type: 'field', field: 'order_id' },
+                    text: {
+                      visible: true,
+                      field: 'order_id',
+                    },
                     color: {
                       type: 'static',
                       color: '#0000ff',
@@ -391,8 +523,144 @@ describe('XY', () => {
       validateAPIConverter(apiXYWithNoYTitleAndInsideLegend, xyStateSchema);
     });
 
+    it('should correctly transform top list layout with pixel truncation', () => {
+      validateAPIConverter(apiXYWithTopListWithTruncationLegend, xyStateSchema);
+    });
+
     it('should correctly transform with custom position legend - bug 248611', () => {
       validateAPIConverter(apiXYWithNoTitleAndCustomOutsideLegend, xyStateSchema);
+    });
+
+    it('should convert API with by-reference annotation layer', () => {
+      validateAPIConverter(
+        {
+          type: 'xy',
+          title: 'Chart with by-ref annotation',
+          layers: [
+            {
+              dataset: { type: 'dataView', id: 'myDataView' },
+              type: 'line',
+              ignore_global_filters: false,
+              sampling: 1,
+              y: [{ operation: 'count', empty_as_null: false }],
+            },
+            {
+              type: 'annotation_group',
+              group_id: 'my-library-annotation-group',
+            },
+          ],
+        },
+        xyStateSchema
+      );
+    });
+
+    describe('XY axis scale support (text-based)', () => {
+      it('should convert temporal scale correctly for ES|QL layer', () => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: 'XY Chart with Temporal Scale',
+            axis: {
+              x: {
+                scale: 'temporal',
+              },
+            },
+            layers: [
+              {
+                ignore_global_filters: false,
+                sampling: 1,
+                dataset: {
+                  type: 'esql',
+                  query:
+                    'FROM kibana_sample_data_logs | STATS count = count() BY buckets = BUCKET(@timestamp, 1 hour)',
+                },
+                type: 'bar',
+                x: { operation: 'value', column: 'buckets' },
+                y: [{ operation: 'value', column: 'count' }],
+              },
+            ],
+          },
+          xyStateSchema
+        );
+      });
+
+      it('should convert linear scale correctly for ES|QL layer', () => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: 'XY Chart with Linear Scale',
+            axis: {
+              x: {
+                scale: 'linear',
+              },
+            },
+            layers: [
+              {
+                ignore_global_filters: false,
+                sampling: 1,
+                dataset: {
+                  type: 'esql',
+                  query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
+                },
+                type: 'line',
+                x: { operation: 'value', column: 'bytes' },
+                y: [{ operation: 'value', column: 'count' }],
+              },
+            ],
+          },
+          xyStateSchema
+        );
+      });
+
+      it('should handle config without axis object', () => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: 'XY Chart without Axis',
+            layers: [
+              {
+                ignore_global_filters: false,
+                sampling: 1,
+                dataset: {
+                  type: 'esql',
+                  query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
+                },
+                type: 'bar',
+                y: [{ operation: 'value', column: 'count' }],
+              },
+            ],
+          },
+          xyStateSchema
+        );
+      });
+
+      it('should handle config with axis but no x axis', () => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: 'XY Chart with Y-Axis Only',
+            axis: {
+              left: {
+                ticks: { visible: true },
+                grid: { visible: true },
+              },
+            },
+            layers: [
+              {
+                ignore_global_filters: false,
+                sampling: 1,
+                dataset: {
+                  type: 'esql',
+                  query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
+                },
+                type: 'bar',
+                y: [{ operation: 'value', column: 'count' }],
+              },
+            ],
+          },
+          xyStateSchema
+        );
+      });
     });
   });
 });

@@ -111,27 +111,20 @@ export const command = {
     });
 
     await Promise.all([
-      time('extract relevant versions for packages', async () => {
-        log.info('extract relevant versions for packages');
-        await moonRun(':extract-version-dependencies', {
+      time('prepare webpack bundles for packages', async () => {
+        log.info('pre-build webpack bundles');
+        await moonRun([':build-webpack'], {
           pipe: !quiet,
           quiet,
           noCache: forceInstall,
         });
-        log.success('relevant versions extracted for packages');
+        log.success('relevant versions extracted for packages and shared webpack bundles built');
       }),
-      time('pre-build webpack bundles for packages', async () => {
-        log.info('pre-build webpack bundles for packages');
-        await moonRun(':build-webpack', {
-          pipe: !quiet,
-          quiet,
-          noCache: forceInstall,
-        });
-        log.success('shared webpack bundles built');
-      }),
-      time('run install scripts', async () => {
-        await runInstallScripts(log, { quiet });
-      }),
+      shouldInstall
+        ? time('run install scripts', async () => {
+            await runInstallScripts(log, { quiet });
+          })
+        : undefined,
     ]);
 
     await time('sort package json', async () => {

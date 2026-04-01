@@ -132,7 +132,10 @@
     "@kbn/observability-agent-builder-plugin",
     "@kbn/presentation-publishing",
     "@kbn/inspector-plugin",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/agent-builder-plugin",
+    "@kbn/controls-constants",
+    "@kbn/es-query-constants"
   ],
   "exclude": ["target/**/*"]
 }

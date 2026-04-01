@@ -47,6 +47,7 @@ export const AgentEnrollmentConfirmationStep = ({
   showLoading,
   poll = true,
   isLongEnrollment = false,
+  isCollector = false,
 }: {
   selectedPolicyId?: string;
   troubleshootLink: string;
@@ -55,10 +56,22 @@ export const AgentEnrollmentConfirmationStep = ({
   poll?: boolean;
   showLoading?: boolean;
   isLongEnrollment?: boolean;
+  isCollector?: boolean;
 }): EuiContainedStepProps => {
   const isComplete = !!agentCount;
   return {
-    title: isComplete
+    title: isCollector
+      ? isComplete
+        ? i18n.translate(
+            'xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmationCompleteCollector',
+            {
+              defaultMessage: 'Collector connection confirmed',
+            }
+          )
+        : i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmationCollector', {
+            defaultMessage: 'Confirm collector connection',
+          })
+      : isComplete
       ? i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmationComplete', {
           defaultMessage: 'Agent enrollment confirmed',
         })
@@ -75,6 +88,7 @@ export const AgentEnrollmentConfirmationStep = ({
             agentCount={agentCount}
             showLoading={!isComplete || showLoading}
             isLongEnrollment={isLongEnrollment}
+            isCollector={isCollector}
           />
         ) : (
           <AgentEnrollmentPrePollInstructions troubleshootLink={troubleshootLink} />

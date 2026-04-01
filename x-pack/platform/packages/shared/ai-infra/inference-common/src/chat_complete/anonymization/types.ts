@@ -6,6 +6,19 @@
  */
 import type { Message } from '../messages';
 
+type NerEntityClass = 'PER' | 'ORG' | 'LOC' | 'MISC';
+export type AnonymizationEntityClass =
+  | NerEntityClass
+  | 'HOST_NAME'
+  | 'USER_NAME'
+  | 'IP'
+  | 'URL'
+  | 'EMAIL'
+  | 'CLOUD_ACCOUNT'
+  | 'ENTITY_NAME'
+  | 'RESOURCE_NAME'
+  | 'RESOURCE_ID';
+
 interface AnonymizationRuleBase {
   type: string;
   enabled: boolean;
@@ -13,14 +26,17 @@ interface AnonymizationRuleBase {
 
 export interface NamedEntityRecognitionRule extends AnonymizationRuleBase {
   type: 'NER';
-  modelId: string;
+  /**
+   * The Elasticsearch ML model ID to use for NER inference.
+   */
+  modelId?: string;
   timeoutSeconds?: number;
   allowedEntityClasses?: Array<'PER' | 'ORG' | 'LOC' | 'MISC'>;
 }
 export interface RegexAnonymizationRule extends AnonymizationRuleBase {
   type: 'RegExp';
   pattern: string;
-  entityClass: string;
+  entityClass: AnonymizationEntityClass;
   mask?: RuleMaskType;
 }
 
@@ -57,6 +73,7 @@ export interface AnonymizationOutput {
   messages: Message[];
   anonymizations: Anonymization[];
   system?: string;
+  replacementsId?: string;
 }
 
 export interface DeanonymizationOutput {
@@ -64,3 +81,21 @@ export interface DeanonymizationOutput {
 }
 
 export type DeanonymizedMessage = Message & { deanonymizations: Deanonymization[] };
+
+/**
+ * Anonymization metadata attached to inference responses and events.
+ */
+export interface AnonymizationResponseMetadata {
+  anonymization?: {
+    replacementsId?: string;
+  };
+}
+
+/**
+ * Deanonymization data for a single message, pairing the deanonymized message
+ * with the positions/entities that were restored.
+ */
+export interface DeanonymizedMessageData {
+  message: Message;
+  deanonymizations: Deanonymization[];
+}

@@ -8,7 +8,7 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
@@ -236,6 +236,7 @@ export const performBulkActionRoute = (
                 : MAX_RULES_TO_PROCESS_TOTAL,
             gapRange: gapParams.gapRange,
             gapFillStatuses: gapParams.gapFillStatuses,
+            schedulerId: body.gap_auto_fill_scheduler_id,
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);

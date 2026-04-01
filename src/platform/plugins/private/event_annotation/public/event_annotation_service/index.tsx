@@ -13,7 +13,7 @@ import type { EventAnnotationServiceType } from '@kbn/event-annotation-component
 export type { EventAnnotationServiceType };
 
 export class EventAnnotationService {
-  private eventAnnotationService?: EventAnnotationServiceType;
+  private servicePromise?: Promise<EventAnnotationServiceType>;
 
   private core: CoreStart;
   private contentManagement: ContentManagementPublicStart;
@@ -23,11 +23,12 @@ export class EventAnnotationService {
     this.contentManagement = contentManagement;
   }
 
-  public async getService() {
-    if (!this.eventAnnotationService) {
-      const { getEventAnnotationService } = await import('./service');
-      this.eventAnnotationService = getEventAnnotationService(this.core, this.contentManagement);
+  public getService(): Promise<EventAnnotationServiceType> {
+    if (!this.servicePromise) {
+      this.servicePromise = import('./service').then(({ getEventAnnotationService }) =>
+        getEventAnnotationService(this.core, this.contentManagement)
+      );
     }
-    return this.eventAnnotationService;
+    return this.servicePromise;
   }
 }

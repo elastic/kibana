@@ -33,6 +33,7 @@ export const createDeserializer =
 
     const _meta: FormInternal['_meta'] = {
       hot: {
+        enabled: Boolean(hot),
         isUsingDefaultRollover: isUsingDefaultRollover(policy),
         customRollover: {
           enabled: Boolean(hot?.actions?.rollover),
@@ -82,6 +83,9 @@ export const createDeserializer =
       ...policy,
       _meta,
     });
+    if (!result.phases.hot) {
+      result.phases.hot = { actions: {} };
+    }
     if (result.phases.hot?.actions?.rollover) {
       if (result.phases.hot.actions.rollover.max_size) {
         const maxSize = splitSizeAndUnits(result.phases.hot.actions.rollover.max_size);

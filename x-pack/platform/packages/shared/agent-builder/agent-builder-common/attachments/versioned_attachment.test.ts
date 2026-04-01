@@ -12,15 +12,16 @@ import {
   parseVersionId,
   isAttachmentActive,
   getActiveAttachments,
+  isVersionedAttachmentWithOrigin,
   hashContent,
   estimateTokens,
   attachmentVersionSchema,
   versionedAttachmentSchema,
   attachmentVersionRefSchema,
-  versionedAttachmentInputSchema,
   attachmentDiffSchema,
   type VersionedAttachment,
   type AttachmentVersion,
+  attachmentInputSchema,
 } from './versioned_attachment';
 
 describe('versioned_attachment', () => {
@@ -330,6 +331,21 @@ describe('versioned_attachment', () => {
     });
   });
 
+  describe('isVersionedAttachmentWithOrigin', () => {
+    it('returns false when origin is undefined', () => {
+      const attachment = createTestAttachment();
+      expect(isVersionedAttachmentWithOrigin(attachment)).toBe(false);
+    });
+
+    it('returns true when origin is defined and narrows the type', () => {
+      const attachment = createTestAttachment({ origin: 'saved-object-id' });
+      expect(isVersionedAttachmentWithOrigin(attachment)).toBe(true);
+      if (isVersionedAttachmentWithOrigin(attachment)) {
+        expect(attachment.origin).toBe('saved-object-id');
+      }
+    });
+  });
+
   describe('Zod schemas', () => {
     describe('attachmentVersionRefSchema', () => {
       it('validates correct data', () => {
@@ -448,7 +464,7 @@ describe('versioned_attachment', () => {
           type: 'text',
           data: { content: 'test' },
         };
-        const result = versionedAttachmentInputSchema.safeParse(valid);
+        const result = attachmentInputSchema.safeParse(valid);
         expect(result.success).toBe(true);
       });
 
@@ -460,7 +476,7 @@ describe('versioned_attachment', () => {
           description: 'My attachment',
           hidden: false,
         };
-        const result = versionedAttachmentInputSchema.safeParse(valid);
+        const result = attachmentInputSchema.safeParse(valid);
         expect(result.success).toBe(true);
       });
 
@@ -468,7 +484,7 @@ describe('versioned_attachment', () => {
         const invalid = {
           data: { content: 'test' },
         };
-        const result = versionedAttachmentInputSchema.safeParse(invalid);
+        const result = attachmentInputSchema.safeParse(invalid);
         expect(result.success).toBe(false);
       });
     });

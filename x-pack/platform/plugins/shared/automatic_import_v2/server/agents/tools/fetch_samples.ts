@@ -6,7 +6,7 @@
  */
 
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Creates a tool that allows the agent to fetch log samples on demand.
@@ -20,8 +20,11 @@ export function fetchSamplesTool(samples: string[]): DynamicStructuredTool {
   return new DynamicStructuredTool({
     name: 'fetch_log_samples',
     description:
-      'Retrieves log samples for analysis. Use this to fetch log samples for further analysis. The samples are not stored in the agent context, so you must use this tool to fetch samples.' +
-      `Currently ${samples.length} samples are available. You can request any number of samples (default: 3, max: 20 recommended for analysis).`,
+      'Retrieves additional log samples beyond those already provided in your context. ' +
+      'Use this ONLY when the provided samples are not sufficient to fully describe the format ' +
+      '(e.g., you suspect structural variants not represented, or need to verify edge cases). ' +
+      'Try to complete your analysis with the provided samples first. ' +
+      `Currently ${samples.length} total samples are available (default: 3, max: 20 recommended).`,
     schema: z.object({
       count: z
         .number()
@@ -46,17 +49,17 @@ export function fetchSamplesTool(samples: string[]): DynamicStructuredTool {
         });
       }
 
-      // Get requested samples
       const endIndex = Math.min(offset + count, samples.length);
       const requestedSamples = samples.slice(offset, endIndex);
 
-      return JSON.stringify({
-        samples: requestedSamples,
-        returned_count: requestedSamples.length,
-        total_available: samples.length,
-        offset,
-        has_more: endIndex < samples.length,
-      });
+      const sampleBlocks = requestedSamples
+        .map((s, i) => `[Sample ${offset + i + 1}]\n${s}`)
+        .join('\n\n');
+
+      return (
+        `Returned ${requestedSamples.length} of ${samples.length} samples (offset: ${offset})` +
+        `${endIndex < samples.length ? ` — more available` : ''}\n\n${sampleBlocks}`
+      );
     },
   });
 }
