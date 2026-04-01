@@ -62,19 +62,21 @@ export function runRspackCli(options: CliOptions = {}): void {
       }
 
       const filter =
-        typeof flags.filter === 'string'
+        typeof flags.filter === 'string' && flags.filter.length > 0
           ? flags.filter.split(',').map((s: string) => s.trim())
           : undefined;
 
       const plugins =
-        typeof flags.plugins === 'string'
+        typeof flags.plugins === 'string' && flags.plugins.length > 0
           ? flags.plugins.split(',').map((s: string) => s.trim())
           : undefined;
 
       const themes = parseThemes(log, typeof flags.themes === 'string' ? flags.themes : undefined);
 
       const outputRoot =
-        typeof flags['output-root'] === 'string' ? Path.resolve(flags['output-root']) : REPO_ROOT;
+        typeof flags['output-root'] === 'string' && flags['output-root'].length > 0
+          ? Path.resolve(flags['output-root'])
+          : REPO_ROOT;
 
       // When profiling, spawn a special worker that doesn't use require-in-the-middle
       // This allows RsDoctor to work (envinfo conflicts with require-in-the-middle)
