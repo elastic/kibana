@@ -10,6 +10,7 @@
 import {
   type EsqlResponseErrorCause,
   EsqlResponseError,
+  extractEsqlEmbeddedError,
   extractEsqlResponseErrorCause,
   formatErrorCause,
 } from './esql_response_error';
@@ -62,6 +63,42 @@ describe('extractEsqlResponseErrorCause', () => {
   });
 });
 
+describe('extractEsqlEmbeddedError', () => {
+  it('returns cause and top-level status when present', () => {
+    expect(
+      extractEsqlEmbeddedError({
+        error: { type: 'remote_transport_exception', reason: 'ccs failed' },
+        status: 400,
+      })
+    ).toEqual({
+      cause: { type: 'remote_transport_exception', reason: 'ccs failed' },
+      status: 400,
+    });
+  });
+
+  it('omits status when absent or not a finite number', () => {
+    expect(
+      extractEsqlEmbeddedError({
+        error: { type: 'x', reason: 'y' },
+      })
+    ).toEqual({ cause: { type: 'x', reason: 'y' } });
+
+    expect(
+      extractEsqlEmbeddedError({
+        error: { type: 'x', reason: 'y' },
+        status: '400',
+      } as object)
+    ).toEqual({ cause: { type: 'x', reason: 'y' } });
+
+    expect(
+      extractEsqlEmbeddedError({
+        error: { type: 'x', reason: 'y' },
+        status: Number.NaN,
+      })
+    ).toEqual({ cause: { type: 'x', reason: 'y' } });
+  });
+});
+
 describe('EsqlResponseError', () => {
   it('extends Error with name, message, and copied fields', () => {
     const err = new EsqlResponseError({
@@ -91,5 +128,14 @@ describe('EsqlResponseError', () => {
 
     expect(err.reason).toBeUndefined();
     expect(err.message).toBe('x');
+  });
+
+  it('stores optional Elasticsearch payload status', () => {
+    const err = new EsqlResponseError(
+      { type: 'remote_transport_exception', reason: 'ccs failed' },
+      { status: 400 }
+    );
+
+    expect(err.status).toBe(400);
   });
 });

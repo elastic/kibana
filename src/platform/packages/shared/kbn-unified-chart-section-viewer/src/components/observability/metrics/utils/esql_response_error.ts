@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO https://github.com/elastic/kibana/issues/260667
 import type { estypes } from '@elastic/elasticsearch';
 
 export type EsqlResponseErrorCause = Partial<estypes.ErrorCause>;
@@ -26,26 +27,46 @@ export const formatErrorCause = (errorCause: EsqlResponseErrorCause): string => 
   return fromRootCause || 'Elasticsearch returned an error';
 };
 
-export const extractEsqlResponseErrorCause = (
-  response: object
-): EsqlResponseErrorCause | undefined => {
+export interface EsqlEmbeddedError {
+  readonly cause: EsqlResponseErrorCause;
+  readonly status?: number;
+}
+
+/**
+ * When Elasticsearch returns a body like `{ error: { type, reason }, status: 400 }`,
+ * returns the error cause and optional status from the payload.
+ */
+export const extractEsqlEmbeddedError = (response: object): EsqlEmbeddedError | undefined => {
   if (!('error' in response) || response.error == null || typeof response.error !== 'object') {
     return undefined;
   }
 
-  return response.error as EsqlResponseErrorCause;
+  const body = response as { status?: unknown };
+  const status =
+    typeof body.status === 'number' && Number.isFinite(body.status) ? body.status : undefined;
+
+  return {
+    cause: response.error as EsqlResponseErrorCause,
+    ...(status !== undefined ? { status } : {}),
+  };
 };
+
+export const extractEsqlResponseErrorCause = (
+  response: object
+): EsqlResponseErrorCause | undefined => extractEsqlEmbeddedError(response)?.cause;
 
 export class EsqlResponseError extends Error {
   public readonly type?: string;
   public readonly reason?: string;
   public readonly rootCause?: EsqlResponseErrorCause[];
+  public readonly status?: number;
 
-  constructor(errorCause: EsqlResponseErrorCause) {
+  constructor(errorCause: EsqlResponseErrorCause, options?: { status?: number }) {
     super(formatErrorCause(errorCause));
     this.name = 'EsqlResponseError';
     this.type = errorCause.type;
     this.reason = errorCause.reason ?? undefined;
     this.rootCause = errorCause.root_cause;
+    this.status = options?.status;
   }
 }

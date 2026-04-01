@@ -19,7 +19,7 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { EsqlResponseError, extractEsqlResponseErrorCause } from './esql_response_error';
+import { EsqlResponseError, extractEsqlEmbeddedError } from './esql_response_error';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 import { getMetricsExecutionContext } from './execution_context';
 
@@ -38,9 +38,9 @@ export const fetchEsqlResponseOrThrow = async (
   params: Parameters<typeof getESQLResults>[0]
 ): Promise<Awaited<ReturnType<typeof getESQLResults>>['response']> => {
   const { response } = await getESQLResults(params);
-  const errorCause = extractEsqlResponseErrorCause(response);
-  if (errorCause) {
-    throw new EsqlResponseError(errorCause);
+  const embedded = extractEsqlEmbeddedError(response as object);
+  if (embedded) {
+    throw new EsqlResponseError(embedded.cause, { status: embedded.status });
   }
 
   return response;
