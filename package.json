@@ -2030,7 +2030,7 @@
     "swagger-ui-express": "5.0.1",
     "table": "6.9.0",
     "tape": "5.9.0",
-    "tar-fs": "3.1.1",
+    "tar-fs": "3.1.2",
     "terser": "5.40.0",
     "terser-webpack-plugin": "5.3.17",
     "tough-cookie": "6.0.0",
