@@ -78,7 +78,7 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [slack-v2-api-credentials]
 
-To use the Slack (v2) connector, you need a Slack app and a Slack **user token** or **bot token**.
+To use the Slack (v2) connector, you need a Slack app and a Slack **user token**.
 
 1. Create a Slack app and install it to your workspace.
 2. Add **User Token Scopes** for the actions you intend to use:
