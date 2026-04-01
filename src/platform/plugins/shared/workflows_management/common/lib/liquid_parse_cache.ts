@@ -9,8 +9,9 @@
 
 /**
  * Shared Liquid engine and parse cache for template string parsing.
- * Used by extract_template_local_context (workflow_context and validate_workflow_yaml)
- * so that a single engine instance and a bounded parse cache are reused across the app.
+ * Used by validate_liquid_template, extract_template_local_context, and
+ * validate_workflow_yaml so that a single engine instance and a bounded
+ * parse cache are reused across the app.
  */
 
 import type { Liquid, Template } from 'liquidjs';
@@ -19,7 +20,8 @@ import { createWorkflowLiquidEngine } from '@kbn/workflows';
 let liquidInstance: Liquid | null = null;
 
 /**
- * Returns the shared workflow Liquid engine instance (lazy-initialized, with json_parse filter).
+ * Returns the shared workflow Liquid engine instance (lazy-initialized).
+ * Registers stub filters so that parse() does not throw on known filter names.
  */
 export function getLiquidInstance(): Liquid {
   if (!liquidInstance) {
@@ -28,21 +30,22 @@ export function getLiquidInstance(): Liquid {
       strictVariables: false,
     });
     liquidInstance.registerFilter('json_parse', (value: unknown): unknown => {
-      if (typeof value !== 'string') return value;
+      if (typeof value !== 'string') {
+        return value;
+      }
       try {
         return JSON.parse(value);
       } catch {
         return value;
       }
     });
+    liquidInstance.registerFilter('entries', (value: unknown): unknown => {
+      return value;
+    });
   }
   return liquidInstance;
 }
 
-/**
- * Maximum number of parsed template strings to keep in memory.
- * Evicting the oldest entries prevents unbounded growth during long editing sessions.
- */
 const MAX_PARSE_CACHE_SIZE = 64;
 
 const parseCache = new Map<string, Template[]>();
@@ -50,17 +53,11 @@ const parseCache = new Map<string, Template[]>();
 /**
  * Parses a Liquid template string and caches the result.
  * Uses a bounded LRU cache: when the cache exceeds MAX_PARSE_CACHE_SIZE,
- * the least-recently-used entry is evicted. This is safer than unbounded
- * memoization (e.g. lodash memoize) when many unique template strings
- * are parsed (e.g. while the user is typing).
- *
- * @param templateString - Raw template content (e.g. step message field value)
- * @returns Parsed Liquid templates (AST)
+ * the least-recently-used entry is evicted.
  */
 export function parseTemplateString(templateString: string): Template[] {
   const cached = parseCache.get(templateString);
   if (cached) {
-    // Move to end (most-recently-used) by re-inserting
     parseCache.delete(templateString);
     parseCache.set(templateString, cached);
     return cached;
