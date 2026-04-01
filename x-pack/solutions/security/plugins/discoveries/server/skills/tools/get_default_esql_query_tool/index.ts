@@ -5,12 +5,52 @@
  * 2.0.
  */
 
-// Stub: real implementation lands in PR8 (Skills). FF-off safe.
-import { ToolType } from '@kbn/agent-builder-common';
-import type { SkillBoundedTool } from '@kbn/agent-builder-server';
+import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
+import { getToolResultId } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { z } from '@kbn/zod/v4';
 
-export const GET_DEFAULT_ESQL_QUERY_TOOL_ID =
-  'security.attack-discovery.default_esql_query' as const;
+import { buildDefaultEsqlQuery } from '@kbn/discoveries/impl/lib/build_default_esql_query';
 
-export const getDefaultEsqlQueryTool = (): SkillBoundedTool =>
-  ({ id: GET_DEFAULT_ESQL_QUERY_TOOL_ID, type: ToolType.builtin } as unknown as SkillBoundedTool);
+export const GET_DEFAULT_ESQL_QUERY_TOOL_ID = 'security.attack-discovery.get_default_esql_query';
+
+export const getDefaultEsqlQueryTool = (): BuiltinSkillBoundedTool => ({
+  description:
+    'Returns the default ES|QL query for retrieving security alerts, using the space-specific anonymization settings to determine the KEEP fields.',
+  handler: async (_args, context) => {
+    try {
+      const query = await buildDefaultEsqlQuery({
+        esClient: context.esClient.asCurrentUser,
+        logger: context.logger,
+        spaceId: context.spaceId,
+      });
+
+      return {
+        results: [
+          {
+            data: { query },
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.other,
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        results: [
+          {
+            data: {
+              message: `Failed to build default ES|QL query: ${
+                error instanceof Error ? error.message : 'Unknown error'
+              }`,
+            },
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.error,
+          },
+        ],
+      };
+    }
+  },
+  id: GET_DEFAULT_ESQL_QUERY_TOOL_ID,
+  schema: z.object({}),
+  type: ToolType.builtin,
+});
