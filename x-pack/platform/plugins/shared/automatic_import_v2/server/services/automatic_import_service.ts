@@ -286,9 +286,31 @@ export class AutomaticImportService {
     dataStreamsDeleted: number;
     errors: Array<{ id: string; error: string }>;
   }> {
-    if (!this.savedObjectService) {
-      throw new Error('Saved Objects service not initialized.');
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+
+    const dataStreams = await this.savedObjectService.getAllDataStreams(integrationId);
+
+    for (const ds of dataStreams) {
+      try {
+        await this.taskManagerService.removeDataStreamCreationTask({
+          integrationId,
+          dataStreamId: ds.data_stream_id,
+        });
+      } catch (error) {
+        this.logger.error(
+          `Failed to remove task for data stream ${ds.data_stream_id} during integration delete: ${error}`
+        );
+      }
+
+      try {
+        await this.samplesIndexService.deleteSamplesForDataStream(integrationId, ds.data_stream_id);
+      } catch (error) {
+        this.logger.error(
+          `Failed to delete samples for data stream ${ds.data_stream_id} during integration delete: ${error}`
+        );
+      }
     }
+
     return this.savedObjectService.deleteIntegration(integrationId, options);
   }
 
@@ -434,14 +456,22 @@ export class AutomaticImportService {
       integrationId,
       TASK_STATUSES.deleting
     );
-    // Remove the data stream creation task
-    await this.taskManagerService.removeDataStreamCreationTask({
-      integrationId,
-      dataStreamId,
-    });
-    // Delete the samples from the samples index
-    await this.samplesIndexService.deleteSamplesForDataStream(integrationId, dataStreamId);
-    // Delete the data stream from the saved objects
+
+    try {
+      await this.taskManagerService.removeDataStreamCreationTask({
+        integrationId,
+        dataStreamId,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to remove task for data stream ${dataStreamId}: ${error}`);
+    }
+
+    try {
+      await this.samplesIndexService.deleteSamplesForDataStream(integrationId, dataStreamId);
+    } catch (error) {
+      this.logger.error(`Failed to delete samples for data stream ${dataStreamId}: ${error}`);
+    }
+
     await this.savedObjectService.deleteDataStream(dataStreamId, integrationId, options);
   }
 

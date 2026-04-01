@@ -2320,7 +2320,7 @@
           "\nPage object that wraps common interactions with the Kibana Monaco-based code editor.\n\nInitially the API is intentionally aligned with the FTR `MonacoEditorService`\n(`src/platform/test/functional/services/monaco_editor.ts`)."
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-        "lineNumber": 13,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2336,7 +2336,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 20,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2358,8 +2358,46 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 20,
+                "lineNumber": 21,
                 "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaCodeEditorWrapper.waitCodeEditorReady",
+            "type": "Function",
+            "tags": [],
+            "label": "waitCodeEditorReady",
+            "description": [
+              "\nWaits for the Monaco textarea inside the container (visible + enabled), like FTR\n`waitCodeEditorReady`."
+            ],
+            "signature": [
+              "(dataTestSubjId: string) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.KibanaCodeEditorWrapper.waitCodeEditorReady.$1",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubjId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
+                "lineNumber": 27,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2380,7 +2418,7 @@
               "(nthIndex?: number) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 22,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2398,7 +2436,7 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 32,
+                "lineNumber": 42,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2422,7 +2460,7 @@
               "(value: string, nthIndex?: number | undefined) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 57,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2440,7 +2478,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 65,
+                "lineNumber": 75,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2459,7 +2497,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 65,
+                "lineNumber": 75,
                 "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2482,7 +2520,7 @@
               "Locator"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 95,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2500,7 +2538,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 106,
+                "lineNumber": 116,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2523,7 +2561,7 @@
               "Locator"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 111,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
