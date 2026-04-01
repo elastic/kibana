@@ -25,12 +25,13 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
-  EuiPageTemplate,
+  EuiPageSection,
   EuiSpacer,
   EuiSteps,
   EuiText,
   EuiTitle,
   type EuiBasicTableColumn,
+  useEuiTheme,
 } from '@elastic/eui';
 import { goldenClusterPrivileges } from '@kbn/evals-common';
 import {
@@ -67,6 +68,7 @@ interface FlyoutState {
 }
 
 export const RemotesListPage: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { data, isLoading, error } = useRemotes();
   const createRemote = useCreateRemote();
   const updateRemote = useUpdateRemote();
@@ -240,21 +242,23 @@ export const RemotesListPage: React.FC = () => {
   const items = data?.remotes ?? [];
 
   return (
-    <EuiPageTemplate>
-      <EuiPageTemplate.Header
-        pageTitle={i18n.PAGE_TITLE}
-        rightSideItems={[
-          <EuiButton onClick={openCreate} fill iconType="plusInCircle">
-            {i18n.CREATE_REMOTE_BUTTON}
-          </EuiButton>,
-        ]}
-      />
-
-      <EuiPageTemplate.Section>
+    <>
+      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={openCreate} fill iconType="plusInCircle">
+              {i18n.CREATE_REMOTE_BUTTON}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
         {error ? (
-          <EuiCallOut title={i18n.LOAD_ERROR_TITLE} color="danger" iconType="error" size="s">
-            <p>{error instanceof Error ? error.message : String(error)}</p>
-          </EuiCallOut>
+          <>
+            <EuiCallOut title={i18n.LOAD_ERROR_TITLE} color="danger" iconType="error" size="s">
+              <p>{error instanceof Error ? error.message : String(error)}</p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
         ) : null}
 
         <EuiBasicTable<EvalsRemoteSummary>
@@ -263,7 +267,7 @@ export const RemotesListPage: React.FC = () => {
           loading={isLoading}
           rowHeader="displayName"
         />
-      </EuiPageTemplate.Section>
+      </EuiPageSection>
 
       {flyout ? (
         <EuiFlyout onClose={closeFlyout} size="m" ownFocus={false}>
@@ -384,6 +388,6 @@ export const RemotesListPage: React.FC = () => {
           <p>{i18n.DELETE_CONFIRM_MESSAGE}</p>
         </EuiConfirmModal>
       ) : null}
-    </EuiPageTemplate>
+    </>
   );
 };
