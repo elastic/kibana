@@ -236,7 +236,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const uiSettings = get(CoreStart('uiSettings'));
       return async () => {
         const soClient = savedObjects.createInternalRepository();
-        const client = uiSettings.asScopedToClient(soClient);
+        const client = uiSettings.globalAsScopedToClient(soClient);
         return client.get<boolean>(DISPATCHER_ENABLED_SETTING_ID);
       };
     })

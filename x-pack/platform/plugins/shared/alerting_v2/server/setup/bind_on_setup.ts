@@ -34,7 +34,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       alertingVTwo: {},
     }));
 
-    container.get(CoreSetup('uiSettings')).register(dispatcherUiSettings);
+    container.get(CoreSetup('uiSettings')).registerGlobal(dispatcherUiSettings);
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
