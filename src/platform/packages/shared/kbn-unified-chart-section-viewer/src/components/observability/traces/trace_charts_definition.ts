@@ -8,6 +8,7 @@
  */
 
 import {
+  AT_TIMESTAMP,
   DURATION,
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
@@ -69,7 +70,7 @@ export function getErrorRateChart({
   try {
     const query = createBaseTraceQuery({ indexes, filters, metadataFields });
     query.pipe(
-      `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure" OR TO_STRING(${STATUS_CODE}) == "Error", all = COUNT(*) BY timestamp = TBUCKET(100)`
+      `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure" OR TO_STRING(${STATUS_CODE}) == "Error", all = COUNT(*) BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
     );
     query.pipe('EVAL error_rate = TO_DOUBLE(failure) / all');
     query.pipe('KEEP timestamp, error_rate');
