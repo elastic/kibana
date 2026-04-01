@@ -138,8 +138,10 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
         const costable = attributes as Costable;
         if (v8Costs.has(costable.cost)) return attributes;
 
-        costable.cost = InstanceTaskCost.Normal; // default to normal if cost is not set or is invalid, to maintain backward compatibility with v8
-        return costable;
+        return {
+          ...(attributes as unknown as Record<string, unknown>),
+          cost: InstanceTaskCost.Normal,
+        };
       },
       create: taskSchemaV9,
     },

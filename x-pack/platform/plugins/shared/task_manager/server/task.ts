@@ -43,7 +43,7 @@ export enum InstanceTaskCost {
 }
 
 /** Maps schema cost strings to their integer values for capacity calculations. */
-export const INSTANCE_TASK_COST_TO_INT: Record<InstanceTaskCost, TaskCost> = {
+const INSTANCE_TASK_COST_TO_INT: Record<InstanceTaskCost, TaskCost> = {
   [InstanceTaskCost.Tiny]: TaskCost.Tiny,
   [InstanceTaskCost.Normal]: TaskCost.Normal,
   [InstanceTaskCost.Large]: TaskCost.Large,
