@@ -8,9 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
-import {
-  SECURITY_SOLUTION_RULE_TYPE_IDS,
-} from '@kbn/securitysolution-rules';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import {
   CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
   CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
@@ -38,10 +36,7 @@ import {
   SERVER_APP_ID,
 } from '../../constants';
 
-const SECURITY_RULE_TYPES = [
-  LEGACY_NOTIFICATIONS_ID,
-  ...SECURITY_SOLUTION_RULE_TYPE_IDS
-];
+const SECURITY_RULE_TYPES = [LEGACY_NOTIFICATIONS_ID, ...SECURITY_SOLUTION_RULE_TYPE_IDS];
 
 const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
   ruleTypeId,
