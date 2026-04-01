@@ -59,6 +59,7 @@ import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
 import { SkillsTab } from './tabs/skills_tab';
 import { PluginsTab } from './tabs/plugins_tab';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useCurrentUser } from '../../../hooks/agents/use_current_user';
@@ -88,6 +89,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { services } = useKibana();
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { manageAgents, isAdmin } = useUiPrivileges();
   const { currentUser } = useCurrentUser();
   const { navigateToAgentBuilderUrl } = useNavigation();
@@ -322,32 +324,36 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           </EuiNotificationBadge>
         ),
       },
-      {
-        id: 'plugins',
-        name: i18n.translate('xpack.agentBuilder.agents.form.pluginsTab', {
-          defaultMessage: 'Plugins',
-        }),
-        content: (
-          <PluginsTab
-            control={control}
-            plugins={plugins}
-            isLoading={isLoading}
-            isFormDisabled={isFormDisabled || !manageAgents}
-          />
-        ),
-        append: (
-          <EuiNotificationBadge
-            color="subdued"
-            css={css`
-              block-size: 20px;
-              min-inline-size: ${euiTheme.size.l};
-              padding: 0 ${euiTheme.size.xs};
-            `}
-          >
-            {activePluginsCount}
-          </EuiNotificationBadge>
-        ),
-      },
+      ...(isExperimentalFeaturesEnabled
+        ? [
+            {
+              id: 'plugins',
+              name: i18n.translate('xpack.agentBuilder.agents.form.pluginsTab', {
+                defaultMessage: 'Plugins',
+              }),
+              content: (
+                <PluginsTab
+                  control={control}
+                  plugins={plugins}
+                  isLoading={isLoading}
+                  isFormDisabled={isFormDisabled || !manageAgents}
+                />
+              ),
+              append: (
+                <EuiNotificationBadge
+                  color="subdued"
+                  css={css`
+                    block-size: 20px;
+                    min-inline-size: ${euiTheme.size.l};
+                    padding: 0 ${euiTheme.size.xs};
+                  `}
+                >
+                  {activePluginsCount}
+                </EuiNotificationBadge>
+              ),
+            },
+          ]
+        : []),
     ],
     [
       control,
@@ -366,6 +372,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       activeSkillsCount,
       activePluginsCount,
       manageAgents,
+      isExperimentalFeaturesEnabled,
     ]
   );
 
