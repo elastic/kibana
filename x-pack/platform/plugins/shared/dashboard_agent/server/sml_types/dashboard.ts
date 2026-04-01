@@ -137,17 +137,23 @@ export const createDashboardSmlType = ({
   },
 
   toAttachment: async (item, context) => {
-    if (!context.requestHandlerContext) {
-      return undefined;
+    try {
+      if (!context.requestHandlerContext) {
+        throw new Error('Missing requestHandlerContext');
+      }
+
+      const dashboardClient = await getDashboardClient();
+      const dashboard = await dashboardClient.read(context.requestHandlerContext, item.origin_id);
+
+      return {
+        type: DASHBOARD_ATTACHMENT_TYPE,
+        data: dashboardStateToAttachment(dashboard.data),
+        origin: dashboard.id,
+      };
+    } catch (error) {
+      throw new Error(
+        `SML dashboard: failed to get data for '${item.origin_id}': ${(error as Error).message}`
+      );
     }
-
-    const dashboardClient = await getDashboardClient();
-    const dashboard = await dashboardClient.read(context.requestHandlerContext, item.origin_id);
-
-    return {
-      type: DASHBOARD_ATTACHMENT_TYPE,
-      data: dashboardStateToAttachment(dashboard.data),
-      origin: dashboard.id,
-    };
   },
 });
