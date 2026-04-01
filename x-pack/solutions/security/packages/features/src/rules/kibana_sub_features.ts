@@ -9,14 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
 import {
-  EQL_RULE_TYPE_ID,
-  ESQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
+  SECURITY_SOLUTION_RULE_TYPE_IDS,
 } from '@kbn/securitysolution-rules';
 import {
   CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
@@ -47,14 +40,7 @@ import {
 
 const SECURITY_RULE_TYPES = [
   LEGACY_NOTIFICATIONS_ID,
-  ESQL_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
+  ...SECURITY_SOLUTION_RULE_TYPE_IDS
 ];
 
 const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
