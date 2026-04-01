@@ -44,6 +44,49 @@ describe('CommandMenuList', () => {
     expect(screen.getByTestId('commandMenuList-loading')).toBeInTheDocument();
   });
 
+  it('renders renderLabel content (EuiSelectable merges option.data onto the renderOption argument)', () => {
+    renderWithProvider(
+      <CommandMenuList
+        options={[
+          {
+            key: '1',
+            label: 'plain accessibility label',
+            renderLabel: <span data-test-subj="richLabel">Rich label with highlight</span>,
+          },
+        ]}
+        isLoading={false}
+        onSelect={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('richLabel')).toHaveTextContent('Rich label with highlight');
+  });
+
+  it('renders a composite renderLabel (e.g. primary text plus trailing description)', () => {
+    renderWithProvider(
+      <CommandMenuList
+        options={[
+          {
+            key: '1',
+            label: 'Skill name',
+            renderLabel: (
+              <span data-test-subj="skillRow">
+                <span>Skill name</span>
+                <span data-test-subj="extraBit">Extra description</span>
+              </span>
+            ),
+          },
+        ]}
+        isLoading={false}
+        onSelect={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('skillRow')).toBeInTheDocument();
+    expect(screen.getByText('Skill name')).toBeInTheDocument();
+    expect(screen.getByTestId('extraBit')).toHaveTextContent('Extra description');
+  });
+
   it('calls onSelect when the first option is clicked', () => {
     const onSelect = jest.fn();
     renderWithProvider(

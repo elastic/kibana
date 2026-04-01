@@ -22,7 +22,6 @@ const mockMetrics = {
   alert_counts: null,
   matched_indices_count: null,
   frozen_indices_queried_count: null,
-  index_duration_ms: null,
 };
 
 const mockUnifiedExecutionResults = {

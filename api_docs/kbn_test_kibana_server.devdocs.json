@@ -112,6 +112,43 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.findTestPluginPaths",
+        "type": "Function",
+        "tags": [],
+        "label": "findTestPluginPaths",
+        "description": [],
+        "signature": [
+          "(dirs: string | string[]) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/find_test_plugin_paths.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.findTestPluginPaths.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dirs",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/find_test_plugin_paths.ts",
+            "lineNumber": 13,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
         "id": "def-common.getArgValue",
         "type": "Function",
         "tags": [],
