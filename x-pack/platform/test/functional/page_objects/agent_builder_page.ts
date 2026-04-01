@@ -383,9 +383,16 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   async selectMcpTool(toolName: string) {
-    await this.testSubjects.click('agentBuilderMcpToolSelect');
-    await this.retry.try(async () => {
-      await this.testSubjects.click(`mcpToolOption-${toolName}`);
+    const optionSelector = `mcpToolOption-${toolName}`;
+    // Check whether the dropdown is already open before clicking, so we don't
+    // accidentally toggle it closed on retry.
+    await this.retry.tryForTime(30000, async () => {
+      const isOpen = await this.testSubjects.exists(optionSelector, { timeout: 0 });
+      if (!isOpen) {
+        await this.testSubjects.click('agentBuilderMcpToolSelect');
+      }
+      await this.testSubjects.existOrFail(optionSelector, { timeout: 2000 });
+      await this.testSubjects.click(optionSelector);
     });
   }
 
@@ -441,7 +448,9 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   async setBulkImportNamespace(namespace: string) {
-    await this.testSubjects.setValue('bulkImportMcpToolsNamespaceInput', namespace);
+    await this.testSubjects.setValue('bulkImportMcpToolsNamespaceInput', namespace, {
+      clearWithKeyboard: true,
+    });
   }
 
   async clickBulkImportSubmit() {
@@ -520,6 +529,7 @@ export class AgentBuilderPageObject extends FtrService {
    * ==========================
    */
   async isToolInTable(toolId: string): Promise<boolean> {
+    await this.toolsSearch().type(toolId);
     try {
       await this.testSubjects.find(`agentBuilderToolsTableRow-${toolId}`);
       return true;
