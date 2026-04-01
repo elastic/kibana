@@ -143,7 +143,7 @@ export const DW_LOAD_BALANCER_CONFIG: LoadBalancerConfig = {
  * lower targetWeightPerAgent because SL has fewer total specs and lower
  * aggregate weight (~200 vs ~800 on ESS). At the ESS target of 45 the
  * overload penalty never fires for SL, letting the greedy LB pile 5+ specs
- * on one agent. Target of 22 (slightly above the 14-agent avg of ~20 for
+ * on one agent. Target of 28 (slightly above the 12-agent avg of ~25 for
  * default-config agents) activates the penalty early enough to spread specs
  * evenly while leaving headroom for natural variance.
  *
@@ -152,5 +152,5 @@ export const DW_LOAD_BALANCER_CONFIG: LoadBalancerConfig = {
  */
 export const DW_SERVERLESS_LOAD_BALANCER_CONFIG: LoadBalancerConfig = {
   ...DW_LOAD_BALANCER_CONFIG,
-  targetWeightPerAgent: 22,
+  targetWeightPerAgent: 28,
 };
