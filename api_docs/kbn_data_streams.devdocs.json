@@ -11918,7 +11918,7 @@
           },
           "<SearchRuntimeMappings> extends Omit<",
           "SearchRequest",
-          ", \"index\" | \"size\" | \"fields\" | \"track_total_hits\">"
+          ", \"index\" | \"fields\" | \"size\" | \"track_total_hits\">"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
         "lineNumber": 16,

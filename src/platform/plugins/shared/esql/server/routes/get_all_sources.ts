@@ -25,6 +25,9 @@ export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginIniti
             }
           ),
         }),
+        query: schema.object({
+          projectRouting: schema.maybe(schema.string()),
+        }),
       },
       security: {
         authz: {
@@ -36,9 +39,12 @@ export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginIniti
     async (requestHandlerContext, request, response) => {
       try {
         const { scope } = request.params;
+        const { projectRouting } = request.query;
         const core = await requestHandlerContext.core;
-        const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
-        const result = await service.getAllIndices(scope);
+        const service = new EsqlService({
+          client: core.elasticsearch.client.asCurrentUser,
+        });
+        const result = await service.getAllIndices(scope, projectRouting);
 
         return response.ok({
           body: result,

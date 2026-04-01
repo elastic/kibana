@@ -172,6 +172,89 @@
       },
       {
         "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.useInferenceEndpointMutation",
+        "type": "Function",
+        "tags": [],
+        "label": "useInferenceEndpointMutation",
+        "description": [],
+        "signature": [
+          "(http: ",
+          "HttpSetup",
+          ", toasts: ",
+          "IToasts",
+          ", onSuccessCallback?: ((inferenceId: string) => void) | undefined) => { isLoading: boolean; mutate: (data: ",
+          {
+            "pluginId": "@kbn/inference-endpoint-ui-common",
+            "scope": "public",
+            "docId": "kibKbnInferenceEndpointUiCommonPluginApi",
+            "section": "def-public.InferenceEndpoint",
+            "text": "InferenceEndpoint"
+          },
+          ", isEditing: boolean) => void; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_inference_endpoint_mutation.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.useInferenceEndpointMutation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_inference_endpoint_mutation.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.useInferenceEndpointMutation.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "toasts",
+            "description": [],
+            "signature": [
+              "IToasts"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_inference_endpoint_mutation.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.useInferenceEndpointMutation.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "onSuccessCallback",
+            "description": [],
+            "signature": [
+              "((inferenceId: string) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_inference_endpoint_mutation.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
         "id": "def-public.useProviders",
         "type": "Function",
         "tags": [],

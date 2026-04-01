@@ -328,10 +328,10 @@
         "label": "allCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; assign: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; assign: boolean; manageTemplates: boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/utils/cases_permissions.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1224,7 +1224,7 @@
         "label": "noCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; assign: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; assign: boolean; manageTemplates: boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/utils/cases_permissions.ts",
         "lineNumber": 8,
@@ -3389,7 +3389,7 @@
         "label": "NavigationEntry",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-        "lineNumber": 47,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3402,7 +3402,7 @@
             "label": "label",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3415,7 +3415,7 @@
             "label": "app",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3428,7 +3428,7 @@
             "label": "path",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3444,7 +3444,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3460,7 +3460,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3476,7 +3476,7 @@
               "((event: React.MouseEvent<HTMLElement | HTMLButtonElement, MouseEvent>) => void) | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3492,7 +3492,7 @@
                   "React.MouseEvent<HTMLElement | HTMLButtonElement, MouseEvent>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-                "lineNumber": 59,
+                "lineNumber": 60,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3512,7 +3512,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3528,7 +3528,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3544,7 +3544,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 65,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3560,7 +3560,7 @@
               "((path: string) => boolean) | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 67,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3576,7 +3576,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-                "lineNumber": 67,
+                "lineNumber": 68,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3596,7 +3596,7 @@
         "label": "NavigationSection",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-        "lineNumber": 70,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3612,7 +3612,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 72,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3625,7 +3625,7 @@
             "label": "sortKey",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3648,7 +3648,7 @@
               "[]"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 76,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3664,7 +3664,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4248,7 +4248,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-        "lineNumber": 234,
+        "lineNumber": 245,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4331,7 +4331,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
-        "lineNumber": 90,
+        "lineNumber": 91,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

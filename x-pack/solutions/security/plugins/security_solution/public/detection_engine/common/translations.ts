@@ -36,14 +36,6 @@ export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
   }
 );
 
-export const UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip',
-  {
-    defaultMessage:
-      'A user with manage cluster privileges must visit the Rules page before you can import value lists.',
-  }
-);
-
 export const ADD_NEW_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addNewRuleTitle',
   {
@@ -1012,6 +1004,13 @@ export const GAP_FILL_STATUS_FILLED = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.filled',
   {
     defaultMessage: 'Filled',
+  }
+);
+
+export const GAP_FILL_STATUS_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.error',
+  {
+    defaultMessage: 'Error',
   }
 );
 
