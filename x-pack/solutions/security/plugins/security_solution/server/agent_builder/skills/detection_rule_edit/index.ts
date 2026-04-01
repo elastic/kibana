@@ -38,8 +38,6 @@ This covers the rule type ES|QL. Do not create a rule with a rule type other tha
 
 ## ⚠️ IMPORTANT: "The Rule" Always Means the Rule Attachment
 
-When the user says "add to the rule", "edit the rule", "change the rule", "update the rule", or any variation — they ALWAYS mean the **rule attachment**. The rule lives inside the attachment's \`text\` field as stringified JSON. There is no other rule object.
-
 **You MUST apply changes directly to the attachment.** Do NOT just describe or suggest what fields to change in your response text. Every edit request requires you to actually call the tools (\`attachment_update\` or \`security.create_detection_rule\`) to persist the change in the attachment. Describing the change without applying it is not acceptable.
 
 ## Core Workflow
@@ -71,7 +69,7 @@ If you are creating a new rule, use the following:
 When asked to edit or update the rule or any field of the rule, use the following:
 **Editing an existing rule** (changing fields like tags, severity, description, schedule, MITRE ATT&CK, index patterns, query, etc.):
 
-"The rule" ALWAYS means the **rule attachment**. The rule lives inside the attachment's \`text\` field as stringified JSON. There is no other rule object. You MUST apply changes directly to the attachment — do NOT just describe or suggest what to change.
+When the user says "add to the rule", "edit the rule", "change the rule", "update the rule", or any variation — they ALWAYS mean the **rule attachment**. The rule lives inside the attachment's \`text\` field as stringified JSON. There is no other rule object.
 
 Follow these steps exactly. Every step is MANDATORY:
 
@@ -244,11 +242,24 @@ The lookback should be at least as long as the interval. A common pattern is int
 { "interval": "24h", "from": "now-25h", ... }
 \`\`\`
 
-### Query and Language
+### Query, Language, and Type
 
 \`query\` (string): The detection query.
-\`language\` (string): Query language — \`"esql"\`, \`"eql"\`, \`"kuery"\`, or \`"lucene"\`.
-\`type\` (string): Rule type — \`"esql"\`, \`"eql"\`, \`"query"\`, \`"threshold"\`, \`"machine_learning"\`, \`"new_terms"\`, \`"threat_match"\`.
+\`language\` (string): Query language.
+\`type\` (string): Rule type.
+
+Always set \`type\` and \`language\` together. Supported languages per rule type:
+
+\`\`\`
+esql           → language: "esql"
+eql            → language: "eql"
+query          → language: "kuery" | "lucene"
+saved_query    → language: "kuery" | "lucene"
+threshold      → language: "kuery" | "lucene"
+threat_match   → language: "kuery" | "lucene"
+new_terms      → language: "kuery" | "lucene"
+machine_learning → no query or language fields
+\`\`\`
 
 **Example** — KQL query rule:
 \`\`\`json
@@ -294,7 +305,7 @@ User says: "Add the tags Network and Lateral Movement to the rule"
    \`\`\`
 7. Render: \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\`
 
-## CRITICAL RULES — READ CAREFULLY
+## CRITICAL INSTRUCTIONS — READ CAREFULLY
 
 1. "The rule" ALWAYS refers to the rule attachment. Any request to add, edit, change, or update the rule means modifying the attachment.
 2. NEVER just suggest or describe changes — ALWAYS apply them by calling \`attachment_update\` or \`security.create_detection_rule\`. The user expects the rule to be updated, not a description of what to update.
