@@ -373,7 +373,7 @@ describe('useWithScriptLibraryData', () => {
       });
     });
 
-    it('should refetch when filters are active and list becomes empty', async () => {
+    it('should NOT refetch when filters are active and list becomes empty', async () => {
       const mockRefetchFiltered = jest.fn();
 
       mockUseGetEndpointScriptsList.mockImplementation((queryParams) => {
@@ -397,7 +397,7 @@ describe('useWithScriptLibraryData', () => {
       );
 
       await waitFor(() => {
-        expect(mockRefetchFiltered).toHaveBeenCalled();
+        expect(mockRefetchFiltered).not.toHaveBeenCalled();
       });
     });
 
@@ -443,6 +443,39 @@ describe('useWithScriptLibraryData', () => {
 
       await waitFor(() => {
         expect(mockRefetchFiltered).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should fetch when list has data after first being empty', async () => {
+      const mockRefetchFiltered = jest.fn();
+      let filteredTotal: number = 0;
+
+      mockUseGetEndpointScriptsList.mockImplementation((queryParams) => {
+        const isUnfiltered = queryParams.pageSize === 1;
+        return {
+          ...defaultGetEndpointScriptsListResponse,
+          data: isUnfiltered
+            ? createMockScriptListResponse(5)
+            : createMockScriptListResponse(filteredTotal),
+          refetch: mockRefetchFiltered,
+        } as unknown as MockUseQueryResult;
+      });
+
+      const { rerender } = renderHook(() =>
+        useWithScriptLibraryData({
+          page: 1,
+          pageSize: 10,
+        })
+      );
+
+      act(() => {
+        filteredTotal = 5;
+      });
+
+      rerender();
+
+      await waitFor(() => {
+        expect(mockRefetchFiltered).toHaveBeenCalled();
       });
     });
   });

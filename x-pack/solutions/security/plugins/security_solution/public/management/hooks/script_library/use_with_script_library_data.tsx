@@ -66,13 +66,43 @@ export const useWithScriptLibraryData = (
     }
   }, [isLoadingHasData, isMounted, isPageInitializing]);
 
-  // Re-check if data exists when list is empty and not loading
+  // Keep the `doesDataExist` updated based on state transitions
+  // Re-check if data exists when:
+  // 1. List data becomes empty after previously having data (deletion)
+  // 2. List data becomes non-empty after being empty (creation)
   useEffect(() => {
-    if (!doesDataExist) return;
-    if (isMounted() && !isLoadingListData && !listDataError && listData && listData.total === 0) {
+    const hasFilters = Boolean(
+      queryParams?.os?.length ||
+        queryParams?.fileType?.length ||
+        queryParams?.category?.length ||
+        queryParams?.searchTerms?.length
+    );
+    if (
+      isMounted() &&
+      !isLoadingListData &&
+      !isLoadingHasData &&
+      !listDataError &&
+      !hasFilters &&
+      // Flow when the last item on the list gets deleted, and list goes back to being empty
+      ((listData && listData.total === 0 && doesDataExist) ||
+        // Flow when the list starts off empty and the first item is added
+        (listData && listData.total > 0 && !doesDataExist))
+    ) {
       verifyDataExists();
     }
-  }, [isMounted, doesDataExist, isLoadingListData, listDataError, listData, verifyDataExists]);
+  }, [
+    doesDataExist,
+    isLoadingHasData,
+    isLoadingListData,
+    isMounted,
+    listData,
+    listDataError,
+    queryParams?.category?.length,
+    queryParams?.fileType?.length,
+    queryParams?.os?.length,
+    queryParams?.searchTerms?.length,
+    verifyDataExists,
+  ]);
 
   return useMemo(
     () => ({
