@@ -49,21 +49,21 @@ export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
   default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
 });
 
-export const FlatInputSchema = z.union([
+export const LegacyWorkflowInputSchema = z.union([
   WorkflowInputStringSchema,
   WorkflowInputNumberSchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
   WorkflowInputArraySchema,
 ]);
-export type FlatInput = z.infer<typeof FlatInputSchema>;
+export type LegacyWorkflowInput = z.infer<typeof LegacyWorkflowInputSchema>;
 
 export const WorkflowInputSchema = z.union([
   // New JSON Schema format
   JsonModelSchema,
   // TODO(https://github.com/elastic/security-team/issues/16526): Remove legacy array format once all workflows are migrated to JSON Schema inputs.
   // Legacy array format (for backward compatibility)
-  z.array(FlatInputSchema),
+  z.array(LegacyWorkflowInputSchema),
 ]);
 export type WorkflowInput = z.infer<typeof WorkflowInputSchema>;
 

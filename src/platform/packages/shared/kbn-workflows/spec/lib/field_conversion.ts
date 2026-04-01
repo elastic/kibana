@@ -12,16 +12,21 @@ import type { z } from '@kbn/zod/v4';
 import type { WorkflowOutput } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 import type { JsonSchema } from '../schema/common/json_model_shape_schema';
-import type { FlatInput, FlatInputSchema } from '../schema/triggers/manual_trigger_schema';
+import type {
+  LegacyWorkflowInput,
+  LegacyWorkflowInputSchema,
+} from '../schema/triggers/manual_trigger_schema';
 
-export type NormalizableFieldSchema = JsonModelSchemaType | Array<FlatInput | WorkflowOutput>;
+export type NormalizableFieldSchema =
+  | JsonModelSchemaType
+  | Array<LegacyWorkflowInput | WorkflowOutput>;
 
 /**
  * Converts a legacy workflow field definition to a JSON Schema property
  * @param field - The legacy field to convert (input or output)
  * @returns A JSON Schema property definition
  */
-function convertLegacyFieldToJsonSchemaProperty(field: FlatInput): JSONSchema7 {
+function convertLegacyFieldToJsonSchemaProperty(field: LegacyWorkflowInput): JSONSchema7 {
   const property: JSONSchema7 = {
     type: field.type === 'choice' ? 'string' : field.type,
   };
@@ -63,7 +68,7 @@ function convertLegacyFieldToJsonSchemaProperty(field: FlatInput): JSONSchema7 {
  * @returns The fields in the new JSON Schema object format
  */
 export function convertLegacyFieldsToJsonSchema(
-  legacyFields: Array<z.infer<typeof FlatInputSchema>>
+  legacyFields: Array<z.infer<typeof LegacyWorkflowInputSchema>>
 ): JsonModelSchemaType {
   const properties: Record<string, JsonSchema> = {};
   const required: string[] = [];
@@ -117,7 +122,7 @@ export function normalizeFieldsToJsonSchema(
   }
 
   if (Array.isArray(fields)) {
-    return convertLegacyFieldsToJsonSchema(fields as FlatInput[]);
+    return convertLegacyFieldsToJsonSchema(fields as LegacyWorkflowInput[]);
   }
 
   return undefined;

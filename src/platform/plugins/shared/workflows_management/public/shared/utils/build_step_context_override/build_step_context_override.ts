@@ -28,7 +28,7 @@ import {
   normalizeFieldsToJsonSchema,
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import type { FlatInput } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import type { LegacyWorkflowInput } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { z } from '@kbn/zod/v4';
 import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
 
@@ -45,7 +45,7 @@ export interface StaticContextData extends Pick<StepContext, 'consts' | 'workflo
    * Used to pre-populate input fields in the test step modal.
    * Can be either legacy array format (LegacyWorkflowInput[]) or JSON Schema format.
    */
-  inputsDefinition?: FlatInput[] | JsonModelSchemaType;
+  inputsDefinition?: LegacyWorkflowInput[] | JsonModelSchemaType;
 }
 
 const StepContextSchemaPropertyPaths = extractSchemaPropertyPaths(StepContextSchema);
@@ -89,7 +89,7 @@ function readPropertyRecursive(
  * Uses the same logic as the exec modal to ensure consistency.
  */
 function buildInputsFromDefinition(
-  inputsDefinition: FlatInput[] | JsonModelSchemaType | undefined
+  inputsDefinition: LegacyWorkflowInput[] | JsonModelSchemaType | undefined
 ): Record<string, unknown> | undefined {
   if (!inputsDefinition) {
     return undefined;

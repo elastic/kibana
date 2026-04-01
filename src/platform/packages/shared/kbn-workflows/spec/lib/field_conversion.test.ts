@@ -15,7 +15,7 @@ import {
   normalizeFieldsToJsonSchema,
 } from './field_conversion';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
-import type { FlatInputSchema } from '../schema/triggers/manual_trigger_schema';
+import type { LegacyWorkflowInputSchema } from '../schema/triggers/manual_trigger_schema';
 
 describe('convertLegacyFieldsToJsonSchema', () => {
   it('should convert array of legacy inputs to JSON Schema object format', () => {
@@ -35,7 +35,7 @@ describe('convertLegacyFieldsToJsonSchema', () => {
     ];
 
     const result = convertLegacyFieldsToJsonSchema(
-      legacyInputs as Array<z.infer<typeof FlatInputSchema>>
+      legacyInputs as Array<z.infer<typeof LegacyWorkflowInputSchema>>
     );
 
     expect(result).toEqual({
@@ -65,7 +65,7 @@ describe('convertLegacyFieldsToJsonSchema', () => {
     ];
 
     const result = convertLegacyFieldsToJsonSchema(
-      legacyInputs as Array<z.infer<typeof FlatInputSchema>>
+      legacyInputs as Array<z.infer<typeof LegacyWorkflowInputSchema>>
     );
 
     expect(result.properties?.status).toEqual({
@@ -86,7 +86,7 @@ describe('convertLegacyFieldsToJsonSchema', () => {
     ];
 
     const result = convertLegacyFieldsToJsonSchema(
-      legacyInputs as Array<z.infer<typeof FlatInputSchema>>
+      legacyInputs as Array<z.infer<typeof LegacyWorkflowInputSchema>>
     );
 
     expect(result.properties?.tags).toEqual({
@@ -116,7 +116,7 @@ describe('convertLegacyFieldsToJsonSchema', () => {
     ];
 
     const result = convertLegacyFieldsToJsonSchema(
-      legacyInputs as Array<z.infer<typeof FlatInputSchema>>
+      legacyInputs as Array<z.infer<typeof LegacyWorkflowInputSchema>>
     );
 
     expect(result.required).toBeUndefined();
@@ -717,7 +717,7 @@ describe('normalizeFieldsToJsonSchema + buildFieldsZodValidator (integration)', 
     const legacyInputs = [
       { name: 'greeting', type: 'string' as const, required: true },
       { name: 'count', type: 'number' as const, required: false },
-    ] as Array<z.infer<typeof FlatInputSchema>>;
+    ] as Array<z.infer<typeof LegacyWorkflowInputSchema>>;
 
     const normalizedSchema = normalizeFieldsToJsonSchema(legacyInputs);
     const validator = buildFieldsZodValidator(normalizedSchema);

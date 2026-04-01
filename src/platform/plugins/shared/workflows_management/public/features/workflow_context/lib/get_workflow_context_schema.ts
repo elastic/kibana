@@ -91,7 +91,7 @@ export function getWorkflowContextSchema(
   const normalizedInputs = normalizeFieldsToJsonSchema(inputs);
   const normalizedOutputs = normalizeFieldsToJsonSchema(outputs);
 
-  const eventSchema = buildEventSchemaFromTriggers(definition.triggers ?? []);
+  const eventSchema = buildEventSchemaFromTriggers(triggers ?? []);
 
   return DynamicWorkflowContextSchema.extend({
     inputs: buildFieldsZodValidator(normalizedInputs),

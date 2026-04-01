@@ -13,7 +13,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { parse } from 'yaml';
 import { WorkflowSchema, WorkflowSchemaForAutocomplete } from './schema';
-import type { JsonModelSchemaType } from './schema/common/json_model_schema';
+import { JsonModelSchema } from './schema/common/json_model_schema';
 import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
 
 describe('Legacy workflow format (backward compatibility)', () => {
@@ -66,20 +66,20 @@ describe('Legacy workflow format (backward compatibility)', () => {
       fail('Manual trigger should be defined');
     }
 
-    const inputs = manualTrigger.inputs as JsonModelSchemaType;
+    const jsonSchemaInputs = JsonModelSchema.parse(manualTrigger?.inputs);
 
     expect(manualTrigger).toBeDefined();
 
     if (result.success) {
       // After transformation, inputs should be in JSON Schema format
-      expect(inputs).toBeDefined();
-      expect(inputs?.properties).toBeDefined();
-      expect(inputs?.properties?.people).toBeDefined();
-      expect(inputs?.properties?.greeting).toBeDefined();
-      expect(inputs?.properties?.people?.type).toBe('array');
-      expect(inputs?.properties?.people?.default).toEqual(['alice', 'bob', 'charlie']);
-      expect(inputs?.properties?.greeting?.type).toBe('string');
-      expect(inputs?.properties?.greeting?.default).toBe('Hello');
+      expect(jsonSchemaInputs).toBeDefined();
+      expect(jsonSchemaInputs?.properties).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.people).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.greeting).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.people?.type).toBe('array');
+      expect(jsonSchemaInputs?.properties?.people?.default).toEqual(['alice', 'bob', 'charlie']);
+      expect(jsonSchemaInputs?.properties?.greeting?.type).toBe('string');
+      expect(jsonSchemaInputs?.properties?.greeting?.default).toBe('Hello');
     }
 
     // Test WorkflowSchemaForAutocomplete (lenient validation for Monaco)
@@ -139,17 +139,18 @@ describe('Legacy workflow format (backward compatibility)', () => {
     if (!manualTrigger) {
       fail('Manual trigger should be defined');
     }
-    const inputs = manualTrigger.inputs as JsonModelSchemaType;
+
+    const jsonSchemaInputs = JsonModelSchema.parse(manualTrigger?.inputs);
 
     if (result.success) {
       // Should be transformed to JSON Schema format
-      expect(inputs).toBeDefined();
-      expect(inputs?.properties).toBeDefined();
-      expect(inputs?.properties?.username).toBeDefined();
-      expect(inputs?.properties?.age).toBeDefined();
-      expect(inputs?.required).toContain('username');
-      expect(inputs?.properties?.username?.default).toBe('admin');
-      expect(inputs?.properties?.age?.default).toBe(25);
+      expect(jsonSchemaInputs).toBeDefined();
+      expect(jsonSchemaInputs?.properties).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.username).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.age).toBeDefined();
+      expect(jsonSchemaInputs?.required).toContain('username');
+      expect(jsonSchemaInputs?.properties?.username?.default).toBe('admin');
+      expect(jsonSchemaInputs?.properties?.age?.default).toBe(25);
     }
   });
 
@@ -165,13 +166,14 @@ describe('Legacy workflow format (backward compatibility)', () => {
       fail('Manual trigger should be defined');
     }
 
-    const inputs = manualTrigger.inputs as JsonModelSchemaType;
+    const jsonSchemaInputs = JsonModelSchema.parse(manualTrigger?.inputs);
+
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(inputs?.properties).toBeDefined();
-      expect(inputs?.properties?.analystEmail).toBeDefined();
-      expect(inputs?.properties?.severity?.default).toBe('medium');
-      expect(inputs?.properties?.priority?.default).toBe('P2');
+      expect(jsonSchemaInputs?.properties).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.analystEmail).toBeDefined();
+      expect(jsonSchemaInputs?.properties?.severity?.default).toBe('medium');
+      expect(jsonSchemaInputs?.properties?.priority?.default).toBe('P2');
     }
   });
 });
