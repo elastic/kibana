@@ -60,8 +60,9 @@ export interface TimeRangeTransformOptions {
   /** Additional accepted delimiter (on top of the built-in `'to'`, `'until'`, and `'-'`) */
   delimiter?: string;
   /**
-   * Format string used for both displaying and parsing absolute dates.
-   * Prepended to built-in formats so custom-formatted dates round-trip correctly.
+   * Additional format string for parsing absolute dates.
+   * Prepended to built-in formats so the parser recognises custom-formatted input.
+   * Does not affect how dates are displayed.
    */
   dateFormat?: string;
   /**
@@ -75,6 +76,11 @@ export interface TimeRangeTransformOptions {
    * @default undefined
    */
   roundRelativeTime?: boolean;
+  /**
+   * Sub-minute precision applied when formatting absolute timestamps.
+   * @default 's'
+   */
+  timePrecision?: TimePrecision;
 }
 
 /** Time unit for the auto-refresh interval. */
@@ -103,6 +109,9 @@ export interface AutoRefreshSettings {
   intervalUnit?: AutoRefreshIntervalUnit;
 }
 
+/** Controls sub-minute precision shown in absolute timestamps. */
+export type TimePrecision = 's' | 'ms' | 'none';
+
 /** User-facing settings exposed by the date range picker settings panel. */
 export interface DateRangePickerSettings {
   /**
@@ -111,6 +120,16 @@ export interface DateRangePickerSettings {
    * @default true
    */
   roundRelativeTime: boolean;
+  /**
+   * Controls sub-minute precision shown in absolute timestamps.
+   * - `'s'` — show seconds (default behaviour when omitted).
+   * - `'ms'` — show seconds and milliseconds.
+   * - `'none'` — show only hours and minutes.
+   *
+   * When set, a toggle is shown in the Settings panel. When omitted the
+   * toggle is hidden and seconds are shown by default.
+   */
+  timePrecision?: TimePrecision;
   /**
    * Auto-refresh preferences. The Settings “Refresh every” row and the toolbar play/pause control
    * are shown only when both this and `DateRangePickerProps.onRefresh` are set.
