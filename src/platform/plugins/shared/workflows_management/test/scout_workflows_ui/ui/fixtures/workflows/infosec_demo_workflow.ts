@@ -10,5 +10,5 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-export const getCrazyTriageWorkflowYaml = () =>
+export const getInfosecDemoWorkflowYaml = () =>
   readFileSync(resolve(__dirname, '../../../../../common/examples/infosec_demo.yaml'), 'utf-8');

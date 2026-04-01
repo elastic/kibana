@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-shadow, playwright/no-wait-for-timeout */
-
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../fixtures';
-import { getCrazyTriageWorkflowYaml, getLargePerfWorkflowYaml } from '../fixtures/workflows';
+import { getInfosecDemoWorkflowYaml, getLargePerfWorkflowYaml } from '../fixtures/workflows';
 
 interface MarkerCallRecord {
   source: string;
@@ -31,8 +29,22 @@ interface EditCycleResult {
 
 const WORKFLOW_CASES = [
   { name: 'large_perf (87 steps, 431 vars)', getYaml: getLargePerfWorkflowYaml },
-  { name: 'crazy_triage (150 steps, 361 vars)', getYaml: getCrazyTriageWorkflowYaml },
+  { name: 'infosec_demo (150 steps, 361 vars)', getYaml: getInfosecDemoWorkflowYaml },
 ] as const;
+
+async function waitForValidationToSettle(
+  validationAccordion: import('@kbn/scout').Locator
+): Promise<void> {
+  await expect(async () => {
+    const text = await validationAccordion.innerText();
+    if (!text.includes('error') && !text.includes('No validation errors')) {
+      throw new Error('Validation not settled yet');
+    }
+  }).toPass({ timeout: 15_000 });
+}
+
+const MARKER_QUIESCENCE_MS = 2000;
+const MARKER_MAX_WAIT_MS = 15000;
 
 test.describe(
   'Workflow editor: validation performance',
@@ -57,99 +69,135 @@ test.describe(
       }) => {
         const yaml = getYaml();
         await pageObjects.workflowEditor.setYamlEditorValue(yaml);
+        await waitForValidationToSettle(pageObjects.workflowEditor.validationErrorsAccordion);
 
-        await page.waitForTimeout(5000);
+        const quiescenceMs = MARKER_QUIESCENCE_MS;
+        const maxWaitMs = MARKER_MAX_WAIT_MS;
 
-        const result: EditCycleResult = await page.evaluate(() => {
-          return new Promise<EditCycleResult>((resolve) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const monacoEnv = (window as any).MonacoEnvironment;
-            const editorEl = document.querySelector('.monaco-editor[data-uri]');
-            if (!editorEl || !monacoEnv?.monaco?.editor) {
-              throw new Error('Monaco editor not available');
-            }
-            const uri = editorEl.getAttribute('data-uri')!;
-            const model = monacoEnv.monaco.editor.getModel(uri);
-            const editors = monacoEnv.monaco.editor.getEditors();
-
-            const editor = editors.find(
+        const result: EditCycleResult = await page.evaluate(
+          ({ quiescence, maxWait }) => {
+            return new Promise<EditCycleResult>((resolve, reject) => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (e: any) => e.getModel()?.uri?.toString() === model.uri.toString()
-            );
+              const monacoEnv = (window as any).MonacoEnvironment;
+              const editorEl = document.querySelector('.monaco-editor[data-uri]');
+              if (!editorEl || !monacoEnv?.monaco?.editor) {
+                throw new Error('Monaco editor not available');
+              }
+              const dataUri = editorEl.getAttribute('data-uri');
+              if (!dataUri) {
+                throw new Error('Editor data-uri attribute not found');
+              }
+              const model = monacoEnv.monaco.editor.getModel(dataUri);
+              const editors = monacoEnv.monaco.editor.getEditors();
 
-            if (!model || !editor) {
-              throw new Error('Editor model or instance not found');
-            }
+              const editor = editors.find(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (e: any) => e.getModel()?.uri?.toString() === model.uri.toString()
+              );
 
-            const markerCalls: MarkerCallRecord[] = [];
-            const origSetModelMarkers = monacoEnv.monaco.editor.setModelMarkers.bind(
-              monacoEnv.monaco.editor
-            );
-            let editTimestamp = 0;
+              if (!model || !editor) {
+                throw new Error('Editor model or instance not found');
+              }
 
-            monacoEnv.monaco.editor.setModelMarkers = (
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              m: any,
-              source: string,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              markers: any[]
-            ) => {
-              const callStart = performance.now();
-              const result = origSetModelMarkers(m, source, markers);
-              const callEnd = performance.now();
-              if (editTimestamp > 0) {
-                markerCalls.push({
-                  source,
-                  markerCount: markers.length,
-                  offsetMs: Number((callStart - editTimestamp).toFixed(2)),
-                  durationMs: Number((callEnd - callStart).toFixed(2)),
+              const markerCalls: MarkerCallRecord[] = [];
+              const origSetModelMarkers = monacoEnv.monaco.editor.setModelMarkers.bind(
+                monacoEnv.monaco.editor
+              );
+              let editTimestamp = 0;
+              let syncEditMs = 0;
+              let quiescenceTimer: ReturnType<typeof setTimeout> | null = null;
+              let maxTimer: ReturnType<typeof setTimeout> | null = null;
+              let settled = false;
+
+              function finish() {
+                if (settled) {
+                  return;
+                }
+                settled = true;
+                if (quiescenceTimer) {
+                  clearTimeout(quiescenceTimer);
+                }
+                if (maxTimer) {
+                  clearTimeout(maxTimer);
+                }
+                monacoEnv.monaco.editor.setModelMarkers = origSetModelMarkers;
+                editor.trigger('perf-test', 'undo', null);
+
+                const firstCall = markerCalls.length > 0 ? markerCalls[0].offsetMs : 0;
+                const lastCall =
+                  markerCalls.length > 0
+                    ? markerCalls[markerCalls.length - 1].offsetMs +
+                      markerCalls[markerCalls.length - 1].durationMs
+                    : 0;
+
+                const totalWork = markerCalls.reduce(
+                  (sum: number, c: MarkerCallRecord) => sum + c.durationMs,
+                  0
+                );
+                resolve({
+                  editSyncMs: syncEditMs,
+                  markerCalls,
+                  totalMarkerCascadeMs: Number((lastCall - firstCall).toFixed(2)),
+                  totalMarkerWorkMs: Number(totalWork.toFixed(2)),
+                  markerCallCount: markerCalls.length,
                 });
               }
-              return result;
-            };
 
-            const ln = 30;
-            const content = model.getLineContent(ln);
-            editTimestamp = performance.now();
+              monacoEnv.monaco.editor.setModelMarkers = (
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                m: any,
+                source: string,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                markers: any[]
+              ) => {
+                const callStart = performance.now();
+                const markerResult = origSetModelMarkers(m, source, markers);
+                const callEnd = performance.now();
+                if (editTimestamp > 0) {
+                  markerCalls.push({
+                    source,
+                    markerCount: markers.length,
+                    offsetMs: Number((callStart - editTimestamp).toFixed(2)),
+                    durationMs: Number((callEnd - callStart).toFixed(2)),
+                  });
+                  if (quiescenceTimer) {
+                    clearTimeout(quiescenceTimer);
+                  }
+                  quiescenceTimer = setTimeout(finish, quiescence);
+                }
+                return markerResult;
+              };
 
-            editor.executeEdits('perf-test', [
-              {
-                range: {
-                  startLineNumber: ln,
-                  startColumn: content.length + 1,
-                  endLineNumber: ln,
-                  endColumn: content.length + 1,
+              const ln = 30;
+              const content = model.getLineContent(ln);
+              editTimestamp = performance.now();
+
+              editor.executeEdits('perf-test', [
+                {
+                  range: {
+                    startLineNumber: ln,
+                    startColumn: content.length + 1,
+                    endLineNumber: ln,
+                    endColumn: content.length + 1,
+                  },
+                  text: ' {{ steps.http_step_0.output }}',
                 },
-                text: ' {{ steps.http_step_0.output }}',
-              },
-            ]);
-            const editSyncMs = Number((performance.now() - editTimestamp).toFixed(2));
+              ]);
 
-            setTimeout(() => {
-              monacoEnv.monaco.editor.setModelMarkers = origSetModelMarkers;
-              editor.trigger('perf-test', 'undo', null);
+              syncEditMs = Number((performance.now() - editTimestamp).toFixed(2));
 
-              const firstCall = markerCalls.length > 0 ? markerCalls[0].offsetMs : 0;
-              const lastCall =
-                markerCalls.length > 0
-                  ? markerCalls[markerCalls.length - 1].offsetMs +
-                    markerCalls[markerCalls.length - 1].durationMs
-                  : 0;
+              quiescenceTimer = setTimeout(finish, quiescence);
+              maxTimer = setTimeout(finish, maxWait);
 
-              const totalWork = markerCalls.reduce(
-                (sum: number, c: MarkerCallRecord) => sum + c.durationMs,
-                0
-              );
-              resolve({
-                editSyncMs,
-                markerCalls,
-                totalMarkerCascadeMs: Number((lastCall - firstCall).toFixed(2)),
-                totalMarkerWorkMs: Number(totalWork.toFixed(2)),
-                markerCallCount: markerCalls.length,
-              });
-            }, 5000);
-          });
-        });
+              setTimeout(() => {
+                if (markerCalls.length === 0 && !settled) {
+                  reject(new Error('No setModelMarkers calls observed within max wait'));
+                }
+              }, maxWait + 1000);
+            });
+          },
+          { quiescence: quiescenceMs, maxWait: maxWaitMs }
+        );
 
         log.info(`Edit sync time: ${result.editSyncMs}ms`);
         log.info(`Marker calls: ${result.markerCallCount}`);
@@ -180,125 +228,144 @@ test.describe(
       }) => {
         const yaml = getYaml();
         await pageObjects.workflowEditor.setYamlEditorValue(yaml);
+        await waitForValidationToSettle(pageObjects.workflowEditor.validationErrorsAccordion);
 
-        await page.waitForTimeout(5000);
+        const settleMs = MARKER_QUIESCENCE_MS;
+        const maxWaitMs = MARKER_MAX_WAIT_MS;
 
-        const frameStats = await page.evaluate(() => {
-          const EDIT_COUNT = 40;
-          const EDIT_INTERVAL_MS = 30;
-          const SETTLE_MS = 4000;
+        const frameStats = await page.evaluate(
+          ({ settle, maxWait }) => {
+            const EDIT_COUNT = 40;
+            const EDIT_INTERVAL_MS = 30;
 
-          return new Promise<{
-            totalFrames: number;
-            droppedFrames: number;
-            jankFrames: number;
-            p95Ms: number;
-            maxMs: number;
-            worst5: number[];
-            markerCascadesDuringEdits: number;
-          }>((resolve) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const monacoEnv = (window as any).MonacoEnvironment;
-            const editorEl = document.querySelector('.monaco-editor[data-uri]');
-            if (!editorEl || !monacoEnv?.monaco?.editor) {
-              throw new Error('Monaco editor not available');
-            }
-            const uri = editorEl.getAttribute('data-uri')!;
-            const model = monacoEnv.monaco.editor.getModel(uri);
-            const editors = monacoEnv.monaco.editor.getEditors();
-
-            const editor = editors.find(
+            return new Promise<{
+              totalFrames: number;
+              droppedFrames: number;
+              jankFrames: number;
+              p95Ms: number;
+              maxMs: number;
+              worst5: number[];
+              markerCascadesDuringEdits: number;
+            }>((resolve) => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (e: any) => e.getModel()?.uri?.toString() === model.uri.toString()
-            );
-
-            if (!model || !editor) {
-              throw new Error('Editor model or instance not found');
-            }
-
-            let markerCascadesDuringEdits = 0;
-            const origSetModelMarkers = monacoEnv.monaco.editor.setModelMarkers.bind(
-              monacoEnv.monaco.editor
-            );
-            monacoEnv.monaco.editor.setModelMarkers = (
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              m: any,
-              source: string,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              markers: any[]
-            ) => {
-              markerCascadesDuringEdits++;
-              return origSetModelMarkers(m, source, markers);
-            };
-
-            const frameDeltas: number[] = [];
-            let lastFrame = performance.now();
-            let rafRunning = true;
-
-            function measureFrame() {
-              if (!rafRunning) {
-                return;
+              const monacoEnv = (window as any).MonacoEnvironment;
+              const editorEl = document.querySelector('.monaco-editor[data-uri]');
+              if (!editorEl || !monacoEnv?.monaco?.editor) {
+                throw new Error('Monaco editor not available');
               }
-              const now = performance.now();
-              frameDeltas.push(now - lastFrame);
-              lastFrame = now;
+              const dataUri = editorEl.getAttribute('data-uri');
+              if (!dataUri) {
+                throw new Error('Editor data-uri attribute not found');
+              }
+              const model = monacoEnv.monaco.editor.getModel(dataUri);
+              const editors = monacoEnv.monaco.editor.getEditors();
+
+              const editor = editors.find(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (e: any) => e.getModel()?.uri?.toString() === model.uri.toString()
+              );
+
+              if (!model || !editor) {
+                throw new Error('Editor model or instance not found');
+              }
+
+              let markerCascadesDuringEdits = 0;
+              const origSetModelMarkers = monacoEnv.monaco.editor.setModelMarkers.bind(
+                monacoEnv.monaco.editor
+              );
+              monacoEnv.monaco.editor.setModelMarkers = (
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                m: any,
+                source: string,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                markers: any[]
+              ) => {
+                markerCascadesDuringEdits++;
+                return origSetModelMarkers(m, source, markers);
+              };
+
+              const frameDeltas: number[] = [];
+              let lastFrame = performance.now();
+              let rafRunning = true;
+
+              function measureFrame() {
+                if (!rafRunning) {
+                  return;
+                }
+                const now = performance.now();
+                frameDeltas.push(now - lastFrame);
+                lastFrame = now;
+                requestAnimationFrame(measureFrame);
+              }
               requestAnimationFrame(measureFrame);
-            }
-            requestAnimationFrame(measureFrame);
 
-            let editIdx = 0;
-            const totalLines = model.getLineCount();
+              let editIdx = 0;
+              const totalLines = model.getLineCount();
+              let quiescenceTimer: ReturnType<typeof setTimeout> | null = null;
+              let frameSettled = false;
 
-            function doEdit() {
-              if (editIdx >= EDIT_COUNT) {
-                setTimeout(() => {
-                  rafRunning = false;
-                  monacoEnv.monaco.editor.setModelMarkers = origSetModelMarkers;
+              function finish() {
+                if (frameSettled) {
+                  return;
+                }
+                frameSettled = true;
+                if (quiescenceTimer) {
+                  clearTimeout(quiescenceTimer);
+                }
+                rafRunning = false;
+                monacoEnv.monaco.editor.setModelMarkers = origSetModelMarkers;
 
-                  for (let i = 0; i < EDIT_COUNT; i++) {
-                    editor.trigger('perf-test', 'undo', null);
-                  }
+                for (let i = 0; i < EDIT_COUNT; i++) {
+                  editor.trigger('perf-test', 'undo', null);
+                }
 
-                  const sorted = [...frameDeltas].sort((a, b) => a - b);
-                  const dropped = frameDeltas.filter((d: number) => d > 16.67);
-                  const jank = frameDeltas.filter((d: number) => d > 50);
-                  const p95 = sorted[Math.floor(sorted.length * 0.95)];
+                const sorted = [...frameDeltas].sort((a, b) => a - b);
+                const dropped = frameDeltas.filter((d: number) => d > 16.67);
+                const jank = frameDeltas.filter((d: number) => d > 50);
+                const p95 = sorted[Math.floor(sorted.length * 0.95)];
 
-                  resolve({
-                    totalFrames: frameDeltas.length,
-                    droppedFrames: dropped.length,
-                    jankFrames: jank.length,
-                    p95Ms: Number(p95.toFixed(2)),
-                    maxMs: Number(Math.max(...frameDeltas).toFixed(2)),
-                    worst5: sorted
-                      .slice(-5)
-                      .reverse()
-                      .map((d: number) => Number(d.toFixed(1))),
-                    markerCascadesDuringEdits,
-                  });
-                }, SETTLE_MS);
-                return;
+                resolve({
+                  totalFrames: frameDeltas.length,
+                  droppedFrames: dropped.length,
+                  jankFrames: jank.length,
+                  p95Ms: Number(p95.toFixed(2)),
+                  maxMs: Number(Math.max(...frameDeltas).toFixed(2)),
+                  worst5: sorted
+                    .slice(-5)
+                    .reverse()
+                    .map((d: number) => Number(d.toFixed(1))),
+                  markerCascadesDuringEdits,
+                });
               }
 
-              const ln = 20 + ((editIdx * 17) % Math.min(totalLines - 20, 200));
-              const content = model.getLineContent(ln);
-              editor.executeEdits('perf-test', [
-                {
-                  range: {
-                    startLineNumber: ln,
-                    startColumn: content.length + 1,
-                    endLineNumber: ln,
-                    endColumn: content.length + 1,
+              function doEdit() {
+                if (editIdx >= EDIT_COUNT) {
+                  quiescenceTimer = setTimeout(finish, settle);
+                  setTimeout(finish, maxWait);
+                  return;
+                }
+
+                const ln = 20 + ((editIdx * 17) % Math.min(totalLines - 20, 200));
+                const content = model.getLineContent(ln);
+                editor.executeEdits('perf-test', [
+                  {
+                    range: {
+                      startLineNumber: ln,
+                      startColumn: content.length + 1,
+                      endLineNumber: ln,
+                      endColumn: content.length + 1,
+                    },
+                    text: ` {{ steps.http_step_${editIdx % 30}.output }}`,
                   },
-                  text: ` {{ steps.http_step_${editIdx % 30}.output }}`,
-                },
-              ]);
-              editIdx++;
-              setTimeout(doEdit, EDIT_INTERVAL_MS);
-            }
-            doEdit();
-          });
-        });
+                ]);
+                editIdx++;
+                setTimeout(doEdit, EDIT_INTERVAL_MS);
+              }
+              doEdit();
+            });
+          },
+          { settle: settleMs, maxWait: maxWaitMs }
+        );
 
         log.info(`Frame stats: ${JSON.stringify(frameStats, null, 2)}`);
 

@@ -19,10 +19,6 @@ import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
  * Folds an array of graph nodes into a steps schema, skipping already-seen
  * and trigger nodes. Mutates `seenStepIds` to track which step IDs have been
  * processed across multiple calls.
- *
- * Foreach nodes need the accumulated steps schema for their item type
- * inference, so they force a flush of the batched shape before processing.
- * All other nodes are batched into a single `.extend()` call.
  */
 function addNodesToStepsSchema(
   nodes: GraphNodeUnion[],

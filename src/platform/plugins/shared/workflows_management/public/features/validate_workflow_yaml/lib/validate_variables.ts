@@ -29,7 +29,7 @@ function fallbackForOffsetValue(
   model?: monaco.editor.ITextModel
 ) {
   if (yamlDocument && model) {
-    return model?.getOffsetAt({
+    return model.getOffsetAt({
       lineNumber: variableItem.startLineNumber,
       column: variableItem.startColumn,
     });

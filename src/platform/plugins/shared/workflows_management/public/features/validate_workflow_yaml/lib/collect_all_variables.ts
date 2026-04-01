@@ -18,17 +18,14 @@ import type { VariableItem } from '../model/types';
 interface ScalarEntry {
   start: number;
   end: number;
-  nodeEnd: number;
   path: Array<string | number>;
 }
 
 const scalarIndexCache = new WeakMap<Document, ScalarEntry[]>();
 
 /**
- * Builds a sorted index of every scalar in the document in a single `visit()`.
- * Each entry records the value range (for content filtering) and the pre-computed
- * YAML path (for path lookup). This replaces the two-pass approach of
- * getScalarRanges + per-match getPathAtOffset, turning 66 full traversals into 1.
+ * Builds a sorted index of every scalar in the document in a single `visit()`,
+ * pre-computing both ranges and YAML paths.
  */
 function getScalarIndex(document: Document): ScalarEntry[] {
   const cached = scalarIndexCache.get(document);
@@ -43,7 +40,6 @@ function getScalarIndex(document: Document): ScalarEntry[] {
         entries.push({
           start: node.range[0],
           end: node.range[1],
-          nodeEnd: node.range[2],
           path: getPathFromAncestors(ancestors, node),
         });
       }

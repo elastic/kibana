@@ -33,8 +33,7 @@ type WorkflowDefinitionForContext =
 
 /**
  * Builds the step-level context schema for a given step name, without
- * template-local extension. This is the expensive part that can be cached
- * across variables that share the same nearest step.
+ * template-local extension.
  */
 export function getContextSchemaForStep(
   baseSchema: typeof DynamicStepContextSchema,
