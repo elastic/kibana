@@ -97,6 +97,7 @@ export const RemotesListPage: React.FC = () => {
   const deleteRemote = useDeleteRemote();
   const testConnection = useTestRemoteConnection();
 
+  const [actionError, setActionError] = useState<string | null>(null);
   const [flyout, setFlyout] = useState<FlyoutState | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<EvalsRemoteSummary | null>(null);
 
@@ -147,6 +148,7 @@ export const RemotesListPage: React.FC = () => {
     setUrl('');
     setApiKey('');
     setFieldErrors({});
+    setActionError(null);
     setFormError(null);
     setTestResult(null);
     setFlyout({ mode: 'create' });
@@ -157,6 +159,7 @@ export const RemotesListPage: React.FC = () => {
     setUrl(remote.url);
     setApiKey('');
     setFieldErrors({});
+    setActionError(null);
     setFormError(null);
     setTestResult(null);
     setFlyout({ mode: 'edit', remote });
@@ -315,6 +318,20 @@ export const RemotesListPage: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
+        {actionError ? (
+          <>
+            <EuiCallOut
+              title={i18n.DELETE_ERROR_TITLE}
+              color="danger"
+              iconType="error"
+              size="s"
+              onDismiss={() => setActionError(null)}
+            >
+              <p>{actionError}</p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         {error ? (
           <>
             <EuiCallOut title={i18n.LOAD_ERROR_TITLE} color="danger" iconType="error" size="s">
@@ -473,10 +490,18 @@ export const RemotesListPage: React.FC = () => {
       {confirmDelete ? (
         <EuiConfirmModal
           title={i18n.DELETE_CONFIRM_TITLE}
-          onCancel={() => setConfirmDelete(null)}
-          onConfirm={async () => {
-            await deleteRemote.mutateAsync(confirmDelete.id);
+          onCancel={() => {
             setConfirmDelete(null);
+          }}
+          onConfirm={async () => {
+            setActionError(null);
+            try {
+              await deleteRemote.mutateAsync(confirmDelete.id);
+            } catch (e) {
+              setActionError(e instanceof Error ? e.message : String(e));
+            } finally {
+              setConfirmDelete(null);
+            }
           }}
           cancelButtonText={i18n.CANCEL_BUTTON}
           confirmButtonText={i18n.DELETE_BUTTON}

@@ -131,6 +131,10 @@ export const FORM_ERROR_TITLE = i18n.translate('xpack.evals.remotesListPage.form
   defaultMessage: 'Could not save remote',
 });
 
+export const DELETE_ERROR_TITLE = i18n.translate('xpack.evals.remotesListPage.deleteErrorTitle', {
+  defaultMessage: 'Could not delete remote',
+});
+
 export const API_KEY_PLACEHOLDER = i18n.translate('xpack.evals.remotesListPage.apiKeyPlaceholder', {
   defaultMessage: '••••••••',
 });
