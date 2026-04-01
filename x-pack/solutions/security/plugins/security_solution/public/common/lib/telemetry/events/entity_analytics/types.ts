@@ -52,6 +52,8 @@ interface ReportToggleRiskSummaryClickedParams extends EntityParam {
 
 type ReportRiskInputsExpandedFlyoutOpenedParams = EntityParam;
 
+type ReportEntityGraphViewClickedParams = EntityParam;
+
 interface ReportAddRiskInputToTimelineClickedParams {
   quantity: number;
 }
@@ -114,7 +116,7 @@ export interface EntityAnalyticsTelemetryEventsMap {
   [EntityEventTypes.EntityRiskFiltered]: ReportEntityRiskFilteredParams;
   [EntityEventTypes.EntityStoreEnablementToggleClicked]: ReportEntityStoreEnablementParams;
   [EntityEventTypes.EntityStoreDashboardInitButtonClicked]: ReportEntityStoreInitParams;
-  [EntityEventTypes.EntityGraphClicked]: EntityParam;
+  [EntityEventTypes.EntityGraphClicked]: ReportEntityGraphViewClickedParams;
   [EntityEventTypes.ToggleRiskSummaryClicked]: ReportToggleRiskSummaryClickedParams;
   [EntityEventTypes.AddRiskInputToTimelineClicked]: ReportAddRiskInputToTimelineClickedParams;
   [EntityEventTypes.RiskInputsExpandedFlyoutOpened]: ReportRiskInputsExpandedFlyoutOpenedParams;

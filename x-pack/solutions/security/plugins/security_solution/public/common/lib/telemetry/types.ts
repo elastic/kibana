@@ -88,7 +88,7 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Al
   : T extends PreviewRuleEventTypes
   ? PreviewRuleTelemetryEventsMap[T]
   : T extends EntityEventTypes
-  ? EntityAnalyticsTelemetryEventsMap[T & keyof EntityAnalyticsTelemetryEventsMap]
+  ? EntityAnalyticsTelemetryEventsMap[T]
   : T extends DataQualityEventTypes
   ? DataQualityTelemetryEventsMap[T]
   : T extends DocumentEventTypes
