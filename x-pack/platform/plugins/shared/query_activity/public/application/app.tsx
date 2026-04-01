@@ -28,7 +28,7 @@ import { QueryActivityTable } from './components/query_activity_table';
 import { QueryActivityNoAccessPrompt } from './no_access_prompt';
 
 const QueryActivityAppWithData: React.FC = () => {
-  const { apiService, notifications } = useQueryActivityAppContext();
+  const { apiService, notifications, docLinks } = useQueryActivityAppContext();
   const { data, isLoading, error, resendRequest } = apiService.useLoadQueryActivity();
 
   const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
@@ -138,7 +138,7 @@ const QueryActivityAppWithData: React.FC = () => {
             values={{
               learnMore: (
                 <EuiLink
-                  href="https://elastic.co"
+                  href={docLinks.links.management.queryActivity}
                   target="_blank"
                   external
                   css={{ whiteSpace: 'nowrap' }}

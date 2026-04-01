@@ -29,6 +29,7 @@ export const renderApp = (
         notifications={coreStart.notifications}
         apiService={apiService}
         url={pluginsStart.share.url}
+        docLinks={coreStart.docLinks}
         kibanaCapabilities={coreStart.application.capabilities}
       >
         <QueryActivityApp />

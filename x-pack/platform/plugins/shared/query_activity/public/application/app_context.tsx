@@ -6,7 +6,13 @@
  */
 
 import React, { useContext, useMemo, type PropsWithChildren } from 'react';
-import type { Capabilities, ChromeStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type {
+  Capabilities,
+  ChromeStart,
+  DocLinksStart,
+  HttpSetup,
+  NotificationsStart,
+} from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { QueryActivityApiService } from '../lib/api';
 
@@ -23,6 +29,7 @@ export interface QueryActivityAppContextValue {
   notifications: NotificationsStart;
   apiService: QueryActivityApiService;
   url: SharePluginStart['url'];
+  docLinks: DocLinksStart;
   capabilities: QueryActivityCapabilities;
 }
 
